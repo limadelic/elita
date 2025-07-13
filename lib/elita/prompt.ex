@@ -1,5 +1,5 @@
 defmodule Elita.Prompt do
-  def build(agent, context) do
+  def prompt(agent, context) do
     """
     #{agent.role}
 

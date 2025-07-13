@@ -20,3 +20,4 @@ Agentic platform using Elixir/OTP for reliable agent behavior. Natural language 
 - Create reusable helpers to stay DRY
 - Use pattern matching never CASE
 - Always use alias for module references, never write Elita.ModuleName.function
+- Import functions to avoid Module.function calls, prefer bare function names
