@@ -2,8 +2,8 @@ defmodule Elita.Loader do
   
   @agent_path "agents"
 
-  def agent(agent_name) do
-    "#{@agent_path}/#{agent_name}.md"
+  def agent(name) do
+    "#{@agent_path}/#{name}.md"
     |> File.read!()
     |> parse_markdown()
   end
@@ -12,19 +12,19 @@ defmodule Elita.Loader do
     lines = String.split(content, "\n")
     
     %{
-      name: extract_name(lines),
-      role: extract_section(lines, "## Role"),
-      goals: extract_section(lines, "## Goals"), 
-      instructions: extract_section(lines, "## Instructions"),
-      examples: extract_section(lines, "## Examples")
+      name: name(lines),
+      role: section(lines, "## Role"),
+      goals: section(lines, "## Goals"),
+      instructions: section(lines, "## Instructions"),
+      examples: section(lines, "## Examples")
     }
   end
 
-  defp extract_name(["# " <> name | _]), do: String.trim(name)
-  defp extract_name([_ | tail]), do: extract_name(tail)
-  defp extract_name([]), do: "Unknown"
+  defp name(["# " <> name | _]), do: String.trim(name)
+  defp name([_ | tail]), do: name(tail)
+  defp name([]), do: "Unknown"
 
-  defp extract_section(lines, header) do
+  defp section(lines, header) do
     lines
     |> Enum.drop_while(&(&1 != header))
     |> Enum.drop(1)

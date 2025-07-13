@@ -1,7 +1,7 @@
 defmodule Elita.Router do
   use Plug.Router
   alias Elita.{Agent, Helpers}
-  import Helpers, only: [respond: 2, not_found: 1]
+  import Helpers, only: [reply: 2, not_found: 1]
   import Agent, only: [decide: 2]
 
   plug :match
@@ -10,7 +10,7 @@ defmodule Elita.Router do
 
   post "/agents/:name" do
     decide(name, conn.body_params)
-    |> respond(conn)
+    |> reply(conn)
   end
 
   match _ do

@@ -1,11 +1,11 @@
 defmodule Elita.Helpers do
   import Plug.Conn
 
-  def respond({:ok, response}, conn) do
+  def reply({:ok, response}, conn) do
     json(conn, 200, response)
   end
 
-  def respond({:error, reason}, conn) do
+  def reply({:error, reason}, conn) do
     json(conn, 400, %{error: reason})
   end
 
