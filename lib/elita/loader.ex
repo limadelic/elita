@@ -1,22 +1,21 @@
 defmodule Elita.Loader do
   
-  @agent_path "agents"
+  @folder "agents"
 
   def agent(name) do
-    "#{@agent_path}/#{name}.md"
+    "#{@folder}/#{name}.md"
     |> File.read!()
-    |> parse_markdown()
+    |> String.split("\n")
+    |> parse()
   end
 
-  defp parse_markdown(content) do
-    lines = String.split(content, "\n")
-    
+  defp parse(md) do
     %{
-      name: name(lines),
-      role: section(lines, "## Role"),
-      goals: section(lines, "## Goals"),
-      instructions: section(lines, "## Instructions"),
-      examples: section(lines, "## Examples")
+      name: name(md),
+      role: section(md, "## Role"),
+      goals: section(md, "## Goals"),
+      instructions: section(md, "## Instructions"),
+      examples: section(md, "## Examples")
     }
   end
 
