@@ -1,8 +1,9 @@
 defmodule Elita.Loader do
-  alias Elita.Agent
+  
+  @agent_path "agents"
 
   def agent(agent_name) do
-    "examples/doble9/#{agent_name}.md"
+    "#{@agent_path}/#{agent_name}.md"
     |> File.read!()
     |> parse_markdown()
   end
@@ -10,7 +11,7 @@ defmodule Elita.Loader do
   defp parse_markdown(content) do
     lines = String.split(content, "\n")
     
-    %Agent{
+    %{
       name: extract_name(lines),
       role: extract_section(lines, "## Role"),
       goals: extract_section(lines, "## Goals"), 

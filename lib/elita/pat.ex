@@ -1,18 +1,12 @@
 defmodule Elita.Pat do
-  @moduledoc """
-  HTTP client for external Pat service
-  """
+  @url "http://localhost:8080/"
 
   def say(prompt) do
-    host = Application.get_env(:elita, :pat_host, "localhost")
-    port = Application.get_env(:elita, :pat_port, 8080)
-    
-    with {:ok, %{status_code: 200, body: body}} <- HTTPoison.post("http://#{host}:#{port}/", prompt) do
-      {:ok, body}
-    else
-      {:ok, %{status_code: code}} -> {:error, "HTTP #{code}"}
-      {:error, reason} -> {:error, inspect(reason)}
-    end
+    HTTPoison.post(@url, prompt)
+    |> response()
   end
+
+  defp response({:ok, %{status_code: 200, body: body}}), do: {:ok, body}
+  defp response({_, res}), do: {:error, inspect(res)}
 end
 
