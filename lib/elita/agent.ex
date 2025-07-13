@@ -8,7 +8,7 @@ defmodule Elita.Agent do
   def decide(name, context) do
     with {:ok, agent} <- load(name),
          {:ok, prompt} <- prompt(agent, context),
-         {:ok, response} <- Elita.Pat.say(prompt, context),
+         {:ok, response} <- Elita.Pat.say(prompt),
          {:ok, parsed} <- parse(response) do
       {:ok, parsed}
     else

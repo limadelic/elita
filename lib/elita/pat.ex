@@ -1,45 +1,18 @@
 defmodule Elita.Pat do
   @moduledoc """
-  Interface for calling LLM APIs
+  HTTP client for external Pat service
   """
 
-  @callback say(prompt :: String.t(), context :: map()) :: {:ok, String.t()} | {:error, String.t()}
-
-  def say(prompt, context) do
-    impl().say(prompt, context)
-  end
-
-  defp impl do
-    Application.get_env(:elita, :pat_module, Elita.Pat.OpenAI)
-  end
-end
-
-defmodule Elita.Pat.OpenAI do
-  @moduledoc """
-  OpenAI implementation of Pat interface
-  """
-  @behaviour Elita.Pat
-
-  def say(_prompt, _context) do
-    # TODO: Implement actual OpenAI API call
-    {:ok, "play [6,3]"}
-  end
-end
-
-defmodule Elita.Pat.Mock do
-  @moduledoc """
-  Mock implementation for testing
-  """
-  @behaviour Elita.Pat
-
-  def say(_prompt, context) do
-    # Return a canned response based on context for testing
-    hand = Map.get(context, "hand", [])
+  def say(prompt) do
+    host = Application.get_env(:elita, :pat_host, "localhost")
+    port = Application.get_env(:elita, :pat_port, 8080)
     
-    if length(hand) > 0 do
-      {:ok, "play [6,3]"}
+    with {:ok, %{status_code: 200, body: body}} <- HTTPoison.post("http://#{host}:#{port}/", prompt) do
+      {:ok, body}
     else
-      {:ok, "knock knock"}
+      {:ok, %{status_code: code}} -> {:error, "HTTP #{code}"}
+      {:error, reason} -> {:error, inspect(reason)}
     end
   end
 end
+

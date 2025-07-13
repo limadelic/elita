@@ -1,15 +1,28 @@
 defmodule Elita.IntegrationTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: false
   import Plug.Test
   import Plug.Conn
 
   setup do
-    # Configure to use mock LLM for tests
-    Application.put_env(:elita, :pat_module, Elita.Pat.Mock)
+    try do
+      :meck.new(Elita.Pat, [:passthrough])
+    catch
+      :error, {:already_started, _} -> :ok
+    end
+    
+    on_exit(fn -> 
+      try do
+        :meck.unload(Elita.Pat)
+      catch
+        :error, _ -> :ok
+      end
+    end)
     :ok
   end
 
   test "POST /agents/greedy returns agent decision" do
+    :meck.expect(Elita.Pat, :say, fn(_prompt) -> {:ok, "play [6,3]"} end)
+    
     game_state = %{
       "type" => "your_turn",
       "hand" => [[3,6], [5,7], [2,4]],
@@ -30,6 +43,8 @@ defmodule Elita.IntegrationTest do
   end
 
   test "POST /agents/greedy handles empty hand" do
+    :meck.expect(Elita.Pat, :say, fn(_prompt) -> {:ok, "knock knock"} end)
+    
     game_state = %{
       "type" => "your_turn", 
       "hand" => [],

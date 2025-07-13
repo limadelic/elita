@@ -24,7 +24,9 @@ defmodule Elita.MixProject do
     [
       {:bandit, "~> 1.0"},
       {:jason, "~> 1.4"},
-      {:plug, "~> 1.14"}
+      {:plug, "~> 1.14"},
+      {:httpoison, "~> 2.0"},
+      {:meck, "~> 0.9", only: :test}
     ]
   end
 end
