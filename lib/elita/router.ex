@@ -1,13 +1,14 @@
 defmodule Elita.Router do
   use Plug.Router
-  import Elita.Helpers
+  alias Elita.{Agent, Helpers}
+  import Helpers
 
   plug :match
   plug Plug.Parsers, parsers: [:json], json_decoder: Jason
   plug :dispatch
 
   post "/agents/:name" do
-    Elita.Agent.decide(name, conn.body_params)
+    Agent.decide(name, conn.body_params)
     |> respond(conn)
   end
 

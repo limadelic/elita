@@ -19,3 +19,4 @@ Agentic platform using Elixir/OTP for reliable agent behavior. Natural language 
 - Follow BDD to name things
 - Create reusable helpers to stay DRY
 - Use pattern matching never CASE
+- Always use alias for module references, never write Elita.ModuleName.function

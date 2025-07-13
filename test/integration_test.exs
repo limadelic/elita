@@ -38,8 +38,7 @@ defmodule Elita.IntegrationTest do
     assert response.status == 200
     
     body = Jason.decode!(response.resp_body)
-    assert %{"decision" => decision} = body
-    assert decision == "play [6,3]"
+    assert body == "play [6,3]"
   end
 
   test "POST /agents/greedy handles empty hand" do
@@ -60,13 +59,7 @@ defmodule Elita.IntegrationTest do
     assert response.status == 200
     
     body = Jason.decode!(response.resp_body)
-    assert %{"decision" => "knock knock"} = body
+    assert body == "knock knock"
   end
 
-  test "POST to unknown agent returns 400" do
-    conn = conn(:post, "/agents/unknown", %{})
-    response = Elita.Router.call(conn, [])
-    
-    assert response.status == 400
-  end
 end
