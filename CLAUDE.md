@@ -14,6 +14,8 @@ Agentic platform using Elixir/OTP for reliable agent behavior. Natural language 
 - Explicit memory control vs auto-magic
 - GenServer = Agent (but don't mention OTP to users)
 
+## ALWAYS TEST FIRST BEFORE ANY CODE CHANGES - RUN `mix test` EVERY TIME
+
 ## Elixir Style Guide
 - Avoid compound names
 - Follow BDD to name things
@@ -21,3 +23,9 @@ Agentic platform using Elixir/OTP for reliable agent behavior. Natural language 
 - Use pattern matching never CASE
 - Always use alias for module references, never write Elita.ModuleName.function
 - Import functions to avoid Module.function calls, prefer bare function names
+
+## TESTING RULES
+- ALWAYS run `mix test` before making ANY code changes
+- ALWAYS run `mix test` after making ANY code changes
+- If tests fail, fix them before doing anything else
+
