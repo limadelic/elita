@@ -14,26 +14,18 @@ end
 
 defmodule Elita.Router do
   use Plug.Router
+  import Elita.Helpers
 
   plug :match
   plug Plug.Parsers, parsers: [:json], json_decoder: Jason
   plug :dispatch
 
-  post "/agents/greedy" do
-    case Elita.AgentRunner.decide("greedy", conn.body_params) do
-      {:ok, response} ->
-        conn
-        |> put_resp_content_type("application/json")
-        |> send_resp(200, Jason.encode!(response))
-      
-      {:error, reason} ->
-        conn
-        |> put_resp_content_type("application/json")
-        |> send_resp(400, Jason.encode!(%{error: reason}))
-    end
+  post "/agents/:name" do
+    Elita.Agent.decide(name, conn.body_params)
+    |> respond(conn)
   end
 
   match _ do
-    send_resp(conn, 404, "Not Found")
+    not_found(conn)
   end
 end

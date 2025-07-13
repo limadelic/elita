@@ -3,10 +3,10 @@ defmodule Elita.Pat do
   Interface for calling LLM APIs
   """
 
-  @callback call(prompt :: String.t(), context :: map()) :: {:ok, String.t()} | {:error, String.t()}
+  @callback say(prompt :: String.t(), context :: map()) :: {:ok, String.t()} | {:error, String.t()}
 
-  def call(prompt, context) do
-    impl().call(prompt, context)
+  def say(prompt, context) do
+    impl().say(prompt, context)
   end
 
   defp impl do
@@ -20,7 +20,7 @@ defmodule Elita.Pat.OpenAI do
   """
   @behaviour Elita.Pat
 
-  def call(_prompt, _context) do
+  def say(_prompt, _context) do
     # TODO: Implement actual OpenAI API call
     {:ok, "play [6,3]"}
   end
@@ -32,7 +32,7 @@ defmodule Elita.Pat.Mock do
   """
   @behaviour Elita.Pat
 
-  def call(_prompt, context) do
+  def say(_prompt, context) do
     # Return a canned response based on context for testing
     hand = Map.get(context, "hand", [])
     

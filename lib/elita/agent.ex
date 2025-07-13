@@ -5,10 +5,21 @@ defmodule Elita.Agent do
 
   defstruct [:name, :role, :goals, :instructions, :examples]
 
-  def load_greedy do
-    case File.read("examples/doble9/greedy.md") do
+  def decide(name, context) do
+    with {:ok, agent} <- load(name),
+         {:ok, prompt} <- prompt(agent, context),
+         {:ok, response} <- Elita.Pat.say(prompt, context),
+         {:ok, parsed} <- parse(response) do
+      {:ok, parsed}
+    else
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
+  def load(agent_name) do
+    case File.read("examples/doble9/#{agent_name}.md") do
       {:ok, content} -> parse_markdown(content)
-      {:error, reason} -> {:error, "Failed to load greedy agent: #{reason}"}
+      {:error, reason} -> {:error, "Failed to load #{agent_name} agent: #{reason}"}
     end
   end
 
@@ -45,5 +56,35 @@ defmodule Elita.Agent do
     else
       ""
     end
+  end
+
+  defp prompt(agent, context) do
+    prompt = """
+    #{agent.role}
+
+    Goals:
+    #{agent.goals}
+
+    Instructions:
+    #{agent.instructions}
+
+    Examples:
+    #{agent.examples}
+
+    Context:
+    #{json(context)}
+    """
+    
+    {:ok, prompt}
+  end
+
+  defp json(context) do
+    Jason.encode!(context, pretty: true)
+  end
+
+  defp parse(response) do
+    # For now, just return the raw response
+    # Later we can add validation and retry logic
+    {:ok, %{decision: String.trim(response)}}
   end
 end

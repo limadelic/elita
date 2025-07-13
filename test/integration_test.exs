@@ -1,6 +1,7 @@
 defmodule Elita.IntegrationTest do
   use ExUnit.Case
-  use Plug.Test
+  import Plug.Test
+  import Plug.Conn
 
   setup do
     # Configure to use mock LLM for tests
@@ -24,8 +25,8 @@ defmodule Elita.IntegrationTest do
     assert response.status == 200
     
     body = Jason.decode!(response.resp_body)
-    assert %{"action" => action} = body
-    assert action == "play [6,3]"
+    assert %{"decision" => decision} = body
+    assert decision == "play [6,3]"
   end
 
   test "POST /agents/greedy handles empty hand" do
@@ -44,13 +45,13 @@ defmodule Elita.IntegrationTest do
     assert response.status == 200
     
     body = Jason.decode!(response.resp_body)
-    assert %{"action" => "knock knock"} = body
+    assert %{"decision" => "knock knock"} = body
   end
 
-  test "POST to unknown agent returns 404" do
+  test "POST to unknown agent returns 400" do
     conn = conn(:post, "/agents/unknown", %{})
     response = Elita.Router.call(conn, [])
     
-    assert response.status == 404
+    assert response.status == 400
   end
 end

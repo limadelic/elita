@@ -14,7 +14,8 @@ Agentic platform using Elixir/OTP for reliable agent behavior. Natural language 
 - Explicit memory control vs auto-magic
 - GenServer = Agent (but don't mention OTP to users)
 
-## Current Status
-- Examples structure created
-- Greedy domino agent template done
-- Next: more agent types or platform architecture
+## Elixir Style Guide
+- Avoid compound names
+- Follow BDD to name things
+- Create reusable helpers to stay DRY
+- Use pattern matching never CASE
