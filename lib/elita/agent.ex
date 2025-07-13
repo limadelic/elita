@@ -6,7 +6,7 @@ defmodule Elita.Agent do
   defstruct [:name, :role, :goals, :instructions, :examples]
 
   def load_greedy do
-    case File.read("../examples/doble9/greedy.md") do
+    case File.read("examples/doble9/greedy.md") do
       {:ok, content} -> parse_markdown(content)
       {:error, reason} -> {:error, "Failed to load greedy agent: #{reason}"}
     end

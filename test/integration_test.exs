@@ -4,7 +4,7 @@ defmodule Elita.IntegrationTest do
 
   setup do
     # Configure to use mock LLM for tests
-    Application.put_env(:elita, :llm_module, Elita.LLM.Mock)
+    Application.put_env(:elita, :pat_module, Elita.Pat.Mock)
     :ok
   end
 

@@ -6,7 +6,7 @@ defmodule Elita.AgentRunner do
   def decide("greedy", context) do
     with {:ok, agent} <- Elita.Agent.load_greedy(),
          {:ok, prompt} <- build_prompt(agent, context),
-         {:ok, response} <- Elita.LLM.call(prompt, context),
+         {:ok, response} <- Elita.Pat.call(prompt, context),
          {:ok, parsed} <- parse_response(response) do
       {:ok, parsed}
     else
