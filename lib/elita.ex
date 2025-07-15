@@ -3,7 +3,8 @@ defmodule Elita.Application do
 
   def start(_type, _args) do
     children = [
-      Elita.HTTP
+      {Registry, keys: :unique, name: Elita.AgentRegistry},
+      {DynamicSupervisor, name: Elita.AgentSupervisor, strategy: :one_for_one}
     ]
 
     opts = [strategy: :one_for_one, name: Elita.Supervisor]

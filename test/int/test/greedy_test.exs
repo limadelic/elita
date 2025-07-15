@@ -33,7 +33,7 @@ defmodule Elita.IntegrationTest do
     conn = conn(:post, "/agents/greedy", game_state)
     conn = put_req_header(conn, "content-type", "application/json")
     
-    response = Elita.Router.call(conn, [])
+    response = Api.Router.call(conn, [])
     
     assert response.status == 200
     
@@ -54,7 +54,7 @@ defmodule Elita.IntegrationTest do
     conn = conn(:post, "/agents/greedy", game_state)
     conn = put_req_header(conn, "content-type", "application/json")
     
-    response = Elita.Router.call(conn, [])
+    response = Api.Router.call(conn, [])
     
     assert response.status == 200
     
