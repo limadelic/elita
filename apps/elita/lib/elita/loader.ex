@@ -1,6 +1,6 @@
 defmodule Elita.Loader do
   
-  @folder "agents"
+  @folder "apps/elita/agents"
 
   def agent(name) do
     "#{@folder}/#{name}.md"

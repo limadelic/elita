@@ -4,9 +4,9 @@ defmodule Elita.Agent do
   import Prompt, only: [prompt: 2]
   import Pat, only: [say: 1]
 
-  def decide(name, context) do
+  def act(name, context) do
     agent_pid = Manager.find_or_spawn(name)
-    GenServer.call(agent_pid, {:decide, context}, 35_000)
+    GenServer.call(agent_pid, {:act, context}, 35_000)
   end
 
   def start_link({name, config}) do
@@ -19,7 +19,7 @@ defmodule Elita.Agent do
   end
 
   @impl true
-  def handle_call({:decide, context}, _from, state) do
+  def handle_call({:act, context}, _from, state) do
     response = state.config
     |> prompt(context)
     |> say()

@@ -7,7 +7,7 @@ defmodule Api.Router do
   plug :dispatch
 
   post "/agents/:name" do
-    case Agent.decide(name, conn.body_params) do
+    case Agent.act(name, conn.body_params) do
       {:ok, response} ->
         conn
         |> put_resp_content_type("application/json")

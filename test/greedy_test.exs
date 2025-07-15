@@ -9,7 +9,7 @@ defmodule E2E.GreedyTest do
       "playable_ends" => [6, 8]
     }
 
-    {:ok, response} = Elita.Agent.decide("greedy", Jason.encode!(game_state))
+    {:ok, response} = Elita.Agent.act("greedy", Jason.encode!(game_state))
     
     assert is_binary(response)
     assert String.contains?(response, "play") or String.contains?(response, "knock")
@@ -23,7 +23,7 @@ defmodule E2E.GreedyTest do
       "playable_ends" => [6, 3]
     }
 
-    {:ok, response} = Elita.Agent.decide("greedy", Jason.encode!(game_state))
+    {:ok, response} = Elita.Agent.act("greedy", Jason.encode!(game_state))
     
     assert is_binary(response)
     assert String.contains?(response, "knock")

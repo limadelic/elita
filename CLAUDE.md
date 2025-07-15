@@ -30,6 +30,7 @@ Agentic platform using Elixir/OTP for reliable agent behavior. Natural language 
 - If tests fail, fix them before doing anything else
 - Use `mix test` for development feedback (unit/integration tests)
 - Use `mix test test/` for final validation before work is done (e2e tests)
+- NEVER cd into directories - always run commands from project root
 
 ## PROJECT STRUCTURE
 - Umbrella project with apps/elita (core platform) and apps/api (gateway)
