@@ -1,9 +1,9 @@
-defmodule Api.MixProject do
+defmodule Elita.App.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :api,
+      app: :elita,
       version: "0.1.0",
       elixir: "~> 1.18",
       start_permanent: Mix.env() == :prod,
@@ -15,17 +15,18 @@ defmodule Api.MixProject do
   def application do
     [
       extra_applications: [:logger],
-      mod: {Api.Application, []}
+      mod: {Elita.Application, []}
     ]
   end
 
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:elita, path: "../"},
-      {:bandit, "~> 1.7"},
-      {:plug, "~> 1.15"},
-      {:jason, "~> 1.4"}
+      {:bandit, "~> 1.0"},
+      {:jason, "~> 1.4"},
+      {:plug, "~> 1.14"},
+      {:httpoison, "~> 2.0"},
+      {:meck, "~> 0.9", only: :test}
     ]
   end
 end

@@ -26,6 +26,13 @@ Agentic platform using Elixir/OTP for reliable agent behavior. Natural language 
 
 ## TESTING RULES
 - ALWAYS run `mix test` before making ANY code changes
-- ALWAYS run `mix test` after making ANY code changes
+- ALWAYS run `mix test` after making ANY code changes  
 - If tests fail, fix them before doing anything else
+- Use `mix test` for development feedback (unit/integration tests)
+- Use `mix test test/` for final validation before work is done (e2e tests)
+
+## PROJECT STRUCTURE
+- Umbrella project with apps/elita (core platform) and apps/api (gateway)
+- Each app has unit tests in their test/ directories
+- E2E tests live in umbrella root test/ directory
 

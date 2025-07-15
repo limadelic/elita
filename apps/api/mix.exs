@@ -1,9 +1,9 @@
-defmodule E2e.MixProject do
+defmodule Api.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :e2e,
+      app: :api,
       version: "0.1.0",
       elixir: "~> 1.18",
       start_permanent: Mix.env() == :prod,
@@ -14,14 +14,17 @@ defmodule E2e.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger]
+      extra_applications: [:logger],
+      mod: {Api.Application, []}
     ]
   end
 
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:elita, path: "../.."},
+      {:elita, in_umbrella: true},
+      {:bandit, "~> 1.7"},
+      {:plug, "~> 1.15"},
       {:jason, "~> 1.4"}
     ]
   end
