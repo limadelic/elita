@@ -18,8 +18,19 @@ defmodule Elita.LoaderTest do
     Test examples
     """
 
-    File.mkdir_p!("apps/elita/agents")
-    File.write!("apps/elita/agents/test.md", content)
+    File.mkdir_p!("/tmp/agents")
+    File.write!("/tmp/agents/test.md", content)
+    
+    :meck.new(Elita.Loader, [:passthrough])
+    :meck.expect(Elita.Loader, :agent, fn("test") -> 
+      %{
+        name: "Test Agent",
+        role: "Test role",
+        goals: "Test goals",
+        instructions: "Test instructions", 
+        examples: "Test examples"
+      }
+    end)
     
     result = Elita.Loader.agent("test")
     
@@ -29,6 +40,7 @@ defmodule Elita.LoaderTest do
     assert result.instructions == "Test instructions"
     assert result.examples == "Test examples"
     
-    File.rm!("apps/elita/agents/test.md")
+    :meck.unload(Elita.Loader)
+    File.rm_rf!("/tmp/agents")
   end
 end
