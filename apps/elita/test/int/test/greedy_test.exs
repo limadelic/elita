@@ -10,9 +10,26 @@ defmodule Elita.IntegrationTest do
       :error, {:already_started, _} -> :ok
     end
     
+    try do
+      :meck.new(Elita.Loader, [:passthrough])
+    catch
+      :error, {:already_started, _} -> :ok
+    end
+    
+    :meck.expect(Elita.Loader, :agent, fn("greedy") -> 
+      %{
+        name: "Greedy",
+        role: "Test role",
+        goals: "Test goals", 
+        instructions: "Test instructions",
+        examples: "Test examples"
+      }
+    end)
+    
     on_exit(fn -> 
       try do
         :meck.unload(Elita.Pat)
+        :meck.unload(Elita.Loader)
       catch
         :error, _ -> :ok
       end

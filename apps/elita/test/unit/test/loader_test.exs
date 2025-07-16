@@ -18,8 +18,8 @@ defmodule Elita.LoaderTest do
     Test examples
     """
 
-    File.mkdir_p!("agents")
-    File.write!("agents/test.md", content)
+    File.mkdir_p!("apps/elita/agents")
+    File.write!("apps/elita/agents/test.md", content)
     
     result = Elita.Loader.agent("test")
     
@@ -29,6 +29,6 @@ defmodule Elita.LoaderTest do
     assert result.instructions == "Test instructions"
     assert result.examples == "Test examples"
     
-    File.rm!("agents/test.md")
+    File.rm!("apps/elita/agents/test.md")
   end
 end

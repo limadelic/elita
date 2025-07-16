@@ -1,9 +1,17 @@
 defmodule Elita.Loader do
   
-  @folder "apps/elita/agents"
+  def folder do
+    cond do
+      File.exists?("apps/elita/agents") -> "apps/elita/agents"
+      File.exists?("agents") -> "agents"
+      File.exists?("../agents") -> "../agents"
+      File.exists?("../../agents") -> "../../agents"
+      true -> "agents"
+    end
+  end
 
   def agent(name) do
-    "#{@folder}/#{name}.md"
+    "#{folder()}/#{name}.md"
     |> File.read!()
     |> String.split("\n")
     |> parse()
