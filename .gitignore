@@ -28,3 +28,6 @@ Thumbs.db
 
 # Runtime
 .env
+
+# Claude private files
+CLAUDE.local.md
