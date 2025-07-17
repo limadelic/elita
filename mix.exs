@@ -23,7 +23,7 @@ defmodule Elita.MixProject do
 
   defp aliases do
     [
-      "test.e2e": ["run -e 'ExUnit.start(); Application.ensure_all_started(:elita); Code.require_file(\"test/greedy_test.exs\"); ExUnit.run()'"]
+      "test.e2e": ["run -e 'ExUnit.start(); Application.ensure_all_started(:elita); Code.require_file(\"test/greedy_test.exs\"); Code.require_file(\"test/tool_calling_test.exs\"); ExUnit.run()'"]
     ]
   end
 end

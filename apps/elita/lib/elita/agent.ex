@@ -1,6 +1,6 @@
 defmodule Elita.Agent do
   use GenServer
-  alias Elita.{Manager, Prompt, Pat}
+  alias Elita.{Manager, Prompt, Pat, Tools}
   import Prompt, only: [prompt: 2]
   import Pat, only: [say: 1]
 
@@ -15,15 +15,18 @@ defmodule Elita.Agent do
 
   @impl true
   def init({name, config}) do
-    {:ok, %{name: name, config: config}}
+    {:ok, %{name: name, config: config, memory: %{}}}
   end
 
   @impl true
   def handle_call({:act, context}, _from, state) do
-    response = state.config
+    {response, new_state} = state.config
     |> prompt(context)
     |> say()
+    |> Tools.process(state)
 
-    {:reply, response, state}
+    {:reply, response, new_state}
   end
+
+
 end
