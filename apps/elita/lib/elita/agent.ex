@@ -15,18 +15,19 @@ defmodule Elita.Agent do
 
   @impl true
   def init({name, config}) do
-    {:ok, %{name: name, config: config, memory: %{}, conversation: []}}
+    {:ok, %{name: name, config: config, memory: %{}, conversation: [], caller: nil}}
   end
 
   @impl true
-  def handle_call({:act, context}, _from, state) do
+  def handle_call({:act, context}, from, state) do
     user_message = %{role: "user", content: context}
-    updated_state = add_message(state, user_message)
-    {result, final_state} = execute_conversation(updated_state)
-    {:reply, result, final_state}
+    updated_state = state |> add_message(user_message) |> Map.put(:caller, from)
+    send(self(), :execute_conversation)
+    {:noreply, updated_state}
   end
 
-  defp execute_conversation(state) do
+  @impl true
+  def handle_info(:execute_conversation, state) do
     llm_response = state.config |> prompt(build_prompt(state)) |> say()
     handle_llm_response(llm_response, state)
   end
@@ -38,16 +39,21 @@ defmodule Elita.Agent do
     handle_tools_response(Tools.process({:ok, response}, updated_state))
   end
 
-  defp handle_llm_response(error, state), do: {error, state}
+  defp handle_llm_response(error, state) do
+    GenServer.reply(state.caller, error)
+    {:noreply, %{state | caller: nil}}
+  end
 
   defp handle_tools_response({:tools_executed, tool_results, new_state}) do
     tool_message = %{role: "tool", content: Enum.join(tool_results, "; ")}
     tool_state = add_message(new_state, tool_message)
-    execute_conversation(tool_state)
+    send(self(), :execute_conversation)
+    {:noreply, tool_state}
   end
 
   defp handle_tools_response({{:ok, final_response}, final_state}) do
-    {{:ok, final_response}, final_state}
+    GenServer.reply(final_state.caller, {:ok, final_response})
+    {:noreply, %{final_state | caller: nil}}
   end
 
   defp add_message(state, message) do
