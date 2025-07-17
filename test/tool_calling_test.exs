@@ -13,7 +13,7 @@ defmodule E2E.ToolCallingTest do
     """
     
     state = %{memory: %{}}
-    {{:ok, _response}, new_state} = Tools.process({:ok, llm_response}, state)
+    {:tools_executed, _results, new_state} = Tools.process({:ok, llm_response}, state)
     
     assert new_state.memory["last_move"] == "played [3,6]"
   end
@@ -28,10 +28,11 @@ defmodule E2E.ToolCallingTest do
     """
     
     state = %{memory: %{}}
-    {{:ok, response}, _new_state} = Tools.process({:ok, llm_response}, state)
+    {:tools_executed, results, _new_state} = Tools.process({:ok, llm_response}, state)
     
-    assert String.contains?(response, "broadcasted")
-    assert String.contains?(response, "Player knocked, skipping turn")
+    result_string = Enum.join(results, ", ")
+    assert String.contains?(result_string, "broadcasted")
+    assert String.contains?(result_string, "Player knocked, skipping turn")
   end
 
   test "tool parsing handles multiple tools" do
@@ -48,10 +49,11 @@ defmodule E2E.ToolCallingTest do
     """
     
     state = %{memory: %{}}
-    {{:ok, response}, new_state} = Tools.process({:ok, llm_response}, state)
+    {:tools_executed, results, new_state} = Tools.process({:ok, llm_response}, state)
     
-    assert String.contains?(response, "stored")
-    assert String.contains?(response, "broadcasted")
+    result_string = Enum.join(results, ", ")
+    assert String.contains?(result_string, "stored")
+    assert String.contains?(result_string, "broadcasted")
     assert new_state.memory["game_state"] == "active"
   end
 end

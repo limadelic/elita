@@ -20,8 +20,8 @@ defmodule Elita.Tools do
       {[result | acc_results], updated_state}
     end)
     
-    success_message = "Tools executed: #{Enum.join(Enum.reverse(results), ", ")}"
-    {{:ok, success_message}, new_state}
+    tool_results = Enum.reverse(results)
+    {:tools_executed, tool_results, new_state}
   end
 
   defp extract_tool_calls(response) do
