@@ -1,13 +1,19 @@
 defmodule Elita.Tools do
+  alias Elita.Convo
+
   def process({:ok, llm_response}, state) do
     if has_tool_calls?(llm_response) do
-      execute_tools(llm_response, state)
+      {tool_results, new_state} = execute_tools(llm_response, state)
+      tool_message = %{role: "tool", content: Enum.join(tool_results, "; ")}
+      updated_conversation = Convo.add_message(new_state.conversation, tool_message)
+      final_state = %{new_state | conversation: updated_conversation}
+      {:continue_conversation, final_state}
     else
-      {{:ok, llm_response}, state}
+      {:final_response, llm_response, state}
     end
   end
 
-  def process(error, state), do: {error, state}
+  def process(error, state), do: {:error, error, state}
 
   defp has_tool_calls?(response) do
     String.contains?(response, "<function_calls>")
@@ -21,7 +27,7 @@ defmodule Elita.Tools do
     end)
     
     tool_results = Enum.reverse(results)
-    {:tools_executed, tool_results, new_state}
+    {tool_results, new_state}
   end
 
   defp extract_tool_calls(response) do
