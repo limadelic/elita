@@ -5,8 +5,8 @@ defmodule Elita.Tools do
     if has_tool_calls?(llm_reply) do
       {tool_results, new_state} = execute_tools(llm_reply, state)
       tool_msg = %{role: "tool", content: Enum.join(tool_results, "; ")}
-      updated_convo = Convo.add_message(new_state.conversation, tool_msg)
-      final_state = %{new_state | conversation: updated_convo}
+      updated_convo = Convo.add_msg(new_state.convo, tool_msg)
+      final_state = %{new_state | convo: updated_convo}
       {:continue_convo, final_state}
     else
       {:final_reply, llm_reply, state}

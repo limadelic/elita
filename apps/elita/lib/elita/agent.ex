@@ -15,29 +15,29 @@ defmodule Elita.Agent do
 
   @impl true
   def init({name, config}) do
-    {:ok, %{name: name, config: config, memory: %{}, conversation: Convo.new(), caller: nil}}
+    {:ok, %{name: name, config: config, memory: %{}, convo: Convo.new(), caller: nil}}
   end
 
   @impl true
   def handle_call({:act, context}, from, state) do
     user_msg = %{role: "user", content: context}
-    updated_convo = Convo.add_message(state.conversation, user_msg)
-    updated_state = %{state | conversation: updated_convo, caller: from}
+    updated_convo = Convo.add_msg(state.convo, user_msg)
+    updated_state = %{state | convo: updated_convo, caller: from}
     send(self(), :execute_convo)
     {:noreply, updated_state}
   end
 
   @impl true
   def handle_info(:execute_convo, state) do
-    prompt_text = Convo.build_prompt(state.conversation)
+    prompt_text = Convo.build_prompt(state.convo)
     llm_reply = state.config |> prompt(prompt_text) |> say()
     handle_llm_reply(llm_reply, state)
   end
 
   defp handle_llm_reply({:ok, reply}, state) do
     assistant_msg = %{role: "assistant", content: reply}
-    updated_convo = Convo.add_message(state.conversation, assistant_msg)
-    updated_state = %{state | conversation: updated_convo}
+    updated_convo = Convo.add_msg(state.convo, assistant_msg)
+    updated_state = %{state | convo: updated_convo}
     
     handle_tool_result(Tools.process({:ok, reply}, updated_state))
   end
