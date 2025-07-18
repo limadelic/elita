@@ -20,44 +20,44 @@ defmodule Elita.Agent do
 
   @impl true
   def handle_call({:act, context}, from, state) do
-    user_message = %{role: "user", content: context}
-    updated_conversation = Convo.add_message(state.conversation, user_message)
-    updated_state = %{state | conversation: updated_conversation, caller: from}
-    send(self(), :execute_conversation)
+    user_msg = %{role: "user", content: context}
+    updated_convo = Convo.add_message(state.conversation, user_msg)
+    updated_state = %{state | conversation: updated_convo, caller: from}
+    send(self(), :execute_convo)
     {:noreply, updated_state}
   end
 
   @impl true
-  def handle_info(:execute_conversation, state) do
+  def handle_info(:execute_convo, state) do
     prompt_text = Convo.build_prompt(state.conversation)
-    llm_response = state.config |> prompt(prompt_text) |> say()
-    handle_llm_response(llm_response, state)
+    llm_reply = state.config |> prompt(prompt_text) |> say()
+    handle_llm_reply(llm_reply, state)
   end
 
-  defp handle_llm_response({:ok, response}, state) do
-    assistant_message = %{role: "assistant", content: response}
-    updated_conversation = Convo.add_message(state.conversation, assistant_message)
-    updated_state = %{state | conversation: updated_conversation}
+  defp handle_llm_reply({:ok, reply}, state) do
+    assistant_msg = %{role: "assistant", content: reply}
+    updated_convo = Convo.add_message(state.conversation, assistant_msg)
+    updated_state = %{state | conversation: updated_convo}
     
-    handle_tools_result(Tools.process({:ok, response}, updated_state))
+    handle_tool_result(Tools.process({:ok, reply}, updated_state))
   end
 
-  defp handle_llm_response(error, state) do
+  defp handle_llm_reply(error, state) do
     GenServer.reply(state.caller, error)
     {:noreply, %{state | caller: nil}}
   end
 
-  defp handle_tools_result({:continue_conversation, updated_state}) do
-    send(self(), :execute_conversation)
+  defp handle_tool_result({:continue_convo, updated_state}) do
+    send(self(), :execute_convo)
     {:noreply, updated_state}
   end
 
-  defp handle_tools_result({:final_response, response, final_state}) do
-    GenServer.reply(final_state.caller, {:ok, response})
+  defp handle_tool_result({:final_reply, reply, final_state}) do
+    GenServer.reply(final_state.caller, {:ok, reply})
     {:noreply, %{final_state | caller: nil}}
   end
 
-  defp handle_tools_result({:error, error, state}) do
+  defp handle_tool_result({:error, error, state}) do
     GenServer.reply(state.caller, error)
     {:noreply, %{state | caller: nil}}
   end

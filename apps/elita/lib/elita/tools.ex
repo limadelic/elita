@@ -1,26 +1,26 @@
 defmodule Elita.Tools do
   alias Elita.Convo
 
-  def process({:ok, llm_response}, state) do
-    if has_tool_calls?(llm_response) do
-      {tool_results, new_state} = execute_tools(llm_response, state)
-      tool_message = %{role: "tool", content: Enum.join(tool_results, "; ")}
-      updated_conversation = Convo.add_message(new_state.conversation, tool_message)
-      final_state = %{new_state | conversation: updated_conversation}
-      {:continue_conversation, final_state}
+  def process({:ok, llm_reply}, state) do
+    if has_tool_calls?(llm_reply) do
+      {tool_results, new_state} = execute_tools(llm_reply, state)
+      tool_msg = %{role: "tool", content: Enum.join(tool_results, "; ")}
+      updated_convo = Convo.add_message(new_state.conversation, tool_msg)
+      final_state = %{new_state | conversation: updated_convo}
+      {:continue_convo, final_state}
     else
-      {:final_response, llm_response, state}
+      {:final_reply, llm_reply, state}
     end
   end
 
   def process(error, state), do: {:error, error, state}
 
-  defp has_tool_calls?(response) do
-    String.contains?(response, "<function_calls>")
+  defp has_tool_calls?(reply) do
+    String.contains?(reply, "<function_calls>")
   end
 
-  defp execute_tools(response, state) do
-    tools = extract_tool_calls(response)
+  defp execute_tools(reply, state) do
+    tools = extract_tool_calls(reply)
     {results, new_state} = Enum.reduce(tools, {[], state}, fn tool, {acc_results, acc_state} ->
       {result, updated_state} = execute_tool(tool, acc_state)
       {[result | acc_results], updated_state}
@@ -30,8 +30,8 @@ defmodule Elita.Tools do
     {tool_results, new_state}
   end
 
-  defp extract_tool_calls(response) do
-    response
+  defp extract_tool_calls(reply) do
+    reply
     |> String.split("<invoke name=\"")
     |> Enum.drop(1)
     |> Enum.map(&parse_tool_call/1)
