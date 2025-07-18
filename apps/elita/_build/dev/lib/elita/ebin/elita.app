@@ -7,7 +7,7 @@
                         'Elixir.Elita.Tools']},
               {optional_applications,[]},
               {applications,[kernel,stdlib,elixir,logger,bandit,jason,plug,
-                             httpoison]},
+                             httpoison,phoenix_pubsub]},
               {description,"elita"},
               {registered,[]},
               {vsn,"0.1.0"},

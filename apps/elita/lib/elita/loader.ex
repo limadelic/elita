@@ -69,6 +69,6 @@ defmodule Elita.Loader do
 
   defp parse_player("- " <> line) do
     [role, agent] = split(line, ": ")
-    {trim(role), trim_leading(agent, "@")}
+    {trim(role), trim(agent) |> trim_leading("@")}
   end
 end
