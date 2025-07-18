@@ -1,27 +1,15 @@
 defmodule Api.Router do
-  use Plug.Router
-  alias Elita.{Agent, Helpers}
-  import Helpers, only: [reply: 2, not_found: 1]
+  use Phoenix.Router
 
-  plug :match
-  plug Plug.Parsers, parsers: [:json], json_decoder: Jason
-  plug :dispatch
-
-  post "/agents/:name" do
-    name
-    |> Agent.act(conn.body_params)
-    |> reply(conn)
+  pipeline :api do
+    plug :accepts, ["json"]
   end
 
-  match _ do
-    not_found(conn)
-  end
-
-  def child_spec(_) do
-    Bandit.child_spec(
-      plug: __MODULE__,
-      scheme: :http,
-      port: 4000
-    )
+  scope "/", Api do
+    pipe_through :api
+    
+    post "/agents/:name", AgentController, :act
+    get "/agents/:name/state", AgentController, :state
+    get "/agents/:name/stream", AgentController, :stream
   end
 end

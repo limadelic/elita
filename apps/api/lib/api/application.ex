@@ -3,7 +3,7 @@ defmodule Api.Application do
 
   def start(_type, _args) do
     children = [
-      Api.Router
+      Api.Endpoint
     ]
 
     opts = [strategy: :one_for_one, name: Api.Supervisor]

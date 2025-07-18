@@ -23,6 +23,7 @@ defmodule Api.MixProject do
   defp deps do
     [
       {:elita, in_umbrella: true},
+      {:phoenix, "~> 1.7"},
       {:bandit, "~> 1.7"},
       {:plug, "~> 1.15"},
       {:jason, "~> 1.4"}
