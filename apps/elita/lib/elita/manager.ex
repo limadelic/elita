@@ -4,10 +4,10 @@ defmodule Elita.Manager do
 
   def find_or_spawn(name) do
     with nil <- Registry.lookup(Elita.AgentRegistry, name) |> List.first() do
-      agent_config = agent(name)
+      config = agent(name)
       {:ok, pid} = DynamicSupervisor.start_child(
         Elita.AgentSupervisor,
-        {Agent, {name, agent_config}}
+        {Agent, {name, config}}
       )
       pid
     else

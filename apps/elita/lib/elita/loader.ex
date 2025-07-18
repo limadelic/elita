@@ -1,19 +1,11 @@
 defmodule Elita.Loader do
+  import Enum, only: [find: 2, drop_while: 2, drop: 2, take_while: 2, join: 2]
+  import String, only: [split: 2, starts_with?: 2, trim_leading: 2, trim: 1]
   
-  def folder do
-    cond do
-      File.exists?("apps/elita/agents") -> "apps/elita/agents"
-      File.exists?("agents") -> "agents"
-      File.exists?("../agents") -> "../agents"
-      File.exists?("../../agents") -> "../../agents"
-      true -> "agents"
-    end
-  end
-
   def agent(name) do
-    "#{folder()}/#{name}.md"
+    "agents/#{name}.md"
     |> File.read!()
-    |> String.split("\n")
+    |> split("\n")
     |> parse()
   end
 
@@ -27,16 +19,18 @@ defmodule Elita.Loader do
     }
   end
 
-  defp name(["# " <> name | _]), do: String.trim(name)
-  defp name([_ | tail]), do: name(tail)
-  defp name([]), do: "Unknown"
+  defp name(lines) do
+    lines
+    |> find(&starts_with?(&1, "# "))
+    |> then(&(&1 && trim_leading(&1, "# ") || "Unknown"))
+  end
 
   defp section(lines, header) do
     lines
-    |> Enum.drop_while(&(&1 != header))
-    |> Enum.drop(1)
-    |> Enum.take_while(&(not String.starts_with?(&1, "## ")))
-    |> Enum.join("\n")
-    |> String.trim()
+    |> drop_while(&(&1 != header))
+    |> drop(1)
+    |> take_while(&(not starts_with?(&1, "## ")))
+    |> join("\n")
+    |> trim()
   end
 end

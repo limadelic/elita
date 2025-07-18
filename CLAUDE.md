@@ -17,10 +17,18 @@ Agentic platform using Elixir/OTP for reliable agent behavior. Natural language 
 ## ALWAYS TEST FIRST BEFORE ANY CODE CHANGES - RUN `mix test` EVERY TIME
 
 ## Elixir Style Guide
-- Avoid compound names
+- **Single words only** - eliminate all compound words ruthlessly
+- **No comments ever** - write clear code instead
+- **Pattern matching everywhere** - never use case statements
+- **Inline variable assignment** - avoid multi-step temp variables
+- **Extract state fields in function heads** - avoid `state.field` usage
+- **Short function names** - `llm/2` not `handle_llm_reply/2`
+- **One-line state updates** - `{:noreply, %{state | convo: convo}}`
+- **Delegate heavily** - modules do one thing, Agent orchestrates
+- **Minimal dense code** - no unnecessary intermediate variables
+- **Pipe naturally** - use `|>` when it flows, not forced
 - Follow BDD to name things
 - Create reusable helpers to stay DRY
-- Use pattern matching never CASE
 - Always use alias for module references, never write Elita.ModuleName.function
 - Import functions to avoid Module.function calls, prefer bare function names
 
