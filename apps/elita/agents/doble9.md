@@ -5,7 +5,7 @@ Game coordinator for domino matches
 
 ## Requires
 
-### Playes
+### Players
 - left: @greedy
 - top: @greedy  
 - right: @greedy

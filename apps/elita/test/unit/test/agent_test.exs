@@ -7,7 +7,10 @@ defmodule Elita.AgentTest do
     :meck.new(Elita.Prompt, [:non_strict])
     :meck.new(Elita.Pat, [:non_strict])
     
-    :meck.expect(Elita.Loader, :agent, fn("test_agent") -> %{name: "Test"} end)
+    :meck.expect(Elita.Loader, :agent, fn("test_agent") -> %{name: "Test", requires: %{}} end)
+    :meck.new(Phoenix.PubSub, [:non_strict])
+    :meck.expect(Phoenix.PubSub, :subscribe, fn(_, _) -> :ok end)
+    :meck.expect(Phoenix.PubSub, :broadcast, fn(_, _, _) -> :ok end)
     :meck.expect(Elita.Prompt, :prompt, fn(_agent, conversation_prompt) -> 
       assert String.contains?(conversation_prompt, "user: test context")
       "prompt result" 

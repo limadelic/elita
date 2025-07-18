@@ -15,7 +15,8 @@ defmodule Elita.Loader do
       role: section(md, "## Role"),
       goals: section(md, "## Goals"),
       instructions: section(md, "## Instructions"),
-      examples: section(md, "## Examples")
+      examples: section(md, "## Examples"),
+      requires: requires(md)
     }
   end
 
@@ -32,5 +33,42 @@ defmodule Elita.Loader do
     |> take_while(&(not starts_with?(&1, "## ")))
     |> join("\n")
     |> trim()
+  end
+
+  defp requires(lines) do
+    case find(lines, &(&1 == "## Requires")) do
+      nil -> %{}
+      _ ->
+        lines
+        |> drop_while(&(&1 != "## Requires"))
+        |> drop(1)
+        |> take_while(&(not starts_with?(&1, "## ")))
+        |> parse_requires()
+    end
+  end
+
+  defp parse_requires(lines) do
+    lines
+    |> find(&starts_with?(&1, "### Players"))
+    |> case do
+      nil -> %{}
+      _ -> 
+        lines
+        |> drop_while(&(&1 != "### Players"))
+        |> drop(1)
+        |> take_while(&(starts_with?(&1, "- ")))
+        |> parse_players()
+    end
+  end
+
+  defp parse_players(lines) do
+    lines
+    |> Enum.map(&parse_player/1)
+    |> Enum.into(%{})
+  end
+
+  defp parse_player("- " <> line) do
+    [role, agent] = split(line, ": ")
+    {trim(role), trim_leading(agent, "@")}
   end
 end

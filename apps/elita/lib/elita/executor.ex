@@ -4,6 +4,7 @@ defmodule Elita.Executor do
   end
 
   def call({"say", %{"message" => message}}, state) do
+    Phoenix.PubSub.broadcast(Elita.PubSub, state.group, {:intercom, state.name, message})
     {"broadcasted: #{message}", state}
   end
 

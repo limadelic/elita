@@ -3,7 +3,10 @@ defmodule Elita.Manager do
   import Loader, only: [agent: 1]
 
   def ensure(name) do
-    find(name) || start(name)
+    case find(name) do
+      nil -> spawn_group(name)
+      pid -> pid
+    end
   end
 
   defp find(name) do
@@ -13,11 +16,27 @@ defmodule Elita.Manager do
     end
   end
 
-  defp start(name) do
+  defp spawn_group(name) do
+    config = agent(name)
+    main_pid = start(name, config)
+    spawn_required(name, config.requires)
+    main_pid
+  end
+
+  defp start(name, config) do
     {:ok, pid} = DynamicSupervisor.start_child(
       Elita.AgentSupervisor,
-      {Agent, {name, agent(name)}}
+      {Agent, {name, config}}
     )
     pid
+  end
+
+  defp spawn_required(_name, requires) when map_size(requires) == 0, do: :ok
+  defp spawn_required(name, requires) do
+    Enum.each(requires, fn {role, template} ->
+      agent_name = "#{name}_#{role}"
+      config = agent(template)
+      start(agent_name, config)
+    end)
   end
 end

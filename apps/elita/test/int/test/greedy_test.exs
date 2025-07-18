@@ -22,7 +22,8 @@ defmodule Elita.IntegrationTest do
         role: "Test role",
         goals: "Test goals", 
         instructions: "Test instructions",
-        examples: "Test examples"
+        examples: "Test examples",
+        requires: %{}
       }
     end)
     

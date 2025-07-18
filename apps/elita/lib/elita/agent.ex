@@ -17,7 +17,16 @@ defmodule Elita.Agent do
 
   @impl true
   def init({name, config}) do
-    {:ok, %{name: name, config: config, memory: %{}, convo: Convo.new(), caller: nil}}
+    group = group_name(name)
+    Phoenix.PubSub.subscribe(Elita.PubSub, group)
+    {:ok, %{name: name, config: config, memory: %{}, convo: Convo.new(), caller: nil, group: group}}
+  end
+
+  defp group_name(name) do
+    case String.split(name, "_") do
+      [group | _] -> group
+      [] -> name
+    end
   end
 
   @impl true
@@ -38,6 +47,12 @@ defmodule Elita.Agent do
       |> say()
 
     llm(reply, state)
+  end
+
+  @impl true
+  def handle_info({:intercom, from, message}, state) do
+    convo = Convo.msg(state.convo, %{role: "intercom", content: "#{from}: #{message}"})
+    {:noreply, %{state | convo: convo}}
   end
 
   defp llm({:ok, reply}, state) do

@@ -26,6 +26,7 @@ defmodule Elita.App.MixProject do
       {:jason, "~> 1.4"},
       {:plug, "~> 1.14"},
       {:httpoison, "~> 2.0"},
+      {:phoenix_pubsub, "~> 2.1"},
       {:meck, "~> 0.9", only: :test}
     ]
   end
