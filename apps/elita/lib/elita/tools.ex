@@ -1,82 +1,84 @@
 defmodule Elita.Tools do
   alias Elita.Convo
+  import String, only: [contains?: 2, split: 2, split: 3, trim: 1]
+  import Enum, only: [join: 2, reduce: 3, drop: 2, map: 2, filter: 2, reverse: 1, into: 2]
 
   def process({:ok, reply}, state) do
-    if has_tool_calls?(reply) do
-      {results, state} = execute_tools(reply, state)
-      msg = %{role: "tool", content: Enum.join(results, "; ")}
-      convo = Convo.msg(state.convo, msg)
-      state = %{state | convo: convo}
-      {:continue, state}
-    else
-      {:done, reply, state}
-    end
+    dispatch(has_tools?(reply), reply, state)
   end
 
   def process(error, state), do: {:error, error, state}
 
-  defp has_tool_calls?(reply) do
-    String.contains?(reply, "<function_calls>")
+  defp dispatch(true, reply, state) do
+    {results, state} = execute(reply, state)
+    {:continue, %{state | convo: Convo.msg(state.convo, %{role: "tool", content: join(results, "; ")})}}
   end
 
-  defp execute_tools(reply, state) do
-    tools = extract_tool_calls(reply)
-    {results, state} = Enum.reduce(tools, {[], state}, fn tool, {acc_results, acc_state} ->
-      {result, state} = execute_tool(tool, acc_state)
-      {[result | acc_results], state}
-    end)
+  defp dispatch(false, reply, state) do
+    {:done, reply, state}
+  end
+
+  defp has_tools?(reply) do
+    contains?(reply, "<function_calls>")
+  end
+
+  defp execute(reply, state) do
+    {results, state} = 
+      reply
+      |> extract()
+      |> reduce({[], state}, fn tool, {results, state} ->
+        {result, state} = call(tool, state)
+        {[result | results], state}
+      end)
     
-    results = Enum.reverse(results)
-    {results, state}
+    {reverse(results), state}
   end
 
-  defp extract_tool_calls(reply) do
+  defp extract(reply) do
     reply
-    |> String.split("<invoke name=\"")
-    |> Enum.drop(1)
-    |> Enum.map(&parse_tool_call/1)
-    |> Enum.filter(& &1)
+    |> split("<invoke name=\"")
+    |> drop(1)
+    |> map(&parse/1)
+    |> filter(& &1)
   end
 
-  defp parse_tool_call(invoke_block) do
-    with [tool_name | rest] <- String.split(invoke_block, "\">", parts: 2),
-         [params_block | _] <- rest,
-         parameters <- extract_parameters(params_block) do
-      {tool_name, parameters}
+  defp parse(block) do
+    with [name | rest] <- split(block, "\">", parts: 2),
+         [params | _] <- rest,
+         parameters <- params(params) do
+      {name, parameters}
     else
       _ -> nil
     end
   end
 
-  defp extract_parameters(params_block) do
-    params_block
-    |> String.split("<parameter name=\"")
-    |> Enum.drop(1)
-    |> Enum.map(&parse_parameter/1)
-    |> Enum.into(%{})
+  defp params(params) do
+    params
+    |> split("<parameter name=\"")
+    |> drop(1)
+    |> map(&param/1)
+    |> into(%{})
   end
 
-  defp parse_parameter(param_block) do
-    with [param_name | rest] <- String.split(param_block, "\">", parts: 2),
-         [value_block | _] <- rest,
-         [value | _] <- String.split(value_block, "</parameter>") do
-      {param_name, String.trim(value)}
+  defp param(block) do
+    with [name | rest] <- split(block, "\">", parts: 2),
+         [value | _] <- rest,
+         [value | _] <- split(value, "</parameter>") do
+      {name, trim(value)}
     else
       _ -> {"", ""}
     end
   end
 
-  defp execute_tool({"set", %{"field" => field, "value" => value}}, state) do
-    memory = Map.put(state.memory, field, value)
-    state = %{state | memory: memory}
-    {"stored #{field}", state}
+  defp call({"set", %{"field" => field, "value" => value}}, state) do
+    {"stored #{field}", %{state | memory: Map.put(state.memory, field, value)}}
   end
 
-  defp execute_tool({"say", %{"message" => message}}, state) do
+  defp call({"say", %{"message" => message}}, state) do
     {"broadcasted: #{message}", state}
   end
 
-  defp execute_tool({tool_name, _params}, state) do
-    {"unknown tool: #{tool_name}", state}
+  defp call({name, _params}, state) do
+    {"unknown tool: #{name}", state}
   end
 end
