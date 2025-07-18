@@ -5,7 +5,7 @@ defmodule Elita.Agent do
   import Pat, only: [say: 1]
 
   def act(name, context) do
-    agent_pid = Manager.find_or_spawn(name)
+    agent_pid = Manager.ensure(name)
     GenServer.call(agent_pid, {:act, context}, 35_000)
   end
 

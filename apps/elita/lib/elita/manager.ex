@@ -2,16 +2,22 @@ defmodule Elita.Manager do
   alias Elita.{Agent, Loader}
   import Loader, only: [agent: 1]
 
-  def find_or_spawn(name) do
-    with nil <- Registry.lookup(Elita.AgentRegistry, name) |> List.first() do
-      config = agent(name)
-      {:ok, pid} = DynamicSupervisor.start_child(
-        Elita.AgentSupervisor,
-        {Agent, {name, config}}
-      )
-      pid
-    else
-      {pid, _} -> pid
+  def ensure(name) do
+    find(name) || spawn(name)
+  end
+
+  defp find(name) do
+    case Registry.lookup(Elita.AgentRegistry, name) do
+      [{pid, _}] -> pid
+      [] -> nil
     end
+  end
+
+  defp spawn(name) do
+    {:ok, pid} = DynamicSupervisor.start_child(
+      Elita.AgentSupervisor,
+      {Agent, {name, agent(name)}}
+    )
+    pid
   end
 end
