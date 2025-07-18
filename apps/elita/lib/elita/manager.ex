@@ -3,7 +3,7 @@ defmodule Elita.Manager do
   import Loader, only: [agent: 1]
 
   def ensure(name) do
-    find(name) || spawn(name)
+    find(name) || start(name)
   end
 
   defp find(name) do
@@ -13,7 +13,7 @@ defmodule Elita.Manager do
     end
   end
 
-  defp spawn(name) do
+  defp start(name) do
     {:ok, pid} = DynamicSupervisor.start_child(
       Elita.AgentSupervisor,
       {Agent, {name, agent(name)}}
