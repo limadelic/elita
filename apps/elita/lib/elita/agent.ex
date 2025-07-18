@@ -10,7 +10,9 @@ defmodule Elita.Agent do
   end
 
   def start_link({name, config}) do
-    GenServer.start_link(__MODULE__, {name, config}, name: {:via, Registry, {Elita.AgentRegistry, name}})
+    GenServer.start_link(__MODULE__, {name, config},
+      name: {:via, Registry, {Elita.AgentRegistry, name}}
+    )
   end
 
   @impl true
@@ -20,43 +22,47 @@ defmodule Elita.Agent do
 
   @impl true
   def handle_call({:act, context}, from, state) do
-    convo = Convo.add_msg(state.convo, %{role: "user", content: context})
-    
-    send(self(), :execute_convo)
+    convo = Convo.msg(state.convo, %{role: "user", content: context})
+
+    send(self(), :act)
     {:noreply, %{state | convo: convo, caller: from}}
   end
 
   @impl true
-  def handle_info(:execute_convo, state) do
-    prompt_text = Convo.build_prompt(state.convo)
-    llm_reply = state.config |> prompt(prompt_text) |> say()
-    handle_llm_reply(llm_reply, state)
+  def handle_info(:act, %{convo: convo, config: config} = state) do
+    msg = Convo.prompt(convo)
+
+    reply =
+      config
+      |> prompt(msg)
+      |> say()
+
+    llm(reply, state)
   end
 
-  defp handle_llm_reply({:ok, reply}, state) do
-    convo = Convo.add_msg(state.convo, %{role: "agent", content: reply})
+  defp llm({:ok, reply}, state) do
+    convo = Convo.msg(state.convo, %{role: "agent", content: reply})
 
     tools(Tools.process({:ok, reply}, %{state | convo: convo}))
   end
 
-  defp handle_llm_reply(error, state) do
+  defp llm(error, state) do
     GenServer.reply(state.caller, error)
     {:noreply, %{state | caller: nil}}
   end
 
-  defp tools({:continue_convo, updated_state}) do
-    send(self(), :execute_convo)
-    {:noreply, updated_state}
+  defp tools({:continue, state}) do
+    send(self(), :act)
+    {:noreply, state}
   end
 
-  defp tools({:final_reply, reply, final_state}) do
-    GenServer.reply(final_state.caller, {:ok, reply})
-    {:noreply, %{final_state | caller: nil}}
+  defp tools({:done, reply, state}) do
+    GenServer.reply(state.caller, {:ok, reply})
+    {:noreply, %{state | caller: nil}}
   end
 
   defp tools({:error, error, state}) do
     GenServer.reply(state.caller, error)
     {:noreply, %{state | caller: nil}}
   end
-
 end

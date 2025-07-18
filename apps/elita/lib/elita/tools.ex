@@ -1,15 +1,15 @@
 defmodule Elita.Tools do
   alias Elita.Convo
 
-  def process({:ok, llm_reply}, state) do
-    if has_tool_calls?(llm_reply) do
-      {tool_results, new_state} = execute_tools(llm_reply, state)
-      tool_msg = %{role: "tool", content: Enum.join(tool_results, "; ")}
-      updated_convo = Convo.add_msg(new_state.convo, tool_msg)
-      final_state = %{new_state | convo: updated_convo}
-      {:continue_convo, final_state}
+  def process({:ok, reply}, state) do
+    if has_tool_calls?(reply) do
+      {results, state} = execute_tools(reply, state)
+      msg = %{role: "tool", content: Enum.join(results, "; ")}
+      convo = Convo.msg(state.convo, msg)
+      state = %{state | convo: convo}
+      {:continue, state}
     else
-      {:final_reply, llm_reply, state}
+      {:done, reply, state}
     end
   end
 
@@ -21,13 +21,13 @@ defmodule Elita.Tools do
 
   defp execute_tools(reply, state) do
     tools = extract_tool_calls(reply)
-    {results, new_state} = Enum.reduce(tools, {[], state}, fn tool, {acc_results, acc_state} ->
-      {result, updated_state} = execute_tool(tool, acc_state)
-      {[result | acc_results], updated_state}
+    {results, state} = Enum.reduce(tools, {[], state}, fn tool, {acc_results, acc_state} ->
+      {result, state} = execute_tool(tool, acc_state)
+      {[result | acc_results], state}
     end)
     
-    tool_results = Enum.reverse(results)
-    {tool_results, new_state}
+    results = Enum.reverse(results)
+    {results, state}
   end
 
   defp extract_tool_calls(reply) do
@@ -67,9 +67,9 @@ defmodule Elita.Tools do
   end
 
   defp execute_tool({"set", %{"field" => field, "value" => value}}, state) do
-    new_memory = Map.put(state.memory, field, value)
-    new_state = %{state | memory: new_memory}
-    {"stored #{field}", new_state}
+    memory = Map.put(state.memory, field, value)
+    state = %{state | memory: memory}
+    {"stored #{field}", state}
   end
 
   defp execute_tool({"say", %{"message" => message}}, state) do

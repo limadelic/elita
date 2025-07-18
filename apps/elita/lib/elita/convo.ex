@@ -3,11 +3,11 @@ defmodule Elita.Convo do
     []
   end
 
-  def add_msg(convo, msg) do
+  def msg(convo, msg) do
     [msg | convo]
   end
 
-  def build_prompt(convo) do
+  def prompt(convo) do
     convo
     |> Enum.reverse()
     |> Enum.map(&format_msg/1)
