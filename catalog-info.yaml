@@ -1,0 +1,17 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: elita
+  tags:
+    - pillar-pro-people
+    - valuestream-talent-acquisition
+    - subvaluestream-recruiting
+  description: battle tested agents
+  annotations:
+    github.com/project-slug: UKGEPIC/elita
+    trove/enabled: "false"
+spec:
+  type: service
+  lifecycle: production
+  system: library
+  owner: user:default/isel-fernandez_ukg
