@@ -7,9 +7,11 @@ defmodule CLI do
   end
 
   defp chat(pid) do
-    input = IO.gets("> ") |> String.trim()
-    resp = Elita.act(pid, input)
-    IO.puts(resp)
+    IO.gets("> ")
+    |> String.trim()
+    |> Elita.act(pid)
+    |> IO.puts()
+    
     chat(pid)
   end
 end

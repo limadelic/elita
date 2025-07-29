@@ -10,7 +10,7 @@ defmodule ElitaTest do
   test "greet" do
     {:ok, pid} = Elita.start_link(:greet)
     
-    response = Elita.act(pid, "hello")
+    response = Elita.act("hello", pid)
     
     assert is_binary(response)
     assert String.length(response) > 0
