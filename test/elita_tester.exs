@@ -10,6 +10,10 @@ defmodule ElitaTester do
     start_link agent
   end
 
+  def tell agent, q do
+    call {:global, agent}, {:act, q}, 30000
+  end
+
   def verify agent, a, q do
     response = call {:global, agent}, {:act, q}, 30000
     IO.puts "Q: #{q}"
