@@ -3,10 +3,10 @@ defmodule GreetTest do
   import ElitaTester
 
   test "greet conversation flow" do
-    pid = start(:greet)
+    start :greet
     
-    verify(pid, "hello", ["Greeeet", "Who am I talking to"])
-    verify(pid, "Mike", ["Mike"])
-    verify(pid, "how are you?", ["I am Greeeet"])
+    verify :greet, "hello", ["Greeeet", "Who am I talking to"]
+    verify :greet, "Mike", "Mike"
+    verify :greet, "how are you?", "I am Greeeet"
   end
 end
