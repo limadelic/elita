@@ -39,12 +39,14 @@ defmodule Prompt do
     
     Available tools:
     #{definitions}
+    
+    To use tools, write them exactly as shown above in your response.
     """
   end
   
   defp build_tools_section(_), do: ""
   
-  defp tool_definition("set"), do: "- set(key, value) - store data"
-  defp tool_definition("get"), do: "- get(key) - retrieve data"
+  defp tool_definition("set"), do: "- set(task1, \"Buy groceries\") - store data"
+  defp tool_definition("get"), do: "- get(task1) - retrieve data"
   defp tool_definition(tool), do: "- #{tool} - tool description"
 end
