@@ -1,8 +1,8 @@
 defmodule Llm do
-  import Jason
-  import String
-  import System
-  import HTTPoison
+  import Jason, only: [encode!: 1, decode: 1]
+  import String, only: [trim: 1]
+  import System, only: [cmd: 2]
+  import HTTPoison, only: [post: 3]
   
   @vertex_url "https://us-east4-aiplatform.googleapis.com/v1/projects/d-ulti-ml-ds-dev-9561/locations/us-east4/publishers/google/models/gemini-1.5-flash:generateContent"
 

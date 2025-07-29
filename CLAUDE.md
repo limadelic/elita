@@ -19,5 +19,5 @@ git pull public main    # from public
 # Code Styles
 
 - use single words ALWAYS
-- import module functions instead of calling Module.func
+- import module functions instead of calling Module.func (only import what you use)
 - remove all parenths that can b removed

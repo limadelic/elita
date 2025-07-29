@@ -7,11 +7,15 @@ defmodule CLI do
   end
 
   defp chat(pid) do
-    IO.gets("> ")
-    |> String.trim()
-    |> Elita.act(pid)
-    |> IO.puts()
-    
-    chat(pid)
+    case IO.gets("> ") do
+      :eof -> :ok
+      input -> 
+        input
+        |> String.trim()
+        |> Elita.act(pid)
+        |> IO.puts()
+        
+        chat(pid)
+    end
   end
 end
