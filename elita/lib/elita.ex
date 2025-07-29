@@ -9,7 +9,7 @@ defmodule Elita do
     GenServer.start_link(__MODULE__, name, name: {:global, name})
   end
 
-  def act(pid, msg) do
+  def act(msg, pid) do
     GenServer.call(pid, {:act, msg})
   end
 
