@@ -6,11 +6,43 @@ defmodule Llm do
   
   @vertex_url "https://us-east4-aiplatform.googleapis.com/v1/projects/d-ulti-ml-ds-dev-9561/locations/us-east4/publishers/google/models/gemini-1.5-pro:generateContent"
 
-  def llm message do
+  @memory_tools [
+    %{
+      function_declarations: [
+        %{
+          name: "set",
+          description: "Store data with a key",
+          parameters: %{
+            type: "object",
+            properties: %{
+              key: %{type: "string", description: "The key to store data under"},
+              value: %{type: "string", description: "The value to store"}
+            },
+            required: ["key", "value"]
+          }
+        },
+        %{
+          name: "get",
+          description: "Retrieve data by key",
+          parameters: %{
+            type: "object", 
+            properties: %{
+              key: %{type: "string", description: "The key to retrieve data for"}
+            },
+            required: ["key"]
+          }
+        }
+      ]
+    }
+  ]
+
+  def llm(message, tools \\ []) do
     @vertex_url
-    |> post(body(message), headers())
+    |> post(body(message, tools), headers())
     |> handle
   end
+
+  def memory_tools, do: @memory_tools
   
   defp headers do
     [
@@ -19,12 +51,22 @@ defmodule Llm do
     ]
   end
   
-  defp body message do
+  defp body(message, []) do
     encode! %{
       contents: [%{
         role: "user",
         parts: [%{text: message}]
       }]
+    }
+  end
+
+  defp body(message, tools) when tools != [] do
+    encode! %{
+      contents: [%{
+        role: "user",
+        parts: [%{text: message}]
+      }],
+      tools: tools
     }
   end
   
@@ -42,12 +84,19 @@ defmodule Llm do
     "#{reason}"
   end
   
-  defp extract {:ok, %{"candidates" => [%{"content" => %{"parts" => [%{"text" => text}]}} | _]}} do
-    text
+  defp extract {:ok, response} do
+    case response do
+      %{"candidates" => [%{"content" => %{"parts" => [%{"text" => text}]}} | _]} ->
+        {:text, text}
+      %{"candidates" => [%{"content" => %{"parts" => [%{"functionCall" => function_call}]}} | _]} ->
+        {:tool_call, function_call}
+      _ ->
+        {:error, "parse failed"}
+    end
   end
   
-  defp extract _ do
-    "parse failed"
+  defp extract _error do
+    {:error, "parse failed"}
   end
   
   defp token do
