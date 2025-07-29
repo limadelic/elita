@@ -21,3 +21,9 @@ elita-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+
+# IDE files
+.idea/
+
+# Escript executable
+/elita
