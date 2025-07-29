@@ -5,8 +5,8 @@ defmodule GreetTest do
   test "greet conversation flow" do
     start :greet
     
-    verify :greet, "hello", ["Greeeet", "Who am I talking to"]
+    verify :greet, "Who am I talking to", "hello"
     verify :greet, "Mike", "Mike"
-    verify :greet, "how are you?", "I am Greeeet"
+    verify :greet, "I am Greeeet", "how are you?"
   end
 end
