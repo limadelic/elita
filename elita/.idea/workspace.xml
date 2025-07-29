@@ -4,7 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="360d6a35-e9ce-43e1-b8c5-518e9e1fabd6" name="Changes" comment="" />
+    <list default="true" id="360d6a35-e9ce-43e1-b8c5-518e9e1fabd6" name="Changes" comment="pipeable args">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/agents/greet.md" beforeDir="false" afterPath="$PROJECT_DIR$/agents/greet.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/elita" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/elita_test.exs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/test_helper.exs" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_helper.exs" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -22,23 +28,25 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Elixir Mix ExUnit.Mix ExUnit elita test.executor&quot;: &quot;Run&quot;,
-    &quot;Elixir Mix ExUnit.Mix ExUnit elita test/elita_test.exs:18.executor&quot;: &quot;Run&quot;,
-    &quot;Elixir Mix ExUnit.Mix ExUnit elita test/elita_test.exs:9.executor&quot;: &quot;Run&quot;,
-    &quot;Elixir Mix ExUnit.Mix ExUnit test.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settingsdialog.IDE.editor.colors.Elixir&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Elixir Mix ExUnit.Mix ExUnit elita test.executor": "Run",
+    "Elixir Mix ExUnit.Mix ExUnit elita test/elita_test.exs:18.executor": "Run",
+    "Elixir Mix ExUnit.Mix ExUnit elita test/elita_test.exs:9.executor": "Run",
+    "Elixir Mix ExUnit.Mix ExUnit test.executor": "Run",
+    "Elixir Mix ExUnit.Mix ExUnit test/greet_test.exs:9.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "run.code.analysis.last.selected.profile": "pProject Default",
+    "settings.editor.selected.configurable": "reference.settingsdialog.IDE.editor.colors.Elixir",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected="Elixir Mix ExUnit.Mix ExUnit test">
     <configuration name="Mix ExUnit elita test" type="MixExUnitRunConfigurationType" factoryName="Elixir Mix ExUnit" temporary="true">
       <mix-test>
@@ -72,9 +80,18 @@
       <module-filters inherit-application-module-filters="true" />
       <method v="2" />
     </configuration>
+    <configuration name="Mix ExUnit test/greet_test.exs:9" type="MixExUnitRunConfigurationType" factoryName="Elixir Mix ExUnit" temporary="true">
+      <mix-test>
+        <argument>test/greet_test.exs:9</argument>
+      </mix-test>
+      <working-directory url="file://$PROJECT_DIR$" />
+      <module-filters inherit-application-module-filters="true" />
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
         <item itemvalue="Elixir Mix ExUnit.Mix ExUnit test" />
+        <item itemvalue="Elixir Mix ExUnit.Mix ExUnit test/greet_test.exs:9" />
         <item itemvalue="Elixir Mix ExUnit.Mix ExUnit elita test" />
         <item itemvalue="Elixir Mix ExUnit.Mix ExUnit elita test/elita_test.exs:9" />
         <item itemvalue="Elixir Mix ExUnit.Mix ExUnit elita test/elita_test.exs:18" />
@@ -98,11 +115,24 @@
       <option name="presentableId" value="Default" />
       <updated>1753395402577</updated>
       <workItem from="1753395403628" duration="2347000" />
-      <workItem from="1753752717050" duration="5552000" />
+      <workItem from="1753752717050" duration="7550000" />
     </task>
+    <task id="LOCAL-00001" summary="pipeable args">
+      <option name="closed" value="true" />
+      <created>1753758671639</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1753758671639</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="pipeable args" />
+    <option name="LAST_COMMIT_MESSAGE" value="pipeable args" />
   </component>
 </project>
