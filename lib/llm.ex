@@ -6,35 +6,6 @@ defmodule Llm do
   
   @vertex_url "https://us-east4-aiplatform.googleapis.com/v1/projects/d-ulti-ml-ds-dev-9561/locations/us-east4/publishers/google/models/gemini-1.5-pro:generateContent"
 
-  @memory_tools [
-    %{
-      function_declarations: [
-        %{
-          name: "set",
-          description: "Store data with a key",
-          parameters: %{
-            type: "object",
-            properties: %{
-              key: %{type: "string", description: "The key to store data under"},
-              value: %{type: "string", description: "The value to store"}
-            },
-            required: ["key", "value"]
-          }
-        },
-        %{
-          name: "get",
-          description: "Retrieve data by key",
-          parameters: %{
-            type: "object", 
-            properties: %{
-              key: %{type: "string", description: "The key to retrieve data for"}
-            },
-            required: ["key"]
-          }
-        }
-      ]
-    }
-  ]
 
   def llm(message, tools \\ []) do
     @vertex_url
@@ -42,7 +13,6 @@ defmodule Llm do
     |> handle
   end
 
-  def memory_tools, do: @memory_tools
   
   defp headers do
     [
