@@ -2,9 +2,9 @@ defmodule Prompt do
   import Enum, only: [reverse: 1, join: 2]
   import String, only: [split: 2, split: 3, trim: 1]
   
-  def prompt(config, history) do
+  def prompt(config, history, include_tool_instructions \\ true) do
     {frontmatter, content} = parse_config(config)
-    tools_section = build_tools_section(frontmatter)
+    tools_section = if include_tool_instructions, do: build_tools_section(frontmatter), else: ""
     
     """
     #{content}

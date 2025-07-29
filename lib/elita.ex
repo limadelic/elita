@@ -2,9 +2,8 @@ defmodule Elita do
   use GenServer
   
   import AgentConfig, only: [config: 1]
-  import Prompt, only: [prompt: 2]
-  import Llm, only: [llm: 1]
-  import Regex, only: [scan: 2]
+  import Prompt, only: [prompt: 3]
+  import Llm, only: [llm: 2, memory_tools: 0]
 
   def start_link name do
     GenServer.start_link __MODULE__, name, name: {:global, name}
@@ -21,9 +20,11 @@ defmodule Elita do
 
   def handle_call {:act, msg}, _from, %{name: name, config: config, history: history} = state do
     history = [msg | history]
-
-    resp = llm prompt config, history
-    final_resp = process_response resp, name
+    
+    tools = if has_tools?(config), do: memory_tools(), else: []
+    include_tool_instructions = tools == []
+    resp = llm prompt(config, history, include_tool_instructions), tools
+    final_resp = process_response resp, name, config, history
     
     {:reply, final_resp, %{state | history: [final_resp | history]}}
   end
@@ -36,57 +37,51 @@ defmodule Elita do
     :"memory_#{name}"
   end
 
-  defp process_response resp, name do
-    case parse_tool_calls resp do
-      [] -> resp
-      tool_calls ->
-        results = execute_tool_calls tool_calls, name
-        generate_response_with_results results, name
+  defp has_tools?(config) do
+    case parse_config(config) do
+      {%{"tools" => _}, _} -> true
+      _ -> false
     end
   end
 
-  defp parse_tool_calls resp do
-    set_calls = scan ~r/set\((\w+),\s*"([^"]+)"\)/, resp
-    get_calls = scan ~r/get\((\w+)\)/, resp
-    
-    set_ops = Enum.map set_calls, fn [_, key, value] -> {:set, key, value} end
-    get_ops = Enum.map get_calls, fn [_, key] -> {:get, key} end
-    
-    set_ops ++ get_ops
-  end
-
-  defp execute_tool_calls tool_calls, name do
-    table = table_name name
-    Enum.map tool_calls, fn call -> execute_tool_call call, table end
-  end
-
-  defp execute_tool_call {:set, key, value}, table do
-    :ets.insert table, {key, value}
-    {:set, key, "stored"}
-  end
-
-  defp execute_tool_call {:get, key}, table do
-    case :ets.lookup table, key do
-      [{^key, value}] -> {:get, key, value}
-      [] -> {:get, key, "not found"}
+  defp parse_config(config) do
+    case String.split(config, "---", parts: 3) do
+      ["", yaml_text, content] ->
+        case YamlElixir.read_from_string(yaml_text) do
+          {:ok, frontmatter} -> {frontmatter, String.trim(content)}
+          _ -> {%{}, config}
+        end
+      _ -> {%{}, config}
     end
   end
 
-  defp generate_response_with_results results, name do
-    tool_results = format_tool_results results
-    config = config name
-    history = ["Tool results: #{tool_results}"]
-    
-    llm prompt config, history
+  defp process_response({:text, text}, _name, _config, _history), do: text
+  
+  defp process_response({:tool_call, function_call}, name, config, history) do
+    result = execute_tool_call(function_call, name)
+    continue_with_tool_result(result, config, history, name)
+  end
+  
+  defp process_response({:error, error}, _name, _config, _history), do: error
+
+  defp execute_tool_call(%{"name" => "set", "args" => %{"key" => key, "value" => value}}, name) do
+    table = table_name(name)
+    :ets.insert(table, {key, value})
+    %{"key" => key, "result" => "stored"}
   end
 
-  defp format_tool_results results do
-    results
-    |> Enum.map(&format_tool_result/1)
-    |> Enum.join(", ")
+  defp execute_tool_call(%{"name" => "get", "args" => %{"key" => key}}, name) do
+    table = table_name(name)
+    case :ets.lookup(table, key) do
+      [{^key, value}] -> %{"key" => key, "result" => value}
+      [] -> %{"key" => key, "result" => "not found"}
+    end
   end
 
-  defp format_tool_result({:set, key, "stored"}), do: "#{key} stored"
-  defp format_tool_result({:get, key, value}), do: "#{key}: #{value}"
+  defp continue_with_tool_result(result, _config, _history, _name) do
+    # For now, just return a simple confirmation
+    # Later we can send the result back to the LLM
+    "Tool executed: #{result["result"]}"
+  end
 
 end
