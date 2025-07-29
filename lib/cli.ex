@@ -8,8 +8,10 @@ defmodule CLI do
 
   defp chat(pid) do
     case IO.gets("> ") do
-      :eof -> :ok
-      input -> 
+      :eof -> 
+        IO.puts("Bye!")
+        :ok
+      input when is_binary(input) -> 
         input
         |> String.trim()
         |> Elita.act(pid)
