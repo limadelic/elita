@@ -9,3 +9,5 @@ elita-*.tar
 /tmp/
 .idea/
 /elita
+/langchain
+/langchain-google
