@@ -1,10 +1,11 @@
 defmodule Prompt do
   import Enum, only: [reverse: 1, join: 2]
   import String, only: [split: 2, split: 3, trim: 1]
+  import Tools, only: [tools: 1]
   
-  def prompt(config, history, include_tool_instructions \\ true) do
+  def prompt(config, history) do
     {frontmatter, content} = parse_config(config)
-    tools_section = if include_tool_instructions, do: build_tools_section(frontmatter), else: ""
+    tools_section = build_tools_section(tools(frontmatter))
     
     """
     #{content}
@@ -25,28 +26,29 @@ defmodule Prompt do
     end
   end
   
-  defp build_tools_section(%{"tools" => tools}) when is_binary(tools) do
-    tool_list = tools |> split(",") |> Enum.map(&trim/1)
-    build_tools_section(%{"tools" => tool_list})
-  end
-  
-  defp build_tools_section(%{"tools" => tools}) when is_list(tools) do
-    definitions = tools
+  defp build_tools_section(tools) when is_list(tools) do
+    tool_descriptions = tools
+    |> Enum.flat_map(fn %{function_declarations: declarations} -> declarations end)
     |> Enum.map(&tool_definition/1)
     |> join("\n")
     
     """
     
     Available tools:
-    #{definitions}
+    #{tool_descriptions}
     
-    To use tools, write them exactly as shown above in your response.
+    IMPORTANT: To use tools, write them in code blocks like this:
+    ```tool_code
+    get('todo_list')
+    ```
+    
+    Always check for existing data first with get() before responding.
     """
   end
   
   defp build_tools_section(_), do: ""
   
-  defp tool_definition("set"), do: "- set(task1, \"Buy groceries\") - store data"
-  defp tool_definition("get"), do: "- get(task1) - retrieve data"
-  defp tool_definition(tool), do: "- #{tool} - tool description"
+  defp tool_definition(%{name: "set", description: desc}), do: "- set(key, value) - #{desc}"
+  defp tool_definition(%{name: "get", description: desc}), do: "- get(key) - #{desc}. Use this to check what's stored."
+  defp tool_definition(%{name: name, description: desc}), do: "- #{name}() - #{desc}"
 end

@@ -2,10 +2,9 @@ defmodule Elita do
   use GenServer
   
   import AgentConfig, only: [config: 1]
-  import Prompt, only: [prompt: 3]
-  import Llm, only: [llm: 2]
-  import Tools, only: [memory_tools: 0, execute: 2]
-  import String, only: [split: 3, trim: 1]
+  import Prompt, only: [prompt: 2]
+  import Llm, only: [llm: 1]
+  import Tools, only: [execute: 2, create_memory: 1]
 
   def start_link name do
     GenServer.start_link __MODULE__, name, name: {:global, name}
@@ -23,41 +22,32 @@ defmodule Elita do
   def handle_call {:act, msg}, _from, %{name: name, config: config, history: history} = state do
     history = [msg | history]
     
-    tools = if(has_tools?(config), do: memory_tools(), else: [])
-    include_tools = tools == []
-    resp = llm prompt(config, history, include_tools), tools
+    resp = llm prompt(config, history)
     final = done? resp, name, config, history
     
     {:reply, final, %{state | history: [final | history]}}
   end
 
-  defp create_memory name do
-    :ets.new table(name), [:set, :public, :named_table]
-  end
 
-  defp table name do
-    :"memory_#{name}"
-  end
-
-  defp has_tools? config do
-    case parse(config) do
-      {%{"tools" => _}, _} -> true
-      _ -> false
+  defp done?({:text, text}, name, config, history) do
+    case parse_tool_call(text) do
+      {:tool_call, call} -> done?({:tool_call, call}, name, config, history)
+      _ -> text
     end
   end
-
-  defp parse config do
-    case split config, "---", parts: 3 do
-      ["", yaml_text, content] ->
-        case YamlElixir.read_from_string yaml_text do
-          {:ok, frontmatter} -> {frontmatter, trim content}
-          _ -> {%{}, config}
+  
+  defp parse_tool_call(text) do
+    case Regex.run(~r/```tool_code\n(\w+)\('?([^']*)'?\)\n```/, text) do
+      [_, func_name, args] -> 
+        {:tool_call, %{"name" => func_name, "args" => %{"key" => args}}}
+      _ -> 
+        case Regex.run(~r/```tool_code\n(\w+)\('?([^']*)'?,\s*'?([^']*)'?\)\n```/, text) do
+          [_, func_name, key, value] -> 
+            {:tool_call, %{"name" => func_name, "args" => %{"key" => key, "value" => value}}}
+          _ -> nil
         end
-      _ -> {%{}, config}
     end
   end
-
-  defp done?({:text, text}, _name, _config, _history), do: text
   
   defp done?({:tool_call, call}, name, config, history) do
     result = execute call, name

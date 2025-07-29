@@ -7,9 +7,9 @@ defmodule Llm do
   @vertex_url "https://us-east4-aiplatform.googleapis.com/v1/projects/d-ulti-ml-ds-dev-9561/locations/us-east4/publishers/google/models/gemini-1.5-pro:generateContent"
 
 
-  def llm(message, tools \\ []) do
+  def llm message do
     @vertex_url
-    |> post(body(message, tools), headers())
+    |> post(body(message), headers())
     |> handle
   end
 
@@ -21,22 +21,12 @@ defmodule Llm do
     ]
   end
   
-  defp body(message, []) do
+  defp body(message) do
     encode! %{
       contents: [%{
         role: "user",
         parts: [%{text: message}]
       }]
-    }
-  end
-
-  defp body(message, tools) when tools != [] do
-    encode! %{
-      contents: [%{
-        role: "user",
-        parts: [%{text: message}]
-      }],
-      tools: tools
     }
   end
   
