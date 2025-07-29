@@ -4,7 +4,7 @@ defmodule Llm do
   import System, only: [cmd: 2]
   import HTTPoison, only: [post: 3]
   
-  @vertex_url "https://us-east4-aiplatform.googleapis.com/v1/projects/d-ulti-ml-ds-dev-9561/locations/us-east4/publishers/google/models/gemini-1.5-flash:generateContent"
+  @vertex_url "https://us-east4-aiplatform.googleapis.com/v1/projects/d-ulti-ml-ds-dev-9561/locations/us-east4/publishers/google/models/gemini-1.5-pro:generateContent"
 
   def llm message do
     @vertex_url
