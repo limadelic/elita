@@ -1,4 +1,6 @@
 defmodule GetTool do
+  @void false
+
   def def do
     %{
       name: "get", 

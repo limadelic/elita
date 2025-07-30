@@ -1,4 +1,6 @@
 defmodule SetTool do
+  @void true
+
   def def do
     %{
       name: "set",
