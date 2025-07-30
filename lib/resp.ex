@@ -7,7 +7,8 @@ defmodule Resp do
     {:function_call, function_call}
   end
 
-  def resp(_) do
+  def resp(response) do
+    IO.inspect(response, label: "FAILED TO PARSE")
     {:error, "parse failed"}
   end
 end
