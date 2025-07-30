@@ -1,9 +1,9 @@
 defmodule ToolsTest do
   use ExUnit.Case
 
-  import Tools, only: [tools: 1]
+  import Def, only: [tools: 1]
 
-  test "Tools.tools" do
+  test "set" do
     config = %{tools: "set"}
 
     result = tools(config)

@@ -4,6 +4,7 @@ defmodule Elita do
   import AgentConfig, only: [config: 1]
   import Prompt, only: [prompt: 2]
   import Llm, only: [llm: 1]
+  import Mem, only: [create: 1]
 
   def start_link(name) do
     GenServer.start_link(__MODULE__, name, name: {:global, name})
@@ -14,6 +15,7 @@ defmodule Elita do
   end
 
   def init(name) do
+    create(name)
     {:ok, %{name: name, config: config(name), history: []}}
   end
 
