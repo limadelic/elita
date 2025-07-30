@@ -22,23 +22,14 @@ defmodule Llm do
   defp handle({:ok, %HTTPoison.Response{status_code: 200, body: body}}) do
     body
     |> decode
-    |> msg
   end
 
   defp handle({:ok, %HTTPoison.Response{status_code: code}}) do
-    "HTTP #{code}"
+    {:error, "HTTP #{code}"}
   end
 
   defp handle({:error, %HTTPoison.Error{reason: reason}}) do
-    "#{reason}"
-  end
-
-  defp msg({:ok, %{"candidates" => [%{"content" => %{"parts" => [%{"text" => text}]}} | _]}}) do
-    text
-  end
-
-  defp msg(_) do
-    "parse failed"
+    {:error, "#{reason}"}
   end
 
   defp token do

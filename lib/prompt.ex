@@ -1,8 +1,11 @@
 defmodule Prompt do
-  def prompt(%{content: content}, history) do
+  import Def, only: [tools: 1]
+
+  def prompt(config, history) do
     %{
       contents: history,
-      systemInstruction: %{parts: [%{text: content}]}
+      systemInstruction: %{parts: [%{text: config.content}]},
+      tools: tools(config)
     }
   end
 end

@@ -11,7 +11,8 @@ defmodule PromptTest do
 
     assert result == %{
       contents: [],
-      systemInstruction: %{parts: [%{text: "You are a helpful assistant."}]}
+      systemInstruction: %{parts: [%{text: "You are a helpful assistant."}]},
+      tools: []
     }
   end
 
@@ -32,7 +33,8 @@ defmodule PromptTest do
         %{role: "user", parts: [%{text: "Hello"}]},
         %{role: "model", parts: [%{text: "Hi there!"}]}
       ],
-      systemInstruction: %{parts: [%{text: "You are a helpful assistant."}]}
+      systemInstruction: %{parts: [%{text: "You are a helpful assistant."}]},
+      tools: []
     }
   end
 end
