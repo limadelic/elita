@@ -3,64 +3,46 @@ defmodule Llm do
   import String, only: [trim: 1]
   import System, only: [cmd: 2]
   import HTTPoison, only: [post: 3]
-  
+
   @vertex_url "https://us-east4-aiplatform.googleapis.com/v1/projects/d-ulti-ml-ds-dev-9561/locations/us-east4/publishers/google/models/gemini-1.5-pro:generateContent"
 
-
-  def llm message do
+  def llm(prompt) do
     @vertex_url
-    |> post(body(message), headers())
+    |> post(encode!(prompt), headers())
     |> handle
   end
 
-  
   defp headers do
     [
       {"Authorization", "Bearer #{token()}"},
       {"Content-Type", "application/json"}
     ]
   end
-  
-  defp body(message) do
-    encode! %{
-      contents: [%{
-        role: "user",
-        parts: [%{text: message}]
-      }]
-    }
-  end
-  
-  defp handle {:ok, %HTTPoison.Response{status_code: 200, body: body}} do
+
+  defp handle({:ok, %HTTPoison.Response{status_code: 200, body: body}}) do
     body
     |> decode
-    |> extract
+    |> msg
   end
-  
-  defp handle {:ok, %HTTPoison.Response{status_code: code}} do
+
+  defp handle({:ok, %HTTPoison.Response{status_code: code}}) do
     "HTTP #{code}"
   end
-  
-  defp handle {:error, %HTTPoison.Error{reason: reason}} do
+
+  defp handle({:error, %HTTPoison.Error{reason: reason}}) do
     "#{reason}"
   end
-  
-  defp extract {:ok, response} do
-    case response do
-      %{"candidates" => [%{"content" => %{"parts" => [%{"text" => text}]}} | _]} ->
-        {:text, text}
-      %{"candidates" => [%{"content" => %{"parts" => [%{"functionCall" => function_call}]}} | _]} ->
-        {:tool_call, function_call}
-      _ ->
-        {:error, "parse failed"}
-    end
+
+  defp msg({:ok, %{"candidates" => [%{"content" => %{"parts" => [%{"text" => text}]}} | _]}}) do
+    text
   end
-  
-  defp extract _error do
-    {:error, "parse failed"}
+
+  defp msg(_) do
+    "parse failed"
   end
-  
+
   defp token do
-    {token, 0} = cmd "gcloud", ~w[auth print-access-token]
-    trim token
+    {token, 0} = cmd("gcloud", ~w[auth print-access-token])
+    trim(token)
   end
 end

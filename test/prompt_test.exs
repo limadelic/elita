@@ -9,12 +9,10 @@ defmodule PromptTest do
 
     result = prompt config, []
 
-    assert result == [
-             %{
-               role: "system",
-               content: "You are a helpful assistant."
-             }
-           ]
+    assert result == %{
+      contents: [],
+      systemInstruction: %{parts: [%{text: "You are a helpful assistant."}]}
+    }
   end
 
   test "agent with history" do
@@ -23,16 +21,18 @@ defmodule PromptTest do
     }
 
     history = [
-      %{role: "user", content: "Hello"},
-      %{role: "assistant", content: "Hi there!"}
+      %{role: "user", parts: [%{text: "Hello"}]},
+      %{role: "model", parts: [%{text: "Hi there!"}]}
     ]
 
     result = prompt config, history
 
-    assert result == [
-             %{role: "system", content: "You are a helpful assistant."},
-             %{role: "user", content: "Hello"},
-             %{role: "assistant", content: "Hi there!"}
-           ]
+    assert result == %{
+      contents: [
+        %{role: "user", parts: [%{text: "Hello"}]},
+        %{role: "model", parts: [%{text: "Hi there!"}]}
+      ],
+      systemInstruction: %{parts: [%{text: "You are a helpful assistant."}]}
+    }
   end
 end

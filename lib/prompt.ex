@@ -1,8 +1,8 @@
 defmodule Prompt do
   def prompt(%{content: content}, history) do
-    [
-      %{role: "system", content: content}
-      | history
-    ]
+    %{
+      contents: history,
+      systemInstruction: %{parts: [%{text: content}]}
+    }
   end
 end
