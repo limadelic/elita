@@ -1,5 +1,5 @@
 defmodule Tools do
-  import String, only: [split: 2, split: 3, trim: 1]
+  import String, only: [split: 2, trim: 1]
   import Enum, only: [map: 2, reject: 2]
 
   def create_memory(name) do
@@ -10,42 +10,19 @@ defmodule Tools do
     :"memory_#{name}"
   end
 
-  def has_tools?(config) do
-    case parse(config) do
-      {%{"tools" => _}, _} -> true
-      _ -> false
-    end
-  end
-
-  def parse(config) do
-    case split(config, "---", parts: 3) do
-      ["", yaml_text, content] ->
-        case YamlElixir.read_from_string(yaml_text) do
-          {:ok, frontmatter} -> {frontmatter, trim(content)}
-          _ -> {%{}, config}
-        end
-
-      _ ->
-        {%{}, config}
-    end
-  end
-
-  def tools(%{"tools" => tools_str}) do
-    declarations =
-      split(tools_str, ",")
+  def tools(%{tools: all}) do
+      split(all, ",")
       |> map(&trim/1)
-      |> map(&tool_declaration/1)
+      |> map(&tool/1)
       |> reject(&is_nil/1)
-
-    case declarations do
-      [] -> []
-      _ -> [%{function_declarations: declarations}]
-    end
+      |> wrap
   end
-
   def tools(_), do: []
 
-  defp tool_declaration("set") do
+  defp wrap([]), do: []
+  defp wrap(tools), do: [%{function_declarations: tools}]
+
+  defp tool("set") do
     %{
       name: "set",
       description: "Store data with a key",
@@ -60,7 +37,7 @@ defmodule Tools do
     }
   end
 
-  defp tool_declaration("get") do
+  defp tool("get") do
     %{
       name: "get",
       description: "Retrieve data by key",
@@ -74,7 +51,7 @@ defmodule Tools do
     }
   end
 
-  defp tool_declaration(_), do: nil
+  defp tool(_), do: nil
 
   def execute(function_call, agent_name) do
     execute_tool_call(function_call, agent_name)
