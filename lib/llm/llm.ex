@@ -3,13 +3,16 @@ defmodule Llm do
   import String, only: [trim: 1]
   import System, only: [cmd: 2]
   import HTTPoison, only: [post: 3]
+  
+  alias HTTPoison.Response, as: Ok
+  alias HTTPoison.Error
 
   @vertex_url "https://us-east4-aiplatform.googleapis.com/v1/projects/d-ulti-ml-ds-dev-9561/locations/us-east4/publishers/google/models/gemini-1.5-pro:generateContent"
 
   def llm(prompt) do
     @vertex_url
     |> post(encode!(prompt), headers())
-    |> handle
+    |> resp
   end
 
   defp headers do
@@ -19,16 +22,15 @@ defmodule Llm do
     ]
   end
 
-  defp handle({:ok, %HTTPoison.Response{status_code: 200, body: body}}) do
-    body
-    |> decode
+  defp resp({:ok, %Ok{status_code: 200, body: body}}) do
+    decode(body)
   end
 
-  defp handle({:ok, %HTTPoison.Response{status_code: code}}) do
+  defp resp({:ok, %Ok{status_code: code}}) do
     {:error, "HTTP #{code}"}
   end
 
-  defp handle({:error, %HTTPoison.Error{reason: reason}}) do
+  defp resp({:error, %Error{reason: reason}}) do
     {:error, "#{reason}"}
   end
 
