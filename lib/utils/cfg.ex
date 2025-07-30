@@ -1,4 +1,4 @@
-defmodule AgentConfig do
+defmodule Cfg do
   import String, only: [split: 3, trim: 1, to_atom: 1]
   import Enum, only: [map: 2]
   import Map, only: [new: 1, put: 3]

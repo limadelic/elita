@@ -1,9 +1,9 @@
-defmodule AgentConfigTest do
+defmodule CfgTest do
   use ExUnit.Case
 
-  import AgentConfig, only: [config: 1]
+  import Cfg, only: [config: 1]
 
-  test "AgentConfig.config" do
+  test "Cfg.config" do
     assert config(:todo) == %{
              name: "todo",
              description: "Todo list manager that tracks tasks and completion status",
