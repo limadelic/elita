@@ -3,6 +3,10 @@ defmodule Prompt do
   import String, only: [split: 3, trim: 1]
   import Tools, only: [tools: 1]
   
+  def prompt1(%{content: content}, _history) do
+    [%{role: "system", content: content}]
+  end
+  
   def prompt(config, history) do
     {frontmatter, content} = parse_config(config)
     tools_section = build_tools_section(tools(frontmatter))
