@@ -1,11 +1,11 @@
 defmodule Prompt do
-  import Def, only: [tools: 1]
+  import Tools, only: [defs: 1]
 
   def prompt(config, history) do
     %{
       contents: history,
       systemInstruction: %{parts: [%{text: config.content}]},
-      tools: tools(config)
+      tools: defs(config)
     }
   end
 end

@@ -5,7 +5,8 @@ defmodule Elita do
   import Prompt, only: [prompt: 2]
   import Llm, only: [llm: 1]
   import Mem, only: [create: 1]
-  import Resp, only: [parse: 1]
+  import Resp, only: [resp: 1]
+  import Tools, only: [exec: 2]
 
   def start_link(name) do
     GenServer.start_link(__MODULE__, name, name: {:global, name})
@@ -23,20 +24,27 @@ defmodule Elita do
   def handle_call({:act, msg}, _from, %{config: config, history: history} = state) do
     history = history ++ [%{role: "user", parts: [%{text: msg}]}]
 
-    prompt_data = prompt(config, history)
-    IO.inspect(prompt_data, label: "PROMPT TO VERTEX")
+    resp = config
+    |> prompt(history)
+    |> llm
+    |> resp
     
-    resp = llm(prompt_data) |> parse()
-    IO.inspect(resp, label: "VERTEX RESPONSE")
+    exec(resp, history, state)
+  end
 
-    case resp do
-      {:text, text} ->
-        history = history ++ [%{role: "model", parts: [%{text: text}]}]
-        {:reply, text, %{state | history: history}}
-      {:function_call, _call} ->
-        {:reply, "function call received", %{state | history: history}}
-      {:error, error} ->
-        {:reply, error, %{state | history: history}}
-    end
+  defp exec({:text, text}, history, state) do
+    history = history ++ [%{role: "model", parts: [%{text: text}]}]
+    {:reply, text, %{state | history: history}}
+  end
+
+  defp exec({:function_call, call}, history, state) do
+    result = exec(call, state.name)
+    history = history ++ [%{role: "function", parts: [%{text: result}]}]
+    
+    handle_call({:act, ""}, nil, %{state | history: history})
+  end
+
+  defp exec({:error, error}, history, state) do
+    {:reply, error, %{state | history: history}}
   end
 end

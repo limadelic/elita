@@ -13,7 +13,7 @@ defmodule GetTool do
     }
   end
 
-  def exec(%{"key" => key}, agent_name) do
+  def exec(agent_name, %{"key" => key}) do
     table = Mem.table(agent_name)
 
     case :ets.lookup(table, key) do
