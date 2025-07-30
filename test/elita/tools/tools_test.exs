@@ -1,14 +1,10 @@
 defmodule ToolsTest do
   use ExUnit.Case
 
-  import Tools, only: [defs: 1]
+  import Tools, only: [tools: 1]
 
   test "set" do
-    config = %{tools: "set"}
-
-    result = defs(config)
-
-    assert result == [
+    assert tools(%{tools: "set"}) == [
              %{
                function_declarations: [
                  %{

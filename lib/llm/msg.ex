@@ -7,7 +7,4 @@ defmodule Msg do
     %{role: "model", parts: [%{text: text}]}
   end
 
-  def function(text) do
-    %{role: "user", parts: [%{text: "Function result: #{text}"}]}
-  end
 end

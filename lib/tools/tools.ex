@@ -1,19 +1,20 @@
 defmodule Tools do
   import String, only: [split: 2, trim: 1, capitalize: 1]
   import Enum, only: [map: 2, reject: 2]
+  import Jason, only: [encode!: 1]
+  import Module, only: [concat: 1]
 
-  def defs(%{tools: names}) do
+  def tools(%{tools: names}) do
       split(names, ",")
       |> map(&trim/1)
       |> map(&tool/1)
       |> reject(&is_nil/1)
       |> wrap
   end
-  def defs(_), do: []
+  def tools(_), do: []
 
-  def exec(call, name) do
-    call(call, name)
-    |> Jason.encode!
+  def exec(%{"name" => tool, "args" => args}, name) do
+    encode! module(tool).exec(name, args)
   end
 
   defp wrap([]), do: []
@@ -25,11 +26,7 @@ defmodule Tools do
     _ -> nil
   end
 
-  defp call(%{"name" => tool, "args" => args}, name) do
-    module(tool).exec(name, args)
-  end
-
   defp module(name) do
-    Module.concat([capitalize(name) <> "Tool"])
+    concat([capitalize(name) <> "Tool"])
   end
 end

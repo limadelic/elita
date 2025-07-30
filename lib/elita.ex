@@ -7,7 +7,7 @@ defmodule Elita do
   import Mem, only: [create: 1]
   import Resp, only: [resp: 1]
   import Tools, only: [exec: 2]
-  import Msg, only: [user: 1, model: 1, function: 1]
+  import Msg, only: [user: 1, model: 1]
 
   def start_link(name) do
     GenServer.start_link(__MODULE__, name, name: {:global, name})
@@ -43,7 +43,7 @@ defmodule Elita do
 
   defp action({:function_call, call}, _, state) do
     result = exec(call, state.name)
-    action(function(result), state)
+    action(user(result), state)
   end
 
   defp action({:error, error}, history, state) do
