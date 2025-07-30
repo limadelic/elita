@@ -13,6 +13,7 @@ defmodule Tools do
 
   def exec(call, name) do
     call(call, name)
+    |> Jason.encode!
   end
 
   defp wrap([]), do: []

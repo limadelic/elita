@@ -8,6 +8,6 @@ defmodule Msg do
   end
 
   def function(text) do
-    %{role: "function", parts: [%{text: text}]}
+    %{role: "user", parts: [%{text: "Function result: #{text}"}]}
   end
 end
