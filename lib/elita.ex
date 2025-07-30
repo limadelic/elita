@@ -29,6 +29,13 @@ defmodule Elita do
   end
 
 
+  defp done?({:error, error}, _name, _config, _history), do: error
+
+  defp done?({:tool_call, call}, name, config, history) do
+    result = execute call, name
+    continue result, config, history, name
+  end
+
   defp done?({:text, text}, name, config, history) do
     case parse_tool_call(text) do
       {:tool_call, call} -> done?({:tool_call, call}, name, config, history)
@@ -48,13 +55,6 @@ defmodule Elita do
         end
     end
   end
-  
-  defp done?({:tool_call, call}, name, config, history) do
-    result = execute call, name
-    continue result, config, history, name
-  end
-  
-  defp done?({:error, error}, _name, _config, _history), do: error
 
 
   defp continue result, _config, _history, _name do

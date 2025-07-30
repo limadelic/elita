@@ -1,6 +1,6 @@
 defmodule Prompt do
   import Enum, only: [reverse: 1, join: 2]
-  import String, only: [split: 2, split: 3, trim: 1]
+  import String, only: [split: 3, trim: 1]
   import Tools, only: [tools: 1]
   
   def prompt(config, history) do
