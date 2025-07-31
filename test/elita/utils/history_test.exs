@@ -15,7 +15,7 @@ defmodule HistoryTest do
     parts = [%{"result" => "stored successfully"}]
     state = %{history: []}
     
-    {:act, "", new_state} = History.record(parts, state)
+    {:reply, "", new_state} = History.record(parts, state)
     
     assert new_state.history == [%{role: "user", parts: [%{text: "stored successfully"}]}]
   end
@@ -27,7 +27,7 @@ defmodule HistoryTest do
     ]
     state = %{history: []}
     
-    {:act, "", new_state} = History.record(parts, state)
+    {:reply, "", new_state} = History.record(parts, state)
     
     expected = [
       %{role: "model", parts: [%{text: "I'll store that for you"}]},
@@ -66,5 +66,23 @@ defmodule HistoryTest do
     {:act, "", new_state} = History.record(parts, state)
     
     assert new_state.history == [%{role: "model", parts: [%{text: "hello"}]}]
+  end
+
+  test "returns reply action for any results" do
+    parts = [%{"result" => "stored"}]
+    state = %{history: []}
+    
+    result = History.record(parts, state)
+    
+    assert {:reply, "", _} = result
+  end
+
+  test "returns continue action when no results" do
+    parts = [%{"text" => "hello"}]
+    state = %{history: []}
+    
+    result = History.record(parts, state)
+    
+    assert {:act, "", _} = result
   end
 end
