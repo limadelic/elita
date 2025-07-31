@@ -49,4 +49,13 @@ defmodule HistoryTest do
     ]
     assert new_state.history == expected
   end
+
+  test "ignores empty parts" do
+    parts = [%{}, %{"text" => "hello"}]
+    state = %{history: []}
+    
+    {:act, "", new_state} = History.record(parts, state)
+    
+    assert new_state.history == [%{role: "model", parts: [%{text: "hello"}]}]
+  end
 end
