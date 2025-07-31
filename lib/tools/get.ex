@@ -19,8 +19,8 @@ defmodule GetTool do
     table = Mem.table(agent)
 
     case :ets.lookup(table, key) do
-      [{^key, value}] -> %{"key" => key, "result" => value}
-      [] -> %{"key" => key, "result" => "not found"}
+      [{^key, value}] -> value
+      [] -> "not found"
     end
   end
 end

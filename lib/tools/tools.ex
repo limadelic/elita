@@ -2,7 +2,6 @@ defmodule Tools do
   import String, only: [split: 2, trim: 1, capitalize: 1]
   import Enum, only: [map: 2, reject: 2]
   import Map, only: [put: 3]
-  import Jason, only: [encode!: 1]
   import Module, only: [concat: 1]
 
   def tools(%{tools: names}) do
@@ -26,7 +25,7 @@ defmodule Tools do
   end
 
   def exec(%{"name" => name, "args" => args}, agent) do
-    encode!(module(name).exec(agent, args))
+    module(name).exec(agent, args)
   end
 
   def exec(part, _agent), do: part

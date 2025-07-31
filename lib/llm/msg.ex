@@ -12,6 +12,6 @@ defmodule Msg do
   end
 
   def function_response(name, response) do
-    %{role: "user", parts: [%{functionResponse: %{name: name, response: response}}]}
+    %{role: "user", parts: [%{functionResponse: %{name: name, response: %{content: response}}}]}
   end
 end

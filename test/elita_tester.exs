@@ -11,14 +11,15 @@ defmodule ElitaTester do
   end
 
   def tell agent, q do
+    IO.puts "Q: #{q}"
     call {:global, agent}, {:act, q}, 30000
   end
 
   def verify agent, a, q do
-    response = call {:global, agent}, {:act, q}, 30000
     IO.puts "Q: #{q}"
-    IO.puts "A: #{response}"
-    assert String.contains? response, a
+    answer = call {:global, agent}, {:act, q}, 30000
+    IO.puts "A: #{answer}"
+    assert String.contains? answer, a
   end
 
 end

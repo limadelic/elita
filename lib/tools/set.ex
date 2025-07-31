@@ -19,6 +19,6 @@ defmodule SetTool do
   def exec(agent, %{"key" => key, "value" => value}) do
     table = Mem.table(agent)
     :ets.insert(table, {key, value})
-    %{"key" => key, "result" => "stored"}
+    "stored"
   end
 end
