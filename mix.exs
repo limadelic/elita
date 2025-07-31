@@ -8,7 +8,8 @@ defmodule Elita.MixProject do
       elixir: "~> 1.18",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      escript: [main_module: CLI]
+      escript: [main_module: Chat],
+      aliases: aliases()
     ]
   end
 
@@ -22,7 +23,15 @@ defmodule Elita.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:httpoison, "~> 2.0"}
+      {:httpoison, "~> 2.0"},
+      {:jason, "~> 1.4"},
+      {:yaml_elixir, "~> 2.9"}
+    ]
+  end
+
+  defp aliases do
+    [
+      build: ["compile", "escript.build"]
     ]
   end
 end

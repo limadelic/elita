@@ -23,9 +23,11 @@ Examples:
 - Table: [8,1], Dominoes: [9,5], [2,4], [7,3] → "knock knock"
 
 ## Response Format:
-- Just state your move: "Play [x,y] on (head|tail)"
+- Just state your move: "Play [x,y] on (head|tail)"  
 - If no moves possible: "knock knock"
-- Those are the only valid responses.
+- Those are the ONLY valid responses.
+- DO NOT write code, explanations, or anything else.
+- ONLY respond with the exact format above.
 
 ## Verify
 - Domino selected is in list of Dominoes
