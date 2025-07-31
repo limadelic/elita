@@ -1,7 +1,7 @@
 defmodule Chat do
   import String, only: [trim: 1, to_atom: 1]
   import IO, only: [gets: 1, puts: 1]
-  import Elita, only: [start_link: 1, act: 2]
+  import Elita, only: [start_link: 1, chat: 2]
   import Node, only: [start: 1]
 
   def main([name]) do
@@ -22,7 +22,7 @@ defmodule Chat do
   defp repl(input, name, pid) when is_binary(input) do
     input
     |> trim()
-    |> act(pid)
+    |> chat(pid)
     |> puts()
     
     repl(name, pid)

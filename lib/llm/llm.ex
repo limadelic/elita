@@ -1,11 +1,9 @@
 defmodule Llm do
-  import Jason, only: [encode!: 1, decode: 1]
+  import Jason, only: [encode!: 1]
   import String, only: [trim: 1]
   import System, only: [cmd: 2]
   import HTTPoison, only: [post: 3]
-  
-  alias HTTPoison.Response, as: Ok
-  alias HTTPoison.Error
+  import Resp, only: [resp: 1]
 
   @vertex_url "https://us-east4-aiplatform.googleapis.com/v1/projects/d-ulti-ml-ds-dev-9561/locations/us-east4/publishers/google/models/gemini-1.5-pro:generateContent"
 
@@ -22,17 +20,6 @@ defmodule Llm do
     ]
   end
 
-  defp resp({:ok, %Ok{status_code: 200, body: body}}) do
-    decode(body)
-  end
-
-  defp resp({:ok, %Ok{status_code: code}}) do
-    {:error, "HTTP #{code}"}
-  end
-
-  defp resp({:error, %Error{reason: reason}}) do
-    {:error, "#{reason}"}
-  end
 
   defp token do
     {token, 0} = cmd("gcloud", ~w[auth print-access-token])

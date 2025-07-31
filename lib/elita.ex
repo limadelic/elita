@@ -5,15 +5,15 @@ defmodule Elita do
   import Prompt, only: [prompt: 2]
   import Llm, only: [llm: 1]
   import Mem, only: [create: 1]
-  import Resp, only: [resp: 1]
   import Tools, only: [exec: 2]
-  import Msg, only: [user: 1, model: 1]
+  import History, only: [record: 2]
+  import Msg, only: [user: 1]
 
   def start_link(name) do
     GenServer.start_link(__MODULE__, name, name: {:global, name})
   end
 
-  def act(msg, pid) do
+  def chat(msg, pid) do
     GenServer.call(pid, {:act, msg})
   end
 
@@ -22,31 +22,26 @@ defmodule Elita do
     {:ok, %{name: name, config: config(name), history: []}}
   end
 
-  def handle_call({:act, msg}, _from, state) do
-    action(user(msg), state)
+  def handle_call({:act, msg}, _, state) do
+    act msg, state
   end
 
-  defp action(msg, %{config: config, history: history} = state) do
-    history = history ++ [msg]
-
-    config
-    |> prompt(history)
+  defp act(msg, %{config: config, history: history, name: name} = state) do
+    history = history ++ [user(msg)]
+    
+    prompt(config, history)
     |> llm
-    |> resp
-    |> action(history, state)
+    |> exec(name)
+    |> record(state)
+    |> done
   end
 
-  defp action({:text, text}, history, state) do
-    history = history ++ [model(text)]
-    {:reply, text, %{state | history: history}}
+  defp done {:act, txt, state} do
+    act txt, state
   end
 
-  defp action({:function_call, call}, _, state) do
-    result = exec(call, state.name)
-    action(user(result), state)
+  defp done {:reply, txt, state} do
+    {:reply, txt, state}
   end
 
-  defp action({:error, error}, history, state) do
-    {:reply, error, %{state | history: history}}
-  end
 end

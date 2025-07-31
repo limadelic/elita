@@ -1,9 +1,9 @@
 defmodule GetTool do
-  @void false
+  def void?, do: false
 
   def def do
     %{
-      name: "get", 
+      name: "get",
       description: "Retrieve data by key",
       parameters: %{
         type: "object",
@@ -15,8 +15,8 @@ defmodule GetTool do
     }
   end
 
-  def exec(agent_name, %{"key" => key}) do
-    table = Mem.table(agent_name)
+  def exec(agent, %{"key" => key}) do
+    table = Mem.table(agent)
 
     case :ets.lookup(table, key) do
       [{^key, value}] -> %{"key" => key, "result" => value}
