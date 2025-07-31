@@ -10,4 +10,13 @@ defmodule HistoryTest do
     
     assert new_state.history == [%{role: "model", parts: [%{text: "hello world"}]}]
   end
+
+  test "records function result as user message" do
+    parts = [%{"result" => "stored successfully"}]
+    state = %{history: []}
+    
+    {:act, "", new_state} = History.record(parts, state)
+    
+    assert new_state.history == [%{role: "user", parts: [%{text: "stored successfully"}]}]
+  end
 end
