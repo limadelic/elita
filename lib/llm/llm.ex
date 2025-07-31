@@ -8,9 +8,12 @@ defmodule Llm do
   @vertex_url "https://us-east4-aiplatform.googleapis.com/v1/projects/d-ulti-ml-ds-dev-9561/locations/us-east4/publishers/google/models/gemini-1.5-pro:generateContent"
 
   def llm(prompt) do
-    @vertex_url
+    IO.puts("LLM: sending prompt with #{length(prompt.contents)} messages")
+    result = @vertex_url
     |> post(encode!(prompt), headers())
     |> resp
+    IO.puts("LLM: received #{length(result)} parts: #{inspect(result)}")
+    result
   end
 
   defp headers do

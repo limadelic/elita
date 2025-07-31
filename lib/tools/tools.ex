@@ -20,7 +20,9 @@ defmodule Tools do
   end
 
   def exec(%{"functionCall" => call} = part, agent) do
-    put(part, "result", exec(call, agent))
+    result = exec(call, agent)
+    IO.puts("TOOLS: functionCall #{inspect(call)} -> result #{inspect(result)}")
+    put(part, "result", result)
   end
 
   def exec(%{"name" => name, "args" => args}, agent) do
