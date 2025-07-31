@@ -6,7 +6,7 @@ defmodule HistoryTest do
     parts = [%{"text" => "hello world"}]
     state = %{history: []}
     
-    {:act, "", new_state} = History.record(parts, state)
+    {:reply, _, new_state} = History.record(parts, state)
     
     assert new_state.history == [%{role: "model", parts: [%{text: "hello world"}]}]
   end
@@ -15,7 +15,7 @@ defmodule HistoryTest do
     parts = [%{"result" => "stored successfully"}]
     state = %{history: []}
     
-    {:reply, "", new_state} = History.record(parts, state)
+    {:act, new_state} = History.record(parts, state)
     
     assert new_state.history == [%{role: "user", parts: [%{text: "stored successfully"}]}]
   end
@@ -27,7 +27,7 @@ defmodule HistoryTest do
     ]
     state = %{history: []}
     
-    {:reply, "", new_state} = History.record(parts, state)
+    {:act, new_state} = History.record(parts, state)
     
     expected = [
       %{role: "model", parts: [%{text: "I'll store that for you"}]},
@@ -41,7 +41,7 @@ defmodule HistoryTest do
     parts = [%{"text" => "new response"}]
     state = %{history: existing}
     
-    {:act, "", new_state} = History.record(parts, state)
+    {:reply, _, new_state} = History.record(parts, state)
     
     expected = [
       %{role: "user", parts: [%{text: "previous message"}]},
@@ -54,7 +54,7 @@ defmodule HistoryTest do
     parts = [%{}, %{"text" => "hello"}]
     state = %{history: []}
     
-    {:act, "", new_state} = History.record(parts, state)
+    {:reply, _, new_state} = History.record(parts, state)
     
     assert new_state.history == [%{role: "model", parts: [%{text: "hello"}]}]
   end
@@ -63,26 +63,35 @@ defmodule HistoryTest do
     parts = [%{"unknown" => "data"}, %{"text" => "hello"}]
     state = %{history: []}
     
-    {:act, "", new_state} = History.record(parts, state)
+    {:reply, _, new_state} = History.record(parts, state)
     
     assert new_state.history == [%{role: "model", parts: [%{text: "hello"}]}]
   end
 
-  test "returns reply action for any results" do
+  test "returns continue action for results" do
     parts = [%{"result" => "stored"}]
     state = %{history: []}
     
     result = History.record(parts, state)
     
-    assert {:reply, "", _} = result
+    assert {:act, _} = result
   end
 
-  test "returns continue action when no results" do
+  test "returns reply action when no results" do
     parts = [%{"text" => "hello"}]
     state = %{history: []}
     
     result = History.record(parts, state)
     
-    assert {:act, "", _} = result
+    assert {:reply, _, _} = result
+  end
+
+  test "returns reply action when void tools run" do
+    parts = [%{"functionCall" => %{"name" => "set"}}]
+    state = %{history: []}
+    
+    result = History.record(parts, state)
+    
+    assert {:reply, _, _} = result
   end
 end

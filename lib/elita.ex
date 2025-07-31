@@ -23,12 +23,15 @@ defmodule Elita do
   end
 
   def handle_call({:act, msg}, _, state) do
-    act msg, state
+    act(msg, state)
   end
 
-  defp act(msg, %{config: config, history: history, name: name} = state) do
+  defp act(msg, %{history: history} = state) do
     history = history ++ [user(msg)]
-    
+    act(%{state | history: history})
+  end
+
+  defp act(%{config: config, history: history, name: name} = state) do
     prompt(config, history)
     |> llm
     |> exec(name)
@@ -36,12 +39,11 @@ defmodule Elita do
     |> done
   end
 
-  defp done {:act, txt, state} do
-    act txt, state
+  defp done({:act, state}) do
+    act(state)
   end
 
-  defp done {:reply, txt, state} do
+  defp done({:reply, txt, state}) do
     {:reply, txt, state}
   end
-
 end
