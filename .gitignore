@@ -1,0 +1,14 @@
+
+/_build/
+/cover/
+/deps/
+/doc/
+erl_crash.dump
+*.ez
+elita-*.tar
+/tmp/
+.idea/
+/elita
+/langchain
+/langchain-google
+CLAUDE.local.md
