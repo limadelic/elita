@@ -35,4 +35,18 @@ defmodule HistoryTest do
     ]
     assert new_state.history == expected
   end
+
+  test "appends to existing history" do
+    existing = [%{role: "user", parts: [%{text: "previous message"}]}]
+    parts = [%{"text" => "new response"}]
+    state = %{history: existing}
+    
+    {:act, "", new_state} = History.record(parts, state)
+    
+    expected = [
+      %{role: "user", parts: [%{text: "previous message"}]},
+      %{role: "model", parts: [%{text: "new response"}]}
+    ]
+    assert new_state.history == expected
+  end
 end
