@@ -58,4 +58,13 @@ defmodule HistoryTest do
     
     assert new_state.history == [%{role: "model", parts: [%{text: "hello"}]}]
   end
+
+  test "ignores unknown part types" do
+    parts = [%{"unknown" => "data"}, %{"text" => "hello"}]
+    state = %{history: []}
+    
+    {:act, "", new_state} = History.record(parts, state)
+    
+    assert new_state.history == [%{role: "model", parts: [%{text: "hello"}]}]
+  end
 end
