@@ -1,4 +1,3 @@
-
 # Code Styles
 
 - use single words ALWAYS (no compound words)
