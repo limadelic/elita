@@ -32,7 +32,8 @@ defmodule Elita.MixProject do
 
   defp aliases do
     [
-      build: ["compile", "escript.build"]
+      build: ["compile", "escript.build"],
+      t: ["test --no-start"]
     ]
   end
 end

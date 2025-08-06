@@ -24,7 +24,8 @@ defmodule Resp do
     {:error, error}
   end
 
-  def resp(_) do
+  def resp(response) do
+    IO.inspect(response, label: "RESPONSE")
     {:error, "parse failed"}
   end
 end

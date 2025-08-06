@@ -13,6 +13,16 @@ defmodule ElitaTester do
     start_link(agent, name)
   end
 
+  def stop(name) do
+    GenServer.stop(via(name))
+  rescue
+    _ -> :ok
+  end
+
+  defp via(name) do
+    {:via, Registry, {ElitaRegistry, name}}
+  end
+
   defp setup do
     case Node.start(:"test@127.0.0.1") do
       {:ok, _} -> set_cookie(:elita)
@@ -26,15 +36,17 @@ defmodule ElitaTester do
     cast(name, msg)
   end
 
-  def verify(name, a, q) do
+  def ask(name, q) do
     IO.puts("Q: #{q}")
     answer = call(name, q)
     IO.puts("A: #{answer}")
+    answer
+  end
 
-    assert String.contains?(
-             String.downcase(answer),
-             String.downcase("#{a}")
-           )
+  def verify(name, a, q) do
+    answer = ask(name, q)
+    assert String.contains?(String.downcase(answer), String.downcase("#{a}")),
+           "Expected '#{answer}' to contain '#{a}'"
   end
 
   def wait_until(agent, cond) do
