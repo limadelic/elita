@@ -1,30 +1,29 @@
 defmodule Chat do
   import String, only: [trim: 1, to_atom: 1]
   import IO, only: [gets: 1, puts: 1]
-  import Elita, only: [start_link: 1, chat: 2]
+  import Elita, only: [start_link: 2, call: 2]
   import Node, only: [start: 1]
 
   def main([name]) do
+    chat(to_atom(name), to_atom(name))
+  end
+
+  def main([agent, name]) do
+    chat(to_atom(agent), to_atom(name))
+  end
+
+  defp chat(agent, name) do
     start(:"#{name}@127.0.0.1")
-    {:ok, pid} = start_link(to_atom(name))
-    repl(name, pid)
+    {:ok, _pid} = start_link(agent, name)
+    repl(name)
   end
 
-  defp repl(name, pid) do
-    gets("#{name} > ")
-    |> repl(name, pid)
-  end
-
-  defp repl(:eof, _name, _pid) do
-    puts("Bye!")
-  end
-
-  defp repl(input, name, pid) when is_binary(input) do
-    input
-    |> trim()
-    |> chat(pid)
-    |> puts()
-    
-    repl(name, pid)
+  defp repl(agent) do
+    case gets("#{agent} > ") do
+      :eof -> puts("Bye!")
+      input -> 
+        puts call(agent, trim(input))
+        repl(agent)
+    end
   end
 end

@@ -2,7 +2,7 @@ defmodule History do
   import Msg, only: [model: 1, user: 1, function_call: 2, function_response: 2]
   import Enum, only: [reduce: 3, any?: 2, find_value: 3]
 
-  def record(parts, state) do
+  def record(parts, state) when is_list(parts) do
     history = reduce(parts, state.history, &add/2)
     text = find_value(parts, "", &text/1)
     
@@ -11,6 +11,10 @@ defmodule History do
     else
       {:reply, text, %{state | history: history}}
     end
+  end
+
+  def record({:error, reason}, state) do
+    {:reply, "Error: #{reason}", state}
   end
 
   defp add(%{"text" => text}, history), do: history ++ [model(text)]

@@ -3,6 +3,7 @@ defmodule Tools do
   import Enum, only: [map: 2, reject: 2]
   import Map, only: [put: 3]
   import Module, only: [concat: 1]
+  import Log, only: [t: 2, r: 1]
 
   def tools(%{tools: names}) do
     split(names, ",")
@@ -14,20 +15,21 @@ defmodule Tools do
 
   def tools(_), do: []
 
-  def exec(parts, agent) when is_list(parts) do
-    map(parts, &exec(&1, agent))
+  def exec(parts) when is_list(parts) do
+    map(parts, &exec/1)
   end
 
-  def exec(%{"functionCall" => call} = part, agent) do
-    result = exec(call, agent)
+  def exec(%{"functionCall" => call} = part) do
+    result = exec(call)
     put(part, "result", result)
   end
 
-  def exec(%{"name" => name, "args" => args}, agent) do
-    module(name).exec(agent, args)
+  def exec(%{"name" => name, "args" => args}) do
+    t(name, args)
+    r module(name).exec(args)
   end
 
-  def exec(part, _agent), do: part
+  def exec(part), do: part
 
   def void?(%{"name" => name}) do
     module(name).void?

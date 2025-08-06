@@ -15,8 +15,8 @@ defmodule GetTool do
     }
   end
 
-  def exec(agent, %{"key" => key}) do
-    table = Mem.table(agent)
+  def exec(%{"key" => key}) do
+    table = Mem.table()
 
     case :ets.lookup(table, key) do
       [{^key, value}] -> value
