@@ -7,7 +7,7 @@ Dual remote setup:
 Sync both:
 ```bash
 git push origin main    # to private
-git push public main    # to public
+git push https://limadelic:$GITHUB_PUBLIC_TOKEN@github.com/limadelic/elita.git main    # to public
 ```
 
 Pull from either:

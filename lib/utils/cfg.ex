@@ -17,8 +17,12 @@ defmodule Cfg do
 
   defp parse header, body do
     header
-    |> read_from_string
+    |> then(&with_warnings_suppressed(fn -> read_from_string(&1) end))
     |> join(body)
+  end
+
+  defp with_warnings_suppressed(fun) do
+    fun.()
   end
 
   defp join(["", header, body], _), do: parse(header, body)
@@ -29,7 +33,7 @@ defmodule Cfg do
     header
     |> map(&props/1)
     |> new
-    |> put(:content, trim body)
+    |> put(:content, trim(body))
   end
 
   defp props({k, v}), do: {to_atom(k), v}

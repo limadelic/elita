@@ -1,9 +1,9 @@
 defmodule Mem do
-  def create(name) do
-    :ets.new(table(name), [:set, :public, :named_table])
+  def create do
+    :ets.new(table(), [:set, :public, :named_table])
   end
 
-  def table(name) do
-    :"mem_#{name}"
+  def table do
+    :"mem_#{:erlang.pid_to_list(self())}"
   end
 end

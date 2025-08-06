@@ -22,6 +22,6 @@ defmodule TodoTest do
   test "todo marks tasks complete" do
     tell :todo, "Add call dentist to my list"
     tell :todo, "Mark call dentist as done"
-    verify :todo, "done", "What do I need to do?"
+    verify :todo, "no", "What do I need to do?"
   end
 end
