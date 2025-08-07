@@ -1,7 +1,7 @@
 ---
 name: doble9
 description: Dominoes Game Cuban style
-tools: dale_agua, tell
+tools: dale_agua, tell, pick_10
 ---
 
 # Doble9

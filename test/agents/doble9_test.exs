@@ -14,6 +14,6 @@ defmodule Doble9Test do
 
   test "fresh shuffle dominoes on start" do
     ask :doble9, "start a new game with players: top, left, bottom, right"
-    ask :doble9, "pick dominoes"
+    verify :doble9, "9", "pick 10 dominoes for a player"
   end
 end

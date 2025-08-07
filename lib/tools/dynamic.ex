@@ -24,7 +24,9 @@ defmodule Dynamic do
 
   defp parse_tool(path) do
     content = File.read!(path)
-    [header | body_parts] = split(content, "---")
+    parts = split(content, "---")
+    # Skip empty first part, take second part as header, rest as body
+    [_, header | body_parts] = parts
     meta = parse_yaml_header(header)
     body = Enum.join(body_parts, "---")
     {meta, body}
@@ -46,25 +48,28 @@ defmodule Dynamic do
     |> Enum.map(&List.first/1)
   end
 
-  defp execute_blocks([], _meta) do
-    "No code blocks found"
-  end
-
-  defp execute_blocks(blocks, _meta) do
+  defp execute_blocks(blocks, meta) do
     case blocks do
-      [] -> "No code to execute"
-      [code | _rest] -> evaluate_elixir_code(code)
+      [] -> "No code blocks found"
+      [code | _rest] -> evaluate_elixir_code(code, meta)
     end
   end
 
-  defp evaluate_elixir_code(code) do
-    # Prepare execution environment with ToolIndex functions
+  defp parse_imports(nil), do: []
+  defp parse_imports(imports_str) do
+    split(imports_str, ",") |> Enum.map(&trim/1)
+  end
+
+  defp evaluate_elixir_code(code, meta) do
+    imports = parse_imports(meta["imports"])
     bindings = []
     
-    # Create code with imports
+    # Build import statements
+    import_statements = ["import ToolIndex"] ++ 
+      Enum.map(imports, fn module -> "import #{module}" end)
+    
     full_code = """
-    import ToolIndex
-    import Enum, only: [shuffle: 1]
+    #{Enum.join(import_statements, "\n")}
     
     #{code}
     """
