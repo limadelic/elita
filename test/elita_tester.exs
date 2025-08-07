@@ -1,6 +1,5 @@
 defmodule ElitaTester do
   import ExUnit.Assertions
-  import Node, only: [set_cookie: 1]
   import Elita, only: [start_link: 2, cast: 2, call: 2]
 
   def start(name) do
@@ -24,11 +23,7 @@ defmodule ElitaTester do
   end
 
   defp setup do
-    case Node.start(:"test@127.0.0.1") do
-      {:ok, _} -> set_cookie(:elita)
-      {:error, {:already_started, _}} -> set_cookie(:elita)
-      {:error, _} -> :ok
-    end
+    :ok
   end
 
   def tell(name, msg) do

@@ -8,15 +8,7 @@ defmodule Doble9Test do
     start :greed, :left
     start :greed, :bottom
     start :greed, :right
-    
-    on_exit fn ->
-      stop :doble9
-      stop :top
-      stop :left
-      stop :bottom
-      stop :right
-    end
-    
+
     :ok
   end
 
