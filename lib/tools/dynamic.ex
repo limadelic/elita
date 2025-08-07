@@ -50,71 +50,33 @@ defmodule Dynamic do
     "No code blocks found"
   end
 
-  defp execute_blocks(blocks, meta) do
-    # Set up execution context
-    imports = parse_imports(meta["imports"])
-    tools = parse_tools(meta["tools"])
+  defp execute_blocks(blocks, _meta) do
+    case blocks do
+      [] -> "No code to execute"
+      [code | _rest] -> evaluate_elixir_code(code)
+    end
+  end
+
+  defp evaluate_elixir_code(code) do
+    # Prepare execution environment with ToolIndex functions
+    bindings = []
     
-    # Execute each block and return last result
-    context = setup_context(imports, tools)
-    execute_code(blocks, context)
-  end
-
-  defp parse_imports(nil), do: []
-  defp parse_imports(imports_str) do
-    String.split(imports_str, ",") |> Enum.map(&String.trim/1)
-  end
-
-  defp parse_tools(nil), do: []
-  defp parse_tools(tools_str) do
-    String.split(tools_str, ",") |> Enum.map(&String.trim/1)
-  end
-
-  defp setup_context(imports, tools) do
-    context = %{}
+    # Create code with imports
+    full_code = """
+    import ToolIndex
+    import Enum, only: [shuffle: 1]
     
-    # Add imports to context
-    context = Enum.reduce(imports, context, fn module_name, acc ->
-      case module_name do
-        "Enum" -> Map.put(acc, :shuffle, &Enum.shuffle/1)
-        _ -> acc
-      end
-    end)
+    #{code}
+    """
     
-    # Add tools to context  
-    Enum.reduce(tools, context, fn tool_name, acc ->
-      case tool_name do
-        "set" -> Map.put(acc, :set, &set_tool/2)
-        _ -> acc
-      end
-    end)
-  end
-
-  defp execute_code([], _context), do: "No code to execute"
-  defp execute_code([code | _rest], context) do
-    # Simple execution - evaluate the code string with context
     try do
-      # This is a simplified execution - would need proper AST evaluation
-      evaluate_elixir_code(code, context)
+      {result, _bindings} = Code.eval_string(full_code, bindings)
+      case result do
+        nil -> "executed successfully"
+        value -> "#{value}"
+      end
     rescue
       e -> "Error: #{inspect e}"
     end
-  end
-
-  defp evaluate_elixir_code(code, _context) do
-    # For now, just check if it's the expected dale_agua code
-    if String.contains?(code, "shuffle") and String.contains?(code, "set :dominoes") do
-      # Execute the logic manually for now
-      dominoes = Enum.shuffle(for h <- 0..9, t <- h..9, do: [h, t])
-      set_tool(:dominoes, dominoes)
-      "dominoes shuffled and stored (#{length(dominoes)} pieces)"
-    else
-      "Code executed: #{code}"
-    end
-  end
-
-  defp set_tool(key, value) do
-    # For now, just confirm it was called
-    "set #{key} = #{inspect value}"
   end
 end
