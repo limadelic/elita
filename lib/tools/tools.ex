@@ -26,7 +26,12 @@ defmodule Tools do
 
   def exec(%{"name" => name, "args" => args}) do
     t(name, args)
-    r module(name).exec(args)
+    result = try do
+      module(name).exec(args)
+    rescue
+      UndefinedFunctionError -> Dynamic.exec(name, args)
+    end
+    r result
   end
 
   def exec(part), do: part
@@ -41,16 +46,7 @@ defmodule Tools do
   defp tool(name) do
     apply(module(name), :def, [])
   rescue
-    _ -> dynamic(name)
-  end
-
-  defp dynamic(name) do
-    path = "agents/tools/#{name}.md"
-    if File.exists?(path) do
-      %{name: name, description: "Dynamic tool: #{name}"}
-    else
-      nil
-    end
+    _ -> Dynamic.tool(name)
   end
 
   defp module(name) do
