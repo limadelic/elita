@@ -6,7 +6,7 @@ defmodule Snippet do
 
   @snippet ~r/(?<!`)`([^`\n]+)`(?!`)/
 
-  def execute(md, imports \\ []) do
+  def snip(md, imports \\ []) do
     imports = build(imports)
     replace(@snippet, md, fn _, code ->
       eval(imports, code)
