@@ -9,6 +9,7 @@ defmodule Dynamic do
   def exec(name, _args) do
     name |> path |> run
   end
+
   defp build(path, name) do
     build(path, name, File.exists?(path))
   end
@@ -17,6 +18,7 @@ defmodule Dynamic do
     {meta, _body} = parse(path)
     %{name: name, description: meta["description"] || "Dynamic tool: #{name}"}
   end
+
   defp build(_, _, false), do: nil
 
   defp run(path) do
@@ -25,8 +27,9 @@ defmodule Dynamic do
 
   defp run(path, true) do
     {meta, body} = parse(path)
-    body |> blocks |> first(meta)  
+    body |> blocks |> first(meta)
   end
+
   defp run(_, false), do: {:error, "Tool not found"}
 
   defp first([], _), do: "No code found"
