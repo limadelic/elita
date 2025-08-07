@@ -13,6 +13,6 @@ tools: dale_agua, tell
 
 # On Start
 
-- shuffle the dominoes
+- dale agua a los dominoes
 - tell each player the game is ready to start
 

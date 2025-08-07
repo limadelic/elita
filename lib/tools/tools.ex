@@ -41,7 +41,16 @@ defmodule Tools do
   defp tool(name) do
     apply(module(name), :def, [])
   rescue
-    _ -> nil
+    _ -> dynamic(name)
+  end
+
+  defp dynamic(name) do
+    path = "agents/tools/#{name}.md"
+    if File.exists?(path) do
+      %{name: name, description: "Dynamic tool: #{name}"}
+    else
+      nil
+    end
   end
 
   defp module(name) do
