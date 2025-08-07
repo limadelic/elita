@@ -1,4 +1,4 @@
-defmodule AskTool do
+defmodule Tools.Ask do
   import GenServer, only: [call: 3]
 
   def void?, do: false

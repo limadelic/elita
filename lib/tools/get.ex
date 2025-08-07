@@ -1,4 +1,4 @@
-defmodule GetTool do
+defmodule Tools.Get do
   def void?, do: false
 
   def def do

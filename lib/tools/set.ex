@@ -1,4 +1,4 @@
-defmodule SetTool do
+defmodule Tools.Set do
   def void?, do: true
 
   def def do

@@ -1,4 +1,4 @@
-defmodule TellTool do
+defmodule Tools.Tell do
   import GenServer, only: [cast: 2]
 
   def void?, do: true

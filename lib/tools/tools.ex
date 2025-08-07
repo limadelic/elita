@@ -2,7 +2,7 @@ defmodule Tools do
   import String, only: [split: 2, trim: 1, capitalize: 1]
   import Enum, only: [map: 2, reject: 2]
   import Map, only: [put: 3]
-  import Module, only: [concat: 1]
+  import Module, only: [concat: 2]
   import Log, only: [t: 2, r: 1]
 
   def tools(%{tools: names}) do
@@ -25,13 +25,15 @@ defmodule Tools do
 
   def exec(%{"name" => name, "args" => args}) do
     t(name, args)
-    r(try do
-      module(name).exec(args)
-    rescue
-      UndefinedFunctionError -> Dynamic.exec(name, args)
-    end)
-  end
 
+    r(
+      try do
+        module(name).exec(args)
+      rescue
+        UndefinedFunctionError -> Dynamic.exec(name, args)
+      end
+    )
+  end
 
   def exec(part), do: part
 
@@ -43,12 +45,12 @@ defmodule Tools do
   defp wrap(tools), do: [%{function_declarations: tools}]
 
   defp tool(name) do
-    apply(module(name), :def, [])
+    module(name).def()
   rescue
-    _ -> Dynamic.tool(name)
+    UndefinedFunctionError -> Dynamic.tool(name)
   end
 
   defp module(name) do
-    concat([capitalize(name) <> "Tool"])
+    concat(Tools, capitalize(name))
   end
 end
