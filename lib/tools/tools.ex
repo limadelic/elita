@@ -20,19 +20,18 @@ defmodule Tools do
   end
 
   def exec(%{"functionCall" => call} = part) do
-    result = exec(call)
-    put(part, "result", result)
+    put(part, "result", exec(call))
   end
 
   def exec(%{"name" => name, "args" => args}) do
     t(name, args)
-    result = try do
+    r(try do
       module(name).exec(args)
     rescue
       UndefinedFunctionError -> Dynamic.exec(name, args)
-    end
-    r result
+    end)
   end
+
 
   def exec(part), do: part
 
