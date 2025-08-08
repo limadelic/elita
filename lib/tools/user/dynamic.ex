@@ -1,12 +1,12 @@
-defmodule Tools.Dynamic do
-  import Tools.Dynamic.Cfg, only: [parse: 1]
+defmodule Tools.User do
+  import Tools.User.Cfg, only: [parse: 1]
 
   def def(name) do
-    name |> tool() |> Tools.Dynamic.Def.def
+    name |> tool() |> Tools.User.Def.def
   end
 
   def exec(name, args) do
-    name |> tool() |> Tools.Dynamic.Exec.exec(args)
+    name |> tool() |> Tools.User.Exec.exec(args)
   end
 
   defp tool(name) do

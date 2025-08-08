@@ -1,4 +1,4 @@
-defmodule Tools.Dynamic.Def do
+defmodule Tools.User.Def do
   def def(tool) when tool != nil do
     %{
       name: tool.name,

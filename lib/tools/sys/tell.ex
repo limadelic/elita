@@ -1,4 +1,4 @@
-defmodule Tools.Static.Tell do
+defmodule Tools.Sys.Tell do
   import GenServer, only: [cast: 2]
 
 

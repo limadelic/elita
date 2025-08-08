@@ -36,13 +36,13 @@ defmodule Tools do
   end
 
   defp module(name) do
-    concat([Tools, Static, capitalize(name)])
+    concat([Tools, Sys, capitalize(name)])
     |> ensure_loaded()
     |> static()
   end
 
   defp static({:module, mod}), do: mod
-  defp static(_), do: Tools.Dynamic
+  defp static(_), do: Tools.User
 
   defp wrap([]), do: []
   defp wrap(tools), do: [%{function_declarations: tools}]

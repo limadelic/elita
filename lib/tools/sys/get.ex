@@ -1,4 +1,4 @@
-defmodule Tools.Static.Get do
+defmodule Tools.Sys.Get do
 
   def def(name) do
     %{

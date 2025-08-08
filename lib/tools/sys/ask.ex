@@ -1,4 +1,4 @@
-defmodule Tools.Static.Ask do
+defmodule Tools.Sys.Ask do
   import GenServer, only: [call: 3]
 
   def def(name) do
