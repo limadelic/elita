@@ -3,8 +3,15 @@ defmodule Tools.Dynamic.Exec do
   import Enum, only: [map: 2, join: 2]
   import Code, only: [eval_string: 2]
 
-  def exec(code, meta) do
-    meta["imports"]
+  def exec(tool, _args) when tool != nil do
+    first(tool.code, tool)
+  end
+
+  def exec(nil, _args), do: {:error, "Tool not found"}
+
+  defp first([], _), do: "No code found"
+  defp first([code | _], tool) do
+    tool.imports
     |> modules
     |> imports
     |> plus(code)

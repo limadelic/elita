@@ -16,12 +16,25 @@ defmodule Tools.Dynamic.Cfg do
   end
 
   defp extract([_, header | rest]) do
-    {yaml(header), join(rest, "---")}
+    markdown = join(rest, "---")
+    yaml(header) 
+    |> atomize 
+    |> put(:code, blocks(markdown))
+    |> put(:body, body(markdown))
   end
 
-  def blocks(body) do
-    scan(@code, body, capture: :all_but_first)
+  defp blocks(markdown) do
+    scan(@code, markdown, capture: :all_but_first)
     |> map(&List.first/1)
+  end
+
+  defp body(markdown) do
+    Regex.replace(@code, markdown, "") |> String.trim()
+  end
+
+  defp atomize(map) do
+    map
+    |> Map.new(fn {k, v} -> {String.to_atom(k), v} end)
   end
 
   defp yaml(header) do

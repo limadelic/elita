@@ -1,38 +1,21 @@
 defmodule Tools.Dynamic do
-  import Tools.Dynamic.Cfg, only: [parse: 1, blocks: 1]
+  import Tools.Dynamic.Cfg, only: [parse: 1]
 
   def def(name) do
-    name |> path |> build(name)
+    name |> tool() |> Tools.Dynamic.Def.def
   end
 
-  def exec(name, _args) do
-    name |> path |> run
+  def exec(name, args) do
+    name |> tool() |> Tools.Dynamic.Exec.exec(args)
   end
 
-  defp build(path, name) do
-    build(path, name, File.exists?(path))
+  defp tool(name) do
+    name |> path() |> load()
   end
-
-  defp build(path, name, true) do
-    {meta, _body} = parse(path)
-    %{name: name, description: meta["description"] || "Dynamic tool: #{name}"}
-  end
-
-  defp build(_, _, false), do: nil
-
-  defp run(path) do
-    run(path, File.exists?(path))
-  end
-
-  defp run(path, true) do
-    {meta, body} = parse(path)
-    body |> blocks |> first(meta)
-  end
-
-  defp run(_, false), do: {:error, "Tool not found"}
-
-  defp first([], _), do: "No code found"
-  defp first([code | _], meta), do: Tools.Dynamic.Exec.exec(code, meta)
 
   defp path(name), do: "agents/tools/#{name}.md"
+
+  defp load(path) do
+    if File.exists?(path), do: parse(path), else: nil
+  end
 end
