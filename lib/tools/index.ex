@@ -1,4 +1,4 @@
-defmodule ToolIndex do
+defmodule Tool.Index do
   import Tools, only: [exec: 1]
 
   def set(key, value) do

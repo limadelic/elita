@@ -1,4 +1,4 @@
-defmodule Tools.Cfg do
+defmodule Tools.Dynamic.Cfg do
   import String, only: [split: 2, trim: 1]
   import File, only: [read!: 1]
   import Enum, only: [join: 2, map: 2, reduce: 3]

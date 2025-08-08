@@ -1,4 +1,4 @@
-defmodule Tools.Exec do
+defmodule Tools.Dynamic.Exec do
   import String, only: [split: 2, trim: 1]
   import Enum, only: [map: 2, join: 2]
   import Code, only: [eval_string: 2]

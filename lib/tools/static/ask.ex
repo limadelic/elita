@@ -1,11 +1,9 @@
-defmodule Tools.Ask do
+defmodule Tools.Static.Ask do
   import GenServer, only: [call: 3]
 
-  def void?, do: false
-
-  def def do
+  def def(name) do
     %{
-      name: "ask",
+      name: name,
       description: "Ask question to another agent and get response",
       parameters: %{
         type: "object",
@@ -18,7 +16,7 @@ defmodule Tools.Ask do
     }
   end
 
-  def exec(%{"recipient" => recipient, "question" => question}) do
+  def exec(_, %{"recipient" => recipient, "question" => question}) do
     recipient_atom = recipient |> String.downcase() |> String.to_atom()
     via_name = {:via, Registry, {ElitaRegistry, recipient_atom}}
     call(via_name, {:act, question}, :infinity)

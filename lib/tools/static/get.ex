@@ -1,9 +1,8 @@
-defmodule Tools.Get do
-  def void?, do: false
+defmodule Tools.Static.Get do
 
-  def def do
+  def def(name) do
     %{
-      name: "get",
+      name: name,
       description: "Retrieve data by key",
       parameters: %{
         type: "object",
@@ -15,7 +14,7 @@ defmodule Tools.Get do
     }
   end
 
-  def exec(%{"key" => key}) do
+  def exec(_, %{"key" => key}) do
     table = Mem.table()
 
     case :ets.lookup(table, key) do

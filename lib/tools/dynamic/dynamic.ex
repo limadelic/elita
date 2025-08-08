@@ -1,14 +1,15 @@
-defmodule Dynamic do
-  import Tools.Cfg, only: [parse: 1, blocks: 1]
-  import Tools.Exec, only: [execute: 2]
+defmodule Tools.Dynamic do
+  import Tools.Dynamic.Cfg, only: [parse: 1, blocks: 1]
+  import Tools.Dynamic.Exec, only: [execute: 2]
 
-  def tool(name) do
+  def def(name) do
     name |> path |> build(name)
   end
 
   def exec(name, _args) do
     name |> path |> run
   end
+
 
   defp build(path, name) do
     build(path, name, File.exists?(path))

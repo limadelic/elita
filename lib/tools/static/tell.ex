@@ -1,11 +1,10 @@
-defmodule Tools.Tell do
+defmodule Tools.Static.Tell do
   import GenServer, only: [cast: 2]
 
-  def void?, do: true
 
-  def def do
+  def def(name) do
     %{
-      name: "tell",
+      name: name,
       description: "Send message to another agent",
       parameters: %{
         type: "object",
@@ -18,7 +17,7 @@ defmodule Tools.Tell do
     }
   end
 
-  def exec(%{"recipient" => recipient, "message" => message}) do
+  def exec(_, %{"recipient" => recipient, "message" => message}) do
     recipient_atom = recipient |> String.downcase() |> String.to_atom()
     via_name = {:via, Registry, {ElitaRegistry, recipient_atom}}
     cast(via_name, {:act, message})
