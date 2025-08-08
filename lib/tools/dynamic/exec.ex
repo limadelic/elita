@@ -3,37 +3,33 @@ defmodule Tools.Dynamic.Exec do
   import Enum, only: [map: 2, join: 2]
   import Code, only: [eval_string: 2]
 
-  def execute(code, meta) do
-    meta["imports"] |> imports |> statements |> source(code) |> run |> format
+  def exec(code, meta) do
+    meta["imports"]
+    |> modules
+    |> imports
+    |> plus(code)
+    |> eval
   end
 
-  defp imports(nil), do: []
-  defp imports(text), do: split(text, ",") |> map(&trim/1)
+  defp modules(nil), do: []
+  defp modules(text), do: split(text, ",") |> map(&trim/1)
 
-  defp statements(modules) do
-    ["import Tool.Index"] ++ map(modules, &build/1)
+  defp imports(modules) when is_list(modules) do
+    ["import Tool.Index"] ++ map(modules, &imports/1)
   end
 
-  defp build(module), do: "import #{module}"
+  defp imports(module), do: "import #{module}"
 
-  defp source(lines, code) do
+  defp plus(imports, code) do
     """
-    #{join(lines, "\n")}
-    
+    #{join(imports, "\n")}
+
     #{code}
     """
   end
 
-  defp run(text) do
-    try do
-      {result, _} = eval_string(text, [])
-      result
-    rescue
-      e -> {:error, e}
-    end
+  defp eval(text) do
+    {result, _} = eval_string(text, [])
+    result
   end
-
-  defp format(nil), do: "executed successfully"
-  defp format({:error, e}), do: "Error: #{inspect e}"
-  defp format(value), do: "#{value}"
 end

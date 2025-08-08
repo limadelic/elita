@@ -1,6 +1,5 @@
 defmodule Tools.Dynamic do
   import Tools.Dynamic.Cfg, only: [parse: 1, blocks: 1]
-  import Tools.Dynamic.Exec, only: [execute: 2]
 
   def def(name) do
     name |> path |> build(name)
@@ -33,7 +32,7 @@ defmodule Tools.Dynamic do
   defp run(_, false), do: {:error, "Tool not found"}
 
   defp first([], _), do: "No code found"
-  defp first([code | _], meta), do: execute(code, meta)
+  defp first([code | _], meta), do: Tools.Dynamic.Exec.exec(code, meta)
 
   defp path(name), do: "agents/tools/#{name}.md"
 end
