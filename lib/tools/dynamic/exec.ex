@@ -11,7 +11,7 @@ defmodule Tools.Dynamic.Exec do
   defp imports(text), do: split(text, ",") |> map(&trim/1)
 
   defp statements(modules) do
-    ["import ToolIndex"] ++ map(modules, &build/1)
+    ["import Tool.Index"] ++ map(modules, &build/1)
   end
 
   defp build(module), do: "import #{module}"

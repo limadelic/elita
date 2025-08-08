@@ -10,7 +10,6 @@ defmodule Tools.Dynamic do
     name |> path |> run
   end
 
-
   defp build(path, name) do
     build(path, name, File.exists?(path))
   end
