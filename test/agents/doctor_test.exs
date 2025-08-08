@@ -2,10 +2,13 @@ defmodule DoctorTest do
   use ExUnit.Case
   import ElitaTester
 
-  test "doctor diagnoses appendicitis" do
+  setup do
     start(:doctor)
     start(:actor, :patient)
+    :ok
+  end
 
+  test "doctor diagnoses appendicitis" do
     ask(:patient, """
     you are a patient with appendicitis
     - sharp right abdominal pain, nausea, fever.
