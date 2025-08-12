@@ -4,11 +4,12 @@ defmodule DoctorTest do
 
   setup do
     start(:doctor)
-    start(:actor, :patient)
+    start(:patient, :actor)
     :ok
   end
 
   test "doctor diagnoses appendicitis" do
+
     ask(:patient, """
     you are a patient with appendicitis
     - sharp right abdominal pain, nausea, fever.

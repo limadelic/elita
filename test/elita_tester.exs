@@ -4,13 +4,16 @@ defmodule ElitaTester do
 
   def start(name) do
     setup()
-    start_link(name, name)
+    start_link(normalize_mixins([name]), name)
   end
 
-  def start(agent, name) do
+  def start(name, mixins) do
     setup()
-    start_link(agent, name)
+    start_link(normalize_mixins(mixins), name)
   end
+
+  defp normalize_mixins(mixins) when is_list(mixins), do: mixins
+  defp normalize_mixins(mixin), do: [mixin]
 
   def stop(name) do
     GenServer.stop(via(name))

@@ -4,10 +4,10 @@ defmodule Doble9Test do
 
   setup do
     start :doble9
-    start :greed, :top
-    start :greed, :left
-    start :greed, :bottom
-    start :greed, :right
+    start :top, [:player, :greed]
+    start :left, [:player, :greed]
+    start :bottom, [:player, :greed]
+    start :right, [:player, :greed]
 
     :ok
   end

@@ -1,13 +1,41 @@
 defmodule Cfg do
   import String, only: [split: 3, trim: 1, to_atom: 1]
-  import Enum, only: [map: 2]
+  import Enum, only: [map: 2, reduce: 3]
   import Map, only: [new: 1, put: 3]
   import YamlElixir, only: [read_from_string: 1]
 
-  def config name do
-    {:ok, md} = File.read "agents/#{name}.md"
+  def config(names) when is_list(names) do
+    names
+    |> map(&load/1)
+    |> compose
+  end
+
+  def config(name), do: config([name])
+
+  defp load(name) do
+    {:ok, md} = File.read("agents/#{name}.md")
     parse md
   end
+
+  defp compose(configs) do
+    configs
+    |> headers
+    |> content(configs)
+  end
+
+  defp headers(configs) do
+    configs
+    |> map(&drop/1)
+    |> reduce(%{}, &Map.merge/2)
+  end
+
+  defp content(merged, configs) do
+    text = configs |> map(&extract/1) |> Enum.join("\n\n")
+    put(merged, :content, text)
+  end
+
+  defp drop(config), do: Map.drop(config, [:content])
+  defp extract(config), do: Map.get(config, :content, "")
 
   defp parse md do
     md
@@ -17,11 +45,11 @@ defmodule Cfg do
 
   defp parse header, body do
     header
-    |> then(&with_warnings_suppressed(fn -> read_from_string(&1) end))
+    |> then(&suppress(fn -> read_from_string(&1) end))
     |> join(body)
   end
 
-  defp with_warnings_suppressed(fun) do
+  defp suppress(fun) do
     fun.()
   end
 
