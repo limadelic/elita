@@ -3,9 +3,9 @@ defmodule BossTest do
   import ElitaTester
 
   test "boss delegates task to worker" do
-    start(:boss)
-    start(:dev, :worker)
-    start(:qa, :worker)
+    spawn(:boss)
+    spawn(:dev, :worker)
+    spawn(:qa, :worker)
 
     tell(:boss, "you manage a software development team with a dev and a qa")
     verify(:boss, "done", "we need more test created")
@@ -15,10 +15,10 @@ defmodule BossTest do
   end
 
   test "michael asks dwight to photocopy sales reports" do
-    start(:michael, :boss)
-    start(:dwight, :boss)
-    start(:pam, :worker)
-    start(:jim, :worker)
+    spawn(:michael, :boss)
+    spawn(:dwight, :boss)
+    spawn(:pam, :worker)
+    spawn(:jim, :worker)
 
     tell(:michael, "you manage dwight the assistant regional manager")
     tell(:dwight, "you manage pam the receptionist and jim the salesman")

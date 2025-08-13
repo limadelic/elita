@@ -3,7 +3,7 @@ defmodule GreetTest do
   import ElitaTester
 
   test "greet conversation flow" do
-    start :greet
+    spawn :greet
     
     verify :greet, "Who am I talking to", "hello"
     verify :greet, "Mike", "Mike"

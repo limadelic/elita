@@ -3,7 +3,7 @@ defmodule ClockwatcherTest do
   import ElitaTester
 
   setup do
-    start(:clockwatcher)
+    spawn(:clockwatcher)
     :ok
   end
 

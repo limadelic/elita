@@ -1,9 +1,10 @@
 defmodule BirthTest do
   use ExUnit.Case
+  import Kernel, except: [spawn: 1, spawn: 2]
   import ElitaTester
 
   setup do
-    start(:mother)
+    spawn(:mother)
     :ok
   end
 

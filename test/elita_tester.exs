@@ -2,12 +2,12 @@ defmodule ElitaTester do
   import ExUnit.Assertions
   import Elita, only: [start_link: 2, cast: 2, call: 2]
 
-  def start(name) do
+  def spawn(name) do
     setup()
     start_link(normalize_mixins([name]), name)
   end
 
-  def start(name, mixins) do
+  def spawn(name, mixins) do
     setup()
     start_link(normalize_mixins(mixins), name)
   end

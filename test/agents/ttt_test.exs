@@ -3,8 +3,8 @@ defmodule TttTest do
   import ElitaTester
 
   test "ttt agents playing each others should always tie" do
-    start(:ttt, :alice)
-    start(:ttt, :bob)
+    spawn(:ttt, :alice)
+    spawn(:ttt, :bob)
 
     tell(:bob, "alice is gonna be your opponent")
     tell(:alice, "start a game with bob, you play first")

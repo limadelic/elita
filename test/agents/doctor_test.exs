@@ -3,8 +3,8 @@ defmodule DoctorTest do
   import ElitaTester
 
   setup do
-    start(:doctor)
-    start(:patient, :actor)
+    spawn(:doctor)
+    spawn(:patient, :actor)
     :ok
   end
 
