@@ -25,9 +25,9 @@ defmodule Elita do
     {:via, Registry, {ElitaRegistry, name}}
   end
 
-  def init(name) do
+  def init(configs) do
     create()
-    {:ok, %{config: config(name), history: []}}
+    {:ok, %{config: config(configs), history: []}}
   end
 
   def handle_call({:act, msg}, _, state) do
