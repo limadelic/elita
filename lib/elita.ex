@@ -9,8 +9,8 @@ defmodule Elita do
   import History, only: [record: 2]
   import Msg, only: [user: 1]
 
-  def start_link(agent, name) do
-    GenServer.start_link(__MODULE__, agent, name: via(name))
+  def start_link(name, configs) do
+    GenServer.start_link(__MODULE__, configs, name: via(name))
   end
 
   def cast(name, msg) do

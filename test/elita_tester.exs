@@ -4,16 +4,16 @@ defmodule ElitaTester do
 
   def spawn(name) do
     setup()
-    start_link(normalize_mixins([name]), name)
+    start_link(Atom.to_string(name), list([Atom.to_string(name)]))
   end
 
-  def spawn(name, mixins) do
+  def spawn(name, configs) do
     setup()
-    start_link(normalize_mixins(mixins), name)
+    start_link(Atom.to_string(name), list(configs) |> Enum.map(&Atom.to_string/1))
   end
 
-  defp normalize_mixins(mixins) when is_list(mixins), do: mixins
-  defp normalize_mixins(mixin), do: [mixin]
+  defp list(configs) when is_list(configs), do: configs
+  defp list(config), do: [config]
 
   def stop(name) do
     GenServer.stop(via(name))
@@ -31,18 +31,19 @@ defmodule ElitaTester do
 
   def tell(name, msg) do
     IO.puts("Tell: #{msg}")
-    cast(name, msg)
+    cast(Atom.to_string(name), msg)
   end
 
   def ask(name, q) do
     IO.puts("Q: #{q}")
-    answer = call(name, q)
+    answer = call(Atom.to_string(name), q)
     IO.puts("A: #{answer}")
     answer
   end
 
   def verify(name, a, q) do
     answer = ask(name, q)
+
     assert String.contains?(String.downcase(answer), String.downcase("#{a}")),
            "Expected '#{answer}' to contain '#{a}'"
   end

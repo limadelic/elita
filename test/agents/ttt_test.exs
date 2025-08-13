@@ -1,5 +1,6 @@
 defmodule TttTest do
   use ExUnit.Case
+  import Kernel, except: [spawn: 1, spawn: 2]
   import ElitaTester
 
   test "ttt agents playing each others should always tie" do

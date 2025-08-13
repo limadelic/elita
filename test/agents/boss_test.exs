@@ -1,5 +1,6 @@
 defmodule BossTest do
   use ExUnit.Case
+  import Kernel, except: [spawn: 1, spawn: 2]
   import ElitaTester
 
   test "boss delegates task to worker" do

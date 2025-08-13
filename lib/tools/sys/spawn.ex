@@ -1,5 +1,6 @@
 defmodule Tools.Sys.Spawn do
   import Elita, only: [start_link: 2]
+  import String, only: [downcase: 1]
 
   def def(name) do
     %{
@@ -9,20 +10,19 @@ defmodule Tools.Sys.Spawn do
         type: "object",
         properties: %{
           name: %{type: "string", description: "Name for the new agent"},
-          mixins: %{type: "string", description: "Config mixins for the agent, defaults to name"}
+          configs: %{type: "string", description: "Configs for the agent, could be multiple, defaults to name"}
         },
         required: ["name"]
       }
     }
   end
 
-  def exec(_, %{"name" => agent_name} = args) do
-    mixins = normalize_mixins(Map.get(args, "mixins", agent_name |> String.downcase()))
-    name_atom = agent_name |> String.downcase() |> String.to_atom()
-    start_link(mixins, name_atom)
+  def exec(_, %{"name" => name} = args) do
+    configs = list(Map.get(args, "configs", name |> downcase()))
+    start_link(name |> downcase(), configs)
     "spawned"
   end
 
-  defp normalize_mixins(mixins) when is_list(mixins), do: mixins
-  defp normalize_mixins(mixin), do: [String.to_atom(mixin)]
+  defp list(configs) when is_list(configs), do: configs
+  defp list(config), do: [config]
 end
