@@ -1,14 +1,13 @@
 defmodule Tools do
-  import String, only: [split: 2, trim: 1, capitalize: 1]
+  import String, only: [capitalize: 1]
   import Enum, only: [map: 2, reject: 2]
   import Map, only: [put: 3]
   import Module, only: [concat: 1]
   import Code, only: [ensure_loaded: 1]
   import Log, only: [t: 2, r: 1]
 
-  def tools(%{tools: names}) do
-    split(names, ",")
-    |> map(&trim/1)
+  def tools(%{tools: names}) when is_list(names) do
+    names
     |> map(&prompt/1)
     |> reject(&is_nil/1)
     |> wrap

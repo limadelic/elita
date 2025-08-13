@@ -1,41 +1,22 @@
 defmodule Cfg do
-  import String, only: [split: 3, trim: 1, to_atom: 1]
-  import Enum, only: [map: 2, reduce: 3]
+  import String, only: [split: 2, split: 3, trim: 1, to_atom: 1]
+  import Enum, only: [map: 2, reject: 2]
   import Map, only: [new: 1, put: 3]
   import YamlElixir, only: [read_from_string: 1]
 
-  def config(names) when is_list(names) do
-    names
-    |> map(&load/1)
-    |> compose
-  end
-
-  def config(name), do: config([name])
-
-  defp load(name) do
+  def config(name) do
     {:ok, md} = File.read("agents/#{name}.md")
-    parse md
+    md |> parse |> tools
   end
 
-  defp compose(configs) do
-    configs
-    |> headers
-    |> content(configs)
+  defp tools(%{tools: raw} = config) when is_binary(raw) do
+    list = split(raw, ",") |> map(&trim/1) |> reject(&empty/1)
+    put config, :tools, list
   end
+  defp tools(config), do: config
 
-  defp headers(configs) do
-    configs
-    |> map(&drop/1)
-    |> reduce(%{}, &Map.merge/2)
-  end
-
-  defp content(merged, configs) do
-    text = configs |> map(&extract/1) |> Enum.join("\n\n")
-    put(merged, :content, text)
-  end
-
-  defp drop(config), do: Map.drop(config, [:content])
-  defp extract(config), do: Map.get(config, :content, "")
+  defp empty(""), do: true
+  defp empty(_), do: false
 
   defp parse md do
     md

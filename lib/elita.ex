@@ -1,7 +1,7 @@
 defmodule Elita do
   use GenServer
 
-  import Cfg, only: [config: 1]
+  import Cfgs, only: [config: 1]
   import Prompt, only: [prompt: 2]
   import Llm, only: [llm: 1]
   import Mem, only: [create: 0]
