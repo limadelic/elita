@@ -3,12 +3,12 @@ defmodule ClockwatcherTest do
   import ElitaTester
 
   setup do
-    start :clockwatcher
+    start(:clockwatcher)
     :ok
   end
 
-  test "clockwatcher responds correctly for current time" do()
-    verify :clockwatcher, response, "can you handle this task?"
+  test "clockwatcher responds correctly for current time" do
+    verify(:clockwatcher, response(), "can you handle this task?")
   end
 
   defp response do
