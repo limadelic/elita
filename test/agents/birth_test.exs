@@ -1,4 +1,4 @@
-defmodule SpawnTest do
+defmodule BirthTest do
   use ExUnit.Case
   import ElitaTester
 
@@ -7,9 +7,9 @@ defmodule SpawnTest do
     :ok
   end
 
-  test "mother spawns baby" do
-    ask(:mother, "it time to give birth")
-    
+  test "mother gives birth to baby" do
+    ask(:mother, "it's time to give birth")
+
     verify(:baby, "WAAAAAH", "spank")
   end
 end
