@@ -2,7 +2,7 @@ defmodule GreedTest do
   use ElitaTester
 
   setup do
-    start :greed, [ :greed, :player]
+    spawn :greed, [ :greed, :player]
     :ok
   end
 

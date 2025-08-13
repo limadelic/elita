@@ -2,7 +2,7 @@ defmodule TodoTest do
   use ElitaTester
 
   setup do
-    start :todo
+    spawn :todo
     :ok
   end
 

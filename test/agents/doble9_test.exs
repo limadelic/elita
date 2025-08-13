@@ -2,11 +2,11 @@ defmodule Doble9Test do
   use ElitaTester
 
   setup do
-    start :doble9
-    start :top, [:player, :greed]
-    start :left, [:player, :greed]
-    start :bottom, [:player, :greed]
-    start :right, [:player, :greed]
+    spawn :doble9
+    spawn :top, [:player, :greed]
+    spawn :left, [:player, :greed]
+    spawn :bottom, [:player, :greed]
+    spawn :right, [:player, :greed]
 
     :ok
   end
