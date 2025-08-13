@@ -1,7 +1,7 @@
 defmodule Elita do
   use GenServer
 
-  import Cfg, only: [config: 1]
+  import Cfgs, only: [config: 1]
   import Prompt, only: [prompt: 2]
   import Llm, only: [llm: 1]
   import Mem, only: [create: 0]
@@ -25,9 +25,9 @@ defmodule Elita do
     {:via, Registry, {ElitaRegistry, name}}
   end
 
-  def init(name) do
+  def init(configs) do
     create()
-    {:ok, %{config: config(name), history: []}}
+    {:ok, %{config: config(configs), history: []}}
   end
 
   def handle_call({:act, msg}, _, state) do

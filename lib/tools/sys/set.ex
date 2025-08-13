@@ -1,9 +1,8 @@
-defmodule SetTool do
-  def void?, do: true
+defmodule Tools.Sys.Set do
 
-  def def do
+  def def(name) do
     %{
-      name: "set",
+      name: name,
       description: "Store data with a key",
       parameters: %{
         type: "object",
@@ -16,7 +15,7 @@ defmodule SetTool do
     }
   end
 
-  def exec(%{"key" => key, "value" => value}) do
+  def exec(_, %{"key" => key, "value" => value}) do
     table = Mem.table()
     :ets.insert(table, {key, value})
     "stored"

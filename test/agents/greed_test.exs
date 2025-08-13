@@ -3,7 +3,7 @@ defmodule GreedTest do
   import ElitaTester
 
   setup do
-    start :greed
+    start :greed, [ :greed, :player]
     :ok
   end
 

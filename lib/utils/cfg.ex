@@ -1,13 +1,28 @@
 defmodule Cfg do
-  import String, only: [split: 3, trim: 1, to_atom: 1]
-  import Enum, only: [map: 2]
+  import String, only: [split: 2, split: 3, trim: 1, to_atom: 1]
+  import Enum, only: [map: 2, reject: 2]
   import Map, only: [new: 1, put: 3]
   import YamlElixir, only: [read_from_string: 1]
 
-  def config name do
-    {:ok, md} = File.read "agents/#{name}.md"
-    parse md
+  def config(name) do
+    {:ok, md} = File.read("agents/#{name}.md")
+    md |> parse |> tools |> includes
   end
+
+  defp tools(%{tools: raw} = config) when is_binary(raw) do
+    list = split(raw, ",") |> map(&trim/1) |> reject(&empty/1)
+    put config, :tools, list
+  end
+  defp tools(config), do: config
+
+  defp includes(%{includes: raw} = config) when is_binary(raw) do
+    list = split(raw, ",") |> map(&trim/1) |> reject(&empty/1)
+    put config, :includes, list
+  end
+  defp includes(config), do: config
+
+  defp empty(""), do: true
+  defp empty(_), do: false
 
   defp parse md do
     md
@@ -17,11 +32,11 @@ defmodule Cfg do
 
   defp parse header, body do
     header
-    |> then(&with_warnings_suppressed(fn -> read_from_string(&1) end))
+    |> then(&suppress(fn -> read_from_string(&1) end))
     |> join(body)
   end
 
-  defp with_warnings_suppressed(fun) do
+  defp suppress(fun) do
     fun.()
   end
 

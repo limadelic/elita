@@ -4,8 +4,8 @@ defmodule BossTest do
 
   test "boss delegates task to worker" do
     start(:boss)
-    start(:worker, :dev)
-    start(:worker, :qa)
+    start(:dev, :worker)
+    start(:qa, :worker)
 
     tell(:boss, "you manage a software development team with a dev and a qa")
     verify(:boss, "done", "we need more test created")
@@ -15,10 +15,10 @@ defmodule BossTest do
   end
 
   test "michael asks dwight to photocopy sales reports" do
-    start(:boss, :michael)
-    start(:boss, :dwight)
-    start(:worker, :pam)
-    start(:worker, :jim)
+    start(:michael, :boss)
+    start(:dwight, :boss)
+    start(:pam, :worker)
+    start(:jim, :worker)
 
     tell(:michael, "you manage dwight the assistant regional manager")
     tell(:dwight, "you manage pam the receptionist and jim the salesman")

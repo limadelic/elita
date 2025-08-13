@@ -1,14 +1,14 @@
 defmodule Tools do
-  import String, only: [split: 2, trim: 1, capitalize: 1]
+  import String, only: [capitalize: 1]
   import Enum, only: [map: 2, reject: 2]
   import Map, only: [put: 3]
   import Module, only: [concat: 1]
+  import Code, only: [ensure_loaded: 1]
   import Log, only: [t: 2, r: 1]
 
-  def tools(%{tools: names}) do
-    split(names, ",")
-    |> map(&trim/1)
-    |> map(&tool/1)
+  def tools(%{tools: names}) when is_list(names) do
+    names
+    |> map(&prompt/1)
     |> reject(&is_nil/1)
     |> wrap
   end
@@ -20,31 +20,30 @@ defmodule Tools do
   end
 
   def exec(%{"functionCall" => call} = part) do
-    result = exec(call)
-    put(part, "result", result)
+    put(part, "result", exec(call))
   end
 
   def exec(%{"name" => name, "args" => args}) do
     t(name, args)
-    r module(name).exec(args)
+    r(module(name).exec(name, args))
   end
-
+  
   def exec(part), do: part
 
-  def void?(%{"name" => name}) do
-    module(name).void?
+  defp prompt(name) do
+    module(name).def(name)
   end
+
+  defp module(name) do
+    concat([Tools, Sys, capitalize(name)])
+    |> ensure_loaded()
+    |> static()
+  end
+
+  defp static({:module, mod}), do: mod
+  defp static(_), do: Tools.User
 
   defp wrap([]), do: []
   defp wrap(tools), do: [%{function_declarations: tools}]
 
-  defp tool(name) do
-    apply(module(name), :def, [])
-  rescue
-    _ -> nil
-  end
-
-  defp module(name) do
-    concat([capitalize(name) <> "Tool"])
-  end
 end
