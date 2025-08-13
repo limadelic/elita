@@ -8,8 +8,8 @@ defmodule SpawnTest do
   end
 
   test "mother spawns baby" do
-    tell(:mother, "it time to give birth")
+    ask(:mother, "it time to give birth")
     
-    verify(:baby, "cry", "spank")
+    verify(:baby, "WAAAAAH", "spank")
   end
 end
