@@ -1,6 +1,5 @@
 defmodule TodoTest do
-  use ExUnit.Case
-  import ElitaTester
+  use ElitaTester
 
   setup do
     start :todo

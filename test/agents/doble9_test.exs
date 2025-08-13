@@ -1,6 +1,5 @@
 defmodule Doble9Test do
-  use ExUnit.Case
-  import ElitaTester
+  use ElitaTester
 
   setup do
     start :doble9

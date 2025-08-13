@@ -17,8 +17,8 @@ defmodule Tools.Sys.Ask do
   end
 
   def exec(_, %{"recipient" => recipient, "question" => question}) do
-    recipient_atom = recipient |> String.downcase() |> String.to_atom()
-    via_name = {:via, Registry, {ElitaRegistry, recipient_atom}}
+    recipient_name = recipient |> String.downcase()
+    via_name = {:via, Registry, {ElitaRegistry, recipient_name}}
     call(via_name, {:act, question}, :infinity)
   end
 end

@@ -2,6 +2,14 @@ defmodule ElitaTester do
   import ExUnit.Assertions
   import Elita, only: [start_link: 2, cast: 2, call: 2]
 
+  defmacro __using__(_opts) do
+    quote do
+      use ExUnit.Case
+      import Kernel, except: [spawn: 1, spawn: 2]
+      import ElitaTester
+    end
+  end
+
   def spawn(name) do
     setup()
     start_link(Atom.to_string(name), list([Atom.to_string(name)]))

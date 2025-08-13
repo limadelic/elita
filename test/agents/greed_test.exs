@@ -1,6 +1,5 @@
 defmodule GreedTest do
-  use ExUnit.Case
-  import ElitaTester
+  use ElitaTester
 
   setup do
     start :greed, [ :greed, :player]
