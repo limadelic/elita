@@ -1,13 +1,31 @@
 defmodule Cfgs do
-  import Enum, only: [map: 2, reduce: 3]
+  import Enum, only: [map: 2, reduce: 3, reject: 2]
   import Map, only: [put: 3]
   def config(names) when is_list(names) do
     names
+    |> expand
     |> map(&Cfg.config/1)
     |> compose
   end
-
+  
   def config(name), do: Cfg.config(name)
+
+  defp expand(list) do
+    deps = list
+      |> map(&deps/1) 
+      |> List.flatten 
+      |> reject(&(&1 in list))
+    
+    expand(list, deps)
+  end
+
+  defp expand(list, []), do: list
+  defp expand(list, deps), do: expand(list ++ deps)
+
+  defp deps(name) do
+    config = Cfg.config(name)
+    config[:includes] || []
+  end
 
   defp compose(configs) do
     configs

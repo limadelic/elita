@@ -6,7 +6,7 @@ defmodule Cfg do
 
   def config(name) do
     {:ok, md} = File.read("agents/#{name}.md")
-    md |> parse |> tools
+    md |> parse |> tools |> includes
   end
 
   defp tools(%{tools: raw} = config) when is_binary(raw) do
@@ -14,6 +14,12 @@ defmodule Cfg do
     put config, :tools, list
   end
   defp tools(config), do: config
+
+  defp includes(%{includes: raw} = config) when is_binary(raw) do
+    list = split(raw, ",") |> map(&trim/1) |> reject(&empty/1)
+    put config, :includes, list
+  end
+  defp includes(config), do: config
 
   defp empty(""), do: true
   defp empty(_), do: false
