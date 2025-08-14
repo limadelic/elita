@@ -1,5 +1,5 @@
 defmodule Doble9Test do
-  use ElitaTester
+  use Tester
 
   setup do
     spawn :doble9

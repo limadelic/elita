@@ -1,5 +1,5 @@
 defmodule BossTest do
-  use ElitaTester
+  use Tester
 
   test "boss delegates task to worker" do
     spawn(:boss)

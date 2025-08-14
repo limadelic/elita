@@ -1,5 +1,5 @@
 defmodule ClockwatcherTest do
-  use ElitaTester
+  use Tester
 
   setup do
     spawn(:clockwatcher)

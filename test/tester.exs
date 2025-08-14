@@ -1,4 +1,4 @@
-defmodule ElitaTester do
+defmodule Tester do
   import ExUnit.Assertions
   import Elita, only: [start_link: 2, cast: 2, call: 2]
 
@@ -6,7 +6,7 @@ defmodule ElitaTester do
     quote do
       use ExUnit.Case
       import Kernel, except: [spawn: 1, spawn: 2]
-      import ElitaTester
+      import Tester
     end
   end
 

@@ -1,5 +1,5 @@
 defmodule DoctorTest do
-  use ElitaTester
+  use Tester
 
   setup do
     spawn(:doctor)

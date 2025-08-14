@@ -1,5 +1,5 @@
 defmodule GreedTest do
-  use ElitaTester
+  use Tester
 
   setup do
     spawn :greed, [ :greed, :player]

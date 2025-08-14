@@ -1,5 +1,5 @@
 defmodule GreetTest do
-  use ElitaTester
+  use Tester
 
   test "greet conversation flow" do
     spawn :greet

@@ -1,5 +1,5 @@
 defmodule TttTest do
-  use ElitaTester
+  use Tester
 
   test "ttt agents playing each others should always tie" do
     spawn(:alice, :ttt)

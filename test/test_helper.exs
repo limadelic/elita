@@ -1,3 +1,3 @@
 ExUnit.start()
 
-Code.require_file("elita_tester.exs", __DIR__)
+Code.require_file("tester.exs", __DIR__)
