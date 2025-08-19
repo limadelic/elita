@@ -8,6 +8,10 @@ defmodule Llm do
 
   @vertex_url "https://us-east4-aiplatform.googleapis.com/v1/projects/d-ulti-ml-ds-dev-9561/locations/us-east4/publishers/google/models/gemini-1.5-pro:generateContent"
 
+  def llm({prompt, state}) do
+    {llm(prompt), state}
+  end
+
   def llm(prompt) do
     prompt
     |> q

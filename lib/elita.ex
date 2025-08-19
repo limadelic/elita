@@ -2,11 +2,11 @@ defmodule Elita do
   use GenServer
 
   import Cfgs, only: [config: 1]
-  import Prompt, only: [prompt: 2]
+  import Prompt, only: [prompt: 1]
   import Llm, only: [llm: 1]
   import Mem, only: [create: 0]
-  import Tools, only: [exec: 2]
-  import History, only: [record: 2]
+  import Tools, only: [exec: 1]
+  import History, only: [record: 1]
   import Msg, only: [user: 1]
 
   def start_link(name, configs) do
@@ -44,11 +44,12 @@ defmodule Elita do
     act(%{state | history: history})
   end
 
-  defp act(%{config: config, history: history} = state) do
-    prompt(config, history)
+  defp act(state) do
+    state
+    |> prompt
     |> llm
-    |> exec(state)
-    |> record(state)
+    |> exec
+    |> record
     |> done
   end
 

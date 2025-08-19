@@ -13,4 +13,8 @@ defmodule Prompt do
       tools: tools(composed)
     }
   end
+
+  def prompt(state) do
+    {prompt(state.config, state.history), state}
+  end
 end

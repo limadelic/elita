@@ -15,6 +15,10 @@ defmodule Tools do
 
   def tools(_), do: []
 
+  def exec({parts, state}) do
+    {exec(parts, state), state}
+  end
+
   def exec(parts, state) when is_list(parts) do
     map(parts, &exec(&1, state))
   end
