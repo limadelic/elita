@@ -45,9 +45,10 @@ defmodule Elita do
   end
 
   defp act(%{config: config, history: history} = state) do
-    llm_response = prompt(config, history) |> llm
-    results = exec(llm_response, state)
-    record(results, state)
+    prompt(config, history)
+    |> llm
+    |> exec(state)
+    |> record(state)
     |> done
   end
 
