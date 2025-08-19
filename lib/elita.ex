@@ -5,7 +5,7 @@ defmodule Elita do
   import Prompt, only: [prompt: 2]
   import Llm, only: [llm: 1]
   import Mem, only: [create: 0]
-  import Tools, only: [exec: 1]
+  import Tools, only: [exec: 2]
   import History, only: [record: 2]
   import Msg, only: [user: 1]
 
@@ -45,10 +45,9 @@ defmodule Elita do
   end
 
   defp act(%{config: config, history: history} = state) do
-    prompt(config, history)
-    |> llm
-    |> exec()
-    |> record(state)
+    llm_response = prompt(config, history) |> llm
+    results = exec(llm_response, state)
+    record(results, state)
     |> done
   end
 

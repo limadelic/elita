@@ -15,6 +15,22 @@ defmodule Tools do
 
   def tools(_), do: []
 
+  def exec(parts, state) when is_list(parts) do
+    map(parts, &exec(&1, state))
+  end
+
+  def exec(%{"functionCall" => call} = part, state) do
+    put(part, "result", exec(call, state))
+  end
+
+  def exec(%{"name" => name, "args" => args}, state) do
+    t(name, args)
+    r(module(name).exec(name, args, state))
+  end
+  
+  def exec(part, _state), do: part
+
+  # Backwards compatibility for Tool.Index
   def exec(parts) when is_list(parts) do
     map(parts, &exec/1)
   end
@@ -25,7 +41,7 @@ defmodule Tools do
 
   def exec(%{"name" => name, "args" => args}) do
     t(name, args)
-    r(module(name).exec(name, args))
+    r(module(name).exec(name, args, %{}))  # Empty state for compatibility
   end
   
   def exec(part), do: part

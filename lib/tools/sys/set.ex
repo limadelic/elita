@@ -15,7 +15,7 @@ defmodule Tools.Sys.Set do
     }
   end
 
-  def exec(_, %{"key" => key, "value" => value}) do
+  def exec(_, %{"key" => key, "value" => value}, _state) do
     table = Mem.table()
     :ets.insert(table, {key, value})
     "stored"

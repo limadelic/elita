@@ -16,7 +16,7 @@ defmodule Tools.Sys.Ask do
     }
   end
 
-  def exec(_, %{"recipient" => recipient, "question" => question}) do
+  def exec(_, %{"recipient" => recipient, "question" => question}, _state) do
     recipient_name = recipient |> String.downcase()
     via_name = {:via, Registry, {ElitaRegistry, recipient_name}}
     call(via_name, {:act, question}, :infinity)

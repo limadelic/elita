@@ -14,7 +14,7 @@ defmodule Tools.Sys.Get do
     }
   end
 
-  def exec(_, %{"key" => key}) do
+  def exec(_, %{"key" => key}, _state) do
     table = Mem.table()
 
     case :ets.lookup(table, key) do
