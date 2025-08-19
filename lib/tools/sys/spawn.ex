@@ -2,7 +2,7 @@ defmodule Tools.Sys.Spawn do
   import Elita, only: [start_link: 2]
   import String, only: [downcase: 1]
 
-  def def(name) do
+  def def(name, _state) do
     %{
       name: name,
       description: "Spawn a new agent",

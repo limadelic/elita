@@ -1,7 +1,7 @@
 defmodule Tools.Sys.Ask do
   import GenServer, only: [call: 3]
 
-  def def(name) do
+  def def(name, _state) do
     %{
       name: name,
       description: "Ask question to another agent and get response",

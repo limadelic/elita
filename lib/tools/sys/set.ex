@@ -1,6 +1,6 @@
 defmodule Tools.Sys.Set do
 
-  def def(name) do
+  def def(name, _state) do
     %{
       name: name,
       description: "Store data with a key",

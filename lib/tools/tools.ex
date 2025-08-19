@@ -6,14 +6,14 @@ defmodule Tools do
   import Code, only: [ensure_loaded: 1]
   import Log, only: [t: 2, r: 1]
 
-  def tools(%{tools: names}) when is_list(names) do
+  def tools(%{tools: names}, state) when is_list(names) do
     names
-    |> map(&prompt/1)
+    |> map(&prompt(&1, state))
     |> reject(&is_nil/1)
     |> wrap
   end
 
-  def tools(_), do: []
+  def tools(_, _), do: []
 
   def exec({parts, state}) do
     {exec(parts, state), state}
@@ -34,8 +34,8 @@ defmodule Tools do
   
   def exec(part, _state), do: part
 
-  defp prompt(name) do
-    module(name).def(name)
+  defp prompt(name, state) do
+    module(name).def(name, state)
   end
 
   defp module(name) do

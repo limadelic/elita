@@ -2,10 +2,9 @@ defmodule Compose do
   import Enum, only: [map: 2, reduce: 3]
   import Map, only: [put: 3]
 
-  def compose(configs) do
-    configs
-    |> headers
-    |> content(configs)
+  def compose([main | rest]) do
+    active = [main | Enum.filter(rest, & &1[:active])]
+    active |> headers |> content(active)
   end
 
   defp headers(configs) do

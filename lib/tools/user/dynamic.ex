@@ -1,7 +1,7 @@
 defmodule Tools.User do
   import Tools.User.Cfg, only: [parse: 1]
 
-  def def(name) do
+  def def(name, _state) do
     name |> tool() |> Tools.User.Def.def
   end
 

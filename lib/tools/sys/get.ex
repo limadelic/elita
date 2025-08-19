@@ -1,6 +1,6 @@
 defmodule Tools.Sys.Get do
 
-  def def(name) do
+  def def(name, _state) do
     %{
       name: name,
       description: "Retrieve data by key",

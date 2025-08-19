@@ -2,7 +2,7 @@ defmodule Tools.Sys.Tell do
   import GenServer, only: [cast: 2]
 
 
-  def def(name) do
+  def def(name, _state) do
     %{
       name: name,
       description: "Send message to another agent",
