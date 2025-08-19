@@ -1,11 +1,11 @@
 defmodule Tools.Sys.Dci do
+  import Map, only: [put: 3]
+  import Enum, only: [drop: 2, map: 2, join: 2]
 
   def def(name, state) do
-    roles = state.config |> Enum.drop(1) |> Enum.map(& &1.name) |> Enum.join(", ")
-    
     %{
       name: name,
-      description: "Switch to role. Available: #{roles}",
+      description: "Switch to role. Available: #{roles(state.config)}",
       parameters: %{
         type: "object",
         properties: %{
@@ -16,14 +16,21 @@ defmodule Tools.Sys.Dci do
     }
   end
 
-  def exec(_, %{"role" => role}, state) do
-    configs = Enum.map(state.config, &activate(&1, role))
-    # TODO: figure out how to update state properly
-    "switched to #{role}"
+  def exec(_, %{"role" => role}, %{config: config} = state) do
+    {
+      "switched to #{role}",
+      %{state | config: map(config, &activate(&1, role))}
+    }
+  end
+
+  defp roles(config) do
+    config
+    |> drop(1)
+    |> map(& &1.name)
+    |> join(", ")
   end
 
   defp activate(config, target) do
-    active = config.name == target
-    Map.put(config, :active, active)
+    put(config, :active, config.name == target)
   end
 end
