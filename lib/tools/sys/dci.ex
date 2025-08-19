@@ -18,8 +18,8 @@ defmodule Tools.Sys.Dci do
 
   def exec(_, %{"role" => role}, state) do
     configs = Enum.map(state.config, &activate(&1, role))
-    
-    {"switched to #{role}", %{state | config: configs}}
+    # TODO: figure out how to update state properly
+    "switched to #{role}"
   end
 
   defp activate(config, target) do

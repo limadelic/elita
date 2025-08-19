@@ -29,7 +29,12 @@ defmodule Tools do
 
   def exec(%{"name" => name, "args" => args}, state) do
     t(name, args)
-    r(module(name).exec(name, args, state))
+    result = module(name).exec(name, args, state)
+    case result do
+      {message, _new_state} -> r(message)
+      other -> r(other)
+    end
+    result
   end
   
   def exec(part, _state), do: part
