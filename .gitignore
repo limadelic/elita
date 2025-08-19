@@ -12,3 +12,4 @@ elita-*.tar
 /langchain
 /langchain-google
 CLAUDE.local.md
+/langgraph/
