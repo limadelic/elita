@@ -1,6 +1,6 @@
 ---
 name: tester
-tools: dci
+tools: cast
 includes: trag, tplan, texec
 ---
 
