@@ -30,22 +30,6 @@ defmodule Tools do
   
   def exec(part, _state), do: part
 
-  # Backwards compatibility for Tool.Index
-  def exec(parts) when is_list(parts) do
-    map(parts, &exec/1)
-  end
-
-  def exec(%{"functionCall" => call} = part) do
-    put(part, "result", exec(call))
-  end
-
-  def exec(%{"name" => name, "args" => args}) do
-    t(name, args)
-    r(module(name).exec(name, args, %{}))  # Empty state for compatibility
-  end
-  
-  def exec(part), do: part
-
   defp prompt(name) do
     module(name).def(name)
   end
