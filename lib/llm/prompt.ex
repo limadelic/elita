@@ -1,14 +1,16 @@
 defmodule Prompt do
   import Tools, only: [tools: 1]
   import Snippet, only: [snip: 2]
+  import Compose, only: [compose: 1]
 
-  def prompt(config, history) do
-    content = snip(config.content, config[:import])
+  def prompt(configs, history) do
+    composed = compose(configs)
+    content = snip(composed.content, composed[:import])
     
     %{
       contents: history,
       systemInstruction: %{parts: [%{text: content}]},
-      tools: tools(config)
+      tools: tools(composed)
     }
   end
 end
