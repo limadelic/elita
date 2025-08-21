@@ -14,12 +14,12 @@ defmodule Tools.Sys.Get do
     }
   end
 
-  def exec(_, %{"key" => key}, _state) do
+  def exec(_, %{"key" => key}, state) do
     table = Mem.table()
-
-    case :ets.lookup(table, key) do
+    value = case :ets.lookup(table, key) do
       [{^key, value}] -> value
       [] -> "not found"
     end
+    {value, state}
   end
 end

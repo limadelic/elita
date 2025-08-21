@@ -17,10 +17,10 @@ defmodule Tools.Sys.Tell do
     }
   end
 
-  def exec(_, %{"recipient" => recipient, "message" => message}, _state) do
+  def exec(_, %{"recipient" => recipient, "message" => message}, state) do
     recipient_name = recipient |> String.downcase()
     via_name = {:via, Registry, {ElitaRegistry, recipient_name}}
     cast(via_name, {:act, message})
-    "sent"
+    {"sent", state}
   end
 end

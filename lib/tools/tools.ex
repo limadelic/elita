@@ -1,6 +1,6 @@
 defmodule Tools do
   import String, only: [capitalize: 1]
-  import Enum, only: [map: 2, reject: 2]
+  import Enum, only: [map: 2, reject: 2, map_reduce: 3]
   import Map, only: [put: 3]
   import Module, only: [concat: 1]
   import Code, only: [ensure_loaded: 1]
@@ -16,28 +16,26 @@ defmodule Tools do
   def tools(_, _), do: []
 
   def exec({parts, state}) do
-    {exec(parts, state), state}
+    exec(parts, state)
   end
 
   def exec(parts, state) when is_list(parts) do
-    map(parts, &exec(&1, state))
+    map_reduce(parts, state, &exec/2)
   end
 
   def exec(%{"functionCall" => call} = part, state) do
-    put(part, "result", exec(call, state))
+    {result, state} = exec(call, state)
+    {put(part, "result", result), state}
   end
 
   def exec(%{"name" => name, "args" => args}, state) do
     t(name, args)
-    result = module(name).exec(name, args, state)
-    case result do
-      {message, _new_state} -> r(message)
-      other -> r(other)
-    end
-    result
+    {result, state} = module(name).exec(name, args, state)
+    r(result)
+    {result, state}
   end
   
-  def exec(part, _state), do: part
+  def exec(part, state), do: {part, state}
 
   defp prompt(name, state) do
     module(name).def(name, state)

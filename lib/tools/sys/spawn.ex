@@ -17,10 +17,10 @@ defmodule Tools.Sys.Spawn do
     }
   end
 
-  def exec(_, %{"name" => name} = args, _state) do
+  def exec(_, %{"name" => name} = args, state) do
     configs = list(Map.get(args, "configs", name |> downcase()))
     start_link(name |> downcase(), configs)
-    "spawned"
+    {"spawned", state}
   end
 
   defp list(configs) when is_list(configs), do: configs

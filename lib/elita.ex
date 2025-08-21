@@ -5,7 +5,7 @@ defmodule Elita do
   import Prompt, only: [prompt: 1]
   import Llm, only: [llm: 1]
   import Mem, only: [create: 0]
-  import Tools, only: [exec: 1]
+  import Tools
   import History, only: [record: 1]
   import Msg, only: [user: 1]
 
