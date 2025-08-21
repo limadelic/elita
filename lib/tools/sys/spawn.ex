@@ -5,7 +5,7 @@ defmodule Tools.Sys.Spawn do
   def def(name, state) do
     %{
       name: name,
-      description: "Spawn a new agent. #{agents(state)}",
+      description: "Spawn a new agent. #{examples(state)}#{agents(state)}",
       parameters: %{
         type: "object",
         properties: %{
@@ -19,17 +19,55 @@ defmodule Tools.Sys.Spawn do
 
   def exec(_, %{"name" => name} = args, state) do
     configs = Map.get(args, "configs", [name |> downcase()])
-    start_link(name |> downcase(), configs)
-    {"spawned", state}
+    available = get_available_agents(state)
+    
+    case validate_configs(configs, available, name) do
+      :ok -> 
+        start_link(name |> downcase(), configs)
+        {"spawned", state}
+      {:error, msg} -> 
+        {msg, state}
+    end
   end
 
+  defp validate_configs(_configs, [], _name), do: :ok
+  defp validate_configs(configs, available, name) do
+    invalid = Enum.reject(configs, &(&1 in available))
+    case invalid do
+      [] -> :ok
+      _ -> 
+        suggestions = Enum.map(available, &"spawn(name: \"#{name}\", configs: [\"#{&1}\"])")
+        {:error, "No '#{Enum.join(invalid, ", ")}' config available. Try: #{Enum.join(suggestions, " or ")}"}
+    end
+  end
+
+  defp get_available_agents(%{config: configs}) do
+    case Enum.find_value(configs, &Map.get(&1, :agents)) do
+      nil -> []
+      agents -> String.split(agents, ", ")
+    end
+  end
+  defp get_available_agents(_), do: []
+
+  defp examples(%{config: configs}) do
+    case Enum.find_value(configs, &Map.get(&1, :agents)) do
+      nil -> ""
+      agents -> 
+        agent_list = String.split(agents, ", ")
+        examples = Enum.map(agent_list, &"spawn(name: \"my#{&1}\", configs: [\"#{&1}\"])")
+        "Examples: #{Enum.join(examples, ", ")}. "
+    end
+  end
+  defp examples(_), do: ""
+
   defp agents(%{config: configs}) do
-    configs
+    result = configs
     |> Enum.find_value(&Map.get(&1, :agents))
     |> case do
-      nil -> ""
+      nil -> "No agents found in configs"
       agents -> "Available: #{agents}"
     end
+    result
   end
   defp agents(_), do: ""
 end
