@@ -2,15 +2,15 @@ defmodule Tools.Sys.Spawn do
   import Elita, only: [start_link: 2]
   import String, only: [downcase: 1]
 
-  def def(name, _state) do
+  def def(name, state) do
     %{
       name: name,
-      description: "Spawn a new agent",
+      description: "Spawn a new agent. #{agents(state)}",
       parameters: %{
         type: "object",
         properties: %{
           name: %{type: "string", description: "Name for the new agent"},
-          configs: %{type: "string", description: "Configs for the agent, could be multiple, defaults to name"}
+          configs: %{type: "array", items: %{type: "string"}, description: "Configs for the agent, defaults to [name]"}
         },
         required: ["name"]
       }
@@ -18,11 +18,18 @@ defmodule Tools.Sys.Spawn do
   end
 
   def exec(_, %{"name" => name} = args, state) do
-    configs = list(Map.get(args, "configs", name |> downcase()))
+    configs = Map.get(args, "configs", [name |> downcase()])
     start_link(name |> downcase(), configs)
     {"spawned", state}
   end
 
-  defp list(configs) when is_list(configs), do: configs
-  defp list(config), do: [config]
+  defp agents(%{config: configs}) do
+    configs
+    |> Enum.find_value(&Map.get(&1, :agents))
+    |> case do
+      nil -> ""
+      agents -> "Available: #{agents}"
+    end
+  end
+  defp agents(_), do: ""
 end

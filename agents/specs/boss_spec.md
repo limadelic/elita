@@ -1,3 +1,7 @@
+---
+agents: boss, worker
+---
+
 # Boss Test
 
 The main goal of a boss is to delegate.
