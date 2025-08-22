@@ -39,6 +39,18 @@ defmodule Log do
     result
   end
 
+  def tell(msg) do
+    puts("\e[38;5;226mTell: #{msg}\e[0m")
+  end
+
+  def question(q) do
+    puts("\e[38;5;82mQ: #{q}\e[0m")
+  end
+
+  def answer(a) do
+    puts("\e[38;5;255mA: #{a}\e[0m")
+  end
+
   defp log(%{parts: [%{text: text}], role: "user"}) do
     puts("\e[38;5;82m#{text}\e[0m")
   end

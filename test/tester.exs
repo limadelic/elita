@@ -1,6 +1,7 @@
 defmodule Tester do
   import ExUnit.Assertions
   import Elita, only: [start_link: 2, cast: 2, call: 2]
+  import Log, only: [tell: 1, question: 1, answer: 1]
 
   defmacro __using__(_opts) do
     quote do
@@ -12,12 +13,12 @@ defmodule Tester do
 
   def spawn(name) do
     setup()
-    start_link(Atom.to_string(name), list([Atom.to_string(name)]))
+    start_link(name(name), list([name(name)]))
   end
 
   def spawn(name, configs) do
     setup()
-    start_link(Atom.to_string(name), list(configs) |> Enum.map(&Atom.to_string/1))
+    start_link(name(name), list(configs) |> Enum.map(&to_string/1))
   end
 
   defp list(configs) when is_list(configs), do: configs
@@ -37,16 +38,18 @@ defmodule Tester do
     :ok
   end
 
+  defp name(n), do: to_string(n)
+
   def tell(name, msg) do
-    IO.puts("\e[38;5;226mTell: #{msg}\e[0m")
-    cast(Atom.to_string(name), msg)
+    tell(msg)
+    cast(name(name), msg)
   end
 
   def ask(name, q) do
-    IO.puts("\e[38;5;82mQ: #{q}\e[0m")
-    answer = call(Atom.to_string(name), q)
-    IO.puts("\e[38;5;255mA: #{answer}\e[0m")
-    answer
+    question(q)
+    result = call(name(name), q)
+    answer(result)
+    result
   end
 
   def verify(name, a, q) do
@@ -60,5 +63,10 @@ defmodule Tester do
     verify(agent, "yes", "did you #{cond}?")
   rescue
     _ -> wait_until(agent, cond)
+  end
+
+  def speck(name) do
+    spawn(name, :speck)
+    verify(name, "passed", "test #{name}")
   end
 end

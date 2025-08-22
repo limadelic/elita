@@ -1,10 +1,10 @@
 ---
-name: tester
+name: speck
 tools: cast
 includes: trag, tplan, texec
 ---
 
-# Tester
+# Speck
 
 Your goal is to verify that system behaves as expected.
 
