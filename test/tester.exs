@@ -1,7 +1,7 @@
 defmodule Tester do
   import ExUnit.Assertions
   import Elita, only: [start_link: 2, cast: 2, call: 2]
-  import Log, only: [tell: 1, q: 1, a: 1]
+  import Log, only: [tell: 1]
 
   defmacro __using__(_opts) do
     quote do
@@ -46,10 +46,7 @@ defmodule Tester do
   end
 
   def ask(name, query) do
-    q(%{contents: [%{parts: [%{text: query}], role: "user"}]})
-    result = call(name(name), query)
-    a([%{"text" => result}])
-    result
+    call(name(name), query)
   end
 
   def verify(name, expected, query) do
