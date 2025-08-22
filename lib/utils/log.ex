@@ -2,7 +2,10 @@ defmodule Log do
   import IO, only: [puts: 1]
 
   def q(prompt) do
-    log(List.last(prompt[:contents] || []))
+    prompt[:contents] 
+      |> Kernel.||([])
+      |> List.last()
+      |> log()
     prompt
   end
 
@@ -12,51 +15,46 @@ defmodule Log do
   end
 
   def t(name, args) do
-    formatted = format_args(name, args)
-    puts("\e[38;5;196mT: #{name}(#{formatted})\e[0m")
+    format(name, args)
+      |> then(&colored("🛠️: #{name}(#{&1})", 196))
   end
 
-  defp format_args("tell", %{"message" => msg, "recipient" => to}) do
-    clean_msg = String.replace(msg, "\\n", "\n")
-    truncated = if String.contains?(clean_msg, "\n") do
-      # Keep structured data like boards intact
-      clean_msg
-    else
-      # Only truncate single line messages
-      if String.length(clean_msg) > 60 do
-        String.slice(clean_msg, 0, 57) <> "..."
-      else
-        clean_msg
-      end
-    end
+  defp format("tell", %{"message" => msg, "recipient" => to}) do
+    truncated = msg
+      |> String.replace("\\n", "\n")
+      |> truncate()
     "#{truncated} → #{to}"
   end
 
-  defp format_args(_, args), do: inspect(args)
+  defp format(_, args), do: inspect args
+
+  defp truncate(text) do
+    case {String.contains?(text, "\n"), String.length(text)} do
+      {false, len} when len > 60 -> String.slice(text, 0, 57) <> "..."
+      _ -> text
+    end
+  end
 
   def r(result) do
-    puts("\e[38;5;226m→ #{inspect(result)}\e[0m")
+    colored("🎯: #{inspect result}", 226)
     result
   end
 
   def tell(msg) do
-    puts("\e[38;5;226mTell: #{msg}\e[0m")
+    colored("📢: #{msg}", 226)
   end
 
-  def question(q) do
-    puts("\e[38;5;82mQ: #{q}\e[0m")
-  end
 
-  def answer(a) do
-    puts("\e[38;5;255mA: #{a}\e[0m")
+  defp colored(text, code) do
+    puts("\e[38;5;#{code}m#{text}\e[0m")
   end
 
   defp log(%{parts: [%{text: text}], role: "user"}) do
-    puts("\e[38;5;82m#{text}\e[0m")
+    colored("🤔: #{text}", 82)
   end
 
   defp log([%{"text" => text}]) do
-    puts("\e[38;5;255m#{text}\e[0m")
+    colored("✨: #{text}", 255)
   end
 
   defp log(_) do

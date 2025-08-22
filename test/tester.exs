@@ -1,7 +1,7 @@
 defmodule Tester do
   import ExUnit.Assertions
   import Elita, only: [start_link: 2, cast: 2, call: 2]
-  import Log, only: [tell: 1, question: 1, answer: 1]
+  import Log, only: [tell: 1, q: 1, a: 1]
 
   defmacro __using__(_opts) do
     quote do
@@ -45,18 +45,18 @@ defmodule Tester do
     cast(name(name), msg)
   end
 
-  def ask(name, q) do
-    question(q)
-    result = call(name(name), q)
-    answer(result)
+  def ask(name, query) do
+    q(%{contents: [%{parts: [%{text: query}], role: "user"}]})
+    result = call(name(name), query)
+    a([%{"text" => result}])
     result
   end
 
-  def verify(name, a, q) do
-    answer = ask(name, q)
+  def verify(name, expected, query) do
+    answer = ask(name, query)
 
-    assert String.contains?(String.downcase(answer), String.downcase("#{a}")),
-           "Expected '#{answer}' to contain '#{a}'"
+    assert String.contains?(String.downcase(answer), String.downcase("#{expected}")),
+           "Expected '#{answer}' to contain '#{expected}'"
   end
 
   def wait_until(agent, cond) do
