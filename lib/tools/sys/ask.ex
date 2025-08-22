@@ -1,5 +1,6 @@
 defmodule Tools.Sys.Ask do
-  import GenServer, only: [call: 3]
+  import Elita, only: [call: 2]
+  import Log, only: [q: 2, a: 1]
 
   def def(name, _state) do
     %{
@@ -16,10 +17,16 @@ defmodule Tools.Sys.Ask do
     }
   end
 
+  def log({%{"args" => %{"recipient" => recipient, "question" => question}}, %{name: sender}}) do
+    q(question, "#{sender} → #{recipient}")
+  end
+
+  def log({response, state}) do
+    a(response)
+    {response, state}
+  end
+
   def exec(_, %{"recipient" => recipient, "question" => question}, state) do
-    recipient_name = recipient |> String.downcase()
-    via_name = {:via, Registry, {ElitaRegistry, recipient_name}}
-    result = call(via_name, {:act, question}, :infinity)
-    {result, state}
+    {call(recipient, question), state}
   end
 end

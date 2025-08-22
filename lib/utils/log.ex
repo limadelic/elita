@@ -2,17 +2,23 @@ defmodule Log do
   import Format
   import IO, only: [puts: 1]
 
-  def q(prompt) do
+  def q(arg, name \\ "user")
+  
+  def q(prompt, name) when is_map(prompt) do
     prompt[:contents]
     |> Kernel.||([])
     |> List.last()
-    |> log()
+    |> log(name)
 
     prompt
   end
 
-  def a(result) do
-    log(result)
+  def q(text, name) when is_binary(text) do
+    pimp("🤔 #{name}: #{text}", 82)
+  end
+
+  def a(result, name \\ "user") do
+    log(result, name)
     result
   end
 
@@ -35,28 +41,27 @@ defmodule Log do
   end
 
   def r(result) do
-    formatted = yaml(result)
-    pimp("🎯: #{formatted}", 226)
+    pimp("🎯: #{yaml(result)}", 226)
     result
   end
 
-  def tell(msg) do
-    pimp("📢: #{msg}", 226)
+  def tell(msg, name \\ "user") do
+    pimp("📢 #{name}: #{msg}", 226)
   end
 
   defp pimp(text, code) do
     puts("\e[38;5;#{code}m#{text}\e[0m")
   end
 
-  defp log(%{parts: [%{text: text}], role: "user"}) do
-    pimp("🤔: #{text}", 82)
+  defp log(%{parts: [%{text: text}], role: "user"}, name) do
+    pimp("🤔 #{name}: #{text}", 82)
   end
 
-  defp log([%{"text" => text}]) do
-    pimp("✨: #{text}", 255)
+  defp log([%{"text" => text}], name) do
+    pimp("✨ #{name}: #{text}", 255)
   end
 
-  defp log(_) do
+  defp log(_, _) do
     nil
   end
 end

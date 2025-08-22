@@ -4,7 +4,6 @@ defmodule Tools do
   import Map, only: [put: 3]
   import Module, only: [concat: 1]
   import Code, only: [ensure_loaded: 1]
-  import Log, only: [t: 2, r: 1]
 
   def tools(%{tools: names}, state) when is_list(names) do
     names
@@ -28,14 +27,29 @@ defmodule Tools do
     {put(part, "result", result), state}
   end
 
-  def exec(%{"name" => name, "args" => args}, state) do
-    t(name, args)
-    {result, state} = module(name).exec(name, args, state)
-    r(result)
-    {result, state}
+  def exec(%{"name" => tool, "args" => args} = a, state) do
+    log({a, state})
+    log({tool, module(tool).exec(tool, args, state)})
   end
-  
+
   def exec(part, state), do: {part, state}
+
+  defp log({%{"name" => tool} = args, state}) do
+    module(tool).log({args, state})
+  rescue
+    UndefinedFunctionError ->
+      Log.t(tool, args)
+  end
+
+  defp log({tool, result}) do
+    try do
+      module(tool).log(result)
+    rescue
+      _ -> Log.r(result)
+    end
+
+    result
+  end
 
   defp prompt(name, state) do
     module(name).def(name, state)
@@ -52,5 +66,4 @@ defmodule Tools do
 
   defp wrap([]), do: []
   defp wrap(tools), do: [%{function_declarations: tools}]
-
 end

@@ -1,7 +1,6 @@
 defmodule Tester do
   import ExUnit.Assertions
   import Elita, only: [start_link: 2, cast: 2, call: 2]
-  import Log, only: [tell: 1]
 
   defmacro __using__(_opts) do
     quote do
@@ -41,12 +40,13 @@ defmodule Tester do
   defp name(n), do: to_string(n)
 
   def tell(name, msg) do
-    tell(msg)
+    Log.tell(msg, name)
     cast(name(name), msg)
   end
 
   def ask(name, query) do
-    call(name(name), query)
+    Log.q(query, name)
+    Log.a(call(name(name), query), name)
   end
 
   def verify(name, expected, query) do

@@ -1,6 +1,6 @@
 defmodule Tools.Sys.Tell do
-  import GenServer, only: [cast: 2]
-
+  import Elita, only: [cast: 2]
+  import Log, only: [tell: 2]
 
   def def(name, _state) do
     %{
@@ -17,10 +17,15 @@ defmodule Tools.Sys.Tell do
     }
   end
 
+  def log({%{"args" => %{"recipient" => recipient, "message" => message}}, %{name: sender}}) do
+    tell("#{sender} → #{recipient}: #{message}", sender)
+  end
+
+  def log(_) do
+  end
+
   def exec(_, %{"recipient" => recipient, "message" => message}, state) do
-    recipient_name = recipient |> String.downcase()
-    via_name = {:via, Registry, {ElitaRegistry, recipient_name}}
-    cast(via_name, {:act, message})
+    cast(recipient, message)
     {"sent", state}
   end
 end
