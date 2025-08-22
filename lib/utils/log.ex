@@ -2,23 +2,12 @@ defmodule Log do
   import Format
   import IO, only: [puts: 1]
 
-  def q(arg, name \\ "user")
-  
-  def q(prompt, name) when is_map(prompt) do
-    prompt[:contents]
-    |> Kernel.||([])
-    |> List.last()
-    |> log(name)
-
-    prompt
-  end
-
-  def q(text, name) when is_binary(text) do
-    pimp("🤔 #{name}: #{text}", 82)
+  def q(text, name) do
+    log("🤔", name, text)
   end
 
   def a(result, name \\ "user") do
-    log(result, name)
+    log("✨", name, result)
     result
   end
 
@@ -53,15 +42,19 @@ defmodule Log do
     puts("\e[38;5;#{code}m#{text}\e[0m")
   end
 
-  defp log(%{parts: [%{text: text}], role: "user"}, name) do
-    pimp("🤔 #{name}: #{text}", 82)
+  defp log(emoji, name, %{parts: [%{text: text}], role: "user"}) do
+    pimp("#{emoji} #{name}: #{text}", 82)
   end
 
-  defp log([%{"text" => text}], name) do
-    pimp("✨ #{name}: #{text}", 255)
+  defp log(emoji, name, [%{"text" => text}]) do
+    pimp("#{emoji} #{name}: #{text}", 255)
   end
 
-  defp log(_, _) do
-    nil
+  defp log(emoji, name, text) when is_binary(text) do
+    pimp("#{emoji} #{name}: #{text}", 255)
+  end
+
+  defp log(emoji, name, result) do
+    pimp("#{emoji} #{name}: #{inspect(result)}", 255)
   end
 end
