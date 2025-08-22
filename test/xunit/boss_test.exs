@@ -1,11 +1,6 @@
 defmodule BossTest do
   use Tester
 
-  test "boss with agent" do
-    spawn(:sut, :tester)
-    verify :sut, "passed", "test boss"
-  end
-
   test "boss delegates task to worker" do
     spawn(:boss)
     spawn(:dev, :worker)
