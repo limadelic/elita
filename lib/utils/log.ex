@@ -13,7 +13,7 @@ defmodule Log do
 
   def t(name, args) do
     formatted = format_args(name, args)
-    puts("#{IO.ANSI.red()}T: #{name}(#{formatted})#{IO.ANSI.reset()}")
+    puts("\e[38;5;196mT: #{name}(#{formatted})\e[0m")
   end
 
   defp format_args("tell", %{"message" => msg, "recipient" => to}) do
@@ -35,16 +35,16 @@ defmodule Log do
   defp format_args(_, args), do: inspect(args)
 
   def r(result) do
-    puts("#{IO.ANSI.light_yellow()}→ #{inspect(result)}#{IO.ANSI.reset()}")
+    puts("\e[38;5;226m→ #{inspect(result)}\e[0m")
     result
   end
 
   defp log(%{parts: [%{text: text}], role: "user"}) do
-    puts(text)
+    puts("\e[38;5;82m#{text}\e[0m")
   end
 
   defp log([%{"text" => text}]) do
-    puts(text)
+    puts("\e[38;5;255m#{text}\e[0m")
   end
 
   defp log(_) do

@@ -10,10 +10,12 @@ In classic object oriented it is equivalent to call a void method on an object.
 It embraces 100% the principle of tell dont ask.  
 It has a companion ask tool.
 
-## Test Scenarios
+## Sut
 
 The boss agent delegates to other agents.  
-It receives a team of agents and delegates tasks.  
+It receives a team of agents and delegates tasks.
+
+## Scenarios
 
 ### Single Message Delivery
 Verify tell delivers messages to individual agents.  

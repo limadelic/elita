@@ -38,14 +38,14 @@ defmodule Tester do
   end
 
   def tell(name, msg) do
-    IO.puts("#{IO.ANSI.light_yellow()}Tell: #{msg}#{IO.ANSI.reset()}")
+    IO.puts("\e[38;5;226mTell: #{msg}\e[0m")
     cast(Atom.to_string(name), msg)
   end
 
   def ask(name, q) do
-    IO.puts("#{IO.ANSI.green()}Q: #{q}#{IO.ANSI.reset()}")
+    IO.puts("\e[38;5;82mQ: #{q}\e[0m")
     answer = call(Atom.to_string(name), q)
-    IO.puts("#{IO.ANSI.white()}A: #{answer}#{IO.ANSI.reset()}")
+    IO.puts("\e[38;5;255mA: #{answer}\e[0m")
     answer
   end
 
