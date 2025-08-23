@@ -1,5 +1,9 @@
 defmodule Tools.Sys.Get do
 
+  def log({%{"args" => %{"key" => key}}, _state}) do
+    Log.log("👀", key, " ?", "", :blue)
+  end
+
   def def(name, _state) do
     %{
       name: name,

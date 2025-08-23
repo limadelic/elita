@@ -7,7 +7,7 @@ defmodule TodoTest do
   end
 
   test "todo remembers tasks" do
-    tell :todo, "Add buy groceries to my list"
+    ask :todo, "Add buy groceries to my list"
     verify :todo, "groceries", "What do I need to do?"
   end
 

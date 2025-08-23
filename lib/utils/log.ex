@@ -10,7 +10,7 @@ defmodule Log do
     red: 196
   }
 
-  def log(emoji, header, body, color) do
-    puts("\e[38;5;#{@colors[color]}m#{emoji} #{header}: #{yaml(body)}\e[0m")
+  def log(emoji, head, neck, body, color) do
+    puts("\e[38;5;#{@colors[color]}m#{emoji} #{head}#{neck}#{yaml(body)}\e[0m")
   end
 end

@@ -1,6 +1,6 @@
 defmodule Tools.Sys.Ask do
   import Elita, only: [call: 2]
-  import Log, only: [log: 4]
+  import Log, only: [log: 5]
 
   def def(name, _state) do
     %{
@@ -18,7 +18,7 @@ defmodule Tools.Sys.Ask do
   end
 
   def log({%{"args" => %{"recipient" => recipient, "question" => question}}, %{name: sender}}) do
-    log("🤔", "#{sender} → #{recipient}", question, :green)
+    log("🤔", "#{sender} → #{recipient}", ": ", question, :green)
   end
 
   def log(response) do

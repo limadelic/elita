@@ -38,17 +38,17 @@ defmodule Tools do
     module(tool).log({tool_call, state})
   rescue
     UndefinedFunctionError ->
-      Log.log("🛠️", tool, args, :red)
+      Log.log("🛠️", tool, ": ", args, :red)
   end
 
-  defp log({tool, result}) do
+  defp log({tool, {result, state}}) do
     try do
-      module(tool).log(result)
+      module(tool).log({result, state})
     rescue
-      _ -> Log.log("🎯", "", result, :yellow)
+      _ -> Log.log("", "", "", result, :yellow)
     end
 
-    result
+    {result, state}
   end
 
   defp prompt(name, state) do
