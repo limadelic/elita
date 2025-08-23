@@ -26,7 +26,8 @@ defmodule Elita.MixProject do
     [
       {:httpoison, "~> 2.0"},
       {:jason, "~> 1.4"},
-      {:yaml_elixir, "~> 2.9"}
+      {:yaml_elixir, "~> 2.9"},
+      {:ymlr, "~> 2.0"}
     ]
   end
 

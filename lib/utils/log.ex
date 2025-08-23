@@ -1,6 +1,7 @@
 defmodule Log do
   import Format
   import IO, only: [puts: 1]
+  import String, only: [contains?: 2, replace: 3]
 
   def q(text, name) do
     log("🤔", name, text)
@@ -11,31 +12,24 @@ defmodule Log do
     result
   end
 
-  def t(name, args) do
-    format(name, args)
-    |> then(&pimp("🛠️: #{&1}", 196))
+  def t(%{"name" => tool, "args" => args}) do
+    pimp("🛠️ #{tool}:#{yaml(args)}", 196)
   end
 
-  defp format("tell", %{"message" => msg, "recipient" => to}) do
-    truncated =
-      msg
-      |> String.replace("\\n", "\n")
-      |> truncate()
-
-    "#{truncated} → #{to}"
-  end
-
-  defp format(name, args) do
-    yaml(name, args)
+  def r({response, state}) do
+    pimp("🎯: #{response}", 226)
+    {response, state}
   end
 
   def r(result) do
-    pimp("🎯: #{yaml(result)}", 226)
+    pimp("🎯: #{result}", 226)
     result
   end
 
   def tell(msg, name \\ "user") do
-    pimp("📢 #{name}: #{msg}", 226)
+    msg = replace(msg, "\\n", "\n")
+    nl = contains?(msg, "\n") && "\n" || ""
+    pimp("📢 #{name}:#{nl}#{msg}", 226)
   end
 
   defp pimp(text, code) do

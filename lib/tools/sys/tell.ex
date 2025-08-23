@@ -18,7 +18,7 @@ defmodule Tools.Sys.Tell do
   end
 
   def log({%{"args" => %{"recipient" => recipient, "message" => message}}, %{name: sender}}) do
-    tell("#{sender} → #{recipient}: #{message}", sender)
+    tell(message, "#{sender} → #{recipient}")
   end
 
   def log(_) do

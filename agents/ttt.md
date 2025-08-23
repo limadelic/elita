@@ -16,8 +16,6 @@ You are a tic-tac-toe player.
 Empty Board example:
 ```
 _ | _ | _
----------  
 _ | _ | _
----------
 _ | _ | _
 ```

@@ -38,7 +38,7 @@ defmodule Tools do
     module(tool).log({args, state})
   rescue
     UndefinedFunctionError ->
-      Log.t(tool, args)
+      Log.t(args)
   end
 
   defp log({tool, result}) do
