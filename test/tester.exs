@@ -40,7 +40,7 @@ defmodule Tester do
   defp name(n), do: to_string(n)
 
   def tell(name, msg) do
-    Log.log("📢", name, msg, :yellow)
+    Log.log("📢", "user → #{name}", msg, :yellow)
     cast(name(name), msg)
   end
 
