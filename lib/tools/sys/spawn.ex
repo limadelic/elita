@@ -1,6 +1,7 @@
 defmodule Tools.Sys.Spawn do
   import Elita, only: [start_link: 2]
   import String, only: [downcase: 1]
+  import Log, only: [log: 5]
 
   def def(name, state) do
     %{
@@ -15,6 +16,18 @@ defmodule Tools.Sys.Spawn do
         required: ["name"]
       }
     }
+  end
+
+  def log({%{"args" => %{"name" => name} = args}, _state}) do
+    configs = Map.get(args, "configs", [downcase(name)])
+    case configs do
+      [^name] -> log("🚀", name, "", "", :green)
+      _ -> log("🚀", name, " as ", Enum.join(configs, ", "), :green)
+    end
+  end
+
+  def log(response) do
+    response
   end
 
   def exec(_, %{"name" => name} = args, state) do

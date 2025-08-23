@@ -1,6 +1,7 @@
 defmodule Tools.Sys.Tell do
   import Elita, only: [cast: 2]
   import Log, only: [log: 5]
+  import String, only: [downcase: 1]
 
   def def(name, _state) do
     %{
@@ -25,7 +26,7 @@ defmodule Tools.Sys.Tell do
   end
 
   def exec(_, %{"recipient" => recipient, "message" => message}, state) do
-    cast(recipient, message)
+    cast(downcase(recipient), message)
     {"sent", state}
   end
 end
