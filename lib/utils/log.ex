@@ -4,11 +4,11 @@ defmodule Log do
   import String, only: [contains?: 2, replace: 3]
 
   def q(text, name) do
-    log("🤔", name, text)
+    log("🤔", name, text, 82)
   end
 
-  def a(result, name \\ "user") do
-    log("✨", name, result)
+  def a(result, name) do
+    log("✨", name, result, 255)
     result
   end
 
@@ -36,19 +36,19 @@ defmodule Log do
     puts("\e[38;5;#{code}m#{text}\e[0m")
   end
 
-  defp log(emoji, name, %{parts: [%{text: text}], role: "user"}) do
-    pimp("#{emoji} #{name}: #{text}", 82)
+  defp log(emoji, name, %{parts: [%{text: text}], role: "user"}, color) do
+    pimp("#{emoji} #{name}: #{text}", color)
   end
 
-  defp log(emoji, name, [%{"text" => text}]) do
-    pimp("#{emoji} #{name}: #{text}", 255)
+  defp log(emoji, name, [%{"text" => text}], color) do
+    pimp("#{emoji} #{name}: #{text}", color)
   end
 
-  defp log(emoji, name, text) when is_binary(text) do
-    pimp("#{emoji} #{name}: #{text}", 255)
+  defp log(emoji, name, text, color) when is_binary(text) do
+    pimp("#{emoji} #{name}: #{text}", color)
   end
 
-  defp log(emoji, name, result) do
-    pimp("#{emoji} #{name}: #{inspect(result)}", 255)
+  defp log(emoji, name, result, color) do
+    pimp("#{emoji} #{name}: #{inspect(result)}", color)
   end
 end

@@ -1,6 +1,6 @@
 defmodule Tools.Sys.Ask do
   import Elita, only: [call: 2]
-  import Log, only: [q: 2, a: 1]
+  import Log, only: [q: 2]
 
   def def(name, _state) do
     %{
@@ -21,9 +21,8 @@ defmodule Tools.Sys.Ask do
     q(question, "#{sender} → #{recipient}")
   end
 
-  def log({response, state}) do
-    a(response)
-    {response, state}
+  def log(response) do
+    response
   end
 
   def exec(_, %{"recipient" => recipient, "question" => question}, state) do
