@@ -1,5 +1,9 @@
 defmodule Tools.Sys.Set do
 
+  def log({%{"name" => _tool, "args" => %{"key" => key, "value" => value}}, _state}) do
+    Log.log("✏️", key, value, :blue)
+  end
+
   def def(name, _state) do
     %{
       name: name,

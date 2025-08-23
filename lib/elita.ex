@@ -8,7 +8,7 @@ defmodule Elita do
   import Tools
   import History, only: [record: 1]
   import Msg, only: [user: 1]
-  import Log, only: [a: 2]
+  import Log, only: [log: 4]
 
   def start_link(name, configs) do
     GenServer.start_link(__MODULE__, {name, configs}, name: via(name))
@@ -59,7 +59,7 @@ defmodule Elita do
   end
 
   defp done({:reply, txt, %{name: name} = state}) do
-    a(txt, name)
+    log("✨", name, txt, :white)
     {:reply, txt, state}
   end
 end

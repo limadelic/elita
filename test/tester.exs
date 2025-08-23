@@ -40,13 +40,13 @@ defmodule Tester do
   defp name(n), do: to_string(n)
 
   def tell(name, msg) do
-    Log.tell(msg, name)
+    Log.log("📢", name, msg, :yellow)
     cast(name(name), msg)
   end
 
   def ask(name, query) do
-    Log.q(query, name)
-    Log.a(call(name(name), query), name)
+    Log.log("🤔", "user → #{name}", query, :green)
+    call(name(name), query)
   end
 
   def verify(name, expected, query) do

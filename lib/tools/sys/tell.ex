@@ -1,6 +1,6 @@
 defmodule Tools.Sys.Tell do
   import Elita, only: [cast: 2]
-  import Log, only: [tell: 2]
+  import Log, only: [log: 4]
 
   def def(name, _state) do
     %{
@@ -18,7 +18,7 @@ defmodule Tools.Sys.Tell do
   end
 
   def log({%{"args" => %{"recipient" => recipient, "message" => message}}, %{name: sender}}) do
-    tell(message, "#{sender} → #{recipient}")
+    log("📢", "#{sender} → #{recipient}", message, :yellow)
   end
 
   def log(_) do

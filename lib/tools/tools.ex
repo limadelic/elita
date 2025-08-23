@@ -34,18 +34,18 @@ defmodule Tools do
 
   def exec(part, state), do: {part, state}
 
-  defp log({%{"name" => tool} = args, state}) do
-    module(tool).log({args, state})
+  defp log({%{"name" => tool, "args" => args} = tool_call, state}) do
+    module(tool).log({tool_call, state})
   rescue
     UndefinedFunctionError ->
-      Log.t(args)
+      Log.log("🛠️", tool, args, :red)
   end
 
   defp log({tool, result}) do
     try do
       module(tool).log(result)
     rescue
-      _ -> Log.r(result)
+      _ -> Log.log("🎯", "", result, :yellow)
     end
 
     result

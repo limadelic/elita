@@ -1,54 +1,19 @@
 defmodule Log do
-  import Format
+  import Format, only: [yaml: 1]
   import IO, only: [puts: 1]
   import String, only: [contains?: 2, replace: 3]
 
-  def q(text, name) do
-    log("🤔", name, text, 82)
-  end
+  @colors %{
+    green: 82,
+    white: 255,
+    blue: 33,
+    yellow: 226,
+    red: 196
+  }
 
-  def a(result, name) do
-    log("✨", name, result, 255)
-    result
-  end
-
-  def t(%{"name" => tool, "args" => args}) do
-    pimp("🛠️ #{tool}:#{yaml(args)}", 196)
-  end
-
-  def r({response, state}) do
-    pimp("🎯: #{response}", 226)
-    {response, state}
-  end
-
-  def r(result) do
-    pimp("🎯: #{result}", 226)
-    result
-  end
-
-  def tell(msg, name \\ "user") do
-    msg = replace(msg, "\\n", "\n")
-    nl = contains?(msg, "\n") && "\n" || ""
-    pimp("📢 #{name}:#{nl}#{msg}", 226)
-  end
-
-  defp pimp(text, code) do
-    puts("\e[38;5;#{code}m#{text}\e[0m")
-  end
-
-  defp log(emoji, name, %{parts: [%{text: text}], role: "user"}, color) do
-    pimp("#{emoji} #{name}: #{text}", color)
-  end
-
-  defp log(emoji, name, [%{"text" => text}], color) do
-    pimp("#{emoji} #{name}: #{text}", color)
-  end
-
-  defp log(emoji, name, text, color) when is_binary(text) do
-    pimp("#{emoji} #{name}: #{text}", color)
-  end
-
-  defp log(emoji, name, result, color) do
-    pimp("#{emoji} #{name}: #{inspect(result)}", color)
+  def log(emoji, header, body, color) do
+    formatted_body = yaml(body)
+    color_code = @colors[color]
+    puts("\e[38;5;#{color_code}m#{emoji} #{header}: #{formatted_body}\e[0m")
   end
 end
