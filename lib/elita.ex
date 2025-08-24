@@ -15,11 +15,11 @@ defmodule Elita do
   end
 
   def cast(name, msg) do
-    GenServer.cast(via(name), {:act, msg})
+    GenServer.cast(via(String.downcase(name)), {:act, msg})
   end
 
   def call(name, msg) do
-    GenServer.call(via(name), {:act, msg}, :infinity)
+    GenServer.call(via(String.downcase(name)), {:act, msg}, :infinity)
   end
   
   defp via(name) do

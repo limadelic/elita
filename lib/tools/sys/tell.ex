@@ -1,7 +1,6 @@
 defmodule Tools.Sys.Tell do
   import Elita, only: [cast: 2]
   import Log, only: [log: 5]
-  import String, only: [downcase: 1]
 
   def def(name, _state) do
     %{
@@ -20,7 +19,7 @@ defmodule Tools.Sys.Tell do
 
   def exec(_, %{"recipient" => recipient, "message" => message}, %{name: sender} = state) do
     log("📢", "#{sender} → #{recipient}", ": ", message, :yellow)
-    cast(downcase(recipient), message)
+    cast(recipient, message)
     {"sent", state}
   end
 end
