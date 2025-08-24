@@ -18,14 +18,12 @@ defmodule Tools.Sys.Tell do
     }
   end
 
-  def log({%{"args" => %{"recipient" => recipient, "message" => message}}, %{name: sender}}) do
+  def log(response) do
+    response
+  end
+
+  def exec(_, %{"recipient" => recipient, "message" => message}, %{name: sender} = state) do
     log("📢", "#{sender} → #{recipient}", ": ", message, :yellow)
-  end
-
-  def log(_) do
-  end
-
-  def exec(_, %{"recipient" => recipient, "message" => message}, state) do
     cast(downcase(recipient), message)
     {"sent", state}
   end
