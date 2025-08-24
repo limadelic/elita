@@ -6,7 +6,7 @@ defmodule Tools.User do
   end
 
   def exec(name, args, state) do
-    result = name |> tool() |> Tools.User.Exec.exec(args)
+    result = Tools.User.Exec.exec(tool(name) , args)
     {result, state}
   end
 
