@@ -1,8 +1,4 @@
 defmodule Tools.Sys.Set do
-  def log({%{"args" => %{"key" => key, "value" => value}}, _state}) do
-    Log.log("✏️", key, " = ", value, :blue)
-  end
-
   def log(response) do
     response
   end
@@ -23,6 +19,7 @@ defmodule Tools.Sys.Set do
   end
 
   def exec(_, %{"key" => key, "value" => value}, state) do
+    Log.log("✏️", key, " = ", value, :blue)
     Mem.table() |> :ets.insert({key, value})
     {"stored", state}
   end
