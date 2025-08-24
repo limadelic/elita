@@ -1,4 +1,5 @@
 defmodule Tools.Sys.Cast do
+  import Log, only: [log: 5]
   import Map, only: [put: 3]
   import Enum, only: [drop: 2, map: 2, join: 2]
 
@@ -16,7 +17,8 @@ defmodule Tools.Sys.Cast do
     }
   end
 
-  def exec(_, %{"role" => role}, %{config: config} = state) do
+  def exec(_, %{"role" => role}, %{config: config, name: name} = state) do
+    log("🎭", name, " as ", role, :magenta)
     {
       "switched to #{role}",
       %{state | config: map(config, &activate(&1, role))}

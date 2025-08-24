@@ -1,7 +1,9 @@
 defmodule Tools.Sys.Spawn do
   import Elita, only: [start_link: 2]
-  import String, only: [downcase: 1]
+  import String, only: [downcase: 1, split: 2]
   import Log, only: [log: 5]
+  import Map, only: [get: 2, get: 3]
+  import Enum, only: [join: 2, find_value: 2, map: 2, reject: 2]
 
   def def(name, state) do
     %{
@@ -20,60 +22,59 @@ defmodule Tools.Sys.Spawn do
 
 
   def exec(_, %{"name" => name} = args, state) do
-    configs = Map.get(args, "configs", [name |> downcase()])
+    configs = get args, "configs", [name |> downcase]
     case configs do
       [^name] -> log("🚀", name, "", "", :green)
-      _ -> log("🚀", name, " as ", Enum.join(configs, ", "), :green)
+      _ -> log("🚀", name, " as ", join(configs, ", "), :green)
     end
-    available = get_available_agents(state)
+    available = from(state)
     
-    case validate_configs(configs, available, name) do
+    case check configs, available, name do
       :ok -> 
-        start_link(name |> downcase(), configs)
+        start_link name |> downcase, configs
         {"spawned", state}
       {:error, msg} -> 
         {msg, state}
     end
   end
 
-  defp validate_configs(_configs, [], _name), do: :ok
-  defp validate_configs(configs, available, name) do
-    invalid = Enum.reject(configs, &(&1 in available))
+  defp check(_configs, [], _name), do: :ok
+  defp check(configs, available, name) do
+    invalid = reject configs, fn config -> not (config in available) end
     case invalid do
       [] -> :ok
       _ -> 
-        suggestions = Enum.map(available, &"spawn(name: \"#{name}\", configs: [\"#{&1}\"])")
-        {:error, "No '#{Enum.join(invalid, ", ")}' config available. Try: #{Enum.join(suggestions, " or ")}"}
+        suggestions = map available, fn agent -> "spawn(name: \"#{name}\", configs: [\"#{agent}\"])" end
+        {:error, "No '#{join invalid, ", "}' config available. Try: #{join suggestions, " or "}"}
     end
   end
 
-  defp get_available_agents(%{config: configs}) do
-    case Enum.find_value(configs, &Map.get(&1, :agents)) do
+  defp from(%{config: configs}) do
+    case find_value configs, fn config -> get config, :agents end do
       nil -> []
-      agents -> String.split(agents, ", ")
+      agents -> split agents, ", "
     end
   end
-  defp get_available_agents(_), do: []
+  defp from(_), do: []
 
   defp examples(%{config: configs}) do
-    case Enum.find_value(configs, &Map.get(&1, :agents)) do
+    case find_value configs, fn config -> get config, :agents end do
       nil -> ""
       agents -> 
-        agent_list = String.split(agents, ", ")
-        examples = Enum.map(agent_list, &"spawn(name: \"my#{&1}\", configs: [\"#{&1}\"])")
-        "Examples: #{Enum.join(examples, ", ")}. "
+        agents = split agents, ", "
+        examples = map agents, fn agent -> "spawn(name: \"my#{agent}\", configs: [\"#{agent}\"])" end
+        "Examples: #{join examples, ", "}. "
     end
   end
   defp examples(_), do: ""
 
   defp agents(%{config: configs}) do
-    result = configs
-    |> Enum.find_value(&Map.get(&1, :agents))
+    configs
+    |> find_value(fn config -> get config, :agents end)
     |> case do
       nil -> "No agents found in configs"
       agents -> "Available: #{agents}"
     end
-    result
   end
   defp agents(_), do: ""
 end

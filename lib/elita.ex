@@ -9,21 +9,22 @@ defmodule Elita do
   import History, only: [record: 1]
   import Msg, only: [user: 1]
   import Log, only: [log: 5]
+  import String, only: [downcase: 1]
 
   def start_link(name, configs) do
     GenServer.start_link(__MODULE__, {name, configs}, name: via(name))
   end
 
   def cast(name, msg) do
-    GenServer.cast(via(String.downcase(name)), {:act, msg})
+    GenServer.cast(via(name), {:act, msg})
   end
 
   def call(name, msg) do
-    GenServer.call(via(String.downcase(name)), {:act, msg}, :infinity)
+    GenServer.call(via(name), {:act, msg}, :infinity)
   end
   
   defp via(name) do
-    {:via, Registry, {ElitaRegistry, name}}
+    {:via, Registry, {ElitaRegistry, downcase(name)}}
   end
 
   def init({name, configs}) do
