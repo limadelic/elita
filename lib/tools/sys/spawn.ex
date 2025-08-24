@@ -18,20 +18,16 @@ defmodule Tools.Sys.Spawn do
     }
   end
 
-  def log({%{"args" => %{"name" => name} = args}, _state}) do
-    configs = Map.get(args, "configs", [downcase(name)])
-    case configs do
-      [^name] -> log("🚀", name, "", "", :green)
-      _ -> log("🚀", name, " as ", Enum.join(configs, ", "), :green)
-    end
-  end
-
   def log(response) do
     response
   end
 
   def exec(_, %{"name" => name} = args, state) do
     configs = Map.get(args, "configs", [name |> downcase()])
+    case configs do
+      [^name] -> log("🚀", name, "", "", :green)
+      _ -> log("🚀", name, " as ", Enum.join(configs, ", "), :green)
+    end
     available = get_available_agents(state)
     
     case validate_configs(configs, available, name) do
