@@ -23,7 +23,7 @@ defmodule History do
 
   defp add(%{"text" => text}, history), do: history ++ [model(text)]
   
-  defp add(%{"result" => {result, _}, "functionCall" => %{"name" => name, "args" => args}}, history) do
+  defp add(%{"result" => result, "functionCall" => %{"name" => name, "args" => args}}, history) do
     history ++ [function_call(name, args), function_response(name, result)]
   end
 
@@ -31,7 +31,7 @@ defmodule History do
     history ++ [function_call(name, args)]
   end
 
-  defp add(%{"result" => {result, _}}, history) do
+  defp add(%{"result" => result}, history) do
     history ++ [user(result)]
   end
 
