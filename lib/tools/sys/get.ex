@@ -1,7 +1,7 @@
 defmodule Tools.Sys.Get do
 
-  def log({%{"args" => %{"key" => key}}, _state}) do
-    Log.log("👀", key, " ?", "", :blue)
+  def log(response) do
+    response
   end
 
   def def(name, _state) do
@@ -19,6 +19,7 @@ defmodule Tools.Sys.Get do
   end
 
   def exec(_, %{"key" => key}, state) do
+    Log.log("👀", key, " ?", "", :blue)
     table = Mem.table()
     value = case :ets.lookup(table, key) do
       [{^key, value}] -> value
