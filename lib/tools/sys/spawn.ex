@@ -18,9 +18,6 @@ defmodule Tools.Sys.Spawn do
     }
   end
 
-  def log(response) do
-    response
-  end
 
   def exec(_, %{"name" => name} = args, state) do
     configs = Map.get(args, "configs", [name |> downcase()])
