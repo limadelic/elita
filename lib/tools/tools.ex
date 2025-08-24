@@ -27,29 +27,12 @@ defmodule Tools do
     {put(part, "result", result), state}
   end
 
-  def exec(%{"name" => tool, "args" => args} = a, state) do
-    log({a, state})
-    log({tool, module(tool).exec(tool, args, state)})
+  def exec(%{"name" => tool, "args" => args}, state) do
+    module(tool).exec(tool, args, state)
   end
 
   def exec(part, state), do: {part, state}
 
-  defp log({%{"name" => tool, "args" => args} = tool_call, state}) do
-    module(tool).log({tool_call, state})
-  rescue
-    UndefinedFunctionError ->
-      Log.log("🛠️", tool, ": ", args, :red)
-  end
-
-  defp log({tool, {result, state}}) do
-    try do
-      module(tool).log({result, state})
-    rescue
-      _ -> Log.log("", "", "", result, :yellow)
-    end
-
-    {result, state}
-  end
 
   defp prompt(name, state) do
     module(name).def(name, state)
