@@ -17,15 +17,12 @@ defmodule Tools.Sys.Ask do
     }
   end
 
-  def log({%{"args" => %{"recipient" => recipient, "question" => question}}, %{name: sender}}) do
-    log("🤔", "#{sender} → #{recipient}", ": ", question, :green)
-  end
-
   def log(response) do
     response
   end
 
-  def exec(_, %{"recipient" => recipient, "question" => question}, state) do
+  def exec(_, %{"recipient" => recipient, "question" => question}, %{name: sender} = state) do
+    log("🤔", "#{sender} → #{recipient}", ": ", question, :green)
     {call(recipient, question), state}
   end
 end
