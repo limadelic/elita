@@ -2,9 +2,13 @@ defmodule Tools.User.Exec do
   import String, only: [split: 2, trim: 1]
   import Enum, only: [map: 2, join: 2]
   import Code, only: [eval_string: 2]
+  import Log, only: [log: 5]
 
-  def exec(tool, _args) when tool != nil do
-    first(tool.code, tool)
+  def exec(tool, args) when tool != nil do
+    log("🛠️", tool.name, ": ", args, :red)
+    result = first(tool.code, tool)
+    log("", "", "", result, :yellow)
+    result
   end
 
   def exec(nil, _args), do: {:error, "Tool not found"}
