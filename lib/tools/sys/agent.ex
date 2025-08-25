@@ -1,6 +1,7 @@
 defmodule Tools.Sys.Agent do
-  import Utils.Reader, only: [read_file: 1]
-  
+  import Utils.File, only: [file: 1]
+  import Log, only: [log: 5]
+
   def def(name, _state) do
     %{
       name: name,
@@ -16,8 +17,8 @@ defmodule Tools.Sys.Agent do
   end
 
   def exec(_, %{"name" => name}, state) do
-    path = "agents/#{name}.md"
-    content = read_file(path)
-    {content, state}
+    agent = file("#{name}.md")
+    log("🤖", name, ":", agent, :white)
+    {agent, state}
   end
 end

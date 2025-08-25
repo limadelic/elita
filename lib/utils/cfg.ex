@@ -5,7 +5,7 @@ defmodule Cfg do
   import YamlElixir, only: [read_from_string: 1]
 
   def config(name) do
-    md = Utils.Reader.read_file("#{name}.md")
+    md = Utils.File.file("#{name}.md")
     md |> parse |> tools |> includes
   end
 

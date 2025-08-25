@@ -1,5 +1,5 @@
 defmodule Tools.Sys.Spec do
-  import Utils.Reader, only: [read_file: 1]
+  import Utils.File, only: [file: 1]
   
   def def(name, _state) do
     %{
@@ -16,8 +16,8 @@ defmodule Tools.Sys.Spec do
   end
 
   def exec(_, %{"name" => name}, %{config: config} = state) do
-    content = read_file("#{name}_spec.md")
-    spec = Cfg.config("#{name}_spec") |> Map.put(:name, "#{name}_spec")
-    {content, %{state | config: config ++ [spec]}}
+    spec = file("#{name}_spec.md")
+    cfg = Cfg.config("#{name}_spec") |> Map.put(:name, "#{name}_spec")
+    {agent, %{state | config: config ++ [cfg]}}
   end
 end
