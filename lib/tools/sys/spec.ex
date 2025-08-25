@@ -1,12 +1,12 @@
 defmodule Tools.Sys.Spec do
-  import Utils.File, only: [file: 1]
-  
+  import Log, only: [log: 5]
+
   def def(name, _state) do
     %{
       name: name,
       description: "Read specification file",
       parameters: %{
-        type: "object", 
+        type: "object",
         properties: %{
           name: %{type: "string", description: "Spec name to read"}
         },
@@ -16,8 +16,8 @@ defmodule Tools.Sys.Spec do
   end
 
   def exec(_, %{"name" => name}, %{config: config} = state) do
-    spec = file("#{name}_spec.md")
-    cfg = Cfg.config("#{name}_spec") |> Map.put(:name, "#{name}_spec")
-    {agent, %{state | config: config ++ [cfg]}}
+    spec = Cfg.config("#{name}_spec")
+    log("🧪", "#{name} spec", ": ", spec.content, :white)
+    {spec.content, %{state | config: config ++ [spec]}}
   end
 end

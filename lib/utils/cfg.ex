@@ -1,12 +1,13 @@
 defmodule Cfg do
   import String, only: [split: 2, split: 3, trim: 1, to_atom: 1]
-  import Enum, only: [map: 2, reject: 2]
-  import Map, only: [new: 1, put: 3]
+  import Enum, only: [map: 2, reject: 2, reduce: 3]
+  import Map, only: [new: 1, put: 3, put_new: 3]
   import YamlElixir, only: [read_from_string: 1]
+  import Utils.File, only: [file: 1]
 
   def config(name) do
-    md = Utils.File.file("#{name}.md")
-    md |> parse |> tools |> includes
+    md = file("#{name}.md")
+    md |> parse |> tools |> includes |> default(name: name)
   end
 
   defp tools(%{tools: raw} = config) when is_binary(raw) do
@@ -52,4 +53,10 @@ defmodule Cfg do
   end
 
   defp props({k, v}), do: {to_atom(k), v}
+
+  defp default(config, defaults) do
+    reduce(defaults, config, fn {key, value}, acc ->
+      put_new(acc, key, value)
+    end)
+  end
 end
