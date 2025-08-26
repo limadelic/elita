@@ -1,5 +1,5 @@
 defmodule Log do
-  import Format, only: [yaml: 1]
+  import Utils.Yaml, only: [yaml: 1]
   import IO, only: [puts: 1]
 
   @colors %{

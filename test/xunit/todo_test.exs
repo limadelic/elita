@@ -23,4 +23,5 @@ defmodule TodoTest do
     tell :todo, "Mark call dentist as done"
     verify :todo, "no", "What do I need to do?"
   end
+
 end
