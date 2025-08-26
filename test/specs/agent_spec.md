@@ -14,7 +14,7 @@ The accumulation of these questions forms the history.
 
 ## Sut
 
-The greeter agent greets you and maintains a greeet conversation.
+The greet agent greets you and maintains a greeet conversation.
 
 ## Scenarios
 
