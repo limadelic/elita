@@ -18,7 +18,7 @@ defmodule Tools.Sys.Spec do
   def exec(_, %{"name" => name}, %{config: config} = state) do
     name = "#{name}_spec"
     spec = Cfg.config(name)
-    log("🧪", name, ":\n", spec.content, :white)
+    log("🧪", name, ":\n", "\n#{spec.content}\n", :white)
     {spec.content, %{state | config: config ++ [spec]}}
   end
 end

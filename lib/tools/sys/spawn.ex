@@ -26,13 +26,22 @@ defmodule Tools.Sys.Spawn do
 
   def exec(_, %{"name" => name} = args, state) do
     configs = get(args, "configs", [name])
-    log("🚀", name, "", "", :green)
+    log(name, configs)
     start_link(name, configs)
     {"spawned", state}
   end
 
+  defp log(name, [name]) do
+    log("🚀", name, "", "", :green)
+  end
+
+  defp log(name, config) do
+    log("🚀", name, " as ", join(config, ", "), :green)
+  end
+
   defp help(%{config: configs}) do
     agents = value(:agents, configs)
+
     """
     Available Agents: #{join(agents, ", ")}
     Examples:
@@ -44,8 +53,8 @@ defmodule Tools.Sys.Spawn do
 
   defp single([]), do: "agent"
   defp single(agents), do: random(agents)
-  
-  defp many([]), do: ["agent1", "agent2"] 
+
+  defp many([]), do: ["agent1", "agent2"]
   defp many([single]), do: [single]
   defp many(agents), do: take_random(agents, 2)
 end
