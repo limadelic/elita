@@ -40,7 +40,7 @@ defmodule Tools.Sys.Spawn do
 
   defp check(_configs, [], _name), do: :ok
   defp check(configs, available, name) do
-    invalid = reject configs, fn config -> not (config in available) end
+    invalid = reject configs, fn config -> config in available end
     case invalid do
       [] -> :ok
       _ -> 

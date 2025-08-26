@@ -18,7 +18,7 @@ defmodule Tools.Sys.Agent do
 
   def exec(_, %{"name" => name}, state) do
     agent = file("#{name}.md")
-    log("🤖", name, ":", agent, :white)
+    log("🤖", name, ":\n", agent, :white)
     {agent, state}
   end
 end
