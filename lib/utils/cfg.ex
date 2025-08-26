@@ -7,7 +7,7 @@ defmodule Cfg do
 
   def config(name) do
     md = file("#{name}.md")
-    md |> parse |> tools |> includes |> default(name: name)
+    md |> parse |> tools |> includes |> agents |> default(name: name)
   end
 
   defp tools(%{tools: raw} = config) when is_binary(raw) do
@@ -21,6 +21,12 @@ defmodule Cfg do
     put config, :includes, list
   end
   defp includes(config), do: config
+
+  defp agents(%{agents: raw} = config) when is_binary(raw) do
+    list = split(raw, ",") |> map(&trim/1) |> reject(&empty/1)
+    put config, :agents, list
+  end
+  defp agents(config), do: config
 
   defp empty(""), do: true
   defp empty(_), do: false

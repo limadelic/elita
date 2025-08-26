@@ -1,5 +1,6 @@
 defmodule Cfgs do
-  import Enum, only: [map: 2, reject: 2]
+  import Enum, only: [map: 2, reject: 2, flat_map: 2, uniq: 1]
+  import Map, only: [get: 3]
 
   def config(names) when is_list(names) do
     names
@@ -8,6 +9,12 @@ defmodule Cfgs do
   end
 
   def config(name), do: Cfg.config(name)
+
+  def value(key, configs) do
+    configs
+    |> flat_map(&get(&1, key, []))
+    |> uniq()
+  end
 
   defp expand(list) do
     deps =
