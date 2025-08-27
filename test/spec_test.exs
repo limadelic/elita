@@ -9,6 +9,10 @@ defmodule SpecTest do
     speck("mem")
   end
 
+  test "spawn spec" do
+    speck("spawn")
+  end
+
   test "tell spec" do
     speck("tell")
   end
