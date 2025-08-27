@@ -9,7 +9,7 @@ defmodule Elita do
   import History, only: [record: 1]
   import Msg, only: [user: 1]
   import Log, only: [log: 5]
-  import String, only: [downcase: 1]
+  import String, only: [downcase: 1, trim: 1]
 
   def start_link(name, configs) do
     GenServer.start_link(__MODULE__, {name, configs}, name: via(name))
@@ -60,6 +60,7 @@ defmodule Elita do
   end
 
   defp done({:reply, txt, %{name: name} = state}) do
+    txt = trim txt
     log("✨", name, ": ", txt, :white)
     {:reply, txt, state}
   end
