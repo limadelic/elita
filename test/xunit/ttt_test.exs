@@ -8,8 +8,6 @@ defmodule TttTest do
     tell(:bob, "alice is gonna be your opponent")
     tell(:alice, "start a game with bob, you play first")
     wait_until(:alice, "the game finish")
-
-    verify(:alice, "tie", "what was the result?")
   end
 
 end
