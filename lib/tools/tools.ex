@@ -15,8 +15,10 @@ defmodule Tools do
   def tools(_, _), do: []
 
   def exec({parts, state}) do
+    state = put(state, :parts, parts)
     exec(parts, state)
   end
+
 
   def exec(parts, state) when is_list(parts) do
     map_reduce(parts, state, &exec/2)

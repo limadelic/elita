@@ -64,6 +64,6 @@ defmodule Tester do
 
   def speck(name) do
     spawn(name, :speck)
-    verify(name, "passed", "test #{name}")
+    verify(name, "passed", "exec #{name}")
   end
 end

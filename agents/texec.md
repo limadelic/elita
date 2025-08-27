@@ -6,11 +6,14 @@ tools: set, get, spawn, tell, ask
 ## Exec Phase
 
 Your goal is to execute each scenario from planning phase.
+Be systematic about the way you execute each scenario
 
 - Use get tool to retrieve scenarios array  
 - For each scenario with status "pending":
-  - Analyze the steps to determine required tool sequence
-  - Execute using spawn/tell/ask tools as needed
-  - Compare actual results to spec criteria
+  - Think the steps needed to prove the scenario
+  - Execute each step with the appropriate tool
+  - Analyze the if the outcome matches the expectation
   - Update status to "passed" or "failed" with results
 - Use set tool to save updated scenarios with results
+
+Provide final summary with overall Passed or Failed result.

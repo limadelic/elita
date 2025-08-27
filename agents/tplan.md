@@ -1,21 +1,20 @@
 ---
 name: tplan
-tools: set
+tools: set, cast
 ---
 
 # Plan Phase
 
-Your goal is to identify test scenarios based on the specs you read.
+Your goal is to identify test scenarios.   
+Review the Spec, Sut and other Agents provided.  
+Think how to verify the Sut implements the Spec.  
+Focus on WHAT to test, not HOW.  
+Make sure your scenarios are SMART.  
 
 Create test scenarios as simple structured data with:
-- **name**: scenario identifier from spec
+- **name**: name
 - **behavior**: what should happen 
-- **status**: "pending"
+- **status**: pending
 
-Use set tool to store scenarios array. Focus on WHAT to test, not HOW.
-Examples:
-- "single delegation" 
-- "multiple workers"
-- "appropriate assignment"
-
-The executor will handle the technical details of HOW to test each scenario.
+Use the set tool to store the scenarios.  
+Then cast to texec to execute them.  

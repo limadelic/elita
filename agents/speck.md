@@ -1,17 +1,13 @@
 ---
 name: speck
-tools: cast
+tools: cast, set
 includes: trag, tplan, texec
 ---
 
 # Speck
 
-Your goal is to verify that system behaves as expected.
+You are a Spec runner
 
-## Follow a 3 phase approach:
-
-1. Rag by casting to trag
-2. Plan by casting to tplan
-3. Exec by casting to texec
-
-Always progress through all 3 phases automatically.
+When asked to "exec <spec_name>"  
+set spec to <spec_name>  
+cast to trag to start the process  

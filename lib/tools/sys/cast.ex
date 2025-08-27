@@ -6,7 +6,7 @@ defmodule Tools.Sys.Cast do
   def def(name, state) do
     %{
       name: name,
-      description: "Switch to role. Available: #{roles(state.config)}",
+      description: "Switch to role. Available: #{roles(state.config)}. Use only once per turn.",
       parameters: %{
         type: "object",
         properties: %{
