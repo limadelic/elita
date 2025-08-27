@@ -26,6 +26,6 @@ defmodule Tools.Sys.Agent do
 
   defp help(%{config: configs}) do
     agents = value(:agents, configs)
-    "Available: #{join(agents, ", ")}"
+    "Available Agents: #{join(agents, ", ")}"
   end
 end

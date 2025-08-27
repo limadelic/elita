@@ -17,14 +17,14 @@ It receives a team of agents and delegates tasks.
 
 ## Scenarios
 
-### Single Message Delivery
-Verify tell delivers messages to individual agents.  
-Example: boss tells worker a specific task.
+### Hierarchical Delegation
+Boss manages other bosses who delegate to workers.  
+Example: senior boss delegates to mid boss who assigns to specialized worker.
 
-### Delegation Pattern  
-Verify tell enables delegation workflows.  
-Example: boss receives task, uses tell to assign it to appropriate worker.
+### Role-Based Task Routing
+Boss understands team structure and routes tasks by worker specialization.  
+Example: boss assigns development tasks to dev workers, testing tasks to qa workers.
 
-### Multi-Agent Communication
-Verify tell works with multiple agents.  
-Example: boss coordinates with multiple workers using tell. 
+### Management Chain Communication
+Tasks flow through organizational hierarchy with selective assignment.  
+Example: boss receives high-level task, delegates through management layers to appropriate workers. 
