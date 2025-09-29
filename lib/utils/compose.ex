@@ -1,9 +1,9 @@
 defmodule Compose do
-  import Enum, only: [map: 2, reduce: 3]
+  import Enum, only: [map: 2, reduce: 3, reject: 2]
   import Map, only: [put: 3]
 
   def compose([main | rest]) do
-    active = [main | Enum.filter(rest, & &1[:active])]
+    active = [main | reject(rest, & &1[:active] == false)]
     active |> headers |> content(active)
   end
 
