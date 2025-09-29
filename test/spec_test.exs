@@ -17,4 +17,8 @@ defmodule SpecTest do
     speck("tell")
   end
 
+  test "ask spec" do
+    speck("ask")
+  end
+
 end

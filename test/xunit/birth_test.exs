@@ -9,6 +9,6 @@ defmodule BirthTest do
   test "mother gives birth to baby" do
     ask(:mother, "it's time to give birth")
 
-    verify(:baby, "WAAAAAH", "spank")
+    verify(:baby, "cries", "spank")
   end
 end

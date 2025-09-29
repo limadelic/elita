@@ -1,6 +1,8 @@
 defmodule Tester do
   import ExUnit.Assertions
   import Elita, only: [start_link: 2, cast: 2, call: 2]
+  import Llm, only: [llm: 1]
+  import String, only: [contains?: 2, downcase: 1]
 
   defmacro __using__(_opts) do
     quote do
@@ -52,8 +54,34 @@ defmodule Tester do
   def verify(name, expected, query) do
     answer = ask(name, query)
 
-    assert String.contains?(String.downcase(answer), String.downcase("#{expected}")),
-           "Expected '#{answer}' to contain '#{expected}'"
+    try do
+      assert contains?(downcase(answer), downcase("#{expected}")),
+             "Expected '#{answer}' to contain '#{expected}'"
+    rescue
+      ExUnit.AssertionError ->
+        ask_llm(answer, expected, query)
+    end
+  end
+
+  defp ask_llm(answer, expected, query) do
+    prompt = %{
+      contents: [
+        %{
+          role: "user",
+          parts: [
+            %{
+              text:
+                "Does the response '#{answer}' match the expected behavior '#{expected}' when asked '#{query}'? Answer only yes or no."
+            }
+          ]
+        }
+      ]
+    }
+
+    [%{"text" => result}] = llm(prompt)
+
+    assert contains?(downcase(result), "yes"),
+           "LLM judge failed: Expected '#{answer}' to match '#{expected}' for query '#{query}'"
   end
 
   def wait_until(agent, cond) do
