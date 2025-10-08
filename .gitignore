@@ -7,6 +7,7 @@ erl_crash.dump
 *.ez
 elita-*.tar
 /tmp/
+/ext/
 .idea/
 /elita
 /langchain
