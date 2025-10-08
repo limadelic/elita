@@ -50,6 +50,16 @@ async function handle(command) {
 
     case 'type':
       await page.type(params.selector, params.text);
+      if (params.wait) {
+        await page.waitForTimeout(params.wait);
+      }
+      return { status: 'ok' };
+
+    case 'press':
+      await page.keyboard.press(params.key);
+      if (params.wait) {
+        await page.waitForTimeout(params.wait);
+      }
       return { status: 'ok' };
 
     case 'screenshot':

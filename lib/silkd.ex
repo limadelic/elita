@@ -8,8 +8,10 @@ defmodule Silkd do
 
   def navigate(url), do: call(:navigate, %{url: url})
   def content, do: call(:content, %{})
+  def contains?(text), do: content()["content"] |> String.contains?(text)
   def click(selector, opts \\ []), do: call(:click, params(selector, opts))
-  def type(selector, text), do: call(:type, %{selector: selector, text: text})
+  def type(selector, text, opts \\ []), do: call(:type, params(selector, opts) |> Map.put(:text, text))
+  def press(key, opts \\ []), do: call(:press, Map.merge(%{key: key}, Map.new(opts)))
   def screenshot, do: call(:screenshot, %{})
   def close, do: call(:close, %{})
 

@@ -16,14 +16,23 @@ defmodule SilkdTest do
   test "close AIVA" do
     Silkd.navigate("https://rec-preview.dlas1.ucloud.int/MORDOR")
 
-    before = Silkd.content()
-    assert String.contains?(before["content"], "AIVA Chat")
-    assert String.contains?(before["content"], ~s(style="display: block;"))
+    assert Silkd.contains?("AIVA Chat")
+    assert Silkd.contains?(~s(style="display: block;"))
 
     result = Silkd.click("button[aria-label='Close AIVA Chat']", wait: 500)
     assert result["status"] == "ok"
 
-    after_click = Silkd.content()
-    assert String.contains?(after_click["content"], ~s(style="display: none;"))
+    assert Silkd.contains?(~s(style="display: none;"))
+  end
+
+  test "apply to engineering opportunity" do
+    Silkd.navigate("https://rec-preview.dlas1.ucloud.int/MORDOR")
+
+    search_input = ~s(input[aria-label="By job title, company, store or requisition number"])
+    Silkd.type(search_input, "engineer")
+    Silkd.press("Enter", wait: 2000)
+
+    result = Silkd.click(~s(ukg-link[data-automation="job-title"]))
+    assert result["status"] == "ok"
   end
 end
