@@ -5,7 +5,7 @@ defmodule Llm do
   import HTTPoison, only: [post: 3]
   import Resp, only: [resp: 1]
 
-  @vertex_url "https://us-central1-aiplatform.googleapis.com/v1/projects/d-ulti-ml-ds-dev-9561/locations/us-central1/publishers/google/models/gemini-2.5-flash:generateContent"
+  @vertex_url "https://us-east5-aiplatform.googleapis.com/v1/projects/l-ulti-tf-48hours-d55d/locations/us-east5/publishers/google/models/gemini-1.5-pro:generateContent"
 
   def llm({prompt, %{name: name} = state}) do
     {llm(prompt, name), state}
