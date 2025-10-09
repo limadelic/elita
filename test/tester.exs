@@ -94,4 +94,10 @@ defmodule Tester do
     spawn(name, :speck)
     verify(name, "passed", "exec #{name}")
   end
+
+  def silkd(name) do
+    spawn(name, :silkd)
+    silk = File.read!("test/silk/#{name}.md")
+    verify(name, silk, "weave #{name}")
+  end
 end

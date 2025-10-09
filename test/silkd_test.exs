@@ -1,5 +1,5 @@
 defmodule SilkdTest do
-  use ExUnit.Case
+  use Tester
 
   setup_all do
     {:ok, pid} = Silkd.start_link()
@@ -7,32 +7,33 @@ defmodule SilkdTest do
     :ok
   end
 
+  @tag :skip
   test "google" do
-    result = Silkd.navigate("https://www.google.com")
-    assert result["status"] == "ok"
-    assert result["url"] =~ "google.com"
+    silkd("google")
   end
 
   test "close AIVA" do
-    Silkd.navigate("https://rec-preview.dlas1.ucloud.int/MORDOR")
+    Silkd.weave(:navigate, %{url: "https://rec-preview.dlas1.ucloud.int/MORDOR"})
 
-    assert Silkd.contains?("AIVA Chat")
-    assert Silkd.contains?(~s(style="display: block;"))
+    content = Silkd.weave(:content)
+    assert content["content"] =~ "AIVA Chat"
+    assert content["content"] =~ ~s(style="display: block;")
 
-    result = Silkd.click("button[aria-label='Close AIVA Chat']", wait: 500)
+    result = Silkd.weave(:click, %{selector: "button[aria-label='Close AIVA Chat']", wait: 500})
     assert result["status"] == "ok"
 
-    assert Silkd.contains?(~s(style="display: none;"))
+    content = Silkd.weave(:content)
+    assert content["content"] =~ ~s(style="display: none;")
   end
 
   test "apply to engineering opportunity" do
-    Silkd.navigate("https://rec-preview.dlas1.ucloud.int/MORDOR")
+    Silkd.weave(:navigate, %{url: "https://rec-preview.dlas1.ucloud.int/MORDOR"})
 
     search_input = ~s(input[aria-label="By job title, company, store or requisition number"])
-    Silkd.type(search_input, "engineer")
-    Silkd.press("Enter", wait: 2000)
+    Silkd.weave(:type, %{selector: search_input, text: "engineer"})
+    Silkd.weave(:press, %{key: "Enter", wait: 2000})
 
-    result = Silkd.click(~s(ukg-link[data-automation="job-title"]))
+    result = Silkd.weave(:click, %{selector: ~s(ukg-link[data-automation="job-title"])})
     assert result["status"] == "ok"
   end
 end

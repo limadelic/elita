@@ -10,4 +10,4 @@ You are a Spec runner
 
 When asked to "exec <spec_name>"  
 set spec to <spec_name>  
-cast to trag to start the process  
+cast to trag to start the process
