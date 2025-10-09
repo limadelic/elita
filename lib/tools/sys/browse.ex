@@ -1,19 +1,19 @@
-defmodule Tools.Sys.Playwright do
+defmodule Tools.Sys.Browse do
   import Log, only: [log: 5]
   import Map, only: [drop: 2]
 
   def def(name, _state) do
     %{
       name: name,
-      description: "Control browser using Playwright",
+      description: "Control browser",
       parameters: %{
         type: "object",
         properties: %{
-          action: %{type: "string", description: "navigate, content, click, type, press, screenshot, close"},
+          action: %{type: "string", description: "navigate, snapshot, click, type, press, content"},
           url: %{type: "string", description: "URL for navigate"},
-          selector: %{type: "string", description: "CSS selector for click/type"},
-          text: %{type: "string", description: "Text for type or contains check"},
-          key: %{type: "string", description: "Key for press (e.g., Enter, Escape)"},
+          index: %{type: "number", description: "Element index from snapshot for click/type"},
+          text: %{type: "string", description: "Text for type"},
+          key: %{type: "string", description: "Key for press (Enter, Escape, etc)"},
           wait: %{type: "number", description: "Milliseconds to wait after action"}
         },
         required: ["action"]
@@ -25,7 +25,7 @@ defmodule Tools.Sys.Playwright do
     action_atom = String.to_atom(action)
     params = drop(args, ["action"])
 
-    log("🎭", "playwright", " #{action}", " #{inspect(params)}", :magenta)
+    log("🌐", "browse", " #{action}", " #{inspect(params)}", :magenta)
     result = Silkd.weave(action_atom, params)
 
     {result, state}

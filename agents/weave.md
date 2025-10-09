@@ -1,6 +1,6 @@
 ---
 name: weave
-tools: get, set, playwright, cast
+tools: get, set, browse, cast
 ---
 
 # Weave
@@ -8,10 +8,13 @@ tools: get, set, playwright, cast
 Your goal is to execute each todo from planning.
 
 Get the todos.
+Get the host.
 For each todo with status pending:
-- Use playwright to achieve the todo goal
-- Before interacting with elements, check snapshot to verify they exist
-- Never guess selectors
+- Use browse to achieve the todo goal
+- Only navigate to URLs on the host
+- Navigate returns numbered snapshot of interactive elements
+- Use element indices from snapshot, never guess
+- Get fresh snapshot after page changes
 - Extract actual data from page content
 - Update todo result with what you found
 - Set status to done

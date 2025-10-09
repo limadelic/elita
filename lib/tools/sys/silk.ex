@@ -15,9 +15,9 @@ defmodule Tools.Sys.Silk do
     }
   end
 
-  def exec(_, %{"name" => name}, %{config: config} = state) do
-    silk = Cfg.config(name)
-    log("🕸️", name, ":", "\n#{silk.content}\n", :white)
-    {silk.content, %{state | config: config ++ [silk]}}
+  def exec(_, %{"name" => name}, state) do
+    content = Utils.File.file("#{name}.md")
+    log("🕸️", name, ":", "\n#{content}\n", :white)
+    {content, state}
   end
 end

@@ -1,6 +1,6 @@
 ---
 name: silkd
-tools: set, cast
+tools: set, cast, browse
 includes: loom, weave, mend, web
 ---
 

@@ -53,7 +53,7 @@ async function handle(command) {
       return { status: 'ok' };
 
     case 'type':
-      await page.type(params.selector, params.text, { timeout: 5000 });
+      await page.type(params.selector, params.text, { timeout: 5000, delay: 100 });
       if (params.wait) {
         await page.waitForTimeout(params.wait);
       }
