@@ -41,15 +41,19 @@ async function handle(command) {
       const content = await page.content();
       return { status: 'ok', content };
 
+    case 'snapshot':
+      const snapshot = await page.accessibility.snapshot();
+      return { status: 'ok', snapshot: JSON.stringify(snapshot) };
+
     case 'click':
-      await page.click(params.selector);
+      await page.click(params.selector, { timeout: 5000 });
       if (params.wait) {
         await page.waitForTimeout(params.wait);
       }
       return { status: 'ok' };
 
     case 'type':
-      await page.type(params.selector, params.text);
+      await page.type(params.selector, params.text, { timeout: 5000 });
       if (params.wait) {
         await page.waitForTimeout(params.wait);
       }
@@ -68,7 +72,7 @@ async function handle(command) {
 
     case 'close':
       await browser.close();
-      process.exit(0);
+      return { status: 'ok' };
 
     default:
       return { status: 'error', message: `unknown action: ${action}` };

@@ -6,7 +6,19 @@ defmodule Silkd do
     GenServer.start_link(__MODULE__, opts, name: __MODULE__)
   end
 
-  def weave(action, params \\ %{}) do
+  def weave(action, params \\ %{})
+
+  def weave(:navigate, params) do
+    nav_result = call(:navigate, params)
+    snapshot_result = call(:snapshot, %{})
+    Map.put(nav_result, "snapshot", snapshot_result["snapshot"])
+  end
+
+  def weave(action, params) do
+    call(action, params)
+  end
+
+  defp call(action, params) do
     GenServer.call(__MODULE__, {:command, %{action: action, params: params}}, 30_000)
   end
 

@@ -7,9 +7,16 @@ defmodule SilkdTest do
     :ok
   end
 
-  @tag :skip
   test "google" do
     silkd("google")
+  end
+
+  test "manual google" do
+    result = Silkd.weave(:navigate, %{url: "https://www.google.com"})
+    assert result["status"] == "ok"
+
+    result = Silkd.weave(:type, %{selector: "textarea[name='q']", text: "test"})
+    assert result["status"] == "ok"
   end
 
   test "close AIVA" do
