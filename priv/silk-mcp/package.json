@@ -1,0 +1,27 @@
+{
+  "name": "silk-mcp",
+  "version": "0.1.0",
+  "description": "Minimal browser automation MCP with indexed elements",
+  "type": "module",
+  "main": "index.js",
+  "bin": {
+    "silk-mcp": "./index.js"
+  },
+  "exports": {
+    ".": "./index.js",
+    "./lib/*": "./lib/*"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "mcp",
+    "browser",
+    "automation",
+    "playwright"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.5",
+    "playwright": "^1.49.1"
+  }
+}
