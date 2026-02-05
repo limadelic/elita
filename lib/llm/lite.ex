@@ -1,5 +1,6 @@
 defmodule Lite do
   import Compose, only: [compose: 1]
+  import Snippet, only: [snip: 2]
   import Tools, only: [tools: 2]
   import Enum, only: [map: 2]
   import System, only: [get_env: 1, get_env: 2]
@@ -14,8 +15,11 @@ defmodule Lite do
   end
 
   def llm(text) when is_binary(text) do
-    req(request(text)) |> resp
+    req(request(text)) |> resp |> text
   end
+
+  defp text([%{"type" => "text", "text" => t} | _]), do: t
+  defp text(other), do: other
 
   defp req(body) do
     post(url(), json: body, headers: headers(), connect_options: connect())
@@ -25,7 +29,7 @@ defmodule Lite do
     base = %{
       model: model(),
       max_tokens: 4096,
-      system: composed.content,
+      system: snip(composed.content, composed[:import]),
       messages: map(history, &convert/1)
     }
     add_tools(base, tools(composed, state))
