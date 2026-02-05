@@ -1,11 +1,38 @@
 defmodule Lite do
   import Jason, only: [encode!: 1, decode: 1]
   import HTTPoison, only: [post: 4]
+  import Compose, only: [compose: 1]
+  import Enum, only: [map: 2]
 
+  # Agent flow: takes state, returns {parts, state}
+  def llm(%{config: config, history: history} = state) do
+    composed = compose(config)
+    body = build(composed.content, history) |> encode!
+    result = post(url(), body, headers(), opts()) |> resp
+    {parts(result), state}
+  end
+
+  # Simple text call
   def llm(text) when is_binary(text) do
     body = request(text) |> encode!
     post(url(), body, headers(), opts()) |> resp
   end
+
+  defp build(system, history) do
+    %{
+      model: model(),
+      max_tokens: 4096,
+      system: system,
+      messages: map(history, &convert/1)
+    }
+  end
+
+  defp convert(%{role: "user", parts: [%{text: text} | _]}), do: %{role: "user", content: text}
+  defp convert(%{role: "model", parts: [%{text: text} | _]}), do: %{role: "assistant", content: text}
+  defp convert(msg), do: msg
+
+  defp parts(text) when is_binary(text), do: [%{"text" => text}]
+  defp parts({:error, _} = err), do: err
 
   defp request(text) do
     %{
