@@ -43,7 +43,7 @@ defmodule Lite do
   defp anthropic(%{parameters: params} = tool) do
     tool |> delete(:parameters) |> put(:input_schema, params)
   end
-  defp anthropic(tool), do: tool
+  defp anthropic(tool), do: put(tool, :input_schema, %{type: "object"})
 
   defp convert(%{role: "user", parts: [%{text: text} | _]}), do: %{role: "user", content: text}
   defp convert(%{role: "model", parts: [%{text: text} | _]}), do: %{role: "assistant", content: text}
@@ -51,9 +51,12 @@ defmodule Lite do
     %{role: "assistant", content: [%{type: "tool_use", id: id, name: n, input: a}]}
   end
   defp convert(%{role: "user", parts: [%{functionResponse: %{response: %{content: c}, id: id}} | _]}) do
-    %{role: "user", content: [%{type: "tool_result", tool_use_id: id, content: c}]}
+    %{role: "user", content: [%{type: "tool_result", tool_use_id: id, content: stringify(c)}]}
   end
   defp convert(msg), do: msg
+
+  defp stringify(c) when is_binary(c), do: c
+  defp stringify(c), do: inspect(c)
 
   defp parts(list) when is_list(list), do: map(list, &part/1)
   defp parts({:error, _} = err), do: err
