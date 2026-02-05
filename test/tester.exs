@@ -75,10 +75,12 @@ defmodule Tester do
            "LLM judge failed: Expected '#{answer}' to match '#{expected}' for query '#{query}'"
   end
 
-  def wait_until(agent, cond) do
+  def wait_until(agent, cond, retries \\ 5)
+  def wait_until(_agent, cond, 0), do: raise "Timeout waiting for: #{cond}"
+  def wait_until(agent, cond, retries) do
     verify(agent, "yes", "did you #{cond}?")
   rescue
-    _ -> wait_until(agent, cond)
+    _ -> wait_until(agent, cond, retries - 1)
   end
 
   def speck(name) do
