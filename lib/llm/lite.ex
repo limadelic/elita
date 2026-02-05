@@ -3,8 +3,8 @@ defmodule Lite do
   import HTTPoison, only: [post: 4]
   import Compose, only: [compose: 1]
   import Enum, only: [map: 2]
+  import System, only: [get_env: 1, get_env: 2]
 
-  # Agent flow: takes state, returns {parts, state}
   def llm(%{config: config, history: history} = state) do
     composed = compose(config)
     body = build(composed.content, history) |> encode!
@@ -12,7 +12,6 @@ defmodule Lite do
     {parts(result), state}
   end
 
-  # Simple text call
   def llm(text) when is_binary(text) do
     body = request(text) |> encode!
     post(url(), body, headers(), opts()) |> resp
@@ -42,14 +41,9 @@ defmodule Lite do
     }
   end
 
-  defp url do
-    base = System.get_env("ANTHROPIC_BASE_URL", "https://api.anthropic.com")
-    "#{base}/v1/messages"
-  end
+  defp url, do: "#{get_env("ANTHROPIC_BASE_URL", "https://api.anthropic.com")}/v1/messages"
 
-  defp model do
-    System.get_env("ANTHROPIC_MODEL", "claude-sonnet-4-5")
-  end
+  defp model, do: get_env("ANTHROPIC_MODEL", "claude-sonnet-4-5")
 
   defp headers do
     [
@@ -59,32 +53,17 @@ defmodule Lite do
     ]
   end
 
-  defp opts do
-    case System.get_env("NODE_EXTRA_CA_CERTS") do
-      nil -> []
-      path -> [ssl: [cacertfile: path]]
-    end
-  end
+  defp opts, do: ssl(get_env("NODE_EXTRA_CA_CERTS")) ++ [recv_timeout: 120_000]
+  defp ssl(nil), do: []
+  defp ssl(path), do: [ssl: [cacertfile: path]]
 
-  defp token do
-    System.get_env("ANTHROPIC_AUTH_TOKEN") ||
-      System.get_env("ANTHROPIC_API_KEY") ||
-      raise "Missing ANTHROPIC_AUTH_TOKEN or ANTHROPIC_API_KEY"
-  end
+  defp token, do: get_env("ANTHROPIC_AUTH_TOKEN") || get_env("ANTHROPIC_API_KEY")
 
-  defp resp({:ok, %{status_code: 200, body: body}}) do
-    case decode(body) do
-      {:ok, %{"content" => [%{"text" => text} | _]}} -> text
-      {:ok, other} -> {:error, "unexpected response: #{inspect(other)}"}
-      {:error, err} -> {:error, "json parse: #{inspect(err)}"}
-    end
-  end
+  defp resp({:ok, %{status_code: 200, body: body}}), do: parse(decode(body))
+  defp resp({:ok, %{status_code: code, body: body}}), do: {:error, "HTTP #{code}: #{body}"}
+  defp resp({:error, %{reason: reason}}), do: {:error, "request failed: #{reason}"}
 
-  defp resp({:ok, %{status_code: code, body: body}}) do
-    {:error, "HTTP #{code}: #{body}"}
-  end
-
-  defp resp({:error, %{reason: reason}}) do
-    {:error, "request failed: #{reason}"}
-  end
+  defp parse({:ok, %{"content" => [%{"text" => text} | _]}}), do: text
+  defp parse({:ok, other}), do: {:error, "unexpected response: #{inspect(other)}"}
+  defp parse({:error, err}), do: {:error, "json parse: #{inspect(err)}"}
 end
