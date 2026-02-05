@@ -1,5 +1,5 @@
 defmodule History do
-  import Msg, only: [model: 1, user: 1, function_call: 2, function_response: 2]
+  import Msg, only: [model: 1, user: 1, function_call: 2, function_call: 3, function_response: 2, function_response: 3]
   import Enum, only: [reduce: 3, any?: 2, find_value: 3]
 
   def record({parts, state}) do
@@ -23,8 +23,16 @@ defmodule History do
 
   defp add(%{"text" => text}, history), do: history ++ [model(text)]
   
+  defp add(%{"result" => result, "functionCall" => %{"name" => name, "args" => args, "id" => id}}, history) do
+    history ++ [function_call(name, args, id), function_response(name, result, id)]
+  end
+
   defp add(%{"result" => result, "functionCall" => %{"name" => name, "args" => args}}, history) do
     history ++ [function_call(name, args), function_response(name, result)]
+  end
+
+  defp add(%{"functionCall" => %{"name" => name, "args" => args, "id" => id}}, history) do
+    history ++ [function_call(name, args, id)]
   end
 
   defp add(%{"functionCall" => %{"name" => name, "args" => args}}, history) do
