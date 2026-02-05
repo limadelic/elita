@@ -68,7 +68,7 @@ defmodule Lite do
 
   defp url, do: "#{get_env("ANTHROPIC_BASE_URL", "https://api.anthropic.com")}/v1/messages"
 
-  defp model, do: get_env("ANTHROPIC_MODEL", "claude-sonnet-4-5")
+  defp model, do: get_env("ANTHROPIC_MODEL", "claude-haiku-4-5")
 
   defp headers do
     [
