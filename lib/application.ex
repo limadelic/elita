@@ -3,17 +3,10 @@ defmodule Elita.Application do
 
   def start(_type, _args) do
     children = [
-      {Registry, keys: :unique, name: ElitaRegistry},
-      :hackney_pool.child_spec(:default, timeout: 15_000, max_connections: 100)
+      {Registry, keys: :unique, name: ElitaRegistry}
     ]
 
     opts = [strategy: :one_for_one, name: Elita.Supervisor]
-    result = Supervisor.start_link(children, opts)
-    warmup()
-    result
-  end
-
-  defp warmup do
-    Lite.llm("warmup")
+    Supervisor.start_link(children, opts)
   end
 end

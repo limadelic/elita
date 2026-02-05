@@ -1,6 +1,4 @@
 defmodule Lite do
-  import Jason, only: [encode!: 1, decode: 1]
-  import HTTPoison, only: [post: 4]
   import Compose, only: [compose: 1]
   import Tools, only: [tools: 2]
   import Enum, only: [map: 2]
@@ -9,14 +7,17 @@ defmodule Lite do
 
   def llm(%{config: config, history: history} = state) do
     composed = compose(config)
-    body = build(composed, history, state) |> encode!
-    result = post(url(), body, headers(), opts()) |> resp
+    body = build(composed, history, state)
+    result = post(body) |> resp
     {parts(result), state}
   end
 
   def llm(text) when is_binary(text) do
-    body = request(text) |> encode!
-    post(url(), body, headers(), opts()) |> resp
+    post(request(text)) |> resp
+  end
+
+  defp post(body) do
+    Req.post(url(), json: body, headers: headers(), connect_options: connect())
   end
 
   defp build(composed, history, state) do
@@ -73,22 +74,20 @@ defmodule Lite do
   defp headers do
     [
       {"x-api-key", token()},
-      {"anthropic-version", "2023-06-01"},
-      {"content-type", "application/json"}
+      {"anthropic-version", "2023-06-01"}
     ]
   end
 
-  defp opts, do: ssl(get_env("NODE_EXTRA_CA_CERTS")) ++ [recv_timeout: 120_000]
-  defp ssl(nil), do: []
-  defp ssl(path), do: [ssl: [cacertfile: path]]
+  defp connect do
+    case get_env("NODE_EXTRA_CA_CERTS") do
+      nil -> []
+      path -> [transport_opts: [cacertfile: path]]
+    end
+  end
 
   defp token, do: get_env("ANTHROPIC_AUTH_TOKEN") || get_env("ANTHROPIC_API_KEY")
 
-  defp resp({:ok, %{status_code: 200, body: body}}), do: parse(decode(body))
-  defp resp({:ok, %{status_code: code, body: body}}), do: {:error, "HTTP #{code}: #{body}"}
-  defp resp({:error, %{reason: reason}}), do: {:error, "request failed: #{reason}"}
-
-  defp parse({:ok, %{"content" => content}}), do: content
-  defp parse({:ok, other}), do: {:error, "unexpected response: #{inspect(other)}"}
-  defp parse({:error, err}), do: {:error, "json parse: #{inspect(err)}"}
+  defp resp({:ok, %{status: 200, body: %{"content" => content}}}), do: content
+  defp resp({:ok, %{status: code, body: body}}), do: {:error, "HTTP #{code}: #{inspect(body)}"}
+  defp resp({:error, err}), do: {:error, "request failed: #{inspect(err)}"}
 end

@@ -1,7 +1,7 @@
 defmodule Tester do
   import ExUnit.Assertions
   import Elita, only: [start_link: 2, cast: 2, call: 2]
-  import Llm, only: [llm: 1]
+  import Lite, only: [llm: 1]
   import String, only: [contains?: 2, downcase: 1]
 
   defmacro __using__(_opts) do
@@ -64,21 +64,8 @@ defmodule Tester do
   end
 
   defp ask_llm(answer, expected, query) do
-    prompt = %{
-      contents: [
-        %{
-          role: "user",
-          parts: [
-            %{
-              text:
-                "Does the response '#{answer}' match the expected behavior '#{expected}' when asked '#{query}'? Answer only yes or no."
-            }
-          ]
-        }
-      ]
-    }
-
-    [%{"text" => result}] = llm(prompt)
+    prompt = "Does the response '#{answer}' match the expected behavior '#{expected}' when asked '#{query}'? Answer only yes or no."
+    result = llm(prompt)
 
     assert contains?(downcase(result), "yes"),
            "LLM judge failed: Expected '#{answer}' to match '#{expected}' for query '#{query}'"
