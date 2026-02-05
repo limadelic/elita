@@ -30,40 +30,27 @@ defmodule Lite do
       model: model(),
       max_tokens: 4096,
       system: snip(composed.content, composed[:import]),
-      messages: map(history, &convert/1)
+      messages: history
     }
     add_tools(base, tools(composed, state))
   end
 
   defp add_tools(base, [%{function_declarations: defs}]) do
-    put(base, :tools, map(defs, &anthropic/1))
+    put(base, :tools, map(defs, &schema/1))
   end
   defp add_tools(base, _), do: base
 
-  defp anthropic(%{parameters: params} = tool) do
+  defp schema(%{parameters: params} = tool) do
     tool |> delete(:parameters) |> put(:input_schema, params)
   end
-  defp anthropic(tool), do: put(tool, :input_schema, %{type: "object"})
-
-  defp convert(%{role: "user", parts: [%{text: text} | _]}), do: %{role: "user", content: text}
-  defp convert(%{role: "model", parts: [%{text: text} | _]}), do: %{role: "assistant", content: text}
-  defp convert(%{role: "model", parts: [%{functionCall: %{name: n, args: a, id: id}} | _]}) do
-    %{role: "assistant", content: [%{type: "tool_use", id: id, name: n, input: a}]}
-  end
-  defp convert(%{role: "user", parts: [%{functionResponse: %{response: %{content: c}, id: id}} | _]}) do
-    %{role: "user", content: [%{type: "tool_result", tool_use_id: id, content: stringify(c)}]}
-  end
-  defp convert(msg), do: msg
-
-  defp stringify(c) when is_binary(c), do: c
-  defp stringify(c), do: inspect(c)
+  defp schema(tool), do: put(tool, :input_schema, %{type: "object"})
 
   defp parts(list) when is_list(list), do: map(list, &part/1)
   defp parts({:error, _} = err), do: err
 
   defp part(%{"type" => "text", "text" => text}), do: %{"text" => text}
-  defp part(%{"type" => "tool_use", "id" => id, "name" => name, "input" => args}) do
-    %{"functionCall" => %{"name" => name, "args" => args, "id" => id}}
+  defp part(%{"type" => "tool_use", "id" => id, "name" => name, "input" => input}) do
+    %{"tool_use" => %{"id" => id, "name" => name, "input" => input}}
   end
   defp part(other), do: other
 

@@ -19,22 +19,20 @@ defmodule Tools do
     exec(parts, state)
   end
 
-
   def exec(parts, state) when is_list(parts) do
     map_reduce(parts, state, &exec/2)
   end
 
-  def exec(%{"functionCall" => call} = part, state) do
+  def exec(%{"tool_use" => call} = part, state) do
     {result, state} = exec(call, state)
     {put(part, "result", result), state}
   end
 
-  def exec(%{"name" => tool, "args" => args}, state) do
-    module(tool).exec(tool, args, state)
+  def exec(%{"id" => _, "name" => tool, "input" => input}, state) do
+    module(tool).exec(tool, input, state)
   end
 
   def exec(part, state), do: {part, state}
-
 
   defp prompt(name, state) do
     module(name).def(name, state)

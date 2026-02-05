@@ -1,17 +1,17 @@
 defmodule Msg do
   def user(text) do
-    %{role: "user", parts: [%{text: text}]}
+    %{role: "user", content: text}
   end
 
-  def model(text) do
-    %{role: "model", parts: [%{text: text}]}
+  def assistant(text) do
+    %{role: "assistant", content: text}
   end
 
-  def function_call(name, args, id \\ nil) do
-    %{role: "model", parts: [%{functionCall: %{name: name, args: args, id: id}}]}
+  def tool_use(id, name, input) do
+    %{role: "assistant", content: [%{type: "tool_use", id: id, name: name, input: input}]}
   end
 
-  def function_response(name, response, id \\ nil) do
-    %{role: "user", parts: [%{functionResponse: %{name: name, response: %{content: response}, id: id}}]}
+  def tool_result(id, content) do
+    %{role: "user", content: [%{type: "tool_result", tool_use_id: id, content: content}]}
   end
 end
