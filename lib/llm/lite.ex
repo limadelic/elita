@@ -4,20 +4,21 @@ defmodule Lite do
   import Enum, only: [map: 2]
   import System, only: [get_env: 1, get_env: 2]
   import Map, only: [put: 3, delete: 2]
+  import Req, only: [post: 2]
 
   def llm(%{config: config, history: history} = state) do
     composed = compose(config)
     body = build(composed, history, state)
-    result = post(body) |> resp
+    result = req(body) |> resp
     {parts(result), state}
   end
 
   def llm(text) when is_binary(text) do
-    post(request(text)) |> resp
+    req(request(text)) |> resp
   end
 
-  defp post(body) do
-    Req.post(url(), json: body, headers: headers(), connect_options: connect())
+  defp req(body) do
+    post(url(), json: body, headers: headers(), connect_options: connect())
   end
 
   defp build(composed, history, state) do
@@ -78,12 +79,9 @@ defmodule Lite do
     ]
   end
 
-  defp connect do
-    case get_env("NODE_EXTRA_CA_CERTS") do
-      nil -> []
-      path -> [transport_opts: [cacertfile: path]]
-    end
-  end
+  defp connect, do: ssl(get_env("NODE_EXTRA_CA_CERTS"))
+  defp ssl(nil), do: []
+  defp ssl(path), do: [transport_opts: [cacertfile: path]]
 
   defp token, do: get_env("ANTHROPIC_AUTH_TOKEN") || get_env("ANTHROPIC_API_KEY")
 
