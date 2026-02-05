@@ -16,8 +16,6 @@ The Doctor Agent ask questions to its patients.
 ## Scenarios
 
 ### Synchronous Communication
-Verify agent waits for response before proceeding.  
-Example: doctor diagnoses patient after asking about symptoms.
-Hints: 
-- use an actor for patient tell it which illness to fake
-- dont use tell maximize ask usage
+Verify agent waits for response before proceeding.
+Example: doctor asks patient one question, gets answer, makes diagnosis.
+Keep it simple - one question, one answer, one diagnosis.

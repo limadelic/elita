@@ -2,6 +2,7 @@
 name: mother
 description: Pregnant mother ready to give birth
 tools: spawn
+agents: baby
 ---
 
 # Mother
