@@ -3,6 +3,10 @@ defmodule Tester do
   import Elita, only: [start_link: 2, cast: 2, call: 2]
   import Lite, only: [llm: 1]
   import String, only: [contains?: 2, downcase: 1]
+  import Enum, only: [map: 2]
+  import GenServer, only: [stop: 1]
+  import Log, only: [log: 5]
+  import File, only: [read!: 1]
 
   defmacro __using__(_opts) do
     quote do
@@ -19,14 +23,14 @@ defmodule Tester do
 
   def spawn(name, configs) do
     setup()
-    start_link(name(name), list(configs) |> Enum.map(&to_string/1))
+    start_link(name(name), list(configs) |> map(&to_string/1))
   end
 
   defp list(configs) when is_list(configs), do: configs
   defp list(config), do: [config]
 
-  def stop(name) do
-    GenServer.stop(via(name))
+  def halt(name) do
+    stop(via(name))
   rescue
     _ -> :ok
   end
@@ -42,12 +46,12 @@ defmodule Tester do
   defp name(n), do: to_string(n)
 
   def tell(name, msg) do
-    Log.log("📢", "user → #{name}", ": ", msg, :yellow)
+    log("📢", "user → #{name}", ": ", msg, :yellow)
     cast(name(name), msg)
   end
 
   def ask(name, query) do
-    Log.log("🤔", "user → #{name}", ": ", query, :green)
+    log("🤔", "user → #{name}", ": ", query, :green)
     call(name(name), query)
   end
 
@@ -84,7 +88,7 @@ defmodule Tester do
 
   def silkd(name) do
     spawn(name, :silkd)
-    silk = File.read!("test/silk/#{name}.md")
+    silk = read!("test/silk/#{name}.md")
     verify(name, silk, "weave #{name}")
   end
 end
