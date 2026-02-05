@@ -5,7 +5,7 @@ defmodule Lite do
   import Tools, only: [tools: 2]
   import Enum, only: [map: 2]
   import System, only: [get_env: 1, get_env: 2]
-  import Map, only: [put: 3]
+  import Map, only: [put: 3, delete: 2]
 
   def llm(%{config: config, history: history} = state) do
     composed = compose(config)
@@ -35,7 +35,7 @@ defmodule Lite do
   defp add_tools(base, _), do: base
 
   defp anthropic(%{parameters: params} = tool) do
-    tool |> Map.delete(:parameters) |> put(:input_schema, params)
+    tool |> delete(:parameters) |> put(:input_schema, params)
   end
   defp anthropic(tool), do: tool
 
