@@ -1,6 +1,7 @@
 defmodule Tools.Sys.Ask do
   import Elita, only: [call: 2]
   import Log, only: [log: 5]
+  import Agents, only: [exists?: 1, missing: 1]
 
   def def(name, _state) do
     %{
@@ -20,6 +21,19 @@ defmodule Tools.Sys.Ask do
 
   def exec(_, %{"recipient" => recipient, "question" => question}, %{name: sender} = state) do
     log("🤔", "#{sender} → #{recipient}", ": ", question, :green)
-    {call(recipient, question), state}
+
+    if not exists?(recipient) do
+      {missing(recipient), state}
+    else
+      try do
+        {call(recipient, question), state}
+      catch
+        :exit, {:noproc, _} ->
+          {missing(recipient), state}
+
+        :exit, reason ->
+          {"Error: agent '#{recipient}' failed — #{inspect(reason)}", state}
+      end
+    end
   end
 end

@@ -6,16 +6,26 @@ defmodule Lite do
   import System, only: [get_env: 1, get_env: 2]
   import Map, only: [put: 3, delete: 2]
   import Req, only: [post: 2]
-
-  def llm(%{config: config, history: history} = state) do
-    composed = compose(config)
-    body = build(composed, history, state)
-    result = req(body) |> resp
-    {parts(result), state}
-  end
+  import Lite.Stream, only: [run: 4]
 
   def llm(text) when is_binary(text) do
     req(request(text)) |> resp |> text
+  end
+
+  def llm(%{config: config, history: history} = state, mode \\ :stdout) do
+    composed = compose(config)
+    body = build(composed, history, state)
+    conn = [url: url(), headers: headers(), connect: connect()]
+
+    case run(body, mode, state.name, conn) do
+      {:ok, content, streamed?, ink} ->
+        state = put(state, :streamed, streamed?)
+        state = if ink != nil, do: put(state, :ink, ink), else: state
+        {parts(content), state}
+
+      {:error, reason} ->
+        {parts({:error, reason}), put(state, :streamed, false)}
+    end
   end
 
   defp text([%{"type" => "text", "text" => t} | _]), do: t
@@ -26,40 +36,44 @@ defmodule Lite do
   end
 
   defp build(composed, history, state) do
-    base = %{
-      model: model(),
-      max_tokens: 4096,
-      system: snip(composed.content, composed[:import]),
-      messages: history
-    }
+    base =
+      core()
+      |> put(:system, snip(composed.content, composed[:import]))
+      |> put(:messages, Enum.reverse(history))
+
     add_tools(base, tools(composed, state))
+  end
+
+  defp core do
+    %{model: model(), max_tokens: 4096}
   end
 
   defp add_tools(base, [%{function_declarations: defs}]) do
     put(base, :tools, map(defs, &schema/1))
   end
+
   defp add_tools(base, _), do: base
 
   defp schema(%{parameters: params} = tool) do
     tool |> delete(:parameters) |> put(:input_schema, params)
   end
+
   defp schema(tool), do: put(tool, :input_schema, %{type: "object"})
 
   defp parts(list) when is_list(list), do: map(list, &part/1)
   defp parts({:error, _} = err), do: err
 
   defp part(%{"type" => "text", "text" => text}), do: %{"text" => text}
+
   defp part(%{"type" => "tool_use", "id" => id, "name" => name, "input" => input}) do
     %{"tool_use" => %{"id" => id, "name" => name, "input" => input}}
   end
+
   defp part(other), do: other
 
   defp request(text) do
-    %{
-      model: model(),
-      max_tokens: 4096,
-      messages: [%{role: "user", content: text}]
-    }
+    core()
+    |> put(:messages, [%{role: "user", content: text}])
   end
 
   defp url, do: "#{get_env("ANTHROPIC_BASE_URL", "https://api.anthropic.com")}/v1/messages"

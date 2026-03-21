@@ -13,6 +13,10 @@ defmodule Elita.MixProject do
     ]
   end
 
+  def cli do
+    [preferred_envs: [test_fast: :test, t: :test]]
+  end
+
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
@@ -27,14 +31,16 @@ defmodule Elita.MixProject do
       {:req, "~> 0.5"},
       {:jason, "~> 1.4"},
       {:yaml_elixir, "~> 2.9"},
-      {:ymlr, "~> 2.0"}
+      {:ymlr, "~> 2.0"},
+      {:mdex, "~> 0.11"}
     ]
   end
 
   defp aliases do
     [
       build: ["compile", "escript.build"],
-      t: ["test --no-start"]
+      t: ["test --no-start"],
+      test_fast: ["test", "--exclude", "integration"]
     ]
   end
 end

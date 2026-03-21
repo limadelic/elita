@@ -21,14 +21,14 @@ defmodule History do
     {:reply, "Error: #{reason}", state}
   end
 
-  defp add(%{"text" => text}, history), do: history ++ [assistant(text)]
+  defp add(%{"text" => text}, history), do: [assistant(text) | history]
 
   defp add(%{"result" => result, "tool_use" => %{"id" => id, "name" => name, "input" => input}}, history) do
-    history ++ [tool_use(id, name, input), tool_result(id, stringify(result))]
+    [tool_result(id, stringify(result)), tool_use(id, name, input) | history]
   end
 
   defp add(%{"tool_use" => %{"id" => id, "name" => name, "input" => input}}, history) do
-    history ++ [tool_use(id, name, input)]
+    [tool_use(id, name, input) | history]
   end
 
   defp add(_, history), do: history
