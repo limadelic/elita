@@ -3,9 +3,37 @@ defmodule Sse do
 
   import Jason, only: [decode: 1]
   import Map, only: [put: 3]
+  import IO, only: [write: 2]
 
-  def init(emit) do
-    %{buffer: "", blocks: %{}, emit: emit, first: true, err: nil, raw: ""}
+  def init(opts) when is_list(opts) do
+    if Keyword.keyword?(opts) do
+      init_from_kw(opts)
+    else
+      raise ArgumentError, "expected keyword list"
+    end
+  end
+
+  def init(nil), do: init_from_kw(emit: nil, ink: :none, name: nil)
+
+  def init(emit) when is_function(emit, 2) do
+    init_from_kw(emit: emit, ink: :none, name: nil)
+  end
+
+  defp init_from_kw(opts) do
+    emit = Keyword.get(opts, :emit)
+    ink = Keyword.get(opts, :ink, :none)
+    name = Keyword.get(opts, :name)
+
+    %{
+      buffer: "",
+      blocks: %{},
+      emit: emit,
+      first: true,
+      err: nil,
+      raw: "",
+      ink: ink,
+      name: name
+    }
   end
 
   def feed(data, state) do
@@ -118,10 +146,19 @@ defmodule Sse do
 
   defp event(_, state), do: state
 
-  defp drain(%{emit: nil} = s, _), do: s
+  defp drain(%{ink: ink} = s, t) when is_map(ink) do
+    if s.first do
+      write(:stderr, "\e[38;5;255m✨ #{s.name}:\e[0m\n")
+    end
 
-  defp drain(%{emit: emit, first: first} = s, t) do
+    ink = Ink.feed(ink, t)
+    %{s | first: false, ink: ink}
+  end
+
+  defp drain(%{emit: emit, first: first} = s, t) when not is_nil(emit) do
     emit.(t, first)
     %{s | first: false}
   end
+
+  defp drain(s, _), do: s
 end

@@ -5,10 +5,8 @@ defmodule Lite do
   import Enum, only: [map: 2]
   import System, only: [get_env: 1, get_env: 2]
   import Map, only: [put: 3, delete: 2]
-  import IO, only: [write: 2]
-  import Out, only: [assist: 1]
-  import Ink, only: [new: 0, feed: 2]
-  import Req, only: [post: 2, post!: 2]
+  import Req, only: [post: 2]
+  import Lite.Stream, only: [run: 4]
 
   def llm(text) when is_binary(text) do
     req(request(text)) |> resp |> text
@@ -17,10 +15,12 @@ defmodule Lite do
   def llm(%{config: config, history: history} = state, mode \\ :stdout) do
     composed = compose(config)
     body = build(composed, history, state)
+    conn = [url: url(), headers: headers(), connect: connect()]
 
-    case stream(body, mode, state.name) do
-      {:ok, content, streamed?} ->
+    case run(body, mode, state.name, conn) do
+      {:ok, content, streamed?, ink} ->
         state = put(state, :streamed, streamed?)
+        state = if ink != nil, do: put(state, :ink, ink), else: state
         {parts(content), state}
 
       {:error, reason} ->
@@ -30,86 +30,6 @@ defmodule Lite do
 
   defp text([%{"type" => "text", "text" => t} | _]), do: t
   defp text(other), do: other
-
-  defp stream(body, mode, name) do
-    emit = emit(name, mode)
-    body = Map.put(body, :stream, true)
-
-    try do
-      resp =
-        post!(
-          url(),
-          json: body,
-          headers: headers(),
-          connect_options: connect(),
-          receive_timeout: 600_000,
-          into: fn {:data, data}, {req, resp} ->
-            sse = Sse.feed(data, resp.private[:elita_sse] || Sse.init(emit))
-            resp = %{resp | private: Map.put(resp.private, :elita_sse, sse)}
-            {:cont, {req, resp}}
-          end
-        )
-
-      if resp.status != 200 do
-        {:error, fault(resp)}
-      else
-        sse = resp.private[:elita_sse] || Sse.init(emit)
-        sse = Sse.finalize(sse)
-
-        case sse.err do
-          nil -> {:ok, Sse.content(sse), mode in [:stdout, :render]}
-          msg -> {:error, msg}
-        end
-      end
-    rescue
-      e -> {:error, Exception.message(e)}
-    end
-  end
-
-  defp fault(resp) do
-    sse = resp.private[:elita_sse]
-
-    cond do
-      is_map(sse) and sse.err ->
-        sse.err
-
-      is_map(sse) and sse.raw != "" ->
-        short(sse.raw)
-
-      true ->
-        "HTTP #{resp.status}"
-    end
-  end
-
-  defp short(raw) do
-    if String.length(raw) > 500, do: String.slice(raw, 0, 500) <> "...", else: raw
-  end
-
-  defp emit(_, :silent), do: nil
-
-  defp emit(name, :stdout) do
-    fn chunk, first? ->
-      if first? do
-        write(:stderr, "\e[38;5;255m✨ #{name}: \e[0m")
-      end
-
-      assist(chunk)
-    end
-  end
-
-  defp emit(name, :render) do
-    ink = new()
-
-    fn chunk, first? ->
-      if first? do
-        write(:stderr, "\e[38;5;255m✨ #{name}:\e[0m\n")
-      end
-
-      s = Process.get(:elita_ink, ink)
-      s = feed(s, chunk)
-      Process.put(:elita_ink, s)
-    end
-  end
 
   defp req(body) do
     post(url(), json: body, headers: headers(), connect_options: connect())

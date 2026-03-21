@@ -2,6 +2,12 @@
 
 Agentic platform using OTP patterns for reliable agent behavior
 
+## Runtime model
+
+`Elita` agent processes are registered by name but **not** placed under the
+application supervisor: they are started from the escript or from tools. Crashes
+are **not** automatically restarted—by design for a CLI-oriented workflow.
+
 ## Installation
 
 If [available in Hex](https://hex.pm/docs/publish), the package can be installed

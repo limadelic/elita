@@ -26,7 +26,7 @@ defmodule Elita do
   def call(name, msg) do
     GenServer.call(via(name), {:act, msg}, :infinity)
   end
-  
+
   defp via(name) do
     {:via, Registry, {ElitaRegistry, downcase(name)}}
   end
@@ -80,8 +80,8 @@ defmodule Elita do
 
   defp done({:reply, txt, %{streamed: true} = state}) do
     txt = trim(txt)
-    ink_flush()
-    {:reply, txt, Map.delete(state, :streamed)}
+    ink_flush(state)
+    {:reply, txt, Map.drop(state, [:streamed, :ink])}
   end
 
   defp done({:reply, txt, %{name: name} = state}) do
@@ -97,20 +97,20 @@ defmodule Elita do
   def terminate(_, _), do: :ok
 
   defp reap(name) do
+    :ets.delete(:elita_agents, {:agent, name})
     :ets.delete(:elita_agents, name)
     GenServer.stop(via(name))
   rescue
     _ -> :ok
   end
 
-  defp ink_flush do
-    case Process.get(:elita_ink) do
+  defp ink_flush(state) do
+    case Map.get(state, :ink) do
       nil ->
         assist("\n")
 
       ink ->
         flush(ink)
-        Process.delete(:elita_ink)
         write(:stderr, "\n")
     end
   end

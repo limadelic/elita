@@ -22,21 +22,37 @@ defmodule Tools.Sys.Define do
   end
 
   def exec(_, args, state) do
-    count = count(state)
-    define(args, state, count)
+    define(args, state)
   end
 
-  defp define(_, state, count) when count >= @limit do
-    log("🚫", "define", ": ", "limit reached (#{@limit})", :red)
-    {"error: agent limit reached", state}
+  defp define(%{"name" => name} = args, state) do
+    if global_full?() and not exists?(name) do
+      log("🚫", "define", ": ", "limit reached (#{@limit}) globally", :red)
+      {"error: agent limit reached", state}
+    else
+      insert(name, args, state)
+    end
   end
 
-  defp define(%{"name" => name} = args, state, count) do
+  defp insert(name, args, state) do
+    :ets.delete(:elita_agents, name)
     md = build(name, args)
-    :ets.insert(:elita_agents, {name, md})
-    log("🧬", name, " defined ", "(#{count + 1}/#{@limit})", :cyan)
+    :ets.insert(:elita_agents, {{:agent, name}, md})
+    log("🧬", name, " defined ", "(#{count()}/#{@limit})", :cyan)
     state = track(state, name)
     {defined(name), state}
+  end
+
+  defp global_full? do
+    count() >= @limit
+  end
+
+  defp count do
+    :ets.info(:elita_agents, :size)
+  end
+
+  defp exists?(name) do
+    :ets.member(:elita_agents, {:agent, name}) or :ets.member(:elita_agents, name)
   end
 
   defp build(name, args) do
@@ -58,7 +74,4 @@ defmodule Tools.Sys.Define do
 
   defp track(%{defined: list} = state, name), do: %{state | defined: list ++ [name]}
   defp track(state, name), do: Map.put(state, :defined, [name])
-
-  defp count(%{defined: list}), do: length(list)
-  defp count(_), do: 0
 end

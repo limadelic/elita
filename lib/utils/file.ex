@@ -17,12 +17,19 @@ defmodule Utils.File do
   defp ephemeral(name) do
     key = replace_suffix(name, ".md", "")
 
+    case :ets.lookup(:elita_agents, {:agent, key}) do
+      [{_, content}] -> content
+      _ -> legacy(key)
+    end
+  rescue
+    ArgumentError -> nil
+  end
+
+  defp legacy(key) do
     case :ets.lookup(:elita_agents, key) do
       [{^key, content}] -> content
       _ -> nil
     end
-  rescue
-    ArgumentError -> nil
   end
 
   defp disk(name) do
