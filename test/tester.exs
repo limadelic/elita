@@ -8,9 +8,12 @@ defmodule Tester do
   import Log, only: [log: 5]
   import File, only: [read!: 1]
 
-  defmacro __using__(_opts) do
+  defmacro __using__(opts) do
+    async = Keyword.get(opts, :async, false)
+
     quote do
-      use ExUnit.Case
+      use ExUnit.Case, async: unquote(async)
+      @moduletag :integration
       import Kernel, except: [spawn: 1, spawn: 2]
       import Tester
     end
