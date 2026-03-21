@@ -2,6 +2,8 @@ defmodule Elita.Application do
   use Application
 
   def start(_type, _args) do
+    :ets.new(:elita_agents, [:set, :public, :named_table])
+
     children = [
       {Registry, keys: :unique, name: ElitaRegistry}
     ]

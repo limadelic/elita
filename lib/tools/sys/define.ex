@@ -1,7 +1,6 @@
 defmodule Tools.Sys.Define do
   import Log, only: [log: 5]
   import Map, only: [get: 3]
-  import Enum, only: [join: 2]
 
   @limit 10
 
@@ -34,8 +33,7 @@ defmodule Tools.Sys.Define do
 
   defp define(%{"name" => name} = args, state, count) do
     md = build(name, args)
-    path = "agents/#{name}.md"
-    File.write!(path, md)
+    :ets.insert(:elita_agents, {name, md})
     log("🧬", name, " defined ", "(#{count + 1}/#{@limit})", :cyan)
     state = track(state, name)
     {defined(name), state}

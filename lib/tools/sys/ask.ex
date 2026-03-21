@@ -20,6 +20,15 @@ defmodule Tools.Sys.Ask do
 
   def exec(_, %{"recipient" => recipient, "question" => question}, %{name: sender} = state) do
     log("🤔", "#{sender} → #{recipient}", ": ", question, :green)
-    {call(recipient, question), state}
+
+    try do
+      {call(recipient, question), state}
+    catch
+      :exit, {:noproc, _} ->
+        {"Error: agent '#{recipient}' is not running — spawn it first", state}
+
+      :exit, reason ->
+        {"Error: agent '#{recipient}' failed — #{inspect(reason)}", state}
+    end
   end
 end

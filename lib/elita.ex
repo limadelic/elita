@@ -2,13 +2,18 @@ defmodule Elita do
   use GenServer
 
   import Cfgs, only: [config: 1]
-  import Lite, only: [llm: 1]
+  import Lite, only: [llm: 2]
   import Mem, only: [create: 0]
   import Tools
   import History, only: [record: 1]
   import Msg, only: [user: 1]
-  import Log, only: [log: 5]
+  import Log, only: [reply: 2]
+  import Ink, only: [flush: 1]
   import String, only: [downcase: 1, trim: 1]
+  import System, only: [get_env: 1]
+  import Out, only: [assist: 1]
+  import IO, only: [write: 2]
+  import Enum, only: [each: 2]
 
   def start_link(name, configs) do
     GenServer.start_link(__MODULE__, {name, configs}, name: via(name))
@@ -47,19 +52,66 @@ defmodule Elita do
 
   defp act(state) do
     state
-    |> llm
+    |> llm(mode())
     |> exec
     |> record
     |> done
+  end
+
+  defp mode do
+    case get_env("ELITA_STREAM") do
+      nil -> Application.get_env(:elita, :stream, :render)
+      v -> parse(v)
+    end
+  end
+
+  defp parse(v) do
+    case downcase(trim(v)) do
+      "silent" -> :silent
+      "stdout" -> :stdout
+      "render" -> :render
+      _ -> Application.get_env(:elita, :stream, :render)
+    end
   end
 
   defp done({:act, state}) do
     act(state)
   end
 
+  defp done({:reply, txt, %{streamed: true} = state}) do
+    txt = trim(txt)
+    ink_flush()
+    {:reply, txt, Map.delete(state, :streamed)}
+  end
+
   defp done({:reply, txt, %{name: name} = state}) do
-    txt = trim txt
-    log("✨", name, ": ", txt, :white)
+    txt = trim(txt)
+    reply(name, txt)
     {:reply, txt, state}
+  end
+
+  def terminate(_reason, %{defined: agents}) do
+    each(agents, &reap/1)
+  end
+
+  def terminate(_, _), do: :ok
+
+  defp reap(name) do
+    :ets.delete(:elita_agents, name)
+    GenServer.stop(via(name))
+  rescue
+    _ -> :ok
+  end
+
+  defp ink_flush do
+    case Process.get(:elita_ink) do
+      nil ->
+        assist("\n")
+
+      ink ->
+        flush(ink)
+        Process.delete(:elita_ink)
+        write(:stderr, "\n")
+    end
   end
 end
