@@ -18,10 +18,18 @@ defmodule Log do
     puts("\e[38;5;#{@colors[color]}m#{emoji} #{head}#{neck}#{body}\e[0m")
   end
 
+  def label(name, :stdout),
+    do: "\e[38;5;#{@colors[:white]}m✨ #{name}: \e[0m"
+
+  def label(name, :render_open),
+    do: "\e[38;5;#{@colors[:white]}m✨ #{name}:\e[0m\n"
+
   def reply(name, body) do
     body = yaml(body)
     sep = if contains?(body, "\n"), do: "\n", else: ""
-    write(:stderr, "\e[38;5;#{@colors[:white]}m✨ #{name}: #{sep}\e[0m")
+    write(:stderr, reply_header(name, sep))
     assist(body <> "\n")
   end
+
+  defp reply_header(name, sep), do: "\e[38;5;#{@colors[:white]}m✨ #{name}: #{sep}\e[0m"
 end

@@ -13,8 +13,31 @@ defmodule Chat do
 
   defp nifs do
     base = :escript.script_name() |> to_string() |> Path.dirname()
-    lib = Path.join(base, "_build/dev/lib")
+    env = System.get_env("MIX_ENV") || "dev"
 
+    roots =
+      [
+        Path.join(base, "_build/#{env}/lib"),
+        Path.join(base, "_build/dev/lib")
+      ]
+      |> Enum.uniq()
+
+    roots =
+      if System.get_env("ELITA_PATHS") == "1" do
+        (roots ++
+           [
+             Path.join(base, "_build/test/lib"),
+             Path.join(base, "_build/prod/lib")
+           ])
+        |> Enum.uniq()
+      else
+        roots
+      end
+
+    Enum.each(roots, &add_lib_paths/1)
+  end
+
+  defp add_lib_paths(lib) do
     if File.dir?(lib) do
       lib
       |> File.ls!()
@@ -43,9 +66,16 @@ defmodule Chat do
 
   defp run({:ok, agent, name, dist}) do
     net(dist, name)
-    {:ok, _pid} = start_link(agent, [agent])
-    tip(dist)
-    repl(agent, name)
+
+    case start_link(agent, [agent]) do
+      {:ok, _pid} ->
+        tip(dist)
+        repl(agent, name)
+
+      {:error, reason} ->
+        puts(:stderr, "failed to start agent: #{inspect(reason)}")
+        System.halt(1)
+    end
   end
 
   defp run({:error, :usage}) do
@@ -59,6 +89,7 @@ defmodule Chat do
            elita <agent> <name> [--dist]
 
     --dist  start Erlang distribution (needs epmd; run epmd -daemon if you see inet_tcp errors)
+    ELITA_PATHS=1  add _build/test and _build/prod lib paths (escript helper)
     """
   end
 

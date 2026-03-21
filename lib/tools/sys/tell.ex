@@ -1,6 +1,7 @@
 defmodule Tools.Sys.Tell do
   import Elita, only: [cast: 2]
   import Log, only: [log: 5]
+  import Agents, only: [exists?: 1, missing: 1]
 
   def def(name, _state) do
     %{
@@ -19,7 +20,12 @@ defmodule Tools.Sys.Tell do
 
   def exec(_, %{"recipient" => recipient, "message" => message}, %{name: sender} = state) do
     log("📢", "#{sender} → #{recipient}", ": ", message, :yellow)
-    cast(recipient, "[from #{sender}] #{message}")
-    {"sent", state}
+
+    if exists?(recipient) do
+      cast(recipient, "[from #{sender}] #{message}")
+      {"sent", state}
+    else
+      {missing(recipient), state}
+    end
   end
 end

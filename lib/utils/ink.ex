@@ -27,7 +27,7 @@ defmodule Ink do
     {blocks, rest, fence} = split_blocks(raw, state.fence)
 
     for block <- blocks do
-      write(:stderr, block |> parse() |> ansi())
+      write_md(block)
     end
 
     %{buf: rest, fence: fence}
@@ -35,10 +35,24 @@ defmodule Ink do
 
   def flush(%{buf: buf}) do
     if String.trim(buf) != "" do
-      write(:stderr, buf |> parse() |> ansi())
+      write_md(buf)
     end
 
     write(:stderr, @reset)
+  end
+
+  defp write_md(block) do
+    try do
+      write(:stderr, block |> parse() |> ansi())
+    rescue
+      e ->
+        msg = Exception.message(e) |> to_string() |> String.slice(0, 120)
+
+        write(
+          :stderr,
+          @dim <> @gray <> "[unrenderable markdown] " <> msg <> @reset <> "\n"
+        )
+    end
   end
 
   defp parse(md), do: parse_document!(md, @opts)

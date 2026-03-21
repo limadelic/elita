@@ -4,6 +4,7 @@ defmodule Sse do
   import Jason, only: [decode: 1]
   import Map, only: [put: 3]
   import IO, only: [write: 2]
+  import Log, only: [label: 2]
 
   def init(opts) when is_list(opts) do
     if Keyword.keyword?(opts) do
@@ -82,8 +83,11 @@ defmodule Sse do
 
   defp data(json, state) do
     case decode(json) do
-      {:ok, ev} -> event(ev, state)
-      _ -> state
+      {:ok, ev} ->
+        event(ev, state)
+
+      {:error, _} ->
+        put_sse_err(state, "invalid JSON in SSE data line")
     end
   end
 
@@ -146,9 +150,12 @@ defmodule Sse do
 
   defp event(_, state), do: state
 
+  defp put_sse_err(%{err: err} = s, _) when not is_nil(err), do: s
+  defp put_sse_err(s, msg), do: %{s | err: msg}
+
   defp drain(%{ink: ink} = s, t) when is_map(ink) do
     if s.first do
-      write(:stderr, "\e[38;5;255m✨ #{s.name}:\e[0m\n")
+      write(:stderr, label(s.name, :render_open))
     end
 
     ink = Ink.feed(ink, t)

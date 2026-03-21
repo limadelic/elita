@@ -5,6 +5,7 @@ defmodule Lite.Stream do
   import Out, only: [assist: 1]
   import Ink, only: [new: 0]
   import Req, only: [post!: 2]
+  import Log, only: [label: 2]
 
   def run(body, mode, name, conn) do
     body = Map.put(body, :stream, true)
@@ -85,7 +86,7 @@ defmodule Lite.Stream do
   defp emit_stdout(name) do
     fn chunk, first? ->
       if first? do
-        write(:stderr, "\e[38;5;255m✨ #{name}: \e[0m")
+        write(:stderr, label(name, :stdout))
       end
 
       assist(chunk)

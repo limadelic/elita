@@ -36,14 +36,16 @@ defmodule Lite do
   end
 
   defp build(composed, history, state) do
-    base = %{
-      model: model(),
-      max_tokens: 4096,
-      system: snip(composed.content, composed[:import]),
-      messages: history
-    }
+    base =
+      core()
+      |> put(:system, snip(composed.content, composed[:import]))
+      |> put(:messages, history)
 
     add_tools(base, tools(composed, state))
+  end
+
+  defp core do
+    %{model: model(), max_tokens: 4096}
   end
 
   defp add_tools(base, [%{function_declarations: defs}]) do
@@ -70,11 +72,8 @@ defmodule Lite do
   defp part(other), do: other
 
   defp request(text) do
-    %{
-      model: model(),
-      max_tokens: 4096,
-      messages: [%{role: "user", content: text}]
-    }
+    core()
+    |> put(:messages, [%{role: "user", content: text}])
   end
 
   defp url, do: "#{get_env("ANTHROPIC_BASE_URL", "https://api.anthropic.com")}/v1/messages"
