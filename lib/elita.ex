@@ -11,7 +11,7 @@ defmodule Elita do
   import Ink, only: [flush: 1]
   import String, only: [downcase: 1, trim: 1]
   import System, only: [get_env: 1]
-  import Out, only: [assist: 1]
+  import Out, only: [assist: 1, flush: 0]
   import IO, only: [write: 2]
   import Enum, only: [each: 2]
 
@@ -46,7 +46,7 @@ defmodule Elita do
   end
 
   defp act(msg, %{history: history} = state) do
-    history = history ++ [user(msg)]
+    history = [user(msg) | history]
     act(%{state | history: history})
   end
 
@@ -81,12 +81,14 @@ defmodule Elita do
   defp done({:reply, txt, %{streamed: true} = state}) do
     txt = trim(txt)
     ink_flush(state)
+    flush()
     {:reply, txt, Map.drop(state, [:streamed, :ink])}
   end
 
   defp done({:reply, txt, %{name: name} = state}) do
     txt = trim(txt)
     reply(name, txt)
+    flush()
     {:reply, txt, state}
   end
 

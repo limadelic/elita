@@ -11,10 +11,22 @@ defmodule Out do
     case mode() do
       {:fd, f} ->
         :file.write(f, bin)
-        :file.sync(f)
 
       :stdio ->
         write(:stdio, bin)
+    end
+  end
+
+  def flush do
+    case :persistent_term.get(@key, :unset) do
+      :unset ->
+        :ok
+
+      {:fd, f} ->
+        :file.sync(f)
+
+      :stdio ->
+        :ok
     end
   end
 

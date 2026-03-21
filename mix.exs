@@ -9,12 +9,12 @@ defmodule Elita.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       escript: [main_module: Chat],
-      aliases: aliases(),
-      preferred_cli_env: [
-        test_fast: :test,
-        t: :test
-      ]
+      aliases: aliases()
     ]
+  end
+
+  def cli do
+    [preferred_envs: [test_fast: :test, t: :test]]
   end
 
   # Run "mix help compile.app" to learn about applications.

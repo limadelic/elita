@@ -16,6 +16,13 @@ defmodule SseTest do
     assert s.err == "upstream"
   end
 
+  test "raw tail is capped for diagnostics" do
+    s = Sse.init(emit: nil, ink: :none, name: nil)
+    chunk = String.duplicate("a", 10_000)
+    s = Sse.feed(chunk, s)
+    assert byte_size(s.raw) == 8192
+  end
+
   test "assembles text block from deltas" do
     s = Sse.init(emit: nil, ink: :none, name: nil)
 

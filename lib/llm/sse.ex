@@ -1,6 +1,12 @@
 defmodule Sse do
   @moduledoc false
 
+  # Raw is capped for error diagnostics only (see append_raw/2). Line parsing still
+  # uses binary concat per chunk; tuning Req receive_timeout / TLS buffers affects
+  # chunk size from the server.
+
+  @raw_cap 8192
+
   import Jason, only: [decode: 1]
   import Map, only: [put: 3]
   import IO, only: [write: 2]
@@ -38,8 +44,18 @@ defmodule Sse do
   end
 
   def feed(data, state) do
-    state = %{state | raw: state.raw <> data}
+    state = %{state | raw: append_raw(state.raw, data)}
     lines(state.buffer <> data, %{state | buffer: ""})
+  end
+
+  defp append_raw(raw, chunk) do
+    combined = raw <> chunk
+
+    if byte_size(combined) <= @raw_cap do
+      combined
+    else
+      binary_part(combined, byte_size(combined) - @raw_cap, @raw_cap)
+    end
   end
 
   def finalize(state) do

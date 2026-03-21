@@ -39,7 +39,7 @@ defmodule Lite do
     base =
       core()
       |> put(:system, snip(composed.content, composed[:import]))
-      |> put(:messages, history)
+      |> put(:messages, Enum.reverse(history))
 
     add_tools(base, tools(composed, state))
   end

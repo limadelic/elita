@@ -2,7 +2,7 @@ defmodule Lite.Stream do
   @moduledoc false
 
   import IO, only: [write: 2]
-  import Out, only: [assist: 1]
+  import Out, only: [assist: 1, flush: 0]
   import Ink, only: [new: 0]
   import Req, only: [post!: 2]
   import Log, only: [label: 2]
@@ -30,6 +30,7 @@ defmodule Lite.Stream do
         )
 
       if resp.status != 200 do
+        flush()
         {:error, fault(resp)}
       else
         sse = resp.private[:elita_sse] || Sse.init(opts)
@@ -38,14 +39,18 @@ defmodule Lite.Stream do
         case sse.err do
           nil ->
             ink = ink_after(mode, sse)
+            flush()
             {:ok, Sse.content(sse), mode in [:stdout, :render], ink}
 
           msg ->
+            flush()
             {:error, msg}
         end
       end
     rescue
-      e -> {:error, Exception.message(e)}
+      e ->
+        flush()
+        {:error, Exception.message(e)}
     end
   end
 
