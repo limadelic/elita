@@ -1,7 +1,7 @@
 defmodule Chat do
   import String, only: [trim: 1]
   import IO, only: [puts: 2, write: 2, read: 2]
-  import Elita, only: [start_link: 2, call: 2]
+  import Elita, only: [start: 2, call: 2]
   import Node, only: [start: 1]
 
   def main(argv) do
@@ -67,7 +67,7 @@ defmodule Chat do
   defp run({:ok, agent, name, dist}) do
     net(dist, name)
 
-    case start_link(agent, [agent]) do
+    case start(agent, [agent]) do
       {:ok, _pid} ->
         tip(dist)
         repl(agent, name)

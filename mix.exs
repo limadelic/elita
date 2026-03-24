@@ -31,8 +31,7 @@ defmodule Elita.MixProject do
       {:req, "~> 0.5"},
       {:jason, "~> 1.4"},
       {:yaml_elixir, "~> 2.9"},
-      {:ymlr, "~> 2.0"},
-      {:mdex, "~> 0.11"}
+      {:ymlr, "~> 2.0"}
     ]
   end
 

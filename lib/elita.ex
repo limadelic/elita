@@ -2,18 +2,26 @@ defmodule Elita do
   use GenServer
 
   import Cfgs, only: [config: 1]
-  import Lite, only: [llm: 2]
+  import Lite, only: [llm: 1]
   import Mem, only: [create: 0]
   import Tools
   import History, only: [record: 1]
   import Msg, only: [user: 1]
-  import Log, only: [reply: 2]
-  import Ink, only: [flush: 1]
+  import Log, only: [log: 5]
   import String, only: [downcase: 1, trim: 1]
-  import System, only: [get_env: 1]
-  import Out, only: [assist: 1, flush: 0]
-  import IO, only: [write: 2]
   import Enum, only: [each: 2]
+
+  def child_spec({name, configs}) do
+    %{
+      id: {__MODULE__, name},
+      start: {__MODULE__, :start_link, [name, configs]},
+      restart: :transient
+    }
+  end
+
+  def start(name, configs) do
+    DynamicSupervisor.start_child(Elita.AgentSupervisor, {__MODULE__, {name, configs}})
+  end
 
   def start_link(name, configs) do
     GenServer.start_link(__MODULE__, {name, configs}, name: via(name))
@@ -52,47 +60,23 @@ defmodule Elita do
 
   defp act(state) do
     state
-    |> llm(mode())
+    |> llm
     |> exec
     |> record
     |> done
-  end
-
-  defp mode do
-    case get_env("ELITA_STREAM") do
-      nil -> Application.get_env(:elita, :stream, :render)
-      v -> parse(v)
-    end
-  end
-
-  defp parse(v) do
-    case downcase(trim(v)) do
-      "silent" -> :silent
-      "stdout" -> :stdout
-      "render" -> :render
-      _ -> Application.get_env(:elita, :stream, :render)
-    end
   end
 
   defp done({:act, state}) do
     act(state)
   end
 
-  defp done({:reply, txt, %{streamed: true} = state}) do
-    txt = trim(txt)
-    ink_flush(state)
-    flush()
-    {:reply, txt, Map.drop(state, [:streamed, :ink])}
-  end
-
   defp done({:reply, txt, %{name: name} = state}) do
     txt = trim(txt)
-    reply(name, txt)
-    flush()
+    log("✨", name, ": ", txt, :white)
     {:reply, txt, state}
   end
 
-  def terminate(_reason, %{defined: agents}) do
+  def terminate(_reason, %{ephemeral: agents}) do
     each(agents, &reap/1)
   end
 
@@ -104,16 +88,5 @@ defmodule Elita do
     GenServer.stop(via(name))
   rescue
     _ -> :ok
-  end
-
-  defp ink_flush(state) do
-    case Map.get(state, :ink) do
-      nil ->
-        assist("\n")
-
-      ink ->
-        flush(ink)
-        write(:stderr, "\n")
-    end
   end
 end

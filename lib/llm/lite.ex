@@ -6,26 +6,16 @@ defmodule Lite do
   import System, only: [get_env: 1, get_env: 2]
   import Map, only: [put: 3, delete: 2]
   import Req, only: [post: 2]
-  import Lite.Stream, only: [run: 4]
+
+  def llm(%{config: config, history: history} = state) do
+    composed = compose(config)
+    body = build(composed, history, state)
+    result = req(body) |> resp
+    {parts(result), state}
+  end
 
   def llm(text) when is_binary(text) do
     req(request(text)) |> resp |> text
-  end
-
-  def llm(%{config: config, history: history} = state, mode \\ :stdout) do
-    composed = compose(config)
-    body = build(composed, history, state)
-    conn = [url: url(), headers: headers(), connect: connect()]
-
-    case run(body, mode, state.name, conn) do
-      {:ok, content, streamed?, ink} ->
-        state = put(state, :streamed, streamed?)
-        state = if ink != nil, do: put(state, :ink, ink), else: state
-        {parts(content), state}
-
-      {:error, reason} ->
-        {parts({:error, reason}), put(state, :streamed, false)}
-    end
   end
 
   defp text([%{"type" => "text", "text" => t} | _]), do: t

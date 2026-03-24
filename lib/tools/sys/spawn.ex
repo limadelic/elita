@@ -1,5 +1,5 @@
 defmodule Tools.Sys.Spawn do
-  import Elita, only: [start_link: 2]
+  import Elita, only: [start: 2]
   import Log, only: [log: 5]
   import Map, only: [get: 3]
   import Enum, only: [join: 2, random: 1, take_random: 2]
@@ -27,7 +27,7 @@ defmodule Tools.Sys.Spawn do
   def exec(_, %{"name" => name} = args, state) do
     configs = get(args, "configs", [name])
     log(name, configs)
-    start_link(name, configs)
+    start(name, configs)
     {"spawned", state}
   end
 

@@ -1,6 +1,6 @@
 defmodule Tester do
   import ExUnit.Assertions
-  import Elita, only: [start_link: 2, cast: 2, call: 2]
+  import Elita, only: [start: 2, cast: 2, call: 2]
   import Lite, only: [llm: 1]
   import String, only: [contains?: 2, downcase: 1]
   import Enum, only: [map: 2]
@@ -21,12 +21,12 @@ defmodule Tester do
 
   def spawn(name) do
     setup()
-    start_link(name(name), list([name(name)]))
+    start(name(name), list([name(name)]))
   end
 
   def spawn(name, configs) do
     setup()
-    start_link(name(name), list(configs) |> map(&to_string/1))
+    start(name(name), list(configs) |> map(&to_string/1))
   end
 
   defp list(configs) when is_list(configs), do: configs

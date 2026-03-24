@@ -2,8 +2,6 @@ defmodule Tools.Sys.Define do
   import Log, only: [log: 5]
   import Map, only: [get: 3]
 
-  @limit 10
-
   def def(name, _state) do
     %{
       name: name,
@@ -14,7 +12,8 @@ defmodule Tools.Sys.Define do
           name: %{type: "string", description: "Agent name (single word, lowercase)"},
           description: %{type: "string", description: "What this agent does"},
           tools: %{type: "string", description: "Comma separated tool names: set, get, tell, ask, spawn, define"},
-          prompt: %{type: "string", description: "System prompt markdown for the agent"}
+          prompt: %{type: "string", description: "System prompt markdown for the agent"},
+          ephemeral: %{type: "boolean", description: "If true, agent is destroyed when parent terminates. Default false (persists)."}
         },
         required: ["name", "prompt"]
       }
@@ -26,33 +25,21 @@ defmodule Tools.Sys.Define do
   end
 
   defp define(%{"name" => name} = args, state) do
-    if global_full?() and not exists?(name) do
-      log("🚫", "define", ": ", "limit reached (#{@limit}) globally", :red)
-      {"error: agent limit reached", state}
-    else
-      insert(name, args, state)
-    end
+    insert(name, args, state)
   end
 
   defp insert(name, args, state) do
     :ets.delete(:elita_agents, name)
     md = build(name, args)
     :ets.insert(:elita_agents, {{:agent, name}, md})
-    log("🧬", name, " defined ", "(#{count()}/#{@limit})", :cyan)
-    state = track(state, name)
+    ephemeral? = get(args, "ephemeral", false)
+    log("🧬", name, " defined ", "(#{count()} active)", :cyan)
+    state = track(state, name, ephemeral?)
     {defined(name), state}
-  end
-
-  defp global_full? do
-    count() >= @limit
   end
 
   defp count do
     :ets.info(:elita_agents, :size)
-  end
-
-  defp exists?(name) do
-    :ets.member(:elita_agents, {:agent, name}) or :ets.member(:elita_agents, name)
   end
 
   defp build(name, args) do
@@ -72,6 +59,19 @@ defmodule Tools.Sys.Define do
 
   defp defined(name), do: "defined #{name}, ready to spawn"
 
-  defp track(%{defined: list} = state, name), do: %{state | defined: list ++ [name]}
-  defp track(state, name), do: Map.put(state, :defined, [name])
+  defp track(state, name, true = _ephemeral) do
+    state
+    |> track_defined(name)
+    |> track_ephemeral(name)
+  end
+
+  defp track(state, name, _ephemeral) do
+    track_defined(state, name)
+  end
+
+  defp track_defined(%{defined: list} = state, name), do: %{state | defined: list ++ [name]}
+  defp track_defined(state, name), do: Map.put(state, :defined, [name])
+
+  defp track_ephemeral(%{ephemeral: list} = state, name), do: %{state | ephemeral: list ++ [name]}
+  defp track_ephemeral(state, name), do: Map.put(state, :ephemeral, [name])
 end
