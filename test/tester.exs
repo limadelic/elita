@@ -1,7 +1,7 @@
 defmodule Tester do
   import ExUnit.Assertions
   import Elita, only: [start_link: 2, cast: 2, call: 2]
-  import Lite, only: [llm: 1]
+  import Llm, only: [llm: 1]
   import String, only: [contains?: 2, downcase: 1]
   import Enum, only: [map: 2]
   import GenServer, only: [stop: 1]

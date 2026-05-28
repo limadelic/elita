@@ -2,7 +2,7 @@ defmodule Elita do
   use GenServer
 
   import Cfgs, only: [config: 1]
-  import Lite, only: [llm: 1]
+  import Llm, only: [llm: 1]
   import Mem, only: [create: 0]
   import Tools
   import History, only: [record: 1]
