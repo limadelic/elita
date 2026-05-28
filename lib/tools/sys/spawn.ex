@@ -24,8 +24,23 @@ defmodule Tools.Sys.Spawn do
     }
   end
 
-  def exec(_, %{"name" => name} = args, state) do
-    configs = get(args, "configs", [name])
+  def exec(_, %{"name" => %{"name" => name} = inner}, state) do
+    configs = case inner["configs"] do
+      list when is_list(list) -> list
+      _ -> [name]
+    end
+    do_spawn(name, configs, state)
+  end
+
+  def exec(_, %{"name" => name} = args, state) when is_binary(name) do
+    do_spawn(name, get(args, "configs", [name]), state)
+  end
+
+  def exec(_, %{"configs" => [name | _] = configs}, state) do
+    do_spawn(name, configs, state)
+  end
+
+  defp do_spawn(name, configs, state) do
     log(name, configs)
     start_link(name, configs)
     {"spawned", state}
