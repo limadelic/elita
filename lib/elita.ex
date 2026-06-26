@@ -42,26 +42,22 @@ defmodule Elita do
 
   defp act(msg, %{history: history} = state) do
     history = history ++ [user(msg)]
-    act(%{state | history: history}, 0)
+    act(%{state | history: history})
   end
 
-  defp act(state, depth) when depth >= 10 do
-    {:reply, "error: max tool iterations", state}
-  end
-
-  defp act(state, depth) do
+  defp act(state) do
     state
     |> llm
     |> exec
     |> record
-    |> done(depth)
+    |> done
   end
 
-  defp done({:act, state}, depth) do
-    act(state, depth + 1)
+  defp done({:act, state}) do
+    act(state)
   end
 
-  defp done({:reply, txt, %{name: name} = state}, _depth) do
+  defp done({:reply, txt, %{name: name} = state}) do
     txt = trim txt
     log("✨", name, ": ", txt, :white)
     {:reply, txt, state}
