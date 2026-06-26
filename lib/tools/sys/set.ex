@@ -16,6 +16,10 @@ defmodule Tools.Sys.Set do
     }
   end
 
+  def exec(tool, %{"value" => value} = args, state) do
+    exec(tool, Map.put_new(args, "key", value), state)
+  end
+
   def exec(_, %{"key" => key, "value" => value}, state) do
     log("✏️", key, " = ", value, :blue)
     Mem.table() |> :ets.insert({key, value})

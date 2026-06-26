@@ -8,7 +8,7 @@ defmodule Mlm do
   @url "http://#{System.get_env("MLM_HOST", "localhost")}:11434/api/chat"
 
   def llm(text) when is_binary(text) do
-    body = %{model: model(), messages: [%{role: "user", content: text}], stream: false}
+    body = %{model: model(), messages: [%{role: "user", content: "/no_think #{text}"}], stream: false}
     req(body) |> resp |> text
   end
 
@@ -19,18 +19,24 @@ defmodule Mlm do
     {req(body) |> resp |> parts, state}
   end
 
-  defp req(body), do: post(@url, json: body, receive_timeout: 60_000)
+  defp req(body), do: post(@url, json: Map.put(body, :think, false), receive_timeout: 120_000)
 
-  defp model, do: get_env("MLM_MODEL", "llama3.2:3b")
+  defp model, do: get_env("MLM_MODEL", "qwen3-fast")
 
-  defp messages(system, history), do: [%{role: "system", content: system} | map(history, &MsgAdapter.to_ollama/1)]
+  defp messages(system, history) do
+    [%{role: "system", content: "/no_think\n#{system}"} | map(history, &MsgAdapter.to_ollama/1)]
+  end
 
   defp add_tools(body, [%{function_declarations: defs}]) do
-    Map.put(body, :tools, map(defs, fn d ->
-      %{type: "function", function: Map.put(d, :parameters, d[:parameters] || %{type: "object"})}
-    end))
+    Map.put(body, :tools, map(defs, &tool/1))
   end
   defp add_tools(body, _), do: body
+
+  defp tool(d) do
+    params = d[:parameters] || %{type: "object"}
+    %{type: "function", function: %{name: d[:name], description: d[:description],
+        parameters: params}}
+  end
 
   defp text([%{"type" => "text", "text" => t} | _]), do: t
   defp text(other), do: other
@@ -43,12 +49,28 @@ defmodule Mlm do
     do: map(calls, fn %{"function" => %{"name" => name, "arguments" => args}} ->
       %{"tool_use" => %{"id" => name, "name" => name, "input" => decode(args)}}
     end)
-  defp resp({:ok, %{status: 200, body: %{"message" => %{"content" => content}}}}), do: content
+  defp resp({:ok, %{status: 200, body: %{"message" => %{"content" => content}}}}), do: strip_think(content)
   defp resp({:ok, %{status: code, body: body}}), do: {:error, "HTTP #{code}: #{inspect(body)}"}
   defp resp({:error, err}), do: {:error, "request failed: #{inspect(err)}"}
 
-  defp decode(args) when is_map(args), do: Map.new(args, fn {k, v} -> {k, decode_val(v)} end)
+  defp decode(args) when is_map(args) do
+    args
+    |> Map.new(fn {k, v} -> {k, decode_val(v)} end)
+    |> flatten_nested()
+  end
   defp decode(args), do: args
+
+  defp flatten_nested(args) do
+    Enum.reduce(args, %{}, fn
+      {_k, v}, acc when is_map(v) -> Map.merge(acc, flatten_nested(v))
+      {k, v}, acc -> Map.put(acc, k, v)
+    end)
+  end
+
+  defp strip_think(content) do
+    stripped = Regex.replace(~r/<think>.*?<\/think>\s*/s, content, "") |> String.trim()
+    if stripped == "", do: content |> String.replace(~r/<\/?think>/s, "") |> String.trim(), else: stripped
+  end
 
   defp decode_val(v) when is_binary(v) do
     json = String.replace(v, "'", "\"")
