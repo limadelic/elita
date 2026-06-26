@@ -1,17 +1,18 @@
 defmodule VerifyBehaviorTest do
   use ExUnit.Case
+  import String, only: [contains?: 2, downcase: 1]
 
   test "substring match with downcase succeeds" do
-    assert String.contains?(String.downcase("HELLO world"), String.downcase("hello"))
+    assert contains?(downcase("HELLO world"), downcase("hello"))
   end
 
   test "substring mismatch fails with assertion error, no API fallback" do
     assert_raise ExUnit.AssertionError, fn ->
       answer = "goodbye world"
       expected = "hello"
-      assert String.contains?(
-        String.downcase(answer),
-        String.downcase("#{expected}")
+      assert contains?(
+        downcase(answer),
+        downcase("#{expected}")
       ), "Expected '#{answer}' to contain '#{expected}'"
     end
   end
@@ -24,7 +25,6 @@ defmodule VerifyBehaviorTest do
   end
 
   test "error tuple not passed to downcase" do
-    # Proves we catch non-binary before downcase can crash on it
     answer = {:error, "api_failed"}
     refute is_binary(answer)
   end
