@@ -1,5 +1,6 @@
 defmodule GreetTest do
   use Tester
+  @moduletag :main
 
   test "greet conversation flow" do
     spawn :greet

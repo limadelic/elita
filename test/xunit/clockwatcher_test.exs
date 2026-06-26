@@ -1,5 +1,6 @@
 defmodule ClockwatcherTest do
   use Tester
+  @moduletag :main
 
   setup do
     spawn(:clockwatcher)

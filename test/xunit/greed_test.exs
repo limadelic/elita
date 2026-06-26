@@ -1,5 +1,6 @@
 defmodule GreedTest do
   use Tester
+  @moduletag :main
 
   setup do
     spawn :greed, [ :greed, :player]
