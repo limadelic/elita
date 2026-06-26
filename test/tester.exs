@@ -1,7 +1,6 @@
 defmodule Tester do
   import ExUnit.Assertions
   import Elita, only: [start_link: 2, cast: 2, call: 2]
-  import Llm, only: [llm: 1]
   import String, only: [contains?: 2, downcase: 1]
   import Enum, only: [map: 2]
   import GenServer, only: [stop: 1]
@@ -58,21 +57,9 @@ defmodule Tester do
   def verify(name, expected, query) do
     answer = ask(name, query)
 
-    try do
-      assert contains?(downcase(answer), downcase("#{expected}")),
-             "Expected '#{answer}' to contain '#{expected}'"
-    rescue
-      ExUnit.AssertionError ->
-        ask_llm(answer, expected, query)
-    end
-  end
-
-  defp ask_llm(answer, expected, query) do
-    prompt = "Does the response '#{answer}' match the expected behavior '#{expected}' when asked '#{query}'? Answer only yes or no."
-    result = llm(prompt)
-
-    assert contains?(downcase(result), "yes"),
-           "LLM judge failed: Expected '#{answer}' to match '#{expected}' for query '#{query}'"
+    assert is_binary(answer), "Expected binary answer, got: #{inspect(answer)}"
+    assert contains?(downcase(answer), downcase("#{expected}")),
+           "Expected '#{answer}' to contain '#{expected}'"
   end
 
   def wait_until(agent, cond, retries \\ 5)
