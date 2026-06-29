@@ -5,7 +5,6 @@ defmodule Tester do
   import Enum, only: [map: 2]
   import GenServer, only: [stop: 1]
   import Log, only: [log: 5]
-  import File, only: [read!: 1]
 
   defmacro __using__(_opts) do
     quote do
@@ -80,11 +79,5 @@ defmodule Tester do
   def speck(name) do
     spawn(name, :speck)
     verify(name, "passed", "exec #{name}")
-  end
-
-  def silkd(name) do
-    spawn(name, :silkd)
-    silk = read!("test/silk/#{name}.md")
-    verify(name, silk, "weave #{name}")
   end
 end
