@@ -2,7 +2,7 @@ defmodule Lite do
   import Compose, only: [compose: 1]
   import Snippet, only: [snip: 2]
   import Tools, only: [tools: 2]
-  import Enum, only: [map: 2]
+  import Enum, only: [map: 2, find_value: 2]
   import System, only: [get_env: 1, get_env: 2]
   import Map, only: [put: 3, delete: 2]
   import Req, only: [post: 2]
@@ -30,13 +30,15 @@ defmodule Lite do
   end
 
   defp build(composed, history, state) do
-    base = %{
-      model: model(),
-      max_tokens: 4096,
-      system: snip(composed.content, composed[:import]),
-      messages: history
-    }
-    add_tools(base, tools(composed, state))
+    composed
+    |> base(history)
+    |> add_tools(tools(composed, state))
+  end
+
+  defp base(composed, history) do
+    %{model: model(), max_tokens: 4096}
+    |> put(:system, snip(composed.content, composed[:import]))
+    |> put(:messages, history)
   end
 
   defp add_tools(base, [%{function_declarations: defs}]) do
@@ -81,7 +83,10 @@ defmodule Lite do
   defp ssl(nil), do: []
   defp ssl(path), do: [transport_opts: [cacertfile: path]]
 
-  defp token, do: get_env("ANTHROPIC_AUTH_TOKEN") || get_env("ANTHROPIC_API_KEY")
+  defp token do
+    ["ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_API_KEY"]
+    |> find_value(&get_env/1)
+  end
 
   defp resp({:ok, %{status: 200, body: %{"content" => content}}}), do: content
   defp resp({:ok, %{status: code, body: body}}), do: {:error, "HTTP #{code}: #{inspect(body)}"}

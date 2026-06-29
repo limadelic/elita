@@ -1,6 +1,6 @@
 defmodule History do
   import Msg, only: [tool_result: 2]
-  import Enum, only: [any?: 2, find_value: 3, filter: 2, map: 2, empty?: 1]
+  import Enum, only: [any?: 2, find_value: 3, filter: 2, map: 2]
 
   def record({parts, state}) do
     record(parts, state)
@@ -8,39 +8,40 @@ defmodule History do
 
   def record(parts, state) when is_list(parts) do
     {messages, text} = build_messages(parts)
-    history = state.history ++ messages
-
-    if any?(parts, &has_result?/1) do
-      {:act, %{state | history: history}}
-    else
-      {:reply, text, %{state | history: history}}
-    end
+    reply_or_act(any?(parts, &has_result?/1), text, state, messages)
   end
 
   def record({:error, reason}, state) do
     {:reply, "Error: #{reason}", state}
   end
 
+  defp reply_or_act(true, _text, state, messages) do
+    {:act, %{state | history: state.history ++ messages}}
+  end
+
+  defp reply_or_act(false, text, state, messages) do
+    {:reply, text, %{state | history: state.history ++ messages}}
+  end
+
   defp build_messages(parts) do
     text = find_value(parts, "", &text/1)
     content = build_content(parts)
-
-    messages =
-      if empty?(content) do
-        []
-      else
-        [%{role: "assistant", content: content}]
-      end
-
-    messages =
-      if any?(parts, &has_result?/1) do
-        messages ++ build_results(parts)
-      else
-        messages
-      end
-
-    {messages, text}
+    {msgs(content, parts), text}
   end
+
+  defp msgs(content, parts) do
+    content_msgs(content) ++ result_msgs(parts)
+  end
+
+  defp content_msgs([]), do: []
+  defp content_msgs(content), do: [%{role: "assistant", content: content}]
+
+  defp result_msgs(parts) do
+    pick_results(any?(parts, &has_result?/1), parts)
+  end
+
+  defp pick_results(true, parts), do: build_results(parts)
+  defp pick_results(false, _parts), do: []
 
   defp build_content(parts) do
     parts
@@ -54,9 +55,9 @@ defmodule History do
     |> map(&to_result/1)
   end
 
-  defp has_content?(part) do
-    Map.has_key?(part, "text") or Map.has_key?(part, "tool_use")
-  end
+  defp has_content?(%{"text" => _}), do: true
+  defp has_content?(%{"tool_use" => _}), do: true
+  defp has_content?(_), do: false
 
   defp to_content(%{"text" => text}) do
     %{type: "text", text: text}

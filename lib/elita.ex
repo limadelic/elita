@@ -33,11 +33,12 @@ defmodule Elita do
   end
 
   defp tape_seed do
-    case System.get_env("TAPE") do
-      nil -> :ok
-      _ -> :rand.seed(:exsss, {1, 2, 3})
-    end
+    System.get_env("TAPE")
+    |> maybe_seed
   end
+
+  defp maybe_seed(nil), do: :ok
+  defp maybe_seed(_), do: :rand.seed(:exsss, {1, 2, 3})
 
   def handle_call({:act, msg}, _, state) do
     act(msg, state)

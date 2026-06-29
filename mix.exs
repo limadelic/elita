@@ -31,14 +31,16 @@ defmodule Elita.MixProject do
       {:req, "~> 0.5"},
       {:jason, "~> 1.4"},
       {:yaml_elixir, "~> 2.9"},
-      {:ymlr, "~> 2.0"}
+      {:ymlr, "~> 2.0"},
+      {:credo, "~> 1.7", runtime: false}
     ]
   end
 
   defp aliases do
     [
       build: ["compile", "escript.build"],
-      t: ["test --no-start"]
+      t: ["test --no-start"],
+      lint: ["format --check-formatted", "credo --strict"]
     ]
   end
 end
