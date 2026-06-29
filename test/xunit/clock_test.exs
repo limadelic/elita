@@ -1,6 +1,6 @@
 defmodule ClockTest do
   use Tester
-  @moduletag :main
+  @moduletag :xunit
   import NaiveDateTime, only: [local_now: 0]
 
   test "clock gives current hour" do

@@ -1,5 +1,6 @@
 defmodule BirthTest do
   use Tester
+  @moduletag :xunit
 
   setup do
     spawn(:mother)

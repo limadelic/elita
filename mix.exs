@@ -6,6 +6,7 @@ defmodule Elita.MixProject do
       app: :elita,
       version: "0.1.0",
       elixir: "~> 1.18",
+      elixirc_paths: paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       escript: [main_module: Chat],
@@ -20,6 +21,9 @@ defmodule Elita.MixProject do
       mod: {Elita.Application, []}
     ]
   end
+
+  defp paths(:test), do: ["lib", "test/support"]
+  defp paths(_), do: ["lib"]
 
   # Run "mix help deps" to learn about dependencies.
   defp deps do

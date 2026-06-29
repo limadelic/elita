@@ -6,18 +6,21 @@ defmodule Lite do
   import System, only: [get_env: 1, get_env: 2]
   import Map, only: [put: 3, delete: 2]
   import Req, only: [post: 2]
-  import Tape, only: [play: 2]
+  import Application, only: [get_env: 3]
 
   def llm(%{config: config, history: history} = state) do
     composed = compose(config)
     body = build(composed, history, state)
-    result = play(body, fn -> req(body) |> resp end)
+    result = tape(body, fn -> req(body) |> resp end)
     {parts(result), state}
   end
 
   def llm(text) when is_binary(text) do
     req(request(text)) |> resp |> text
   end
+
+  defp tape(body, fun), do: get_env(:elita, :tape, &thru/2).(body, fun)
+  defp thru(_body, fun), do: fun.()
 
   defp text([%{"type" => "text", "text" => t} | _]), do: t
   defp text(other), do: other

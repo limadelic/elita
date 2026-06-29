@@ -1,6 +1,6 @@
 defmodule ClockwatcherTest do
   use Tester
-  @moduletag :main
+  @moduletag :xunit
 
   setup do
     spawn(:clockwatcher)
@@ -19,7 +19,7 @@ defmodule ClockwatcherTest do
     cond do
       weekday > 5 -> "come back monday"
       hour < 9 -> "don't start until 9"
-      hour == 12 -> "lunch time"
+      hour in [12, 13] -> "lunch time"
       hour >= 17 -> "done for the day"
       true -> "yes"
     end
