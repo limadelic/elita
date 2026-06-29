@@ -1,5 +1,6 @@
 defmodule TodoTest do
   use Tester
+  @moduletag :xunit
 
   setup do
     spawn :todo
