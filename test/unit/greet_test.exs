@@ -1,4 +1,4 @@
-defmodule GreetMockTest do
+defmodule GreetUnitTest do
   use Tester
   @moduletag :main
 

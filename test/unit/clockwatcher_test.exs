@@ -1,4 +1,4 @@
-defmodule ClockwatcherMockTest do
+defmodule ClockwatcherUnitTest do
   use Tester
   @moduletag :main
 

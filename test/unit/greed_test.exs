@@ -1,4 +1,4 @@
-defmodule GreedMockTest do
+defmodule GreedUnitTest do
   use Tester
   @moduletag :main
 
