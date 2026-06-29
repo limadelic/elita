@@ -1,6 +1,8 @@
 defmodule BossTest do
   use Tester
 
+  @moduletag :xunit
+
   test "boss delegates task to worker" do
     spawn(:boss)
     spawn(:dev, :worker)

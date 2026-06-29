@@ -1,9 +1,17 @@
-defmodule GreedTest do
+defmodule GreedUnitTest do
   use Tester
-  @moduletag :xunit
+  @moduletag :main
 
   setup do
-    spawn :greed, [ :greed, :player]
+    System.put_env("TAPE", "replay")
+    System.put_env("CASSETTE", "greed")
+
+    on_exit(fn ->
+      System.delete_env("TAPE")
+      System.delete_env("CASSETTE")
+    end)
+
+    spawn :greed, [:greed, :player]
     :ok
   end
 

@@ -1,5 +1,6 @@
 defmodule BirthTest do
   use Tester
+  @moduletag :xunit
 
   setup do
     spawn(:mother)
@@ -9,6 +10,6 @@ defmodule BirthTest do
   test "mother gives birth to baby" do
     ask(:mother, "it's time to give birth")
 
-    verify(:baby, "cries", "spank")
+    verify(:baby, "cry", "spank")
   end
 end

@@ -1,5 +1,6 @@
 defmodule Doble9Test do
   use Tester
+  @moduletag :xunit
 
   setup do
     spawn :doble9

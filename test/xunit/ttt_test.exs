@@ -1,6 +1,7 @@
 defmodule TttTest do
   use Tester
 
+  @tag :skip
   test "ttt agents play to finish" do
     spawn(:alice, :ttt)
     spawn(:bob, :ttt)

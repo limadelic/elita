@@ -2,7 +2,7 @@ defmodule Elita do
   use GenServer
 
   import Cfgs, only: [config: 1]
-  import Lite, only: [llm: 1]
+  import Llm, only: [llm: 1]
   import Mem, only: [create: 0]
   import Tools
   import History, only: [record: 1]
@@ -28,8 +28,17 @@ defmodule Elita do
 
   def init({name, configs}) do
     create()
+    tape_seed()
     {:ok, %{name: name, config: config(configs), history: []}}
   end
+
+  defp tape_seed do
+    System.get_env("TAPE")
+    |> maybe_seed
+  end
+
+  defp maybe_seed(nil), do: :ok
+  defp maybe_seed(_), do: :rand.seed(:exsss, {1, 2, 3})
 
   def handle_call({:act, msg}, _, state) do
     act(msg, state)
