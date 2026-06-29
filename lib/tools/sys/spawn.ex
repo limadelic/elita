@@ -5,7 +5,6 @@ defmodule Tools.Sys.Spawn do
   import Enum, only: [join: 2, random: 1, take_random: 2]
   import Cfgs, only: [value: 2]
 
-  # credo:disable-for-lines:1 Credo.Check.Refactor.CyclomaticComplexity
   def def(name, state), do: spec(name, state)
 
   def exec(_, %{"name" => %{"name" => name} = inner}, state) do

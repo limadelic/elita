@@ -1,7 +1,6 @@
 defmodule Tools.Sys.Set do
   import Log, only: [log: 5]
 
-  # credo:disable-for-lines:1 Credo.Check.Refactor.CyclomaticComplexity
   def def(name, _state), do: spec(name)
 
   def exec(tool, %{"value" => value} = args, state) when not is_map_key(args, "key") do
