@@ -1,16 +1,22 @@
-defmodule DoctorTest do
+defmodule DoctorUnitTest do
   use Tester
-
-  @moduletag :xunit
+  @moduletag :main
 
   setup do
+    System.put_env("TAPE", "replay")
+    System.put_env("CASSETTE", "doctor")
+
+    on_exit(fn ->
+      System.delete_env("TAPE")
+      System.delete_env("CASSETTE")
+    end)
+
     spawn(:doctor)
     spawn(:patient, :actor)
     :ok
   end
 
   test "doctor diagnoses appendicitis" do
-
     ask(:patient, """
     you are a patient with appendicitis
     - sharp right abdominal pain, nausea, fever.
@@ -19,5 +25,4 @@ defmodule DoctorTest do
 
     verify(:doctor, "appendicitis", "diagnose patient")
   end
-
 end
