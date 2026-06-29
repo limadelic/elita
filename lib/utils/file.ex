@@ -12,19 +12,19 @@ defmodule Utils.File do
   def file(name) do
     @paths
     |> map(fn path -> join(path, name) end)
-    |> find_value(fn path -> attempt(path) end)
-    |> case do
-      nil -> "file not found: #{name}"
-      content -> content
-    end
+    |> find_value(&safe_read/1)
+    |> handle_missing(name)
   end
+
+  defp handle_missing(nil, name), do: "file not found: #{name}"
+  defp handle_missing(content, _name), do: content
 
   defp join(path, name), do: "#{path}#{name}"
 
-  defp attempt(path) do
-    case read(path) do
-      {:ok, content} -> content
-      {:error, _} -> nil
-    end
+  defp safe_read({:ok, content}), do: content
+  defp safe_read({:error, _}), do: nil
+
+  defp safe_read(path) do
+    read(path) |> safe_read()
   end
 end

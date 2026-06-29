@@ -5,31 +5,62 @@ defmodule Utils.Yaml do
   import Ymlr, only: [document!: 1]
   import Jason, only: [decode: 1]
 
-  def yaml(args) when is_map(args) or is_list(args) do
+  def yaml(args) when is_map(args) do
+    encode_yaml(args)
+  end
+
+  def yaml(args) when is_list(args) do
+    encode_yaml(args)
+  end
+
+  def yaml(args) when is_binary(args) do
+    result = try_json(args)
+    fallback(result, args)
+  end
+
+  def yaml(nil), do: nil
+
+  def yaml(args), do: "#{inspect(args)}"
+
+  defp encode_yaml(args) do
+    render(args)
+  rescue
+    _ -> inspect(args)
+  end
+
+  defp render(args) do
     args
     |> atomize()
     |> document!()
     |> replace_prefix("---", "")
-  rescue
-    _ -> "#{inspect(args)}"
   end
 
-  def yaml(args) when is_binary(args) do
-    yaml(
-      json(args) ||
-      json(replace(args, "'", "\""))
-    ) || args
+  defp fallback(nil, args), do: args
+  defp fallback(result, _args), do: result
+
+  defp try_json(args) do
+    first = json(args)
+    handle_json(first, args)
   end
 
-  def yaml(nil), do: nil
-  def yaml(args), do: "#{inspect(args)}"
-
-  defp json args do
-    case decode(args)do
-      {:ok, json} -> json
-      _ -> nil
-    end
+  defp handle_json(nil, args) do
+    yaml(json(replaced(args)))
   end
+
+  defp handle_json(parsed, _args) do
+    yaml(parsed)
+  end
+
+  defp replaced(args) do
+    replace(args, "'", "\"")
+  end
+
+  defp json(args) do
+    decode(args) |> parse_json()
+  end
+
+  defp parse_json({:ok, json}), do: json
+  defp parse_json(_), do: nil
 
   defp atomize(map) when is_map(map) do
     new(map, fn {k, v} -> {to_atom(k), atomize(v)} end)

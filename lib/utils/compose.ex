@@ -14,8 +14,16 @@ defmodule Compose do
   end
 
   defp combine(config, acc) do
-    tools = (acc[:tools] || []) ++ (config[:tools] || []) |> uniq
+    tools = merge_tools(acc, config)
     merge(acc, config) |> put(:tools, tools)
+  end
+
+  defp merge_tools(acc, config) do
+    tools(acc) ++ tools(config) |> uniq
+  end
+
+  defp tools(config) do
+    get(config, :tools, [])
   end
 
   defp content(merged, configs) do

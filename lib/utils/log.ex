@@ -13,7 +13,18 @@ defmodule Log do
 
   def log(emoji, head, neck, body, color) do
     body = yaml(body)
-    neck = neck <> (contains?(body, "\n") && "\n" || "")
+    neck = neck <> eol(body)
     puts("\e[38;5;#{@colors[color]}m#{emoji} #{head}#{neck}#{body}\e[0m")
   end
+
+  defp eol(body) do
+    body |> has_newline() |> eol_char()
+  end
+
+  defp has_newline(body) do
+    contains?(body, "\n")
+  end
+
+  defp eol_char(true), do: "\n"
+  defp eol_char(false), do: ""
 end
