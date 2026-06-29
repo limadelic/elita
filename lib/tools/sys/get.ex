@@ -19,7 +19,7 @@ defmodule Tools.Sys.Get do
   def exec(_, %{"key" => key}, state) do
     value = case :ets.lookup(Mem.table(), key) do
       [{^key, value}] -> value
-      [] -> "not found"
+      [] -> "(empty)"
     end
     log("👀", key, ": ", value, :blue)
     {value, state}

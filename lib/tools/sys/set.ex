@@ -16,8 +16,8 @@ defmodule Tools.Sys.Set do
     }
   end
 
-  def exec(tool, %{"value" => value} = args, state) do
-    exec(tool, Map.put_new(args, "key", value), state)
+  def exec(tool, %{"value" => value} = args, state) when not is_map_key(args, "key") do
+    exec(tool, Map.put(args, "key", value), state)
   end
 
   def exec(_, %{"key" => key, "value" => value}, state) do

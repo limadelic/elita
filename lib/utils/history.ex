@@ -1,14 +1,14 @@
 defmodule History do
-  import Msg, only: [assistant: 1, tool_use: 3, tool_result: 2]
-  import Enum, only: [reduce: 3, any?: 2, find_value: 3]
+  import Msg, only: [tool_result: 2]
+  import Enum, only: [any?: 2, find_value: 3, filter: 2, map: 2, empty?: 1]
 
   def record({parts, state}) do
     record(parts, state)
   end
 
   def record(parts, state) when is_list(parts) do
-    history = reduce(parts, state.history, &add/2)
-    text = find_value(parts, "", &text/1)
+    {messages, text} = build_messages(parts)
+    history = state.history ++ messages
 
     if any?(parts, &has_result?/1) do
       {:act, %{state | history: history}}
@@ -21,17 +21,54 @@ defmodule History do
     {:reply, "Error: #{reason}", state}
   end
 
-  defp add(%{"text" => text}, history), do: history ++ [assistant(text)]
+  defp build_messages(parts) do
+    text = find_value(parts, "", &text/1)
+    content = build_content(parts)
 
-  defp add(%{"result" => result, "tool_use" => %{"id" => id, "name" => name, "input" => input}}, history) do
-    history ++ [tool_use(id, name, input), tool_result(id, stringify(result))]
+    messages =
+      if empty?(content) do
+        []
+      else
+        [%{role: "assistant", content: content}]
+      end
+
+    messages =
+      if any?(parts, &has_result?/1) do
+        messages ++ build_results(parts)
+      else
+        messages
+      end
+
+    {messages, text}
   end
 
-  defp add(%{"tool_use" => %{"id" => id, "name" => name, "input" => input}}, history) do
-    history ++ [tool_use(id, name, input)]
+  defp build_content(parts) do
+    parts
+    |> filter(&has_content?/1)
+    |> map(&to_content/1)
   end
 
-  defp add(_, history), do: history
+  defp build_results(parts) do
+    parts
+    |> filter(&has_result?/1)
+    |> map(&to_result/1)
+  end
+
+  defp has_content?(part) do
+    Map.has_key?(part, "text") or Map.has_key?(part, "tool_use")
+  end
+
+  defp to_content(%{"text" => text}) do
+    %{type: "text", text: text}
+  end
+
+  defp to_content(%{"tool_use" => %{"id" => id, "name" => name, "input" => input}}) do
+    %{type: "tool_use", id: id, name: name, input: input}
+  end
+
+  defp to_result(%{"tool_use" => %{"id" => id}, "result" => result}) do
+    tool_result(id, stringify(result))
+  end
 
   defp text(%{"text" => text}), do: text
   defp text(_), do: nil

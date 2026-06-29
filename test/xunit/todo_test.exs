@@ -1,5 +1,6 @@
 defmodule TodoTest do
   use Tester
+  @moduletag :main
 
   setup do
     spawn :todo
