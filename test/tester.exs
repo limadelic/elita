@@ -65,9 +65,16 @@ defmodule Tester do
   def wait_until(agent, cond, retries \\ 5)
   def wait_until(_agent, cond, 0), do: raise "Timeout waiting for: #{cond}"
   def wait_until(agent, cond, retries) do
+    settle(agent)
     verify(agent, "yes", "did you #{cond}?")
   rescue
     _ -> wait_until(agent, cond, retries - 1)
+  end
+
+  defp settle(agent) do
+    ask(agent, "are you ready?")
+  rescue
+    _ -> :ok
   end
 
   def speck(name) do
