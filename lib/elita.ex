@@ -28,7 +28,15 @@ defmodule Elita do
 
   def init({name, configs}) do
     create()
+    tape_seed()
     {:ok, %{name: name, config: config(configs), history: []}}
+  end
+
+  defp tape_seed do
+    case System.get_env("TAPE") do
+      nil -> :ok
+      _ -> :rand.seed(:exsss, {1, 2, 3})
+    end
   end
 
   def handle_call({:act, msg}, _, state) do
