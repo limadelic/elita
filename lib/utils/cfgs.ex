@@ -17,20 +17,25 @@ defmodule Cfgs do
   end
 
   defp expand(list) do
-    deps =
-      list
-      |> map(&deps/1)
-      |> List.flatten()
-      |> reject(&(&1 in list))
-
+    deps = gather_deps(list)
     expand(list, deps)
+  end
+
+  defp gather_deps(list) do
+    list
+    |> map(&deps/1)
+    |> List.flatten()
+    |> reject(&(&1 in list))
   end
 
   defp expand(list, []), do: list
   defp expand(list, deps), do: expand(list ++ deps)
 
   defp deps(name) do
-    config = Cfg.config(name)
-    config[:includes] || []
+    Cfg.config(name) |> includes()
+  end
+
+  defp includes(config) do
+    get(config, :includes, [])
   end
 end

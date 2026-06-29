@@ -19,11 +19,15 @@ defmodule Chat do
   end
 
   defp repl(agent) do
-    case gets("#{agent} > ") do
-      :eof -> puts("Bye!")
-      input -> 
-        puts call(agent, trim(input))
-        repl(agent)
-    end
+    gets("#{agent} > ") |> handle_input(agent)
+  end
+
+  defp handle_input(:eof, _agent) do
+    puts("Bye!")
+  end
+
+  defp handle_input(input, agent) do
+    puts(call(agent, trim(input)))
+    repl(agent)
   end
 end
