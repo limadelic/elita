@@ -6,12 +6,12 @@ defmodule Lite do
   import System, only: [get_env: 1, get_env: 2]
   import Map, only: [put: 3, delete: 2]
   import Req, only: [post: 2]
-  import Tape, only: [play: 1]
+  import Tape, only: [play: 2]
 
   def llm(%{config: config, history: history} = state) do
     composed = compose(config)
     body = build(composed, history, state)
-    result = play(fn -> req(body) |> resp end)
+    result = play(body, fn -> req(body) |> resp end)
     {parts(result), state}
   end
 

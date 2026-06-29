@@ -1,7 +1,16 @@
-defmodule TodoTest do
+defmodule TodoMockTest do
   use Tester
+  @moduletag :main
 
   setup do
+    System.put_env("TAPE", "replay")
+    System.put_env("CASSETTE", "todo")
+
+    on_exit(fn ->
+      System.delete_env("TAPE")
+      System.delete_env("CASSETTE")
+    end)
+
     spawn :todo
     :ok
   end

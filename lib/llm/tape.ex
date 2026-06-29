@@ -2,39 +2,43 @@ defmodule Tape do
   import File, only: [write: 2, read!: 1, exists?: 1, mkdir_p: 1]
   import System, only: [get_env: 1]
   import Jason, only: [encode!: 1, decode!: 1]
+  import Map, only: [fetch: 2, put: 3]
 
-  def play(request_fun) do
+  def play(body, request_fun) do
     case get_env("TAPE") do
-      "record" -> record(request_fun)
-      "replay" -> replay()
+      "record" -> record(body, request_fun)
+      "replay" -> replay(body)
       _ -> request_fun.()
     end
   end
 
-  defp record(fun) do
+  defp record(body, fun) do
     result = fun.()
-    write_cassette(result)
+    key = compute_key(body)
+    write_cassette(key, result)
     result
   end
 
-  defp replay do
+  defp replay(body) do
     init_ets()
-    entries = read_cassette()
-    pos = get_position()
-    if pos < length(entries) do
-      entry = Enum.at(entries, pos)
-      bump_position()
-      entry
-    else
-      {:error, "cassette exhausted at position #{pos}"}
+    cassette = read_cassette()
+    key = compute_key(body)
+    case fetch(cassette, key) do
+      {:ok, content} -> content
+      :error -> {:error, "no cassette entry for #{key}"}
     end
   end
 
-  defp write_cassette(entry) do
+  defp compute_key(body) do
+    messages = body[:messages] || []
+    :erlang.phash2(messages) |> to_string()
+  end
+
+  defp write_cassette(key, entry) do
     path = cassette_file()
     mkdir_p(cassette_dir())
-    entries = existing_entries(path)
-    updated = entries ++ [entry]
+    cassette = existing_cassette(path)
+    updated = put(cassette, key, entry)
     write(path, encode!(updated))
   end
 
@@ -42,30 +46,18 @@ defmodule Tape do
     cassette_file() |> read!() |> decode!()
   end
 
-  defp existing_entries(path) do
+  defp existing_cassette(path) do
     if exists?(path) do
       path |> read!() |> decode!()
     else
-      []
+      %{}
     end
-  end
-
-  defp get_position do
-    case :ets.lookup(:tape, :position) do
-      [{:position, pos}] -> pos
-      [] -> 0
-    end
-  end
-
-  defp bump_position do
-    :ets.update_counter(:tape, :position, {2, 1})
   end
 
   defp init_ets do
     case :ets.whereis(:tape) do
       :undefined ->
         :ets.new(:tape, [:named_table, :public])
-        :ets.insert(:tape, {:position, 0})
 
       _ ->
         :ok
