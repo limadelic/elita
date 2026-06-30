@@ -15,8 +15,7 @@ defmodule ClockwatcherUnitTest do
     :ok
   end
 
-  test "clockwatcher responds with a schedule answer" do
-    response = ask(:clockwatcher, "can you handle this task?")
-    assert is_binary(response)
+  test "clockwatcher declines before 9 AM" do
+    verify :clockwatcher, "don't start until 9", "can you handle this task?"
   end
 end

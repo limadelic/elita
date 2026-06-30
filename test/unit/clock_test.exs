@@ -16,8 +16,6 @@ defmodule ClockUnitTest do
   end
 
   test "clock responds with an hour" do
-    response = ask(:clock, "what hour is it?")
-    assert is_binary(response)
-    assert String.match?(response, ~r/\d+/)
+    verify :clock, "00", "what hour is it?"
   end
 end
