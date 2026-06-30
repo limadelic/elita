@@ -1,1 +1,22 @@
-{"35812991":[{"text":"I need to check the current time first.\n\nThe current time is **2026-06-29 13:11:07**, which is **1:11 PM on a Monday**.\n\nSince it's currently **during lunch break (12 PM to 1 PM)**, I'm unable to help with tasks right now.\n\n**No, it's lunch time.** Please come back after 1 PM and I'll be happy to assist!","type":"text"}]}
+[
+  [
+    "clockwatcher",
+    "[{\"role\":\"user\",\"content\":\"can you handle this task?\"}]",
+    [
+      {
+        "text": "I need to check the current time first.\n\n**Current time: 2026-06-30 00:57:47** (12:57 AM on Tuesday)\n\nNo, I can't handle that task right now. It's 12:57 AM, which is well before my work hours begin at 9 AM. I don't start until 9 AM on weekdays.\n\nPlease come back during business hours (9 AM to 5 PM, Monday through Friday).",
+        "type": "text"
+      }
+    ]
+  ],
+  [
+    "clockwatcher",
+    "[{\"role\":\"user\",\"content\":\"can you handle this task?\"}]",
+    [
+      {
+        "text": "I need to check the current time first.\n\n**Current time: 2026-06-30 00:58:00** (12:58 AM on Tuesday, June 30th, 2026)\n\n**No, I can't handle this task right now.** It's 12:58 AM, which is before my 9 AM start time. Please come back during work hours (9 AM to 5 PM, Monday through Friday).",
+        "type": "text"
+      }
+    ]
+  ]
+]

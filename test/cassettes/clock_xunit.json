@@ -1,0 +1,12 @@
+[
+  [
+    "clock",
+    "[{\"role\":\"user\",\"content\":\"what hour is it?\"}]",
+    [
+      {
+        "text": "The current hour is **0** (midnight), or **12 AM** in 12-hour format.\n\nThe full current time is 2026-06-30 00:58:09.",
+        "type": "text"
+      }
+    ]
+  ]
+]

@@ -101,8 +101,13 @@ defmodule Tape do
   defp write_new_entry(agent_name, messages, response) do
     path = cassette_file()
     mkdir_p(cassette_dir())
+    entries =
+      case read_cassette_data() do
+        {:new_format, e} -> e
+        _ -> []
+      end
     req_json = encode!(messages)
-    updated = [[agent_name, req_json, response]]
+    updated = entries ++ [[agent_name, req_json, response]]
     write(path, encode!(updated, pretty: true))
   end
 

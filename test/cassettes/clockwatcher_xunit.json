@@ -1,0 +1,12 @@
+[
+  [
+    "clockwatcher",
+    "[{\"role\":\"user\",\"content\":\"can you handle this task?\"}]",
+    [
+      {
+        "text": "# Clock says: The current time is 2026-06-30 00:58:07 (12:58 AM on Tuesday, June 30, 2026)\n\n---\n\n**No, I can't handle this task.** \n\nIt's 12:58 AM - I don't start until 9 AM. Please come back during work hours (9 AM to 5 PM, Monday through Friday).",
+        "type": "text"
+      }
+    ]
+  ]
+]
