@@ -7,9 +7,22 @@ defmodule Tape do
   def play(body, request_fun) do
     case get_env("TAPE") do
       "record" -> record(body, request_fun)
-      "replay" -> replay(body)
-      _ -> request_fun.()
+      _ -> replay_or_record(body, request_fun)
     end
+  end
+
+  defp replay_or_record(body, request_fun) do
+    cassette = read_cassette_safe()
+    key = compute_key(body)
+    case fetch(cassette, key) do
+      {:ok, content} -> content
+      :error -> record(body, request_fun)
+    end
+  end
+
+  defp read_cassette_safe do
+    path = cassette_file()
+    existing_cassette(path)
   end
 
   defp record(body, fun) do
@@ -17,16 +30,6 @@ defmodule Tape do
     key = compute_key(body)
     write_cassette(key, result)
     result
-  end
-
-  defp replay(body) do
-    init_ets()
-    cassette = read_cassette()
-    key = compute_key(body)
-    case fetch(cassette, key) do
-      {:ok, content} -> content
-      :error -> {:error, "no cassette entry for #{key}"}
-    end
   end
 
   defp compute_key(body) do
@@ -42,25 +45,11 @@ defmodule Tape do
     write(path, encode!(updated))
   end
 
-  defp read_cassette do
-    cassette_file() |> read!() |> decode!()
-  end
-
   defp existing_cassette(path) do
     if exists?(path) do
       path |> read!() |> decode!()
     else
       %{}
-    end
-  end
-
-  defp init_ets do
-    case :ets.whereis(:tape) do
-      :undefined ->
-        :ets.new(:tape, [:named_table, :public])
-
-      _ ->
-        :ok
     end
   end
 

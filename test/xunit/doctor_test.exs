@@ -4,8 +4,15 @@ defmodule DoctorTest do
   @moduletag :xunit
 
   setup do
+    System.put_env("CASSETTE", "doctor_xunit")
+
+    on_exit(fn ->
+      System.delete_env("CASSETTE")
+    end)
+
     spawn(:doctor)
     spawn(:patient, :actor)
+    spawn(:judge)
     :ok
   end
 
@@ -17,7 +24,8 @@ defmodule DoctorTest do
     Improvise realistic details.
     """)
 
-    verify(:doctor, "appendicitis", "diagnose patient")
+    diagnosis = ask(:doctor, "diagnose patient")
+    judge(diagnosis, "appendicitis is identified as the likely diagnosis")
   end
 
 end
