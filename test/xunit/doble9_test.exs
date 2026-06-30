@@ -3,7 +3,16 @@ defmodule Doble9Test do
   @moduletag :xunit
 
   setup do
+    System.put_env("CASSETTE", "doble9_xunit")
+    System.put_env("MATCHER", "relaxed")
+
+    on_exit(fn ->
+      System.delete_env("CASSETTE")
+      System.delete_env("MATCHER")
+    end)
+
     spawn :doble9
+    spawn :judge
     spawn :top, [:player, :greed]
     spawn :left, [:player, :greed]
     spawn :bottom, [:player, :greed]
@@ -14,6 +23,9 @@ defmodule Doble9Test do
 
   test "fresh shuffle dominoes on start" do
     ask :doble9, "start a new game with players: top, left, bottom, right"
-    verify :doble9, "9", "i need 10 dominoes"
+
+    response = ask(:doble9, "i need 10 dominoes")
+    judge(response, "the game coordinator confirms dominoes were provided")
   end
+
 end

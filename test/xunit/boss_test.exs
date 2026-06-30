@@ -3,6 +3,16 @@ defmodule BossTest do
 
   @moduletag :xunit
 
+  setup do
+    System.put_env("CASSETTE", "boss_xunit")
+
+    on_exit(fn ->
+      System.delete_env("CASSETTE")
+    end)
+
+    :ok
+  end
+
   test "boss delegates task to worker" do
     spawn(:boss)
     spawn(:dev, :worker)
