@@ -3,11 +3,9 @@ defmodule TodoUnitTest do
   @moduletag :main
 
   setup do
-    System.put_env("TAPE", "replay")
     System.put_env("CASSETTE", "todo")
 
     on_exit(fn ->
-      System.delete_env("TAPE")
       System.delete_env("CASSETTE")
     end)
 
