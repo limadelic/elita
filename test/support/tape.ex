@@ -5,9 +5,10 @@ defmodule Tape do
   import Enum, only: [find_index: 2, drop: 2]
 
   def play(body, agent_name, request_fun) do
-    case get_env("TAPE") do
-      "record" -> record(body, agent_name, request_fun)
-      _ -> replay_or_record(body, agent_name, request_fun)
+    if get_env("LIVE") == "1" do
+      record(body, agent_name, request_fun)
+    else
+      replay_or_record(body, agent_name, request_fun)
     end
   end
 
@@ -26,7 +27,7 @@ defmodule Tape do
     key = content_key(messages)
     case Map.fetch(cassette_map, key) do
       {:ok, content} -> content
-      :error -> record(body, agent_name, request_fun)
+      :error -> record_and_append(body, agent_name, request_fun)
     end
   end
 
@@ -37,7 +38,7 @@ defmodule Tape do
         consume(agent_name, idx)
         response
       :not_found ->
-        record(body, agent_name, request_fun)
+        record_and_append(body, agent_name, request_fun)
     end
   end
 
@@ -58,9 +59,23 @@ defmodule Tape do
     end
   end
 
-  defp record(body, agent_name, fun) do
-    result = fun.()
+  defp record_and_append(body, agent_name, request_fun) do
+    result = request_fun.()
     messages = body[:messages] || []
+    
+    case get_env("MATCHER") do
+      "relaxed" ->
+        append_new_entry(agent_name, messages, result)
+      _ ->
+        append_old_entry(messages, result)
+    end
+    result
+  end
+
+  defp record(body, agent_name, request_fun) do
+    result = request_fun.()
+    messages = body[:messages] || []
+    
     case get_env("MATCHER") do
       "relaxed" ->
         write_new_entry(agent_name, messages, result)
@@ -68,6 +83,62 @@ defmodule Tape do
         write_old_entry(messages, result)
     end
     result
+  end
+
+  defp append_new_entry(agent_name, messages, response) do
+    path = cassette_file()
+    mkdir_p(cassette_dir())
+    entries =
+      case read_cassette_data() do
+        {:new_format, e} -> e
+        _ -> []
+      end
+    req_json = encode!(messages)
+    updated = entries ++ [[agent_name, req_json, response]]
+    write(path, encode!(updated, pretty: true))
+  end
+
+  defp write_new_entry(agent_name, messages, response) do
+    path = cassette_file()
+    mkdir_p(cassette_dir())
+    req_json = encode!(messages)
+    updated = [[agent_name, req_json, response]]
+    write(path, encode!(updated, pretty: true))
+  end
+
+  defp append_old_entry(messages, response) do
+    path = cassette_file()
+    mkdir_p(cassette_dir())
+    cassette =
+      case read_cassette_data() do
+        {:old_format, c} -> c
+        _ -> %{}
+      end
+    key = content_key(messages)
+    updated = Map.put(cassette, key, response)
+    write(path, encode!(updated))
+  end
+
+  defp write_old_entry(messages, response) do
+    path = cassette_file()
+    mkdir_p(cassette_dir())
+    key = content_key(messages)
+    updated = %{key => response}
+    write(path, encode!(updated))
+  end
+
+  defp read_cassette_data do
+    path = cassette_file()
+    if exists?(path) do
+      data = path |> read!() |> decode!()
+      if is_map(data) do
+        {:old_format, data}
+      else
+        {:new_format, data}
+      end
+    else
+      {:old_format, %{}}
+    end
   end
 
   defp content_key(messages) do
@@ -87,53 +158,6 @@ defmodule Tape do
 
   defp match_relaxed(_messages, agent_name, recorded_agent, _recorded_messages) do
     agent_name == recorded_agent
-  end
-
-  defp write_new_entry(agent_name, messages, response) do
-    path = cassette_file()
-    mkdir_p(cassette_dir())
-    entries =
-      case read_cassette_data() do
-        {:new_format, e} -> e
-        _ -> []
-      end
-    req_json = encode!(messages)
-    updated = entries ++ [[agent_name, req_json, response]]
-    write(path, encode!(updated, pretty: true))
-  end
-
-  defp write_old_entry(messages, response) do
-    path = cassette_file()
-    mkdir_p(cassette_dir())
-    cassette =
-      case read_cassette_data() do
-        {:old_format, c} -> c
-        _ -> %{}
-      end
-    key = content_key(messages)
-    updated = Map.put(cassette, key, response)
-    write(path, encode!(updated))
-  end
-
-  defp read_cassette_data do
-    path = cassette_file()
-    if exists?(path) do
-      data = path |> read!() |> decode!()
-      if is_map(data) do
-        {:old_format, data}
-      else
-        {:new_format, data}
-      end
-    else
-      {:old_format, %{}}
-    end
-  end
-
-  defp read_entries do
-    case read_cassette_data() do
-      {:new_format, entries} -> entries
-      {:old_format, _} -> []
-    end
   end
 
   defp consumed_count(agent_name) do
