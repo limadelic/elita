@@ -15,6 +15,8 @@ defmodule TriageTest do
 
     result = ask(:triage, emails)
 
+    spawned([:classifier_1, :classifier_2, :classifier_3])
+
     assert contains?(downcase(result), downcase("urgent"))
     assert contains?(downcase(result), downcase("spam"))
     assert contains?(downcase(result), downcase("feature"))

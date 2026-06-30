@@ -1,4 +1,5 @@
 defmodule Tester do
+  require Logger
   import ExUnit.Assertions
   import Elita, only: [start_link: 2, cast: 2, call: 2]
   import String, only: [contains?: 2, downcase: 1]
@@ -80,4 +81,19 @@ defmodule Tester do
     spawn(name, :speck)
     verify(name, "passed", "exec #{name}")
   end
+
+  def spawned(names) do
+    names
+    |> Enum.map(&to_string/1)
+    |> Enum.each(&alive/1)
+  end
+
+  defp alive(name) do
+    ElitaRegistry
+    |> Registry.lookup(name)
+    |> assert_alive(name)
+  end
+
+  defp assert_alive([{_pid, _}], _name), do: :ok
+  defp assert_alive([], name), do: raise("#{name} never spawned")
 end
