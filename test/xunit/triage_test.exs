@@ -3,6 +3,7 @@ defmodule TriageTest do
   import String, only: [contains?: 2, downcase: 1]
 
   @moduletag :xunit
+  @moduletag :prose
 
   test "triage fans out to classifiers and merges verdicts" do
     spawn(:triage)

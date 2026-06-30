@@ -40,6 +40,7 @@ defmodule Elita.MixProject do
     [
       build: ["compile", "escript.build"],
       t: ["test --no-start"],
+      prose: ["test --only prose"],
       lint: ["format --check-formatted", "credo --strict"]
     ]
   end

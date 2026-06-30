@@ -3,6 +3,7 @@ defmodule ResearchTest do
   import String, only: [contains?: 2, downcase: 1]
 
   @moduletag :xunit
+  @moduletag :prose
 
   test "research coordinates multiple researchers into synthesis" do
     spawn(:research)
