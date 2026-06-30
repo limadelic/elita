@@ -5,7 +5,7 @@ defmodule Tape do
   import Enum, only: [find_index: 2, drop: 2]
 
   def play(body, agent_name, request_fun) do
-    if get_env("LIVE") == "1" do
+    if get_env("REC") == "1" do
       record(body, agent_name, request_fun)
     else
       replay_or_record(body, agent_name, request_fun)
