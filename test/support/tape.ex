@@ -31,16 +31,60 @@ defmodule Tape do
     end
   end
 
+  defp new_replay([[_req, _resp] | _] = entries, _messages, body, _agent_name, request_fun) do
+    case find_index(entries, fn [req, _] -> contains(req, request(body)) end) do
+      nil ->
+        live(body, request_fun)
+
+      offset ->
+        [_, response] = Enum.at(entries, offset)
+        response
+    end
+  end
+
   defp new_replay(entries, messages, body, agent_name, request_fun) do
     matcher = select_matcher()
+
     case find_match(entries, messages, agent_name, matcher) do
       {idx, response} ->
         consume(agent_name, idx)
         response
+
       :not_found ->
         record_and_append(body, agent_name, request_fun)
     end
   end
+
+  defp live(body, request_fun) do
+    response = request_fun.()
+    append_containment(request(body), response)
+    response
+  end
+
+  defp request(body), do: Map.take(body, [:system, :messages, :tools])
+
+  defp append_containment(req, response) do
+    path = cassette_file()
+    mkdir_p(cassette_dir())
+
+    entries =
+      case read_cassette_data() do
+        {:new_format, e} -> e
+        _ -> []
+      end
+
+    write(path, encode!(entries ++ [[req, response]], pretty: true))
+  end
+
+  defp contains(a, b) when is_map(a) and is_map(b),
+    do: Enum.all?(a, fn {k, v} -> contains(v, b[k] || b[to_string(k)]) end)
+
+  defp contains(a, b) when is_list(a) and is_list(b),
+    do: Enum.all?(a, fn x -> Enum.any?(b, &contains(x, &1)) end)
+
+  defp contains(a, b) when is_binary(a) and is_binary(b), do: String.contains?(b, a)
+
+  defp contains(a, b), do: a == b
 
   defp find_match(entries, messages, agent_name, matcher) do
     idx = consumed_count(agent_name)
