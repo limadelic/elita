@@ -42,6 +42,10 @@ defmodule Tape do
     end
   end
 
+  defp new_replay([], _messages, body, _agent_name, request_fun) do
+    live(body, request_fun)
+  end
+
   defp new_replay(entries, messages, body, agent_name, request_fun) do
     matcher = select_matcher()
 
