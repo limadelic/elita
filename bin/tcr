@@ -21,6 +21,10 @@ if ! mix credo; then
   exit 1
 fi
 
+case "$1" in
+  -*) shift ;;
+esac
+
 git add -A
 msg="${1:-tcr: $(git diff --cached --name-only | tr '\n' ' ')}"
 git commit -m "$msg"
