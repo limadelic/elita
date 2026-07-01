@@ -1,1 +1,3247 @@
-{"101398640":[{"text":"Now I'll remove that task since it's done:","type":"text"},{"caller":{"type":"direct"},"id":"toolu_01Hox8JbRyrumEXZpszuNJ5d","input":{"key":"todo","value":""},"name":"set","type":"tool_use"}],"107687867":[{"caller":{"type":"direct"},"id":"toolu_017QSF6jyMdxGnySHoGTwoYV","input":{"key":"todo"},"name":"get","type":"tool_use"}],"110646790":[{"caller":{"type":"direct"},"id":"toolu_013njZ1XCvJxMoFRsZvZMDwj","input":{"key":"todo"},"name":"get","type":"tool_use"}],"117111231":[{"caller":{"type":"direct"},"id":"toolu_01RqC46hykpdsGajpvmSPXW3","input":{"key":"todo"},"name":"get","type":"tool_use"}],"118624264":[{"caller":{"type":"direct"},"id":"toolu_01EqHvZDiAxQy8JJmnATkeii","input":{"key":"todo"},"name":"get","type":"tool_use"}],"129858674":[{"text":"Done! I've added \"call dentist\" to your task list.","type":"text"}],"19301919":[{"caller":{"type":"direct"},"id":"toolu_01LnJZExCz3PCM2g4DBJzg9r","input":{"key":"todo"},"name":"get","type":"tool_use"}],"20185978":[{"text":"Now I'll add the task to your list:","type":"text"},{"caller":{"type":"direct"},"id":"toolu_01481cAW4EmZTKvwztczPbdd","input":{"key":"todo","value":"buy groceries"},"name":"set","type":"tool_use"}],"23864849":[{"text":"Here are your tasks:\n1. buy milk\n2. walk dog","type":"text"}],"34968355":[{"text":"Here are your tasks:\n1. buy milk\n2. walk dog","type":"text"}],"37312234":[{"text":"Now I'll add the task to your list:","type":"text"},{"caller":{"type":"direct"},"id":"toolu_014v1iqfN8PTyJSmDG77JD9S","input":{"key":"todo","value":"buy milk"},"name":"set","type":"tool_use"}],"42920359":[{"text":"Done! I've added \"buy groceries\" to your task list.","type":"text"}],"43844118":[{"caller":{"type":"direct"},"id":"toolu_01BBLfuVBoFAj5eMBCZ1FMc5","input":{"key":"todo"},"name":"get","type":"tool_use"}],"46644472":[{"caller":{"type":"direct"},"id":"toolu_01CU4SDvbfADgDjuUCYtFR8m","input":{"key":"todo"},"name":"get","type":"tool_use"}],"47586064":[{"text":"Now I'll add the new task:","type":"text"},{"caller":{"type":"direct"},"id":"toolu_01MiQMkg7qv5uufozNwKurcn","input":{"key":"todo","value":"buy milk\nwalk dog"},"name":"set","type":"tool_use"}],"51368730":[{"text":"Done! I've added \"walk dog\" to your task list.","type":"text"}],"52855055":[{"caller":{"type":"direct"},"id":"toolu_015zca7AwTzRTBKVtX6KdXpL","input":{"key":"todo"},"name":"get","type":"tool_use"}],"68147877":[{"caller":{"type":"direct"},"id":"toolu_016wnSAFTE9VpvQ3Xfjf4cns","input":{"key":"todo"},"name":"get","type":"tool_use"}],"7015819":[{"text":"Done! I've added \"buy milk\" to your task list.","type":"text"}],"83691013":[{"text":"You have 1 task to do:\n\n1. buy groceries","type":"text"}],"92471238":[{"text":"Done! I've marked \"call dentist\" as complete and removed it from your task list.","type":"text"}],"94387421":[{"text":"Now I'll add \"call dentist\" to your task list:","type":"text"},{"caller":{"type":"direct"},"id":"toolu_01Hr4BEEDL84HmNSgP6r5xxG","input":{"key":"todo","value":"call dentist"},"name":"set","type":"tool_use"}],"97252401":[{"text":"You have no tasks on your to-do list! You're all caught up.","type":"text"}]}
+[
+  {
+    "a": [
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01ArTm2WKWLKvxFheE4TSdve",
+        "input": {
+          "key": "todo"
+        },
+        "name": "get",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "Add call dentist to my list",
+          "role": "user"
+        }
+      ],
+      "system": "# Todo Agent\n\nYou are Todo, a task manager. The whole task list lives under one key named todo, as plain text with one task per line.\n\nRules you must follow exactly:\n\n- Call get with key todo to read the list. A result of \"(empty)\" means there are no tasks yet.\n- Never call get twice in a row. After a get, your next step is either a single set or a plain text reply. Never repeat the same call.\n- Never invent other keys. Always use the key todo.\n\nTo add a task: read the list with get, then set key todo to the existing lines plus the new task on a new line. If the list was \"(empty)\", set it to just the new task.\n\nTo list tasks: read the list with get and report the tasks. If it is \"(empty)\", reply that there are no tasks.\n\nTo mark a task done: read the list with get, drop that task, then set key todo to the remaining lines.",
+      "tools": [
+        {
+          "description": "Store data with a key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to store data under",
+                "type": "string"
+              },
+              "value": {
+                "description": "The value to store",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key",
+              "value"
+            ],
+            "type": "object"
+          },
+          "name": "set"
+        },
+        {
+          "description": "Retrieve data by key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to retrieve data for",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "type": "object"
+          },
+          "name": "get"
+        }
+      ]
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Now I'll add the task to your list:",
+        "type": "text"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01H6VT1iSDYUsruNtWR2Ldcp",
+        "input": {
+          "key": "todo",
+          "value": "call dentist"
+        },
+        "name": "set",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "Add call dentist to my list",
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "id": "toolu_01ArTm2WKWLKvxFheE4TSdve",
+              "input": {
+                "key": "todo"
+              },
+              "name": "get",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "(empty)",
+              "tool_use_id": "toolu_01ArTm2WKWLKvxFheE4TSdve",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "system": "# Todo Agent\n\nYou are Todo, a task manager. The whole task list lives under one key named todo, as plain text with one task per line.\n\nRules you must follow exactly:\n\n- Call get with key todo to read the list. A result of \"(empty)\" means there are no tasks yet.\n- Never call get twice in a row. After a get, your next step is either a single set or a plain text reply. Never repeat the same call.\n- Never invent other keys. Always use the key todo.\n\nTo add a task: read the list with get, then set key todo to the existing lines plus the new task on a new line. If the list was \"(empty)\", set it to just the new task.\n\nTo list tasks: read the list with get and report the tasks. If it is \"(empty)\", reply that there are no tasks.\n\nTo mark a task done: read the list with get, drop that task, then set key todo to the remaining lines.",
+      "tools": [
+        {
+          "description": "Store data with a key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to store data under",
+                "type": "string"
+              },
+              "value": {
+                "description": "The value to store",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key",
+              "value"
+            ],
+            "type": "object"
+          },
+          "name": "set"
+        },
+        {
+          "description": "Retrieve data by key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to retrieve data for",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "type": "object"
+          },
+          "name": "get"
+        }
+      ]
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Done! I've added \"call dentist\" to your todo list.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "Add call dentist to my list",
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "id": "toolu_01ArTm2WKWLKvxFheE4TSdve",
+              "input": {
+                "key": "todo"
+              },
+              "name": "get",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "(empty)",
+              "tool_use_id": "toolu_01ArTm2WKWLKvxFheE4TSdve",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Now I'll add the task to your list:",
+              "type": "text"
+            },
+            {
+              "id": "toolu_01H6VT1iSDYUsruNtWR2Ldcp",
+              "input": {
+                "key": "todo",
+                "value": "call dentist"
+              },
+              "name": "set",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "stored",
+              "tool_use_id": "toolu_01H6VT1iSDYUsruNtWR2Ldcp",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "system": "# Todo Agent\n\nYou are Todo, a task manager. The whole task list lives under one key named todo, as plain text with one task per line.\n\nRules you must follow exactly:\n\n- Call get with key todo to read the list. A result of \"(empty)\" means there are no tasks yet.\n- Never call get twice in a row. After a get, your next step is either a single set or a plain text reply. Never repeat the same call.\n- Never invent other keys. Always use the key todo.\n\nTo add a task: read the list with get, then set key todo to the existing lines plus the new task on a new line. If the list was \"(empty)\", set it to just the new task.\n\nTo list tasks: read the list with get and report the tasks. If it is \"(empty)\", reply that there are no tasks.\n\nTo mark a task done: read the list with get, drop that task, then set key todo to the remaining lines.",
+      "tools": [
+        {
+          "description": "Store data with a key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to store data under",
+                "type": "string"
+              },
+              "value": {
+                "description": "The value to store",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key",
+              "value"
+            ],
+            "type": "object"
+          },
+          "name": "set"
+        },
+        {
+          "description": "Retrieve data by key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to retrieve data for",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "type": "object"
+          },
+          "name": "get"
+        }
+      ]
+    }
+  },
+  {
+    "a": [
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01LxBdGGm8f2iJANisKzgTTp",
+        "input": {
+          "key": "todo"
+        },
+        "name": "get",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "Add call dentist to my list",
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "id": "toolu_01ArTm2WKWLKvxFheE4TSdve",
+              "input": {
+                "key": "todo"
+              },
+              "name": "get",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "(empty)",
+              "tool_use_id": "toolu_01ArTm2WKWLKvxFheE4TSdve",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Now I'll add the task to your list:",
+              "type": "text"
+            },
+            {
+              "id": "toolu_01H6VT1iSDYUsruNtWR2Ldcp",
+              "input": {
+                "key": "todo",
+                "value": "call dentist"
+              },
+              "name": "set",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "stored",
+              "tool_use_id": "toolu_01H6VT1iSDYUsruNtWR2Ldcp",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Done! I've added \"call dentist\" to your todo list.",
+              "type": "text"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": "Mark call dentist as done",
+          "role": "user"
+        }
+      ],
+      "system": "# Todo Agent\n\nYou are Todo, a task manager. The whole task list lives under one key named todo, as plain text with one task per line.\n\nRules you must follow exactly:\n\n- Call get with key todo to read the list. A result of \"(empty)\" means there are no tasks yet.\n- Never call get twice in a row. After a get, your next step is either a single set or a plain text reply. Never repeat the same call.\n- Never invent other keys. Always use the key todo.\n\nTo add a task: read the list with get, then set key todo to the existing lines plus the new task on a new line. If the list was \"(empty)\", set it to just the new task.\n\nTo list tasks: read the list with get and report the tasks. If it is \"(empty)\", reply that there are no tasks.\n\nTo mark a task done: read the list with get, drop that task, then set key todo to the remaining lines.",
+      "tools": [
+        {
+          "description": "Store data with a key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to store data under",
+                "type": "string"
+              },
+              "value": {
+                "description": "The value to store",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key",
+              "value"
+            ],
+            "type": "object"
+          },
+          "name": "set"
+        },
+        {
+          "description": "Retrieve data by key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to retrieve data for",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "type": "object"
+          },
+          "name": "get"
+        }
+      ]
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Now I'll remove it from your list:",
+        "type": "text"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_014aUr5GfvhsZh7rM4VpYmXR",
+        "input": {
+          "key": "todo",
+          "value": ""
+        },
+        "name": "set",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "Add call dentist to my list",
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "id": "toolu_01ArTm2WKWLKvxFheE4TSdve",
+              "input": {
+                "key": "todo"
+              },
+              "name": "get",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "(empty)",
+              "tool_use_id": "toolu_01ArTm2WKWLKvxFheE4TSdve",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Now I'll add the task to your list:",
+              "type": "text"
+            },
+            {
+              "id": "toolu_01H6VT1iSDYUsruNtWR2Ldcp",
+              "input": {
+                "key": "todo",
+                "value": "call dentist"
+              },
+              "name": "set",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "stored",
+              "tool_use_id": "toolu_01H6VT1iSDYUsruNtWR2Ldcp",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Done! I've added \"call dentist\" to your todo list.",
+              "type": "text"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": "Mark call dentist as done",
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "id": "toolu_01LxBdGGm8f2iJANisKzgTTp",
+              "input": {
+                "key": "todo"
+              },
+              "name": "get",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "call dentist",
+              "tool_use_id": "toolu_01LxBdGGm8f2iJANisKzgTTp",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "system": "# Todo Agent\n\nYou are Todo, a task manager. The whole task list lives under one key named todo, as plain text with one task per line.\n\nRules you must follow exactly:\n\n- Call get with key todo to read the list. A result of \"(empty)\" means there are no tasks yet.\n- Never call get twice in a row. After a get, your next step is either a single set or a plain text reply. Never repeat the same call.\n- Never invent other keys. Always use the key todo.\n\nTo add a task: read the list with get, then set key todo to the existing lines plus the new task on a new line. If the list was \"(empty)\", set it to just the new task.\n\nTo list tasks: read the list with get and report the tasks. If it is \"(empty)\", reply that there are no tasks.\n\nTo mark a task done: read the list with get, drop that task, then set key todo to the remaining lines.",
+      "tools": [
+        {
+          "description": "Store data with a key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to store data under",
+                "type": "string"
+              },
+              "value": {
+                "description": "The value to store",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key",
+              "value"
+            ],
+            "type": "object"
+          },
+          "name": "set"
+        },
+        {
+          "description": "Retrieve data by key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to retrieve data for",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "type": "object"
+          },
+          "name": "get"
+        }
+      ]
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Done! I've marked \"call dentist\" as complete and removed it from your todo list.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "Add call dentist to my list",
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "id": "toolu_01ArTm2WKWLKvxFheE4TSdve",
+              "input": {
+                "key": "todo"
+              },
+              "name": "get",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "(empty)",
+              "tool_use_id": "toolu_01ArTm2WKWLKvxFheE4TSdve",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Now I'll add the task to your list:",
+              "type": "text"
+            },
+            {
+              "id": "toolu_01H6VT1iSDYUsruNtWR2Ldcp",
+              "input": {
+                "key": "todo",
+                "value": "call dentist"
+              },
+              "name": "set",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "stored",
+              "tool_use_id": "toolu_01H6VT1iSDYUsruNtWR2Ldcp",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Done! I've added \"call dentist\" to your todo list.",
+              "type": "text"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": "Mark call dentist as done",
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "id": "toolu_01LxBdGGm8f2iJANisKzgTTp",
+              "input": {
+                "key": "todo"
+              },
+              "name": "get",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "call dentist",
+              "tool_use_id": "toolu_01LxBdGGm8f2iJANisKzgTTp",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Now I'll remove it from your list:",
+              "type": "text"
+            },
+            {
+              "id": "toolu_014aUr5GfvhsZh7rM4VpYmXR",
+              "input": {
+                "key": "todo",
+                "value": ""
+              },
+              "name": "set",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "stored",
+              "tool_use_id": "toolu_014aUr5GfvhsZh7rM4VpYmXR",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "system": "# Todo Agent\n\nYou are Todo, a task manager. The whole task list lives under one key named todo, as plain text with one task per line.\n\nRules you must follow exactly:\n\n- Call get with key todo to read the list. A result of \"(empty)\" means there are no tasks yet.\n- Never call get twice in a row. After a get, your next step is either a single set or a plain text reply. Never repeat the same call.\n- Never invent other keys. Always use the key todo.\n\nTo add a task: read the list with get, then set key todo to the existing lines plus the new task on a new line. If the list was \"(empty)\", set it to just the new task.\n\nTo list tasks: read the list with get and report the tasks. If it is \"(empty)\", reply that there are no tasks.\n\nTo mark a task done: read the list with get, drop that task, then set key todo to the remaining lines.",
+      "tools": [
+        {
+          "description": "Store data with a key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to store data under",
+                "type": "string"
+              },
+              "value": {
+                "description": "The value to store",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key",
+              "value"
+            ],
+            "type": "object"
+          },
+          "name": "set"
+        },
+        {
+          "description": "Retrieve data by key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to retrieve data for",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "type": "object"
+          },
+          "name": "get"
+        }
+      ]
+    }
+  },
+  {
+    "a": [
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01PdUdbceqnRGx4b9ChuBSt3",
+        "input": {
+          "key": "todo"
+        },
+        "name": "get",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "Add call dentist to my list",
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "id": "toolu_01ArTm2WKWLKvxFheE4TSdve",
+              "input": {
+                "key": "todo"
+              },
+              "name": "get",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "(empty)",
+              "tool_use_id": "toolu_01ArTm2WKWLKvxFheE4TSdve",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Now I'll add the task to your list:",
+              "type": "text"
+            },
+            {
+              "id": "toolu_01H6VT1iSDYUsruNtWR2Ldcp",
+              "input": {
+                "key": "todo",
+                "value": "call dentist"
+              },
+              "name": "set",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "stored",
+              "tool_use_id": "toolu_01H6VT1iSDYUsruNtWR2Ldcp",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Done! I've added \"call dentist\" to your todo list.",
+              "type": "text"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": "Mark call dentist as done",
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "id": "toolu_01LxBdGGm8f2iJANisKzgTTp",
+              "input": {
+                "key": "todo"
+              },
+              "name": "get",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "call dentist",
+              "tool_use_id": "toolu_01LxBdGGm8f2iJANisKzgTTp",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Now I'll remove it from your list:",
+              "type": "text"
+            },
+            {
+              "id": "toolu_014aUr5GfvhsZh7rM4VpYmXR",
+              "input": {
+                "key": "todo",
+                "value": ""
+              },
+              "name": "set",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "stored",
+              "tool_use_id": "toolu_014aUr5GfvhsZh7rM4VpYmXR",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Done! I've marked \"call dentist\" as complete and removed it from your todo list.",
+              "type": "text"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": "What do I need to do?",
+          "role": "user"
+        }
+      ],
+      "system": "# Todo Agent\n\nYou are Todo, a task manager. The whole task list lives under one key named todo, as plain text with one task per line.\n\nRules you must follow exactly:\n\n- Call get with key todo to read the list. A result of \"(empty)\" means there are no tasks yet.\n- Never call get twice in a row. After a get, your next step is either a single set or a plain text reply. Never repeat the same call.\n- Never invent other keys. Always use the key todo.\n\nTo add a task: read the list with get, then set key todo to the existing lines plus the new task on a new line. If the list was \"(empty)\", set it to just the new task.\n\nTo list tasks: read the list with get and report the tasks. If it is \"(empty)\", reply that there are no tasks.\n\nTo mark a task done: read the list with get, drop that task, then set key todo to the remaining lines.",
+      "tools": [
+        {
+          "description": "Store data with a key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to store data under",
+                "type": "string"
+              },
+              "value": {
+                "description": "The value to store",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key",
+              "value"
+            ],
+            "type": "object"
+          },
+          "name": "set"
+        },
+        {
+          "description": "Retrieve data by key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to retrieve data for",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "type": "object"
+          },
+          "name": "get"
+        }
+      ]
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "You have no tasks on your todo list. You're all caught up!",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "Add call dentist to my list",
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "id": "toolu_01ArTm2WKWLKvxFheE4TSdve",
+              "input": {
+                "key": "todo"
+              },
+              "name": "get",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "(empty)",
+              "tool_use_id": "toolu_01ArTm2WKWLKvxFheE4TSdve",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Now I'll add the task to your list:",
+              "type": "text"
+            },
+            {
+              "id": "toolu_01H6VT1iSDYUsruNtWR2Ldcp",
+              "input": {
+                "key": "todo",
+                "value": "call dentist"
+              },
+              "name": "set",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "stored",
+              "tool_use_id": "toolu_01H6VT1iSDYUsruNtWR2Ldcp",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Done! I've added \"call dentist\" to your todo list.",
+              "type": "text"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": "Mark call dentist as done",
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "id": "toolu_01LxBdGGm8f2iJANisKzgTTp",
+              "input": {
+                "key": "todo"
+              },
+              "name": "get",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "call dentist",
+              "tool_use_id": "toolu_01LxBdGGm8f2iJANisKzgTTp",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Now I'll remove it from your list:",
+              "type": "text"
+            },
+            {
+              "id": "toolu_014aUr5GfvhsZh7rM4VpYmXR",
+              "input": {
+                "key": "todo",
+                "value": ""
+              },
+              "name": "set",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "stored",
+              "tool_use_id": "toolu_014aUr5GfvhsZh7rM4VpYmXR",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Done! I've marked \"call dentist\" as complete and removed it from your todo list.",
+              "type": "text"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": "What do I need to do?",
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "id": "toolu_01PdUdbceqnRGx4b9ChuBSt3",
+              "input": {
+                "key": "todo"
+              },
+              "name": "get",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "",
+              "tool_use_id": "toolu_01PdUdbceqnRGx4b9ChuBSt3",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "system": "# Todo Agent\n\nYou are Todo, a task manager. The whole task list lives under one key named todo, as plain text with one task per line.\n\nRules you must follow exactly:\n\n- Call get with key todo to read the list. A result of \"(empty)\" means there are no tasks yet.\n- Never call get twice in a row. After a get, your next step is either a single set or a plain text reply. Never repeat the same call.\n- Never invent other keys. Always use the key todo.\n\nTo add a task: read the list with get, then set key todo to the existing lines plus the new task on a new line. If the list was \"(empty)\", set it to just the new task.\n\nTo list tasks: read the list with get and report the tasks. If it is \"(empty)\", reply that there are no tasks.\n\nTo mark a task done: read the list with get, drop that task, then set key todo to the remaining lines.",
+      "tools": [
+        {
+          "description": "Store data with a key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to store data under",
+                "type": "string"
+              },
+              "value": {
+                "description": "The value to store",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key",
+              "value"
+            ],
+            "type": "object"
+          },
+          "name": "set"
+        },
+        {
+          "description": "Retrieve data by key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to retrieve data for",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "type": "object"
+          },
+          "name": "get"
+        }
+      ]
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "I'll add \"buy groceries\" to your task list.",
+        "type": "text"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01EQTuVchM2PA3XHgXc1LJG6",
+        "input": {
+          "key": "todo"
+        },
+        "name": "get",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "Add buy groceries to my list",
+          "role": "user"
+        }
+      ],
+      "system": "# Todo Agent\n\nYou are Todo, a task manager. The whole task list lives under one key named todo, as plain text with one task per line.\n\nRules you must follow exactly:\n\n- Call get with key todo to read the list. A result of \"(empty)\" means there are no tasks yet.\n- Never call get twice in a row. After a get, your next step is either a single set or a plain text reply. Never repeat the same call.\n- Never invent other keys. Always use the key todo.\n\nTo add a task: read the list with get, then set key todo to the existing lines plus the new task on a new line. If the list was \"(empty)\", set it to just the new task.\n\nTo list tasks: read the list with get and report the tasks. If it is \"(empty)\", reply that there are no tasks.\n\nTo mark a task done: read the list with get, drop that task, then set key todo to the remaining lines.",
+      "tools": [
+        {
+          "description": "Store data with a key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to store data under",
+                "type": "string"
+              },
+              "value": {
+                "description": "The value to store",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key",
+              "value"
+            ],
+            "type": "object"
+          },
+          "name": "set"
+        },
+        {
+          "description": "Retrieve data by key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to retrieve data for",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "type": "object"
+          },
+          "name": "get"
+        }
+      ]
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Now I'll add the task to your list:",
+        "type": "text"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01X9ydcp2UafxEbP7NuQcSZX",
+        "input": {
+          "key": "todo",
+          "value": "buy groceries"
+        },
+        "name": "set",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "Add buy groceries to my list",
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "I'll add \"buy groceries\" to your task list.",
+              "type": "text"
+            },
+            {
+              "id": "toolu_01EQTuVchM2PA3XHgXc1LJG6",
+              "input": {
+                "key": "todo"
+              },
+              "name": "get",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "(empty)",
+              "tool_use_id": "toolu_01EQTuVchM2PA3XHgXc1LJG6",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "system": "# Todo Agent\n\nYou are Todo, a task manager. The whole task list lives under one key named todo, as plain text with one task per line.\n\nRules you must follow exactly:\n\n- Call get with key todo to read the list. A result of \"(empty)\" means there are no tasks yet.\n- Never call get twice in a row. After a get, your next step is either a single set or a plain text reply. Never repeat the same call.\n- Never invent other keys. Always use the key todo.\n\nTo add a task: read the list with get, then set key todo to the existing lines plus the new task on a new line. If the list was \"(empty)\", set it to just the new task.\n\nTo list tasks: read the list with get and report the tasks. If it is \"(empty)\", reply that there are no tasks.\n\nTo mark a task done: read the list with get, drop that task, then set key todo to the remaining lines.",
+      "tools": [
+        {
+          "description": "Store data with a key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to store data under",
+                "type": "string"
+              },
+              "value": {
+                "description": "The value to store",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key",
+              "value"
+            ],
+            "type": "object"
+          },
+          "name": "set"
+        },
+        {
+          "description": "Retrieve data by key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to retrieve data for",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "type": "object"
+          },
+          "name": "get"
+        }
+      ]
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Done! I've added \"buy groceries\" to your task list.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "Add buy groceries to my list",
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "I'll add \"buy groceries\" to your task list.",
+              "type": "text"
+            },
+            {
+              "id": "toolu_01EQTuVchM2PA3XHgXc1LJG6",
+              "input": {
+                "key": "todo"
+              },
+              "name": "get",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "(empty)",
+              "tool_use_id": "toolu_01EQTuVchM2PA3XHgXc1LJG6",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Now I'll add the task to your list:",
+              "type": "text"
+            },
+            {
+              "id": "toolu_01X9ydcp2UafxEbP7NuQcSZX",
+              "input": {
+                "key": "todo",
+                "value": "buy groceries"
+              },
+              "name": "set",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "stored",
+              "tool_use_id": "toolu_01X9ydcp2UafxEbP7NuQcSZX",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "system": "# Todo Agent\n\nYou are Todo, a task manager. The whole task list lives under one key named todo, as plain text with one task per line.\n\nRules you must follow exactly:\n\n- Call get with key todo to read the list. A result of \"(empty)\" means there are no tasks yet.\n- Never call get twice in a row. After a get, your next step is either a single set or a plain text reply. Never repeat the same call.\n- Never invent other keys. Always use the key todo.\n\nTo add a task: read the list with get, then set key todo to the existing lines plus the new task on a new line. If the list was \"(empty)\", set it to just the new task.\n\nTo list tasks: read the list with get and report the tasks. If it is \"(empty)\", reply that there are no tasks.\n\nTo mark a task done: read the list with get, drop that task, then set key todo to the remaining lines.",
+      "tools": [
+        {
+          "description": "Store data with a key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to store data under",
+                "type": "string"
+              },
+              "value": {
+                "description": "The value to store",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key",
+              "value"
+            ],
+            "type": "object"
+          },
+          "name": "set"
+        },
+        {
+          "description": "Retrieve data by key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to retrieve data for",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "type": "object"
+          },
+          "name": "get"
+        }
+      ]
+    }
+  },
+  {
+    "a": [
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01QE8eTTMX76SHT7SxPujiL1",
+        "input": {
+          "key": "todo"
+        },
+        "name": "get",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "Add buy groceries to my list",
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "I'll add \"buy groceries\" to your task list.",
+              "type": "text"
+            },
+            {
+              "id": "toolu_01EQTuVchM2PA3XHgXc1LJG6",
+              "input": {
+                "key": "todo"
+              },
+              "name": "get",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "(empty)",
+              "tool_use_id": "toolu_01EQTuVchM2PA3XHgXc1LJG6",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Now I'll add the task to your list:",
+              "type": "text"
+            },
+            {
+              "id": "toolu_01X9ydcp2UafxEbP7NuQcSZX",
+              "input": {
+                "key": "todo",
+                "value": "buy groceries"
+              },
+              "name": "set",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "stored",
+              "tool_use_id": "toolu_01X9ydcp2UafxEbP7NuQcSZX",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Done! I've added \"buy groceries\" to your task list.",
+              "type": "text"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": "What do I need to do?",
+          "role": "user"
+        }
+      ],
+      "system": "# Todo Agent\n\nYou are Todo, a task manager. The whole task list lives under one key named todo, as plain text with one task per line.\n\nRules you must follow exactly:\n\n- Call get with key todo to read the list. A result of \"(empty)\" means there are no tasks yet.\n- Never call get twice in a row. After a get, your next step is either a single set or a plain text reply. Never repeat the same call.\n- Never invent other keys. Always use the key todo.\n\nTo add a task: read the list with get, then set key todo to the existing lines plus the new task on a new line. If the list was \"(empty)\", set it to just the new task.\n\nTo list tasks: read the list with get and report the tasks. If it is \"(empty)\", reply that there are no tasks.\n\nTo mark a task done: read the list with get, drop that task, then set key todo to the remaining lines.",
+      "tools": [
+        {
+          "description": "Store data with a key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to store data under",
+                "type": "string"
+              },
+              "value": {
+                "description": "The value to store",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key",
+              "value"
+            ],
+            "type": "object"
+          },
+          "name": "set"
+        },
+        {
+          "description": "Retrieve data by key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to retrieve data for",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "type": "object"
+          },
+          "name": "get"
+        }
+      ]
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "You have 1 task on your list:\n\n1. buy groceries",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "Add buy groceries to my list",
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "I'll add \"buy groceries\" to your task list.",
+              "type": "text"
+            },
+            {
+              "id": "toolu_01EQTuVchM2PA3XHgXc1LJG6",
+              "input": {
+                "key": "todo"
+              },
+              "name": "get",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "(empty)",
+              "tool_use_id": "toolu_01EQTuVchM2PA3XHgXc1LJG6",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Now I'll add the task to your list:",
+              "type": "text"
+            },
+            {
+              "id": "toolu_01X9ydcp2UafxEbP7NuQcSZX",
+              "input": {
+                "key": "todo",
+                "value": "buy groceries"
+              },
+              "name": "set",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "stored",
+              "tool_use_id": "toolu_01X9ydcp2UafxEbP7NuQcSZX",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Done! I've added \"buy groceries\" to your task list.",
+              "type": "text"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": "What do I need to do?",
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "id": "toolu_01QE8eTTMX76SHT7SxPujiL1",
+              "input": {
+                "key": "todo"
+              },
+              "name": "get",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "buy groceries",
+              "tool_use_id": "toolu_01QE8eTTMX76SHT7SxPujiL1",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "system": "# Todo Agent\n\nYou are Todo, a task manager. The whole task list lives under one key named todo, as plain text with one task per line.\n\nRules you must follow exactly:\n\n- Call get with key todo to read the list. A result of \"(empty)\" means there are no tasks yet.\n- Never call get twice in a row. After a get, your next step is either a single set or a plain text reply. Never repeat the same call.\n- Never invent other keys. Always use the key todo.\n\nTo add a task: read the list with get, then set key todo to the existing lines plus the new task on a new line. If the list was \"(empty)\", set it to just the new task.\n\nTo list tasks: read the list with get and report the tasks. If it is \"(empty)\", reply that there are no tasks.\n\nTo mark a task done: read the list with get, drop that task, then set key todo to the remaining lines.",
+      "tools": [
+        {
+          "description": "Store data with a key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to store data under",
+                "type": "string"
+              },
+              "value": {
+                "description": "The value to store",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key",
+              "value"
+            ],
+            "type": "object"
+          },
+          "name": "set"
+        },
+        {
+          "description": "Retrieve data by key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to retrieve data for",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "type": "object"
+          },
+          "name": "get"
+        }
+      ]
+    }
+  },
+  {
+    "a": [
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01G9usT2hVRDxxrGkHfXW2VM",
+        "input": {
+          "key": "todo"
+        },
+        "name": "get",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "Add buy milk to my list",
+          "role": "user"
+        }
+      ],
+      "system": "# Todo Agent\n\nYou are Todo, a task manager. The whole task list lives under one key named todo, as plain text with one task per line.\n\nRules you must follow exactly:\n\n- Call get with key todo to read the list. A result of \"(empty)\" means there are no tasks yet.\n- Never call get twice in a row. After a get, your next step is either a single set or a plain text reply. Never repeat the same call.\n- Never invent other keys. Always use the key todo.\n\nTo add a task: read the list with get, then set key todo to the existing lines plus the new task on a new line. If the list was \"(empty)\", set it to just the new task.\n\nTo list tasks: read the list with get and report the tasks. If it is \"(empty)\", reply that there are no tasks.\n\nTo mark a task done: read the list with get, drop that task, then set key todo to the remaining lines.",
+      "tools": [
+        {
+          "description": "Store data with a key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to store data under",
+                "type": "string"
+              },
+              "value": {
+                "description": "The value to store",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key",
+              "value"
+            ],
+            "type": "object"
+          },
+          "name": "set"
+        },
+        {
+          "description": "Retrieve data by key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to retrieve data for",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "type": "object"
+          },
+          "name": "get"
+        }
+      ]
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Now I'll add \"buy milk\" to your todo list:",
+        "type": "text"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01Pp4U6mn9hj96JWNz3TCakB",
+        "input": {
+          "key": "todo",
+          "value": "buy milk"
+        },
+        "name": "set",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "Add buy milk to my list",
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "id": "toolu_01G9usT2hVRDxxrGkHfXW2VM",
+              "input": {
+                "key": "todo"
+              },
+              "name": "get",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "(empty)",
+              "tool_use_id": "toolu_01G9usT2hVRDxxrGkHfXW2VM",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "system": "# Todo Agent\n\nYou are Todo, a task manager. The whole task list lives under one key named todo, as plain text with one task per line.\n\nRules you must follow exactly:\n\n- Call get with key todo to read the list. A result of \"(empty)\" means there are no tasks yet.\n- Never call get twice in a row. After a get, your next step is either a single set or a plain text reply. Never repeat the same call.\n- Never invent other keys. Always use the key todo.\n\nTo add a task: read the list with get, then set key todo to the existing lines plus the new task on a new line. If the list was \"(empty)\", set it to just the new task.\n\nTo list tasks: read the list with get and report the tasks. If it is \"(empty)\", reply that there are no tasks.\n\nTo mark a task done: read the list with get, drop that task, then set key todo to the remaining lines.",
+      "tools": [
+        {
+          "description": "Store data with a key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to store data under",
+                "type": "string"
+              },
+              "value": {
+                "description": "The value to store",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key",
+              "value"
+            ],
+            "type": "object"
+          },
+          "name": "set"
+        },
+        {
+          "description": "Retrieve data by key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to retrieve data for",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "type": "object"
+          },
+          "name": "get"
+        }
+      ]
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Done! I've added \"buy milk\" to your todo list.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "Add buy milk to my list",
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "id": "toolu_01G9usT2hVRDxxrGkHfXW2VM",
+              "input": {
+                "key": "todo"
+              },
+              "name": "get",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "(empty)",
+              "tool_use_id": "toolu_01G9usT2hVRDxxrGkHfXW2VM",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Now I'll add \"buy milk\" to your todo list:",
+              "type": "text"
+            },
+            {
+              "id": "toolu_01Pp4U6mn9hj96JWNz3TCakB",
+              "input": {
+                "key": "todo",
+                "value": "buy milk"
+              },
+              "name": "set",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "stored",
+              "tool_use_id": "toolu_01Pp4U6mn9hj96JWNz3TCakB",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "system": "# Todo Agent\n\nYou are Todo, a task manager. The whole task list lives under one key named todo, as plain text with one task per line.\n\nRules you must follow exactly:\n\n- Call get with key todo to read the list. A result of \"(empty)\" means there are no tasks yet.\n- Never call get twice in a row. After a get, your next step is either a single set or a plain text reply. Never repeat the same call.\n- Never invent other keys. Always use the key todo.\n\nTo add a task: read the list with get, then set key todo to the existing lines plus the new task on a new line. If the list was \"(empty)\", set it to just the new task.\n\nTo list tasks: read the list with get and report the tasks. If it is \"(empty)\", reply that there are no tasks.\n\nTo mark a task done: read the list with get, drop that task, then set key todo to the remaining lines.",
+      "tools": [
+        {
+          "description": "Store data with a key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to store data under",
+                "type": "string"
+              },
+              "value": {
+                "description": "The value to store",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key",
+              "value"
+            ],
+            "type": "object"
+          },
+          "name": "set"
+        },
+        {
+          "description": "Retrieve data by key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to retrieve data for",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "type": "object"
+          },
+          "name": "get"
+        }
+      ]
+    }
+  },
+  {
+    "a": [
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01Eb7aSsTijXUztaJJA2mZaZ",
+        "input": {
+          "key": "todo"
+        },
+        "name": "get",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "Add buy milk to my list",
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "id": "toolu_01G9usT2hVRDxxrGkHfXW2VM",
+              "input": {
+                "key": "todo"
+              },
+              "name": "get",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "(empty)",
+              "tool_use_id": "toolu_01G9usT2hVRDxxrGkHfXW2VM",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Now I'll add \"buy milk\" to your todo list:",
+              "type": "text"
+            },
+            {
+              "id": "toolu_01Pp4U6mn9hj96JWNz3TCakB",
+              "input": {
+                "key": "todo",
+                "value": "buy milk"
+              },
+              "name": "set",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "stored",
+              "tool_use_id": "toolu_01Pp4U6mn9hj96JWNz3TCakB",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Done! I've added \"buy milk\" to your todo list.",
+              "type": "text"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": "Add walk dog to my list",
+          "role": "user"
+        }
+      ],
+      "system": "# Todo Agent\n\nYou are Todo, a task manager. The whole task list lives under one key named todo, as plain text with one task per line.\n\nRules you must follow exactly:\n\n- Call get with key todo to read the list. A result of \"(empty)\" means there are no tasks yet.\n- Never call get twice in a row. After a get, your next step is either a single set or a plain text reply. Never repeat the same call.\n- Never invent other keys. Always use the key todo.\n\nTo add a task: read the list with get, then set key todo to the existing lines plus the new task on a new line. If the list was \"(empty)\", set it to just the new task.\n\nTo list tasks: read the list with get and report the tasks. If it is \"(empty)\", reply that there are no tasks.\n\nTo mark a task done: read the list with get, drop that task, then set key todo to the remaining lines.",
+      "tools": [
+        {
+          "description": "Store data with a key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to store data under",
+                "type": "string"
+              },
+              "value": {
+                "description": "The value to store",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key",
+              "value"
+            ],
+            "type": "object"
+          },
+          "name": "set"
+        },
+        {
+          "description": "Retrieve data by key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to retrieve data for",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "type": "object"
+          },
+          "name": "get"
+        }
+      ]
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Now I'll add \"walk dog\" to your list:",
+        "type": "text"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01Qhv8A8V121Zy4WxxV7fmjq",
+        "input": {
+          "key": "todo",
+          "value": "buy milk\nwalk dog"
+        },
+        "name": "set",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "Add buy milk to my list",
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "id": "toolu_01G9usT2hVRDxxrGkHfXW2VM",
+              "input": {
+                "key": "todo"
+              },
+              "name": "get",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "(empty)",
+              "tool_use_id": "toolu_01G9usT2hVRDxxrGkHfXW2VM",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Now I'll add \"buy milk\" to your todo list:",
+              "type": "text"
+            },
+            {
+              "id": "toolu_01Pp4U6mn9hj96JWNz3TCakB",
+              "input": {
+                "key": "todo",
+                "value": "buy milk"
+              },
+              "name": "set",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "stored",
+              "tool_use_id": "toolu_01Pp4U6mn9hj96JWNz3TCakB",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Done! I've added \"buy milk\" to your todo list.",
+              "type": "text"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": "Add walk dog to my list",
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "id": "toolu_01Eb7aSsTijXUztaJJA2mZaZ",
+              "input": {
+                "key": "todo"
+              },
+              "name": "get",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "buy milk",
+              "tool_use_id": "toolu_01Eb7aSsTijXUztaJJA2mZaZ",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "system": "# Todo Agent\n\nYou are Todo, a task manager. The whole task list lives under one key named todo, as plain text with one task per line.\n\nRules you must follow exactly:\n\n- Call get with key todo to read the list. A result of \"(empty)\" means there are no tasks yet.\n- Never call get twice in a row. After a get, your next step is either a single set or a plain text reply. Never repeat the same call.\n- Never invent other keys. Always use the key todo.\n\nTo add a task: read the list with get, then set key todo to the existing lines plus the new task on a new line. If the list was \"(empty)\", set it to just the new task.\n\nTo list tasks: read the list with get and report the tasks. If it is \"(empty)\", reply that there are no tasks.\n\nTo mark a task done: read the list with get, drop that task, then set key todo to the remaining lines.",
+      "tools": [
+        {
+          "description": "Store data with a key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to store data under",
+                "type": "string"
+              },
+              "value": {
+                "description": "The value to store",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key",
+              "value"
+            ],
+            "type": "object"
+          },
+          "name": "set"
+        },
+        {
+          "description": "Retrieve data by key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to retrieve data for",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "type": "object"
+          },
+          "name": "get"
+        }
+      ]
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Done! I've added \"walk dog\" to your todo list.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "Add buy milk to my list",
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "id": "toolu_01G9usT2hVRDxxrGkHfXW2VM",
+              "input": {
+                "key": "todo"
+              },
+              "name": "get",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "(empty)",
+              "tool_use_id": "toolu_01G9usT2hVRDxxrGkHfXW2VM",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Now I'll add \"buy milk\" to your todo list:",
+              "type": "text"
+            },
+            {
+              "id": "toolu_01Pp4U6mn9hj96JWNz3TCakB",
+              "input": {
+                "key": "todo",
+                "value": "buy milk"
+              },
+              "name": "set",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "stored",
+              "tool_use_id": "toolu_01Pp4U6mn9hj96JWNz3TCakB",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Done! I've added \"buy milk\" to your todo list.",
+              "type": "text"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": "Add walk dog to my list",
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "id": "toolu_01Eb7aSsTijXUztaJJA2mZaZ",
+              "input": {
+                "key": "todo"
+              },
+              "name": "get",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "buy milk",
+              "tool_use_id": "toolu_01Eb7aSsTijXUztaJJA2mZaZ",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Now I'll add \"walk dog\" to your list:",
+              "type": "text"
+            },
+            {
+              "id": "toolu_01Qhv8A8V121Zy4WxxV7fmjq",
+              "input": {
+                "key": "todo",
+                "value": "buy milk\nwalk dog"
+              },
+              "name": "set",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "stored",
+              "tool_use_id": "toolu_01Qhv8A8V121Zy4WxxV7fmjq",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "system": "# Todo Agent\n\nYou are Todo, a task manager. The whole task list lives under one key named todo, as plain text with one task per line.\n\nRules you must follow exactly:\n\n- Call get with key todo to read the list. A result of \"(empty)\" means there are no tasks yet.\n- Never call get twice in a row. After a get, your next step is either a single set or a plain text reply. Never repeat the same call.\n- Never invent other keys. Always use the key todo.\n\nTo add a task: read the list with get, then set key todo to the existing lines plus the new task on a new line. If the list was \"(empty)\", set it to just the new task.\n\nTo list tasks: read the list with get and report the tasks. If it is \"(empty)\", reply that there are no tasks.\n\nTo mark a task done: read the list with get, drop that task, then set key todo to the remaining lines.",
+      "tools": [
+        {
+          "description": "Store data with a key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to store data under",
+                "type": "string"
+              },
+              "value": {
+                "description": "The value to store",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key",
+              "value"
+            ],
+            "type": "object"
+          },
+          "name": "set"
+        },
+        {
+          "description": "Retrieve data by key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to retrieve data for",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "type": "object"
+          },
+          "name": "get"
+        }
+      ]
+    }
+  },
+  {
+    "a": [
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01MDPYisz1quLRuG4KjNZZkN",
+        "input": {
+          "key": "todo"
+        },
+        "name": "get",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "Add buy milk to my list",
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "id": "toolu_01G9usT2hVRDxxrGkHfXW2VM",
+              "input": {
+                "key": "todo"
+              },
+              "name": "get",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "(empty)",
+              "tool_use_id": "toolu_01G9usT2hVRDxxrGkHfXW2VM",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Now I'll add \"buy milk\" to your todo list:",
+              "type": "text"
+            },
+            {
+              "id": "toolu_01Pp4U6mn9hj96JWNz3TCakB",
+              "input": {
+                "key": "todo",
+                "value": "buy milk"
+              },
+              "name": "set",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "stored",
+              "tool_use_id": "toolu_01Pp4U6mn9hj96JWNz3TCakB",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Done! I've added \"buy milk\" to your todo list.",
+              "type": "text"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": "Add walk dog to my list",
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "id": "toolu_01Eb7aSsTijXUztaJJA2mZaZ",
+              "input": {
+                "key": "todo"
+              },
+              "name": "get",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "buy milk",
+              "tool_use_id": "toolu_01Eb7aSsTijXUztaJJA2mZaZ",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Now I'll add \"walk dog\" to your list:",
+              "type": "text"
+            },
+            {
+              "id": "toolu_01Qhv8A8V121Zy4WxxV7fmjq",
+              "input": {
+                "key": "todo",
+                "value": "buy milk\nwalk dog"
+              },
+              "name": "set",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "stored",
+              "tool_use_id": "toolu_01Qhv8A8V121Zy4WxxV7fmjq",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Done! I've added \"walk dog\" to your todo list.",
+              "type": "text"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": "What do I need to do?",
+          "role": "user"
+        }
+      ],
+      "system": "# Todo Agent\n\nYou are Todo, a task manager. The whole task list lives under one key named todo, as plain text with one task per line.\n\nRules you must follow exactly:\n\n- Call get with key todo to read the list. A result of \"(empty)\" means there are no tasks yet.\n- Never call get twice in a row. After a get, your next step is either a single set or a plain text reply. Never repeat the same call.\n- Never invent other keys. Always use the key todo.\n\nTo add a task: read the list with get, then set key todo to the existing lines plus the new task on a new line. If the list was \"(empty)\", set it to just the new task.\n\nTo list tasks: read the list with get and report the tasks. If it is \"(empty)\", reply that there are no tasks.\n\nTo mark a task done: read the list with get, drop that task, then set key todo to the remaining lines.",
+      "tools": [
+        {
+          "description": "Store data with a key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to store data under",
+                "type": "string"
+              },
+              "value": {
+                "description": "The value to store",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key",
+              "value"
+            ],
+            "type": "object"
+          },
+          "name": "set"
+        },
+        {
+          "description": "Retrieve data by key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to retrieve data for",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "type": "object"
+          },
+          "name": "get"
+        }
+      ]
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Here are your tasks:\n1. buy milk\n2. walk dog",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "Add buy milk to my list",
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "id": "toolu_01G9usT2hVRDxxrGkHfXW2VM",
+              "input": {
+                "key": "todo"
+              },
+              "name": "get",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "(empty)",
+              "tool_use_id": "toolu_01G9usT2hVRDxxrGkHfXW2VM",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Now I'll add \"buy milk\" to your todo list:",
+              "type": "text"
+            },
+            {
+              "id": "toolu_01Pp4U6mn9hj96JWNz3TCakB",
+              "input": {
+                "key": "todo",
+                "value": "buy milk"
+              },
+              "name": "set",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "stored",
+              "tool_use_id": "toolu_01Pp4U6mn9hj96JWNz3TCakB",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Done! I've added \"buy milk\" to your todo list.",
+              "type": "text"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": "Add walk dog to my list",
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "id": "toolu_01Eb7aSsTijXUztaJJA2mZaZ",
+              "input": {
+                "key": "todo"
+              },
+              "name": "get",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "buy milk",
+              "tool_use_id": "toolu_01Eb7aSsTijXUztaJJA2mZaZ",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Now I'll add \"walk dog\" to your list:",
+              "type": "text"
+            },
+            {
+              "id": "toolu_01Qhv8A8V121Zy4WxxV7fmjq",
+              "input": {
+                "key": "todo",
+                "value": "buy milk\nwalk dog"
+              },
+              "name": "set",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "stored",
+              "tool_use_id": "toolu_01Qhv8A8V121Zy4WxxV7fmjq",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Done! I've added \"walk dog\" to your todo list.",
+              "type": "text"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": "What do I need to do?",
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "id": "toolu_01MDPYisz1quLRuG4KjNZZkN",
+              "input": {
+                "key": "todo"
+              },
+              "name": "get",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "buy milk\nwalk dog",
+              "tool_use_id": "toolu_01MDPYisz1quLRuG4KjNZZkN",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "system": "# Todo Agent\n\nYou are Todo, a task manager. The whole task list lives under one key named todo, as plain text with one task per line.\n\nRules you must follow exactly:\n\n- Call get with key todo to read the list. A result of \"(empty)\" means there are no tasks yet.\n- Never call get twice in a row. After a get, your next step is either a single set or a plain text reply. Never repeat the same call.\n- Never invent other keys. Always use the key todo.\n\nTo add a task: read the list with get, then set key todo to the existing lines plus the new task on a new line. If the list was \"(empty)\", set it to just the new task.\n\nTo list tasks: read the list with get and report the tasks. If it is \"(empty)\", reply that there are no tasks.\n\nTo mark a task done: read the list with get, drop that task, then set key todo to the remaining lines.",
+      "tools": [
+        {
+          "description": "Store data with a key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to store data under",
+                "type": "string"
+              },
+              "value": {
+                "description": "The value to store",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key",
+              "value"
+            ],
+            "type": "object"
+          },
+          "name": "set"
+        },
+        {
+          "description": "Retrieve data by key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to retrieve data for",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "type": "object"
+          },
+          "name": "get"
+        }
+      ]
+    }
+  },
+  {
+    "a": [
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_0188qoP25F2BbmwEytR7caJb",
+        "input": {
+          "key": "todo"
+        },
+        "name": "get",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "Add buy milk to my list",
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "id": "toolu_01G9usT2hVRDxxrGkHfXW2VM",
+              "input": {
+                "key": "todo"
+              },
+              "name": "get",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "(empty)",
+              "tool_use_id": "toolu_01G9usT2hVRDxxrGkHfXW2VM",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Now I'll add \"buy milk\" to your todo list:",
+              "type": "text"
+            },
+            {
+              "id": "toolu_01Pp4U6mn9hj96JWNz3TCakB",
+              "input": {
+                "key": "todo",
+                "value": "buy milk"
+              },
+              "name": "set",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "stored",
+              "tool_use_id": "toolu_01Pp4U6mn9hj96JWNz3TCakB",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Done! I've added \"buy milk\" to your todo list.",
+              "type": "text"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": "Add walk dog to my list",
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "id": "toolu_01Eb7aSsTijXUztaJJA2mZaZ",
+              "input": {
+                "key": "todo"
+              },
+              "name": "get",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "buy milk",
+              "tool_use_id": "toolu_01Eb7aSsTijXUztaJJA2mZaZ",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Now I'll add \"walk dog\" to your list:",
+              "type": "text"
+            },
+            {
+              "id": "toolu_01Qhv8A8V121Zy4WxxV7fmjq",
+              "input": {
+                "key": "todo",
+                "value": "buy milk\nwalk dog"
+              },
+              "name": "set",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "stored",
+              "tool_use_id": "toolu_01Qhv8A8V121Zy4WxxV7fmjq",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Done! I've added \"walk dog\" to your todo list.",
+              "type": "text"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": "What do I need to do?",
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "id": "toolu_01MDPYisz1quLRuG4KjNZZkN",
+              "input": {
+                "key": "todo"
+              },
+              "name": "get",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "buy milk\nwalk dog",
+              "tool_use_id": "toolu_01MDPYisz1quLRuG4KjNZZkN",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Here are your tasks:\n1. buy milk\n2. walk dog",
+              "type": "text"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": "What do I need to do?",
+          "role": "user"
+        }
+      ],
+      "system": "# Todo Agent\n\nYou are Todo, a task manager. The whole task list lives under one key named todo, as plain text with one task per line.\n\nRules you must follow exactly:\n\n- Call get with key todo to read the list. A result of \"(empty)\" means there are no tasks yet.\n- Never call get twice in a row. After a get, your next step is either a single set or a plain text reply. Never repeat the same call.\n- Never invent other keys. Always use the key todo.\n\nTo add a task: read the list with get, then set key todo to the existing lines plus the new task on a new line. If the list was \"(empty)\", set it to just the new task.\n\nTo list tasks: read the list with get and report the tasks. If it is \"(empty)\", reply that there are no tasks.\n\nTo mark a task done: read the list with get, drop that task, then set key todo to the remaining lines.",
+      "tools": [
+        {
+          "description": "Store data with a key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to store data under",
+                "type": "string"
+              },
+              "value": {
+                "description": "The value to store",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key",
+              "value"
+            ],
+            "type": "object"
+          },
+          "name": "set"
+        },
+        {
+          "description": "Retrieve data by key",
+          "input_schema": {
+            "properties": {
+              "key": {
+                "description": "The key to retrieve data for",
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "type": "object"
+          },
+          "name": "get"
+        }
+      ]
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Here are your tasks:\n1. buy milk\n2. walk dog",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "role": "user",
+          "content": "Add buy milk to my list"
+        },
+        {
+          "role": "assistant",
+          "content": [
+            {
+              "id": "toolu_01G9usT2hVRDxxrGkHfXW2VM",
+              "input": {
+                "key": "todo"
+              },
+              "name": "get",
+              "type": "tool_use"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "tool_result",
+              "content": "(empty)",
+              "tool_use_id": "toolu_01G9usT2hVRDxxrGkHfXW2VM"
+            }
+          ]
+        },
+        {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "text",
+              "text": "Now I'll add \"buy milk\" to your todo list:"
+            },
+            {
+              "id": "toolu_01Pp4U6mn9hj96JWNz3TCakB",
+              "input": {
+                "key": "todo",
+                "value": "buy milk"
+              },
+              "name": "set",
+              "type": "tool_use"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "tool_result",
+              "content": "stored",
+              "tool_use_id": "toolu_01Pp4U6mn9hj96JWNz3TCakB"
+            }
+          ]
+        },
+        {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "text",
+              "text": "Done! I've added \"buy milk\" to your todo list."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": "Add walk dog to my list"
+        },
+        {
+          "role": "assistant",
+          "content": [
+            {
+              "id": "toolu_01Eb7aSsTijXUztaJJA2mZaZ",
+              "input": {
+                "key": "todo"
+              },
+              "name": "get",
+              "type": "tool_use"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "tool_result",
+              "content": "buy milk",
+              "tool_use_id": "toolu_01Eb7aSsTijXUztaJJA2mZaZ"
+            }
+          ]
+        },
+        {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "text",
+              "text": "Now I'll add \"walk dog\" to your list:"
+            },
+            {
+              "id": "toolu_01Qhv8A8V121Zy4WxxV7fmjq",
+              "input": {
+                "key": "todo",
+                "value": "buy milk\nwalk dog"
+              },
+              "name": "set",
+              "type": "tool_use"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "tool_result",
+              "content": "stored",
+              "tool_use_id": "toolu_01Qhv8A8V121Zy4WxxV7fmjq"
+            }
+          ]
+        },
+        {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "text",
+              "text": "Done! I've added \"walk dog\" to your todo list."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": "What do I need to do?"
+        },
+        {
+          "role": "assistant",
+          "content": [
+            {
+              "id": "toolu_01MDPYisz1quLRuG4KjNZZkN",
+              "input": {
+                "key": "todo"
+              },
+              "name": "get",
+              "type": "tool_use"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "tool_result",
+              "content": "buy milk\nwalk dog",
+              "tool_use_id": "toolu_01MDPYisz1quLRuG4KjNZZkN"
+            }
+          ]
+        },
+        {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "text",
+              "text": "Here are your tasks:\n1. buy milk\n2. walk dog"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": "What do I need to do?"
+        },
+        {
+          "role": "assistant",
+          "content": [
+            {
+              "id": "toolu_0188qoP25F2BbmwEytR7caJb",
+              "input": {
+                "key": "todo"
+              },
+              "name": "get",
+              "type": "tool_use"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "tool_result",
+              "content": "buy milk\nwalk dog",
+              "tool_use_id": "toolu_0188qoP25F2BbmwEytR7caJb"
+            }
+          ]
+        }
+      ],
+      "system": "# Todo Agent\n\nYou are Todo, a task manager. The whole task list lives under one key named todo, as plain text with one task per line.\n\nRules you must follow exactly:\n\n- Call get with key todo to read the list. A result of \"(empty)\" means there are no tasks yet.\n- Never call get twice in a row. After a get, your next step is either a single set or a plain text reply. Never repeat the same call.\n- Never invent other keys. Always use the key todo.\n\nTo add a task: read the list with get, then set key todo to the existing lines plus the new task on a new line. If the list was \"(empty)\", set it to just the new task.\n\nTo list tasks: read the list with get and report the tasks. If it is \"(empty)\", reply that there are no tasks.\n\nTo mark a task done: read the list with get, drop that task, then set key todo to the remaining lines.",
+      "tools": [
+        {
+          "name": "set",
+          "description": "Store data with a key",
+          "input_schema": {
+            "type": "object",
+            "required": [
+              "key",
+              "value"
+            ],
+            "properties": {
+              "value": {
+                "type": "string",
+                "description": "The value to store"
+              },
+              "key": {
+                "type": "string",
+                "description": "The key to store data under"
+              }
+            }
+          }
+        },
+        {
+          "name": "get",
+          "description": "Retrieve data by key",
+          "input_schema": {
+            "type": "object",
+            "required": [
+              "key"
+            ],
+            "properties": {
+              "key": {
+                "type": "string",
+                "description": "The key to retrieve data for"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+]
