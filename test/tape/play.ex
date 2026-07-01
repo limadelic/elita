@@ -56,14 +56,11 @@ defmodule Tape.Play do
   end
 
   defp get_hit_count(idx) do
-    key = :"tape_hit_#{cassette_key()}_#{idx}"
-    Process.get(key, 0)
+    Tape.Writer.get_hit_count(cassette_key(), idx)
   end
 
   defp increment_hit_count(idx) do
-    key = :"tape_hit_#{cassette_key()}_#{idx}"
-    current = Process.get(key, 0)
-    Process.put(key, current + 1)
+    Tape.Writer.increment_hit_count(cassette_key(), idx)
   end
 
   defp cassette_key do
