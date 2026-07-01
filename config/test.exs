@@ -2,7 +2,7 @@ import Config
 
 tape_handler =
   case System.get_env("TAPE") do
-    "rec" -> Tape.Record
+    "rec" -> &Tape.Record.handle/3
     _ -> &Tape.play/3
   end
 
