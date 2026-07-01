@@ -36,23 +36,40 @@ defmodule Tape do
 
   defp first_match(entries, body, request_fun) do
     incoming = normalize(request(body))
-    used = consumed_count(cassette_key())
-    match_and_use(entries, used, incoming, body, request_fun)
+    find_match(entries, incoming, 0, body, request_fun)
   end
 
-  defp match_and_use(entries, used, incoming, body, request_fun) do
-    entries
-    |> drop(used)
-    |> find_index(fn %{"req" => req} -> contains(req, incoming) end)
-    |> use_first(used, entries, body, request_fun)
+  defp find_match(entries, incoming, idx, body, request_fun) when idx < length(entries) do
+    entry = Enum.at(entries, idx)
+    if matches_and_available?(entry, incoming, idx), do: use_entry(entry, idx), else: find_match(entries, incoming, idx + 1, body, request_fun)
   end
 
-  defp use_first(nil, _used, _entries, body, request_fun), do: live(body, request_fun)
+  defp find_match(_entries, _incoming, _idx, body, request_fun), do: live(body, request_fun)
 
-  defp use_first(offset, used, entries, _body, _request_fun) do
-    idx = used + offset
-    consume(cassette_key(), idx)
-    Enum.at(entries, idx)["res"]
+  defp use_entry(entry, idx) do
+    increment_hit_count(idx)
+    entry["res"]
+  end
+
+  defp matches_and_available?(entry, incoming, idx) do
+    req = entry["req"]
+    contains(req, incoming) and not exhausted?(entry, idx)
+  end
+
+  defp exhausted?(entry, idx) do
+    times = entry["times"] || 1
+    times != "always" and get_hit_count(idx) >= times
+  end
+
+  defp get_hit_count(idx) do
+    key = :"tape_hit_#{cassette_key()}_#{idx}"
+    Process.get(key, 0)
+  end
+
+  defp increment_hit_count(idx) do
+    key = :"tape_hit_#{cassette_key()}_#{idx}"
+    current = Process.get(key, 0)
+    Process.put(key, current + 1)
   end
 
   defp cassette_key, do: get_env("CASSETTE")
