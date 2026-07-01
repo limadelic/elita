@@ -30,7 +30,7 @@ defmodule Tape.Store do
     entries = load_entries()
     path = cassette_file()
     mkdir_p(cassette_dir())
-    write(path, encode!(entries ++ [%{"req" => req, "res" => response}], pretty: true))
+    write(path, encode!(entries ++ [%{"q" => req, "a" => response}], pretty: true))
   end
 
   def record_and_append(body, agent_name, request_fun) do

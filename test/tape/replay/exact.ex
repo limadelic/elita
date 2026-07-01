@@ -18,7 +18,7 @@ defmodule Tape.Replay.Exact do
   end
 
   defp check_match(entry, ctx, idx) do
-    req = entry["req"]
+    req = entry["q"]
     match = contains(req, ctx.incoming)
     process_match(match, entry, ctx, idx)
   end
@@ -33,7 +33,7 @@ defmodule Tape.Replay.Exact do
 
   defp use_entry_if(false, entry, _ctx, idx) do
     increment_hit_count(idx)
-    entry["res"]
+    entry["a"]
   end
 
   defp use_entry_if(true, _entry, ctx, idx) do

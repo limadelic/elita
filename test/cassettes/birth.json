@@ -1,7 +1,7 @@
 [
   {
-    "req": { "messages": [ { "content": "it's time to give birth" } ] },
-    "res": [
+    "q": { "messages": [ { "content": "it's time to give birth" } ] },
+    "a": [
       {
         "text": "Oh my! It's time! Let me bring our baby into the world!",
         "type": "text"
@@ -16,8 +16,8 @@
     ]
   },
   {
-    "req": { "messages": [ { "content": "spank" } ] },
-    "res": [
+    "q": { "messages": [ { "content": "spank" } ] },
+    "a": [
       {
         "text": "*WAAAAAAHHHHH!* 😭\n\n*cry cry cry*\n\nOhhhhh! I cry! I cry! \n\n*whimper whimper*\n\nWAAAAAHHHHH! 👶",
         "type": "text"
@@ -25,8 +25,8 @@
     ]
   },
   {
-    "req": { "messages": [ { "content": "give birth" } ] },
-    "res": [
+    "q": { "messages": [ { "content": "give birth" } ] },
+    "a": [
       {
         "text": "🎉 **Congratulations!** Baby has arrived! \n\nI'm so relieved and overjoyed! After all this time, our precious little one is finally here. The labor was intense, but it was all worth it to meet our beautiful baby! \n\n*holds baby close*\n\nWelcome to the world, sweet one! 💕👶",
         "type": "text"
