@@ -32,7 +32,9 @@ defmodule Tape do
   end
 
   defp new_replay([[_req, _resp] | _] = entries, _messages, body, _agent_name, request_fun) do
-    case find_index(entries, fn [req, _] -> contains(req, request(body)) end) do
+    incoming = lastmsg(normalize(request(body)))
+
+    case find_index(entries, fn [req, _] -> contains(lastmsg(req), incoming) end) do
       nil ->
         live(body, request_fun)
 
@@ -41,6 +43,13 @@ defmodule Tape do
         response
     end
   end
+
+  defp normalize(req), do: req |> encode!() |> decode!()
+
+  defp lastmsg(%{"messages" => m} = req) when is_list(m) and m != [],
+    do: Map.put(req, "messages", [List.last(m)])
+
+  defp lastmsg(req), do: req
 
   defp new_replay([], _messages, body, _agent_name, request_fun) do
     live(body, request_fun)
