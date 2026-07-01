@@ -31,15 +31,15 @@ defmodule Tape do
     end
   end
 
-  defp new_replay([[_req, _resp] | _] = entries, _messages, body, _agent_name, request_fun) do
+  defp new_replay([%{} | _] = entries, _messages, body, _agent_name, request_fun) do
     incoming = lastmsg(normalize(request(body)))
 
-    case find_index(entries, fn [req, _] -> contains(lastmsg(req), incoming) end) do
+    case find_index(entries, fn %{"req" => req} -> contains(lastmsg(req), incoming) end) do
       nil ->
         live(body, request_fun)
 
       offset ->
-        [_, response] = Enum.at(entries, offset)
+        %{"res" => response} = Enum.at(entries, offset)
         response
     end
   end
@@ -86,7 +86,7 @@ defmodule Tape do
         _ -> []
       end
 
-    write(path, encode!(entries ++ [[req, response]], pretty: true))
+    write(path, encode!(entries ++ [%{"req" => req, "res" => response}], pretty: true))
   end
 
   defp contains(a, b) when is_map(a) and is_map(b),
