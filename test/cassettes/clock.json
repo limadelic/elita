@@ -1,22 +1,17 @@
 [
-  [
-    "clock",
-    "[{\"role\":\"user\",\"content\":\"what hour is it?\"}]",
-    [
+  {
+    "q": {
+      "messages": [
+        {
+          "content": "what hour is it?"
+        }
+      ]
+    },
+    "a": [
       {
         "text": "It is the **0th hour** (or **midnight hour**) - specifically 12:57 AM.\n\nIn 24-hour format, it's **00:57**, so the hour is **00**.",
         "type": "text"
       }
     ]
-  ],
-  [
-    "clock",
-    "[{\"role\":\"user\",\"content\":\"what hour is it?\"}]",
-    [
-      {
-        "text": "It is **00 hours** (midnight), or 12:58 AM on June 30, 2026.",
-        "type": "text"
-      }
-    ]
-  ]
+  }
 ]
