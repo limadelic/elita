@@ -21,7 +21,7 @@ defmodule Lite do
     result |> text
   end
 
-  defp tape(body, agent_name, fun), do: get_env(:elita, :tape, &thru/3).(body, agent_name, fun)
+  defp tape(body, agent_name, fun), do: get_env(:elita, :tape_handler, &thru/3).(body, agent_name, fun)
   defp thru(_body, _agent_name, fun), do: fun.()
 
   defp text([%{"type" => "text", "text" => t} | _]), do: t
