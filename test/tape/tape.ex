@@ -111,6 +111,15 @@ defmodule Tape do
   defp contains(a, b) when is_list(a) and is_list(b),
     do: Enum.all?(a, fn x -> Enum.any?(b, &contains(x, &1)) end)
 
+  defp contains(<<"/" <> rest::binary>>, b) when is_binary(b) do
+    if String.ends_with?(rest, "/"), do: regex_match(rest, b), else: String.contains?(b, "/" <> rest)
+  end
+
+  defp regex_match(rest, b) do
+    pattern = String.slice(rest, 0, String.length(rest) - 1)
+    Regex.match?(Regex.compile!(pattern), b)
+  end
+
   defp contains(a, b) when is_binary(a) and is_binary(b), do: String.contains?(b, a)
 
   defp contains(a, b), do: a == b
