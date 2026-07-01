@@ -3,6 +3,7 @@ defmodule Tape do
   import System, only: [get_env: 1]
   import Jason
   import Enum, only: [find_index: 2, drop: 2]
+  import Tape.Matcher, only: [contains: 2]
 
   def play(body, agent_name, request_fun) do
     if get_env("REC") == "1", do: record(body, agent_name, request_fun), else: replay_or_record(body, agent_name, request_fun)
@@ -104,25 +105,6 @@ defmodule Tape do
     mkdir_p(cassette_dir())
     write(path, encode!(entries ++ [%{"req" => req, "res" => response}], pretty: true))
   end
-
-  defp contains(a, b) when is_map(a) and is_map(b),
-    do: Enum.all?(a, fn {k, v} -> contains(v, b[k] || b[to_string(k)]) end)
-
-  defp contains(a, b) when is_list(a) and is_list(b),
-    do: Enum.all?(a, fn x -> Enum.any?(b, &contains(x, &1)) end)
-
-  defp contains(<<"/" <> rest::binary>>, b) when is_binary(b) do
-    if String.ends_with?(rest, "/"), do: regex_match(rest, b), else: String.contains?(b, "/" <> rest)
-  end
-
-  defp regex_match(rest, b) do
-    pattern = String.slice(rest, 0, String.length(rest) - 1)
-    Regex.match?(Regex.compile!(pattern), b)
-  end
-
-  defp contains(a, b) when is_binary(a) and is_binary(b), do: String.contains?(b, a)
-
-  defp contains(a, b), do: a == b
 
   defp find_match(entries, messages, agent_name, matcher) do
     idx = consumed_count(agent_name)
