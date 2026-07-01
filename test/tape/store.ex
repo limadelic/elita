@@ -27,6 +27,10 @@ defmodule Tape.Store do
   defp load_old_entries_from(_), do: %{}
 
   def append_live(req, response) do
+    Tape.Writer.acquire(fn -> live(req, response) end)
+  end
+
+  defp live(req, response) do
     entries = load_entries()
     path = cassette_file()
     mkdir_p(cassette_dir())
