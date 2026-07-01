@@ -35,13 +35,27 @@ defmodule Tape do
     do: matched_replay(entries, messages, agent_name, request_fun, body)
 
   defp first_match(entries, body, request_fun) do
-    incoming = lastmsg(normalize(request(body)))
-    find_index(entries, fn %{"req" => req} -> contains(lastmsg(req), incoming) end)
-    |> use_first(entries, body, request_fun)
+    incoming = normalize(request(body))
+    used = consumed_count(cassette_key())
+    match_and_use(entries, used, incoming, body, request_fun)
   end
 
-  defp use_first(nil, _entries, body, request_fun), do: live(body, request_fun)
-  defp use_first(offset, entries, _body, _request_fun), do: Enum.at(entries, offset)["res"]
+  defp match_and_use(entries, used, incoming, body, request_fun) do
+    entries
+    |> drop(used)
+    |> find_index(fn %{"req" => req} -> contains(req, incoming) end)
+    |> use_first(used, entries, body, request_fun)
+  end
+
+  defp use_first(nil, _used, _entries, body, request_fun), do: live(body, request_fun)
+
+  defp use_first(offset, used, entries, _body, _request_fun) do
+    idx = used + offset
+    consume(cassette_key(), idx)
+    Enum.at(entries, idx)["res"]
+  end
+
+  defp cassette_key, do: get_env("CASSETTE")
 
   defp matched_replay(entries, messages, agent_name, request_fun, body) do
     matcher = select_matcher()
@@ -58,10 +72,6 @@ defmodule Tape do
   end
 
   defp normalize(req), do: req |> encode!() |> decode!()
-
-  defp lastmsg(%{"messages" => m} = req) when is_list(m) and m != [],
-    do: Map.put(req, "messages", [List.last(m)])
-  defp lastmsg(req), do: req
 
   defp live(body, request_fun) do
     response = request_fun.()
