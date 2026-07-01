@@ -1,6 +1,5 @@
 defmodule Tape.Play do
   import Tape.Matcher, only: [contains: 2]
-  alias Tape.Record
 
   def handle(body, name, fun) do
     normalized = normalize(request(body))
@@ -10,7 +9,7 @@ defmodule Tape.Play do
   end
 
   defp find_match(%{entries: entries} = ctx, idx) when idx >= length(entries) do
-    Record.handle(ctx.body, ctx.name, ctx.fun)
+    raise "tape miss: #{ctx.name} #{inspect(ctx.normalized)}"
   end
 
   defp find_match(ctx, idx) do
