@@ -1,5 +1,4 @@
 defmodule Tape.Play do
-  import Jason
   import Tape.Matcher, only: [contains: 2]
   alias Tape.Record
 
