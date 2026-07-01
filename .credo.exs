@@ -22,7 +22,8 @@
         # In the latter case `**/*.{ex,exs}` will be used.
         #
         included: [
-          "lib/"
+          "lib/",
+          "test/tape/"
         ],
         excluded: [~r"/_build/", ~r"/deps/", ~r"/node_modules/"]
       },
@@ -64,10 +65,10 @@
           {Credo.Check.Readability.ModuleNames, []},
           {Credo.Check.Readability.VariableNames, []},
           {Credo.Check.Refactor.FunctionArity, [max_arity: 5]},
-          {Credo.Check.Refactor.CyclomaticComplexity, [max_complexity: 1, files: %{excluded: [~r/lib\/tools\/sys\/(get|set|spawn)\.ex/]}]},
+          {Credo.Check.Refactor.CyclomaticComplexity, [max_complexity: 1, files: %{excluded: [~r/lib\/tools\/sys\/(get|set|spawn)\.ex/, ~r/test\/tape/]}]},
           {Credo.Check.Design.DuplicatedCode, mass_threshold: 40},
           {Elita.Credo.MaxFunctionLines, [max_lines: 5]},
-          {Elita.Credo.MaxModuleLines, [max_lines: 100]},
+          {Elita.Credo.MaxModuleLines, [max_lines: 100, files: %{excluded: [~r/test\/tape/]}]},
           {Credo.Check.Warning.Dbg, []},
           {Credo.Check.Warning.IoInspect, []},
           {Credo.Check.Warning.IExPry, []},

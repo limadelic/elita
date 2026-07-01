@@ -22,7 +22,7 @@ defmodule Elita.MixProject do
     ]
   end
 
-  defp paths(:test), do: ["lib", "test/support"]
+  defp paths(:test), do: ["lib", "test/support", "test/tape"]
   defp paths(_), do: ["lib"]
 
   # Run "mix help deps" to learn about dependencies.
