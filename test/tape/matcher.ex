@@ -1,17 +1,91 @@
 defmodule Tape.Matcher do
-  def contains(a, b) when is_map(a) and is_map(b),
-    do: Enum.all?(a, fn {k, v} -> contains(v, b[k] || b[to_string(k)]) end)
-
-  def contains(a, b) when is_list(a) and is_list(b),
-    do: Enum.all?(a, fn x -> Enum.any?(b, &contains(x, &1)) end)
-
-  def contains(<<"/" <> rest::binary>>, b) when is_binary(b) do
-    if String.ends_with?(rest, "/"), do: regex_match(rest, b), else: String.contains?(b, "/" <> rest)
+  def contains(a, b) do
+    dispatch_contains(a, b)
   end
 
-  def contains(a, b) when is_binary(a) and is_binary(b), do: String.contains?(b, a)
+  defp dispatch_contains(a, b) when is_map(a) do
+    dispatch_map_contains(a, b, is_map(b))
+  end
 
-  def contains(a, b), do: a == b
+  defp dispatch_contains(a, b) when is_list(a) do
+    dispatch_list_contains(a, b, is_list(b))
+  end
+
+  defp dispatch_contains(<<"/" <> _::binary>> = a, b) do
+    dispatch_regex_contains(a, b)
+  end
+
+  defp dispatch_contains(a, b) do
+    equal_or_contains(a, b)
+  end
+
+  defp dispatch_map_contains(a, b, true) do
+    Enum.all?(a, &check_map_entry(&1, b))
+  end
+
+  defp dispatch_map_contains(_a, _b, false) do
+    false
+  end
+
+  defp dispatch_list_contains(a, b, true) do
+    Enum.all?(a, &check_list_item(&1, b))
+  end
+
+  defp dispatch_list_contains(_a, _b, false) do
+    false
+  end
+
+  defp dispatch_regex_contains(<<"/" <> rest::binary>>, b) do
+    dispatch_by_binary_type(rest, b, is_binary(b))
+  end
+
+  defp dispatch_by_binary_type(rest, b, true) do
+    check_regex_or_string(rest, b)
+  end
+
+  defp dispatch_by_binary_type(_rest, _b, false) do
+    false
+  end
+
+  defp equal_or_contains(a, b) do
+    check_binary_contains(a, b, is_binary(a), is_binary(b))
+  end
+
+  defp check_binary_contains(a, b, true, true) do
+    String.contains?(b, a)
+  end
+
+  defp check_binary_contains(a, b, false, false) do
+    a == b
+  end
+
+  defp check_binary_contains(_a, _b, _ab, _bb) do
+    false
+  end
+
+  defp check_map_entry({k, v}, b) do
+    val = get_map_value(b, k)
+    contains(v, val)
+  end
+
+  defp get_map_value(b, k) do
+    get_by_atom_or_string(Map.fetch(b, k), b, k)
+  end
+
+  defp get_by_atom_or_string({:ok, val}, _b, _k), do: val
+  defp get_by_atom_or_string(:error, b, k), do: b[to_string(k)]
+
+  defp check_list_item(x, b) do
+    Enum.any?(b, &contains(x, &1))
+  end
+
+  defp check_regex_or_string(rest, b) do
+    is_regex = String.ends_with?(rest, "/")
+    handle_regex_check(is_regex, rest, b)
+  end
+
+  defp handle_regex_check(true, rest, b), do: regex_match(rest, b)
+  defp handle_regex_check(false, rest, b), do: String.contains?(b, "/" <> rest)
 
   defp regex_match(rest, b) do
     pattern = String.slice(rest, 0, String.length(rest) - 1)
