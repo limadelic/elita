@@ -1,0 +1,26 @@
+#!/bin/sh
+set -e
+
+branch=$(git rev-parse --abbrev-ref HEAD)
+if [ "$branch" = "main" ]; then
+  echo "TCR: refusing to run on main."
+  exit 1
+fi
+
+if ! mix test; then
+  echo "TCR: test failed, reverting."
+  git checkout -- .
+  git clean -fd -e bin/tcr
+  exit 1
+fi
+
+if ! mix credo; then
+  echo "TCR: credo failed, reverting."
+  git checkout -- .
+  git clean -fd -e bin/tcr
+  exit 1
+fi
+
+git add -A
+msg="${1:-tcr: $(git diff --cached --name-only | tr '\n' ' ')}"
+git commit -m "$msg"
