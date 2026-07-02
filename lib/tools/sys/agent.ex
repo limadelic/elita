@@ -1,13 +1,10 @@
 defmodule Tools.Sys.Agent.Schema do
-  import Enum, only: [join: 2]
-  import Cfgs, only: [value: 2]
-
-  def get(name, state) do
-    %{name: name, description: desc(state), parameters: params()}
+  def get(name, _state) do
+    %{name: name, description: desc(), parameters: params()}
   end
 
-  defp desc(state) do
-    "Read agent definition file. #{help(state)}"
+  defp desc do
+    "Read agent definition file."
   end
 
   defp params do
@@ -16,11 +13,6 @@ defmodule Tools.Sys.Agent.Schema do
 
   defp properties do
     %{name: %{type: "string", description: "Agent name to read"}}
-  end
-
-  defp help(%{config: configs}) do
-    agents = value(:agents, configs)
-    "Available Agents: #{join(agents, ", ")}"
   end
 end
 
