@@ -2,6 +2,7 @@ defmodule Elita.Application do
   use Application
 
   def start(_type, _args) do
+    Mem.init_global()
     Supervisor.start_link(children(), opts())
   end
 

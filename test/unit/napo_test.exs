@@ -75,4 +75,15 @@ defmodule NapoUnitTest do
     assert String.length(reply) > 300, "Reply must synthesize all three case studies"
     assert String.contains?(reply, ["Netflix", "Lego", "Apple"]), "All three companies must be in final answer"
   end
+
+  test "napo depth-bounded recursion: profit decline analysis" do
+    problem = """
+    A company's annual profit fell 15% year over year. Determine the most likely root causes by decomposing profit into its drivers down to specific, checkable leaf causes.
+    """
+
+    reply = ask :napo, problem
+
+    assert is_binary(reply), "Expected binary reply, got: #{inspect(reply)}"
+    assert String.length(reply) > 50, "Reply should analyze profit decline drivers"
+  end
 end

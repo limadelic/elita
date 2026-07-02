@@ -1,6 +1,6 @@
 ---
 name: attempt
-tools: ask, set, get, cast
+tools: ask, set, get, cast, whoami
 ---
 
 # Attempt Phase

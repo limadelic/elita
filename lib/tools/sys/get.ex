@@ -22,7 +22,8 @@ defmodule Tools.Sys.Get do
   end
 
   defp fetch(key) do
-    found(key, :ets.lookup(Mem.table(), key))
+    table = if String.starts_with?(key, "depth_"), do: Mem.depth_table(), else: Mem.table()
+    found(key, :ets.lookup(table, key))
   end
 
   defp found(key, [{k, value}]) when key == k, do: value

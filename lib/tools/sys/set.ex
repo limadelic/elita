@@ -29,6 +29,7 @@ defmodule Tools.Sys.Set do
   end
 
   defp store(key, value) do
-    Mem.table() |> :ets.insert({key, value})
+    table = if String.starts_with?(key, "depth_"), do: Mem.depth_table(), else: Mem.table()
+    table |> :ets.insert({key, value})
   end
 end
