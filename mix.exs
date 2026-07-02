@@ -41,7 +41,19 @@ defmodule Elita.MixProject do
       build: ["compile", "escript.build"],
       t: ["test --no-start"],
       prose: ["test --only prose"],
-      lint: ["format --check-formatted", "credo --strict"]
+      lint: ["format --check-formatted", "credo --strict"],
+      tape: [&tape/1],
+      live: [&live/1]
     ]
+  end
+
+  defp tape(args) do
+    cmd = "TAPE=rec mix test #{Enum.join(args, " ")}"
+    Mix.shell().cmd(cmd)
+  end
+
+  defp live(args) do
+    cmd = "LIVE=1 mix test #{Enum.join(args, " ")}"
+    Mix.shell().cmd(cmd)
   end
 end
