@@ -12,30 +12,6 @@
           "content": "you manage pam the receptionist and jim the salesman",
           "role": "user"
         }
-      ],
-      "system": "# Boss\n\nYou are a boss who delegates work to your team. After delegating, respond with \"done\".",
-      "tools": [
-        {
-          "description": "Send message to another agent",
-          "input_schema": {
-            "properties": {
-              "message": {
-                "description": "Message content",
-                "type": "string"
-              },
-              "recipient": {
-                "description": "Agent name to send message to",
-                "type": "string"
-              }
-            },
-            "required": [
-              "recipient",
-              "message"
-            ],
-            "type": "object"
-          },
-          "name": "tell"
-        }
       ]
     }
   },
@@ -51,30 +27,6 @@
         {
           "content": "you manage dwight the assistant regional manager",
           "role": "user"
-        }
-      ],
-      "system": "# Boss\n\nYou are a boss who delegates work to your team. After delegating, respond with \"done\".",
-      "tools": [
-        {
-          "description": "Send message to another agent",
-          "input_schema": {
-            "properties": {
-              "message": {
-                "description": "Message content",
-                "type": "string"
-              },
-              "recipient": {
-                "description": "Agent name to send message to",
-                "type": "string"
-              }
-            },
-            "required": [
-              "recipient",
-              "message"
-            ],
-            "type": "object"
-          },
-          "name": "tell"
         }
       ]
     }
@@ -97,45 +49,8 @@
     "q": {
       "messages": [
         {
-          "content": "you manage dwight the assistant regional manager",
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "text": "I understand! I'm the boss who manages Dwight, the Assistant Regional Manager. I'm ready to delegate tasks to him. \n\nWhat would you like me to have Dwight do?",
-              "type": "text"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
           "content": "we need 50 copies of the quarterly sales report",
           "role": "user"
-        }
-      ],
-      "system": "# Boss\n\nYou are a boss who delegates work to your team. After delegating, respond with \"done\".",
-      "tools": [
-        {
-          "description": "Send message to another agent",
-          "input_schema": {
-            "properties": {
-              "message": {
-                "description": "Message content",
-                "type": "string"
-              },
-              "recipient": {
-                "description": "Agent name to send message to",
-                "type": "string"
-              }
-            },
-            "required": [
-              "recipient",
-              "message"
-            ],
-            "type": "object"
-          },
-          "name": "tell"
         }
       ]
     }
@@ -158,45 +73,8 @@
     "q": {
       "messages": [
         {
-          "content": "you manage pam the receptionist and jim the salesman",
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "text": "I understand. I'm a boss who manages:\n- **Pam** - the receptionist\n- **Jim** - the salesman\n\nI'm ready to delegate work to them. What would you like me to have them do?",
-              "type": "text"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
           "content": "[from michael] Dwight, I need you to make 50 copies of the quarterly sales report. Get this done right away.",
           "role": "user"
-        }
-      ],
-      "system": "# Boss\n\nYou are a boss who delegates work to your team. After delegating, respond with \"done\".",
-      "tools": [
-        {
-          "description": "Send message to another agent",
-          "input_schema": {
-            "properties": {
-              "message": {
-                "description": "Message content",
-                "type": "string"
-              },
-              "recipient": {
-                "description": "Agent name to send message to",
-                "type": "string"
-              }
-            },
-            "required": [
-              "recipient",
-              "message"
-            ],
-            "type": "object"
-          },
-          "name": "tell"
         }
       ]
     }
@@ -210,37 +88,6 @@
     ],
     "q": {
       "messages": [
-        {
-          "content": "you manage dwight the assistant regional manager",
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "text": "I understand! I'm the boss who manages Dwight, the Assistant Regional Manager. I'm ready to delegate tasks to him. \n\nWhat would you like me to have Dwight do?",
-              "type": "text"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": "we need 50 copies of the quarterly sales report",
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "id": "toolu_01QAdFnzNjE6g4VJoQfF17gv",
-              "input": {
-                "message": "Dwight, I need you to make 50 copies of the quarterly sales report. Get this done right away.",
-                "recipient": "Dwight"
-              },
-              "name": "tell",
-              "type": "tool_use"
-            }
-          ],
-          "role": "assistant"
-        },
         {
           "content": [
             {
@@ -251,30 +98,6 @@
           ],
           "role": "user"
         }
-      ],
-      "system": "# Boss\n\nYou are a boss who delegates work to your team. After delegating, respond with \"done\".",
-      "tools": [
-        {
-          "description": "Send message to another agent",
-          "input_schema": {
-            "properties": {
-              "message": {
-                "description": "Message content",
-                "type": "string"
-              },
-              "recipient": {
-                "description": "Agent name to send message to",
-                "type": "string"
-              }
-            },
-            "required": [
-              "recipient",
-              "message"
-            ],
-            "type": "object"
-          },
-          "name": "tell"
-        }
       ]
     }
   },
@@ -288,37 +111,6 @@
     "q": {
       "messages": [
         {
-          "content": "you manage pam the receptionist and jim the salesman",
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "text": "I understand. I'm a boss who manages:\n- **Pam** - the receptionist\n- **Jim** - the salesman\n\nI'm ready to delegate work to them. What would you like me to have them do?",
-              "type": "text"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": "[from michael] Dwight, I need you to make 50 copies of the quarterly sales report. Get this done right away.",
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "id": "toolu_01QrczEmRCurGNSs4vkbGn9S",
-              "input": {
-                "message": "Pam, I need you to make 50 copies of the quarterly sales report right away. This is a priority.",
-                "recipient": "pam"
-              },
-              "name": "tell",
-              "type": "tool_use"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
           "content": [
             {
               "content": "sent",
@@ -327,30 +119,6 @@
             }
           ],
           "role": "user"
-        }
-      ],
-      "system": "# Boss\n\nYou are a boss who delegates work to your team. After delegating, respond with \"done\".",
-      "tools": [
-        {
-          "description": "Send message to another agent",
-          "input_schema": {
-            "properties": {
-              "message": {
-                "description": "Message content",
-                "type": "string"
-              },
-              "recipient": {
-                "description": "Agent name to send message to",
-                "type": "string"
-              }
-            },
-            "required": [
-              "recipient",
-              "message"
-            ],
-            "type": "object"
-          },
-          "name": "tell"
         }
       ]
     }
@@ -381,19 +149,6 @@
     "q": {
       "messages": [
         {
-          "content": "[from dwight] Pam, I need you to make 50 copies of the quarterly sales report right away. This is a priority.",
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "text": "*looks up from desk*\n\nYes, I received that task. You need 50 copies of the quarterly sales report made as soon as possible because it's a priority.\n\nI'll get on it right now. Do you need them collated and stapled, or just copies?",
-              "type": "text"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
           "content": "are you ready?",
           "role": "user"
         }
@@ -409,32 +164,6 @@
     ],
     "q": {
       "messages": [
-        {
-          "content": "[from dwight] Pam, I need you to make 50 copies of the quarterly sales report right away. This is a priority.",
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "text": "*looks up from desk*\n\nYes, I received that task. You need 50 copies of the quarterly sales report made as soon as possible because it's a priority.\n\nI'll get on it right now. Do you need them collated and stapled, or just copies?",
-              "type": "text"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": "are you ready?",
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "text": "*nods*\n\nYes, I'm ready. I have the assignment - 50 copies of the quarterly sales report, priority. I'm heading to the copy machine now.",
-              "type": "text"
-            }
-          ],
-          "role": "assistant"
-        },
         {
           "content": "did you receive a task to make 50 copies?",
           "role": "user"
@@ -455,8 +184,7 @@
           "content": "Result: Yes, I did. Dwight asked me to make 50 copies of the quarterly sales report right away because it's a priority task.\n\nExpectation: confirms they did receive a task to make 50 copies",
           "role": "user"
         }
-      ],
-      "system": "# Judge\n\nYou are a strict evaluator. Answer yes or no only.\n\nGiven a result and an expectation, determine if the expectation is clearly true about the result.\n\nRespond with only one word: yes or no.\n\nBe strict. Say no if the expectation is not clearly and directly supported by the result. Do not infer, assume, or rubber-stamp. If there is doubt, say no."
+      ]
     }
   },
   {
@@ -469,8 +197,8 @@
     "q": {
       "messages": [
         {
-          "role": "user",
-          "content": "did you receive a task?"
+          "content": "did you receive a task?",
+          "role": "user"
         }
       ]
     }

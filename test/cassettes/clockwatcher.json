@@ -1,32 +1,32 @@
 [
   {
+    "a": [
+      {
+        "text": "No, I can't handle that task right now. It's 00:57, which is well before my work hours begin at 9 AM. I don't start until 9 AM on weekdays. Please come back during business hours (9 AM to 5 PM, Monday through Friday).",
+        "type": "text"
+      }
+    ],
     "q": {
       "messages": [
         {
           "content": "can you handle this task?"
         }
       ]
-    },
-    "a": [
-      {
-        "text": "No, I can't handle that task right now. It's 00:57, which is well before my work hours begin at 9 AM. I don't start until 9 AM on weekdays. Please come back during business hours (9 AM to 5 PM, Monday through Friday).",
-        "type": "text"
-      }
-    ]
+    }
   },
   {
+    "a": [
+      {
+        "text": "yes",
+        "type": "text"
+      }
+    ],
     "q": {
       "messages": [
         {
           "content": "work hours"
         }
       ]
-    },
-    "a": [
-      {
-        "text": "yes",
-        "type": "text"
-      }
-    ]
+    }
   }
 ]

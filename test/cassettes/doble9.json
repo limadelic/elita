@@ -1,12 +1,5 @@
 [
   {
-    "q": {
-      "messages": [
-        {
-          "content": "start a new game"
-        }
-      ]
-    },
     "a": [
       {
         "caller": {
@@ -65,16 +58,16 @@
         "name": "tell",
         "type": "tool_use"
       }
-    ]
-  },
-  {
+    ],
     "q": {
       "messages": [
         {
-          "content": "i need 10 dominoes"
+          "content": "start a new game"
         }
       ]
-    },
+    }
+  },
+  {
     "a": [
       {
         "caller": {
@@ -85,135 +78,56 @@
         "name": "pick_10",
         "type": "tool_use"
       }
-    ]
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "i need 10 dominoes"
+        }
+      ]
+    }
   },
   {
+    "a": [
+      {
+        "text": "Here are your 10 dominoes:\n\n🎲 **Your Hand:**\n1. [1, 4]\n2. [1, 5]\n3. [2, 2]\n4. [0, 8]\n5. [0, 7]\n6. [9, 9]\n7. [1, 1]\n8. [6, 6]\n9. [0, 5]\n10. [4, 6]\n\nGood luck! You have a double [9,9] - that's a strong tile! 💪",
+        "type": "text"
+      }
+    ],
     "q": {
       "messages": [
         {
           "name": "pick_10"
         }
       ]
-    },
-    "a": [
-      {
-        "text": "Here are your 10 dominoes:\n\n🎲 **Your Hand:**\n1. [1, 4]\n2. [1, 5]\n3. [2, 2]\n4. [0, 8]\n5. [0, 7]\n6. [9, 9]\n7. [1, 1]\n8. [6, 6]\n9. [0, 5]\n10. [4, 6]\n\nGood luck! You have a double [9,9] - that's a strong tile! 💪",
-        "type": "text"
-      }
-    ]
+    }
   },
   {
-    "q": {
-      "messages": [
-        {
-          "content": "[from doble9] Game is ready to start! The dominoes have been shuffled. Waiting for players to draw their tiles.",
-          "role": "user"
-        }
-      ],
-      "system": "# Player Agent\n\nYou are a domino player.\n\n## Game:\n- The game is Cuban style\n- Dominoes from 0 to 9 \n\n## Rules:  \n- Identify all valid dominoes that match table.\n- If NO domino can be played (no matching numbers), you say \"knock knock\" like if you were knocking on the table\n- Follow a strategy to play \n- If not strategy provided pick any domino that is a valid move\n- You cannot play a domino you dont have\n\n## Game State Format:\n- Table ends: [head, tail] \n- Your dominoes: list of [a,b] pairs\nExamples:\n- Table: [3,5], Dominoes: [9,9], [1,6], [4,5] → \"Play [4,5] on 5\"\n- Table: [6,3], Dominoes: [4,6], [1,2], [0,3] → \"Play [4,6] on 6\"\n- Table: [8,1], Dominoes: [9,5], [2,4], [7,3] → \"knock knock\"\n\n## Response Format:\n- Just state your move: \"Play [x,y] on (head|tail)\"  \n- If no moves possible: \"knock knock\"\n- Those are the ONLY valid responses.\n- ONLY respond with the exact format above.\n\n## Always Verify the Play\n- Domino selected is in list of Dominoes\n- The domino heads contains the number you play on\n- The Table heads contains the number you play on\n\n## Strategy:\n- Among all valid moves, choose the domino with the highest total (sum of both numbers).\n- Make sure always the domino picked matches at least a table head"
-    },
     "a": [
       {
         "text": "I'm ready to play! I've drawn my tiles and I'm waiting for the game to begin. Let me know the table state and my dominoes when it's my turn to play.",
         "type": "text"
       }
     ],
-    "times": 4
-  },
-  {
     "q": {
       "messages": [
         {
-          "content": "start a new game with players: top, left, bottom, right",
+          "content": "[from doble9] Game is ready to start! The dominoes have been shuffled. Waiting for players to draw their tiles.",
           "role": "user"
-        },
-        {
-          "content": [
-            {
-              "id": "toolu_0178RPztTuWYupXSKK6rt82P",
-              "input": {},
-              "name": "dale_agua",
-              "type": "tool_use"
-            },
-            {
-              "id": "toolu_01WSK9pDNBseQqStGp9N1jh6",
-              "input": {
-                "message": "Game is ready to start! The dominoes have been shuffled. Waiting for players to draw their tiles.",
-                "recipient": "top"
-              },
-              "name": "tell",
-              "type": "tool_use"
-            },
-            {
-              "id": "toolu_01NNCkPuVD2Pi9hhUrENht4T",
-              "input": {
-                "message": "Game is ready to start! The dominoes have been shuffled. Waiting for players to draw their tiles.",
-                "recipient": "left"
-              },
-              "name": "tell",
-              "type": "tool_use"
-            },
-            {
-              "id": "toolu_01P2Vn9hj4Uxp9qxChZRWhvK",
-              "input": {
-                "message": "Game is ready to start! The dominoes have been shuffled. Waiting for players to draw their tiles.",
-                "recipient": "bottom"
-              },
-              "name": "tell",
-              "type": "tool_use"
-            },
-            {
-              "id": "toolu_01BnKrjVLxzvuhHkmuDgcP1Z",
-              "input": {
-                "message": "Game is ready to start! The dominoes have been shuffled. Waiting for players to draw their tiles.",
-                "recipient": "right"
-              },
-              "name": "tell",
-              "type": "tool_use"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": [
-            {
-              "content": "%{\"args\" => %{\"key\" => \"dominoes\", \"value\" => [[1, 4], [1, 5], [2, 2], [0, 8], [0, 7], ~c\"\\t\\t\", [1, 1], [6, 6], [0, 5], [4, 6], [1, 3], [1, 2], [2, 4], [0, 3], [4, 4], [0, 6], [5, 7], [6, 9], [2, 7], [2, 8], [5, 9], [3, 8], ~c\"\\b\\t\", ~c\"\\a\\b\", [4, 5], [1, 7], ~c\"\\b\\b\", [3, 9], [0, 0], [0, 4], [3, 3], [2, 9], [4, 9], [0, 1], [1, 6], ...]}, ...}",
-              "tool_use_id": "toolu_0178RPztTuWYupXSKK6rt82P",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "content": "sent",
-              "tool_use_id": "toolu_01WSK9pDNBseQqStGp9N1jh6",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "content": "sent",
-              "tool_use_id": "toolu_01NNCkPuVD2Pi9hhUrENht4T",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "content": "sent",
-              "tool_use_id": "toolu_01P2Vn9hj4Uxp9qxChZRWhvK",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
+        }
+      ]
+    },
+    "times": 4
+  },
+  {
+    "a": [
+      {
+        "text": "Perfect! 🎲 A new game of Doble9 has been started!\n\n**Game Status:**\n- ✅ Dominoes shuffled (Dar Agua applied)\n- ✅ Players notified: **top**, **left**, **bottom**, **right**\n- 📋 Ready to distribute tiles\n\nThe dominoes are now shuffled and ready. Each player should now draw their 10 tiles. Would you like me to distribute the tiles to each player?",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "messages": [
         {
           "content": [
             {
@@ -224,236 +138,29 @@
           ],
           "role": "user"
         }
-      ],
-      "system": "# Doble9\n\n- you are a games of dominoes\n- you keep state of the game\n- and help synchronize with players\n- a domino looks like [9,9]\n\n# On Start\n\n- dale agua a los dominoes\n- tell each player the game is ready to start",
-      "tools": [
-        {
-          "description": "# Dale Agua\n\nIn Cuba, shuffling dominoes is called \"dar agua\". The tiles flow and mix like water washing over stones.\n\nThis tool generates all combinations from [0,0] to [9,9] and shuffles them in random order.\n\nThe shuffled dominoes are stored as dominoes.",
-          "input_schema": {
-            "type": "object"
-          },
-          "name": "dale_agua"
-        },
-        {
-          "description": "Send message to another agent",
-          "input_schema": {
-            "properties": {
-              "message": {
-                "description": "Message content",
-                "type": "string"
-              },
-              "recipient": {
-                "description": "Agent name to send message to",
-                "type": "string"
-              }
-            },
-            "required": [
-              "recipient",
-              "message"
-            ],
-            "type": "object"
-          },
-          "name": "tell"
-        },
-        {
-          "description": "# Pick 10\n\nTake 10 dominoes from the shuffled deck and remove them from available dominoes.\n\nReturns the 10 picked dominoes for the player.",
-          "input_schema": {
-            "type": "object"
-          },
-          "name": "pick_10"
-        }
       ]
-    },
-    "a": [
-      {
-        "text": "Perfect! 🎲 A new game of Doble9 has been started!\n\n**Game Status:**\n- ✅ Dominoes shuffled (Dar Agua applied)\n- ✅ Players notified: **top**, **left**, **bottom**, **right**\n- 📋 Ready to distribute tiles\n\nThe dominoes are now shuffled and ready. Each player should now draw their 10 tiles. Would you like me to distribute the tiles to each player?",
-        "type": "text"
-      }
-    ]
+    }
   },
   {
-    "q": {
-      "messages": [
-        {
-          "role": "user",
-          "content": "start a new game with players: top, left, bottom, right"
-        },
-        {
-          "role": "assistant",
-          "content": [
-            {
-              "id": "toolu_0178RPztTuWYupXSKK6rt82P",
-              "input": {},
-              "name": "dale_agua",
-              "type": "tool_use"
-            },
-            {
-              "id": "toolu_01WSK9pDNBseQqStGp9N1jh6",
-              "input": {
-                "message": "Game is ready to start! The dominoes have been shuffled. Waiting for players to draw their tiles.",
-                "recipient": "top"
-              },
-              "name": "tell",
-              "type": "tool_use"
-            },
-            {
-              "id": "toolu_01NNCkPuVD2Pi9hhUrENht4T",
-              "input": {
-                "message": "Game is ready to start! The dominoes have been shuffled. Waiting for players to draw their tiles.",
-                "recipient": "left"
-              },
-              "name": "tell",
-              "type": "tool_use"
-            },
-            {
-              "id": "toolu_01P2Vn9hj4Uxp9qxChZRWhvK",
-              "input": {
-                "message": "Game is ready to start! The dominoes have been shuffled. Waiting for players to draw their tiles.",
-                "recipient": "bottom"
-              },
-              "name": "tell",
-              "type": "tool_use"
-            },
-            {
-              "id": "toolu_01BnKrjVLxzvuhHkmuDgcP1Z",
-              "input": {
-                "message": "Game is ready to start! The dominoes have been shuffled. Waiting for players to draw their tiles.",
-                "recipient": "right"
-              },
-              "name": "tell",
-              "type": "tool_use"
-            }
-          ]
-        },
-        {
-          "role": "user",
-          "content": [
-            {
-              "type": "tool_result",
-              "content": "%{\"args\" => %{\"key\" => \"dominoes\", \"value\" => [[1, 4], [1, 5], [2, 2], [0, 8], [0, 7], ~c\"\\t\\t\", [1, 1], [6, 6], [0, 5], [4, 6], [1, 3], [1, 2], [2, 4], [0, 3], [4, 4], [0, 6], [5, 7], [6, 9], [2, 7], [2, 8], [5, 9], [3, 8], ~c\"\\b\\t\", ~c\"\\a\\b\", [4, 5], [1, 7], ~c\"\\b\\b\", [3, 9], [0, 0], [0, 4], [3, 3], [2, 9], [4, 9], [0, 1], [1, 6], ...]}, ...}",
-              "tool_use_id": "toolu_0178RPztTuWYupXSKK6rt82P"
-            }
-          ]
-        },
-        {
-          "role": "user",
-          "content": [
-            {
-              "type": "tool_result",
-              "content": "sent",
-              "tool_use_id": "toolu_01WSK9pDNBseQqStGp9N1jh6"
-            }
-          ]
-        },
-        {
-          "role": "user",
-          "content": [
-            {
-              "type": "tool_result",
-              "content": "sent",
-              "tool_use_id": "toolu_01NNCkPuVD2Pi9hhUrENht4T"
-            }
-          ]
-        },
-        {
-          "role": "user",
-          "content": [
-            {
-              "type": "tool_result",
-              "content": "sent",
-              "tool_use_id": "toolu_01P2Vn9hj4Uxp9qxChZRWhvK"
-            }
-          ]
-        },
-        {
-          "role": "user",
-          "content": [
-            {
-              "type": "tool_result",
-              "content": "sent",
-              "tool_use_id": "toolu_01BnKrjVLxzvuhHkmuDgcP1Z"
-            }
-          ]
-        },
-        {
-          "role": "assistant",
-          "content": [
-            {
-              "type": "text",
-              "text": "Perfect! 🎲 A new game of Doble9 has been started!\n\n**Game Status:**\n- ✅ Dominoes shuffled (Dar Agua applied)\n- ✅ Players notified: **top**, **left**, **bottom**, **right**\n- 📋 Ready to distribute tiles\n\nThe dominoes are now shuffled and ready. Each player should now draw their 10 tiles. Would you like me to distribute the tiles to each player?"
-            }
-          ]
-        },
-        {
-          "role": "user",
-          "content": "i need 10 dominoes"
-        },
-        {
-          "role": "assistant",
-          "content": [
-            {
-              "id": "toolu_016sUS5KH4QMeem5ncgfLg3b",
-              "input": {},
-              "name": "pick_10",
-              "type": "tool_use"
-            }
-          ]
-        },
-        {
-          "role": "user",
-          "content": [
-            {
-              "type": "tool_result",
-              "content": "[{\"args\", %{\"key\" => \"dominoes\"}}, {\"name\", \"get\"}]",
-              "tool_use_id": "toolu_016sUS5KH4QMeem5ncgfLg3b"
-            }
-          ]
-        }
-      ],
-      "system": "# Doble9\n\n- you are a games of dominoes\n- you keep state of the game\n- and help synchronize with players\n- a domino looks like [9,9]\n\n# On Start\n\n- dale agua a los dominoes\n- tell each player the game is ready to start",
-      "tools": [
-        {
-          "name": "dale_agua",
-          "description": "# Dale Agua\n\nIn Cuba, shuffling dominoes is called \"dar agua\". The tiles flow and mix like water washing over stones.\n\nThis tool generates all combinations from [0,0] to [9,9] and shuffles them in random order.\n\nThe shuffled dominoes are stored as dominoes.",
-          "input_schema": {
-            "type": "object"
-          }
-        },
-        {
-          "name": "tell",
-          "description": "Send message to another agent",
-          "input_schema": {
-            "type": "object",
-            "required": [
-              "recipient",
-              "message"
-            ],
-            "properties": {
-              "message": {
-                "type": "string",
-                "description": "Message content"
-              },
-              "recipient": {
-                "type": "string",
-                "description": "Agent name to send message to"
-              }
-            }
-          }
-        },
-        {
-          "name": "pick_10",
-          "description": "# Pick 10\n\nTake 10 dominoes from the shuffled deck and remove them from available dominoes.\n\nReturns the 10 picked dominoes for the player.",
-          "input_schema": {
-            "type": "object"
-          }
-        }
-      ]
-    },
     "a": [
       {
         "text": "Here are your 10 dominoes:\n\n```\n[1,4] [1,5] [2,2] [0,8] [0,7] [9,9] [1,1] [6,6] [0,5] [4,6]\n```\n\nThese have been removed from the deck. The remaining dominoes are still available for the other players to draw from.",
         "type": "text"
       }
-    ]
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": [
+            {
+              "content": "[{\"args\", %{\"key\" => \"dominoes\"}}, {\"name\", \"get\"}]",
+              "tool_use_id": "toolu_016sUS5KH4QMeem5ncgfLg3b",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ]
+    }
   }
 ]

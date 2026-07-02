@@ -1,14 +1,47 @@
 [
   {
-    "q": { "messages": [ { "content": "hello" } ] },
-    "a": [ { "text": "Who am I talking to?", "type": "text" } ]
+    "a": [
+      {
+        "text": "Who am I talking to?",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "hello"
+        }
+      ]
+    }
   },
   {
-    "q": { "messages": [ { "content": "Mike" } ] },
-    "a": [ { "text": "I am Greeeet, and it's wonderful to meet you, Mike! How can I help you today?", "type": "text" } ]
+    "a": [
+      {
+        "text": "I am Greeeet, and it's wonderful to meet you, Mike! How can I help you today?",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "Mike"
+        }
+      ]
+    }
   },
   {
-    "q": { "messages": [ { "content": "how are you" } ] },
-    "a": [ { "text": "I am Greeeet, and I'm doing great, thank you for asking, Mike! I'm here and ready to help. How are *you* doing today?", "type": "text" } ]
+    "a": [
+      {
+        "text": "I am Greeeet, and I'm doing great, thank you for asking, Mike! I'm here and ready to help. How are *you* doing today?",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "how are you"
+        }
+      ]
+    }
   }
 ]

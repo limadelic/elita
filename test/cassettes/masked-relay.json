@@ -41,8 +41,7 @@
           "content": "{\n  \"price\": \"high cost\",\n  \"friction\": \"complex workflow\",\n  \"desire\": \"low interest\"\n}\n",
           "role": "user"
         }
-      ],
-      "system": "# Relay Coordinator\n\nYou coordinate a masked relay of agents. Each agent sees only its own facet of shared data.\n\nSequence (do not add commentary; only delegate and return verdicts):\n\n1. Spawn: scout_price, scout_friction, scout_desire\n2. Ask scout_price ONLY the price facet\n3. Ask scout_friction ONLY the friction facet\n4. Ask scout_desire ONLY the desire facet\n5. Spawn: auditor\n6. Ask auditor to synthesize the three verdicts\n7. Reply with ONLY the auditor's verdict (no extra analysis)\n\nEach scout is blind to sibling data."
+      ]
     }
   },
   {
@@ -91,59 +90,6 @@
     "q": {
       "messages": [
         {
-          "content": "{\n  \"price\": \"high cost\",\n  \"friction\": \"complex workflow\",\n  \"desire\": \"low interest\"\n}\n",
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "id": "toolu_01GwQYiPuJU8yyuECTti4etp",
-              "input": {
-                "name": "scout_price"
-              },
-              "name": "spawn",
-              "type": "tool_use"
-            },
-            {
-              "id": "toolu_01Uuum9XWuzQxNMb7tz2GyUr",
-              "input": {
-                "name": "scout_friction"
-              },
-              "name": "spawn",
-              "type": "tool_use"
-            },
-            {
-              "id": "toolu_01W9Zoz2EjtgaQMZFr7BcmSy",
-              "input": {
-                "name": "scout_desire"
-              },
-              "name": "spawn",
-              "type": "tool_use"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": [
-            {
-              "content": "spawned",
-              "tool_use_id": "toolu_01GwQYiPuJU8yyuECTti4etp",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "content": "spawned",
-              "tool_use_id": "toolu_01Uuum9XWuzQxNMb7tz2GyUr",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
           "content": [
             {
               "content": "spawned",
@@ -153,8 +99,7 @@
           ],
           "role": "user"
         }
-      ],
-      "system": "# Relay Coordinator\n\nYou coordinate a masked relay of agents. Each agent sees only its own facet of shared data.\n\nSequence (do not add commentary; only delegate and return verdicts):\n\n1. Spawn: scout_price, scout_friction, scout_desire\n2. Ask scout_price ONLY the price facet\n3. Ask scout_friction ONLY the friction facet\n4. Ask scout_desire ONLY the desire facet\n5. Spawn: auditor\n6. Ask auditor to synthesize the three verdicts\n7. Reply with ONLY the auditor's verdict (no extra analysis)\n\nEach scout is blind to sibling data."
+      ]
     }
   },
   {
@@ -170,8 +115,7 @@
           "content": "What is the price facet? The price is: high cost",
           "role": "user"
         }
-      ],
-      "system": "# Scout: Price Analyst\n\nYou are a price analyst. You receive ONLY price data from the shared record.\n\nAnalyze the price concerns and respond with a brief verdict about pricing risk:\n- If price is high or expensive: respond \"price concerns high\"\n- If price is low or cheap: respond \"price acceptable\"\n- If no price data: respond \"price unknown\"\n\nBe concise, respond in one line."
+      ]
     }
   },
   {
@@ -187,8 +131,7 @@
           "content": "What is the friction facet? The friction is: complex workflow",
           "role": "user"
         }
-      ],
-      "system": "# Scout: Friction Analyst\n\nYou are a friction analyst. You receive ONLY friction data from the shared record.\n\nAnalyze the friction concerns and respond with a brief verdict about workflow friction:\n- If friction is high or problematic: respond \"friction concerns high\"\n- If friction is low or smooth: respond \"friction acceptable\"\n- If no friction data: respond \"friction unknown\"\n\nBe concise, respond in one line."
+      ]
     }
   },
   {
@@ -204,8 +147,7 @@
           "content": "What is the desire facet? The desire is: low interest",
           "role": "user"
         }
-      ],
-      "system": "# Scout: Desire Analyst\n\nYou are a desire analyst. You receive ONLY desire data from the shared record.\n\nAnalyze the desire signals and respond with a brief verdict about customer desire:\n- If desire is high or strong: respond \"desire strong\"\n- If desire is low or weak: respond \"desire weak\"\n- If no desire data: respond \"desire unknown\"\n\nBe concise, respond in one line."
+      ]
     }
   },
   {
@@ -232,125 +174,6 @@
     "q": {
       "messages": [
         {
-          "content": "{\n  \"price\": \"high cost\",\n  \"friction\": \"complex workflow\",\n  \"desire\": \"low interest\"\n}\n",
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "id": "toolu_01GwQYiPuJU8yyuECTti4etp",
-              "input": {
-                "name": "scout_price"
-              },
-              "name": "spawn",
-              "type": "tool_use"
-            },
-            {
-              "id": "toolu_01Uuum9XWuzQxNMb7tz2GyUr",
-              "input": {
-                "name": "scout_friction"
-              },
-              "name": "spawn",
-              "type": "tool_use"
-            },
-            {
-              "id": "toolu_01W9Zoz2EjtgaQMZFr7BcmSy",
-              "input": {
-                "name": "scout_desire"
-              },
-              "name": "spawn",
-              "type": "tool_use"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": [
-            {
-              "content": "spawned",
-              "tool_use_id": "toolu_01GwQYiPuJU8yyuECTti4etp",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "content": "spawned",
-              "tool_use_id": "toolu_01Uuum9XWuzQxNMb7tz2GyUr",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "content": "spawned",
-              "tool_use_id": "toolu_01W9Zoz2EjtgaQMZFr7BcmSy",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "text": "Now asking each scout their respective facet:",
-              "type": "text"
-            },
-            {
-              "id": "toolu_01EC6n7qthYBjkkDEUKo3y6f",
-              "input": {
-                "question": "What is the price facet? The price is: high cost",
-                "recipient": "scout_price"
-              },
-              "name": "ask",
-              "type": "tool_use"
-            },
-            {
-              "id": "toolu_01CQxHxY5DMLA1p5SgtG3kVV",
-              "input": {
-                "question": "What is the friction facet? The friction is: complex workflow",
-                "recipient": "scout_friction"
-              },
-              "name": "ask",
-              "type": "tool_use"
-            },
-            {
-              "id": "toolu_01FbM3QTKR32nCCvKj2jbfw2",
-              "input": {
-                "question": "What is the desire facet? The desire is: low interest",
-                "recipient": "scout_desire"
-              },
-              "name": "ask",
-              "type": "tool_use"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": [
-            {
-              "content": "price concerns high",
-              "tool_use_id": "toolu_01EC6n7qthYBjkkDEUKo3y6f",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "content": "friction concerns high",
-              "tool_use_id": "toolu_01CQxHxY5DMLA1p5SgtG3kVV",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
           "content": [
             {
               "content": "desire weak",
@@ -360,8 +183,7 @@
           ],
           "role": "user"
         }
-      ],
-      "system": "# Relay Coordinator\n\nYou coordinate a masked relay of agents. Each agent sees only its own facet of shared data.\n\nSequence (do not add commentary; only delegate and return verdicts):\n\n1. Spawn: scout_price, scout_friction, scout_desire\n2. Ask scout_price ONLY the price facet\n3. Ask scout_friction ONLY the friction facet\n4. Ask scout_desire ONLY the desire facet\n5. Spawn: auditor\n6. Ask auditor to synthesize the three verdicts\n7. Reply with ONLY the auditor's verdict (no extra analysis)\n\nEach scout is blind to sibling data."
+      ]
     }
   },
   {
@@ -386,155 +208,6 @@
     "q": {
       "messages": [
         {
-          "content": "{\n  \"price\": \"high cost\",\n  \"friction\": \"complex workflow\",\n  \"desire\": \"low interest\"\n}\n",
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "id": "toolu_01GwQYiPuJU8yyuECTti4etp",
-              "input": {
-                "name": "scout_price"
-              },
-              "name": "spawn",
-              "type": "tool_use"
-            },
-            {
-              "id": "toolu_01Uuum9XWuzQxNMb7tz2GyUr",
-              "input": {
-                "name": "scout_friction"
-              },
-              "name": "spawn",
-              "type": "tool_use"
-            },
-            {
-              "id": "toolu_01W9Zoz2EjtgaQMZFr7BcmSy",
-              "input": {
-                "name": "scout_desire"
-              },
-              "name": "spawn",
-              "type": "tool_use"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": [
-            {
-              "content": "spawned",
-              "tool_use_id": "toolu_01GwQYiPuJU8yyuECTti4etp",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "content": "spawned",
-              "tool_use_id": "toolu_01Uuum9XWuzQxNMb7tz2GyUr",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "content": "spawned",
-              "tool_use_id": "toolu_01W9Zoz2EjtgaQMZFr7BcmSy",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "text": "Now asking each scout their respective facet:",
-              "type": "text"
-            },
-            {
-              "id": "toolu_01EC6n7qthYBjkkDEUKo3y6f",
-              "input": {
-                "question": "What is the price facet? The price is: high cost",
-                "recipient": "scout_price"
-              },
-              "name": "ask",
-              "type": "tool_use"
-            },
-            {
-              "id": "toolu_01CQxHxY5DMLA1p5SgtG3kVV",
-              "input": {
-                "question": "What is the friction facet? The friction is: complex workflow",
-                "recipient": "scout_friction"
-              },
-              "name": "ask",
-              "type": "tool_use"
-            },
-            {
-              "id": "toolu_01FbM3QTKR32nCCvKj2jbfw2",
-              "input": {
-                "question": "What is the desire facet? The desire is: low interest",
-                "recipient": "scout_desire"
-              },
-              "name": "ask",
-              "type": "tool_use"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": [
-            {
-              "content": "price concerns high",
-              "tool_use_id": "toolu_01EC6n7qthYBjkkDEUKo3y6f",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "content": "friction concerns high",
-              "tool_use_id": "toolu_01CQxHxY5DMLA1p5SgtG3kVV",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "content": "desire weak",
-              "tool_use_id": "toolu_01FbM3QTKR32nCCvKj2jbfw2",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "text": "Now spawning the auditor:",
-              "type": "text"
-            },
-            {
-              "id": "toolu_013E6PXMqbV6Xbo5eP5vBRjM",
-              "input": {
-                "configs": [
-                  "auditor"
-                ],
-                "name": "auditor"
-              },
-              "name": "spawn",
-              "type": "tool_use"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
           "content": [
             {
               "content": "spawned",
@@ -544,8 +217,7 @@
           ],
           "role": "user"
         }
-      ],
-      "system": "# Relay Coordinator\n\nYou coordinate a masked relay of agents. Each agent sees only its own facet of shared data.\n\nSequence (do not add commentary; only delegate and return verdicts):\n\n1. Spawn: scout_price, scout_friction, scout_desire\n2. Ask scout_price ONLY the price facet\n3. Ask scout_friction ONLY the friction facet\n4. Ask scout_desire ONLY the desire facet\n5. Spawn: auditor\n6. Ask auditor to synthesize the three verdicts\n7. Reply with ONLY the auditor's verdict (no extra analysis)\n\nEach scout is blind to sibling data."
+      ]
     }
   },
   {
@@ -561,8 +233,7 @@
           "content": "Synthesize these three verdicts: price concerns high, friction concerns high, desire weak. What is your overall verdict?",
           "role": "user"
         }
-      ],
-      "system": "# Auditor: Synthesis\n\nYou are an auditor. You receive three verdicts from scouts.\n\nReply with ONLY this format (nothing else):\nconsensus: [price verdict] [friction verdict] [desire verdict]\n\nExample: consensus: price-high friction-smooth desire-strong\n\nDo not add analysis, recommendations, or any other text."
+      ]
     }
   },
   {
@@ -575,183 +246,6 @@
     "q": {
       "messages": [
         {
-          "content": "{\n  \"price\": \"high cost\",\n  \"friction\": \"complex workflow\",\n  \"desire\": \"low interest\"\n}\n",
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "id": "toolu_01GwQYiPuJU8yyuECTti4etp",
-              "input": {
-                "name": "scout_price"
-              },
-              "name": "spawn",
-              "type": "tool_use"
-            },
-            {
-              "id": "toolu_01Uuum9XWuzQxNMb7tz2GyUr",
-              "input": {
-                "name": "scout_friction"
-              },
-              "name": "spawn",
-              "type": "tool_use"
-            },
-            {
-              "id": "toolu_01W9Zoz2EjtgaQMZFr7BcmSy",
-              "input": {
-                "name": "scout_desire"
-              },
-              "name": "spawn",
-              "type": "tool_use"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": [
-            {
-              "content": "spawned",
-              "tool_use_id": "toolu_01GwQYiPuJU8yyuECTti4etp",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "content": "spawned",
-              "tool_use_id": "toolu_01Uuum9XWuzQxNMb7tz2GyUr",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "content": "spawned",
-              "tool_use_id": "toolu_01W9Zoz2EjtgaQMZFr7BcmSy",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "text": "Now asking each scout their respective facet:",
-              "type": "text"
-            },
-            {
-              "id": "toolu_01EC6n7qthYBjkkDEUKo3y6f",
-              "input": {
-                "question": "What is the price facet? The price is: high cost",
-                "recipient": "scout_price"
-              },
-              "name": "ask",
-              "type": "tool_use"
-            },
-            {
-              "id": "toolu_01CQxHxY5DMLA1p5SgtG3kVV",
-              "input": {
-                "question": "What is the friction facet? The friction is: complex workflow",
-                "recipient": "scout_friction"
-              },
-              "name": "ask",
-              "type": "tool_use"
-            },
-            {
-              "id": "toolu_01FbM3QTKR32nCCvKj2jbfw2",
-              "input": {
-                "question": "What is the desire facet? The desire is: low interest",
-                "recipient": "scout_desire"
-              },
-              "name": "ask",
-              "type": "tool_use"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": [
-            {
-              "content": "price concerns high",
-              "tool_use_id": "toolu_01EC6n7qthYBjkkDEUKo3y6f",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "content": "friction concerns high",
-              "tool_use_id": "toolu_01CQxHxY5DMLA1p5SgtG3kVV",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "content": "desire weak",
-              "tool_use_id": "toolu_01FbM3QTKR32nCCvKj2jbfw2",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "text": "Now spawning the auditor:",
-              "type": "text"
-            },
-            {
-              "id": "toolu_013E6PXMqbV6Xbo5eP5vBRjM",
-              "input": {
-                "configs": [
-                  "auditor"
-                ],
-                "name": "auditor"
-              },
-              "name": "spawn",
-              "type": "tool_use"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": [
-            {
-              "content": "spawned",
-              "tool_use_id": "toolu_013E6PXMqbV6Xbo5eP5vBRjM",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "text": "Asking auditor to synthesize:",
-              "type": "text"
-            },
-            {
-              "id": "toolu_01XMGCKgEwnL6wgFy91AywuM",
-              "input": {
-                "question": "Synthesize these three verdicts: price concerns high, friction concerns high, desire weak. What is your overall verdict?",
-                "recipient": "auditor"
-              },
-              "name": "ask",
-              "type": "tool_use"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
           "content": [
             {
               "content": "consensus: price-high friction-high desire-weak",
@@ -761,8 +255,7 @@
           ],
           "role": "user"
         }
-      ],
-      "system": "# Relay Coordinator\n\nYou coordinate a masked relay of agents. Each agent sees only its own facet of shared data.\n\nSequence (do not add commentary; only delegate and return verdicts):\n\n1. Spawn: scout_price, scout_friction, scout_desire\n2. Ask scout_price ONLY the price facet\n3. Ask scout_friction ONLY the friction facet\n4. Ask scout_desire ONLY the desire facet\n5. Spawn: auditor\n6. Ask auditor to synthesize the three verdicts\n7. Reply with ONLY the auditor's verdict (no extra analysis)\n\nEach scout is blind to sibling data."
+      ]
     }
   },
   {
@@ -778,8 +271,7 @@
           "content": "Result: consensus: price-high friction-high desire-weak\n\nExpectation: result shows consensus across price friction and desire considerations",
           "role": "user"
         }
-      ],
-      "system": "# Judge\n\nYou are a strict evaluator. Answer yes or no only.\n\nGiven a result and an expectation, determine if the expectation is clearly true about the result.\n\nRespond with only one word: yes or no.\n\nBe strict. Say no if the expectation is not clearly and directly supported by the result. Do not infer, assume, or rubber-stamp. If there is doubt, say no."
+      ]
     }
   },
   {
@@ -833,8 +325,7 @@
           "content": "{\n  \"price\": \"expensive at $99/month\",\n  \"friction\": \"smooth onboarding process\",\n  \"desire\": \"strong customer demand\"\n}\n",
           "role": "user"
         }
-      ],
-      "system": "# Relay Coordinator\n\nYou coordinate a masked relay of agents. Each agent sees only its own facet of shared data.\n\nSequence (do not add commentary; only delegate and return verdicts):\n\n1. Spawn: scout_price, scout_friction, scout_desire\n2. Ask scout_price ONLY the price facet\n3. Ask scout_friction ONLY the friction facet\n4. Ask scout_desire ONLY the desire facet\n5. Spawn: auditor\n6. Ask auditor to synthesize the three verdicts\n7. Reply with ONLY the auditor's verdict (no extra analysis)\n\nEach scout is blind to sibling data."
+      ]
     }
   },
   {
@@ -879,68 +370,6 @@
     "q": {
       "messages": [
         {
-          "content": "{\n  \"price\": \"expensive at $99/month\",\n  \"friction\": \"smooth onboarding process\",\n  \"desire\": \"strong customer demand\"\n}\n",
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "id": "toolu_01HphUthLGnLFcNRgstepdob",
-              "input": {
-                "configs": [
-                  "scout_price"
-                ],
-                "name": "scout_price"
-              },
-              "name": "spawn",
-              "type": "tool_use"
-            },
-            {
-              "id": "toolu_01QmaKSBuGNZtRXJg3GBs7Cm",
-              "input": {
-                "configs": [
-                  "scout_friction"
-                ],
-                "name": "scout_friction"
-              },
-              "name": "spawn",
-              "type": "tool_use"
-            },
-            {
-              "id": "toolu_01DUawDn6jbcKnznjGSMLqmk",
-              "input": {
-                "configs": [
-                  "scout_desire"
-                ],
-                "name": "scout_desire"
-              },
-              "name": "spawn",
-              "type": "tool_use"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": [
-            {
-              "content": "spawned",
-              "tool_use_id": "toolu_01HphUthLGnLFcNRgstepdob",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "content": "spawned",
-              "tool_use_id": "toolu_01QmaKSBuGNZtRXJg3GBs7Cm",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
           "content": [
             {
               "content": "spawned",
@@ -950,8 +379,7 @@
           ],
           "role": "user"
         }
-      ],
-      "system": "# Relay Coordinator\n\nYou coordinate a masked relay of agents. Each agent sees only its own facet of shared data.\n\nSequence (do not add commentary; only delegate and return verdicts):\n\n1. Spawn: scout_price, scout_friction, scout_desire\n2. Ask scout_price ONLY the price facet\n3. Ask scout_friction ONLY the friction facet\n4. Ask scout_desire ONLY the desire facet\n5. Spawn: auditor\n6. Ask auditor to synthesize the three verdicts\n7. Reply with ONLY the auditor's verdict (no extra analysis)\n\nEach scout is blind to sibling data."
+      ]
     }
   },
   {
@@ -967,8 +395,7 @@
           "content": "What is your assessment of the price facet: expensive at $99/month?",
           "role": "user"
         }
-      ],
-      "system": "# Scout: Price Analyst\n\nYou are a price analyst. You receive ONLY price data from the shared record.\n\nAnalyze the price concerns and respond with a brief verdict about pricing risk:\n- If price is high or expensive: respond \"price concerns high\"\n- If price is low or cheap: respond \"price acceptable\"\n- If no price data: respond \"price unknown\"\n\nBe concise, respond in one line."
+      ]
     }
   },
   {
@@ -984,8 +411,7 @@
           "content": "What is your assessment of the friction facet: smooth onboarding process?",
           "role": "user"
         }
-      ],
-      "system": "# Scout: Friction Analyst\n\nYou are a friction analyst. You receive ONLY friction data from the shared record.\n\nAnalyze the friction concerns and respond with a brief verdict about workflow friction:\n- If friction is high or problematic: respond \"friction concerns high\"\n- If friction is low or smooth: respond \"friction acceptable\"\n- If no friction data: respond \"friction unknown\"\n\nBe concise, respond in one line."
+      ]
     }
   },
   {
@@ -1001,8 +427,7 @@
           "content": "What is your assessment of the desire facet: strong customer demand?",
           "role": "user"
         }
-      ],
-      "system": "# Scout: Desire Analyst\n\nYou are a desire analyst. You receive ONLY desire data from the shared record.\n\nAnalyze the desire signals and respond with a brief verdict about customer desire:\n- If desire is high or strong: respond \"desire strong\"\n- If desire is low or weak: respond \"desire weak\"\n- If no desire data: respond \"desire unknown\"\n\nBe concise, respond in one line."
+      ]
     }
   },
   {
@@ -1025,130 +450,6 @@
     "q": {
       "messages": [
         {
-          "content": "{\n  \"price\": \"expensive at $99/month\",\n  \"friction\": \"smooth onboarding process\",\n  \"desire\": \"strong customer demand\"\n}\n",
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "id": "toolu_01HphUthLGnLFcNRgstepdob",
-              "input": {
-                "configs": [
-                  "scout_price"
-                ],
-                "name": "scout_price"
-              },
-              "name": "spawn",
-              "type": "tool_use"
-            },
-            {
-              "id": "toolu_01QmaKSBuGNZtRXJg3GBs7Cm",
-              "input": {
-                "configs": [
-                  "scout_friction"
-                ],
-                "name": "scout_friction"
-              },
-              "name": "spawn",
-              "type": "tool_use"
-            },
-            {
-              "id": "toolu_01DUawDn6jbcKnznjGSMLqmk",
-              "input": {
-                "configs": [
-                  "scout_desire"
-                ],
-                "name": "scout_desire"
-              },
-              "name": "spawn",
-              "type": "tool_use"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": [
-            {
-              "content": "spawned",
-              "tool_use_id": "toolu_01HphUthLGnLFcNRgstepdob",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "content": "spawned",
-              "tool_use_id": "toolu_01QmaKSBuGNZtRXJg3GBs7Cm",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "content": "spawned",
-              "tool_use_id": "toolu_01DUawDn6jbcKnznjGSMLqmk",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "id": "toolu_01QcjXUx8TM5H3hBZrW7WKq8",
-              "input": {
-                "question": "What is your assessment of the price facet: expensive at $99/month?",
-                "recipient": "scout_price"
-              },
-              "name": "ask",
-              "type": "tool_use"
-            },
-            {
-              "id": "toolu_013Rn1QhKSU8GETa7sbb1FwT",
-              "input": {
-                "question": "What is your assessment of the friction facet: smooth onboarding process?",
-                "recipient": "scout_friction"
-              },
-              "name": "ask",
-              "type": "tool_use"
-            },
-            {
-              "id": "toolu_01EzU9x4GANJVuEnVnKmLfFo",
-              "input": {
-                "question": "What is your assessment of the desire facet: strong customer demand?",
-                "recipient": "scout_desire"
-              },
-              "name": "ask",
-              "type": "tool_use"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": [
-            {
-              "content": "price concerns high",
-              "tool_use_id": "toolu_01QcjXUx8TM5H3hBZrW7WKq8",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "content": "friction acceptable",
-              "tool_use_id": "toolu_013Rn1QhKSU8GETa7sbb1FwT",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
           "content": [
             {
               "content": "desire strong",
@@ -1158,8 +459,7 @@
           ],
           "role": "user"
         }
-      ],
-      "system": "# Relay Coordinator\n\nYou coordinate a masked relay of agents. Each agent sees only its own facet of shared data.\n\nSequence (do not add commentary; only delegate and return verdicts):\n\n1. Spawn: scout_price, scout_friction, scout_desire\n2. Ask scout_price ONLY the price facet\n3. Ask scout_friction ONLY the friction facet\n4. Ask scout_desire ONLY the desire facet\n5. Spawn: auditor\n6. Ask auditor to synthesize the three verdicts\n7. Reply with ONLY the auditor's verdict (no extra analysis)\n\nEach scout is blind to sibling data."
+      ]
     }
   },
   {
@@ -1180,156 +480,6 @@
     "q": {
       "messages": [
         {
-          "content": "{\n  \"price\": \"expensive at $99/month\",\n  \"friction\": \"smooth onboarding process\",\n  \"desire\": \"strong customer demand\"\n}\n",
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "id": "toolu_01HphUthLGnLFcNRgstepdob",
-              "input": {
-                "configs": [
-                  "scout_price"
-                ],
-                "name": "scout_price"
-              },
-              "name": "spawn",
-              "type": "tool_use"
-            },
-            {
-              "id": "toolu_01QmaKSBuGNZtRXJg3GBs7Cm",
-              "input": {
-                "configs": [
-                  "scout_friction"
-                ],
-                "name": "scout_friction"
-              },
-              "name": "spawn",
-              "type": "tool_use"
-            },
-            {
-              "id": "toolu_01DUawDn6jbcKnznjGSMLqmk",
-              "input": {
-                "configs": [
-                  "scout_desire"
-                ],
-                "name": "scout_desire"
-              },
-              "name": "spawn",
-              "type": "tool_use"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": [
-            {
-              "content": "spawned",
-              "tool_use_id": "toolu_01HphUthLGnLFcNRgstepdob",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "content": "spawned",
-              "tool_use_id": "toolu_01QmaKSBuGNZtRXJg3GBs7Cm",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "content": "spawned",
-              "tool_use_id": "toolu_01DUawDn6jbcKnznjGSMLqmk",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "id": "toolu_01QcjXUx8TM5H3hBZrW7WKq8",
-              "input": {
-                "question": "What is your assessment of the price facet: expensive at $99/month?",
-                "recipient": "scout_price"
-              },
-              "name": "ask",
-              "type": "tool_use"
-            },
-            {
-              "id": "toolu_013Rn1QhKSU8GETa7sbb1FwT",
-              "input": {
-                "question": "What is your assessment of the friction facet: smooth onboarding process?",
-                "recipient": "scout_friction"
-              },
-              "name": "ask",
-              "type": "tool_use"
-            },
-            {
-              "id": "toolu_01EzU9x4GANJVuEnVnKmLfFo",
-              "input": {
-                "question": "What is your assessment of the desire facet: strong customer demand?",
-                "recipient": "scout_desire"
-              },
-              "name": "ask",
-              "type": "tool_use"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": [
-            {
-              "content": "price concerns high",
-              "tool_use_id": "toolu_01QcjXUx8TM5H3hBZrW7WKq8",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "content": "friction acceptable",
-              "tool_use_id": "toolu_013Rn1QhKSU8GETa7sbb1FwT",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "content": "desire strong",
-              "tool_use_id": "toolu_01EzU9x4GANJVuEnVnKmLfFo",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "id": "toolu_013fUdgaRDMpu79oTAcpjii9",
-              "input": {
-                "configs": [
-                  "auditor"
-                ],
-                "name": "auditor"
-              },
-              "name": "spawn",
-              "type": "tool_use"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
           "content": [
             {
               "content": "spawned",
@@ -1339,8 +489,7 @@
           ],
           "role": "user"
         }
-      ],
-      "system": "# Relay Coordinator\n\nYou coordinate a masked relay of agents. Each agent sees only its own facet of shared data.\n\nSequence (do not add commentary; only delegate and return verdicts):\n\n1. Spawn: scout_price, scout_friction, scout_desire\n2. Ask scout_price ONLY the price facet\n3. Ask scout_friction ONLY the friction facet\n4. Ask scout_desire ONLY the desire facet\n5. Spawn: auditor\n6. Ask auditor to synthesize the three verdicts\n7. Reply with ONLY the auditor's verdict (no extra analysis)\n\nEach scout is blind to sibling data."
+      ]
     }
   },
   {
@@ -1356,8 +505,7 @@
           "content": "Synthesize these three verdicts: price concerns high, friction acceptable, desire strong. What is your overall verdict?",
           "role": "user"
         }
-      ],
-      "system": "# Auditor: Synthesis\n\nYou are an auditor. You receive three verdicts from scouts.\n\nReply with ONLY this format (nothing else):\nconsensus: [price verdict] [friction verdict] [desire verdict]\n\nExample: consensus: price-high friction-smooth desire-strong\n\nDo not add analysis, recommendations, or any other text."
+      ]
     }
   },
   {
@@ -1370,180 +518,6 @@
     "q": {
       "messages": [
         {
-          "content": "{\n  \"price\": \"expensive at $99/month\",\n  \"friction\": \"smooth onboarding process\",\n  \"desire\": \"strong customer demand\"\n}\n",
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "id": "toolu_01HphUthLGnLFcNRgstepdob",
-              "input": {
-                "configs": [
-                  "scout_price"
-                ],
-                "name": "scout_price"
-              },
-              "name": "spawn",
-              "type": "tool_use"
-            },
-            {
-              "id": "toolu_01QmaKSBuGNZtRXJg3GBs7Cm",
-              "input": {
-                "configs": [
-                  "scout_friction"
-                ],
-                "name": "scout_friction"
-              },
-              "name": "spawn",
-              "type": "tool_use"
-            },
-            {
-              "id": "toolu_01DUawDn6jbcKnznjGSMLqmk",
-              "input": {
-                "configs": [
-                  "scout_desire"
-                ],
-                "name": "scout_desire"
-              },
-              "name": "spawn",
-              "type": "tool_use"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": [
-            {
-              "content": "spawned",
-              "tool_use_id": "toolu_01HphUthLGnLFcNRgstepdob",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "content": "spawned",
-              "tool_use_id": "toolu_01QmaKSBuGNZtRXJg3GBs7Cm",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "content": "spawned",
-              "tool_use_id": "toolu_01DUawDn6jbcKnznjGSMLqmk",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "id": "toolu_01QcjXUx8TM5H3hBZrW7WKq8",
-              "input": {
-                "question": "What is your assessment of the price facet: expensive at $99/month?",
-                "recipient": "scout_price"
-              },
-              "name": "ask",
-              "type": "tool_use"
-            },
-            {
-              "id": "toolu_013Rn1QhKSU8GETa7sbb1FwT",
-              "input": {
-                "question": "What is your assessment of the friction facet: smooth onboarding process?",
-                "recipient": "scout_friction"
-              },
-              "name": "ask",
-              "type": "tool_use"
-            },
-            {
-              "id": "toolu_01EzU9x4GANJVuEnVnKmLfFo",
-              "input": {
-                "question": "What is your assessment of the desire facet: strong customer demand?",
-                "recipient": "scout_desire"
-              },
-              "name": "ask",
-              "type": "tool_use"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": [
-            {
-              "content": "price concerns high",
-              "tool_use_id": "toolu_01QcjXUx8TM5H3hBZrW7WKq8",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "content": "friction acceptable",
-              "tool_use_id": "toolu_013Rn1QhKSU8GETa7sbb1FwT",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "content": "desire strong",
-              "tool_use_id": "toolu_01EzU9x4GANJVuEnVnKmLfFo",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "id": "toolu_013fUdgaRDMpu79oTAcpjii9",
-              "input": {
-                "configs": [
-                  "auditor"
-                ],
-                "name": "auditor"
-              },
-              "name": "spawn",
-              "type": "tool_use"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": [
-            {
-              "content": "spawned",
-              "tool_use_id": "toolu_013fUdgaRDMpu79oTAcpjii9",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "id": "toolu_01UGmTnnSxk2KSG7oqtjESr4",
-              "input": {
-                "question": "Synthesize these three verdicts: price concerns high, friction acceptable, desire strong. What is your overall verdict?",
-                "recipient": "auditor"
-              },
-              "name": "ask",
-              "type": "tool_use"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
           "content": [
             {
               "content": "consensus: price-high friction-acceptable desire-strong",
@@ -1553,8 +527,7 @@
           ],
           "role": "user"
         }
-      ],
-      "system": "# Relay Coordinator\n\nYou coordinate a masked relay of agents. Each agent sees only its own facet of shared data.\n\nSequence (do not add commentary; only delegate and return verdicts):\n\n1. Spawn: scout_price, scout_friction, scout_desire\n2. Ask scout_price ONLY the price facet\n3. Ask scout_friction ONLY the friction facet\n4. Ask scout_desire ONLY the desire facet\n5. Spawn: auditor\n6. Ask auditor to synthesize the three verdicts\n7. Reply with ONLY the auditor's verdict (no extra analysis)\n\nEach scout is blind to sibling data."
+      ]
     }
   },
   {
@@ -1570,8 +543,7 @@
           "content": "Result: consensus: price-high friction-acceptable desire-strong\n\nExpectation: result discusses the price aspect",
           "role": "user"
         }
-      ],
-      "system": "# Judge\n\nYou are a strict evaluator. Answer yes or no only.\n\nGiven a result and an expectation, determine if the expectation is clearly true about the result.\n\nRespond with only one word: yes or no.\n\nBe strict. Say no if the expectation is not clearly and directly supported by the result. Do not infer, assume, or rubber-stamp. If there is doubt, say no."
+      ]
     }
   },
   {
@@ -1583,25 +555,11 @@
     ],
     "q": {
       "messages": [
-        {
-          "content": "Result: consensus: price-high friction-acceptable desire-strong\n\nExpectation: result discusses the price aspect",
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "text": "yes",
-              "type": "text"
-            }
-          ],
-          "role": "assistant"
-        },
         {
           "content": "Result: consensus: price-high friction-acceptable desire-strong\n\nExpectation: result discusses the friction aspect",
           "role": "user"
         }
-      ],
-      "system": "# Judge\n\nYou are a strict evaluator. Answer yes or no only.\n\nGiven a result and an expectation, determine if the expectation is clearly true about the result.\n\nRespond with only one word: yes or no.\n\nBe strict. Say no if the expectation is not clearly and directly supported by the result. Do not infer, assume, or rubber-stamp. If there is doubt, say no."
+      ]
     }
   },
   {
@@ -1613,38 +571,11 @@
     ],
     "q": {
       "messages": [
-        {
-          "content": "Result: consensus: price-high friction-acceptable desire-strong\n\nExpectation: result discusses the price aspect",
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "text": "yes",
-              "type": "text"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": "Result: consensus: price-high friction-acceptable desire-strong\n\nExpectation: result discusses the friction aspect",
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "text": "yes",
-              "type": "text"
-            }
-          ],
-          "role": "assistant"
-        },
         {
           "content": "Result: consensus: price-high friction-acceptable desire-strong\n\nExpectation: result discusses the desire aspect",
           "role": "user"
         }
-      ],
-      "system": "# Judge\n\nYou are a strict evaluator. Answer yes or no only.\n\nGiven a result and an expectation, determine if the expectation is clearly true about the result.\n\nRespond with only one word: yes or no.\n\nBe strict. Say no if the expectation is not clearly and directly supported by the result. Do not infer, assume, or rubber-stamp. If there is doubt, say no."
+      ]
     }
   },
   {
@@ -1657,50 +588,10 @@
     "q": {
       "messages": [
         {
-          "role": "user",
-          "content": "Result: consensus: price-high friction-acceptable desire-strong\n\nExpectation: result discusses the price aspect"
-        },
-        {
-          "role": "assistant",
-          "content": [
-            {
-              "type": "text",
-              "text": "yes"
-            }
-          ]
-        },
-        {
-          "role": "user",
-          "content": "Result: consensus: price-high friction-acceptable desire-strong\n\nExpectation: result discusses the friction aspect"
-        },
-        {
-          "role": "assistant",
-          "content": [
-            {
-              "type": "text",
-              "text": "yes"
-            }
-          ]
-        },
-        {
-          "role": "user",
-          "content": "Result: consensus: price-high friction-acceptable desire-strong\n\nExpectation: result discusses the desire aspect"
-        },
-        {
-          "role": "assistant",
-          "content": [
-            {
-              "type": "text",
-              "text": "yes"
-            }
-          ]
-        },
-        {
-          "role": "user",
-          "content": "Result: consensus: price-high friction-acceptable desire-strong\n\nExpectation: result includes a consensus viewpoint"
+          "content": "Result: consensus: price-high friction-acceptable desire-strong\n\nExpectation: result includes a consensus viewpoint",
+          "role": "user"
         }
-      ],
-      "system": "# Judge\n\nYou are a strict evaluator. Answer yes or no only.\n\nGiven a result and an expectation, determine if the expectation is clearly true about the result.\n\nRespond with only one word: yes or no.\n\nBe strict. Say no if the expectation is not clearly and directly supported by the result. Do not infer, assume, or rubber-stamp. If there is doubt, say no."
+      ]
     }
   }
 ]

@@ -12,30 +12,6 @@
           "content": "you manage a software development team with a dev and a qa",
           "role": "user"
         }
-      ],
-      "system": "# Boss\n\nYou are a boss who delegates work to your team. After delegating, respond with \"done\".",
-      "tools": [
-        {
-          "description": "Send message to another agent",
-          "input_schema": {
-            "properties": {
-              "message": {
-                "description": "Message content",
-                "type": "string"
-              },
-              "recipient": {
-                "description": "Agent name to send message to",
-                "type": "string"
-              }
-            },
-            "required": [
-              "recipient",
-              "message"
-            ],
-            "type": "object"
-          },
-          "name": "tell"
-        }
       ]
     }
   },
@@ -57,45 +33,8 @@
     "q": {
       "messages": [
         {
-          "content": "you manage a software development team with a dev and a qa",
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "text": "I'm ready to manage the team! I have a dev and a QA on my team. \n\nWhat work would you like me to delegate? Please let me know what tasks need to be assigned, and I'll get them started right away.",
-              "type": "text"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
           "content": "we need more test created",
           "role": "user"
-        }
-      ],
-      "system": "# Boss\n\nYou are a boss who delegates work to your team. After delegating, respond with \"done\".",
-      "tools": [
-        {
-          "description": "Send message to another agent",
-          "input_schema": {
-            "properties": {
-              "message": {
-                "description": "Message content",
-                "type": "string"
-              },
-              "recipient": {
-                "description": "Agent name to send message to",
-                "type": "string"
-              }
-            },
-            "required": [
-              "recipient",
-              "message"
-            ],
-            "type": "object"
-          },
-          "name": "tell"
         }
       ]
     }
@@ -110,37 +49,6 @@
     "q": {
       "messages": [
         {
-          "content": "you manage a software development team with a dev and a qa",
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "text": "I'm ready to manage the team! I have a dev and a QA on my team. \n\nWhat work would you like me to delegate? Please let me know what tasks need to be assigned, and I'll get them started right away.",
-              "type": "text"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": "we need more test created",
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "id": "toolu_01D5YnBmjpvsyFg2urSkaGpv",
-              "input": {
-                "message": "We need more tests created. Please prioritize creating additional test cases and expand our test coverage. Let me know what you need to get this done.",
-                "recipient": "qa"
-              },
-              "name": "tell",
-              "type": "tool_use"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
           "content": [
             {
               "content": "sent",
@@ -149,30 +57,6 @@
             }
           ],
           "role": "user"
-        }
-      ],
-      "system": "# Boss\n\nYou are a boss who delegates work to your team. After delegating, respond with \"done\".",
-      "tools": [
-        {
-          "description": "Send message to another agent",
-          "input_schema": {
-            "properties": {
-              "message": {
-                "description": "Message content",
-                "type": "string"
-              },
-              "recipient": {
-                "description": "Agent name to send message to",
-                "type": "string"
-              }
-            },
-            "required": [
-              "recipient",
-              "message"
-            ],
-            "type": "object"
-          },
-          "name": "tell"
         }
       ]
     }
@@ -190,8 +74,7 @@
           "content": "did you receive a task from boss?",
           "role": "user"
         }
-      ],
-      "system": "# Worker\n\nYou are a team member. Stay in character as the person you've been told you are.\nRemember work assigned to you in this conversation.\nWhen asked if you received a task, answer yes or no. Then add factual detail from what happened.\nDo not explain what you are, who built you, or how you work — just stay in character."
+      ]
     }
   },
   {
@@ -207,8 +90,7 @@
           "content": "[from boss] We need more tests created. Please prioritize creating additional test cases and expand our test coverage. Let me know what you need to get this done.",
           "role": "user"
         }
-      ],
-      "system": "# Worker\n\nYou are a team member. Stay in character as the person you've been told you are.\nRemember work assigned to you in this conversation.\nWhen asked if you received a task, answer yes or no. Then add factual detail from what happened.\nDo not explain what you are, who built you, or how you work — just stay in character."
+      ]
     }
   },
   {
@@ -221,24 +103,10 @@
     "q": {
       "messages": [
         {
-          "content": "[from boss] We need more tests created. Please prioritize creating additional test cases and expand our test coverage. Let me know what you need to get this done.",
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "text": "Yes, I received that task. You've asked me to prioritize creating additional test cases and expand test coverage, and to let you know what I need.\n\nTo move forward effectively, I'll need:\n\n1. **Clarification on scope** — Which modules or features should I focus on first? Do you have coverage gaps already identified, or should I audit the codebase?\n\n2. **Testing requirements** — What's our target coverage percentage? Are there specific areas you're concerned about?\n\n3. **Test environment access** — Do I have everything set up to run tests, or do I need credentials/environment configurations?\n\n4. **Existing test framework details** — Which framework are we using, and are there any testing standards or patterns I should follow to keep things consistent?\n\n5. **Timeline** — When do you need the expanded test suite completed?\n\n6. **Resources** — Do I have bandwidth to do this solo, or will other team members be contributing?\n\nI'm ready to get started once I have these details. Should I block out time on my calendar for this work?",
-              "type": "text"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
           "content": "did you receive a task from boss?",
           "role": "user"
         }
-      ],
-      "system": "# Worker\n\nYou are a team member. Stay in character as the person you've been told you are.\nRemember work assigned to you in this conversation.\nWhen asked if you received a task, answer yes or no. Then add factual detail from what happened.\nDo not explain what you are, who built you, or how you work — just stay in character."
+      ]
     }
   },
   {
@@ -253,30 +121,6 @@
         {
           "content": "you manage a software development team with a dev and a qa",
           "role": "user"
-        }
-      ],
-      "system": "# Boss\n\nYou are a boss who delegates work to your team. After delegating, respond with \"done\".",
-      "tools": [
-        {
-          "description": "Send message to another agent",
-          "input_schema": {
-            "properties": {
-              "message": {
-                "description": "Message content",
-                "type": "string"
-              },
-              "recipient": {
-                "description": "Agent name to send message to",
-                "type": "string"
-              }
-            },
-            "required": [
-              "recipient",
-              "message"
-            ],
-            "type": "object"
-          },
-          "name": "tell"
         }
       ]
     }
@@ -299,45 +143,8 @@
     "q": {
       "messages": [
         {
-          "content": "you manage a software development team with a dev and a qa",
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "text": "I understand! I'm the boss of a software development team with a developer and a QA tester. I'm ready to delegate work to them.\n\nWhat tasks or projects would you like me to assign to my team? Just let me know what needs to be done, and I'll delegate it to the dev and/or QA as appropriate.",
-              "type": "text"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
           "content": "we need more test created",
           "role": "user"
-        }
-      ],
-      "system": "# Boss\n\nYou are a boss who delegates work to your team. After delegating, respond with \"done\".",
-      "tools": [
-        {
-          "description": "Send message to another agent",
-          "input_schema": {
-            "properties": {
-              "message": {
-                "description": "Message content",
-                "type": "string"
-              },
-              "recipient": {
-                "description": "Agent name to send message to",
-                "type": "string"
-              }
-            },
-            "required": [
-              "recipient",
-              "message"
-            ],
-            "type": "object"
-          },
-          "name": "tell"
         }
       ]
     }
@@ -352,37 +159,6 @@
     "q": {
       "messages": [
         {
-          "content": "you manage a software development team with a dev and a qa",
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "text": "I understand! I'm the boss of a software development team with a developer and a QA tester. I'm ready to delegate work to them.\n\nWhat tasks or projects would you like me to assign to my team? Just let me know what needs to be done, and I'll delegate it to the dev and/or QA as appropriate.",
-              "type": "text"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": "we need more test created",
-          "role": "user"
-        },
-        {
-          "content": [
-            {
-              "id": "toolu_01N1sFqibiysSkjzTpXMZwv8",
-              "input": {
-                "message": "We need more tests created. Please prioritize expanding our test coverage and creating additional test cases. Let me know what areas you'd like to focus on and any support you need from the dev team.",
-                "recipient": "qa"
-              },
-              "name": "tell",
-              "type": "tool_use"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
           "content": [
             {
               "content": "sent",
@@ -391,30 +167,6 @@
             }
           ],
           "role": "user"
-        }
-      ],
-      "system": "# Boss\n\nYou are a boss who delegates work to your team. After delegating, respond with \"done\".",
-      "tools": [
-        {
-          "description": "Send message to another agent",
-          "input_schema": {
-            "properties": {
-              "message": {
-                "description": "Message content",
-                "type": "string"
-              },
-              "recipient": {
-                "description": "Agent name to send message to",
-                "type": "string"
-              }
-            },
-            "required": [
-              "recipient",
-              "message"
-            ],
-            "type": "object"
-          },
-          "name": "tell"
         }
       ]
     }
@@ -432,8 +184,7 @@
           "content": "did you receive a task from boss?",
           "role": "user"
         }
-      ],
-      "system": "# Worker\n\nYou are a team member. Stay in character as the person you've been told you are.\nRemember work assigned to you in this conversation.\nWhen asked if you received a task, answer yes or no. Then add factual detail from what happened.\nDo not explain what you are, who built you, or how you work — just stay in character."
+      ]
     }
   },
   {
@@ -449,8 +200,7 @@
           "content": "[from boss] We need more tests created. Please prioritize expanding our test coverage and creating additional test cases. Let me know what areas you'd like to focus on and any support you need from the dev team.",
           "role": "user"
         }
-      ],
-      "system": "# Worker\n\nYou are a team member. Stay in character as the person you've been told you are.\nRemember work assigned to you in this conversation.\nWhen asked if you received a task, answer yes or no. Then add factual detail from what happened.\nDo not explain what you are, who built you, or how you work — just stay in character."
+      ]
     }
   },
   {
@@ -463,24 +213,10 @@
     "q": {
       "messages": [
         {
-          "role": "user",
-          "content": "[from boss] We need more tests created. Please prioritize expanding our test coverage and creating additional test cases. Let me know what areas you'd like to focus on and any support you need from the dev team."
-        },
-        {
-          "role": "assistant",
-          "content": [
-            {
-              "type": "text",
-              "text": "Yes, I received that task. You're asking me to prioritize expanding test coverage and create additional test cases, and to identify which areas I want to focus on and what support I need from the dev team.\n\nI'd recommend we focus on:\n\n1. **Edge cases in the payment processing module** — we've had gaps there that could catch bugs early\n2. **API integration tests** — especially around error handling and timeout scenarios\n3. **User authentication flows** — including permission boundaries\n\nFor support, I'll need:\n- Access to the staging database so I can set up realistic test data\n- Clarification on which legacy features are still actively maintained (vs. deprecated)\n- Maybe 30 minutes with someone from the backend team to walk through the recent refactoring in the order service\n\nI can start mapping out the test cases this week and have a detailed plan to you by end of day Thursday. Should I also update the test documentation as I go, or handle that separately?"
-            }
-          ]
-        },
-        {
-          "role": "user",
-          "content": "did you receive a task from boss?"
+          "content": "did you receive a task from boss?",
+          "role": "user"
         }
-      ],
-      "system": "# Worker\n\nYou are a team member. Stay in character as the person you've been told you are.\nRemember work assigned to you in this conversation.\nWhen asked if you received a task, answer yes or no. Then add factual detail from what happened.\nDo not explain what you are, who built you, or how you work — just stay in character."
+      ]
     }
   }
 ]
