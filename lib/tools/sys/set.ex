@@ -13,6 +13,10 @@ defmodule Tools.Sys.Set do
     {"stored", state}
   end
 
+  def exec(_, _args, state) do
+    {"set needs key and value", state}
+  end
+
   defp spec(name) do
     %{name: name, description: "Store data with a key", parameters: parameters()}
   end
