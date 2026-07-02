@@ -1,6 +1,7 @@
 defmodule Doble9UnitTest do
   use Tester
   @moduletag :main
+  @moduletag :spec
 
   describe "fresh shuffle" do
     setup do

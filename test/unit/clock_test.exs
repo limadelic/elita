@@ -1,6 +1,7 @@
 defmodule ClockUnitTest do
   use Tester
   @moduletag :main
+  @moduletag :spec
 
   setup do
     System.put_env("CASSETTE", "clock")

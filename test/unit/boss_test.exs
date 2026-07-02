@@ -1,6 +1,7 @@
 defmodule BossUnitTest do
   use Tester
   @moduletag :main
+  @moduletag :spec
 
   describe "single boss" do
     setup do
