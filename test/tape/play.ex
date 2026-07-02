@@ -24,42 +24,19 @@ defmodule Tape.Play do
   end
 
   defp process_match(true, entry, ctx, idx) do
-    use_entry_if(exhausted?(entry, idx), entry, ctx, idx)
+    if Tape.Writer.claim(cassette_key(), idx, get_times(entry)) do
+      entry["a"]
+    else
+      find_match(ctx, idx + 1)
+    end
   end
 
   defp process_match(false, _entry, ctx, idx) do
     find_match(ctx, idx + 1)
   end
 
-  defp use_entry_if(false, entry, _ctx, idx) do
-    increment_hit_count(idx)
-    entry["a"]
-  end
-
-  defp use_entry_if(true, _entry, ctx, idx) do
-    find_match(ctx, idx + 1)
-  end
-
-  defp exhausted?(entry, idx) do
-    times = get_times(entry)
-    is_exhausted_check(times, idx)
-  end
-
   defp get_times(%{"times" => times}), do: times
   defp get_times(_entry), do: 1
-
-  defp is_exhausted_check("always", _idx), do: false
-  defp is_exhausted_check(times, idx) do
-    times <= get_hit_count(idx)
-  end
-
-  defp get_hit_count(idx) do
-    Tape.Writer.get_hit_count(cassette_key(), idx)
-  end
-
-  defp increment_hit_count(idx) do
-    Tape.Writer.increment_hit_count(cassette_key(), idx)
-  end
 
   defp cassette_key do
     System.get_env("CASSETTE")

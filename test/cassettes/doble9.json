@@ -88,7 +88,13 @@
     ]
   },
   {
-    "q": { "messages": [ { "name": "pick_10" } ] },
+    "q": {
+      "messages": [
+        {
+          "name": "pick_10"
+        }
+      ]
+    },
     "a": [
       {
         "text": "Here are your 10 dominoes:\n\n🎲 **Your Hand:**\n1. [1, 4]\n2. [1, 5]\n3. [2, 2]\n4. [0, 8]\n5. [0, 7]\n6. [9, 9]\n7. [1, 1]\n8. [6, 6]\n9. [0, 5]\n10. [4, 6]\n\nGood luck! You have a double [9,9] - that's a strong tile! 💪",
@@ -111,41 +117,8 @@
         "text": "I'm ready to play! I've drawn my tiles and I'm waiting for the game to begin. Let me know the table state and my dominoes when it's my turn to play.",
         "type": "text"
       }
-    ]
-  },
-  {
-    "q": {
-      "messages": [
-        {
-          "content": "[from doble9] Game is ready to start! The dominoes have been shuffled. Waiting for players to draw their tiles.",
-          "role": "user"
-        }
-      ],
-      "system": "# Player Agent\n\nYou are a domino player.\n\n## Game:\n- The game is Cuban style\n- Dominoes from 0 to 9 \n\n## Rules:  \n- Identify all valid dominoes that match table.\n- If NO domino can be played (no matching numbers), you say \"knock knock\" like if you were knocking on the table\n- Follow a strategy to play \n- If not strategy provided pick any domino that is a valid move\n- You cannot play a domino you dont have\n\n## Game State Format:\n- Table ends: [head, tail] \n- Your dominoes: list of [a,b] pairs\nExamples:\n- Table: [3,5], Dominoes: [9,9], [1,6], [4,5] → \"Play [4,5] on 5\"\n- Table: [6,3], Dominoes: [4,6], [1,2], [0,3] → \"Play [4,6] on 6\"\n- Table: [8,1], Dominoes: [9,5], [2,4], [7,3] → \"knock knock\"\n\n## Response Format:\n- Just state your move: \"Play [x,y] on (head|tail)\"  \n- If no moves possible: \"knock knock\"\n- Those are the ONLY valid responses.\n- ONLY respond with the exact format above.\n\n## Always Verify the Play\n- Domino selected is in list of Dominoes\n- The domino heads contains the number you play on\n- The Table heads contains the number you play on\n\n## Strategy:\n- Among all valid moves, choose the domino with the highest total (sum of both numbers).\n- Make sure always the domino picked matches at least a table head"
-    },
-    "a": [
-      {
-        "text": "I'm ready! I have drawn my tiles and I'm waiting for the game to begin. Once you tell me:\n- The current table state (the dominoes played so far)\n- My hand (the dominoes I'm holding)\n\nI'll make my moves following the strategy: playing the valid domino with the highest sum.\n\nLet's play! 🎲",
-        "type": "text"
-      }
-    ]
-  },
-  {
-    "q": {
-      "messages": [
-        {
-          "content": "[from doble9] Game is ready to start! The dominoes have been shuffled. Waiting for players to draw their tiles.",
-          "role": "user"
-        }
-      ],
-      "system": "# Player Agent\n\nYou are a domino player.\n\n## Game:\n- The game is Cuban style\n- Dominoes from 0 to 9 \n\n## Rules:  \n- Identify all valid dominoes that match table.\n- If NO domino can be played (no matching numbers), you say \"knock knock\" like if you were knocking on the table\n- Follow a strategy to play \n- If not strategy provided pick any domino that is a valid move\n- You cannot play a domino you dont have\n\n## Game State Format:\n- Table ends: [head, tail] \n- Your dominoes: list of [a,b] pairs\nExamples:\n- Table: [3,5], Dominoes: [9,9], [1,6], [4,5] → \"Play [4,5] on 5\"\n- Table: [6,3], Dominoes: [4,6], [1,2], [0,3] → \"Play [4,6] on 6\"\n- Table: [8,1], Dominoes: [9,5], [2,4], [7,3] → \"knock knock\"\n\n## Response Format:\n- Just state your move: \"Play [x,y] on (head|tail)\"  \n- If no moves possible: \"knock knock\"\n- Those are the ONLY valid responses.\n- ONLY respond with the exact format above.\n\n## Always Verify the Play\n- Domino selected is in list of Dominoes\n- The domino heads contains the number you play on\n- The Table heads contains the number you play on\n\n## Strategy:\n- Among all valid moves, choose the domino with the highest total (sum of both numbers).\n- Make sure always the domino picked matches at least a table head"
-    },
-    "a": [
-      {
-        "text": "I'm ready to play! I've drawn my tiles and I'm waiting for the game to begin. \n\nPlease provide me with:\n1. The current table state (the dominoes on the table)\n2. My hand (the dominoes I'm holding)\n\nOnce you share the game state, I'll make my move following the strategy: among all valid moves, I'll play the domino with the highest total (sum of both numbers).",
-        "type": "text"
-      }
-    ]
+    ],
+    "times": 4
   },
   {
     "q": {

@@ -11,16 +11,15 @@ defmodule Tape.Writer do
     end)
   end
 
-  def get_hit_count(cassette_key, idx) do
-    key = {cassette_key, idx}
-    get(__MODULE__, fn state -> Map.get(state, key, 0) end)
-  end
-
-  def increment_hit_count(cassette_key, idx) do
+  def claim(cassette_key, idx, times) do
     key = {cassette_key, idx}
     get_and_update(__MODULE__, fn state ->
-      new_count = Map.get(state, key, 0) + 1
-      {new_count, Map.put(state, key, new_count)}
+      current_count = Map.get(state, key, 0)
+      if times == "always" || current_count < times do
+        {true, Map.put(state, key, current_count + 1)}
+      else
+        {false, state}
+      end
     end)
   end
 end
