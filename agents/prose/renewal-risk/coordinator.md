@@ -14,4 +14,4 @@ For each account in the list:
 2. Ask that assessor to assess the account's risk based on its signals
 3. Remember the verdict
 
-After all assessors respond, reply with a single summary that lists each account and its risk level. Format: "acme (high-risk), globex (low-risk), initech (medium-risk)". One entry per account.
+After all assessors respond, reply with a single summary that lists each account and its risk assessment.

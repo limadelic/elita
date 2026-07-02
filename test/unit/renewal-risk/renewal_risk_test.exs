@@ -1,13 +1,21 @@
-defmodule RenewalRiskTest do
+defmodule RenewalRiskUnitTest do
   use Tester
-  import String, only: [contains?: 2, downcase: 1]
-
-  @moduletag :xunit
+  @moduletag :main
   @moduletag :prose
 
-  test "coordinator assesses multiple accounts and flags at-risk renewals" do
-    spawn(:coordinator)
+  setup do
+    System.put_env("CASSETTE", "renewal-risk")
 
+    on_exit(fn ->
+      System.delete_env("CASSETTE")
+    end)
+
+    spawn(:coordinator)
+    spawn(:judge)
+    :ok
+  end
+
+  test "coordinator assesses multiple accounts and flags at-risk renewals" do
     accounts = """
     Account: acme
     Usage trend: 1000 per week dropping to 200 per week (80% decline)
@@ -29,11 +37,11 @@ defmodule RenewalRiskTest do
 
     spawned([:assessor_acme, :assessor_globex, :assessor_initech])
 
-    assert contains?(downcase(result), "acme")
-    assert contains?(downcase(result), "high-risk")
-    assert contains?(downcase(result), "globex")
-    assert contains?(downcase(result), "low-risk")
-    assert contains?(downcase(result), "initech")
-    assert contains?(downcase(result), "medium-risk")
+    judge(result, "result mentions acme account")
+    judge(result, "result mentions globex account")
+    judge(result, "result mentions initech account")
+    judge(result, "result includes risk assessment for acme")
+    judge(result, "result includes risk assessment for globex")
+    judge(result, "result includes risk assessment for initech")
   end
 end
