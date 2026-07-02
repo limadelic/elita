@@ -2,7 +2,6 @@ defmodule ResearchUnitTest do
   use Tester
   @moduletag :main
   @moduletag :prose
-  @moduletag :spec
 
   setup do
     System.put_env("CASSETTE", "research-tree")
