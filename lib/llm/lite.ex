@@ -8,19 +8,21 @@ defmodule Lite do
   import Req, only: [post: 2]
   import Application, only: [get_env: 3]
 
-  def llm(%{config: config, history: history} = state) do
+  def llm(%{config: config, history: history, name: agent_name} = state) do
     composed = compose(config)
     body = build(composed, history, state)
-    result = tape(body, fn -> req(body) |> resp end)
+    result = tape(body, agent_name, fn -> req(body) |> resp end)
     {parts(result), state}
   end
 
   def llm(text) when is_binary(text) do
-    req(request(text)) |> resp |> text
+    body = request(text)
+    result = tape(body, "direct", fn -> req(body) |> resp end)
+    result |> text
   end
 
-  defp tape(body, fun), do: get_env(:elita, :tape, &thru/2).(body, fun)
-  defp thru(_body, fun), do: fun.()
+  defp tape(body, agent_name, fun), do: get_env(:elita, :tape_handler, &thru/3).(body, agent_name, fun)
+  defp thru(_body, _agent_name, fun), do: fun.()
 
   defp text([%{"type" => "text", "text" => t} | _]), do: t
   defp text(other), do: other

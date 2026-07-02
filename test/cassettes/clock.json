@@ -1,1 +1,32 @@
-{"125055152":[{"text":"The current hour is **13** (1:00 PM in 12-hour format).","type":"text"}]}
+[
+  {
+    "a": [
+      {
+        "text": "It is the 23rd hour (or 11 PM) - the evening hour.\n\nIn 24-hour format, the current time is 23:19, so the hour is **23**.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "what hour is it?"
+        }
+      ]
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "yes",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "states the current hour"
+        }
+      ]
+    }
+  }
+]

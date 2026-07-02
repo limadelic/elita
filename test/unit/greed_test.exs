@@ -3,11 +3,9 @@ defmodule GreedUnitTest do
   @moduletag :main
 
   setup do
-    System.put_env("TAPE", "replay")
     System.put_env("CASSETTE", "greed")
 
     on_exit(fn ->
-      System.delete_env("TAPE")
       System.delete_env("CASSETTE")
     end)
 

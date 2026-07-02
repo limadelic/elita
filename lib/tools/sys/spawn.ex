@@ -2,8 +2,7 @@ defmodule Tools.Sys.Spawn do
   import Elita, only: [start_link: 2]
   import Log, only: [log: 5]
   import Map, only: [get: 3]
-  import Enum, only: [join: 2, random: 1, take_random: 2]
-  import Cfgs, only: [value: 2]
+  import Enum, only: [join: 2]
 
   def def(name, state), do: spec(name, state)
 
@@ -27,17 +26,8 @@ defmodule Tools.Sys.Spawn do
     "Spawn a new agent.#{help(state)}"
   end
 
-  defp help(%{config: configs}) do
-    agents = value(:agents, configs)
-    help_text(agents)
-  end
-
-  defp help_text(agents) do
-    body(agents)
-  end
-
-  defp body(agents) do
-    "Available Agents: #{join(agents, ", ")}\nExamples:\n- spawn agent: spawn(name: \"#{single(agents)}\")\n- spawn named agent: spawn(name: \"agent_name\", configs: [\"#{single(agents)}\"])\n- spawn multi role agent: spawn(name: \"hybrid\", configs: [\"#{join(many(agents), ", ")}\"])"
+  defp help(_state) do
+    "\nExamples:\n- spawn agent: spawn(name: \"my_agent\")\n- spawn named agent: spawn(name: \"agent_name\", configs: [\"config\"])\n- spawn multi role: spawn(name: \"hybrid\", configs: [\"config1\", \"config2\"])"
   end
 
   defp parameters do
@@ -80,11 +70,4 @@ defmodule Tools.Sys.Spawn do
   defp log(name, config) do
     log("🚀", name, " as ", join(config, ", "), :green)
   end
-
-  defp single([]), do: "agent"
-  defp single(agents), do: random(agents)
-
-  defp many([]), do: ["agent1", "agent2"]
-  defp many([single]), do: [single]
-  defp many(agents), do: take_random(agents, 2)
 end

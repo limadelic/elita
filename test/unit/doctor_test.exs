@@ -1,6 +1,7 @@
 defmodule DoctorUnitTest do
   use Tester
   @moduletag :main
+  @moduletag :spec
 
   setup do
     System.put_env("TAPE", "replay")

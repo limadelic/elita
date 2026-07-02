@@ -1,4 +1,5 @@
 defmodule Tester do
+  require Logger
   import ExUnit.Assertions
   import Elita, only: [start_link: 2, cast: 2, call: 2]
   import String, only: [contains?: 2, downcase: 1]
@@ -61,11 +62,20 @@ defmodule Tester do
            "Expected '#{answer}' to contain '#{expected}'"
   end
 
+  def judge(result, expectation) do
+    prompt = "Result: #{result}\n\nExpectation: #{expectation}"
+    verdict = ask(:judge, prompt)
+
+    assert is_binary(verdict), "Expected binary verdict, got: #{inspect(verdict)}"
+    assert downcase(verdict) == "yes",
+           "Judge said: #{verdict}. Expectation failed: #{expectation}"
+  end
+
   def wait_until(agent, cond, retries \\ 5)
   def wait_until(_agent, cond, 0), do: raise "Timeout waiting for: #{cond}"
   def wait_until(agent, cond, retries) do
     settle(agent)
-    verify(agent, "yes", "did you #{cond}?")
+    judge ask(agent, "did you #{cond}?"), "confirms they did #{cond}"
   rescue
     _ -> wait_until(agent, cond, retries - 1)
   end
@@ -80,4 +90,19 @@ defmodule Tester do
     spawn(name, :speck)
     verify(name, "passed", "exec #{name}")
   end
+
+  def spawned(names) do
+    names
+    |> Enum.map(&to_string/1)
+    |> Enum.each(&alive/1)
+  end
+
+  defp alive(name) do
+    ElitaRegistry
+    |> Registry.lookup(name)
+    |> assert_alive(name)
+  end
+
+  defp assert_alive([{_pid, _}], _name), do: :ok
+  defp assert_alive([], name), do: raise("#{name} never spawned")
 end
