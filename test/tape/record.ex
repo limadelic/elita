@@ -3,11 +3,15 @@ defmodule Tape.Record do
 
   def handle(body, _name, fun) do
     response = fun.()
-    Store.append_live(normalize(body), response)
+    Store.append_live(sparse(body), response)
     response
   end
 
-  defp normalize(body) do
-    Map.take(body, [:system, :messages, :tools])
+  defp sparse(body) do
+    messages = Map.get(body, :messages, [])
+    %{messages: last_only(messages)}
   end
+
+  defp last_only([]), do: []
+  defp last_only(messages), do: [List.last(messages)]
 end
