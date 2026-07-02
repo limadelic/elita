@@ -75,7 +75,7 @@ defmodule Tester do
   def wait_until(_agent, cond, 0), do: raise "Timeout waiting for: #{cond}"
   def wait_until(agent, cond, retries) do
     settle(agent)
-    verify(agent, "yes", "did you #{cond}?")
+    judge ask(agent, "did you #{cond}?"), "confirms they did #{cond}"
   rescue
     _ -> wait_until(agent, cond, retries - 1)
   end

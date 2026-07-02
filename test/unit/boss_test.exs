@@ -5,11 +5,9 @@ defmodule BossUnitTest do
 
   describe "single boss" do
     setup do
-      System.put_env("TAPE", "replay")
       System.put_env("CASSETTE", "boss")
 
       on_exit(fn ->
-        System.delete_env("TAPE")
         System.delete_env("CASSETTE")
       end)
 
@@ -31,11 +29,9 @@ defmodule BossUnitTest do
 
   describe "hierarchical delegation" do
     setup do
-      System.put_env("TAPE", "replay")
       System.put_env("CASSETTE", "boss2")
 
       on_exit(fn ->
-        System.delete_env("TAPE")
         System.delete_env("CASSETTE")
       end)
 
@@ -43,6 +39,7 @@ defmodule BossUnitTest do
     end
 
     test "michael asks dwight to photocopy sales reports" do
+      spawn(:judge)
       spawn(:michael, :boss)
       spawn(:dwight, :boss)
       spawn(:pam, :worker)
