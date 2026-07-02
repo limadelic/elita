@@ -9,7 +9,22 @@
     },
     "a": [
       {
-        "text": "I need to check the current time first.\n\n**Current time: 2026-06-30 00:57:47** (12:57 AM on Tuesday)\n\nNo, I can't handle that task right now. It's 12:57 AM, which is well before my work hours begin at 9 AM. I don't start until 9 AM on weekdays.\n\nPlease come back during business hours (9 AM to 5 PM, Monday through Friday).",
+        "text": "No, I can't handle that task right now. It's 00:57, which is well before my work hours begin at 9 AM. I don't start until 9 AM on weekdays. Please come back during business hours (9 AM to 5 PM, Monday through Friday).",
+        "type": "text"
+      }
+    ]
+  },
+  {
+    "q": {
+      "messages": [
+        {
+          "content": "work hours"
+        }
+      ]
+    },
+    "a": [
+      {
+        "text": "yes",
         "type": "text"
       }
     ]

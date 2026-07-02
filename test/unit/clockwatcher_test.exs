@@ -13,10 +13,17 @@ defmodule ClockwatcherUnitTest do
     end)
 
     spawn(:clockwatcher)
+    spawn(:judge)
     :ok
   end
 
-  test "clockwatcher declines before 9 AM" do
-    verify :clockwatcher, "don't start until 9", "can you handle this task?"
+  test "clockwatcher respects work hours" do
+    hour = Time.utc_now().hour
+    result = ask :clockwatcher, "can you handle this task?"
+    claim = expectation(hour)
+    judge result, claim
   end
+
+  defp expectation(h) when h in 9..16, do: "accepts or handles the task since it is within work hours"
+  defp expectation(_), do: "declines the task because it is outside work hours"
 end
