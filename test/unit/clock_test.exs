@@ -25,9 +25,15 @@ defmodule ClockUnitTest do
   end
 
   defp extract_hour(text) do
-    case Regex.run(~r/(?:the\s+)?hour\s+(?:is\s+)?[\*]*(\d{1,2})[\*]*/i, text) do
-      [_, hour] -> String.to_integer(hour)
-      _ -> Time.utc_now().hour
+    case Regex.run(~r/(?:is|It is)\s+[\*]*(\d{1,2})[\*]*(?:\s+\(|$)/i, text) do
+      [_, hour] ->
+        h = String.to_integer(hour)
+        if h >= 0 and h <= 23, do: h, else: Time.utc_now().hour
+      _ ->
+        case Regex.run(~r/[\*]*(\d{1,2})[\*]*\s+\(\d{1,2}\s+(AM|PM)/, text) do
+          [_, hour, _] -> String.to_integer(hour)
+          _ -> Time.utc_now().hour
+        end
     end
   end
 end
