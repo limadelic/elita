@@ -18,3 +18,13 @@ end
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at <https://hexdocs.pm/elita>.
+
+## Tape
+
+Agent calls replay from cassettes in `test/cassettes/` — readable JSON, `q` matches the request, `a` is the reply.
+
+- `mix test` — replay, free
+- `mix tape` — record live
+- `mix live` — live, no tape
+
+Edit the tape and the tape is the spec.
