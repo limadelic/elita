@@ -9,7 +9,22 @@
     },
     "a": [
       {
-        "text": "It is the **0th hour** (or **midnight hour**) - specifically 12:57 AM.\n\nIn 24-hour format, it's **00:57**, so the hour is **00**.",
+        "text": "It is the 23rd hour (or 11 PM) - the evening hour.\n\nIn 24-hour format, the current time is 23:19, so the hour is **23**.",
+        "type": "text"
+      }
+    ]
+  },
+  {
+    "q": {
+      "messages": [
+        {
+          "content": "states the current hour"
+        }
+      ]
+    },
+    "a": [
+      {
+        "text": "yes",
         "type": "text"
       }
     ]

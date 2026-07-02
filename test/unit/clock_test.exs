@@ -13,10 +13,12 @@ defmodule ClockUnitTest do
     end)
 
     spawn :clock
+    spawn :judge
     :ok
   end
 
   test "clock responds with an hour" do
-    verify :clock, "00", "what hour is it?"
+    result = ask :clock, "what hour is it?"
+    judge result, "states the current hour"
   end
 end
