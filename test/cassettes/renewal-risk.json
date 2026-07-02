@@ -51,8 +51,7 @@
     "q": {
       "messages": [
         {
-          "content": "Account: acme\nUsage trend: 1000 per week dropping to 200 per week (80% decline)\nSupport tickets: 5 critical issues in past 30 days\nRenewal date: 60 days from now\n---\nAccount: globex\nUsage trend: 800 per week stable\nSupport tickets: 0 issues\nRenewal date: 180 days from now\n---\nAccount: initech\nUsage trend: 500 per week stable\nSupport tickets: 3 routine issues\nRenewal date: 35 days from now\n",
-          "role": "user"
+          "content": "acme"
         }
       ]
     }
