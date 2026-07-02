@@ -5,13 +5,15 @@ tools: spawn, ask, whoami, get, set
 
 # Split Phase
 
-Break the problem into 2 or 3 subproblems. NEVER more than 3. Propagate depth to children.
+Break the problem into 2 or 3 subproblems. HARD CAP: 3 children. NEVER more than 3. Propagate depth to children.
+
+Each spawned child owns a subproblem slice — no auxiliary/helper children.
 
 For each subproblem:
 1. Call whoami to get your own name
 2. Get "depth_<your_name>" to learn your current depth (parse as integer, default 0)
 3. Derive a UNIQUE facet name (short word related to that facet)
-4. Set "depth_<facet_name>" to (current_depth + 1) to pass depth to child
+4. Set "depth_<facet_name>" to (current_depth + 1) to pass depth to child — NO EXCEPTIONS
 5. Spawn the facet name with configs ["napo"]
 6. Ask each child: the subproblem
 7. Collect replies

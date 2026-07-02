@@ -76,14 +76,16 @@ defmodule NapoUnitTest do
     assert String.contains?(reply, ["Netflix", "Lego", "Apple"]), "All three companies must be in final answer"
   end
 
-  test "napo depth-bounded recursion: profit decline analysis" do
-    problem = """
-    A company's annual profit fell 15% year over year. Determine the most likely root causes by decomposing profit into its drivers down to specific, checkable leaf causes.
-    """
+  test "napo reuses colony across instances" do
+    problem1 = "Our company's profit declined 30% this year. Build the complete root-cause tree: every driver decomposed to concrete checkable causes with the data you'd pull for each. A summary of top-level drivers is not acceptable."
+    problem2 = "Same analysis for a different company: a 45% profit decline at a retail chain."
 
-    reply = ask :napo, problem
+    reply1 = ask :napo, problem1
+    assert is_binary(reply1), "Expected binary reply, got: #{inspect(reply1)}"
+    assert String.length(reply1) > 50, "Reply1 should analyze profit decline drivers"
 
-    assert is_binary(reply), "Expected binary reply, got: #{inspect(reply)}"
-    assert String.length(reply) > 50, "Reply should analyze profit decline drivers"
+    reply2 = ask :napo, problem2
+    assert is_binary(reply2), "Expected binary reply, got: #{inspect(reply2)}"
+    assert String.length(reply2) > 50, "Reply2 should analyze retail chain profit decline"
   end
 end
