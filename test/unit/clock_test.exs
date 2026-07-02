@@ -18,7 +18,7 @@ defmodule ClockUnitTest do
   end
 
   test "clock responds with an hour" do
-    {_, {hour, _, _}} = :calendar.local_time()
+    {_, {hour, _, _}} = Now.time()
     result = ask :clock, "what hour is it?"
     judge result, "states the current hour as #{hour} or within one hour of it"
   end

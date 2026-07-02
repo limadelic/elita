@@ -18,7 +18,7 @@ defmodule ClockwatcherUnitTest do
   end
 
   test "clockwatcher respects work hours" do
-    hour = Time.utc_now().hour
+    {_, {hour, _, _}} = Now.time()
     result = ask :clockwatcher, "can you handle this task?"
     claim = expectation(hour)
     judge result, claim
