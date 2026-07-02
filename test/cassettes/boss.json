@@ -2,7 +2,7 @@
   {
     "a": [
       {
-        "text": "I understand! I'm a boss managing a software development team with:\n1. **Dev** - handles development work\n2. **QA** - handles quality assurance and testing\n\nI'm ready to delegate tasks to my team. What work would you like me to assign to them?",
+        "text": "I understand! I'm a boss managing a software development team with a developer and a QA person. I'm ready to delegate tasks to them.\n\nWhat work would you like me to assign to my team? Just let me know what needs to be done and I'll delegate it accordingly.",
         "type": "text"
       }
     ],
@@ -45,9 +45,9 @@
         "caller": {
           "type": "direct"
         },
-        "id": "toolu_01MSLgqYQ5XGuYJc7wBR8s95",
+        "id": "toolu_01GmVZoP6sbAR2ksYS4foviV",
         "input": {
-          "message": "We need more tests created. Please prioritize creating additional test cases and expand our test coverage. Let me know what you need from the dev team to get started.",
+          "message": "We need more tests created. Please prioritize this and get started on expanding our test coverage. Let me know if you need any additional details or resources.",
           "recipient": "qa"
         },
         "name": "tell",
@@ -63,7 +63,7 @@
         {
           "content": [
             {
-              "text": "I understand! I'm a boss managing a software development team with:\n1. **Dev** - handles development work\n2. **QA** - handles quality assurance and testing\n\nI'm ready to delegate tasks to my team. What work would you like me to assign to them?",
+              "text": "I understand! I'm a boss managing a software development team with a developer and a QA person. I'm ready to delegate tasks to them.\n\nWhat work would you like me to assign to my team? Just let me know what needs to be done and I'll delegate it accordingly.",
               "type": "text"
             }
           ],
@@ -116,7 +116,7 @@
         {
           "content": [
             {
-              "text": "I understand! I'm a boss managing a software development team with:\n1. **Dev** - handles development work\n2. **QA** - handles quality assurance and testing\n\nI'm ready to delegate tasks to my team. What work would you like me to assign to them?",
+              "text": "I understand! I'm a boss managing a software development team with a developer and a QA person. I'm ready to delegate tasks to them.\n\nWhat work would you like me to assign to my team? Just let me know what needs to be done and I'll delegate it accordingly.",
               "type": "text"
             }
           ],
@@ -129,9 +129,9 @@
         {
           "content": [
             {
-              "id": "toolu_01MSLgqYQ5XGuYJc7wBR8s95",
+              "id": "toolu_01GmVZoP6sbAR2ksYS4foviV",
               "input": {
-                "message": "We need more tests created. Please prioritize creating additional test cases and expand our test coverage. Let me know what you need from the dev team to get started.",
+                "message": "We need more tests created. Please prioritize this and get started on expanding our test coverage. Let me know if you need any additional details or resources.",
                 "recipient": "qa"
               },
               "name": "tell",
@@ -144,7 +144,7 @@
           "content": [
             {
               "content": "sent",
-              "tool_use_id": "toolu_01MSLgqYQ5XGuYJc7wBR8s95",
+              "tool_use_id": "toolu_01GmVZoP6sbAR2ksYS4foviV",
               "type": "tool_result"
             }
           ],
@@ -180,54 +180,7 @@
   {
     "a": [
       {
-        "text": "Got it! I've received this task assignment. \n\n**Task confirmed:** Create additional test cases and expand test coverage.\n\nTo get started effectively, here's what I'd need from the dev team:\n\n1. **Codebase access/documentation**\n   - Current test structure and naming conventions\n   - Which areas have low coverage (a coverage report would be helpful)\n   - Any existing test templates or frameworks in use\n\n2. **Prioritization guidance**\n   - Which modules or features are highest priority for expanded testing?\n   - Are there known problem areas or recent bug patterns to focus on?\n   - Any specific functionality that's untested or undertested?\n\n3. **Technical details**\n   - Current test framework(s) and tools being used\n   - Environment setup instructions if I need to run tests locally\n   - Details on dependencies and how to mock/stub external services\n\n4. **Requirements clarity**\n   - Target coverage percentage or specific coverage goals?\n   - Types of tests needed (unit, integration, edge cases)?\n   - Any specific test scenarios or user workflows to cover?\n\nOnce I have this information, I can start creating comprehensive test cases. Ready to move forward!",
-        "type": "text"
-      }
-    ],
-    "q": {
-      "messages": [
-        {
-          "content": "[from boss] We need more tests created. Please prioritize creating additional test cases and expand our test coverage. Let me know what you need from the dev team to get started.",
-          "role": "user"
-        }
-      ],
-      "system": "# Worker\n\nYou are a team member. Remember work you've been assigned in this conversation.\n\nIf asked about tasks and you have received one in this conversation, say yes.\nIf asked about tasks and you have not received any in this conversation, say no."
-    }
-  },
-  {
-    "a": [
-      {
-        "text": "Yes. I received a task assignment from the boss in this conversation.\n\nThe task is: Create additional test cases and expand test coverage.",
-        "type": "text"
-      }
-    ],
-    "q": {
-      "messages": [
-        {
-          "role": "user",
-          "content": "[from boss] We need more tests created. Please prioritize creating additional test cases and expand our test coverage. Let me know what you need from the dev team to get started."
-        },
-        {
-          "role": "assistant",
-          "content": [
-            {
-              "type": "text",
-              "text": "Got it! I've received this task assignment. \n\n**Task confirmed:** Create additional test cases and expand test coverage.\n\nTo get started effectively, here's what I'd need from the dev team:\n\n1. **Codebase access/documentation**\n   - Current test structure and naming conventions\n   - Which areas have low coverage (a coverage report would be helpful)\n   - Any existing test templates or frameworks in use\n\n2. **Prioritization guidance**\n   - Which modules or features are highest priority for expanded testing?\n   - Are there known problem areas or recent bug patterns to focus on?\n   - Any specific functionality that's untested or undertested?\n\n3. **Technical details**\n   - Current test framework(s) and tools being used\n   - Environment setup instructions if I need to run tests locally\n   - Details on dependencies and how to mock/stub external services\n\n4. **Requirements clarity**\n   - Target coverage percentage or specific coverage goals?\n   - Types of tests needed (unit, integration, edge cases)?\n   - Any specific test scenarios or user workflows to cover?\n\nOnce I have this information, I can start creating comprehensive test cases. Ready to move forward!"
-            }
-          ]
-        },
-        {
-          "role": "user",
-          "content": "did you receive a task from boss?"
-        }
-      ],
-      "system": "# Worker\n\nYou are a team member. Remember work you've been assigned in this conversation.\n\nIf asked about tasks and you have received one in this conversation, say yes.\nIf asked about tasks and you have not received any in this conversation, say no."
-    }
-  },
-  {
-    "a": [
-      {
-        "text": "No, I haven't received a task from a boss in this conversation. This is the start of our conversation, so no tasks have been assigned to me yet.\n\nIf you'd like to assign me a task, feel free to do so!",
+        "text": "No, I haven't received a task from the boss yet. This is the first message in our conversation, so nothing's been assigned to me so far. I'm ready to go whenever they need me though!",
         "type": "text"
       }
     ],
@@ -237,8 +190,52 @@
           "content": "did you receive a task from boss?",
           "role": "user"
         }
-      ],
-      "system": "# Worker\n\nYou are a team member. Remember work you've been assigned in this conversation.\n\nIf asked about tasks and you have received one in this conversation, say yes.\nIf asked about tasks and you have not received any in this conversation, say no."
+      ]
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Yes, I've got it. I'm prioritizing test coverage expansion right away.\n\nBefore I dive in, I do need a few details to work effectively:\n\n- **Which areas or modules** should I focus on first? Are there specific components or features that are currently under-tested?\n- **What's the test framework and format** you're using? (Unit tests, integration tests, E2E, etc.)\n- **Any particular coverage targets** you're aiming for?\n- **Timeline** — when do you need this completed?\n\nI'm ready to get started once I have those details. Let me know if there are any existing test examples or documentation I should reference, and I'll get moving on this.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "[from boss] We need more tests created. Please prioritize this and get started on expanding our test coverage. Let me know if you need any additional details or resources.",
+          "role": "user"
+        }
+      ]
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Yes, I received a task from my boss. They asked me to prioritize creating more tests and expanding our test coverage, and to let them know if I need additional details or resources.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "role": "user",
+          "content": "[from boss] We need more tests created. Please prioritize this and get started on expanding our test coverage. Let me know if you need any additional details or resources."
+        },
+        {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "text",
+              "text": "Yes, I've got it. I'm prioritizing test coverage expansion right away.\n\nBefore I dive in, I do need a few details to work effectively:\n\n- **Which areas or modules** should I focus on first? Are there specific components or features that are currently under-tested?\n- **What's the test framework and format** you're using? (Unit tests, integration tests, E2E, etc.)\n- **Any particular coverage targets** you're aiming for?\n- **Timeline** — when do you need this completed?\n\nI'm ready to get started once I have those details. Let me know if there are any existing test examples or documentation I should reference, and I'll get moving on this."
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": "did you receive a task from boss?"
+        }
+      ]
     }
   }
 ]
