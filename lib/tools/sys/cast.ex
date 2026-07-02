@@ -40,6 +40,10 @@ defmodule Tools.Sys.Cast do
     }
   end
 
+  def exec(_, _args, state) do
+    {"cast needs role", state}
+  end
+
   defp activate(config, target) do
     put(config, :active, config.name == target)
   end

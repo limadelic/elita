@@ -25,4 +25,8 @@ defmodule Tools.Sys.Ask do
     log("🤔", "#{sender} → #{recipient}", ": ", question, :green)
     {call(recipient, question), state}
   end
+
+  def exec(_, _args, state) do
+    {"ask needs recipient and question", state}
+  end
 end

@@ -26,4 +26,8 @@ defmodule Tools.Sys.Tell do
     cast(recipient, "[from #{sender}] #{message}")
     {"sent", state}
   end
+
+  def exec(_, _args, state) do
+    {"tell needs recipient and message", state}
+  end
 end
