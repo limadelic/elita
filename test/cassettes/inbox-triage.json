@@ -1,0 +1,620 @@
+[
+  {
+    "a": [
+      {
+        "text": "I'll triage these three emails by spawning a classifier for each one and collecting their verdicts.",
+        "type": "text"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01Q3TbtHBEi2nm8Q1fcooxDq",
+        "input": {
+          "configs": [
+            "classifier"
+          ],
+          "name": "classifier_1"
+        },
+        "name": "spawn",
+        "type": "tool_use"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01Ky6fyfoAppsW7TB9fyUnup",
+        "input": {
+          "configs": [
+            "classifier"
+          ],
+          "name": "classifier_2"
+        },
+        "name": "spawn",
+        "type": "tool_use"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01D7BPFvDpi7YHqa276oV4mP",
+        "input": {
+          "configs": [
+            "classifier"
+          ],
+          "name": "classifier_3"
+        },
+        "name": "spawn",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "Email 1: Subject: Urgent payment overdue. Body: Your billing is past due.\nEmail 2: Subject: Claim your free prize! Body: You've won a promotional offer!\nEmail 3: Subject: New feature request. Body: Please add dark mode to the app.\n",
+          "role": "user"
+        }
+      ],
+      "system": "# Triage\n\nYou coordinate email triage. When given emails, spawn a classifier for each one, ask each to classify, collect the verdicts, and reply with a single merged summary.\n\nFor each email in the list:\n1. Spawn a new classifier agent with a unique name (e.g., classifier_1, classifier_2)\n2. Ask that classifier to classify the email by subject and body\n3. Remember all the verdicts\n\nAfter all classifiers respond, reply with a single-line summary that lists each verdict. Example: \"urgent (billing), spam (promo), feature (request)\". Use one word per email from the classification.",
+      "tools": [
+        {
+          "description": "Spawn a new agent.Available Agents: classifier\nExamples:\n- spawn agent: spawn(name: \"classifier\")\n- spawn named agent: spawn(name: \"agent_name\", configs: [\"classifier\"])\n- spawn multi role agent: spawn(name: \"hybrid\", configs: [\"classifier\"])",
+          "input_schema": {
+            "properties": {
+              "configs": {
+                "description": "Configs for the agent, defaults to [name]",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "name": {
+                "description": "Name for the new agent",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name"
+            ],
+            "type": "object"
+          },
+          "name": "spawn"
+        },
+        {
+          "description": "Ask question to another agent and get response",
+          "input_schema": {
+            "properties": {
+              "question": {
+                "description": "Question to ask",
+                "type": "string"
+              },
+              "recipient": {
+                "description": "Agent name to ask question to",
+                "type": "string"
+              }
+            },
+            "required": [
+              "recipient",
+              "question"
+            ],
+            "type": "object"
+          },
+          "name": "ask"
+        }
+      ]
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Now I'll ask each classifier to classify their respective email:",
+        "type": "text"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_016JixJdEDmWeAt5gKhq1NHo",
+        "input": {
+          "question": "Classify this email: Subject: Urgent payment overdue. Body: Your billing is past due.",
+          "recipient": "classifier_1"
+        },
+        "name": "ask",
+        "type": "tool_use"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01HCVBXXWYfJUhw4n8fsB7gM",
+        "input": {
+          "question": "Classify this email: Subject: Claim your free prize! Body: You've won a promotional offer!",
+          "recipient": "classifier_2"
+        },
+        "name": "ask",
+        "type": "tool_use"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01KMcdtmH4Fhvp2QBjCnVvtQ",
+        "input": {
+          "question": "Classify this email: Subject: New feature request. Body: Please add dark mode to the app.",
+          "recipient": "classifier_3"
+        },
+        "name": "ask",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "Email 1: Subject: Urgent payment overdue. Body: Your billing is past due.\nEmail 2: Subject: Claim your free prize! Body: You've won a promotional offer!\nEmail 3: Subject: New feature request. Body: Please add dark mode to the app.\n",
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "I'll triage these three emails by spawning a classifier for each one and collecting their verdicts.",
+              "type": "text"
+            },
+            {
+              "id": "toolu_01Q3TbtHBEi2nm8Q1fcooxDq",
+              "input": {
+                "configs": [
+                  "classifier"
+                ],
+                "name": "classifier_1"
+              },
+              "name": "spawn",
+              "type": "tool_use"
+            },
+            {
+              "id": "toolu_01Ky6fyfoAppsW7TB9fyUnup",
+              "input": {
+                "configs": [
+                  "classifier"
+                ],
+                "name": "classifier_2"
+              },
+              "name": "spawn",
+              "type": "tool_use"
+            },
+            {
+              "id": "toolu_01D7BPFvDpi7YHqa276oV4mP",
+              "input": {
+                "configs": [
+                  "classifier"
+                ],
+                "name": "classifier_3"
+              },
+              "name": "spawn",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "spawned",
+              "tool_use_id": "toolu_01Q3TbtHBEi2nm8Q1fcooxDq",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "content": "spawned",
+              "tool_use_id": "toolu_01Ky6fyfoAppsW7TB9fyUnup",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "content": "spawned",
+              "tool_use_id": "toolu_01D7BPFvDpi7YHqa276oV4mP",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "system": "# Triage\n\nYou coordinate email triage. When given emails, spawn a classifier for each one, ask each to classify, collect the verdicts, and reply with a single merged summary.\n\nFor each email in the list:\n1. Spawn a new classifier agent with a unique name (e.g., classifier_1, classifier_2)\n2. Ask that classifier to classify the email by subject and body\n3. Remember all the verdicts\n\nAfter all classifiers respond, reply with a single-line summary that lists each verdict. Example: \"urgent (billing), spam (promo), feature (request)\". Use one word per email from the classification.",
+      "tools": [
+        {
+          "description": "Spawn a new agent.Available Agents: classifier\nExamples:\n- spawn agent: spawn(name: \"classifier\")\n- spawn named agent: spawn(name: \"agent_name\", configs: [\"classifier\"])\n- spawn multi role agent: spawn(name: \"hybrid\", configs: [\"classifier\"])",
+          "input_schema": {
+            "properties": {
+              "configs": {
+                "description": "Configs for the agent, defaults to [name]",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "name": {
+                "description": "Name for the new agent",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name"
+            ],
+            "type": "object"
+          },
+          "name": "spawn"
+        },
+        {
+          "description": "Ask question to another agent and get response",
+          "input_schema": {
+            "properties": {
+              "question": {
+                "description": "Question to ask",
+                "type": "string"
+              },
+              "recipient": {
+                "description": "Agent name to ask question to",
+                "type": "string"
+              }
+            },
+            "required": [
+              "recipient",
+              "question"
+            ],
+            "type": "object"
+          },
+          "name": "ask"
+        }
+      ]
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "urgent",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "Classify this email: Subject: Urgent payment overdue. Body: Your billing is past due.",
+          "role": "user"
+        }
+      ],
+      "system": "# Classifier\n\nYou are an email classifier. Classify the given email into exactly one word: urgent, spam, feature, or other.\n\nReply with just the one-word classification. No explanation, no dashes, just the word."
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "spam",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "Classify this email: Subject: Claim your free prize! Body: You've won a promotional offer!",
+          "role": "user"
+        }
+      ],
+      "system": "# Classifier\n\nYou are an email classifier. Classify the given email into exactly one word: urgent, spam, feature, or other.\n\nReply with just the one-word classification. No explanation, no dashes, just the word."
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "feature",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "Classify this email: Subject: New feature request. Body: Please add dark mode to the app.",
+          "role": "user"
+        }
+      ],
+      "system": "# Classifier\n\nYou are an email classifier. Classify the given email into exactly one word: urgent, spam, feature, or other.\n\nReply with just the one-word classification. No explanation, no dashes, just the word."
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "**Email Triage Summary:**\n\nurgent (payment), spam (promotion), feature (request)",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "Email 1: Subject: Urgent payment overdue. Body: Your billing is past due.\nEmail 2: Subject: Claim your free prize! Body: You've won a promotional offer!\nEmail 3: Subject: New feature request. Body: Please add dark mode to the app.\n",
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "I'll triage these three emails by spawning a classifier for each one and collecting their verdicts.",
+              "type": "text"
+            },
+            {
+              "id": "toolu_01Q3TbtHBEi2nm8Q1fcooxDq",
+              "input": {
+                "configs": [
+                  "classifier"
+                ],
+                "name": "classifier_1"
+              },
+              "name": "spawn",
+              "type": "tool_use"
+            },
+            {
+              "id": "toolu_01Ky6fyfoAppsW7TB9fyUnup",
+              "input": {
+                "configs": [
+                  "classifier"
+                ],
+                "name": "classifier_2"
+              },
+              "name": "spawn",
+              "type": "tool_use"
+            },
+            {
+              "id": "toolu_01D7BPFvDpi7YHqa276oV4mP",
+              "input": {
+                "configs": [
+                  "classifier"
+                ],
+                "name": "classifier_3"
+              },
+              "name": "spawn",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "spawned",
+              "tool_use_id": "toolu_01Q3TbtHBEi2nm8Q1fcooxDq",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "content": "spawned",
+              "tool_use_id": "toolu_01Ky6fyfoAppsW7TB9fyUnup",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "content": "spawned",
+              "tool_use_id": "toolu_01D7BPFvDpi7YHqa276oV4mP",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "Now I'll ask each classifier to classify their respective email:",
+              "type": "text"
+            },
+            {
+              "id": "toolu_016JixJdEDmWeAt5gKhq1NHo",
+              "input": {
+                "question": "Classify this email: Subject: Urgent payment overdue. Body: Your billing is past due.",
+                "recipient": "classifier_1"
+              },
+              "name": "ask",
+              "type": "tool_use"
+            },
+            {
+              "id": "toolu_01HCVBXXWYfJUhw4n8fsB7gM",
+              "input": {
+                "question": "Classify this email: Subject: Claim your free prize! Body: You've won a promotional offer!",
+                "recipient": "classifier_2"
+              },
+              "name": "ask",
+              "type": "tool_use"
+            },
+            {
+              "id": "toolu_01KMcdtmH4Fhvp2QBjCnVvtQ",
+              "input": {
+                "question": "Classify this email: Subject: New feature request. Body: Please add dark mode to the app.",
+                "recipient": "classifier_3"
+              },
+              "name": "ask",
+              "type": "tool_use"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": [
+            {
+              "content": "urgent",
+              "tool_use_id": "toolu_016JixJdEDmWeAt5gKhq1NHo",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "content": "spam",
+              "tool_use_id": "toolu_01HCVBXXWYfJUhw4n8fsB7gM",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "content": "feature",
+              "tool_use_id": "toolu_01KMcdtmH4Fhvp2QBjCnVvtQ",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "system": "# Triage\n\nYou coordinate email triage. When given emails, spawn a classifier for each one, ask each to classify, collect the verdicts, and reply with a single merged summary.\n\nFor each email in the list:\n1. Spawn a new classifier agent with a unique name (e.g., classifier_1, classifier_2)\n2. Ask that classifier to classify the email by subject and body\n3. Remember all the verdicts\n\nAfter all classifiers respond, reply with a single-line summary that lists each verdict. Example: \"urgent (billing), spam (promo), feature (request)\". Use one word per email from the classification.",
+      "tools": [
+        {
+          "description": "Spawn a new agent.Available Agents: classifier\nExamples:\n- spawn agent: spawn(name: \"classifier\")\n- spawn named agent: spawn(name: \"agent_name\", configs: [\"classifier\"])\n- spawn multi role agent: spawn(name: \"hybrid\", configs: [\"classifier\"])",
+          "input_schema": {
+            "properties": {
+              "configs": {
+                "description": "Configs for the agent, defaults to [name]",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "name": {
+                "description": "Name for the new agent",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name"
+            ],
+            "type": "object"
+          },
+          "name": "spawn"
+        },
+        {
+          "description": "Ask question to another agent and get response",
+          "input_schema": {
+            "properties": {
+              "question": {
+                "description": "Question to ask",
+                "type": "string"
+              },
+              "recipient": {
+                "description": "Agent name to ask question to",
+                "type": "string"
+              }
+            },
+            "required": [
+              "recipient",
+              "question"
+            ],
+            "type": "object"
+          },
+          "name": "ask"
+        }
+      ]
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "yes",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "Result: **Email Triage Summary:**\n\nurgent (payment), spam (promotion), feature (request)\n\nExpectation: summary lists urgent as a classification",
+          "role": "user"
+        }
+      ],
+      "system": "# Judge\n\nYou are a strict evaluator. Answer yes or no only.\n\nGiven a result and an expectation, determine if the expectation is clearly true about the result.\n\nRespond with only one word: yes or no.\n\nBe strict. Say no if the expectation is not clearly and directly supported by the result. Do not infer, assume, or rubber-stamp. If there is doubt, say no."
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "yes",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "Result: **Email Triage Summary:**\n\nurgent (payment), spam (promotion), feature (request)\n\nExpectation: summary lists urgent as a classification",
+          "role": "user"
+        },
+        {
+          "content": [
+            {
+              "text": "yes",
+              "type": "text"
+            }
+          ],
+          "role": "assistant"
+        },
+        {
+          "content": "Result: **Email Triage Summary:**\n\nurgent (payment), spam (promotion), feature (request)\n\nExpectation: summary lists spam as a classification",
+          "role": "user"
+        }
+      ],
+      "system": "# Judge\n\nYou are a strict evaluator. Answer yes or no only.\n\nGiven a result and an expectation, determine if the expectation is clearly true about the result.\n\nRespond with only one word: yes or no.\n\nBe strict. Say no if the expectation is not clearly and directly supported by the result. Do not infer, assume, or rubber-stamp. If there is doubt, say no."
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "yes",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "role": "user",
+          "content": "Result: **Email Triage Summary:**\n\nurgent (payment), spam (promotion), feature (request)\n\nExpectation: summary lists urgent as a classification"
+        },
+        {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "text",
+              "text": "yes"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": "Result: **Email Triage Summary:**\n\nurgent (payment), spam (promotion), feature (request)\n\nExpectation: summary lists spam as a classification"
+        },
+        {
+          "role": "assistant",
+          "content": [
+            {
+              "type": "text",
+              "text": "yes"
+            }
+          ]
+        },
+        {
+          "role": "user",
+          "content": "Result: **Email Triage Summary:**\n\nurgent (payment), spam (promotion), feature (request)\n\nExpectation: summary lists feature as a classification"
+        }
+      ],
+      "system": "# Judge\n\nYou are a strict evaluator. Answer yes or no only.\n\nGiven a result and an expectation, determine if the expectation is clearly true about the result.\n\nRespond with only one word: yes or no.\n\nBe strict. Say no if the expectation is not clearly and directly supported by the result. Do not infer, assume, or rubber-stamp. If there is doubt, say no."
+    }
+  }
+]

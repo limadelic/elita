@@ -24,16 +24,16 @@ defmodule Tape.Play do
   end
 
   defp process_match(true, entry, ctx, idx) do
-    if Tape.Writer.claim(cassette_key(), idx, get_times(entry)) do
-      entry["a"]
-    else
-      find_match(ctx, idx + 1)
-    end
+    claimed = Tape.Writer.claim(cassette_key(), idx, get_times(entry))
+    return_or_skip(claimed, entry, ctx, idx)
   end
 
   defp process_match(false, _entry, ctx, idx) do
     find_match(ctx, idx + 1)
   end
+
+  defp return_or_skip(true, entry, _ctx, _idx), do: entry["a"]
+  defp return_or_skip(false, _entry, ctx, idx), do: find_match(ctx, idx + 1)
 
   defp get_times(%{"times" => times}), do: times
   defp get_times(_entry), do: 1
