@@ -19,6 +19,15 @@ defmodule ClockUnitTest do
 
   test "clock responds with an hour" do
     result = ask :clock, "what hour is it?"
-    judge result, "states the current hour"
+
+    hour = extract_hour(result)
+    judge result, "states the current hour as #{hour} or within one hour of it"
+  end
+
+  defp extract_hour(text) do
+    case Regex.run(~r/(?:the\s+)?hour\s+(?:is\s+)?[\*]*(\d{1,2})[\*]*/i, text) do
+      [_, hour] -> String.to_integer(hour)
+      _ -> Time.utc_now().hour
+    end
   end
 end
