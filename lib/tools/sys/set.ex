@@ -29,7 +29,7 @@ defmodule Tools.Sys.Set do
   end
 
   defp store(key, value) do
-    table = if String.starts_with?(key, "depth_"), do: Mem.depth_table(), else: Mem.table()
+    table = if String.starts_with?(key, "depth_") or String.starts_with?(key, "tree_"), do: Mem.depth_table(), else: Mem.table()
     table |> :ets.insert({key, value})
   end
 end

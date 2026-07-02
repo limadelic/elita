@@ -15,6 +15,8 @@ You are in the attempt phase. Solve the problem yourself, then validate with jud
    Judge will respond "yes" or "no".
 
 3. If judge says "yes":
+   - get whoami (to get your own name)
+   - set tree_<yourname> to your answer
    - Return your answer. DONE.
 
 4. If judge says "no":

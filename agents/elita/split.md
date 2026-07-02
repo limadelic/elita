@@ -16,6 +16,14 @@ For each subproblem:
 6. Ask each child: the subproblem
 7. Collect replies
 
-Combine the replies into one final answer. Return it.
+After all children spawned and replied:
+8. For each child, get "tree_<child_name>" to retrieve their subtree (if it exists)
+9. Call whoami again to confirm your own name
+10. Build combined tree structure:
+    - Include each child's tree: "child1: [their_tree_content] | child2: [their_tree_content] | ..."
+11. Set "tree_<your_name>" to this combined structure
+12. In your final answer, include the complete assembled tree (do NOT paraphrase children's content; present it verbatim from tree_ keys)
+
+Combine the replies into one final answer with the tree structure. Return it.
 
 CRITICAL: Each spawned child must have a UNIQUE name. Do NOT reuse "napo" or any other child name. Unique names prevent registry collision.
