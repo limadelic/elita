@@ -10,10 +10,17 @@ defmodule Utils.File do
   ]
 
   def file(name) do
-    @paths
-    |> map(fn path -> join(path, name) end)
+    paths(name)
     |> find_value(&safe_read/1)
     |> handle_missing(name)
+  end
+
+  defp paths(name) do
+    map(@paths, fn path -> join(path, name) end) ++ nested(name)
+  end
+
+  defp nested(name) do
+    Path.wildcard("agents/**/#{name}")
   end
 
   defp handle_missing(nil, name), do: "file not found: #{name}"
