@@ -55,53 +55,7 @@
           "role": "user"
         }
       ],
-      "system": "# Triage\n\nYou coordinate email triage. When given emails, spawn a classifier for each one, ask each to classify, collect the verdicts, and reply with a single merged summary.\n\nFor each email in the list:\n1. Spawn a new classifier agent with a unique name (e.g., classifier_1, classifier_2)\n2. Ask that classifier to classify the email by subject and body\n3. Remember all the verdicts\n\nAfter all classifiers respond, reply with a single-line summary that lists each verdict. Example: \"urgent (billing), spam (promo), feature (request)\". Use one word per email from the classification.",
-      "tools": [
-        {
-          "description": "Spawn a new agent.Available Agents: classifier\nExamples:\n- spawn agent: spawn(name: \"classifier\")\n- spawn named agent: spawn(name: \"agent_name\", configs: [\"classifier\"])\n- spawn multi role agent: spawn(name: \"hybrid\", configs: [\"classifier\"])",
-          "input_schema": {
-            "properties": {
-              "configs": {
-                "description": "Configs for the agent, defaults to [name]",
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              "name": {
-                "description": "Name for the new agent",
-                "type": "string"
-              }
-            },
-            "required": [
-              "name"
-            ],
-            "type": "object"
-          },
-          "name": "spawn"
-        },
-        {
-          "description": "Ask question to another agent and get response",
-          "input_schema": {
-            "properties": {
-              "question": {
-                "description": "Question to ask",
-                "type": "string"
-              },
-              "recipient": {
-                "description": "Agent name to ask question to",
-                "type": "string"
-              }
-            },
-            "required": [
-              "recipient",
-              "question"
-            ],
-            "type": "object"
-          },
-          "name": "ask"
-        }
-      ]
+      "system": "# Triage\n\nYou coordinate email triage. When given emails, spawn a classifier for each one, ask each to classify, collect the verdicts, and reply with a single merged summary.\n\nFor each email in the list:\n1. Spawn a new classifier agent with a unique name (e.g., classifier_1, classifier_2)\n2. Ask that classifier to classify the email by subject and body\n3. Remember all the verdicts\n\nAfter all classifiers respond, reply with a single-line summary that lists each verdict. Example: \"urgent (billing), spam (promo), feature (request)\". Use one word per email from the classification."
     }
   },
   {
@@ -226,53 +180,7 @@
           "role": "user"
         }
       ],
-      "system": "# Triage\n\nYou coordinate email triage. When given emails, spawn a classifier for each one, ask each to classify, collect the verdicts, and reply with a single merged summary.\n\nFor each email in the list:\n1. Spawn a new classifier agent with a unique name (e.g., classifier_1, classifier_2)\n2. Ask that classifier to classify the email by subject and body\n3. Remember all the verdicts\n\nAfter all classifiers respond, reply with a single-line summary that lists each verdict. Example: \"urgent (billing), spam (promo), feature (request)\". Use one word per email from the classification.",
-      "tools": [
-        {
-          "description": "Spawn a new agent.Available Agents: classifier\nExamples:\n- spawn agent: spawn(name: \"classifier\")\n- spawn named agent: spawn(name: \"agent_name\", configs: [\"classifier\"])\n- spawn multi role agent: spawn(name: \"hybrid\", configs: [\"classifier\"])",
-          "input_schema": {
-            "properties": {
-              "configs": {
-                "description": "Configs for the agent, defaults to [name]",
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              "name": {
-                "description": "Name for the new agent",
-                "type": "string"
-              }
-            },
-            "required": [
-              "name"
-            ],
-            "type": "object"
-          },
-          "name": "spawn"
-        },
-        {
-          "description": "Ask question to another agent and get response",
-          "input_schema": {
-            "properties": {
-              "question": {
-                "description": "Question to ask",
-                "type": "string"
-              },
-              "recipient": {
-                "description": "Agent name to ask question to",
-                "type": "string"
-              }
-            },
-            "required": [
-              "recipient",
-              "question"
-            ],
-            "type": "object"
-          },
-          "name": "ask"
-        }
-      ]
+      "system": "# Triage\n\nYou coordinate email triage. When given emails, spawn a classifier for each one, ask each to classify, collect the verdicts, and reply with a single merged summary.\n\nFor each email in the list:\n1. Spawn a new classifier agent with a unique name (e.g., classifier_1, classifier_2)\n2. Ask that classifier to classify the email by subject and body\n3. Remember all the verdicts\n\nAfter all classifiers respond, reply with a single-line summary that lists each verdict. Example: \"urgent (billing), spam (promo), feature (request)\". Use one word per email from the classification."
     }
   },
   {
@@ -478,53 +386,7 @@
           "role": "user"
         }
       ],
-      "system": "# Triage\n\nYou coordinate email triage. When given emails, spawn a classifier for each one, ask each to classify, collect the verdicts, and reply with a single merged summary.\n\nFor each email in the list:\n1. Spawn a new classifier agent with a unique name (e.g., classifier_1, classifier_2)\n2. Ask that classifier to classify the email by subject and body\n3. Remember all the verdicts\n\nAfter all classifiers respond, reply with a single-line summary that lists each verdict. Example: \"urgent (billing), spam (promo), feature (request)\". Use one word per email from the classification.",
-      "tools": [
-        {
-          "description": "Spawn a new agent.Available Agents: classifier\nExamples:\n- spawn agent: spawn(name: \"classifier\")\n- spawn named agent: spawn(name: \"agent_name\", configs: [\"classifier\"])\n- spawn multi role agent: spawn(name: \"hybrid\", configs: [\"classifier\"])",
-          "input_schema": {
-            "properties": {
-              "configs": {
-                "description": "Configs for the agent, defaults to [name]",
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              "name": {
-                "description": "Name for the new agent",
-                "type": "string"
-              }
-            },
-            "required": [
-              "name"
-            ],
-            "type": "object"
-          },
-          "name": "spawn"
-        },
-        {
-          "description": "Ask question to another agent and get response",
-          "input_schema": {
-            "properties": {
-              "question": {
-                "description": "Question to ask",
-                "type": "string"
-              },
-              "recipient": {
-                "description": "Agent name to ask question to",
-                "type": "string"
-              }
-            },
-            "required": [
-              "recipient",
-              "question"
-            ],
-            "type": "object"
-          },
-          "name": "ask"
-        }
-      ]
+      "system": "# Triage\n\nYou coordinate email triage. When given emails, spawn a classifier for each one, ask each to classify, collect the verdicts, and reply with a single merged summary.\n\nFor each email in the list:\n1. Spawn a new classifier agent with a unique name (e.g., classifier_1, classifier_2)\n2. Ask that classifier to classify the email by subject and body\n3. Remember all the verdicts\n\nAfter all classifiers respond, reply with a single-line summary that lists each verdict. Example: \"urgent (billing), spam (promo), feature (request)\". Use one word per email from the classification."
     }
   },
   {

@@ -2,7 +2,6 @@
 name: research
 description: Research coordinator that breaks questions into sub-questions and synthesizes findings
 tools: spawn, ask
-agents: researcher
 ---
 
 # Research

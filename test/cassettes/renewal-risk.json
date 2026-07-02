@@ -55,53 +55,7 @@
           "role": "user"
         }
       ],
-      "system": "# Coordinator\n\nYou coordinate renewal risk assessment. When given a batch of accounts with their signals, spawn an assessor for each account, ask each to assess, collect the verdicts, and reply with a summary.\n\nFor each account in the list:\n1. Spawn a new assessor agent with a unique name (e.g., assessor_acme, assessor_globex)\n2. Ask that assessor to assess the account's risk based on its signals\n3. Remember the verdict\n\nAfter all assessors respond, reply with a single summary that lists each account and its risk assessment.",
-      "tools": [
-        {
-          "description": "Spawn a new agent.Available Agents: assessor\nExamples:\n- spawn agent: spawn(name: \"assessor\")\n- spawn named agent: spawn(name: \"agent_name\", configs: [\"assessor\"])\n- spawn multi role agent: spawn(name: \"hybrid\", configs: [\"assessor\"])",
-          "input_schema": {
-            "properties": {
-              "configs": {
-                "description": "Configs for the agent, defaults to [name]",
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              "name": {
-                "description": "Name for the new agent",
-                "type": "string"
-              }
-            },
-            "required": [
-              "name"
-            ],
-            "type": "object"
-          },
-          "name": "spawn"
-        },
-        {
-          "description": "Ask question to another agent and get response",
-          "input_schema": {
-            "properties": {
-              "question": {
-                "description": "Question to ask",
-                "type": "string"
-              },
-              "recipient": {
-                "description": "Agent name to ask question to",
-                "type": "string"
-              }
-            },
-            "required": [
-              "recipient",
-              "question"
-            ],
-            "type": "object"
-          },
-          "name": "ask"
-        }
-      ]
+      "system": "# Coordinator\n\nYou coordinate renewal risk assessment. When given a batch of accounts with their signals, spawn an assessor for each account, ask each to assess, collect the verdicts, and reply with a summary.\n\nFor each account in the list:\n1. Spawn a new assessor agent with a unique name (e.g., assessor_acme, assessor_globex)\n2. Ask that assessor to assess the account's risk based on its signals\n3. Remember the verdict\n\nAfter all assessors respond, reply with a single summary that lists each account and its risk assessment."
     }
   },
   {
@@ -226,53 +180,7 @@
           "role": "user"
         }
       ],
-      "system": "# Coordinator\n\nYou coordinate renewal risk assessment. When given a batch of accounts with their signals, spawn an assessor for each account, ask each to assess, collect the verdicts, and reply with a summary.\n\nFor each account in the list:\n1. Spawn a new assessor agent with a unique name (e.g., assessor_acme, assessor_globex)\n2. Ask that assessor to assess the account's risk based on its signals\n3. Remember the verdict\n\nAfter all assessors respond, reply with a single summary that lists each account and its risk assessment.",
-      "tools": [
-        {
-          "description": "Spawn a new agent.Available Agents: assessor\nExamples:\n- spawn agent: spawn(name: \"assessor\")\n- spawn named agent: spawn(name: \"agent_name\", configs: [\"assessor\"])\n- spawn multi role agent: spawn(name: \"hybrid\", configs: [\"assessor\"])",
-          "input_schema": {
-            "properties": {
-              "configs": {
-                "description": "Configs for the agent, defaults to [name]",
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              "name": {
-                "description": "Name for the new agent",
-                "type": "string"
-              }
-            },
-            "required": [
-              "name"
-            ],
-            "type": "object"
-          },
-          "name": "spawn"
-        },
-        {
-          "description": "Ask question to another agent and get response",
-          "input_schema": {
-            "properties": {
-              "question": {
-                "description": "Question to ask",
-                "type": "string"
-              },
-              "recipient": {
-                "description": "Agent name to ask question to",
-                "type": "string"
-              }
-            },
-            "required": [
-              "recipient",
-              "question"
-            ],
-            "type": "object"
-          },
-          "name": "ask"
-        }
-      ]
+      "system": "# Coordinator\n\nYou coordinate renewal risk assessment. When given a batch of accounts with their signals, spawn an assessor for each account, ask each to assess, collect the verdicts, and reply with a summary.\n\nFor each account in the list:\n1. Spawn a new assessor agent with a unique name (e.g., assessor_acme, assessor_globex)\n2. Ask that assessor to assess the account's risk based on its signals\n3. Remember the verdict\n\nAfter all assessors respond, reply with a single summary that lists each account and its risk assessment."
     }
   },
   {
@@ -478,53 +386,7 @@
           "role": "user"
         }
       ],
-      "system": "# Coordinator\n\nYou coordinate renewal risk assessment. When given a batch of accounts with their signals, spawn an assessor for each account, ask each to assess, collect the verdicts, and reply with a summary.\n\nFor each account in the list:\n1. Spawn a new assessor agent with a unique name (e.g., assessor_acme, assessor_globex)\n2. Ask that assessor to assess the account's risk based on its signals\n3. Remember the verdict\n\nAfter all assessors respond, reply with a single summary that lists each account and its risk assessment.",
-      "tools": [
-        {
-          "description": "Spawn a new agent.Available Agents: assessor\nExamples:\n- spawn agent: spawn(name: \"assessor\")\n- spawn named agent: spawn(name: \"agent_name\", configs: [\"assessor\"])\n- spawn multi role agent: spawn(name: \"hybrid\", configs: [\"assessor\"])",
-          "input_schema": {
-            "properties": {
-              "configs": {
-                "description": "Configs for the agent, defaults to [name]",
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              "name": {
-                "description": "Name for the new agent",
-                "type": "string"
-              }
-            },
-            "required": [
-              "name"
-            ],
-            "type": "object"
-          },
-          "name": "spawn"
-        },
-        {
-          "description": "Ask question to another agent and get response",
-          "input_schema": {
-            "properties": {
-              "question": {
-                "description": "Question to ask",
-                "type": "string"
-              },
-              "recipient": {
-                "description": "Agent name to ask question to",
-                "type": "string"
-              }
-            },
-            "required": [
-              "recipient",
-              "question"
-            ],
-            "type": "object"
-          },
-          "name": "ask"
-        }
-      ]
+      "system": "# Coordinator\n\nYou coordinate renewal risk assessment. When given a batch of accounts with their signals, spawn an assessor for each account, ask each to assess, collect the verdicts, and reply with a summary.\n\nFor each account in the list:\n1. Spawn a new assessor agent with a unique name (e.g., assessor_acme, assessor_globex)\n2. Ask that assessor to assess the account's risk based on its signals\n3. Remember the verdict\n\nAfter all assessors respond, reply with a single summary that lists each account and its risk assessment."
     }
   },
   {

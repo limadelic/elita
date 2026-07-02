@@ -55,53 +55,7 @@
           "role": "user"
         }
       ],
-      "system": "# Research\n\nYou are a research coordinator. Given a complex research question, break it into 2-3 specific sub-questions, spawn a researcher for each, collect their findings, and synthesize them into one comprehensive answer.\n\n## Process\n\n1. Break the question into 2-3 narrow sub-questions\n2. For each sub-question:\n   - Spawn a researcher with a unique name (researcher_1, researcher_2, researcher_3)\n   - Ask that researcher the sub-question\n   - Record the finding\n3. Synthesize all findings into one answer that:\n   - Incorporates insights from each researcher\n   - Maintains a coherent narrative\n   - Cites the distinct angles explored\n\nReply with the merged synthesis only.",
-      "tools": [
-        {
-          "description": "Spawn a new agent.Available Agents: researcher\nExamples:\n- spawn agent: spawn(name: \"researcher\")\n- spawn named agent: spawn(name: \"agent_name\", configs: [\"researcher\"])\n- spawn multi role agent: spawn(name: \"hybrid\", configs: [\"researcher\"])",
-          "input_schema": {
-            "properties": {
-              "configs": {
-                "description": "Configs for the agent, defaults to [name]",
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              "name": {
-                "description": "Name for the new agent",
-                "type": "string"
-              }
-            },
-            "required": [
-              "name"
-            ],
-            "type": "object"
-          },
-          "name": "spawn"
-        },
-        {
-          "description": "Ask question to another agent and get response",
-          "input_schema": {
-            "properties": {
-              "question": {
-                "description": "Question to ask",
-                "type": "string"
-              },
-              "recipient": {
-                "description": "Agent name to ask question to",
-                "type": "string"
-              }
-            },
-            "required": [
-              "recipient",
-              "question"
-            ],
-            "type": "object"
-          },
-          "name": "ask"
-        }
-      ]
+      "system": "# Research\n\nYou are a research coordinator. Given a complex research question, break it into 2-3 specific sub-questions, spawn a researcher for each, collect their findings, and synthesize them into one comprehensive answer.\n\n## Process\n\n1. Break the question into 2-3 narrow sub-questions\n2. For each sub-question:\n   - Spawn a researcher with a unique name (researcher_1, researcher_2, researcher_3)\n   - Ask that researcher the sub-question\n   - Record the finding\n3. Synthesize all findings into one answer that:\n   - Incorporates insights from each researcher\n   - Maintains a coherent narrative\n   - Cites the distinct angles explored\n\nReply with the merged synthesis only."
     }
   },
   {
@@ -226,53 +180,7 @@
           "role": "user"
         }
       ],
-      "system": "# Research\n\nYou are a research coordinator. Given a complex research question, break it into 2-3 specific sub-questions, spawn a researcher for each, collect their findings, and synthesize them into one comprehensive answer.\n\n## Process\n\n1. Break the question into 2-3 narrow sub-questions\n2. For each sub-question:\n   - Spawn a researcher with a unique name (researcher_1, researcher_2, researcher_3)\n   - Ask that researcher the sub-question\n   - Record the finding\n3. Synthesize all findings into one answer that:\n   - Incorporates insights from each researcher\n   - Maintains a coherent narrative\n   - Cites the distinct angles explored\n\nReply with the merged synthesis only.",
-      "tools": [
-        {
-          "description": "Spawn a new agent.Available Agents: researcher\nExamples:\n- spawn agent: spawn(name: \"researcher\")\n- spawn named agent: spawn(name: \"agent_name\", configs: [\"researcher\"])\n- spawn multi role agent: spawn(name: \"hybrid\", configs: [\"researcher\"])",
-          "input_schema": {
-            "properties": {
-              "configs": {
-                "description": "Configs for the agent, defaults to [name]",
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              "name": {
-                "description": "Name for the new agent",
-                "type": "string"
-              }
-            },
-            "required": [
-              "name"
-            ],
-            "type": "object"
-          },
-          "name": "spawn"
-        },
-        {
-          "description": "Ask question to another agent and get response",
-          "input_schema": {
-            "properties": {
-              "question": {
-                "description": "Question to ask",
-                "type": "string"
-              },
-              "recipient": {
-                "description": "Agent name to ask question to",
-                "type": "string"
-              }
-            },
-            "required": [
-              "recipient",
-              "question"
-            ],
-            "type": "object"
-          },
-          "name": "ask"
-        }
-      ]
+      "system": "# Research\n\nYou are a research coordinator. Given a complex research question, break it into 2-3 specific sub-questions, spawn a researcher for each, collect their findings, and synthesize them into one comprehensive answer.\n\n## Process\n\n1. Break the question into 2-3 narrow sub-questions\n2. For each sub-question:\n   - Spawn a researcher with a unique name (researcher_1, researcher_2, researcher_3)\n   - Ask that researcher the sub-question\n   - Record the finding\n3. Synthesize all findings into one answer that:\n   - Incorporates insights from each researcher\n   - Maintains a coherent narrative\n   - Cites the distinct angles explored\n\nReply with the merged synthesis only."
     }
   },
   {
@@ -478,53 +386,7 @@
           "role": "user"
         }
       ],
-      "system": "# Research\n\nYou are a research coordinator. Given a complex research question, break it into 2-3 specific sub-questions, spawn a researcher for each, collect their findings, and synthesize them into one comprehensive answer.\n\n## Process\n\n1. Break the question into 2-3 narrow sub-questions\n2. For each sub-question:\n   - Spawn a researcher with a unique name (researcher_1, researcher_2, researcher_3)\n   - Ask that researcher the sub-question\n   - Record the finding\n3. Synthesize all findings into one answer that:\n   - Incorporates insights from each researcher\n   - Maintains a coherent narrative\n   - Cites the distinct angles explored\n\nReply with the merged synthesis only.",
-      "tools": [
-        {
-          "description": "Spawn a new agent.Available Agents: researcher\nExamples:\n- spawn agent: spawn(name: \"researcher\")\n- spawn named agent: spawn(name: \"agent_name\", configs: [\"researcher\"])\n- spawn multi role agent: spawn(name: \"hybrid\", configs: [\"researcher\"])",
-          "input_schema": {
-            "properties": {
-              "configs": {
-                "description": "Configs for the agent, defaults to [name]",
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              "name": {
-                "description": "Name for the new agent",
-                "type": "string"
-              }
-            },
-            "required": [
-              "name"
-            ],
-            "type": "object"
-          },
-          "name": "spawn"
-        },
-        {
-          "description": "Ask question to another agent and get response",
-          "input_schema": {
-            "properties": {
-              "question": {
-                "description": "Question to ask",
-                "type": "string"
-              },
-              "recipient": {
-                "description": "Agent name to ask question to",
-                "type": "string"
-              }
-            },
-            "required": [
-              "recipient",
-              "question"
-            ],
-            "type": "object"
-          },
-          "name": "ask"
-        }
-      ]
+      "system": "# Research\n\nYou are a research coordinator. Given a complex research question, break it into 2-3 specific sub-questions, spawn a researcher for each, collect their findings, and synthesize them into one comprehensive answer.\n\n## Process\n\n1. Break the question into 2-3 narrow sub-questions\n2. For each sub-question:\n   - Spawn a researcher with a unique name (researcher_1, researcher_2, researcher_3)\n   - Ask that researcher the sub-question\n   - Record the finding\n3. Synthesize all findings into one answer that:\n   - Incorporates insights from each researcher\n   - Maintains a coherent narrative\n   - Cites the distinct angles explored\n\nReply with the merged synthesis only."
     }
   },
   {

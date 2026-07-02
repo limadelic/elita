@@ -2,7 +2,6 @@
 name: relay
 description: Relay coordinator that masks data and routes to scouts
 tools: spawn, ask
-agents: scout_price, scout_friction, scout_desire, auditor
 ---
 
 # Relay Coordinator

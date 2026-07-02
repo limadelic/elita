@@ -2,7 +2,6 @@
 name: coordinator
 description: Renewal risk coordinator that assesses multiple accounts
 tools: spawn, ask
-agents: assessor
 ---
 
 # Coordinator

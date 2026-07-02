@@ -2,7 +2,6 @@
 name: triage
 description: Email inbox coordinator that spawns classifiers and merges verdicts
 tools: spawn, ask
-agents: classifier
 ---
 
 # Triage
