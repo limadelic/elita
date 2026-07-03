@@ -57,11 +57,28 @@ defmodule NapoContractTest do
     35. NOTICES: Legal notices sent to addresses listed in signature block, effective upon receipt.
     """
 
-    ask :napo, problem
+    tell :napo, problem
 
-    children = extract_depth_children()
+    children = wait_for_children()
     assert length(children) >= 2,
            "Should have at least 2 child facets spawned, got: #{inspect(children)}"
+
+    answer = ask :napo, "All children done? Return the combined answer."
+    assert is_binary(answer), "Expected binary answer, got: #{inspect(answer)}"
+  end
+
+  defp wait_for_children(retries \\ 30)
+  defp wait_for_children(0), do: raise "Timeout waiting for children with depth_*=1 and tree_* keys"
+  defp wait_for_children(retries) do
+    children = extract_depth_children()
+    tree_keys = extract_tree_keys(children)
+
+    if length(children) >= 2 && length(tree_keys) >= 2 do
+      children
+    else
+      Process.sleep(10_000)
+      wait_for_children(retries - 1)
+    end
   end
 
   defp extract_depth_children do
@@ -73,5 +90,14 @@ defmodule NapoContractTest do
       String.replace_prefix(key, "depth_", "")
     end)
     |> Enum.sort()
+  end
+
+  defp extract_tree_keys(children) do
+    Enum.flat_map(children, fn child ->
+      :ets.tab2list(:mem_depth_global)
+      |> Enum.filter(fn {key, _value} ->
+        is_binary(key) && String.starts_with?(key, "tree_#{child}")
+      end)
+    end)
   end
 end
