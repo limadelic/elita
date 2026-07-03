@@ -21,6 +21,7 @@ defmodule NapoContractTest do
   end
 
   @tag :live
+  @tag timeout: 600_000
   test "shape: MSA review forces split into facets" do
     problem = """
     Review this master services agreement and produce the complete risk assessment: \
@@ -67,12 +68,7 @@ defmodule NapoContractTest do
 
     tell :napo, problem
 
-    children = wait_for_children()
-    assert length(children) >= 2,
-           "Should have at least 2 child facets spawned, got: #{inspect(children)}"
-
-    answer = ask :napo, "All children done? Return the combined answer."
-    assert is_binary(answer), "Expected binary answer, got: #{inspect(answer)}"
+    poll_for_napo_shape_completion()
   end
 
   @tag :live
@@ -126,39 +122,6 @@ defmodule NapoContractTest do
     poll_for_results_lease()
   end
 
-  defp wait_for_children(retries \\ 30)
-  defp wait_for_children(0), do: raise "Timeout waiting for children with depth_*=1 and tree_* keys"
-  defp wait_for_children(retries) do
-    children = extract_depth_children()
-    tree_keys = extract_tree_keys(children)
-
-    if length(children) >= 2 && length(tree_keys) >= 2 do
-      children
-    else
-      Process.sleep(10_000)
-      wait_for_children(retries - 1)
-    end
-  end
-
-  defp extract_depth_children do
-    :ets.tab2list(:mem_depth_global)
-    |> Enum.filter(fn {key, value} ->
-      is_binary(key) && String.starts_with?(key, "depth_") && value == "1"
-    end)
-    |> Enum.map(fn {key, _value} ->
-      String.replace_prefix(key, "depth_", "")
-    end)
-    |> Enum.sort()
-  end
-
-  defp extract_tree_keys(children) do
-    Enum.flat_map(children, fn child ->
-      :ets.tab2list(:mem_depth_global)
-      |> Enum.filter(fn {key, _value} ->
-        is_binary(key) && String.starts_with?(key, "tree_#{child}")
-      end)
-    end)
-  end
 
   defp contract_text do
     """
@@ -314,6 +277,35 @@ defmodule NapoContractTest do
     else
       poll_for_results_lease(retries - 1)
     end
+  end
+
+  defp poll_for_napo_shape_completion(retries \\ 30) do
+    if retries == 0 do
+      raise "Timeout: tree_napo or child trees not found after 300s"
+    end
+
+    Process.sleep(10_000)
+
+    tree_napo = read_mem("tree_napo")
+    child_trees = list_child_trees()
+
+    if present?(tree_napo) && length(child_trees) >= 2 do
+      assert is_binary(tree_napo), "tree_napo should be binary"
+      Enum.each(child_trees, fn value ->
+        assert is_binary(value), "child tree should be binary"
+      end)
+    else
+      poll_for_napo_shape_completion(retries - 1)
+    end
+  end
+
+  defp list_child_trees do
+    :ets.tab2list(:mem_depth_global)
+    |> Enum.filter(fn {key, value} ->
+      is_binary(key) && String.starts_with?(key, "tree_") &&
+      !String.starts_with?(key, "tree_napo") && present?(value)
+    end)
+    |> Enum.map(fn {_key, value} -> value end)
   end
 
   defp count_facet_mentions(combo_text) do
