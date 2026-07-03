@@ -1,18 +1,26 @@
 defmodule Tools.Sys.Whoami do
   import Log, only: [log: 5]
 
-  def def(name, _state), do: spec(name)
+  defdelegate def(name, state), to: __MODULE__, as: :schema
 
-  def exec(_, _args, %{name: name} = state) do
-    log("🤷", "I am ", name, "", :blue)
-    {name, state}
+  def schema(name, _state), do: build(name)
+
+  defp build(name) do
+    %{name: name, description: "Get your own agent name", parameters: params()}
   end
 
-  defp spec(name) do
-    %{name: name, description: "Get your own agent name", parameters: parameters()}
+  def exec(_, _args, state) do
+    announce(name(state), state)
   end
 
-  defp parameters do
+  defp announce(n, state) do
+    log("🤷", "I am ", n, "", :blue)
+    {n, state}
+  end
+
+  defp name(%{name: n}), do: n
+
+  defp params do
     %{type: "object", properties: %{}, required: []}
   end
 end
