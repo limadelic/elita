@@ -5,9 +5,16 @@ defmodule NapoProfitTest do
 
   setup do
     System.put_env("LIVE", "1")
+    System.put_env("CASSETTE", "profit")
+
+    unless System.get_env("TAPE") do
+      System.put_env("TAPE", "replay")
+    end
 
     on_exit(fn ->
       System.delete_env("LIVE")
+      System.delete_env("CASSETTE")
+      System.delete_env("TAPE")
     end)
 
     spawn :napo
