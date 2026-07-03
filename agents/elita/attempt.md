@@ -1,6 +1,6 @@
 ---
 name: attempt
-tools: ask, set, get, cast, whoami
+tools: ask, set, get, cast, whoami, tell
 ---
 
 # Attempt Phase
@@ -17,6 +17,7 @@ You are in the attempt phase. Solve the problem yourself, then validate with jud
 3. If judge says "yes":
    - get whoami (to get your own name)
    - set tree_<yourname> to your answer
+   - If problem names a parent, tell that parent "<yourname> done"
    - Return your answer. DONE.
 
 4. If judge says "no":
