@@ -25,29 +25,31 @@ defmodule Tape.Play do
   defp agent_answer(ctx) do
     ctx.entries
     |> Enum.filter(&agent_entry?(&1, ctx.name))
-    |> Enum.filter(&turn_match?(&1, ctx.body))
     |> Enum.filter(&content_match?(&1, ctx.normalized))
     |> pick_answer(ctx)
   end
 
   defp agent_entry?(e, name), do: Map.get(e["q"], "agent") == name
 
-  defp turn_match?(%{"q" => %{"n" => n}}, body) do
-    n == length(Map.get(body, :messages, []))
-  end
-
-  defp turn_match?(_entry, _body), do: true
-
   defp content_match?(entry, normalized) do
-    contains(Map.delete(entry["q"], "agent"), normalized)
+    contains(Map.drop(entry["q"], ["agent", "n"]), normalized)
   end
 
   defp pick_answer([], _ctx), do: nil
 
   defp pick_answer(matches, ctx) do
-    indexed = Enum.map(matches, &{&1, find_idx(ctx.entries, &1)})
+    body_msg_count = length(Map.get(ctx.body, :messages, []))
+    sorted = sort_by_turn_match(matches, body_msg_count)
+    indexed = Enum.map(sorted, &{&1, find_idx(ctx.entries, &1)})
     claimed = Enum.find(indexed, &claim_slot?(ctx, &1))
-    extract_answer(claimed, matches)
+    extract_answer(claimed, sorted)
+  end
+
+  defp sort_by_turn_match(matches, body_msg_count) do
+    {turn_matches, other_matches} = Enum.split_with(matches, fn entry ->
+      Map.get(entry["q"], "n") == body_msg_count
+    end)
+    turn_matches ++ other_matches
   end
 
   defp extract_answer({e, _}, _), do: e["a"]
@@ -71,7 +73,7 @@ defmodule Tape.Play do
   end
 
   defp dispatch_tag_check(nil, entry, ctx, idx), do: check_untagged(entry, ctx, idx)
-  defp dispatch_tag_check(_agent, ctx, idx), do: untagged(ctx, idx + 1)
+  defp dispatch_tag_check(_agent, _entry, ctx, idx), do: untagged(ctx, idx + 1)
 
   defp check_untagged(entry, ctx, idx) do
     dispatch_content_check(contains(entry["q"], ctx.normalized), entry, ctx, idx)
