@@ -1,5 +1,6 @@
 defmodule Tools.Sys.Set do
   import Log, only: [log: 5]
+  import Mem, only: [depth_table: 0, table: 0]
 
   def def(name, _state), do: spec(name)
 
@@ -33,7 +34,10 @@ defmodule Tools.Sys.Set do
   end
 
   defp store(key, value) do
-    table = if String.starts_with?(key, "depth_") or String.starts_with?(key, "tree_"), do: Mem.depth_table(), else: Mem.table()
-    table |> :ets.insert({key, value})
+    key |> pick() |> :ets.insert({key, value})
   end
+
+  defp pick("depth_" <> _), do: depth_table()
+  defp pick("tree_" <> _), do: depth_table()
+  defp pick(_), do: table()
 end
