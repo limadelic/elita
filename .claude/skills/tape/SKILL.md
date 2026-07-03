@@ -7,6 +7,13 @@ description: Record and replay agent tests via cassettes. Use when taping a test
 
 Record once live, replay free forever. The tape IS the spec — edit the cassette, don't re-record.
 
+## Run
+
+- `mix test` — replay from cassettes, free, seconds
+- `mix tape [file:line]` — record live (`TAPE=rec mix test`)
+- `mix live [file:line]` — reality check against the real API, no recording (`LIVE=1 mix test`)
+- Live tests need `--include live`; replay is the default everywhere
+
 ## Record
 
 - Clean cassette first, failed runs poison it: `git checkout -- test/cassettes/<name>.json`
