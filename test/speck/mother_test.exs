@@ -1,0 +1,27 @@
+defmodule SpecMotherTest do
+  use Tester
+  @moduletag :live
+  @moduletag :spec
+  @moduletag timeout: 1_200_000
+
+  setup do
+    System.put_env("LIVE", "1")
+    System.put_env("CASSETTE", "mother_speck")
+
+    unless System.get_env("TAPE") do
+      System.put_env("TAPE", "replay")
+    end
+
+    on_exit(fn ->
+      System.delete_env("LIVE")
+      System.delete_env("CASSETTE")
+      System.delete_env("TAPE")
+    end)
+
+    :ok
+  end
+
+  test "mother speck passes" do
+    speck(:mother)
+  end
+end
