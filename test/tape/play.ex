@@ -32,7 +32,7 @@ defmodule Tape.Play do
 
   defp try_agent_match(ctx, agent_entries, idx) do
     entry = Enum.at(agent_entries, idx)
-    req = entry["q"]
+    req = Map.delete(entry["q"], "agent")
     match = contains(req, ctx.normalized)
     handle_agent_match(match, entry, ctx, idx, agent_entries)
   end
