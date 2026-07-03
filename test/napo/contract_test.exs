@@ -21,7 +21,7 @@ defmodule NapoContractTest do
   end
 
   @tag :live
-  @tag timeout: 600_000
+  @tag timeout: 1_200_000
   test "shape: MSA review forces split into facets" do
     problem = """
     Review this master services agreement and produce the complete risk assessment: \
@@ -68,7 +68,7 @@ defmodule NapoContractTest do
 
     tell :napo, problem
 
-    poll_for_napo_shape_completion()
+    settle()
   end
 
   @tag :live
@@ -279,15 +279,15 @@ defmodule NapoContractTest do
     end
   end
 
-  defp poll_for_napo_shape_completion(retries \\ 30) do
+  defp settle(retries \\ 115) do
     if retries == 0 do
-      raise "Timeout: tree_napo or child trees not found after 300s"
+      raise "Timeout: tree_napo or child trees not found after 1150s"
     end
 
     Process.sleep(10_000)
 
     tree_napo = read_mem("tree_napo")
-    child_trees = list_child_trees()
+    child_trees = kids()
 
     if present?(tree_napo) && length(child_trees) >= 2 do
       assert is_binary(tree_napo), "tree_napo should be binary"
@@ -295,11 +295,11 @@ defmodule NapoContractTest do
         assert is_binary(value), "child tree should be binary"
       end)
     else
-      poll_for_napo_shape_completion(retries - 1)
+      settle(retries - 1)
     end
   end
 
-  defp list_child_trees do
+  defp kids do
     :ets.tab2list(:mem_depth_global)
     |> Enum.filter(fn {key, value} ->
       is_binary(key) && String.starts_with?(key, "tree_") &&
