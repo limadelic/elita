@@ -21,14 +21,16 @@ You are in the attempt phase. Solve the problem yourself, then validate with jud
    - Return your answer. DONE.
 
 4. If judge says "no":
-   - get attempts
-   - Add 1 to attempts
-   - set attempts to new count
+   - get whoami (to get your own name)
+   - get attempts_<yourname>
+   - Increment: new attempts = (previous + 1)
+   - set attempts_<yourname> to new count
+   
+   HARD CAP: If new attempts >= 3, you are FORBIDDEN to attempt again.
+     - get depth
+     - If depth < 2: cast to role "split" (must split the problem)
+     - If depth >= 2: return your best answer (you are a leaf)
    
    If new attempts < 3:
      - Refine your answer using judge's feedback
      - Loop back to step 1
-   
-   If new attempts >= 3:
-     - If your name is "napo": cast to role "split"
-     - If your name is NOT "napo": return your best answer (you are a leaf, do not cast)
