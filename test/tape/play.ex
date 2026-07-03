@@ -25,11 +25,18 @@ defmodule Tape.Play do
   defp agent_answer(ctx) do
     ctx.entries
     |> Enum.filter(&agent_entry?(&1, ctx.name))
+    |> Enum.filter(&turn_match?(&1, ctx.body))
     |> Enum.filter(&content_match?(&1, ctx.normalized))
     |> pick_answer(ctx)
   end
 
   defp agent_entry?(e, name), do: Map.get(e["q"], "agent") == name
+
+  defp turn_match?(%{"q" => %{"n" => n}}, body) do
+    n == length(Map.get(body, :messages, []))
+  end
+
+  defp turn_match?(_entry, _body), do: true
 
   defp content_match?(entry, normalized) do
     contains(Map.delete(entry["q"], "agent"), normalized)
