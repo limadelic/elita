@@ -22,6 +22,7 @@ Record once live, replay free forever. The tape IS the spec — edit the cassett
 - Helpers from Tester: `spawn`, `tell`, `ask`, `verify`, `judge`, `wait_until`, `speck`, `spawned`
 - `@tag timeout` must exceed any poll bound inside the test — red "Timeout after Ns" with healthy log = bound too short, not a bug
 - `ask` on an agent that asks others deadlocks — `tell` then poll mem for the done marker
+- Taping napo trees: [napo.md](napo.md)
 
 ## Record
 
