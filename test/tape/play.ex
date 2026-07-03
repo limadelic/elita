@@ -1,5 +1,7 @@
 defmodule Tape.Play do
   import Tape.Matcher, only: [contains: 2]
+  import Tape.Writer, only: [claim_agent: 4, claim: 3]
+  import Tape.Store, only: [load_entries: 0]
 
   def handle(body, name, fun) do
     ensure_entries(load())
@@ -7,7 +9,7 @@ defmodule Tape.Play do
     |> answer()
   end
 
-  defp load, do: Tape.Store.load_entries()
+  defp load, do: load_entries()
   defp norm(body), do: normalize(request(body))
 
   defp ensure_entries([]), do: validate_cassette(System.get_env("CASSETTE"))
@@ -57,7 +59,7 @@ defmodule Tape.Play do
   defp extract_answer(nil, matches), do: List.last(matches)["a"]
 
   defp claim_slot?(ctx, {e, idx}) do
-    Tape.Writer.claim_agent(cassette_key(), ctx.name, idx, get_times(e))
+    claim_agent(cassette_key(), ctx.name, idx, get_times(e))
   end
 
   defp find_idx(entries, target) do
@@ -84,7 +86,8 @@ defmodule Tape.Play do
   defp dispatch_content_check(false, _entry, ctx, idx), do: untagged(ctx, idx + 1)
 
   defp try_claim_untagged(entry, ctx, idx) do
-    dispatch_claim(Tape.Writer.claim(cassette_key(), idx, get_times(entry)), entry, ctx, idx)
+    claimed = claim(cassette_key(), idx, get_times(entry))
+    dispatch_claim(claimed, entry, ctx, idx)
   end
 
   defp dispatch_claim(true, entry, _ctx, _idx), do: entry["a"]

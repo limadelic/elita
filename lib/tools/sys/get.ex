@@ -1,5 +1,6 @@
 defmodule Tools.Sys.Get do
   import Log, only: [log: 5]
+  import Mem, only: [depth_table: 0, table: 0]
 
   def def(name, _state), do: spec(name)
 
@@ -22,9 +23,13 @@ defmodule Tools.Sys.Get do
   end
 
   defp fetch(key) do
-    table = if String.starts_with?(key, "depth_") or String.starts_with?(key, "tree_"), do: Mem.depth_table(), else: Mem.table()
+    table = pick(key)
     found(key, :ets.lookup(table, key))
   end
+
+  defp pick("depth_" <> _), do: depth_table()
+  defp pick("tree_" <> _), do: depth_table()
+  defp pick(_), do: table()
 
   defp found(key, [{k, value}]) when key == k, do: value
   defp found(_key, []), do: "(empty)"

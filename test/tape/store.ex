@@ -2,6 +2,7 @@ defmodule Tape.Store do
   import File, only: [write: 2, read!: 1, exists?: 1, mkdir_p: 1]
   import System, only: [get_env: 1]
   import Jason
+  import Tape.Writer, only: [acquire: 1]
 
   def read_cassette do
     path = cassette_file()
@@ -21,7 +22,7 @@ defmodule Tape.Store do
   defp normalize(_), do: []
 
   def append_live(req, response) do
-    Tape.Writer.acquire(fn -> live(req, response) end)
+    acquire(fn -> live(req, response) end)
   end
 
   defp live(req, response) do
