@@ -14,12 +14,11 @@ defmodule Tool.Index do
   end
 
   def tell(target, message) do
-    {result, _state} =
-      exec(
-        %{"name" => "tell", "args" => %{"recipient" => "#{target}", "message" => "#{message}"}},
-        %{}
-      )
-
+    {result, _state} = exec(tell_spec(target, message), %{})
     result
+  end
+
+  defp tell_spec(target, message) do
+    %{"name" => "tell", "args" => %{"recipient" => "#{target}", "message" => "#{message}"}}
   end
 end

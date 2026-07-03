@@ -42,21 +42,18 @@ defmodule Tape.Play do
   defp pick_answer([], _ctx), do: nil
 
   defp pick_answer(matches, ctx) do
-    body_msg_count = length(Map.get(ctx.body, :messages, []))
-    sorted = sort_by_turn_match(matches, body_msg_count)
-    indexed = Enum.map(sorted, &{&1, find_idx(ctx.entries, &1)})
-    claimed = Enum.find(indexed, &claim_slot?(ctx, &1))
-    extract_answer(claimed, sorted)
+    count = length(Map.get(ctx.body, :messages, []))
+    sorted = sort_matches(matches, count)
+    indexed = Enum.map(sorted, fn m -> {m, find_idx(ctx.entries, m)} end)
+    extract_answer(Enum.find(indexed, &claim_slot?(ctx, &1)), sorted)
   end
 
-  defp sort_by_turn_match(matches, body_msg_count) do
-    {turn_matches, other_matches} =
-      Enum.split_with(matches, fn entry ->
-        Map.get(entry["q"], "n") == body_msg_count
-      end)
-
-    turn_matches ++ other_matches
+  defp sort_matches(matches, count) do
+    {t, o} = Enum.split_with(matches, &(Map.get(&1["q"], "n") == count))
+    t ++ o
   end
+
+  defp find_idx(entries, target), do: Enum.find_index(entries, &(&1 == target))
 
   defp extract_answer({e, _}, _), do: e["a"]
   defp extract_answer(nil, matches), do: List.last(matches)["a"]
@@ -65,36 +62,30 @@ defmodule Tape.Play do
     claim_agent(cassette_key(), ctx.name, idx, get_times(e))
   end
 
-  defp find_idx(entries, target) do
-    Enum.find_index(entries, &(&1 == target))
-  end
-
   defp untagged(%{entries: entries} = ctx, idx) when idx >= length(entries) do
     raise "tape miss: #{ctx.name} #{inspect(ctx.normalized)}"
   end
 
   defp untagged(ctx, idx) do
     entry = Enum.at(ctx.entries, idx)
-    dispatch_tag_check(Map.get(entry["q"], "agent"), entry, ctx, idx)
+    check_untagged(entry, ctx, idx, Map.get(entry["q"], "agent"))
   end
 
-  defp dispatch_tag_check(nil, entry, ctx, idx), do: check_untagged(entry, ctx, idx)
-  defp dispatch_tag_check(_agent, _entry, ctx, idx), do: untagged(ctx, idx + 1)
-
-  defp check_untagged(entry, ctx, idx) do
-    dispatch_content_check(contains(entry["q"], ctx.normalized), entry, ctx, idx)
+  defp check_untagged(entry, ctx, idx, nil) do
+    if_match(contains(entry["q"], ctx.normalized), entry, ctx, idx)
   end
 
-  defp dispatch_content_check(true, entry, ctx, idx), do: try_claim_untagged(entry, ctx, idx)
-  defp dispatch_content_check(false, _entry, ctx, idx), do: untagged(ctx, idx + 1)
+  defp check_untagged(_entry, ctx, idx, _agent), do: untagged(ctx, idx + 1)
 
-  defp try_claim_untagged(entry, ctx, idx) do
-    claimed = claim(cassette_key(), idx, get_times(entry))
-    dispatch_claim(claimed, entry, ctx, idx)
+  defp if_match(true, entry, ctx, idx) do
+    claim(cassette_key(), idx, get_times(entry))
+    |> claim_result(entry, ctx, idx)
   end
 
-  defp dispatch_claim(true, entry, _ctx, _idx), do: entry["a"]
-  defp dispatch_claim(false, _entry, ctx, idx), do: untagged(ctx, idx + 1)
+  defp if_match(false, _entry, ctx, idx), do: untagged(ctx, idx + 1)
+
+  defp claim_result(true, entry, _ctx, _idx), do: entry["a"]
+  defp claim_result(false, _entry, ctx, idx), do: untagged(ctx, idx + 1)
 
   defp get_times(%{"times" => times}), do: times
   defp get_times(_), do: 1

@@ -16,12 +16,18 @@ defmodule Tools.User.Cfg do
   end
 
   defp extract([_, header | rest]) do
-    markdown = join(rest, "---")
-
     yaml(header)
     |> atomize
-    |> put(:code, blocks(markdown))
-    |> put(:body, body(markdown))
+    |> with_blocks(rest)
+    |> with_body(rest)
+  end
+
+  defp with_blocks(cfg, rest) do
+    put(cfg, :code, blocks(join(rest, "---")))
+  end
+
+  defp with_body(cfg, rest) do
+    put(cfg, :body, body(join(rest, "---")))
   end
 
   defp blocks(markdown) do

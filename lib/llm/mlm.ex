@@ -13,15 +13,15 @@ defmodule Mlm do
   end
 
   def llm(%{config: config, history: history} = state) do
-    composed = compose(config)
-    msgs = messages(composed.content, history)
-
-    body =
-      %{model: model(), messages: msgs, stream: false}
-      |> add_tools(tools(composed, state))
-
-    {req(body) |> resp |> parts, state}
+    {build_body(compose(config), history, state) |> req |> resp |> parts, state}
   end
+
+  defp build_body(composed, history, state) do
+    base_body(model(), messages(composed.content, history))
+    |> add_tools(tools(composed, state))
+  end
+
+  defp base_body(m, msgs), do: %{model: m, messages: msgs, stream: false}
 
   defp req(body), do: post(@url, json: Map.put(body, :think, false), receive_timeout: 120_000)
 
@@ -31,15 +31,12 @@ defmodule Mlm do
     [%{role: "system", content: "/no_think\n#{system}"} | map(history, &MsgAdapter.to_ollama/1)]
   end
 
-  defp add_tools(body, [%{function_declarations: defs}]) do
-    Map.put(body, :tools, map(defs, &tool/1))
-  end
+  defp add_tools(body, [%{function_declarations: defs}]),
+    do: Map.put(body, :tools, map(defs, &tool/1))
 
   defp add_tools(body, _), do: body
 
-  defp tool(d) do
-    %{type: "function", function: func_spec(d)}
-  end
+  defp tool(d), do: %{type: "function", function: func_spec(d)}
 
   defp func_spec(d) do
     %{
@@ -57,16 +54,17 @@ defmodule Mlm do
   defp parts({:error, _} = err), do: err
 
   defp resp({:ok, %{status: 200, body: %{"message" => %{"tool_calls" => calls}}}}),
-    do:
-      map(calls, fn %{"function" => %{"name" => name, "arguments" => args}} ->
-        %{"tool_use" => %{"id" => name, "name" => name, "input" => decode(args)}}
-      end)
+    do: map(calls, &build_tool_use/1)
 
   defp resp({:ok, %{status: 200, body: %{"message" => %{"content" => content}}}}),
     do: strip_think(content)
 
   defp resp({:ok, %{status: code, body: body}}), do: {:error, "HTTP #{code}: #{inspect(body)}"}
   defp resp({:error, err}), do: {:error, "request failed: #{inspect(err)}"}
+
+  defp build_tool_use(%{"function" => %{"name" => name, "arguments" => args}}) do
+    %{"tool_use" => %{"id" => name, "name" => name, "input" => decode(args)}}
+  end
 
   defp decode(args) when is_map(args) do
     args
