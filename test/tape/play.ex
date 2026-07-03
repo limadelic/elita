@@ -9,11 +9,16 @@ defmodule Tape.Play do
     find_match(ctx, 0)
   end
 
-  defp ensure_entries(entries) do
-    cassette = System.get_env("CASSETTE")
-    if cassette && Enum.empty?(entries) do
-      raise "no cassette: #{cassette}"
-    end
+  defp ensure_entries([]) do
+    validate_cassette(System.get_env("CASSETTE"))
+  end
+
+  defp ensure_entries(_entries), do: :ok
+
+  defp validate_cassette(nil), do: :ok
+
+  defp validate_cassette(cassette) do
+    raise("no cassette: #{cassette}")
   end
 
   defp find_match(%{entries: entries} = ctx, idx) when idx >= length(entries) do
@@ -27,19 +32,26 @@ defmodule Tape.Play do
 
   defp check_match(entry, ctx, idx) do
     req = entry["q"]
-    if agent_match(req, ctx.name) do
-      filtered = Map.delete(req, "agent")
-      match = contains(filtered, ctx.normalized)
-      process_match(match, entry, ctx, idx)
-    else
-      find_match(ctx, idx + 1)
-    end
+    handle_agent_check(agent_match(req, ctx.name), req, ctx, entry, idx)
+  end
+
+  defp handle_agent_check(true, req, ctx, entry, idx) do
+    filtered = Map.delete(req, "agent")
+    match = contains(filtered, ctx.normalized)
+    process_match(match, entry, ctx, idx)
+  end
+
+  defp handle_agent_check(false, _req, ctx, _entry, idx) do
+    find_match(ctx, idx + 1)
   end
 
   defp agent_match(req, name) do
-    agent = Map.get(req, "agent")
-    agent == nil or agent == name
+    agent_matches(Map.get(req, "agent"), name)
   end
+
+  defp agent_matches(nil, _name), do: true
+
+  defp agent_matches(agent, name), do: agent == name
 
   defp process_match(true, entry, ctx, idx) do
     claimed = Tape.Writer.claim(cassette_key(), idx, get_times(entry))

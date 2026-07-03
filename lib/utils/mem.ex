@@ -1,10 +1,13 @@
 defmodule Mem do
   def init_global do
-    case :ets.whereis(depth_table()) do
-      :undefined -> :ets.new(depth_table(), [:set, :public, :named_table])
-      _ -> :ok
-    end
+    create_depth_table(:ets.whereis(depth_table()))
   end
+
+  defp create_depth_table(:undefined) do
+    :ets.new(depth_table(), [:set, :public, :named_table])
+  end
+
+  defp create_depth_table(_), do: :ok
 
   def create do
     :ets.new(table(), [:set, :public, :named_table])
