@@ -1,6 +1,10 @@
 defmodule Tools.Sys.Ask.Schema do
   def get(name, _state) do
-    %{name: name, description: "Ask question to another agent and get response", parameters: params()}
+    %{
+      name: name,
+      description: "Ask question to another agent and get response",
+      parameters: params()
+    }
   end
 
   defp params do

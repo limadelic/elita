@@ -34,6 +34,7 @@ defmodule Tools.Sys.Cast do
 
   def exec(_, %{"role" => role}, %{config: config, name: name} = state) do
     log("🎭", name, " as ", role, :magenta)
+
     {
       "switched to #{role}",
       %{state | config: map(config, &activate(&1, role))}

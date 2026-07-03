@@ -58,6 +58,7 @@ defmodule Tester do
     answer = ask(name, query)
 
     assert is_binary(answer), "Expected binary answer, got: #{inspect(answer)}"
+
     assert contains?(downcase(answer), downcase("#{expected}")),
            "Expected '#{answer}' to contain '#{expected}'"
   end
@@ -67,15 +68,17 @@ defmodule Tester do
     verdict = ask(:judge, prompt)
 
     assert is_binary(verdict), "Expected binary verdict, got: #{inspect(verdict)}"
+
     assert downcase(verdict) == "yes",
            "Judge said: #{verdict}. Expectation failed: #{expectation}"
   end
 
   def wait_until(agent, cond, retries \\ 5)
-  def wait_until(_agent, cond, 0), do: raise "Timeout waiting for: #{cond}"
+  def wait_until(_agent, cond, 0), do: raise("Timeout waiting for: #{cond}")
+
   def wait_until(agent, cond, retries) do
     settle(agent)
-    judge ask(agent, "did you #{cond}?"), "confirms they did #{cond}"
+    judge(ask(agent, "did you #{cond}?"), "confirms they did #{cond}")
   rescue
     _ -> wait_until(agent, cond, retries - 1)
   end

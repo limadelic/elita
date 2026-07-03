@@ -47,7 +47,7 @@ defmodule Tools.Sys.Spawn do
     }
   end
 
-  defp fetch_configs([_|_] = list, _name) do
+  defp fetch_configs([_ | _] = list, _name) do
     list
   end
 

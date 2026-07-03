@@ -4,7 +4,7 @@ defmodule Tools.Sys.Set do
 
   def spec(name, _state) do
     spec(name)
-end
+  end
 
   defp spec(name) do
     %{

@@ -3,7 +3,7 @@ defmodule Compose do
   import Map, only: [put: 3, merge: 2, drop: 2, get: 3]
 
   def compose([main | rest]) do
-    active = [main | reject(rest, & &1[:active] == false)]
+    active = [main | reject(rest, &(&1[:active] == false))]
     active |> headers |> content(active)
   end
 
@@ -19,7 +19,7 @@ defmodule Compose do
   end
 
   defp merge_tools(acc, config) do
-    tools(acc) ++ tools(config) |> uniq
+    (tools(acc) ++ tools(config)) |> uniq
   end
 
   defp tools(config) do

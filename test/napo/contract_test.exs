@@ -16,7 +16,7 @@ defmodule NapoContractTest do
       System.delete_env("TAPE")
     end)
 
-    spawn :napo
+    spawn(:napo)
     :ok
   end
 
@@ -66,62 +66,106 @@ defmodule NapoContractTest do
     35. NOTICES: Legal notices sent to addresses listed in signature block, effective upon receipt.
     """
 
-    tell :napo, problem
+    tell(:napo, problem)
 
     settle()
   end
 
   @tag :live
   test "contract review: three facets analyze employment contract, parent combines" do
-    spawn :financial, ["napo"]
-    spawn :liability, ["napo"]
-    spawn :operational, ["napo"]
-    spawn :combo, ["napo"]
+    spawn(:financial, ["napo"])
+    spawn(:liability, ["napo"])
+    spawn(:operational, ["napo"])
+    spawn(:combo, ["napo"])
 
     contract = contract_text()
 
-    tell :financial, "Review this employment contract for financial risks: #{contract}. When done, set tree_financial and tell combo."
-    tell :liability, "Review this employment contract for liability risks: #{contract}. When done, set tree_liability and tell combo."
-    tell :operational, "Review this employment contract for operational risks: #{contract}. When done, set tree_operational and tell combo."
-    tell :combo, "Children are financial, liability, operational. Combine tree_financial, tree_liability, and tree_operational into tree_combo when all report done."
+    tell(
+      :financial,
+      "Review this employment contract for financial risks: #{contract}. When done, set tree_financial and tell combo."
+    )
+
+    tell(
+      :liability,
+      "Review this employment contract for liability risks: #{contract}. When done, set tree_liability and tell combo."
+    )
+
+    tell(
+      :operational,
+      "Review this employment contract for operational risks: #{contract}. When done, set tree_operational and tell combo."
+    )
+
+    tell(
+      :combo,
+      "Children are financial, liability, operational. Combine tree_financial, tree_liability, and tree_operational into tree_combo when all report done."
+    )
 
     poll_for_results()
   end
 
   @tag :live
   test "contract review: vendor agreement with red flags" do
-    spawn :f2, ["napo"]
-    spawn :l2, ["napo"]
-    spawn :o2, ["napo"]
-    spawn :combo2, ["napo"]
+    spawn(:f2, ["napo"])
+    spawn(:l2, ["napo"])
+    spawn(:o2, ["napo"])
+    spawn(:combo2, ["napo"])
 
     contract = vendor_agreement_text()
 
-    tell :f2, "Review this vendor agreement for financial risks: #{contract}. When done, set tree_f2 and tell combo2."
-    tell :l2, "Review this vendor agreement for liability risks: #{contract}. When done, set tree_l2 and tell combo2."
-    tell :o2, "Review this vendor agreement for operational risks: #{contract}. When done, set tree_o2 and tell combo2."
-    tell :combo2, "Children are f2, l2, o2. Combine tree_f2, tree_l2, and tree_o2 into tree_combo2 when all report done."
+    tell(
+      :f2,
+      "Review this vendor agreement for financial risks: #{contract}. When done, set tree_f2 and tell combo2."
+    )
+
+    tell(
+      :l2,
+      "Review this vendor agreement for liability risks: #{contract}. When done, set tree_l2 and tell combo2."
+    )
+
+    tell(
+      :o2,
+      "Review this vendor agreement for operational risks: #{contract}. When done, set tree_o2 and tell combo2."
+    )
+
+    tell(
+      :combo2,
+      "Children are f2, l2, o2. Combine tree_f2, tree_l2, and tree_o2 into tree_combo2 when all report done."
+    )
 
     poll_for_results_vendor()
   end
 
   @tag :live
   test "contract review: office lease with red flags" do
-    spawn :f3, ["napo"]
-    spawn :l3, ["napo"]
-    spawn :o3, ["napo"]
-    spawn :combo3, ["napo"]
+    spawn(:f3, ["napo"])
+    spawn(:l3, ["napo"])
+    spawn(:o3, ["napo"])
+    spawn(:combo3, ["napo"])
 
     contract = office_lease_text()
 
-    tell :f3, "Review this office lease for financial risks: #{contract}. When done, set tree_f3 and tell combo3."
-    tell :l3, "Review this office lease for liability risks: #{contract}. When done, set tree_l3 and tell combo3."
-    tell :o3, "Review this office lease for operational risks: #{contract}. When done, set tree_o3 and tell combo3."
-    tell :combo3, "Children are f3, l3, o3. Combine tree_f3, tree_l3, and tree_o3 into tree_combo3 when all report done."
+    tell(
+      :f3,
+      "Review this office lease for financial risks: #{contract}. When done, set tree_f3 and tell combo3."
+    )
+
+    tell(
+      :l3,
+      "Review this office lease for liability risks: #{contract}. When done, set tree_l3 and tell combo3."
+    )
+
+    tell(
+      :o3,
+      "Review this office lease for operational risks: #{contract}. When done, set tree_o3 and tell combo3."
+    )
+
+    tell(
+      :combo3,
+      "Children are f3, l3, o3. Combine tree_f3, tree_l3, and tree_o3 into tree_combo3 when all report done."
+    )
 
     poll_for_results_lease()
   end
-
 
   defp contract_text do
     """
@@ -213,7 +257,8 @@ defmodule NapoContractTest do
     tree_operational = read_mem("tree_operational")
     tree_combo = read_mem("tree_combo")
 
-    if present?(tree_financial) && present?(tree_liability) && present?(tree_operational) && present?(tree_combo) do
+    if present?(tree_financial) && present?(tree_liability) && present?(tree_operational) &&
+         present?(tree_combo) do
       assert is_binary(tree_financial), "tree_financial should be binary"
       assert is_binary(tree_liability), "tree_liability should be binary"
       assert is_binary(tree_operational), "tree_operational should be binary"
@@ -221,7 +266,9 @@ defmodule NapoContractTest do
 
       combo_text = String.downcase(tree_combo)
       facet_mentions = count_facet_mentions(combo_text)
-      assert facet_mentions >= 2, "tree_combo should integrate findings from at least 2 facets, found #{facet_mentions}"
+
+      assert facet_mentions >= 2,
+             "tree_combo should integrate findings from at least 2 facets, found #{facet_mentions}"
     else
       poll_for_results(retries - 1)
     end
@@ -247,7 +294,9 @@ defmodule NapoContractTest do
 
       combo_text = String.downcase(tree_combo2)
       facet_mentions = count_facet_mentions_vendor(combo_text)
-      assert facet_mentions >= 2, "tree_combo2 should integrate findings from at least 2 facets, found #{facet_mentions}"
+
+      assert facet_mentions >= 2,
+             "tree_combo2 should integrate findings from at least 2 facets, found #{facet_mentions}"
     else
       poll_for_results_vendor(retries - 1)
     end
@@ -273,7 +322,9 @@ defmodule NapoContractTest do
 
       combo_text = String.downcase(tree_combo3)
       facet_mentions = count_facet_mentions_lease(combo_text)
-      assert facet_mentions >= 2, "tree_combo3 should integrate findings from at least 2 facets, found #{facet_mentions}"
+
+      assert facet_mentions >= 2,
+             "tree_combo3 should integrate findings from at least 2 facets, found #{facet_mentions}"
     else
       poll_for_results_lease(retries - 1)
     end
@@ -291,6 +342,7 @@ defmodule NapoContractTest do
 
     if present?(tree_napo) && length(child_trees) >= 2 do
       assert is_binary(tree_napo), "tree_napo should be binary"
+
       Enum.each(child_trees, fn value ->
         assert is_binary(value), "child tree should be binary"
       end)
@@ -303,32 +355,71 @@ defmodule NapoContractTest do
     :ets.tab2list(:mem_depth_global)
     |> Enum.filter(fn {key, value} ->
       is_binary(key) && String.starts_with?(key, "tree_") &&
-      !String.starts_with?(key, "tree_napo") && present?(value)
+        !String.starts_with?(key, "tree_napo") && present?(value)
     end)
     |> Enum.map(fn {_key, value} -> value end)
   end
 
   defp count_facet_mentions(combo_text) do
     count = 0
-    count = if String.contains?(combo_text, ["financial", "salary", "compensation", "overtime"]), do: count + 1, else: count
-    count = if String.contains?(combo_text, ["liability", "dispute", "arbitration", "non-compete"]), do: count + 1, else: count
-    count = if String.contains?(combo_text, ["operational", "hours", "remote", "probation"]), do: count + 1, else: count
+
+    count =
+      if String.contains?(combo_text, ["financial", "salary", "compensation", "overtime"]),
+        do: count + 1,
+        else: count
+
+    count =
+      if String.contains?(combo_text, ["liability", "dispute", "arbitration", "non-compete"]),
+        do: count + 1,
+        else: count
+
+    count =
+      if String.contains?(combo_text, ["operational", "hours", "remote", "probation"]),
+        do: count + 1,
+        else: count
+
     count
   end
 
   defp count_facet_mentions_vendor(combo_text) do
     count = 0
-    count = if String.contains?(combo_text, ["pricing", "upfront", "payment", "refundable"]), do: count + 1, else: count
-    count = if String.contains?(combo_text, ["indemnity", "indemnification", "liability", "negligence"]), do: count + 1, else: count
-    count = if String.contains?(combo_text, ["auto-renewal", "uptime", "sla", "service level"]), do: count + 1, else: count
+
+    count =
+      if String.contains?(combo_text, ["pricing", "upfront", "payment", "refundable"]),
+        do: count + 1,
+        else: count
+
+    count =
+      if String.contains?(combo_text, ["indemnity", "indemnification", "liability", "negligence"]),
+         do: count + 1,
+         else: count
+
+    count =
+      if String.contains?(combo_text, ["auto-renewal", "uptime", "sla", "service level"]),
+        do: count + 1,
+        else: count
+
     count
   end
 
   defp count_facet_mentions_lease(combo_text) do
     count = 0
-    count = if String.contains?(combo_text, ["triple-net", "cam", "taxes", "insurance"]), do: count + 1, else: count
-    count = if String.contains?(combo_text, ["personal guarantee", "indemnity", "eviction", "liability"]), do: count + 1, else: count
-    count = if String.contains?(combo_text, ["sublease", "renewal", "termination", "maintenance"]), do: count + 1, else: count
+
+    count =
+      if String.contains?(combo_text, ["triple-net", "cam", "taxes", "insurance"]),
+        do: count + 1,
+        else: count
+
+    count =
+      if String.contains?(combo_text, ["personal guarantee", "indemnity", "eviction", "liability"]),
+         do: count + 1,
+         else: count
+
+    count =
+      if String.contains?(combo_text, ["sublease", "renewal", "termination", "maintenance"]),
+        do: count + 1,
+        else: count
+
     count
   end
 

@@ -17,8 +17,9 @@ defmodule Tools.User.Cfg do
 
   defp extract([_, header | rest]) do
     markdown = join(rest, "---")
-    yaml(header) 
-    |> atomize 
+
+    yaml(header)
+    |> atomize
     |> put(:code, blocks(markdown))
     |> put(:body, body(markdown))
   end

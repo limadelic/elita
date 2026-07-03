@@ -17,14 +17,14 @@ defmodule Doble9UnitTest do
     end
 
     test "dominoes on start" do
-      spawn :doble9
-      spawn :top, [:player, :greed]
-      spawn :left, [:player, :greed]
-      spawn :bottom, [:player, :greed]
-      spawn :right, [:player, :greed]
+      spawn(:doble9)
+      spawn(:top, [:player, :greed])
+      spawn(:left, [:player, :greed])
+      spawn(:bottom, [:player, :greed])
+      spawn(:right, [:player, :greed])
 
-      ask :doble9, "start a new game with players: top, left, bottom, right"
-      verify :doble9, "9", "i need 10 dominoes"
+      ask(:doble9, "start a new game with players: top, left, bottom, right")
+      verify(:doble9, "9", "i need 10 dominoes")
     end
   end
 end

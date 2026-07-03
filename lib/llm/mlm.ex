@@ -15,8 +15,11 @@ defmodule Mlm do
   def llm(%{config: config, history: history} = state) do
     composed = compose(config)
     msgs = messages(composed.content, history)
-    body = %{model: model(), messages: msgs, stream: false}
-    |> add_tools(tools(composed, state))
+
+    body =
+      %{model: model(), messages: msgs, stream: false}
+      |> add_tools(tools(composed, state))
+
     {req(body) |> resp |> parts, state}
   end
 
@@ -31,6 +34,7 @@ defmodule Mlm do
   defp add_tools(body, [%{function_declarations: defs}]) do
     Map.put(body, :tools, map(defs, &tool/1))
   end
+
   defp add_tools(body, _), do: body
 
   defp tool(d) do
@@ -38,8 +42,11 @@ defmodule Mlm do
   end
 
   defp func_spec(d) do
-    %{name: d[:name], description: d[:description],
-      parameters: Map.get(d, :parameters, %{type: "object"})}
+    %{
+      name: d[:name],
+      description: d[:description],
+      parameters: Map.get(d, :parameters, %{type: "object"})
+    }
   end
 
   defp text([%{"type" => "text", "text" => t} | _]), do: t
@@ -50,10 +57,14 @@ defmodule Mlm do
   defp parts({:error, _} = err), do: err
 
   defp resp({:ok, %{status: 200, body: %{"message" => %{"tool_calls" => calls}}}}),
-    do: map(calls, fn %{"function" => %{"name" => name, "arguments" => args}} ->
-      %{"tool_use" => %{"id" => name, "name" => name, "input" => decode(args)}}
-    end)
-  defp resp({:ok, %{status: 200, body: %{"message" => %{"content" => content}}}}), do: strip_think(content)
+    do:
+      map(calls, fn %{"function" => %{"name" => name, "arguments" => args}} ->
+        %{"tool_use" => %{"id" => name, "name" => name, "input" => decode(args)}}
+      end)
+
+  defp resp({:ok, %{status: 200, body: %{"message" => %{"content" => content}}}}),
+    do: strip_think(content)
+
   defp resp({:ok, %{status: code, body: body}}), do: {:error, "HTTP #{code}: #{inspect(body)}"}
   defp resp({:error, err}), do: {:error, "request failed: #{inspect(err)}"}
 
@@ -62,6 +73,7 @@ defmodule Mlm do
     |> Map.new(fn {k, v} -> {k, decode_val(v)} end)
     |> flatten_nested()
   end
+
   defp decode(args), do: args
 
   defp flatten_nested(args) do
@@ -78,11 +90,13 @@ defmodule Mlm do
   defp maybe_fallback("", c) do
     c |> String.replace(~r/<\/?think>/s, "") |> String.trim()
   end
+
   defp maybe_fallback(s, _), do: s
 
   defp decode_val(v) when is_binary(v) do
     v |> String.replace("'", "\"") |> Jason.decode() |> decode_result(v)
   end
+
   defp decode_val(v), do: v
 
   defp decode_result({:ok, d}, _), do: d

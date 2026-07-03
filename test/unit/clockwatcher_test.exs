@@ -19,11 +19,13 @@ defmodule ClockwatcherUnitTest do
 
   test "clockwatcher respects work hours" do
     {_, {hour, _, _}} = Now.time()
-    result = ask :clockwatcher, "can you handle this task?"
+    result = ask(:clockwatcher, "can you handle this task?")
     claim = expectation(hour)
-    judge result, claim
+    judge(result, claim)
   end
 
-  defp expectation(h) when h in 9..16, do: "accepts or handles the task since it is within work hours"
+  defp expectation(h) when h in 9..16,
+    do: "accepts or handles the task since it is within work hours"
+
   defp expectation(_), do: "declines the task because it is outside work hours"
 end

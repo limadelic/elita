@@ -5,6 +5,7 @@ defmodule Tape.Play do
 
   def handle(body, name, fun) do
     ensure_entries(load())
+
     %{entries: load(), normalized: norm(body), body: body, name: name, fun: fun}
     |> answer()
   end
@@ -49,9 +50,11 @@ defmodule Tape.Play do
   end
 
   defp sort_by_turn_match(matches, body_msg_count) do
-    {turn_matches, other_matches} = Enum.split_with(matches, fn entry ->
-      Map.get(entry["q"], "n") == body_msg_count
-    end)
+    {turn_matches, other_matches} =
+      Enum.split_with(matches, fn entry ->
+        Map.get(entry["q"], "n") == body_msg_count
+      end)
+
     turn_matches ++ other_matches
   end
 

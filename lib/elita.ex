@@ -21,7 +21,7 @@ defmodule Elita do
   def call(name, msg) do
     GenServer.call(via(name), {:act, msg}, :infinity)
   end
-  
+
   defp via(name) do
     {:via, Registry, {ElitaRegistry, downcase(name)}}
   end
@@ -79,7 +79,7 @@ defmodule Elita do
   end
 
   defp done({:reply, txt, %{name: name} = state}) do
-    txt = trim txt
+    txt = trim(txt)
     log("✨", name, ": ", txt, :white)
     {:reply, txt, state}
   end

@@ -8,6 +8,7 @@ defmodule Snippet do
 
   def snip(md, imports \\ []) do
     imports = build(imports)
+
     replace(@snippet, md, fn _, code ->
       eval(imports, code)
     end)
