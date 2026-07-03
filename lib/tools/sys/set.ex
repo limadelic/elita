@@ -2,20 +2,7 @@ defmodule Tools.Sys.Set do
   import Log, only: [log: 5]
   import Mem, only: [depth_table: 0, table: 0]
 
-  def def(name, _state) do
-    %{
-      name: name,
-      description: "Store data with a key",
-      parameters: %{
-        type: "object",
-        properties: %{
-          key: %{type: "string", description: "The key to store data under"},
-          value: %{type: "string", description: "The value to store"}
-        },
-        required: ["key", "value"]
-      }
-    }
-  end
+  def def(name, _state), do: spec(name)
 
   def exec(tool, %{"value" => value} = args, state) when not is_map_key(args, "key") do
     exec(tool, Map.put(args, "key", value), state)
@@ -29,6 +16,21 @@ defmodule Tools.Sys.Set do
 
   def exec(_, _args, state) do
     {"set needs key and value", state}
+  end
+
+  defp spec(name) do
+    %{name: name, description: "Store data with a key", parameters: parameters()}
+  end
+
+  defp parameters do
+    %{type: "object", properties: props(), required: ["key", "value"]}
+  end
+
+  defp props do
+    %{
+      key: %{type: "string", description: "The key to store data under"},
+      value: %{type: "string", description: "The value to store"}
+    }
   end
 
   defp store(key, value) do
