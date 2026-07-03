@@ -15,7 +15,10 @@ defmodule Tape.Store do
     load_entries_from(read_cassette())
   end
 
-  defp load_entries_from({:new_format, e}), do: e
+  defp load_entries_from({:new_format, e}), do: normalize(e)
+
+  defp normalize(list) when is_list(list), do: list
+  defp normalize(_), do: []
 
   def append_live(req, response) do
     Tape.Writer.acquire(fn -> live(req, response) end)
