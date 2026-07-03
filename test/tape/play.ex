@@ -5,90 +5,85 @@ defmodule Tape.Play do
     normalized = normalize(request(body))
     entries = Tape.Store.load_entries()
     ensure_entries(entries)
-    ctx = %{entries: entries, normalized: normalized, body: body, name: name, fun: fun}
-    try_ordered(ctx)
+    %{entries: entries, normalized: normalized, body: body, name: name, fun: fun}
+    |> answer()
   end
 
-  defp ensure_entries([]) do
-    validate_cassette(System.get_env("CASSETTE"))
-  end
-
-  defp ensure_entries(_entries), do: :ok
+  defp ensure_entries([]), do: validate_cassette(System.get_env("CASSETTE"))
+  defp ensure_entries(_), do: :ok
 
   defp validate_cassette(nil), do: :ok
+  defp validate_cassette(cassette), do: raise("no cassette: #{cassette}")
 
-  defp validate_cassette(cassette) do
-    raise("no cassette: #{cassette}")
+  defp answer(ctx) do
+    agent_answer(ctx) |> handle_answer(ctx)
   end
 
-  defp try_ordered(ctx) do
-    agent_entries = agent_list(ctx.entries, ctx.name)
-    try_agent_match(ctx, agent_entries, 0)
+  defp handle_answer(nil, ctx), do: untagged(ctx, 0)
+  defp handle_answer(answer, _ctx), do: answer
+
+  defp agent_answer(ctx) do
+    ctx.entries
+    |> Enum.filter(&agent_entry?(&1, ctx.name))
+    |> Enum.filter(&content_match?(&1, ctx.normalized))
+    |> pick_answer(ctx)
   end
 
-  defp try_agent_match(ctx, agent_entries, idx) when idx >= length(agent_entries) do
-    find_untagged(ctx, 0)
+  defp agent_entry?(e, name), do: Map.get(e["q"], "agent") == name
+
+  defp content_match?(entry, normalized) do
+    contains(Map.delete(entry["q"], "agent"), normalized)
   end
 
-  defp try_agent_match(ctx, agent_entries, idx) do
-    entry = Enum.at(agent_entries, idx)
-    req = Map.delete(entry["q"], "agent")
-    match = contains(req, ctx.normalized)
-    handle_agent_match(match, entry, ctx, idx, agent_entries)
+  defp pick_answer([], _ctx), do: nil
+
+  defp pick_answer(matches, ctx) do
+    indexed = Enum.map(matches, &{&1, find_idx(ctx.entries, &1)})
+    claimed = Enum.find(indexed, &claim_slot?(ctx, &1))
+    extract_answer(claimed, matches)
   end
 
-  defp handle_agent_match(true, entry, _ctx, _idx, _agent_entries) do
-    entry["a"]
+  defp extract_answer({e, _}, _), do: e["a"]
+  defp extract_answer(nil, matches), do: List.last(matches)["a"]
+
+  defp claim_slot?(ctx, {e, idx}) do
+    Tape.Writer.claim_agent(cassette_key(), ctx.name, idx, get_times(e))
   end
 
-  defp handle_agent_match(false, _entry, ctx, idx, agent_entries) do
-    try_agent_match(ctx, agent_entries, idx + 1)
+  defp find_idx(entries, target) do
+    Enum.find_index(entries, &(&1 == target))
   end
 
-  defp agent_list(entries, name) do
-    entries |> Enum.filter(fn e -> Map.get(e["q"], "agent") == name end)
-  end
-
-  defp find_untagged(%{entries: entries} = ctx, idx) when idx >= length(entries) do
+  defp untagged(%{entries: entries} = ctx, idx) when idx >= length(entries) do
     raise "tape miss: #{ctx.name} #{inspect(ctx.normalized)}"
   end
 
-  defp find_untagged(ctx, idx) do
+  defp untagged(ctx, idx) do
     entry = Enum.at(ctx.entries, idx)
-    req = entry["q"]
-    agent = Map.get(req, "agent")
-    check_match(agent, entry, ctx, idx)
+    dispatch_tag_check(Map.get(entry["q"], "agent"), entry, ctx, idx)
   end
 
-  defp check_match(nil, entry, ctx, idx) do
-    match = contains(entry["q"], ctx.normalized)
-    process_match(match, entry, ctx, idx)
+  defp dispatch_tag_check(nil, entry, ctx, idx), do: check_untagged(entry, ctx, idx)
+  defp dispatch_tag_check(_agent, ctx, idx), do: untagged(ctx, idx + 1)
+
+  defp check_untagged(entry, ctx, idx) do
+    dispatch_content_check(contains(entry["q"], ctx.normalized), entry, ctx, idx)
   end
 
-  defp check_match(_agent, _entry, ctx, idx) do
-    find_untagged(ctx, idx + 1)
+  defp dispatch_content_check(true, entry, ctx, idx), do: try_claim_untagged(entry, ctx, idx)
+  defp dispatch_content_check(false, _entry, ctx, idx), do: untagged(ctx, idx + 1)
+
+  defp try_claim_untagged(entry, ctx, idx) do
+    dispatch_claim(Tape.Writer.claim(cassette_key(), idx, get_times(entry)), entry, ctx, idx)
   end
 
-  defp process_match(true, entry, ctx, idx) do
-    claimed = Tape.Writer.claim(cassette_key(), idx, get_times(entry))
-    return_or_skip(claimed, entry, ctx, idx)
-  end
-
-  defp process_match(false, _entry, ctx, idx) do
-    find_untagged(ctx, idx + 1)
-  end
-
-  defp return_or_skip(true, entry, _ctx, _idx), do: entry["a"]
-  defp return_or_skip(false, _entry, ctx, idx), do: find_untagged(ctx, idx + 1)
+  defp dispatch_claim(true, entry, _ctx, _idx), do: entry["a"]
+  defp dispatch_claim(false, _entry, ctx, idx), do: untagged(ctx, idx + 1)
 
   defp get_times(%{"times" => times}), do: times
-  defp get_times(_entry), do: 1
+  defp get_times(_), do: 1
 
-  defp cassette_key do
-    System.get_env("CASSETTE")
-  end
-
+  defp cassette_key, do: System.get_env("CASSETTE")
   defp normalize(req), do: req |> Jason.encode!() |> Jason.decode!()
-
   defp request(body), do: Map.take(body, [:system, :messages, :tools])
 end
