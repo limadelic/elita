@@ -19,7 +19,7 @@ defmodule Tools.Sys.Tell do
   import Elita, only: [cast: 2]
   import Log, only: [log: 5]
 
-  defdelegate def(name, state), to: Tools.Sys.Tell.Schema, as: :get
+  defdelegate spec(name, state), to: Tools.Sys.Tell.Schema, as: :get
 
   def exec(_, %{"recipient" => recipient, "message" => message}, %{name: sender} = state) do
     log("📢", "#{sender} → #{recipient}", ": ", message, :yellow)

@@ -19,7 +19,7 @@ defmodule Tools.Sys.Ask do
   import Elita, only: [call: 2]
   import Log, only: [log: 5]
 
-  defdelegate def(name, state), to: Tools.Sys.Ask.Schema, as: :get
+  defdelegate spec(name, state), to: Tools.Sys.Ask.Schema, as: :get
 
   def exec(_, %{"recipient" => recipient, "question" => question}, %{name: sender} = state) do
     log("🤔", "#{sender} → #{recipient}", ": ", question, :green)

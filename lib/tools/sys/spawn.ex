@@ -4,7 +4,7 @@ defmodule Tools.Sys.Spawn do
   import Map, only: [get: 3]
   import Enum, only: [join: 2]
 
-  def def(name, state) do
+  def spec(name, state) do
     %{
       name: name,
       description: "Spawn a new agent." <> help(state),

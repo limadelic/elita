@@ -2,9 +2,9 @@ defmodule Tools.Sys.Set do
   import Log, only: [log: 5]
   import Mem, only: [depth_table: 0, table: 0]
 
-  def def(name, _state) do
+  def spec(name, _state) do
     spec(name)
-  end
+end
 
   defp spec(name) do
     %{

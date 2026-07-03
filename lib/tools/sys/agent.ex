@@ -20,7 +20,7 @@ defmodule Tools.Sys.Agent do
   import Utils.File, only: [file: 1]
   import Log, only: [log: 5]
 
-  defdelegate def(name, state), to: Tools.Sys.Agent.Schema, as: :get
+  defdelegate spec(name, state), to: Tools.Sys.Agent.Schema, as: :get
 
   def exec(_, %{"name" => name}, state) do
     agent = file("#{name}.md")

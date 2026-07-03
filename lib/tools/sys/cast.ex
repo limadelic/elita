@@ -30,7 +30,7 @@ defmodule Tools.Sys.Cast do
   import Map, only: [put: 3]
   import Enum, only: [map: 2]
 
-  defdelegate def(name, state), to: Tools.Sys.Cast.Schema, as: :get
+  defdelegate spec(name, state), to: Tools.Sys.Cast.Schema, as: :get
 
   def exec(_, %{"role" => role}, %{config: config, name: name} = state) do
     log("🎭", name, " as ", role, :magenta)

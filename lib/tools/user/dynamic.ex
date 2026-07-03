@@ -5,7 +5,7 @@ defmodule Tools.User.Load.Schema do
     name
     |> path()
     |> load()
-    |> Tools.User.Def.def(state)
+    |> Tools.User.Def.spec(state)
   end
 
   def tool(name) do
@@ -26,7 +26,7 @@ defmodule Tools.User do
   import Tools.User.Exec, only: [exec: 2]
   import Tools.User.Load.Schema, only: [tool: 1]
 
-  defdelegate def(name, state), to: Tools.User.Load.Schema, as: :get
+  defdelegate spec(name, state), to: Tools.User.Load.Schema, as: :get
 
   def exec(name, args, state) do
     result = exec(tool(name), args)

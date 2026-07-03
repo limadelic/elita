@@ -1,7 +1,7 @@
 defmodule Tools.Sys.Whoami do
   import Log, only: [log: 5]
 
-  defdelegate def(name, state), to: __MODULE__, as: :schema
+  defdelegate spec(name, state), to: __MODULE__, as: :schema
 
   def schema(name, _state), do: build(name)
 

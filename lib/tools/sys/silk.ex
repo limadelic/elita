@@ -16,7 +16,7 @@ defmodule Tools.Sys.Silk do
   import Log, only: [log: 5]
   import Utils.File, only: [file: 1]
 
-  defdelegate def(name, state), to: Tools.Sys.Silk.Schema, as: :get
+  defdelegate spec(name, state), to: Tools.Sys.Silk.Schema, as: :get
 
   def exec(_, %{"name" => name}, state) do
     content = file("#{name}.md")
