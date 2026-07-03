@@ -23,25 +23,26 @@ defmodule Tape.Play do
 
   defp try_ordered(ctx) do
     agent_entries = agent_list(ctx.entries, ctx.name)
-    try_next_ordered(ctx, agent_entries)
+    try_agent_match(ctx, agent_entries, 0)
   end
 
-  defp try_next_ordered(ctx, agent_entries) when length(agent_entries) > 0 do
-    idx = Tape.Writer.next_idx(cassette_key(), ctx.name)
+  defp try_agent_match(ctx, agent_entries, idx) when idx >= length(agent_entries) do
+    find_untagged(ctx, 0)
+  end
+
+  defp try_agent_match(ctx, agent_entries, idx) do
     entry = Enum.at(agent_entries, idx)
-    return_ordered_or_fallback(entry, ctx)
+    req = entry["q"]
+    match = contains(req, ctx.normalized)
+    handle_agent_match(match, entry, ctx, idx, agent_entries)
   end
 
-  defp return_ordered_or_fallback(entry, ctx) when not is_nil(entry) do
+  defp handle_agent_match(true, entry, _ctx, _idx, _agent_entries) do
     entry["a"]
   end
 
-  defp return_ordered_or_fallback(_entry, ctx) do
-    find_untagged(ctx, 0)
-  end
-
-  defp try_next_ordered(ctx, _agent_entries) do
-    find_untagged(ctx, 0)
+  defp handle_agent_match(false, _entry, ctx, idx, agent_entries) do
+    try_agent_match(ctx, agent_entries, idx + 1)
   end
 
   defp agent_list(entries, name) do
