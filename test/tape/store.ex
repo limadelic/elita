@@ -28,7 +28,8 @@ defmodule Tape.Store do
     entries = load_entries()
     path = cassette_file()
     mkdir_p(cassette_dir())
-    write(path, encode!(entries ++ [%{"q" => req, "a" => response}], pretty: true))
+    entry = %{"q" => req, "a" => response}
+    write(path, encode!(entries ++ [entry], pretty: true))
   end
 
   defp cassette_file do

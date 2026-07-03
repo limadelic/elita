@@ -2,12 +2,13 @@ defmodule Tape.Play do
   import Tape.Matcher, only: [contains: 2]
 
   def handle(body, name, fun) do
-    normalized = normalize(request(body))
-    entries = Tape.Store.load_entries()
-    ensure_entries(entries)
-    %{entries: entries, normalized: normalized, body: body, name: name, fun: fun}
+    ensure_entries(load())
+    %{entries: load(), normalized: norm(body), body: body, name: name, fun: fun}
     |> answer()
   end
+
+  defp load, do: Tape.Store.load_entries()
+  defp norm(body), do: normalize(request(body))
 
   defp ensure_entries([]), do: validate_cassette(System.get_env("CASSETTE"))
   defp ensure_entries(_), do: :ok

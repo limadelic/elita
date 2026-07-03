@@ -27,8 +27,11 @@ defmodule Lite do
   defp text([%{"type" => "text", "text" => t} | _]), do: t
   defp text(other), do: other
 
-  defp req(body) do
-    post(url(), json: body, headers: headers(), connect_options: connect(), receive_timeout: 120_000)
+  defp req(body), do: post(url(), opts(body))
+
+  defp opts(body) do
+    [json: body, headers: headers(), connect_options: connect(),
+     receive_timeout: 120_000]
   end
 
   defp build(composed, history, state) do
