@@ -1,6 +1,7 @@
 defmodule NapoContractTest do
   use Tester
   @moduletag :live
+  @moduletag timeout: 600_000
 
   setup do
     System.put_env("LIVE", "1")
