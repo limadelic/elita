@@ -29,7 +29,7 @@ defmodule Elita do
   def init({name, configs}) do
     create()
     tape_seed()
-    {:ok, %{name: name, config: config(configs), history: []}}
+    {:ok, %{name: name, config: config(configs), history: [], configs: configs}}
   end
 
   defp tape_seed do
@@ -49,9 +49,21 @@ defmodule Elita do
     {:noreply, state}
   end
 
-  defp act(msg, %{history: history} = state) do
-    history = history ++ [user(msg)]
+  defp act(msg, %{configs: configs, history: history} = state) do
+    history = branch(judge?(configs), history, user(msg))
     act(%{state | history: history})
+  end
+
+  defp branch(true, _history, msg) do
+    [msg]
+  end
+
+  defp branch(false, history, msg) do
+    history ++ [msg]
+  end
+
+  defp judge?(configs) do
+    "judge" in configs
   end
 
   defp act(state) do
