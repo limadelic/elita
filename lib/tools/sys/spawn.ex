@@ -4,7 +4,24 @@ defmodule Tools.Sys.Spawn do
   import Map, only: [get: 3]
   import Enum, only: [join: 2]
 
-  def def(name, state), do: spec(name, state)
+  def def(name, _state) do
+    %{
+      name: name,
+      description: "Spawn a new agent.\nExamples:\n- spawn agent: spawn(name: \"my_agent\")\n- spawn named agent: spawn(name: \"agent_name\", configs: [\"config\"])\n- spawn multi role: spawn(name: \"hybrid\", configs: [\"config1\", \"config2\"])",
+      parameters: %{
+        type: "object",
+        properties: %{
+          name: %{type: "string", description: "Name for the new agent"},
+          configs: %{
+            type: "array",
+            items: %{type: "string"},
+            description: "Configs for the agent, defaults to [name]"
+          }
+        },
+        required: ["name"]
+      }
+    }
+  end
 
   def exec(_, %{"name" => %{"name" => name} = inner}, state) do
     do_spawn(name, fetch_configs(inner["configs"], name), state)
@@ -16,37 +33,6 @@ defmodule Tools.Sys.Spawn do
 
   def exec(_, %{"configs" => [name | _] = configs}, state) do
     do_spawn(name, configs, state)
-  end
-
-  defp spec(name, state) do
-    %{name: name, description: desc(state), parameters: parameters()}
-  end
-
-  defp desc(state) do
-    "Spawn a new agent.#{help(state)}"
-  end
-
-  defp help(_state) do
-    "\nExamples:\n- spawn agent: spawn(name: \"my_agent\")\n- spawn named agent: spawn(name: \"agent_name\", configs: [\"config\"])\n- spawn multi role: spawn(name: \"hybrid\", configs: [\"config1\", \"config2\"])"
-  end
-
-  defp parameters do
-    %{type: "object", properties: props(), required: ["name"]}
-  end
-
-  defp props do
-    %{
-      name: %{type: "string", description: "Name for the new agent"},
-      configs: configs_prop()
-    }
-  end
-
-  defp configs_prop do
-    %{
-      type: "array",
-      items: %{type: "string"},
-      description: "Configs for the agent, defaults to [name]"
-    }
   end
 
   defp fetch_configs(list, _name) when is_list(list) do
