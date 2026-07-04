@@ -1,5 +1,6 @@
 defmodule El.CLI do
   def main(argv) do
+    Application.ensure_all_started(:elita)
     argv
     |> parse()
     |> execute()
