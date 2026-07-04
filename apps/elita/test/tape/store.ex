@@ -4,6 +4,8 @@ defmodule Tape.Store do
   import Jason
   import Tape.Writer, only: [acquire: 1]
 
+  @app_root Path.expand("../..", __DIR__)
+
   def read_cassette do
     path = cassette_file()
     read_cassette_at(path, exists?(path))
@@ -33,37 +35,11 @@ defmodule Tape.Store do
     write(path, encode!(entries ++ [entry], pretty: true))
   end
 
-  defp root do
-    # Try to find the source root for tests
-    case File.cwd() do
-      {:ok, cwd} ->
-        cond do
-          String.ends_with?(cwd, "apps/elita") ->
-            cwd
-
-          File.exists?(Path.join(cwd, "apps/elita")) ->
-            Path.join(cwd, "apps/elita")
-
-          # We might be in apps/el, go up and check
-          String.contains?(cwd, "apps/el") ->
-            parent = Path.dirname(cwd)
-            parent_parent = Path.dirname(parent)
-            Path.join(parent_parent, "apps/elita")
-
-          true ->
-            Application.app_dir(:elita) || raise "elita app not loaded"
-        end
-
-      _ ->
-        Application.app_dir(:elita) || raise "elita app not loaded"
-    end
-  end
-
   defp cassette_file do
-    Path.join(root(), "test/cassettes/#{get_env("CASSETTE")}.json")
+    Path.join(@app_root, "test/cassettes/#{get_env("CASSETTE")}.json")
   end
 
   defp cassette_dir do
-    Path.join(root(), "test/cassettes")
+    Path.join(@app_root, "test/cassettes")
   end
 end
