@@ -7,13 +7,16 @@ defmodule Agent.Manager do
   end
 
   defp boot_agent({name, folder}) do
-    case Agent.Session.start_link(name: name, folder: folder) do
-      {:ok, pid} ->
-        Agent.Registry.register(name, folder, pid)
-        Logger.info("Agent booted: #{name} at #{folder}")
+    Agent.Session.start_link(name: name, folder: folder)
+    |> handle_boot_result(name, folder)
+  end
 
-      {:error, reason} ->
-        Logger.error("Failed to boot #{name}: #{inspect(reason)}")
-    end
+  defp handle_boot_result({:ok, pid}, name, folder) do
+    Agent.Registry.register(name, folder, pid)
+    Logger.info("Agent booted: #{name} at #{folder}")
+  end
+
+  defp handle_boot_result({:error, reason}, name, _folder) do
+    Logger.error("Failed to boot #{name}: #{inspect(reason)}")
   end
 end

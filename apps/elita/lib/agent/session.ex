@@ -52,28 +52,37 @@ defmodule Agent.Session do
   end
 
   defp port_opts(message, folder) do
-    [
-      {:args, ["-p", message]},
-      {:cd, String.to_charlist(folder)},
-      :binary,
-      :exit_status,
-      :use_stdio,
-      :stderr_to_stdout
-    ]
+    [{:args, ["-p", message]}, {:cd, String.to_charlist(folder)}] ++
+      [:binary, :exit_status, :use_stdio, :stderr_to_stdout]
   end
 
   defp read_response(port, acc) do
     receive do
-      {^port, {:data, data}} -> read_response(port, acc <> data)
-      {^port, {:exit_status, _}} -> String.trim(acc)
+      {^port, msg} -> handle_port_msg(msg, port, acc)
     after
-      30000 -> Logger.warning("Claude port timeout") || acc
+      30000 -> on_timeout(acc)
     end
   end
 
-  defp find_claude do
-    System.find_executable("claude") || raise "claude executable not found"
+  defp handle_port_msg({:data, data}, port, acc) do
+    read_response(port, acc <> data)
   end
+
+  defp handle_port_msg({:exit_status, _}, _port, acc) do
+    String.trim(acc)
+  end
+
+  defp on_timeout(acc) do
+    Logger.warning("Claude port timeout")
+    acc
+  end
+
+  defp find_claude do
+    System.find_executable("claude") |> require_executable()
+  end
+
+  defp require_executable(nil), do: raise("claude executable not found")
+  defp require_executable(path), do: path
 
   defp close_safe(port) do
     Port.close(port)

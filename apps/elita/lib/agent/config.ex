@@ -1,10 +1,11 @@
 defmodule Agent.Config do
   def load do
-    case System.get_env("AGENT_REGISTRATIONS") do
-      nil -> []
-      value -> parse(value)
-    end
+    System.get_env("AGENT_REGISTRATIONS")
+    |> load_entries()
   end
+
+  defp load_entries(nil), do: []
+  defp load_entries(value), do: parse(value)
 
   defp parse(value) do
     value
@@ -14,9 +15,14 @@ defmodule Agent.Config do
   end
 
   defp parse_entry(entry) do
-    case String.split(entry, ":", parts: 2) do
-      [name, folder] -> {String.to_atom(String.trim(name)), String.trim(folder)}
-      _ -> nil
-    end
+    entry
+    |> String.split(":", parts: 2)
+    |> to_config()
   end
+
+  defp to_config([name, folder]) do
+    {String.to_atom(String.trim(name)), String.trim(folder)}
+  end
+
+  defp to_config(_), do: nil
 end

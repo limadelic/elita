@@ -27,18 +27,15 @@ defmodule Tools.Sys.Ask do
   def exec(_, %{"recipient" => recipient, "question" => question}, %{name: sender} = state) do
     log("🤔", "#{sender} → #{recipient}", ": ", question, :green)
     result = Agent.Router.route(String.to_atom(recipient), :ask, question)
-
-    response =
-      case result do
-        {:ok, resp} -> resp
-        {:error, :not_found} -> "#{recipient} not found"
-        resp -> resp
-      end
-
+    response = format_response(result, recipient)
     {response, state}
   end
 
   def exec(_, _args, state) do
     {"ask needs recipient and question", state}
   end
+
+  defp format_response({:ok, resp}, _recipient), do: resp
+  defp format_response({:error, :not_found}, recipient), do: "#{recipient} not found"
+  defp format_response(resp, _recipient), do: resp
 end

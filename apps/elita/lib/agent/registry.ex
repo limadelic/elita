@@ -9,11 +9,12 @@ defmodule Agent.Registry do
   end
 
   def lookup(name) do
-    case :ets.lookup(table(), name) do
-      [{^name, pid, folder}] -> {:ok, {pid, folder}}
-      [] -> {:error, :not_found}
-    end
+    :ets.lookup(table(), name)
+    |> match_lookup(name)
   end
+
+  defp match_lookup([{name, pid, folder}], name), do: {:ok, {pid, folder}}
+  defp match_lookup([], _name), do: {:error, :not_found}
 
   def remove(name) do
     :ets.delete(table(), name)
