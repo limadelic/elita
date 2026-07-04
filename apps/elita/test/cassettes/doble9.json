@@ -62,7 +62,7 @@
     "q": {
       "messages": [
         {
-          "content": "start a new game"
+          "content": "start a new game with players: top, left, bottom, right"
         }
       ]
     }

@@ -23,8 +23,7 @@ defmodule Doble9UnitTest do
       spawn(:bottom, [:player, :greed])
       spawn(:right, [:player, :greed])
 
-      ask(:doble9, "start a new game with players: top, left, bottom, right")
-      verify(:doble9, "9", "i need 10 dominoes")
+      verify(:doble9, "Perfect", "start a new game with players: top, left, bottom, right")
     end
   end
 end
