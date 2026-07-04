@@ -52,8 +52,14 @@ defmodule Agent.Session do
   end
 
   defp port_opts(message, folder) do
-    [{:args, ["-p", message]}, {:cd, String.to_charlist(folder)}, :binary,
-     :exit_status, :use_stdio, :stderr_to_stdout]
+    [
+      {:args, ["-p", message]},
+      {:cd, String.to_charlist(folder)},
+      :binary,
+      :exit_status,
+      :use_stdio,
+      :stderr_to_stdout
+    ]
   end
 
   defp read_response(port, acc) do
