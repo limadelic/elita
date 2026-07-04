@@ -15,7 +15,7 @@ end
 defmodule Tools.Sys.Spec do
   import Log, only: [log: 5]
 
-  defdelegate def(name, state), to: Tools.Sys.Spec.Schema, as: :get
+  defdelegate spec(name, state), to: Tools.Sys.Spec.Schema, as: :get
 
   def exec(_, %{"name" => name}, %{config: config} = state) do
     name = "#{name}_spec"

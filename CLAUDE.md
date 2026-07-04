@@ -1,3 +1,10 @@
+# Gates
+
+- mix test green + mix lint clean ALWAYS
+- replay only: $0 cost, under 1 second
+- gates met + progress = commit push wip
+- NO worktrees, one tree, one change at a time
+
 # Code Styles
 
 - use single words ALWAYS (no compound words)

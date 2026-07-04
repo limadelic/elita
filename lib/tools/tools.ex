@@ -35,7 +35,7 @@ defmodule Tools do
   def exec(part, state), do: {part, state}
 
   defp prompt(name, state) do
-    module(name).def(name, state)
+    module(name).spec(name, state)
   end
 
   defp module(name) do

@@ -12,26 +12,28 @@ defmodule Cfg do
 
   defp tools(%{tools: raw} = config) when is_binary(raw) do
     list = split(raw, ",") |> map(&trim/1) |> reject(&empty/1)
-    put config, :tools, list
+    put(config, :tools, list)
   end
+
   defp tools(config), do: config
 
   defp includes(%{includes: raw} = config) when is_binary(raw) do
     list = split(raw, ",") |> map(&trim/1) |> reject(&empty/1)
-    put config, :includes, list
+    put(config, :includes, list)
   end
+
   defp includes(config), do: config
 
   defp empty(""), do: true
   defp empty(_), do: false
 
-  defp parse md do
+  defp parse(md) do
     md
     |> split("---", parts: 3)
     |> join(md)
   end
 
-  defp parse header, body do
+  defp parse(header, body) do
     header
     |> then(&suppress(fn -> read_from_string(&1) end))
     |> join(body)
@@ -45,7 +47,7 @@ defmodule Cfg do
   defp join({:ok, header}, body), do: to_map(header, body)
   defp join(_, md), do: %{content: md}
 
-  defp to_map header, body do
+  defp to_map(header, body) do
     header
     |> map(&props/1)
     |> new

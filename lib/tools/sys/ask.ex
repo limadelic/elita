@@ -1,6 +1,10 @@
 defmodule Tools.Sys.Ask.Schema do
   def get(name, _state) do
-    %{name: name, description: "Ask question to another agent and get response", parameters: params()}
+    %{
+      name: name,
+      description: "Ask question to another agent and get response",
+      parameters: params()
+    }
   end
 
   defp params do
@@ -19,10 +23,14 @@ defmodule Tools.Sys.Ask do
   import Elita, only: [call: 2]
   import Log, only: [log: 5]
 
-  defdelegate def(name, state), to: Tools.Sys.Ask.Schema, as: :get
+  defdelegate spec(name, state), to: Tools.Sys.Ask.Schema, as: :get
 
   def exec(_, %{"recipient" => recipient, "question" => question}, %{name: sender} = state) do
     log("🤔", "#{sender} → #{recipient}", ": ", question, :green)
     {call(recipient, question), state}
+  end
+
+  def exec(_, _args, state) do
+    {"ask needs recipient and question", state}
   end
 end

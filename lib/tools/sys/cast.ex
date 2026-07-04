@@ -30,14 +30,19 @@ defmodule Tools.Sys.Cast do
   import Map, only: [put: 3]
   import Enum, only: [map: 2]
 
-  defdelegate def(name, state), to: Tools.Sys.Cast.Schema, as: :get
+  defdelegate spec(name, state), to: Tools.Sys.Cast.Schema, as: :get
 
-  def exec(_, %{"role" => role}, %{config: config, name: name} = state) do
-    log("🎭", name, " as ", role, :magenta)
-    {
-      "switched to #{role}",
-      %{state | config: map(config, &activate(&1, role))}
-    }
+  def exec(_, %{"role" => role}, state) do
+    log("🎭", state.name, " as ", role, :magenta)
+    {"switched to #{role}", switch(state, role)}
+  end
+
+  def exec(_, _args, state) do
+    {"cast needs role", state}
+  end
+
+  defp switch(state, role) do
+    %{state | config: map(state.config, &activate(&1, role))}
   end
 
   defp activate(config, target) do

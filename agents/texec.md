@@ -13,6 +13,8 @@ Be systematic about the way you execute each scenario
   - Think the steps needed to prove the scenario
   - Execute using spawn/tell/ask tools as needed
   - You MUST spawn the agents before talking to them
+  - **Spawn Suts with unique suffixed names** (e.g. agent_v1, agent_v2) — never use bare names
+  - When telling a Sut its task, **use the exact spawned names** for all collaborators — never bare names
   - Analyze the if the outcome matches the expectation
   - Update status to "passed" or "failed" with results
 - Use set tool to save updated scenarios with results

@@ -10,5 +10,5 @@ defmodule Tools.User.Def.Schema do
 end
 
 defmodule Tools.User.Def do
-  defdelegate def(tool, state), to: Tools.User.Def.Schema, as: :get
+  defdelegate spec(tool, state), to: Tools.User.Def.Schema, as: :get
 end

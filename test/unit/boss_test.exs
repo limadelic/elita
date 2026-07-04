@@ -55,5 +55,4 @@ defmodule BossUnitTest do
       verify(:jim, "no", "did you receive a task?")
     end
   end
-
 end

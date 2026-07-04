@@ -8,9 +8,11 @@ defmodule MsgAdapter do
   def to_ollama(%{role: "user", content: [%{type: "tool_result"} | _] = content}) do
     %{role: "tool", content: find_value(content, &tool_result/1)}
   end
+
   def to_ollama(%{role: role, content: content}) when is_list(content) do
     %{role: role, content: content |> map(&text/1) |> Enum.join(" ")}
   end
+
   def to_ollama(msg), do: msg
 
   defp tool_result(%{"type" => "tool_result", "content" => c}), do: c

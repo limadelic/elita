@@ -14,6 +14,7 @@ defmodule Tools.User.Exec do
   def exec(nil, _args), do: {:error, "Tool not found"}
 
   defp first([], _), do: "No code found"
+
   defp first([code | _], tool) do
     tool.imports
     |> modules

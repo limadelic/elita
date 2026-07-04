@@ -4,26 +4,24 @@ defmodule Tools.Sys.Spawn do
   import Map, only: [get: 3]
   import Enum, only: [join: 2]
 
-  def def(name, state), do: spec(name, state)
+  def spec(name, state) do
+    %{
+      name: name,
+      description: "Spawn a new agent." <> help(state),
+      parameters: parameters()
+    }
+  end
 
   def exec(_, %{"name" => %{"name" => name} = inner}, state) do
     do_spawn(name, fetch_configs(inner["configs"], name), state)
   end
 
-  def exec(_, %{"name" => name} = args, state) when is_binary(name) do
+  def exec(_, %{"name" => name} = args, state) do
     do_spawn(name, get(args, "configs", [name]), state)
   end
 
   def exec(_, %{"configs" => [name | _] = configs}, state) do
     do_spawn(name, configs, state)
-  end
-
-  defp spec(name, state) do
-    %{name: name, description: desc(state), parameters: parameters()}
-  end
-
-  defp desc(state) do
-    "Spawn a new agent.#{help(state)}"
   end
 
   defp help(_state) do
@@ -49,7 +47,7 @@ defmodule Tools.Sys.Spawn do
     }
   end
 
-  defp fetch_configs(list, _name) when is_list(list) do
+  defp fetch_configs([_ | _] = list, _name) do
     list
   end
 

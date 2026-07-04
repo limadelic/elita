@@ -21,20 +21,21 @@ defmodule Lite do
     result |> text
   end
 
-  defp tape(body, agent_name, fun), do: get_env(:elita, :tape_handler, &thru/3).(body, agent_name, fun)
+  defp tape(body, agent_name, fun),
+    do: get_env(:elita, :tape_handler, &thru/3).(body, agent_name, fun)
+
   defp thru(_body, _agent_name, fun), do: fun.()
 
   defp text([%{"type" => "text", "text" => t} | _]), do: t
   defp text(other), do: other
 
-  defp req(body) do
-    post(url(), json: body, headers: headers(), connect_options: connect())
-  end
+  defp req(body), do: post(url(), opts(body))
+
+  defp opts(body), do: [json: body] ++ req_opts()
+  defp req_opts, do: [headers: headers(), connect_options: connect(), receive_timeout: 120_000]
 
   defp build(composed, history, state) do
-    composed
-    |> base(history)
-    |> add_tools(tools(composed, state))
+    base(composed, history) |> add_tools(tools(composed, state))
   end
 
   defp base(composed, history) do
@@ -43,23 +44,25 @@ defmodule Lite do
     |> put(:messages, history)
   end
 
-  defp add_tools(base, [%{function_declarations: defs}]) do
-    put(base, :tools, map(defs, &schema/1))
-  end
+  defp add_tools(base, [%{function_declarations: defs}]),
+    do: put(base, :tools, map(defs, &schema/1))
+
   defp add_tools(base, _), do: base
 
-  defp schema(%{parameters: params} = tool) do
-    tool |> delete(:parameters) |> put(:input_schema, params)
-  end
-  defp schema(tool), do: put(tool, :input_schema, %{type: "object"})
+  defp schema(%{parameters: params} = tool),
+    do: tool |> delete(:parameters) |> put(:input_schema, params)
+
+  defp schema(tool),
+    do: put(tool, :input_schema, %{type: "object"})
 
   defp parts(list) when is_list(list), do: map(list, &part/1)
   defp parts({:error, _} = err), do: err
 
   defp part(%{"type" => "text", "text" => text}), do: %{"text" => text}
-  defp part(%{"type" => "tool_use", "id" => id, "name" => name, "input" => input}) do
-    %{"tool_use" => %{"id" => id, "name" => name, "input" => input}}
-  end
+
+  defp part(%{"type" => "tool_use", "id" => id, "name" => name, "input" => input}),
+    do: %{"tool_use" => %{"id" => id, "name" => name, "input" => input}}
+
   defp part(other), do: other
 
   defp request(text) do
@@ -71,7 +74,6 @@ defmodule Lite do
   end
 
   defp url, do: "#{get_env("ANTHROPIC_BASE_URL", "https://api.anthropic.com")}/v1/messages"
-
   defp model, do: "claude-haiku-4-5"
 
   defp headers do

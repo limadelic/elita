@@ -16,6 +16,11 @@ defmodule Tape.Writer do
     get_and_update(__MODULE__, &check_claim(&1, key, times))
   end
 
+  def claim_agent(cassette_key, agent, idx, times) do
+    key = {cassette_key, agent, idx}
+    get_and_update(__MODULE__, &check_claim(&1, key, times))
+  end
+
   defp check_claim(state, key, "always") do
     count = Map.get(state, key, 0)
     {true, Map.put(state, key, count + 1)}

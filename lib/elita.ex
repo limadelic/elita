@@ -21,7 +21,7 @@ defmodule Elita do
   def call(name, msg) do
     GenServer.call(via(name), {:act, msg}, :infinity)
   end
-  
+
   defp via(name) do
     {:via, Registry, {ElitaRegistry, downcase(name)}}
   end
@@ -29,7 +29,7 @@ defmodule Elita do
   def init({name, configs}) do
     create()
     tape_seed()
-    {:ok, %{name: name, config: config(configs), history: []}}
+    {:ok, %{name: name, config: config(configs), history: [], configs: configs}}
   end
 
   defp tape_seed do
@@ -49,9 +49,21 @@ defmodule Elita do
     {:noreply, state}
   end
 
-  defp act(msg, %{history: history} = state) do
-    history = history ++ [user(msg)]
+  defp act(msg, %{configs: configs, history: history} = state) do
+    history = branch(judge?(configs), history, user(msg))
     act(%{state | history: history})
+  end
+
+  defp branch(true, _history, msg) do
+    [msg]
+  end
+
+  defp branch(false, history, msg) do
+    history ++ [msg]
+  end
+
+  defp judge?(configs) do
+    "judge" in configs
   end
 
   defp act(state) do
@@ -67,7 +79,7 @@ defmodule Elita do
   end
 
   defp done({:reply, txt, %{name: name} = state}) do
-    txt = trim txt
+    txt = trim(txt)
     log("✨", name, ": ", txt, :white)
     {:reply, txt, state}
   end

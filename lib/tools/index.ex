@@ -2,7 +2,9 @@ defmodule Tool.Index do
   import Tools, only: [exec: 2]
 
   def set(key, value) do
-    {result, _state} = exec(%{"name" => "set", "args" => %{"key" => "#{key}", "value" => value}}, %{})
+    {result, _state} =
+      exec(%{"name" => "set", "args" => %{"key" => "#{key}", "value" => value}}, %{})
+
     result
   end
 
@@ -12,7 +14,11 @@ defmodule Tool.Index do
   end
 
   def tell(target, message) do
-    {result, _state} = exec(%{"name" => "tell", "args" => %{"recipient" => "#{target}", "message" => "#{message}"}}, %{})
+    {result, _state} = exec(tell_spec(target, message), %{})
     result
+  end
+
+  defp tell_spec(target, message) do
+    %{"name" => "tell", "args" => %{"recipient" => "#{target}", "message" => "#{message}"}}
   end
 end
