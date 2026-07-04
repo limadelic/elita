@@ -1,5 +1,4 @@
 import Config
 
-if System.get_env("TAPE") do
-  config :elita, tape_handler: &Tape.Play.handle/3
-end
+# Configure the tape handler - it checks TAPE at runtime
+config :elita, tape_handler: &TapeHandler.handle/3
