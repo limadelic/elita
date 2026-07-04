@@ -23,7 +23,8 @@ defmodule Elita.Umbrella do
   defp aliases do
     [
       test: [&run_test/1],
-      lint: [&run_lint/1]
+      lint: [&run_lint/1],
+      build: [&run_build/1]
     ]
   end
 
@@ -34,6 +35,11 @@ defmodule Elita.Umbrella do
 
   defp run_lint(_) do
     cmd = "cd apps/elita && mix lint"
+    Mix.shell().cmd(cmd)
+  end
+
+  defp run_build(_) do
+    cmd = "cd apps/el && mix escript.build"
     Mix.shell().cmd(cmd)
   end
 

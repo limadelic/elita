@@ -8,6 +8,7 @@ erl_crash.dump
 elita-*.tar
 /elita
 /apps/elita/elita
+/apps/el/el
 CLAUDE.local.md
 status.json
 

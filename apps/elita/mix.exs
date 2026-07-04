@@ -9,7 +9,6 @@ defmodule Elita.MixProject do
       elixirc_paths: paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      escript: [main_module: Chat],
       aliases: aliases(),
       build_path: "../../_build",
       config_path: "../../config/config.exs",
@@ -42,7 +41,6 @@ defmodule Elita.MixProject do
 
   defp aliases do
     [
-      build: ["compile", "escript.build"],
       t: ["test --no-start"],
       prose: ["test --only prose"],
       lint: ["format --check-formatted", "credo --strict"],
