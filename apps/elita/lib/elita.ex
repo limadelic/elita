@@ -23,7 +23,8 @@ defmodule Elita do
   end
 
   defp via(name) do
-    {:via, Registry, {ElitaRegistry, downcase(name)}}
+    normalized = name |> to_string |> downcase
+    {:via, Registry, {ElitaRegistry, normalized}}
   end
 
   def init({name, configs}) do
