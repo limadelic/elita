@@ -1,8 +1,6 @@
 defmodule Tools.User.Load.Schema do
   import Tools.User.Cfg, only: [parse: 1]
 
-  @app_root Path.expand("../..", __DIR__)
-
   def get(name, state) do
     name
     |> path()
@@ -14,7 +12,11 @@ defmodule Tools.User.Load.Schema do
     name |> path() |> load()
   end
 
-  defp path(name), do: Path.join(@app_root, "agents/tools/#{name}.md")
+  defp root do
+    Application.app_dir(:elita) || raise "elita app not loaded"
+  end
+
+  defp path(name), do: Path.join(root(), "agents/tools/#{name}.md")
 
   defp load(path) do
     exists_and_parse(File.exists?(path), path)

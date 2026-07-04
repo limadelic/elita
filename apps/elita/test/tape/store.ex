@@ -4,8 +4,6 @@ defmodule Tape.Store do
   import Jason
   import Tape.Writer, only: [acquire: 1]
 
-  @app_root Path.expand("../..", __DIR__)
-
   def read_cassette do
     path = cassette_file()
     read_cassette_at(path, exists?(path))
@@ -35,11 +33,15 @@ defmodule Tape.Store do
     write(path, encode!(entries ++ [entry], pretty: true))
   end
 
+  defp root do
+    Application.app_dir(:elita) || raise "elita app not loaded"
+  end
+
   defp cassette_file do
-    Path.join(@app_root, "test/cassettes/#{get_env("CASSETTE")}.json")
+    Path.join(root(), "test/cassettes/#{get_env("CASSETTE")}.json")
   end
 
   defp cassette_dir do
-    Path.join(@app_root, "test/cassettes")
+    Path.join(root(), "test/cassettes")
   end
 end
