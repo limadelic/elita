@@ -2,6 +2,8 @@ defmodule Utils.File do
   import Enum, only: [map: 2, find_value: 2]
   import File, only: [read: 1]
 
+  @app_root Path.expand("../..", __DIR__)
+
   @paths [
     "",
     "agents/",
@@ -16,11 +18,11 @@ defmodule Utils.File do
   end
 
   defp paths(name) do
-    map(@paths, fn path -> join(path, name) end) ++ nested(name)
+    map(@paths, fn path -> join(Path.join(@app_root, path), name) end) ++ nested(name)
   end
 
   defp nested(name) do
-    Path.wildcard("agents/**/#{name}")
+    Path.wildcard(Path.join(@app_root, "agents/**/#{name}"))
   end
 
   defp handle_missing(nil, name), do: "file not found: #{name}"
