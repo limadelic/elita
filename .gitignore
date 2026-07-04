@@ -1,4 +1,4 @@
-
+.idea/
 /_build/
 /cover/
 /deps/
@@ -6,13 +6,7 @@
 erl_crash.dump
 *.ez
 elita-*.tar
-/tmp/
-/ext/
-.idea/
 /elita
-/langchain
-/langchain-google
 CLAUDE.local.md
-/langgraph/
 status.json
-.claude/worktrees/
+
