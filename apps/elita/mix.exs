@@ -10,7 +10,11 @@ defmodule Elita.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       escript: [main_module: Chat],
-      aliases: aliases()
+      aliases: aliases(),
+      build_path: "../../_build",
+      config_path: "../../config/config.exs",
+      deps_path: "../../deps",
+      lockfile: "../../mix.lock"
     ]
   end
 
