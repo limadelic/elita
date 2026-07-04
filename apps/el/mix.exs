@@ -6,6 +6,7 @@ defmodule El.MixProject do
       app: :el,
       version: "0.1.0",
       elixir: "~> 1.18",
+      elixirc_paths: paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       escript: [main_module: El.CLI],
@@ -15,6 +16,9 @@ defmodule El.MixProject do
       lockfile: "../../mix.lock"
     ]
   end
+
+  defp paths(:test), do: ["lib", "test/support"]
+  defp paths(_), do: ["lib"]
 
   def application do
     [

@@ -29,8 +29,10 @@ defmodule Elita.Umbrella do
   end
 
   defp run_test(_) do
-    cmd = "cd apps/elita && mix test"
-    Mix.shell().cmd(cmd)
+    cmd1 = "cd apps/elita && mix test"
+    cmd2 = "cd apps/el && mix test"
+    Mix.shell().cmd(cmd1)
+    Mix.shell().cmd(cmd2)
   end
 
   defp run_lint(_) do
