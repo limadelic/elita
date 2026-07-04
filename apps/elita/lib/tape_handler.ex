@@ -11,6 +11,7 @@ defmodule TapeHandler do
           :exit, reason ->
             # If tape system exits, fall back to calling fun if it's a known issue
             reason_str = inspect(reason)
+
             if String.contains?(reason_str, "no process") do
               fun.()
             else
