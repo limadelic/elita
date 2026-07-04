@@ -20,14 +20,19 @@ defmodule Tools.Sys.Ask.Schema do
 end
 
 defmodule Tools.Sys.Ask do
-  import Elita, only: [call: 2]
   import Log, only: [log: 5]
 
   defdelegate spec(name, state), to: Tools.Sys.Ask.Schema, as: :get
 
   def exec(_, %{"recipient" => recipient, "question" => question}, %{name: sender} = state) do
     log("🤔", "#{sender} → #{recipient}", ": ", question, :green)
-    {call(recipient, question), state}
+    result = Agent.Router.route(String.to_atom(recipient), :ask, question)
+    response = case result do
+      {:ok, resp} -> resp
+      {:error, :not_found} -> "#{recipient} not found"
+      resp -> resp
+    end
+    {response, state}
   end
 
   def exec(_, _args, state) do

@@ -4,7 +4,10 @@ defmodule Elita.Application do
 
   def start(_type, _args) do
     init_global()
-    Supervisor.start_link(children(), opts())
+    {:ok, _} = Supervisor.start_link(children(), opts())
+    Agent.Registry.create()
+    Agent.Manager.start_agents()
+    {:ok, self()}
   end
 
   defp children do
