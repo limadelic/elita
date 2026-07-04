@@ -6,16 +6,20 @@ defmodule TapeHandler do
 
       _ ->
         try do
-          # Try to use tape if Tape.Writer is available
           Tape.Play.handle(body, name, fun)
-        rescue
-          e ->
-            # If tape system fails (e.g., Tape.Writer not started), fall through to real call
-            if String.contains?(Exception.message(e), "no process") do
+        catch
+          :exit, reason ->
+            # If tape system exits, fall back to calling fun if it's a known issue
+            reason_str = inspect(reason)
+            if String.contains?(reason_str, "no process") do
               fun.()
             else
-              reraise(e, __STACKTRACE__)
+              exit(reason)
             end
+        rescue
+          _e ->
+            # If tape system fails for any reason, fall through to real call
+            fun.()
         end
     end
   end
