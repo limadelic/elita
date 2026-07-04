@@ -4,5 +4,5 @@ defmodule TapeHandler do
   end
 
   defp handle_mode(_body, _name, fun, nil), do: fun.()
-  defp handle_mode(body, name, fun, _), do: TapeWrapper.safe_handle(body, name, fun)
+  defp handle_mode(body, name, fun, _), do: Tape.Play.handle(body, name, fun)
 end
