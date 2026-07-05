@@ -22,7 +22,12 @@ defmodule Elita.Credo.Imports do
   end
 
   defp check_call({{:., meta, [module, _func]}, _call_meta, _args} = ast, issues, allowlist, filename) do
-    {ast, maybe_add_issue(module, meta, issues, allowlist, filename)}
+    # Skip compiler-generated calls (interpolation, bracket access, etc.)
+    if Keyword.get(meta, :generated, false) do
+      {ast, issues}
+    else
+      {ast, maybe_add_issue(module, meta, issues, allowlist, filename)}
+    end
   end
 
   defp check_call(ast, issues, _allowlist, _filename) do
@@ -37,7 +42,7 @@ defmodule Elita.Credo.Imports do
     issues
   end
 
-  defp maybe_add_issue({:__aliases__, _meta, [_module]}, _meta, issues, _allowlist, _filename) do
+  defp maybe_add_issue({:__aliases__, _meta1, [_module]}, _meta2, issues, _allowlist, _filename) do
     # Single-segment aliases (e.g., Record.handle via alias Tape.Record) are OK
     issues
   end
@@ -72,6 +77,8 @@ defmodule Elita.Credo.Imports do
 
   defp should_report_nested(module_name, allowlist) do
     not String.starts_with?(module_name, ":") and
+      not String.starts_with?(module_name, "Elixir.Kernel") and
+      not String.starts_with?(module_name, "Elixir.Access") and
       not in_allowlist_string(module_name, allowlist)
   end
 
@@ -88,7 +95,7 @@ defmodule Elita.Credo.Imports do
 
   defp is_special_module(module) do
     module_str = to_string(module)
-    String.starts_with?(module_str, ":")
+    String.starts_with?(module_str, ":") or module in [:Kernel, :Access]
   end
 
   defp in_allowlist(module, allowlist) do
