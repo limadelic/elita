@@ -36,12 +36,7 @@ defmodule Tools.User do
   defdelegate spec(name, state), to: Tools.User.Load.Schema, as: :get
 
   def exec(name, args, state) do
-    sender = Map.get(state, :name, :user)
-    result = exec(tool(name), enrich(args, sender))
+    result = exec(tool(name), args)
     {result, state}
-  end
-
-  defp enrich(args, sender) do
-    Map.put(args, "sender", sender)
   end
 end
