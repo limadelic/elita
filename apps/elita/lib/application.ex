@@ -2,18 +2,21 @@ defmodule Elita.Application do
   use Application
   import Mem, only: [init_global: 0]
   import Supervisor, only: [start_link: 2]
+  import Agent.Registry, only: [create: 0]
+  import Agent.Manager, only: [start_agents: 0]
+  import Registry, only: [child_spec: 1]
 
   def start(_type, _args) do
     init_global()
     start_supervisor()
-    Agent.Registry.create()
-    Agent.Manager.start_agents()
+    create()
+    start_agents()
     {:ok, self()}
   end
 
   defp start_supervisor do
     start_link(
-      [Registry.child_spec(keys: :unique, name: ElitaRegistry)],
+      [child_spec(keys: :unique, name: ElitaRegistry)],
       strategy: :one_for_one,
       name: Elita.Supervisor
     )
