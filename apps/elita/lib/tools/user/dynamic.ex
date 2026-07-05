@@ -5,8 +5,6 @@ defmodule Tools.User.Load.Schema do
   alias File
 
   @app_root Path.expand("../..", __DIR__)
-  @tool_path "agents/tools/"
-  @tool_suffix ".md"
 
   def get(name, state) do
     name
@@ -20,7 +18,7 @@ defmodule Tools.User.Load.Schema do
   end
 
   defp path(name) do
-    Path.join(@app_root, @tool_path <> name <> @tool_suffix)
+    Path.join(@app_root, "agents/tools/#{name}.md")
   end
 
   defp load(file_path) do
