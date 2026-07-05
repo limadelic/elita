@@ -1,5 +1,6 @@
 ---
 name: el
+description: Routes messages to agents via registry or spawn
 tools: lookup, wake, spawn, ask
 ---
 
