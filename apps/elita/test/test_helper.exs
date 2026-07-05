@@ -9,7 +9,7 @@ timeout = if System.get_env("LIVE") == "1", do: 600_000, else: 300_000
 ExUnit.start(
   timeout: timeout,
   max_cases: 1,
-  exclude: [:prose, :live, :napo],
+  exclude: [:prose, :live, :napo, :dude],
   include: include_tags
 )
 
