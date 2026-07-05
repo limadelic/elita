@@ -120,17 +120,85 @@
       "agent": "el",
       "messages": [
         {
+          "content": [
+            {
+              "content": "Who am I talking to?",
+              "tool_use_id": "toolu_013g6EBPEjQEJKJ9tvxws9GD",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "n": 7
+    }
+  },
+  {
+    "a": [
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01Xf23Stme8gjxRGSqzKntdc",
+        "input": {
+          "question": "hello",
+          "recipient": "greet"
+        },
+        "name": "ask",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "content": "ask greet hello",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Who am I talking to?",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "greet",
+      "messages": [
+        {
+          "content": "hello",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Who am I talking to?",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
           "role": "user",
           "content": [
             {
               "type": "tool_result",
               "content": "Who am I talking to?",
-              "tool_use_id": "toolu_013g6EBPEjQEJKJ9tvxws9GD"
+              "tool_use_id": "toolu_01Xf23Stme8gjxRGSqzKntdc"
             }
           ]
         }
       ],
-      "n": 7
+      "n": 3
     }
   }
 ]

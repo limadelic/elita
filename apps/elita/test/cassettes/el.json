@@ -256,17 +256,221 @@
       "agent": "el",
       "messages": [
         {
+          "content": [
+            {
+              "content": "I am Greeeet, and I'm doing great, thanks for asking, Mike! I'm here and ready to chat with you. How are you doing?",
+              "tool_use_id": "toolu_01JcJCSMc5nVsaFSL11hHAD5",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "n": 15
+    }
+  },
+  {
+    "a": [
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01QRpaR4qHkTcGmyQNExwfYp",
+        "input": {
+          "question": "hello",
+          "recipient": "greet"
+        },
+        "name": "ask",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "content": "ask greet hello",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Who am I talking to?",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "greet",
+      "messages": [
+        {
+          "content": "hello",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Who am I talking to?",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "content": [
+            {
+              "content": "Who am I talking to?",
+              "tool_use_id": "toolu_01QRpaR4qHkTcGmyQNExwfYp",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "n": 3
+    }
+  },
+  {
+    "a": [
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01EgdWM1233Ari5cxnV2KxKw",
+        "input": {
+          "question": "Mike",
+          "recipient": "greet"
+        },
+        "name": "ask",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "content": "ask greet Mike",
+          "role": "user"
+        }
+      ],
+      "n": 5
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "I am Greeeet, and it's wonderful to meet you, Mike! 👋 How can I help you today?",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "greet",
+      "messages": [
+        {
+          "content": "Mike",
+          "role": "user"
+        }
+      ],
+      "n": 3
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "I am Greeeet, and it's wonderful to meet you, Mike! 👋 How can I help you today?",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "content": [
+            {
+              "content": "I am Greeeet, and it's wonderful to meet you, Mike! 👋 How can I help you today?",
+              "tool_use_id": "toolu_01EgdWM1233Ari5cxnV2KxKw",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "n": 7
+    }
+  },
+  {
+    "a": [
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_018M5SZj5MSyFjDRBL6tGQNs",
+        "input": {
+          "question": "how are you",
+          "recipient": "greet"
+        },
+        "name": "ask",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "content": "ask greet how are you",
+          "role": "user"
+        }
+      ],
+      "n": 9
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "I am Greeeet, and I'm doing great, thanks for asking, Mike! I'm here and ready to help with whatever you need. How are *you* doing today?",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "greet",
+      "messages": [
+        {
+          "content": "how are you",
+          "role": "user"
+        }
+      ],
+      "n": 5
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "I am Greeeet, and I'm doing great, thanks for asking, Mike! I'm here and ready to help with whatever you need. How are *you* doing today?",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
           "role": "user",
           "content": [
             {
               "type": "tool_result",
-              "content": "I am Greeeet, and I'm doing great, thanks for asking, Mike! I'm here and ready to chat with you. How are you doing?",
-              "tool_use_id": "toolu_01JcJCSMc5nVsaFSL11hHAD5"
+              "content": "I am Greeeet, and I'm doing great, thanks for asking, Mike! I'm here and ready to help with whatever you need. How are *you* doing today?",
+              "tool_use_id": "toolu_018M5SZj5MSyFjDRBL6tGQNs"
             }
           ]
         }
       ],
-      "n": 15
+      "n": 11
     }
   }
 ]
