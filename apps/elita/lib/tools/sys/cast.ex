@@ -6,7 +6,7 @@ defmodule Tools.Sys.Cast.Schema do
   end
 
   defp desc(state) do
-    "Switch to role. Available: " <> roles(state.config) <> ". Use only once per turn."
+    "Switch to role. Available: #{roles(state.config)}. Use only once per turn."
   end
 
   defp params do
@@ -34,7 +34,7 @@ defmodule Tools.Sys.Cast do
 
   def exec(_, %{"role" => role}, state) do
     log("🎭", state.name, " as ", role, :magenta)
-    {"switched to " <> role, switch(state, role)}
+    {"switched to #{role}", switch(state, role)}
   end
 
   def exec(_, _args, state) do
