@@ -27,7 +27,7 @@ defmodule Tools.Sys.Ask do
   defdelegate spec(name, state), to: Tools.Sys.Ask.Schema, as: :get
 
   def exec(_, %{"recipient" => recipient, "question" => question}, %{name: sender} = state) do
-    log("🤔", "#{sender} → #{recipient}", ": ", question, :green)
+    log("🤔", sender <> " → " <> recipient, ": ", question, :green)
     result = route(to_atom(recipient), :ask, question)
     response = format_response(result, recipient)
     {response, state}
@@ -38,6 +38,6 @@ defmodule Tools.Sys.Ask do
   end
 
   defp format_response({:ok, resp}, _recipient), do: resp
-  defp format_response({:error, :not_found}, recipient), do: "#{recipient} not found"
+  defp format_response({:error, :not_found}, recipient), do: recipient <> " not found"
   defp format_response(resp, _recipient), do: resp
 end
