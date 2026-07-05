@@ -14,6 +14,13 @@ defmodule Agent.Router do
     |> tell_route(name, message)
   end
 
+  defp ask_route({:ok, {_pid, nil}}, name, message) do
+    call(name, message)
+    |> wrap_ok()
+  rescue
+    _ -> {:error, :not_found}
+  end
+
   defp ask_route({:ok, {pid, _}}, _name, message) do
     ask(pid, message)
   end
