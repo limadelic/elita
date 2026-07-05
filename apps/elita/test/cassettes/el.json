@@ -67,10 +67,10 @@
         },
         "id": "toolu_01NW4MsW1RNobnSZLhjmsJJD",
         "input": {
-          "message": "hello",
-          "name": "greet"
+          "question": "hello",
+          "recipient": "greet"
         },
-        "name": "wake",
+        "name": "ask",
         "type": "tool_use"
       }
     ],
@@ -141,10 +141,10 @@
         },
         "id": "toolu_01Dzx96hwH1nAPgPz4SeRjo3",
         "input": {
-          "message": "Mike",
-          "name": "greet"
+          "question": "Mike",
+          "recipient": "greet"
         },
-        "name": "wake",
+        "name": "ask",
         "type": "tool_use"
       }
     ],
@@ -209,10 +209,10 @@
         },
         "id": "toolu_01JcJCSMc5nVsaFSL11hHAD5",
         "input": {
-          "message": "how are you",
-          "name": "greet"
+          "question": "how are you",
+          "recipient": "greet"
         },
-        "name": "wake",
+        "name": "ask",
         "type": "tool_use"
       }
     ],

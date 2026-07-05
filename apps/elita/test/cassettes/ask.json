@@ -67,10 +67,10 @@
         },
         "id": "toolu_013g6EBPEjQEJKJ9tvxws9GD",
         "input": {
-          "message": "hello",
-          "name": "greet"
+          "question": "hello",
+          "recipient": "greet"
         },
-        "name": "wake",
+        "name": "ask",
         "type": "tool_use"
       }
     ],
