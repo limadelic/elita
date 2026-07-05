@@ -6,6 +6,6 @@ defmodule Now do
   end
 
   defp default do
-    DateTime.now!(:local) |> DateTime.to_time()
+    :calendar.local_time()
   end
 end
