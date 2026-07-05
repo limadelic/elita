@@ -68,7 +68,7 @@ defmodule Tape.Play do
 
   defp untagged(ctx, idx) do
     entry = Enum.at(ctx.entries, idx)
-    check_untagged(entry, ctx, idx, Map.get(entry["q"], "agent"))
+    check_untagged(entry, ctx, idx, Map.get(Map.get(entry, "q"), "agent"))
   end
 
   defp check_untagged(entry, ctx, idx, nil) do
