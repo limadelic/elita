@@ -30,10 +30,14 @@ defmodule Tools.User.Exec do
     ["import Tool.Index"] ++ map(modules, &imports/1)
   end
 
-  defp imports(module), do: "import " <> module
+  defp imports(module), do: "import #{module}"
 
   defp plus(imports, code) do
-    join(imports, "\n") <> "\n\n" <> code
+    """
+    #{join(imports, "\n")}
+
+    #{code}
+    """
   end
 
   defp eval(text) do
