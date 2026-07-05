@@ -1,8 +1,7 @@
 defmodule Agent.Router do
-  import Elita, only: [call: 2, cast: 2]
+  import Elita, only: [call: 2]
   import Agent.Registry, only: [lookup: 1]
-  import Agent.Session, only: [ask: 2]
-  alias Agent.Session
+  import Agent.Session, only: [ask: 2, cast: 2]
 
   def route(name, :ask, message) do
     lookup(name)
@@ -30,12 +29,11 @@ defmodule Agent.Router do
   end
 
   defp tell_route({:ok, {_pid, nil}}, name, message) do
-    cast(name, message)
-    :ok
+    markdown_tell(name, message)
   end
 
   defp tell_route({:ok, {pid, _}}, _name, message) do
-    Session.cast(pid, message)
+    cast(pid, message)
     :ok
   end
 
@@ -51,7 +49,7 @@ defmodule Agent.Router do
   end
 
   defp markdown_tell(name, message) do
-    cast(name, message)
+    Elita.cast(name, message)
     :ok
   rescue
     _ -> {:error, :not_found}
