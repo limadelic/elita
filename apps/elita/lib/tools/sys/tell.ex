@@ -23,8 +23,8 @@ defmodule Tools.Sys.Tell do
   defdelegate spec(name, state), to: Tools.Sys.Tell.Schema, as: :get
 
   def exec(_, %{"recipient" => recipient, "message" => message}, %{name: sender} = state) do
-    log("📢", sender <> " → " <> recipient, ": ", message, :yellow)
-    route(to_atom(recipient), :tell, "[from " <> sender <> "] " <> message)
+    log("📢", "#{sender} → #{recipient}", ": ", message, :yellow)
+    route(to_atom(recipient), :tell, "[from #{sender}] #{message}")
     {"sent", state}
   end
 
