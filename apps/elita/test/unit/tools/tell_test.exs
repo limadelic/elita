@@ -18,7 +18,7 @@ defmodule Tools.User.TellUnitTest do
     Agent.Registry.register(:local, nil, pid)
 
     {response, _state} =
-      Tools.User.exec("tell", %{"recipient" => "local", "message" => "hello"}, %{})
+      Tools.User.exec("tell", %{"name" => "local", "message" => "hello"}, %{})
 
     assert response == "message sent"
   end
@@ -31,7 +31,7 @@ defmodule Tools.User.TellUnitTest do
     Agent.Registry.register(:worker, "/tmp", pid)
 
     {response, _state} =
-      Tools.User.exec("tell", %{"recipient" => "worker", "message" => "hello"}, %{})
+      Tools.User.exec("tell", %{"name" => "worker", "message" => "hello"}, %{})
 
     assert response == "message sent"
   end
@@ -39,7 +39,7 @@ defmodule Tools.User.TellUnitTest do
   @tag :main
   test "tell unknown agent returns error string" do
     {response, _state} =
-      Tools.User.exec("tell", %{"recipient" => "unknown", "message" => "hello"}, %{})
+      Tools.User.exec("tell", %{"name" => "unknown", "message" => "hello"}, %{})
 
     assert response == "agent not found"
   end

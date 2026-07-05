@@ -15,9 +15,9 @@ Dispatches by folder kind:
 Returns acknowledgment: "message sent" or "agent not found" if not registered.
 
 ```elixir
-case Agent.Registry.lookup(String.to_atom(recipient)) do
+case Agent.Registry.lookup(String.to_atom(name)) do
   {:ok, {_pid, nil}} ->
-    Elita.cast(String.to_atom(recipient), message)
+    Elita.cast(String.to_atom(name), message)
     "message sent"
   {:ok, {pid, _folder}} ->
     Agent.Session.cast(pid, message)

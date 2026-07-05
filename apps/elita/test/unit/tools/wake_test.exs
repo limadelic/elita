@@ -19,7 +19,7 @@ defmodule Tools.User.WakeUnitTest do
 
     result =
       try do
-        Tools.User.exec("wake", %{"agent" => "native", "message" => "hello"}, %{})
+        Tools.User.exec("wake", %{"name" => "native", "message" => "hello"}, %{})
       rescue
         _error -> :error_from_elita
       catch
@@ -39,7 +39,7 @@ defmodule Tools.User.WakeUnitTest do
     Agent.Registry.register(:runner, "/tmp", pid)
 
     {response, _state} =
-      Tools.User.exec("wake", %{"agent" => "runner", "message" => "hello"}, %{})
+      Tools.User.exec("wake", %{"name" => "runner", "message" => "hello"}, %{})
 
     assert response == "stub response"
   end
@@ -47,7 +47,7 @@ defmodule Tools.User.WakeUnitTest do
   @tag :main
   test "wake unknown agent returns error string" do
     {response, _state} =
-      Tools.User.exec("wake", %{"agent" => "unknown", "message" => "hello"}, %{})
+      Tools.User.exec("wake", %{"name" => "unknown", "message" => "hello"}, %{})
 
     assert response == "agent not found"
   end

@@ -5,7 +5,7 @@
         "caller": {
           "type": "direct"
         },
-        "id": "toolu_01TDgGcxZHhNUgt28GaNxEdg",
+        "id": "toolu_01CX8CtQM6v29Xrh6iJ3iupY",
         "input": {
           "name": "greet"
         },
@@ -34,7 +34,7 @@
         "caller": {
           "type": "direct"
         },
-        "id": "toolu_01TvCVfMjd3QbFr4xHEDM5PX",
+        "id": "toolu_0124HheSBmFDJLPxE4RowCp9",
         "input": {
           "name": "greet"
         },
@@ -49,7 +49,7 @@
           "content": [
             {
               "content": "not found",
-              "tool_use_id": "toolu_01TDgGcxZHhNUgt28GaNxEdg",
+              "tool_use_id": "toolu_01CX8CtQM6v29Xrh6iJ3iupY",
               "type": "tool_result"
             }
           ],
@@ -62,14 +62,10 @@
   {
     "a": [
       {
-        "text": "Now I'll wake it with the message:",
-        "type": "text"
-      },
-      {
         "caller": {
           "type": "direct"
         },
-        "id": "toolu_01WSvBkev2KPF3tVX76Mvayc",
+        "id": "toolu_013g6EBPEjQEJKJ9tvxws9GD",
         "input": {
           "message": "hello",
           "name": "greet"
@@ -85,7 +81,7 @@
           "content": [
             {
               "content": "spawned",
-              "tool_use_id": "toolu_01TvCVfMjd3QbFr4xHEDM5PX",
+              "tool_use_id": "toolu_0124HheSBmFDJLPxE4RowCp9",
               "type": "tool_result"
             }
           ],
@@ -98,43 +94,25 @@
   {
     "a": [
       {
-        "text": "Let me try with the tell function instead:",
+        "text": "Who am I talking to?",
         "type": "text"
-      },
-      {
-        "caller": {
-          "type": "direct"
-        },
-        "id": "toolu_01W6hWEC8JPmBYtBzFYBsVbQ",
-        "input": {
-          "message": "hello",
-          "recipient": "greet"
-        },
-        "name": "tell",
-        "type": "tool_use"
       }
     ],
     "q": {
-      "agent": "el",
+      "agent": "greet",
       "messages": [
         {
-          "content": [
-            {
-              "content": "wake needs ",
-              "tool_use_id": "toolu_01WSvBkev2KPF3tVX76Mvayc",
-              "type": "tool_result"
-            }
-          ],
+          "content": "hello",
           "role": "user"
         }
       ],
-      "n": 7
+      "n": 1
     }
   },
   {
     "a": [
       {
-        "text": "The message \"hello\" has been sent to the greet agent.",
+        "text": "Who am I talking to?",
         "type": "text"
       }
     ],
@@ -146,13 +124,13 @@
           "content": [
             {
               "type": "tool_result",
-              "content": "sent",
-              "tool_use_id": "toolu_01W6hWEC8JPmBYtBzFYBsVbQ"
+              "content": "Who am I talking to?",
+              "tool_use_id": "toolu_013g6EBPEjQEJKJ9tvxws9GD"
             }
           ]
         }
       ],
-      "n": 9
+      "n": 7
     }
   }
 ]
