@@ -1,4 +1,5 @@
 defmodule Utils.File do
+  import Kernel
   import Enum, only: [map: 2, find_value: 2]
   import File, only: [read: 1]
   import Path, only: [expand: 2, wildcard: 1]
@@ -23,13 +24,13 @@ defmodule Utils.File do
   end
 
   defp nested(name) do
-    wildcard(Path.join(@app_root, "agents/**/#{name}"))
+    wildcard(Path.join(@app_root, "agents/**/" <> name))
   end
 
-  defp handle_missing(nil, name), do: "file not found: #{name}"
+  defp handle_missing(nil, name), do: "file not found: " <> name
   defp handle_missing(content, _name), do: content
 
-  defp join(path, name), do: "#{path}#{name}"
+  defp join(path, name), do: path <> name
 
   defp safe_read({:ok, content}), do: content
   defp safe_read({:error, _}), do: nil
