@@ -45,7 +45,7 @@ defmodule Tape.Play do
     count = length(Map.get(ctx.body, :messages, []))
     sorted = sort_matches(matches, count)
     indexed = Enum.map(sorted, fn m -> {m, find_idx(ctx.entries, m)} end)
-    extract_answer(Enum.find(indexed, &claim_slot?(ctx, &1)), sorted)
+    extract_answer(Enum.find(indexed, &claim_slot?(ctx, &1)), sorted, ctx)
   end
 
   defp sort_matches(matches, count) do
@@ -55,9 +55,11 @@ defmodule Tape.Play do
 
   defp find_idx(entries, target), do: Enum.find_index(entries, &(&1 == target))
 
-  defp extract_answer({e, _}, _), do: e["a"]
-  defp extract_answer(nil, []), do: nil
-  defp extract_answer(nil, matches), do: List.last(matches)["a"]
+  defp extract_answer({e, _}, _, _), do: e["a"]
+  defp extract_answer(nil, [], _), do: nil
+  defp extract_answer(nil, _, ctx) do
+    raise "tape miss: #{ctx.name} #{inspect(ctx.normalized)}"
+  end
 
   defp claim_slot?(ctx, {e, idx}) do
     claim_agent(cassette_key(), ctx.name, idx, get_times(e))
