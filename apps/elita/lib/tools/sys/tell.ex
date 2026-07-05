@@ -17,12 +17,14 @@ end
 
 defmodule Tools.Sys.Tell do
   import Log, only: [log: 5]
+  import Agent.Router, only: [route: 3]
+  import String, only: [to_atom: 1]
 
   defdelegate spec(name, state), to: Tools.Sys.Tell.Schema, as: :get
 
   def exec(_, %{"recipient" => recipient, "message" => message}, %{name: sender} = state) do
-    log("📢", "#{sender} → #{recipient}", ": ", message, :yellow)
-    Agent.Router.route(String.to_atom(recipient), :tell, "[from #{sender}] #{message}")
+    log("📢", sender <> " → " <> recipient, ": ", message, :yellow)
+    route(to_atom(recipient), :tell, "[from " <> sender <> "] " <> message)
     {"sent", state}
   end
 
