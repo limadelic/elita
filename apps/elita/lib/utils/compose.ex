@@ -3,7 +3,7 @@ defmodule Compose do
   import Map, only: [put: 3, merge: 2, drop: 2, get: 3]
 
   def compose([main | rest]) do
-    active = [main | reject(rest, fn item -> get(item, :active, nil) == false end)]
+    active = [main | reject(rest, &(&1[:active] == false))]
     active |> headers |> content(active)
   end
 
