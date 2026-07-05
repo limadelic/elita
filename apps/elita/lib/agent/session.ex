@@ -41,7 +41,9 @@ defmodule Agent.Session do
   end
 
   defp default_runner(message, folder) do
-    find_claude()
+    path = find_claude()
+
+    {:spawn_executable, path}
     |> open(port_opts(message, folder))
     |> handle_port()
   end
@@ -58,8 +60,8 @@ defmodule Agent.Session do
   end
 
   defp port_opts(message, folder) do
-    [{:args, ["-p", message, "--allowedTools", "", "--bare"]}, {:cd, String.to_charlist(folder)}] ++
-      [:binary, :exit_status, :use_stdio, :stderr_to_stdout]
+    [{:args, ["-p", message, "--allowedTools", ""]}, {:cd, String.to_charlist(folder)}] ++
+      [:binary, :exit_status, :use_stdio]
   end
 
   defp read_response(port, acc) do

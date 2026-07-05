@@ -37,7 +37,7 @@ defmodule DudeUnitTest do
 
     @tag :live
     test "el routes ask message to dude agent via registered session" do
-      verify(:el, "dude", "ask dude hello")
+      verify(:el, "dude", "ask dude what is your name")
     end
   end
 end
