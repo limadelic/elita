@@ -42,7 +42,7 @@ defmodule Tape.Play do
   defp pick_answer([], _ctx), do: nil
 
   defp pick_answer(matches, ctx) do
-    count = length(Map.get(ctx.body, :messages, []))
+    count = Enum.count(Map.get(ctx.body, :messages, []))
     sorted = sort_matches(matches, count)
     indexed = Enum.map(sorted, fn m -> {m, find_idx(ctx.entries, m)} end)
     extract_answer(Enum.find(indexed, &claim_slot?(ctx, &1)), sorted)
