@@ -23,7 +23,7 @@ defmodule Tools.Sys.AskUnitTest do
 
     @tag :live
     test "ask through el to greet agent" do
-      verify(:el, "hello", "ask greet hello")
+      verify(:el, "Who am I talking to?", "ask greet hello")
     end
   end
 end

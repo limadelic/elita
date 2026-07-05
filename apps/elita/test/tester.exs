@@ -39,6 +39,13 @@ defmodule Tester do
   end
 
   defp setup do
+    el_entry = :ets.lookup(:agent_registry, :el)
+    :ets.delete_all_objects(:agent_registry)
+
+    if el_entry != [] do
+      :ets.insert(:agent_registry, el_entry)
+    end
+
     :ok
   end
 

@@ -42,12 +42,18 @@ defmodule Tools.User.Exec do
   end
 
   defp eval(text, args, name) do
-    try do
-      run(text, args)
-    rescue
-      error -> failed(error, __STACKTRACE__, name)
-    end
+    attempt(text, args)
+    |> result(name)
   end
+
+  defp attempt(text, args) do
+    {:ok, run(text, args)}
+  rescue
+    error -> {:error, error, __STACKTRACE__}
+  end
+
+  defp result({:ok, value}, _), do: value
+  defp result({:error, error, stack}, name), do: failed(error, stack, name)
 
   defp run(text, args) do
     bindings = args |> Map.to_list() |> map(&atomize_key/1)
