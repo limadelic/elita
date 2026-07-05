@@ -1,6 +1,4 @@
 defmodule Tape.Matcher do
-  import Kernel
-
   def contains(a, b) do
     dispatch_contains(a, b)
   end
