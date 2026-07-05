@@ -1,0 +1,28 @@
+defmodule Tools.Sys.WakeUnitTest do
+  use ExUnit.Case
+
+  setup do
+    Agent.Registry.create()
+    {:ok, pid} = Agent.Session.start_link(name: :runner, folder: "/tmp", runner: &stub_runner/2)
+    Agent.Registry.register(:runner, "/tmp", pid)
+    :ok
+  end
+
+  test "wake registered agent returns stub response" do
+    {response, _state} =
+      Tools.Sys.Wake.exec(nil, %{"agent" => "runner", "message" => "hello"}, %{})
+
+    assert response == "stub response"
+  end
+
+  test "wake unknown agent returns error string" do
+    {response, _state} =
+      Tools.Sys.Wake.exec(nil, %{"agent" => "unknown", "message" => "hello"}, %{})
+
+    assert response == "agent not found"
+  end
+
+  defp stub_runner(_message, _folder) do
+    "stub response"
+  end
+end
