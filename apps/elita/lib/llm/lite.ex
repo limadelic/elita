@@ -35,12 +35,12 @@ defmodule Lite do
   defp req_opts, do: [headers: headers(), connect_options: connect(), receive_timeout: 120_000]
 
   defp build(composed, history, state) do
-    base(composed, history) |> add_tools(tools(composed, state))
+    base(composed, history, state) |> add_tools(tools(composed, state))
   end
 
-  defp base(composed, history) do
+  defp base(composed, history, %{name: agent_name}) do
     %{model: model(), max_tokens: 4096}
-    |> put(:system, snip(composed.content, composed[:import]))
+    |> put(:system, snip(composed.content, composed[:import]) <> " Your name is #{agent_name}.")
     |> put(:messages, history)
   end
 
