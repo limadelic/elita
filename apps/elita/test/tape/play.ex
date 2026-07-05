@@ -36,7 +36,7 @@ defmodule Tape.Play do
   defp agent_entry?(e, name), do: Map.get(Map.get(e, "q"), "agent") == name
 
   defp content_match?(entry, normalized) do
-    contains(Map.drop(entry["q"], ["agent", "n"]), normalized)
+    contains(Map.drop(Map.get(entry, "q"), ["agent", "n"]), normalized)
   end
 
   defp pick_answer([], _ctx), do: nil
