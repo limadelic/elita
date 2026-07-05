@@ -44,8 +44,8 @@ defmodule Mlm do
 
   defp func_spec(d) do
     %{
-      name: d[:name],
-      description: d[:description],
+      name: Access.get(d, :name),
+      description: Access.get(d, :description),
       parameters: get(d, :parameters, %{type: "object"})
     }
   end
