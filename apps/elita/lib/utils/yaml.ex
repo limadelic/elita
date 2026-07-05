@@ -1,5 +1,4 @@
 defmodule Utils.Yaml do
-  import Kernel
   import String, only: [replace_prefix: 3, to_atom: 1, replace: 3]
   import Map, only: [new: 2]
   import Enum, only: [map: 2]

@@ -1,5 +1,4 @@
 defmodule History do
-  import Kernel
   import Msg, only: [tool_result: 2]
   import Enum, only: [any?: 2, find_value: 3, filter: 2, map: 2]
 

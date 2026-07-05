@@ -1,5 +1,4 @@
 defmodule Mem do
-  import Kernel
   import String, only: [to_atom: 1]
 
   def init_global do

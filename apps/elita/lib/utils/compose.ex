@@ -1,5 +1,4 @@
 defmodule Compose do
-  import Kernel
   import Enum, only: [map: 2, reduce: 3, reject: 2, uniq: 1, join: 2]
   import Map, only: [put: 3, merge: 2, drop: 2, get: 3]
 

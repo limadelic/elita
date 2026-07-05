@@ -1,5 +1,4 @@
 defmodule Utils.File do
-  import Kernel
   import Enum, only: [map: 2, find_value: 2]
   import File, only: [read: 1]
   import Path, only: [expand: 2, wildcard: 1]

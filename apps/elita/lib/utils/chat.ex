@@ -1,5 +1,4 @@
 defmodule Chat do
-  import Kernel
   import String, only: [trim: 1, to_atom: 1]
   import IO, only: [gets: 1, puts: 1]
   import Elita, only: [start_link: 2, call: 2]
