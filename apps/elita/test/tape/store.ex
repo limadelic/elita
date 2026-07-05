@@ -1,11 +1,10 @@
 defmodule Tape.Store do
   import File, only: [write: 2, read!: 1, exists?: 1, mkdir_p: 1]
   import System, only: [get_env: 1]
-  import Path, only: [join: 2, expand: 2]
-  import Jason, only: [encode!: 2, decode!: 1]
+  import Jason
   import Tape.Writer, only: [acquire: 1]
 
-  @app_root expand("../..", __DIR__)
+  @app_root Path.expand("../..", __DIR__)
 
   def read_cassette do
     path = cassette_file()
@@ -37,12 +36,10 @@ defmodule Tape.Store do
   end
 
   defp cassette_file do
-    cassette = get_env("CASSETTE")
-    path = "test/cassettes/" <> cassette <> ".json"
-    join(@app_root, path)
+    Path.join(@app_root, "test/cassettes/#{get_env("CASSETTE")}.json")
   end
 
   defp cassette_dir do
-    join(@app_root, "test/cassettes")
+    Path.join(@app_root, "test/cassettes")
   end
 end
