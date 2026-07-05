@@ -17,7 +17,7 @@ defmodule Tape.Play do
   defp ensure_entries(_), do: :ok
 
   defp validate_cassette(nil), do: :ok
-  defp validate_cassette(cassette), do: raise(RuntimeError, "no cassette: #{cassette}")
+  defp validate_cassette(cassette), do: raise("no cassette: #{cassette}")
 
   defp answer(ctx) do
     agent_answer(ctx) |> handle_answer(ctx)
@@ -33,47 +33,47 @@ defmodule Tape.Play do
     |> pick_answer(ctx)
   end
 
-  defp agent_entry?(e, name), do: Map.get(Map.get(e, "q"), "agent") == name
+  defp agent_entry?(e, name), do: Map.get(e["q"], "agent") == name
 
   defp content_match?(entry, normalized) do
-    contains(Map.drop(Map.get(entry, "q"), ["agent", "n"]), normalized)
+    contains(Map.drop(entry["q"], ["agent", "n"]), normalized)
   end
 
   defp pick_answer([], _ctx), do: nil
 
   defp pick_answer(matches, ctx) do
-    count = Enum.count(Map.get(ctx.body, :messages, []))
+    count = length(Map.get(ctx.body, :messages, []))
     sorted = sort_matches(matches, count)
     indexed = Enum.map(sorted, fn m -> {m, find_idx(ctx.entries, m)} end)
     extract_answer(Enum.find(indexed, &claim_slot?(ctx, &1)), sorted)
   end
 
   defp sort_matches(matches, count) do
-    {t, o} = Enum.split_with(matches, &(Map.get(Map.get(&1, "q"), "n") == count))
+    {t, o} = Enum.split_with(matches, &(Map.get(&1["q"], "n") == count))
     t ++ o
   end
 
   defp find_idx(entries, target), do: Enum.find_index(entries, &(&1 == target))
 
-  defp extract_answer({e, _}, _), do: Map.get(e, "a")
+  defp extract_answer({e, _}, _), do: e["a"]
   defp extract_answer(nil, []), do: nil
-  defp extract_answer(nil, matches), do: Map.get(List.last(matches), "a")
+  defp extract_answer(nil, matches), do: List.last(matches)["a"]
 
   defp claim_slot?(ctx, {e, idx}) do
     claim_agent(cassette_key(), ctx.name, idx, get_times(e))
   end
 
   defp untagged(%{entries: entries} = ctx, idx) when idx >= length(entries) do
-    raise(RuntimeError, "tape miss: #{ctx.name} #{inspect(ctx.normalized)}")
+    raise "tape miss: #{ctx.name} #{inspect(ctx.normalized)}"
   end
 
   defp untagged(ctx, idx) do
     entry = Enum.at(ctx.entries, idx)
-    check_untagged(entry, ctx, idx, Map.get(Map.get(entry, "q"), "agent"))
+    check_untagged(entry, ctx, idx, Map.get(entry["q"], "agent"))
   end
 
   defp check_untagged(entry, ctx, idx, nil) do
-    if_match(contains(Map.get(entry, "q"), ctx.normalized), entry, ctx, idx)
+    if_match(contains(entry["q"], ctx.normalized), entry, ctx, idx)
   end
 
   defp check_untagged(_entry, ctx, idx, _agent), do: untagged(ctx, idx + 1)
@@ -85,7 +85,7 @@ defmodule Tape.Play do
 
   defp if_match(false, _entry, ctx, idx), do: untagged(ctx, idx + 1)
 
-  defp claim_result(true, entry, _ctx, _idx), do: Map.get(entry, "a")
+  defp claim_result(true, entry, _ctx, _idx), do: entry["a"]
   defp claim_result(false, _entry, ctx, idx), do: untagged(ctx, idx + 1)
 
   defp get_times(%{"times" => times}), do: times
