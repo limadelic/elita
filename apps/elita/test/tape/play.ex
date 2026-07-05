@@ -2,6 +2,7 @@ defmodule Tape.Play do
   import Tape.Matcher, only: [contains: 2]
   import Tape.Writer, only: [claim_agent: 4, claim: 3]
   import Tape.Store, only: [load_entries: 0]
+  import Kernel, only: [raise: 2, inspect: 1]
 
   def handle(body, name, fun) do
     ensure_entries(load())
