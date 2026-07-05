@@ -1,59 +1,53 @@
-defmodule Elita.MixProject do
+defmodule Elita.Umbrella do
   use Mix.Project
 
   def project do
     [
-      app: :elita,
+      app: :elita_umbrella,
       version: "0.1.0",
       elixir: "~> 1.18",
-      elixirc_paths: paths(Mix.env()),
+      apps_path: "apps",
+      config_path: "config/config.exs",
       start_permanent: Mix.env() == :prod,
-      deps: deps(),
-      escript: [main_module: Chat],
-      aliases: aliases()
+      aliases: aliases(),
+      deps: deps()
     ]
   end
 
-  # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger],
-      mod: {Elita.Application, []}
-    ]
-  end
-
-  defp paths(:test), do: ["lib", "test/support", "test/tape"]
-  defp paths(_), do: ["lib"]
-
-  # Run "mix help deps" to learn about dependencies.
-  defp deps do
-    [
-      {:req, "~> 0.5"},
-      {:jason, "~> 1.4"},
-      {:yaml_elixir, "~> 2.9"},
-      {:ymlr, "~> 2.0"},
-      {:credo, "~> 1.7", runtime: false}
+      extra_applications: [:logger]
     ]
   end
 
   defp aliases do
     [
-      build: ["compile", "escript.build"],
-      t: ["test --no-start"],
-      prose: ["test --only prose"],
-      lint: ["format --check-formatted", "credo --strict"],
-      tape: [&tape/1],
-      live: [&live/1]
+      test: [&run_test/1],
+      lint: [&run_lint/1],
+      build: [&run_build/1]
     ]
   end
 
-  defp tape(args) do
-    cmd = "TAPE=rec mix test #{Enum.join(args, " ")}"
+  defp run_test(_) do
+    cmd1 = "cd apps/elita && mix test"
+    cmd2 = "cd apps/el && mix test"
+    Mix.shell().cmd(cmd1)
+    Mix.shell().cmd(cmd2)
+  end
+
+  defp run_lint(_) do
+    cmd1 = "cd apps/elita && mix lint"
+    cmd2 = "cd apps/el && mix lint"
+    Mix.shell().cmd(cmd1)
+    Mix.shell().cmd(cmd2)
+  end
+
+  defp run_build(_) do
+    cmd = "cd apps/el && mix escript.build"
     Mix.shell().cmd(cmd)
   end
 
-  defp live(args) do
-    cmd = "LIVE=1 mix test #{Enum.join(args, " ")}"
-    Mix.shell().cmd(cmd)
+  defp deps do
+    []
   end
 end
