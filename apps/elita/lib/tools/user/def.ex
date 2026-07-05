@@ -4,28 +4,28 @@ defmodule Tools.User.Def.Schema do
 
   def get(tool, _state) when tool != nil do
     spec = %{name: tool.name, description: tool.body}
-    with_params(spec, tool[:params])
+    armed(spec, tool[:params])
   end
 
   def get(nil, _state), do: nil
 
-  defp with_params(spec, nil), do: spec
-  defp with_params(spec, ""), do: spec
+  defp armed(spec, nil), do: spec
+  defp armed(spec, ""), do: spec
 
-  defp with_params(spec, params) do
+  defp armed(spec, params) do
     names = split(params, ",") |> map(&trim/1)
-    Map.put(spec, :parameters, params_spec(names))
+    Map.put(spec, :parameters, schema(names))
   end
 
-  defp params_spec(names) do
+  defp schema(names) do
     %{
       type: "object",
-      properties: params_properties(names),
+      properties: fields(names),
       required: names
     }
   end
 
-  defp params_properties(names) do
+  defp fields(names) do
     Map.new(names, fn name -> {String.to_atom(name), %{type: "string"}} end)
   end
 end

@@ -57,6 +57,17 @@ defmodule Tools.User.TellUnitTest do
     assert schema.parameters.required == ["recipient", "message"]
   end
 
+  @tag :main
+  test "tell with empty state defaults sender to user" do
+    pid = spawn(fn -> :timer.sleep(:infinity) end)
+    Agent.Registry.register(:local, nil, pid)
+
+    {response, _state} =
+      Tools.User.exec("tell", %{"recipient" => "local", "message" => "hello"}, %{})
+
+    assert response == "sent"
+  end
+
   defp stub_runner(_message, _folder) do
     "stub response"
   end

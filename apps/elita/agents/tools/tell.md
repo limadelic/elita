@@ -14,7 +14,10 @@ Registry routes sessions with binary folder; unregistered/markdown agents fall b
 Returns acknowledgment: "sent".
 
 ```elixir
-formatted = "[from #{sender}] #{message}"
+formatted = case sender do
+  nil -> message
+  _ -> "[from #{sender}] #{message}"
+end
 
 case Agent.Registry.lookup(String.to_atom(recipient)) do
   {:ok, {pid, folder}} when is_binary(folder) ->
