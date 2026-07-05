@@ -8,6 +8,8 @@ defmodule Lite do
   import Req, only: [post: 2]
   import Application, only: [get_env: 3]
 
+  @cache_key %{type: "ephemeral"}
+
   def llm(%{config: config, history: history, name: agent_name} = state) do
     composed = compose(config)
     body = build(composed, history, state)
@@ -39,13 +41,26 @@ defmodule Lite do
   end
 
   defp base(composed, history, %{name: agent_name}) do
+    text = snip(composed.content, composed[:import]) <> " Your name is #{agent_name}."
+
     %{model: model(), max_tokens: 4096}
-    |> put(:system, snip(composed.content, composed[:import]) <> " Your name is #{agent_name}.")
+    |> put(:system, [%{type: "text", text: text, cache_control: @cache_key}])
     |> put(:messages, history)
   end
 
-  defp add_tools(base, [%{function_declarations: defs}]),
-    do: put(base, :tools, map(defs, &schema/1))
+  defp add_tools(base, [%{function_declarations: defs}]) do
+    tools = map(defs, &schema/1)
+    {last, init} = List.pop_at(tools, -1)
+
+    cached =
+      if last do
+        init ++ [put(last, :cache_control, @cache_key)]
+      else
+        tools
+      end
+
+    put(base, :tools, cached)
+  end
 
   defp add_tools(base, _), do: base
 

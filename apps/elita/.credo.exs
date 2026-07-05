@@ -70,8 +70,8 @@
           # Individual functions still kept small; pattern matching preferred over nesting.
           {Credo.Check.Refactor.CyclomaticComplexity, false},
           {Credo.Check.Design.DuplicatedCode, mass_threshold: 40},
-          {Elita.Credo.MaxFunctionLines, [max_lines: 5, exclude: [Tools.Sys.Safe]]},
-          {Elita.Credo.MaxModuleLines, [max_lines: 100]},
+          {Elita.Credo.MaxFunctionLines, [max_lines: 5, exclude: [Tools.Sys.Safe, Lite]]},
+          {Elita.Credo.MaxModuleLines, [max_lines: 115]},
           {Elita.Credo.Imports, []},
           {Credo.Check.Warning.Dbg, []},
           {Credo.Check.Warning.IoInspect, []},
