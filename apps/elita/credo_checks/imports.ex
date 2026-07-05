@@ -95,7 +95,8 @@ defmodule Elita.Credo.Imports do
 
   defp is_special_module(module) do
     module_str = to_string(module)
-    String.starts_with?(module_str, ":") or module in [:Kernel, :Access]
+    String.starts_with?(module_str, ":") or module in [:Kernel, :Access] or
+      module_str in ["Kernel", "Access", "Elixir.Kernel", "Elixir.Access"]
   end
 
   defp in_allowlist(module, allowlist) do
