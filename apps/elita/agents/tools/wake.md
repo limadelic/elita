@@ -1,6 +1,7 @@
 ---
 name: wake
 description: Wake an agent with a message
+params: name, message
 imports: 
 ---
 

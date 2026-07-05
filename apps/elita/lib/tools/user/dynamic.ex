@@ -36,7 +36,9 @@ defmodule Tools.User do
   defdelegate spec(name, state), to: Tools.User.Load.Schema, as: :get
 
   def exec(name, args, state) do
-    result = exec(tool(name), args)
+    sender = Map.get(state, :name)
+    args_with_sender = Map.put(args, "sender", sender)
+    result = exec(tool(name), args_with_sender)
     {result, state}
   end
 end

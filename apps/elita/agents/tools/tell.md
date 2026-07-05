@@ -1,6 +1,7 @@
 ---
 name: tell
 description: Tell an agent a message asynchronously
+params: recipient, message
 imports: 
 ---
 
@@ -8,21 +9,19 @@ imports:
 
 Look up an agent in the registry and send it a message without waiting for response.
 
-Dispatches by folder kind:
-- nil folder → markdown/Elita agent via Elita.cast
-- binary folder → external session via Agent.Session.cast
+Registry routes sessions with binary folder; unregistered/markdown agents fall back to plain cast.
 
-Returns acknowledgment: "message sent" or "agent not found" if not registered.
+Returns acknowledgment: "sent".
 
 ```elixir
-case Agent.Registry.lookup(String.to_atom(name)) do
-  {:ok, {_pid, nil}} ->
-    Elita.cast(String.to_atom(name), message)
-    "message sent"
-  {:ok, {pid, _folder}} ->
-    Agent.Session.cast(pid, message)
-    "message sent"
-  {:error, :not_found} ->
-    "agent not found"
+formatted = "[from #{sender}] #{message}"
+
+case Agent.Registry.lookup(String.to_atom(recipient)) do
+  {:ok, {pid, folder}} when is_binary(folder) ->
+    Agent.Session.cast(pid, formatted)
+    "sent"
+  _ ->
+    Elita.cast(String.to_atom(recipient), formatted)
+    "sent"
 end
 ```

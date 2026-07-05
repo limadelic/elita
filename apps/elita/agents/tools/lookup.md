@@ -1,6 +1,7 @@
 ---
 name: lookup
 description: Query registry for agent location
+params: name
 imports: 
 ---
 

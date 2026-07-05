@@ -18,9 +18,9 @@ defmodule Tools.User.TellUnitTest do
     Agent.Registry.register(:local, nil, pid)
 
     {response, _state} =
-      Tools.User.exec("tell", %{"name" => "local", "message" => "hello"}, %{})
+      Tools.User.exec("tell", %{"recipient" => "local", "message" => "hello"}, %{name: :user})
 
-    assert response == "message sent"
+    assert response == "sent"
   end
 
   @tag :main
@@ -31,17 +31,30 @@ defmodule Tools.User.TellUnitTest do
     Agent.Registry.register(:worker, "/tmp", pid)
 
     {response, _state} =
-      Tools.User.exec("tell", %{"name" => "worker", "message" => "hello"}, %{})
+      Tools.User.exec("tell", %{"recipient" => "worker", "message" => "hello"}, %{name: :user})
 
-    assert response == "message sent"
+    assert response == "sent"
   end
 
   @tag :main
-  test "tell unknown agent returns error string" do
+  test "tell unknown agent casts via Elita.cast" do
     {response, _state} =
-      Tools.User.exec("tell", %{"name" => "unknown", "message" => "hello"}, %{})
+      Tools.User.exec("tell", %{"recipient" => "unknown", "message" => "hello"}, %{name: :user})
 
-    assert response == "agent not found"
+    assert response == "sent"
+  end
+
+  test "tell spec includes parameters with recipient and message" do
+    state = %{name: :test}
+
+    schema = Tools.User.spec("tell", state)
+
+    assert schema.name == "tell"
+    assert schema.parameters != nil
+    assert schema.parameters.type == "object"
+    assert Map.has_key?(schema.parameters.properties, :recipient)
+    assert Map.has_key?(schema.parameters.properties, :message)
+    assert schema.parameters.required == ["recipient", "message"]
   end
 
   defp stub_runner(_message, _folder) do
