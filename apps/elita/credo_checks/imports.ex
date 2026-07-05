@@ -5,18 +5,18 @@ defmodule Elita.Credo.Imports do
   alias Credo.Code
 
   def param_defaults do
-    [allowlist: []]
+    [allowlist: [:ets, :erlang, :rand]]
   end
 
-  @check_desc "Functions must be imported, not called with Module.func syntax."
-  @param_desc "Modules to allowlist for qualified calls."
+  @check_desc "Functions must be imported, not called with Module.func syntax. Aliases (single-segment qualified calls) are OK."
+  @param_desc "Erlang modules to allowlist for qualified calls."
 
   def explanations do
     [check: @check_desc, params: [allowlist: @param_desc]]
   end
 
   def run(%SourceFile{} = source_file, params) do
-    allowlist = Keyword.get(params, :allowlist, [])
+    allowlist = Keyword.get(params, :allowlist, [:ets, :erlang, :rand])
     filename = source_file.filename
     Code.prewalk(source_file, &check_call(&1, &2, allowlist, filename))
   end
@@ -37,13 +37,9 @@ defmodule Elita.Credo.Imports do
     issues
   end
 
-  defp maybe_add_issue({:__aliases__, _meta, [module]}, meta, issues, allowlist, filename)
-       when is_atom(module) do
-    if should_report?(module, allowlist) do
-      [create_issue(module, meta, filename) | issues]
-    else
-      issues
-    end
+  defp maybe_add_issue({:__aliases__, _meta, [_module]}, _meta, issues, _allowlist, _filename) do
+    # Single-segment aliases (e.g., Record.handle via alias Tape.Record) are OK
+    issues
   end
 
   defp maybe_add_issue({:__aliases__, _meta, parts}, meta, issues, allowlist, filename)
@@ -76,12 +72,7 @@ defmodule Elita.Credo.Imports do
 
   defp should_report_nested(module_name, allowlist) do
     not String.starts_with?(module_name, ":") and
-      not is_forbidden_module(module_name) and
       not in_allowlist_string(module_name, allowlist)
-  end
-
-  defp is_forbidden_module(module_name) do
-    String.contains?(module_name, ["Kernel", "Access", "Elixir.Kernel", "Elixir.Access"])
   end
 
   defp in_allowlist_string(module_name, allowlist) do
@@ -97,7 +88,7 @@ defmodule Elita.Credo.Imports do
 
   defp is_special_module(module) do
     module_str = to_string(module)
-    String.starts_with?(module_str, ":") or module in [:Kernel, :Access]
+    String.starts_with?(module_str, ":")
   end
 
   defp in_allowlist(module, allowlist) do
