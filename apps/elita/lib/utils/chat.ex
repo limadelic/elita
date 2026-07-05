@@ -1,4 +1,5 @@
 defmodule Chat do
+  import Kernel
   import String, only: [trim: 1, to_atom: 1]
   import IO, only: [gets: 1, puts: 1]
   import Elita, only: [start_link: 2, call: 2]
@@ -13,13 +14,13 @@ defmodule Chat do
   end
 
   defp chat(agent, name) do
-    start(:"#{name}@127.0.0.1")
+    start(String.to_atom(to_string(name) <> "@127.0.0.1"))
     {:ok, _pid} = start_link(agent, name)
     repl(name)
   end
 
   defp repl(agent) do
-    gets("#{agent} > ") |> handle_input(agent)
+    gets(to_string(agent) <> " > ") |> handle_input(agent)
   end
 
   defp handle_input(:eof, _agent) do
