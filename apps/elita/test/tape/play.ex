@@ -72,7 +72,7 @@ defmodule Tape.Play do
   end
 
   defp check_untagged(entry, ctx, idx, nil) do
-    if_match(contains(entry["q"], ctx.normalized), entry, ctx, idx)
+    if_match(contains(Map.get(entry, "q"), ctx.normalized), entry, ctx, idx)
   end
 
   defp check_untagged(_entry, ctx, idx, _agent), do: untagged(ctx, idx + 1)
