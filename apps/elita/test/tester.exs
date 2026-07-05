@@ -39,9 +39,7 @@ defmodule Tester do
   end
 
   defp setup do
-    Registry.select(ElitaRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
-    |> Enum.each(&Registry.unregister(ElitaRegistry, &1))
-    Agent.update(Tape.Writer, fn _state -> %{} end)
+    :ok
   end
 
   defp name(n), do: to_string(n)
