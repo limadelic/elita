@@ -14,13 +14,14 @@ end
 
 defmodule Tools.Sys.Spec do
   import Log, only: [log: 5]
+  alias Cfg
 
   defdelegate spec(name, state), to: Tools.Sys.Spec.Schema, as: :get
 
   def exec(_, %{"name" => name}, %{config: config} = state) do
-    name = "#{name}_spec"
+    name = name <> "_spec"
     spec = Cfg.config(name)
-    log("🧪", name, ":", "\n#{spec.content}\n", :white)
+    log("🧪", name, ":", "\n" <> spec.content <> "\n", :white)
     {spec.content, %{state | config: config ++ [spec]}}
   end
 end
