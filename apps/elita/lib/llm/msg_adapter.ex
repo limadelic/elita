@@ -1,5 +1,5 @@
 defmodule MsgAdapter do
-  import Enum, only: [map: 2, find_value: 2]
+  import Enum, only: [map: 2, find_value: 2, join: 2]
 
   def to_ollama(%{role: "user", content: content}) when is_binary(content) do
     %{role: "user", content: "/no_think #{content}"}
@@ -10,7 +10,7 @@ defmodule MsgAdapter do
   end
 
   def to_ollama(%{role: role, content: content}) when is_list(content) do
-    %{role: role, content: content |> map(&text/1) |> Enum.join(" ")}
+    %{role: role, content: content |> map(&text/1) |> join(" ")}
   end
 
   def to_ollama(msg), do: msg
