@@ -15,13 +15,13 @@ defmodule Snippet do
   end
 
   defp eval(imports, code) do
-    {result, _} = eval_string(to_string(imports) <> "; " <> code)
+    {result, _} = eval_string("#{imports}; #{code}")
     to_string(result)
   rescue
     _ -> code
   end
 
   defp build(imports) do
-    wrap(imports) |> map(&("import " <> to_string(&1))) |> join("; ")
+    wrap(imports) |> map(&"import #{&1}") |> join("; ")
   end
 end
