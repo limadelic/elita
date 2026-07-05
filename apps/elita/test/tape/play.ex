@@ -55,8 +55,8 @@ defmodule Tape.Play do
 
   defp find_idx(entries, target), do: Enum.find_index(entries, &(&1 == target))
 
-  defp extract_answer({e, _}, _), do: e["a"]
-  defp extract_answer(nil, matches), do: List.last(matches)["a"]
+  defp extract_answer({e, _}, _), do: Map.get(e, "a")
+  defp extract_answer(nil, matches), do: Map.get(List.last(matches), "a")
 
   defp claim_slot?(ctx, {e, idx}) do
     claim_agent(cassette_key(), ctx.name, idx, get_times(e))
