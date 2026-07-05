@@ -1,27 +1,34 @@
 defmodule Tools.User.Load.Schema do
   import Tools.User.Cfg, only: [parse: 1]
+  import Tools.User.Def, only: [spec: 2]
+  alias Path
+  alias File
 
   @app_root Path.expand("../..", __DIR__)
+  @tool_path "agents/tools/"
+  @tool_suffix ".md"
 
   def get(name, state) do
     name
     |> path()
     |> load()
-    |> Tools.User.Def.spec(state)
+    |> spec(state)
   end
 
   def tool(name) do
     name |> path() |> load()
   end
 
-  defp path(name), do: Path.join(@app_root, "agents/tools/#{name}.md")
-
-  defp load(path) do
-    exists_and_parse(File.exists?(path), path)
+  defp path(name) do
+    Path.join(@app_root, @tool_path <> name <> @tool_suffix)
   end
 
-  defp exists_and_parse(true, path), do: parse(path)
-  defp exists_and_parse(false, _path), do: nil
+  defp load(file_path) do
+    exists_and_parse(File.exists?(file_path), file_path)
+  end
+
+  defp exists_and_parse(true, file_path), do: parse(file_path)
+  defp exists_and_parse(false, _file_path), do: nil
 end
 
 defmodule Tools.User do
