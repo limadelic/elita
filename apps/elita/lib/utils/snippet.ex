@@ -1,5 +1,4 @@
 defmodule Snippet do
-  import Kernel
   import Regex, only: [replace: 3]
   import Enum, only: [map: 2, join: 2]
   import Code, only: [eval_string: 1]

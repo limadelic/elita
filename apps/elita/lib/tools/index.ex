@@ -1,5 +1,4 @@
 defmodule Tool.Index do
-  import Kernel
   import Tools, only: [exec: 2]
 
   def set(key, value) do

@@ -1,5 +1,4 @@
 defmodule Color do
-  import Kernel
   import IO, only: [puts: 1]
 
   def puts(text, code) do

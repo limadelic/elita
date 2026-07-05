@@ -1,5 +1,4 @@
 defmodule Cfg do
-  import Kernel
   import String, only: [split: 2, split: 3, trim: 1, to_atom: 1]
   import Enum, only: [map: 2, reject: 2, reduce: 3]
   import Map, only: [new: 1, put: 3, put_new: 3]
