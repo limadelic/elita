@@ -81,7 +81,7 @@ defmodule Elita.Credo.Imports do
   end
 
   defp is_forbidden_module(module_name) do
-    String.contains?(module_name, ["Kernel", "Access"])
+    String.contains?(module_name, ["Kernel", "Access", "Elixir.Kernel", "Elixir.Access"])
   end
 
   defp in_allowlist_string(module_name, allowlist) do
