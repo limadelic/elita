@@ -8,7 +8,7 @@ defmodule Tools.Sys.Spawn do
   def spec(name, state) do
     %{
       name: name,
-      description: "Spawn a new agent." <> help(state),
+      description: "Spawn a new agent.#{help(state)}",
       parameters: parameters()
     }
   end
