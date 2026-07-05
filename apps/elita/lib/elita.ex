@@ -9,6 +9,7 @@ defmodule Elita do
   import Msg, only: [user: 1]
   import Log, only: [log: 5]
   import String, only: [downcase: 1, trim: 1]
+  import System, only: [get_env: 1]
 
   def start_link(name, configs) do
     GenServer.start_link(__MODULE__, {name, configs}, name: via(name))
@@ -34,7 +35,7 @@ defmodule Elita do
   end
 
   defp tape_seed do
-    System.get_env("TAPE")
+    get_env("TAPE")
     |> maybe_seed
   end
 

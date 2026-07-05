@@ -69,7 +69,7 @@
           {Credo.Check.Design.DuplicatedCode, mass_threshold: 40},
           {Elita.Credo.MaxFunctionLines, [max_lines: 5]},
           {Elita.Credo.MaxModuleLines, [max_lines: 100]},
-          {Elita.Credo.Imports, [allowlist: [:rand, :ets, :erlang, :Kernel, :Access, "Tape.Record", "Tape.Play"]]},
+          {Elita.Credo.Imports, [allowlist: [:rand, :ets, :erlang, :Kernel, :Access, "Tape.Record", "Tape.Play", :GenServer]]},
           {Credo.Check.Warning.Dbg, []},
           {Credo.Check.Warning.IoInspect, []},
           {Credo.Check.Warning.IExPry, []},
