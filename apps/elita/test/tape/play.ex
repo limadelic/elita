@@ -1,5 +1,4 @@
 defmodule Tape.Play do
-  import Kernel
   import Tape.Matcher, only: [contains: 2]
   import Tape.Writer, only: [claim_agent: 4, claim: 3]
   import Tape.Store, only: [load_entries: 0]
