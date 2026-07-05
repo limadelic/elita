@@ -1,5 +1,4 @@
 defmodule Log do
-  import Kernel
   import Utils.Yaml, only: [yaml: 1]
   import String, only: [contains?: 2]
   import IO, only: [puts: 1]
