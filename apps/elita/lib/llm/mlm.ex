@@ -7,9 +7,7 @@ defmodule Mlm do
   import Map, only: [put: 3, get: 3, merge: 2]
   import String, only: [replace: 3, trim: 1]
   import MsgAdapter, only: [to_ollama: 1]
-
   @url "http://#{get_env("MLM_HOST", "localhost")}:11434/api/chat"
-
   def llm(text) when is_binary(text) do
     messages = [%{role: "user", content: "/no_think #{text}"}]
     %{model: model(), messages: messages, stream: false} |> req |> resp |> text
@@ -51,7 +49,6 @@ defmodule Mlm do
 
   defp text([%{"type" => "text", "text" => t} | _]), do: t
   defp text(other), do: other
-
   defp parts(list) when is_list(list), do: list
   defp parts(content) when is_binary(content), do: [%{"text" => content}]
   defp parts({:error, _} = err), do: err
