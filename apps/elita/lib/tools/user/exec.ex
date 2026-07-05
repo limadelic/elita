@@ -6,21 +6,21 @@ defmodule Tools.User.Exec do
 
   def exec(tool, args) when tool != nil do
     log("🛠️", tool.name, ": ", args, :red)
-    result = first(tool.code, tool)
+    result = first(tool.code, tool, args)
     log("", "", "", result, :yellow)
     result
   end
 
   def exec(nil, _args), do: {:error, "Tool not found"}
 
-  defp first([], _), do: "No code found"
+  defp first([], _, _), do: "No code found"
 
-  defp first([code | _], tool) do
+  defp first([code | _], tool, args) do
     tool.imports
     |> modules
     |> imports
     |> plus(code)
-    |> eval
+    |> eval(args)
   end
 
   defp modules(nil), do: []
@@ -40,8 +40,9 @@ defmodule Tools.User.Exec do
     """
   end
 
-  defp eval(text) do
-    {result, _} = eval_string(text, [])
+  defp eval(text, args) do
+    bindings = args |> Map.to_list()
+    {result, _} = eval_string(text, bindings)
     result
   end
 end
