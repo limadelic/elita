@@ -4,6 +4,7 @@ defmodule Tools.Sys.Spawn do
   import Log, only: [log: 5]
   import Map, only: [get: 2, get: 3]
   import Enum, only: [join: 2]
+  import String, only: [to_atom: 1]
   alias Access
 
   def spec(name, state) do
@@ -59,13 +60,12 @@ defmodule Tools.Sys.Spawn do
 
   defp do_spawn(name, configs, state) do
     log(name, configs)
-    {:ok, pid} = start_link(name, configs)
-    register(to_atom(name), nil, pid)
+    started(start_link(name, configs), name)
     {"spawned", state}
   end
 
-  defp to_atom(atom) when is_atom(atom), do: atom
-  defp to_atom(string), do: String.to_atom(string)
+  defp started({:ok, pid}, name), do: register(to_atom(name), nil, pid)
+  defp started({:error, {:already_started, _}}, _name), do: :ok
 
   defp log(name, [name]) do
     log("🚀", name, "", "", :green)
