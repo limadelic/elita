@@ -15,8 +15,12 @@ defmodule Log do
   def log(emoji, head, neck, body, color) do
     body = yaml(body)
     neck = neck <> eol(body)
-    color_code = @colors[color]
-    puts("\e[38;5;" <> to_string(color_code) <> "m" <> emoji <> " " <> head <> neck <> body <> "\e[0m")
+    color_code = Map.get(@colors, color)
+
+    puts(
+      "\e[38;5;" <>
+        to_string(color_code) <> "m" <> emoji <> " " <> head <> neck <> body <> "\e[0m"
+    )
   end
 
   defp eol(body) do
