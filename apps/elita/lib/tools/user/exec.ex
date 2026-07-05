@@ -20,7 +20,7 @@ defmodule Tools.User.Exec do
     |> modules
     |> imports
     |> plus(code)
-    |> eval(args)
+    |> eval(args, tool.name)
   end
 
   defp modules(nil), do: []
@@ -40,9 +40,25 @@ defmodule Tools.User.Exec do
     """
   end
 
-  defp eval(text, args) do
+  defp eval(text, args, name) do
     bindings = args |> Map.to_list()
-    {result, _} = eval_string(text, bindings)
-    result
+    try do
+      {result, _} = eval_string(text, bindings)
+      result
+    rescue
+      error ->
+        missing = extract_missing(error)
+        "#{name} needs #{missing}"
+    end
+  end
+
+  defp extract_missing(error) do
+    message = Exception.message(error)
+    case String.split(message, "undefined variable \"") do
+      [_, rest] ->
+        String.split(rest, "\"") |> List.first()
+      _ ->
+        "arg"
+    end
   end
 end

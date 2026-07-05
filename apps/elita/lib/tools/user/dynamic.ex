@@ -4,7 +4,7 @@ defmodule Tools.User.Load.Schema do
   alias Path
   alias File
 
-  @app_root Path.expand("../..", __DIR__)
+  @app_root Path.expand("../../..", __DIR__)
 
   def get(name, state) do
     name

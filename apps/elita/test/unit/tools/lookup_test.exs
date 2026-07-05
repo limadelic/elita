@@ -2,7 +2,9 @@ defmodule Tools.User.LookupUnitTest do
   use ExUnit.Case
 
   setup do
-    Agent.Registry.create()
+    if :ets.whereis(:agent_registry) == :undefined do
+      Agent.Registry.create()
+    end
     :ok
   end
 
@@ -31,5 +33,16 @@ defmodule Tools.User.LookupUnitTest do
 
     assert schema.name == "lookup"
     assert String.contains?(schema.description, "registry")
+  end
+
+  @tag :main
+  test "lookup with empty args returns error message" do
+    state = %{name: :test}
+
+    {result, ^state} = Tools.User.exec("lookup", %{}, state)
+
+    assert is_binary(result)
+    assert String.contains?(result, "lookup")
+    assert String.contains?(result, "needs")
   end
 end
