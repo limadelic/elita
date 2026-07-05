@@ -18,6 +18,8 @@ end
 defmodule Tools.Sys.Tell do
   import Log, only: [log: 5]
   import Agent.Registry, only: [lookup: 1]
+  import Agent.Session, only: [cast: 2]
+  import Tools.Sys.Safe, only: [call: 2]
 
   defdelegate spec(name, state), to: Tools.Sys.Tell.Schema, as: :get
 
@@ -32,21 +34,23 @@ defmodule Tools.Sys.Tell do
   end
 
   defp route(recipient, message) do
-    case lookup(String.to_atom(recipient)) do
-      {:ok, {_pid, nil}} ->
-        Elita.cast(String.to_atom(recipient), message)
+    lookup(String.to_atom(recipient))
+    |> handle(recipient, message)
+  end
 
-      {:ok, {pid, _folder}} ->
-        Agent.Session.cast(pid, message)
+  defp handle({:ok, {_pid, nil}}, recipient, message) do
+    Elita.cast(String.to_atom(recipient), message)
+  end
 
-      {:error, :not_found} ->
-        try do
-          Elita.cast(String.to_atom(recipient), message)
-        rescue
-          _error -> nil
-        catch
-          :exit, _reason -> nil
-        end
-    end
+  defp handle({:ok, {pid, _folder}}, _recipient, message) do
+    cast(pid, message)
+  end
+
+  defp handle({:error, :not_found}, recipient, message) do
+    defend(recipient, message)
+  end
+
+  defp defend(recipient, message) do
+    call(fn -> Elita.cast(String.to_atom(recipient), message) end, nil)
   end
 end

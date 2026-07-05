@@ -22,6 +22,8 @@ end
 defmodule Tools.Sys.Ask do
   import Log, only: [log: 5]
   import Agent.Registry, only: [lookup: 1]
+  import Agent.Session, only: [ask: 2]
+  import Tools.Sys.Safe, only: [call: 2]
 
   defdelegate spec(name, state), to: Tools.Sys.Ask.Schema, as: :get
 
@@ -36,22 +38,24 @@ defmodule Tools.Sys.Ask do
   end
 
   defp route(recipient, question) do
-    case lookup(String.to_atom(recipient)) do
-      {:ok, {_pid, nil}} ->
-        Elita.call(String.to_atom(recipient), question)
+    lookup(String.to_atom(recipient))
+    |> handle(recipient, question)
+  end
 
-      {:ok, {pid, _folder}} ->
-        {:ok, response} = Agent.Session.ask(pid, question)
-        response
+  defp handle({:ok, {_pid, nil}}, recipient, question) do
+    Elita.call(String.to_atom(recipient), question)
+  end
 
-      {:error, :not_found} ->
-        try do
-          Elita.call(String.to_atom(recipient), question)
-        rescue
-          _error -> "agent not found"
-        catch
-          :exit, _reason -> "agent not found"
-        end
-    end
+  defp handle({:ok, {pid, _folder}}, _recipient, question) do
+    {:ok, response} = ask(pid, question)
+    response
+  end
+
+  defp handle({:error, :not_found}, recipient, question) do
+    guard(recipient, question)
+  end
+
+  defp guard(recipient, question) do
+    call(fn -> Elita.call(String.to_atom(recipient), question) end, "agent not found")
   end
 end
