@@ -29,6 +29,11 @@ defmodule Agent.Router do
     markdown_ask(name, message)
   end
 
+  defp tell_route({:ok, {_pid, nil}}, name, message) do
+    cast(name, message)
+    :ok
+  end
+
   defp tell_route({:ok, {pid, _}}, _name, message) do
     Session.cast(pid, message)
     :ok

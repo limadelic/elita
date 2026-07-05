@@ -5,6 +5,8 @@ defmodule Agent.RouterUnitTest do
     Agent.Registry.create()
     {:ok, pid} = Agent.Session.start_link(name: :dude, folder: "/tmp", runner: &stub_runner/2)
     Agent.Registry.register(:dude, "/tmp", pid)
+    {:ok, nil_pid} = Agent.Session.start_link(name: :root, folder: nil, runner: &stub_runner/2)
+    Agent.Registry.register(:root, nil, nil_pid)
     :ok
   end
 
@@ -15,6 +17,10 @@ defmodule Agent.RouterUnitTest do
 
   test "route tell to registered external agent" do
     :ok = Agent.Router.route(:dude, :tell, "hello")
+  end
+
+  test "route tell to nil folder agent" do
+    :ok = Agent.Router.route(:root, :tell, "hello")
   end
 
   test "route ask to markdown agent falls back" do
