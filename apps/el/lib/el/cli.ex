@@ -2,6 +2,9 @@ defmodule El.CLI do
   import Application, only: [ensure_all_started: 1]
   import IO, only: [puts: 1]
 
+  alias El.Commands.Ask
+  alias El.Commands.Tell
+
   def main(argv) do
     ensure_all_started(:elita)
 
@@ -29,10 +32,10 @@ defmodule El.CLI do
   end
 
   defp execute({:ask, agent, msg}) do
-    El.Commands.Ask.execute(agent, msg)
+    Ask.execute(agent, msg)
   end
 
   defp execute({:tell, agent, msg}) do
-    El.Commands.Tell.execute(agent, msg)
+    Tell.execute(agent, msg)
   end
 end
