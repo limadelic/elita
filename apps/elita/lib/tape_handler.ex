@@ -1,6 +1,8 @@
 defmodule TapeHandler do
+  import System, only: [get_env: 1]
+
   def handle(body, name, fun) do
-    handle_mode(body, name, fun, System.get_env("TAPE"), System.get_env("LIVE"))
+    handle_mode(body, name, fun, get_env("TAPE"), get_env("LIVE"))
   end
 
   defp handle_mode(body, name, fun, "rec", _live), do: Tape.Record.handle(body, name, fun)
