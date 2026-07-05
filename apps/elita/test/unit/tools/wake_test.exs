@@ -3,25 +3,23 @@ defmodule Tools.User.WakeUnitTest do
 
   setup do
     Agent.Registry.create()
-    ensure_registry_started()
-    :ok
-  end
 
-  defp ensure_registry_started do
     case Registry.start_link(keys: :unique, name: ElitaRegistry) do
       {:ok, _pid} -> :ok
       {:error, {:already_started, _pid}} -> :ok
     end
+
+    :ok
   end
 
   @tag :main
   test "wake nil-folder agent dispatches via Elita.call" do
     pid = spawn(fn -> :timer.sleep(:infinity) end)
-    Agent.Registry.register(:elita_agent, nil, pid)
+    Agent.Registry.register(:native, nil, pid)
 
     result =
       try do
-        Tools.User.exec("wake", %{"agent" => "elita_agent", "message" => "hello"}, %{})
+        Tools.User.exec("wake", %{"agent" => "native", "message" => "hello"}, %{})
       rescue
         _error -> :error_from_elita
       catch
@@ -36,12 +34,12 @@ defmodule Tools.User.WakeUnitTest do
   @tag :main
   test "wake binary-folder agent dispatches via Agent.Session.ask" do
     {:ok, pid} =
-      Agent.Session.start_link(name: :session_agent, folder: "/tmp", runner: &stub_runner/2)
+      Agent.Session.start_link(name: :runner, folder: "/tmp", runner: &stub_runner/2)
 
-    Agent.Registry.register(:session_agent, "/tmp", pid)
+    Agent.Registry.register(:runner, "/tmp", pid)
 
     {response, _state} =
-      Tools.User.exec("wake", %{"agent" => "session_agent", "message" => "hello"}, %{})
+      Tools.User.exec("wake", %{"agent" => "runner", "message" => "hello"}, %{})
 
     assert response == "stub response"
   end
