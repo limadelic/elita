@@ -5,7 +5,13 @@ include_tags = if System.get_env("LIVE") == "1", do: [:main, :live], else: [:mai
 
 # Live tests need longer timeout for agent orchestration
 timeout = if System.get_env("LIVE") == "1", do: 600_000, else: 300_000
-ExUnit.start(timeout: timeout, max_cases: 1, exclude: [:prose, :live, :napo], include: include_tags)
+
+ExUnit.start(
+  timeout: timeout,
+  max_cases: 1,
+  exclude: [:prose, :live, :napo],
+  include: include_tags
+)
 
 {:ok, _} = Tape.Writer.start_link(nil)
 
