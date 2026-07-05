@@ -62,8 +62,8 @@ defmodule Tape.Play do
     claim_agent(cassette_key(), ctx.name, idx, get_times(e))
   end
 
-  defp untagged(%{entries: entries} = ctx, idx) when idx >= length(entries) do
-    raise "tape miss: #{ctx.name} #{inspect(ctx.normalized)}"
+  defp untagged(%{entries: entries} = ctx, idx) when idx >= Enum.count(entries) do
+    raise(RuntimeError, "tape miss: #{ctx.name} #{inspect(ctx.normalized)}")
   end
 
   defp untagged(ctx, idx) do
