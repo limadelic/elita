@@ -1,0 +1,47 @@
+[
+  {
+    "a": [
+      {
+        "text": "Who am I talking to?",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "ask greet hello"
+        }
+      ]
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "I am Greeeet, and it's wonderful to meet you, Mike! How can I help you today?",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "ask greet Mike"
+        }
+      ]
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "I am Greeeet, and I'm doing great, thank you for asking, Mike! I'm here and ready to help. How are *you* doing today?",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "ask greet how are you"
+        }
+      ]
+    }
+  }
+]
