@@ -4,8 +4,12 @@ defmodule Mlm do
   import Enum, only: [map: 2]
   import System, only: [get_env: 2]
   import Req, only: [post: 2]
+  import Map, only: [put: 3, get: 3, merge: 2]
+  import Regex, only: [replace: 4]
+  import String, only: [replace: 3, trim: 1]
+  import MsgAdapter, only: [to_ollama: 1]
 
-  @url "http://#{System.get_env("MLM_HOST", "localhost")}:11434/api/chat"
+  @url "http://#{get_env("MLM_HOST", "localhost")}:11434/api/chat"
 
   def llm(text) when is_binary(text) do
     messages = [%{role: "user", content: "/no_think #{text}"}]
@@ -23,12 +27,12 @@ defmodule Mlm do
 
   defp base_body(m, msgs), do: %{model: m, messages: msgs, stream: false}
 
-  defp req(body), do: post(@url, json: Map.put(body, :think, false), receive_timeout: 120_000)
+  defp req(body), do: post(@url, json: put(body, :think, false), receive_timeout: 120_000)
 
   defp model, do: get_env("MLM_MODEL", "qwen3-fast")
 
   defp messages(system, history) do
-    [%{role: "system", content: "/no_think\n#{system}"} | map(history, &MsgAdapter.to_ollama/1)]
+    [%{role: "system", content: "/no_think\n#{system}"} | map(history, &to_ollama/1)]
   end
 
   defp add_tools(body, [%{function_declarations: defs}]),
@@ -42,7 +46,7 @@ defmodule Mlm do
     %{
       name: d[:name],
       description: d[:description],
-      parameters: Map.get(d, :parameters, %{type: "object"})
+      parameters: get(d, :parameters, %{type: "object"})
     }
   end
 
@@ -76,23 +80,23 @@ defmodule Mlm do
 
   defp flatten_nested(args) do
     Enum.reduce(args, %{}, fn
-      {_k, v}, acc when is_map(v) -> Map.merge(acc, flatten_nested(v))
-      {k, v}, acc -> Map.put(acc, k, v)
+      {_k, v}, acc when is_map(v) -> merge(acc, flatten_nested(v))
+      {k, v}, acc -> put(acc, k, v)
     end)
   end
 
   defp strip_think(c) do
-    c |> Regex.replace(~r/<think>.*?<\/think>\s*/s, "") |> String.trim() |> maybe_fallback(c)
+    c |> replace(~r/<think>.*?<\/think>\s*/s, "") |> trim() |> maybe_fallback(c)
   end
 
   defp maybe_fallback("", c) do
-    c |> String.replace(~r/<\/?think>/s, "") |> String.trim()
+    c |> replace(~r/<\/?think>/s, "") |> trim()
   end
 
   defp maybe_fallback(s, _), do: s
 
   defp decode_val(v) when is_binary(v) do
-    v |> String.replace("'", "\"") |> Jason.decode() |> decode_result(v)
+    v |> replace("'", "\"") |> Jason.decode() |> decode_result(v)
   end
 
   defp decode_val(v), do: v
