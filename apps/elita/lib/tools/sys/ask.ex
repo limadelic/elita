@@ -21,12 +21,14 @@ end
 
 defmodule Tools.Sys.Ask do
   import Log, only: [log: 5]
+  import String, only: [to_atom: 1]
+  import Agent.Router, only: [route: 3]
 
   defdelegate spec(name, state), to: Tools.Sys.Ask.Schema, as: :get
 
   def exec(_, %{"recipient" => recipient, "question" => question}, %{name: sender} = state) do
     log("🤔", "#{sender} → #{recipient}", ": ", question, :green)
-    result = Agent.Router.route(String.to_atom(recipient), :ask, question)
+    result = route(to_atom(recipient), :ask, question)
     response = format_response(result, recipient)
     {response, state}
   end
