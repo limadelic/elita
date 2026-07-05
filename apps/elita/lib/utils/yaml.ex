@@ -1,4 +1,5 @@
 defmodule Utils.Yaml do
+  import Kernel
   import String, only: [replace_prefix: 3, to_atom: 1, replace: 3]
   import Map, only: [new: 2]
   import Enum, only: [map: 2]
@@ -20,7 +21,7 @@ defmodule Utils.Yaml do
 
   def yaml(nil), do: nil
 
-  def yaml(args), do: "#{inspect(args)}"
+  def yaml(args), do: inspect(args)
 
   defp encode_yaml(args) do
     render(args)
