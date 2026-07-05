@@ -1,5 +1,6 @@
 defmodule Tools.Sys.Spawn do
   import Elita, only: [start_link: 2]
+  import Agent.Registry, only: [register: 3]
   import Log, only: [log: 5]
   import Map, only: [get: 2, get: 3]
   import Enum, only: [join: 2]
@@ -58,9 +59,13 @@ defmodule Tools.Sys.Spawn do
 
   defp do_spawn(name, configs, state) do
     log(name, configs)
-    start_link(name, configs)
+    {:ok, pid} = start_link(name, configs)
+    register(to_atom(name), nil, pid)
     {"spawned", state}
   end
+
+  defp to_atom(atom) when is_atom(atom), do: atom
+  defp to_atom(string), do: String.to_atom(string)
 
   defp log(name, [name]) do
     log("🚀", name, "", "", :green)
