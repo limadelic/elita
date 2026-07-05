@@ -1,6 +1,10 @@
 defmodule Agent.Registry do
   def create do
-    :ets.new(table(), [:set, :public, :named_table])
+    try do
+      :ets.new(table(), [:set, :public, :named_table])
+    rescue
+      ArgumentError -> table()
+    end
   end
 
   def register(name, folder, pid) do

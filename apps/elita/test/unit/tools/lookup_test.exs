@@ -3,7 +3,6 @@ defmodule Tools.User.LookupUnitTest do
 
   setup do
     Agent.Registry.create()
-    on_exit(fn -> :ets.delete(:agent_registry) end)
     :ok
   end
 

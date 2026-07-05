@@ -40,14 +40,16 @@ defmodule Tools.User.Exec do
     """
   end
 
-  defp eval(text, args, name), do: run(text, args, name)
-
-  defp run(text, args, name) do
+  defp eval(text, args, name) do
     try do
-      result(eval_string(text, args |> Map.to_list()))
+      run(text, args)
     rescue
       error -> failed(error, __STACKTRACE__, name)
     end
+  end
+
+  defp run(text, args) do
+    result(eval_string(text, args |> Map.to_list()))
   end
 
   defp result({res, _}), do: res
