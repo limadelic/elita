@@ -20,7 +20,7 @@ defmodule Utils.Yaml do
 
   def yaml(nil), do: nil
 
-  def yaml(args), do: inspect(args)
+  def yaml(args), do: "#{inspect(args)}"
 
   defp encode_yaml(args) do
     render(args)
