@@ -1,6 +1,9 @@
 defmodule El.CLI do
+  import Application, only: [ensure_all_started: 1]
+  import IO, only: [puts: 1]
+
   def main(argv) do
-    Application.ensure_all_started(:elita)
+    ensure_all_started(:elita)
 
     argv
     |> parse()
@@ -20,9 +23,9 @@ defmodule El.CLI do
   end
 
   defp execute(:usage) do
-    IO.puts("Usage:")
-    IO.puts("  el ask <agent> <message>")
-    IO.puts("  el tell <agent> <message>")
+    puts("Usage:")
+    puts("  el ask <agent> <message>")
+    puts("  el tell <agent> <message>")
   end
 
   defp execute({:ask, agent, msg}) do

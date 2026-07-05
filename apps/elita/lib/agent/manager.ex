@@ -1,18 +1,21 @@
 defmodule Agent.Manager do
   require Logger
+  import Agent.Config, only: [load: 0]
+  import Agent.Session, only: [start_link: 1]
+  import Agent.Registry, only: [register: 3]
 
   def start_agents do
-    Agent.Config.load()
+    load()
     |> Enum.each(&boot_agent/1)
   end
 
   defp boot_agent({name, folder}) do
-    Agent.Session.start_link(name: name, folder: folder)
+    start_link(name: name, folder: folder)
     |> handle_boot_result(name, folder)
   end
 
   defp handle_boot_result({:ok, pid}, name, folder) do
-    Agent.Registry.register(name, folder, pid)
+    register(name, folder, pid)
     Logger.info("Agent booted: #{name} at #{folder}")
   end
 

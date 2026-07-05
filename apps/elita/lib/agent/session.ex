@@ -1,13 +1,14 @@
 defmodule Agent.Session do
   use GenServer
   require Logger
+  import GenServer, only: [start_link: 3, call: 3]
 
   def start_link(opts) do
-    GenServer.start_link(__MODULE__, opts)
+    start_link(__MODULE__, opts, [])
   end
 
   def ask(pid, message) do
-    GenServer.call(pid, {:ask, message}, :infinity)
+    call(pid, {:ask, message}, :infinity)
   end
 
   def cast(pid, message) do

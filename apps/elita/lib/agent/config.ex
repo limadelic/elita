@@ -1,4 +1,6 @@
 defmodule Agent.Config do
+  import String, only: [to_atom: 1, split: 3, trim: 1]
+
   def load do
     System.get_env("AGENT_REGISTRATIONS")
     |> load_entries()
@@ -9,19 +11,19 @@ defmodule Agent.Config do
 
   defp parse(value) do
     value
-    |> String.split(",")
+    |> split(",", [])
     |> Enum.map(&parse_entry/1)
     |> Enum.reject(&is_nil/1)
   end
 
   defp parse_entry(entry) do
     entry
-    |> String.split(":", parts: 2)
+    |> split(":", parts: 2)
     |> to_config()
   end
 
   defp to_config([name, folder]) do
-    {String.to_atom(String.trim(name)), String.trim(folder)}
+    {to_atom(trim(name)), trim(folder)}
   end
 
   defp to_config(_), do: nil

@@ -1,18 +1,20 @@
 defmodule Agent.Router do
   import Elita, only: [call: 2, cast: 2]
+  import Agent.Registry, only: [lookup: 1]
+  import Agent.Session, only: [ask: 2]
 
   def route(name, :ask, message) do
-    Agent.Registry.lookup(name)
+    lookup(name)
     |> ask_route(name, message)
   end
 
   def route(name, :tell, message) do
-    Agent.Registry.lookup(name)
+    lookup(name)
     |> tell_route(name, message)
   end
 
   defp ask_route({:ok, {pid, _}}, _name, message) do
-    Agent.Session.ask(pid, message)
+    ask(pid, message)
   end
 
   defp ask_route({:error, _}, name, message) do
