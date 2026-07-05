@@ -11,6 +11,7 @@ defmodule Elita.Application do
     {:ok, _} = start_supervisor()
     create()
     start_agents()
+    {:ok, _} = Elita.start_link("el", ["el"])
     {:ok, self()}
   end
 
