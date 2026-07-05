@@ -1,4 +1,5 @@
 defmodule Mlm do
+  alias Access
   import Compose, only: [compose: 1]
   import Tools, only: [tools: 2]
   import Enum, only: [map: 2]
