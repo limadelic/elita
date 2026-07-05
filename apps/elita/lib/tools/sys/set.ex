@@ -1,6 +1,7 @@
 defmodule Tools.Sys.Set do
   import Log, only: [log: 5]
   import Mem, only: [depth_table: 0, table: 0]
+  import Map, only: [put: 3]
 
   def spec(name, _state) do
     spec(name)
@@ -21,7 +22,7 @@ defmodule Tools.Sys.Set do
   end
 
   def exec(tool, %{"value" => value} = args, state) do
-    exec(tool, Map.put(args, "key", value), state)
+    exec(tool, put(args, "key", value), state)
   end
 
   def exec(_, _args, state) do
