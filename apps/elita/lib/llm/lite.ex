@@ -1,4 +1,6 @@
 defmodule Lite do
+  import Kernel, except: [map: 2]
+  import Access
   import Compose, only: [compose: 1]
   import Snippet, only: [snip: 2]
   import Tools, only: [tools: 2]
@@ -40,7 +42,7 @@ defmodule Lite do
 
   defp base(composed, history) do
     %{model: model(), max_tokens: 4096}
-    |> put(:system, snip(composed.content, composed[:import]))
+    |> put(:system, snip(composed.content, Access.get(composed, :import)))
     |> put(:messages, history)
   end
 
