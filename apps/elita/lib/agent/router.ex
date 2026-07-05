@@ -2,6 +2,7 @@ defmodule Agent.Router do
   import Elita, only: [call: 2, cast: 2]
   import Agent.Registry, only: [lookup: 1]
   import Agent.Session, only: [ask: 2]
+  alias Agent.Session
 
   def route(name, :ask, message) do
     lookup(name)
@@ -22,7 +23,7 @@ defmodule Agent.Router do
   end
 
   defp tell_route({:ok, {pid, _}}, _name, message) do
-    Agent.Session.cast(pid, message)
+    Session.cast(pid, message)
     :ok
   end
 
