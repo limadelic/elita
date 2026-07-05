@@ -1,4 +1,5 @@
 defmodule Log do
+  import Kernel
   import Utils.Yaml, only: [yaml: 1]
   import String, only: [contains?: 2]
   import IO, only: [puts: 1]
@@ -14,7 +15,8 @@ defmodule Log do
   def log(emoji, head, neck, body, color) do
     body = yaml(body)
     neck = neck <> eol(body)
-    puts("\e[38;5;#{@colors[color]}m#{emoji} #{head}#{neck}#{body}\e[0m")
+    color_code = @colors[color]
+    puts("\e[38;5;" <> to_string(color_code) <> "m" <> emoji <> " " <> head <> neck <> body <> "\e[0m")
   end
 
   defp eol(body) do
