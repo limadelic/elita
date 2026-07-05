@@ -1,6 +1,6 @@
 ---
 name: napo
-tools: spawn, cast, set, get, whoami
+tools: spawn, cast, set, get
 includes: attempt, split, judge
 ---
 
