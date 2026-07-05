@@ -1,0 +1,158 @@
+[
+  {
+    "a": [
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01TDgGcxZHhNUgt28GaNxEdg",
+        "input": {
+          "name": "greet"
+        },
+        "name": "lookup",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "content": "ask greet hello",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Now I'll spawn the agent and then wake it with the message:",
+        "type": "text"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01TvCVfMjd3QbFr4xHEDM5PX",
+        "input": {
+          "name": "greet"
+        },
+        "name": "spawn",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "content": [
+            {
+              "content": "not found",
+              "tool_use_id": "toolu_01TDgGcxZHhNUgt28GaNxEdg",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "n": 3
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Now I'll wake it with the message:",
+        "type": "text"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01WSvBkev2KPF3tVX76Mvayc",
+        "input": {
+          "message": "hello",
+          "name": "greet"
+        },
+        "name": "wake",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "content": [
+            {
+              "content": "spawned",
+              "tool_use_id": "toolu_01TvCVfMjd3QbFr4xHEDM5PX",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "n": 5
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Let me try with the tell function instead:",
+        "type": "text"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01W6hWEC8JPmBYtBzFYBsVbQ",
+        "input": {
+          "message": "hello",
+          "recipient": "greet"
+        },
+        "name": "tell",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "content": [
+            {
+              "content": "wake needs ",
+              "tool_use_id": "toolu_01WSvBkev2KPF3tVX76Mvayc",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "n": 7
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "The message \"hello\" has been sent to the greet agent.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "tool_result",
+              "content": "sent",
+              "tool_use_id": "toolu_01W6hWEC8JPmBYtBzFYBsVbQ"
+            }
+          ]
+        }
+      ],
+      "n": 9
+    }
+  }
+]
