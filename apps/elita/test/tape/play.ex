@@ -49,7 +49,7 @@ defmodule Tape.Play do
   end
 
   defp sort_matches(matches, count) do
-    {t, o} = Enum.split_with(matches, &(Map.get(&1["q"], "n") == count))
+    {t, o} = Enum.split_with(matches, &(Map.get(Map.get(&1, "q"), "n") == count))
     t ++ o
   end
 
