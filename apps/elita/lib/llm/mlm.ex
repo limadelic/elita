@@ -1,12 +1,10 @@
 defmodule Mlm do
-  alias Access
   import Compose, only: [compose: 1]
   import Tools, only: [tools: 2]
   import Enum, only: [map: 2]
   import System, only: [get_env: 2]
   import Req, only: [post: 2]
   import Map, only: [put: 3, get: 3, merge: 2]
-  import Regex, only: [replace: 4]
   import String, only: [replace: 3, trim: 1]
   import MsgAdapter, only: [to_ollama: 1]
 
@@ -45,8 +43,8 @@ defmodule Mlm do
 
   defp func_spec(d) do
     %{
-      name: Access.get(d, :name),
-      description: Access.get(d, :description),
+      name: d[:name],
+      description: d[:description],
       parameters: get(d, :parameters, %{type: "object"})
     }
   end
