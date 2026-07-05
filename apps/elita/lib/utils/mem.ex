@@ -1,4 +1,7 @@
 defmodule Mem do
+  import Kernel
+  import String, only: [to_atom: 1]
+
   def init_global do
     create_depth_table(:ets.whereis(depth_table()))
   end
@@ -14,7 +17,7 @@ defmodule Mem do
   end
 
   def table do
-    :"mem_#{:erlang.pid_to_list(self())}"
+    String.to_atom("mem_" <> to_string(:erlang.pid_to_list(self())))
   end
 
   def depth_table do
