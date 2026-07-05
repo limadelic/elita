@@ -1,5 +1,6 @@
 defmodule Agent.Manager do
   require Logger
+  import Kernel
   import Agent.Config, only: [load: 0]
   import Agent.Session, only: [start_link: 1]
   import Agent.Registry, only: [register: 3]
