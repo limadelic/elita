@@ -1,8 +1,9 @@
 defmodule Tools.Sys.Spawn do
   import Elita, only: [start_link: 2]
   import Log, only: [log: 5]
-  import Map, only: [get: 3]
+  import Map, only: [get: 2, get: 3]
   import Enum, only: [join: 2]
+  alias Access
 
   def spec(name, state) do
     %{
@@ -13,7 +14,7 @@ defmodule Tools.Sys.Spawn do
   end
 
   def exec(_, %{"name" => %{"name" => name} = inner}, state) do
-    do_spawn(name, fetch_configs(inner["configs"], name), state)
+    do_spawn(name, fetch_configs(get(inner, "configs"), name), state)
   end
 
   def exec(_, %{"name" => name} = args, state) do
