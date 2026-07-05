@@ -16,18 +16,37 @@ defmodule Tools.Sys.Tell.Schema do
 end
 
 defmodule Tools.Sys.Tell do
-  import Elita, only: [cast: 2]
   import Log, only: [log: 5]
+  import Agent.Registry, only: [lookup: 1]
 
   defdelegate spec(name, state), to: Tools.Sys.Tell.Schema, as: :get
 
   def exec(_, %{"recipient" => recipient, "message" => message}, %{name: sender} = state) do
     log("📢", "#{sender} → #{recipient}", ": ", message, :yellow)
-    cast(recipient, "[from #{sender}] #{message}")
+    route(recipient, "[from #{sender}] #{message}")
     {"sent", state}
   end
 
   def exec(_, _args, state) do
     {"tell needs recipient and message", state}
+  end
+
+  defp route(recipient, message) do
+    case lookup(String.to_atom(recipient)) do
+      {:ok, {_pid, nil}} ->
+        Elita.cast(String.to_atom(recipient), message)
+
+      {:ok, {pid, _folder}} ->
+        Agent.Session.cast(pid, message)
+
+      {:error, :not_found} ->
+        try do
+          Elita.cast(String.to_atom(recipient), message)
+        rescue
+          _error -> nil
+        catch
+          :exit, _reason -> nil
+        end
+    end
   end
 end
