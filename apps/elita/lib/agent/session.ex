@@ -2,6 +2,11 @@ defmodule Agent.Session do
   use GenServer
   require Logger
   import GenServer, only: [start_link: 3, call: 3]
+  import String, only: [trim: 1]
+  import Port, only: [open: 2, close: 1]
+  import System, only: [find_executable: 1]
+  import Logger, only: [error: 1, warning: 1]
+  import Keyword, only: [fetch!: 2, get: 3]
 
   def start_link(opts) do
     start_link(__MODULE__, opts, [])
@@ -17,9 +22,9 @@ defmodule Agent.Session do
 
   @impl true
   def init(opts) do
-    name = Keyword.fetch!(opts, :name)
-    folder = Keyword.fetch!(opts, :folder)
-    runner = Keyword.get(opts, :runner, &default_runner/2)
+    name = fetch!(opts, :name)
+    folder = fetch!(opts, :folder)
+    runner = get(opts, :runner, &default_runner/2)
     {:ok, %{name: name, folder: folder, runner: runner}}
   end
 
@@ -37,12 +42,12 @@ defmodule Agent.Session do
 
   defp default_runner(message, folder) do
     find_claude()
-    |> Port.open(port_opts(message, folder))
+    |> open(port_opts(message, folder))
     |> handle_port()
   end
 
   defp handle_port({:error, reason}) do
-    Logger.error("Failed to open Claude port: #{inspect(reason)}")
+    error("Failed to open Claude port: #{inspect(reason)}")
     "ERROR: Could not start Claude"
   end
 
@@ -70,23 +75,23 @@ defmodule Agent.Session do
   end
 
   defp handle_port_msg({:exit_status, _}, _port, acc) do
-    String.trim(acc)
+    trim(acc)
   end
 
   defp on_timeout(acc) do
-    Logger.warning("Claude port timeout")
+    warning("Claude port timeout")
     acc
   end
 
   defp find_claude do
-    System.find_executable("claude") |> require_executable()
+    find_executable("claude") |> require_executable()
   end
 
   defp require_executable(nil), do: raise("claude executable not found")
   defp require_executable(path), do: path
 
   defp close_safe(port) do
-    Port.close(port)
+    close(port)
   rescue
     _ -> :ok
   end
