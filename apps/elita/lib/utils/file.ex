@@ -8,8 +8,7 @@ defmodule Utils.File do
   @paths [
     "",
     "agents/",
-    "test/specs/",
-    "test/silk/"
+    "test/specs/"
   ]
 
   def file(name) do
