@@ -23,8 +23,8 @@ defmodule Tools.Sys.Agent do
   defdelegate spec(name, state), to: Tools.Sys.Agent.Schema, as: :get
 
   def exec(_, %{"name" => name}, state) do
-    agent = file(name <> ".md")
-    log("🤖", name, ":", "\n" <> agent <> "\n", :white)
+    agent = file("#{name}.md")
+    log("🤖", name, ":", "\n#{agent}\n", :white)
     {agent, state}
   end
 end
