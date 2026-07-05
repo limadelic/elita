@@ -1,4 +1,5 @@
 defmodule History do
+  import Kernel
   import Msg, only: [tool_result: 2]
   import Enum, only: [any?: 2, find_value: 3, filter: 2, map: 2]
 
@@ -12,7 +13,7 @@ defmodule History do
   end
 
   def record({:error, reason}, state) do
-    {:reply, "Error: #{reason}", state}
+    {:reply, "Error: " <> to_string(reason), state}
   end
 
   defp reply_or_act(true, _text, state, messages) do
