@@ -1,4 +1,4 @@
-defmodule Tools.Sys.WakeUnitTest do
+defmodule Tools.User.WakeUnitTest do
   use ExUnit.Case
 
   setup do
@@ -19,14 +19,13 @@ defmodule Tools.Sys.WakeUnitTest do
 
     result =
       try do
-        {response, _state} =
-          Tools.Sys.Wake.exec(:wake, %{"name" => "native", "message" => "hello"}, %{})
-
-        response
+        Tools.User.exec("wake", %{"name" => "native", "message" => "hello"}, %{})
       rescue
         _error -> :error_from_elita
       catch
         :exit, _reason -> :error_from_elita
+      else
+        res -> res
       end
 
     refute result == "agent not found"
@@ -40,7 +39,7 @@ defmodule Tools.Sys.WakeUnitTest do
     Agent.Registry.register(:runner, "/tmp", pid)
 
     {response, _state} =
-      Tools.Sys.Wake.exec(:wake, %{"name" => "runner", "message" => "hello"}, %{})
+      Tools.User.exec("wake", %{"name" => "runner", "message" => "hello"}, %{})
 
     assert response == "stub response"
   end
@@ -48,7 +47,7 @@ defmodule Tools.Sys.WakeUnitTest do
   @tag :main
   test "wake unknown agent returns error string" do
     {response, _state} =
-      Tools.Sys.Wake.exec(:wake, %{"name" => "unknown", "message" => "hello"}, %{})
+      Tools.User.exec("wake", %{"name" => "unknown", "message" => "hello"}, %{})
 
     assert response == "agent not found"
   end
