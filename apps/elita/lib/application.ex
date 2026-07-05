@@ -8,7 +8,7 @@ defmodule Elita.Application do
 
   def start(_type, _args) do
     init_global()
-    start_supervisor()
+    {:ok, _} = start_supervisor()
     create()
     start_agents()
     {:ok, self()}
