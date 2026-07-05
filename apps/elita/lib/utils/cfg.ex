@@ -6,7 +6,7 @@ defmodule Cfg do
   import Utils.File, only: [file: 1]
 
   def config(name) do
-    md = name |> to_string() |> then(&file(&1 <> ".md"))
+    md = file("#{name}.md")
     md |> parse |> tools |> includes |> default(name: name)
   end
 
