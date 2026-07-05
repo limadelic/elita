@@ -84,7 +84,7 @@ defmodule Tape.Play do
 
   defp if_match(false, _entry, ctx, idx), do: untagged(ctx, idx + 1)
 
-  defp claim_result(true, entry, _ctx, _idx), do: entry["a"]
+  defp claim_result(true, entry, _ctx, _idx), do: Map.get(entry, "a")
   defp claim_result(false, _entry, ctx, idx), do: untagged(ctx, idx + 1)
 
   defp get_times(%{"times" => times}), do: times
