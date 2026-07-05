@@ -1,6 +1,6 @@
 defmodule Tools.User.Exec do
   import String, only: [split: 2, trim: 1]
-  import Enum, only: [map: 2, join: 2]
+  import Enum, only: [map: 2, join: 2, at: 2]
   import Code, only: [eval_string: 2]
   import Log, only: [log: 5]
 
@@ -40,25 +40,24 @@ defmodule Tools.User.Exec do
     """
   end
 
-  defp eval(text, args, name) do
-    bindings = args |> Map.to_list()
+  defp eval(text, args, name), do: run(text, args, name)
+
+  defp run(text, args, name) do
     try do
-      {result, _} = eval_string(text, bindings)
-      result
+      result(eval_string(text, args |> Map.to_list()))
     rescue
-      error ->
-        missing = extract_missing(error)
-        "#{name} needs #{missing}"
+      error -> failed(error, __STACKTRACE__, name)
     end
   end
 
-  defp extract_missing(error) do
-    message = Exception.message(error)
-    case String.split(message, "undefined variable \"") do
-      [_, rest] ->
-        String.split(rest, "\"") |> List.first()
-      _ ->
-        "arg"
-    end
+  defp result({res, _}), do: res
+
+  defp failed(%CompileError{description: desc}, _, name),
+    do: "#{name} needs #{var(desc)}"
+
+  defp failed(error, stack, _), do: reraise(error, stack)
+
+  defp var(desc) do
+    at(split(desc, "\""), 1)
   end
 end
