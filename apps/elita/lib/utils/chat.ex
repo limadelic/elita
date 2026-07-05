@@ -13,13 +13,13 @@ defmodule Chat do
   end
 
   defp chat(agent, name) do
-    start(String.to_atom(to_string(name) <> "@127.0.0.1"))
+    start(:"#{name}@127.0.0.1")
     {:ok, _pid} = start_link(agent, name)
     repl(name)
   end
 
   defp repl(agent) do
-    gets(to_string(agent) <> " > ") |> handle_input(agent)
+    gets("#{agent} > ") |> handle_input(agent)
   end
 
   defp handle_input(:eof, _agent) do
