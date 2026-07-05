@@ -12,7 +12,7 @@ defmodule History do
   end
 
   def record({:error, reason}, state) do
-    {:reply, "Error: " <> to_string(reason), state}
+    {:reply, "Error: #{reason}", state}
   end
 
   defp reply_or_act(true, _text, state, messages) do
