@@ -19,8 +19,8 @@ defmodule Tools.Sys.Silk do
   defdelegate spec(name, state), to: Tools.Sys.Silk.Schema, as: :get
 
   def exec(_, %{"name" => name}, state) do
-    content = file("#{name}.md")
-    log("🕸️", name, ":", "\n#{content}\n", :white)
+    content = file(name <> ".md")
+    log("🕸️", name, ":", "\n" <> content <> "\n", :white)
     {content, state}
   end
 end
