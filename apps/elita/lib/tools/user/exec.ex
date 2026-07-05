@@ -24,6 +24,7 @@ defmodule Tools.User.Exec do
   end
 
   defp modules(nil), do: []
+  defp modules(""), do: []
   defp modules(text), do: split(text, ",") |> map(&trim/1)
 
   defp imports(modules) when is_list(modules) do
@@ -49,8 +50,12 @@ defmodule Tools.User.Exec do
   end
 
   defp run(text, args) do
-    result(eval_string(text, args |> Map.to_list()))
+    bindings = args |> Map.to_list() |> map(&atomize_key/1)
+    result(eval_string(text, bindings))
   end
+
+  defp atomize_key({k, v}) when is_binary(k), do: {String.to_atom(k), v}
+  defp atomize_key({k, v}), do: {k, v}
 
   defp result({res, _}), do: res
 

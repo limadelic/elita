@@ -1,4 +1,4 @@
-defmodule Tools.Sys.WakeUnitTest do
+defmodule Tools.User.WakeUnitTest do
   use ExUnit.Case
 
   setup do
@@ -8,16 +8,18 @@ defmodule Tools.Sys.WakeUnitTest do
     :ok
   end
 
+  @tag :main
   test "wake registered agent returns stub response" do
     {response, _state} =
-      Tools.Sys.Wake.exec(nil, %{"agent" => "runner", "message" => "hello"}, %{})
+      Tools.User.exec("wake", %{"agent" => "runner", "message" => "hello"}, %{})
 
     assert response == "stub response"
   end
 
+  @tag :main
   test "wake unknown agent returns error string" do
     {response, _state} =
-      Tools.Sys.Wake.exec(nil, %{"agent" => "unknown", "message" => "hello"}, %{})
+      Tools.User.exec("wake", %{"agent" => "unknown", "message" => "hello"}, %{})
 
     assert response == "agent not found"
   end
