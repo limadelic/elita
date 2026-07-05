@@ -17,7 +17,7 @@ defmodule Tape.Play do
   defp ensure_entries(_), do: :ok
 
   defp validate_cassette(nil), do: :ok
-  defp validate_cassette(cassette), do: raise("no cassette: #{cassette}")
+  defp validate_cassette(cassette), do: raise(RuntimeError, "no cassette: #{cassette}")
 
   defp answer(ctx) do
     agent_answer(ctx) |> handle_answer(ctx)
