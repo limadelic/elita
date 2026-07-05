@@ -5,7 +5,7 @@
         "caller": {
           "type": "direct"
         },
-        "id": "toolu_015AzJxAzRCrqdiogxDk6HPe",
+        "id": "toolu_01U51WBSdbiCHxkzPFHfBpaN",
         "input": {
           "name": "greet"
         },
@@ -27,14 +27,14 @@
   {
     "a": [
       {
-        "text": "Now I'll spawn the agent and ask it the question:",
+        "text": "Now I'll spawn the agent and then wake it with the message:",
         "type": "text"
       },
       {
         "caller": {
           "type": "direct"
         },
-        "id": "toolu_01Ho1FYPhCUUDCqXVEAP7EGh",
+        "id": "toolu_016qsaSdF8cjGu4B9SP1n2P4",
         "input": {
           "name": "greet"
         },
@@ -49,7 +49,7 @@
           "content": [
             {
               "content": "not found",
-              "tool_use_id": "toolu_015AzJxAzRCrqdiogxDk6HPe",
+              "tool_use_id": "toolu_01U51WBSdbiCHxkzPFHfBpaN",
               "type": "tool_result"
             }
           ],
@@ -65,12 +65,12 @@
         "caller": {
           "type": "direct"
         },
-        "id": "toolu_013scv6hxvtsLd1RSXSH9KMT",
+        "id": "toolu_01U9qyQrEoHdzWbPZ6QRPSKh",
         "input": {
-          "question": "hello",
-          "recipient": "greet"
+          "agent": "greet",
+          "message": "hello"
         },
-        "name": "ask",
+        "name": "wake",
         "type": "tool_use"
       }
     ],
@@ -81,7 +81,7 @@
           "content": [
             {
               "content": "spawned",
-              "tool_use_id": "toolu_01Ho1FYPhCUUDCqXVEAP7EGh",
+              "tool_use_id": "toolu_016qsaSdF8cjGu4B9SP1n2P4",
               "type": "tool_result"
             }
           ],
@@ -123,7 +123,7 @@
           "content": [
             {
               "content": "Who am I talking to?",
-              "tool_use_id": "toolu_013scv6hxvtsLd1RSXSH9KMT",
+              "tool_use_id": "toolu_01U9qyQrEoHdzWbPZ6QRPSKh",
               "type": "tool_result"
             }
           ],
@@ -139,11 +139,12 @@
         "caller": {
           "type": "direct"
         },
-        "id": "toolu_01HVDdvJovt9FfhsFeuNJSNb",
+        "id": "toolu_01GTUw6W4UFzTHeE3ALTzfif",
         "input": {
-          "name": "greet"
+          "agent": "greet",
+          "message": "Mike"
         },
-        "name": "lookup",
+        "name": "wake",
         "type": "tool_use"
       }
     ],
@@ -156,69 +157,6 @@
         }
       ],
       "n": 9
-    }
-  },
-  {
-    "a": [
-      {
-        "caller": {
-          "type": "direct"
-        },
-        "id": "toolu_01VmDSwSY13LDuZ4cMZETvA2",
-        "input": {
-          "name": "greet"
-        },
-        "name": "spawn",
-        "type": "tool_use"
-      }
-    ],
-    "q": {
-      "agent": "el",
-      "messages": [
-        {
-          "content": [
-            {
-              "content": "not found",
-              "tool_use_id": "toolu_01HVDdvJovt9FfhsFeuNJSNb",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        }
-      ],
-      "n": 11
-    }
-  },
-  {
-    "a": [
-      {
-        "caller": {
-          "type": "direct"
-        },
-        "id": "toolu_012VPSrpQgpEVx1nDCRVZ9PF",
-        "input": {
-          "question": "Mike",
-          "recipient": "greet"
-        },
-        "name": "ask",
-        "type": "tool_use"
-      }
-    ],
-    "q": {
-      "agent": "el",
-      "messages": [
-        {
-          "content": [
-            {
-              "content": "spawned",
-              "tool_use_id": "toolu_01VmDSwSY13LDuZ4cMZETvA2",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        }
-      ],
-      "n": 13
     }
   },
   {
@@ -253,14 +191,14 @@
           "content": [
             {
               "content": "I am Greeeet, and it's wonderful to meet you, Mike! 🎉 How can I help you today?",
-              "tool_use_id": "toolu_012VPSrpQgpEVx1nDCRVZ9PF",
+              "tool_use_id": "toolu_01GTUw6W4UFzTHeE3ALTzfif",
               "type": "tool_result"
             }
           ],
           "role": "user"
         }
       ],
-      "n": 15
+      "n": 11
     }
   },
   {
@@ -269,11 +207,12 @@
         "caller": {
           "type": "direct"
         },
-        "id": "toolu_01A9GczhDsb1UMmvNqBGkuzS",
+        "id": "toolu_01LjmnKW18RJQZCjBsS4skxe",
         "input": {
-          "name": "greet"
+          "agent": "greet",
+          "message": "how are you"
         },
-        "name": "lookup",
+        "name": "wake",
         "type": "tool_use"
       }
     ],
@@ -285,76 +224,13 @@
           "role": "user"
         }
       ],
-      "n": 17
+      "n": 13
     }
   },
   {
     "a": [
       {
-        "caller": {
-          "type": "direct"
-        },
-        "id": "toolu_01JD8Uy9HWdDRARxh1vNjBfZ",
-        "input": {
-          "name": "greet"
-        },
-        "name": "spawn",
-        "type": "tool_use"
-      }
-    ],
-    "q": {
-      "agent": "el",
-      "messages": [
-        {
-          "content": [
-            {
-              "content": "not found",
-              "tool_use_id": "toolu_01A9GczhDsb1UMmvNqBGkuzS",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        }
-      ],
-      "n": 19
-    }
-  },
-  {
-    "a": [
-      {
-        "caller": {
-          "type": "direct"
-        },
-        "id": "toolu_017i5uYwVEWXTPnN2J6UR6Nk",
-        "input": {
-          "question": "how are you",
-          "recipient": "greet"
-        },
-        "name": "ask",
-        "type": "tool_use"
-      }
-    ],
-    "q": {
-      "agent": "el",
-      "messages": [
-        {
-          "content": [
-            {
-              "content": "spawned",
-              "tool_use_id": "toolu_01JD8Uy9HWdDRARxh1vNjBfZ",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        }
-      ],
-      "n": 21
-    }
-  },
-  {
-    "a": [
-      {
-        "text": "I am Greeeet, and I'm doing great, thanks for asking, Mike! I'm here and ready to help. How are *you* doing?",
+        "text": "I am Greeeet and I'm doing great, thanks for asking, Mike! I'm here and ready to chat with you. How are *you* doing today?",
         "type": "text"
       }
     ],
@@ -372,7 +248,7 @@
   {
     "a": [
       {
-        "text": "I am Greeeet, and I'm doing great, thanks for asking, Mike! I'm here and ready to help. How are *you* doing?",
+        "text": "I am Greeeet and I'm doing great, thanks for asking, Mike! I'm here and ready to chat with you. How are *you* doing today?",
         "type": "text"
       }
     ],
@@ -384,13 +260,13 @@
           "content": [
             {
               "type": "tool_result",
-              "content": "I am Greeeet, and I'm doing great, thanks for asking, Mike! I'm here and ready to help. How are *you* doing?",
-              "tool_use_id": "toolu_017i5uYwVEWXTPnN2J6UR6Nk"
+              "content": "I am Greeeet and I'm doing great, thanks for asking, Mike! I'm here and ready to chat with you. How are *you* doing today?",
+              "tool_use_id": "toolu_01LjmnKW18RJQZCjBsS4skxe"
             }
           ]
         }
       ],
-      "n": 23
+      "n": 15
     }
   }
 ]
