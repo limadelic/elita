@@ -1,4 +1,5 @@
 defmodule Cfg do
+  import Kernel
   import String, only: [split: 2, split: 3, trim: 1, to_atom: 1]
   import Enum, only: [map: 2, reject: 2, reduce: 3]
   import Map, only: [new: 1, put: 3, put_new: 3]
@@ -6,7 +7,7 @@ defmodule Cfg do
   import Utils.File, only: [file: 1]
 
   def config(name) do
-    md = file("#{name}.md")
+    md = name |> to_string() |> then(&file(&1 <> ".md"))
     md |> parse |> tools |> includes |> default(name: name)
   end
 
