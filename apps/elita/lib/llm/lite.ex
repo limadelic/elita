@@ -1,6 +1,5 @@
 defmodule Lite do
-  import Kernel, except: [map: 2]
-  import Access
+  alias Access
   import Compose, only: [compose: 1]
   import Snippet, only: [snip: 2]
   import Tools, only: [tools: 2]
