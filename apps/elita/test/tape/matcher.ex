@@ -1,4 +1,6 @@
 defmodule Tape.Matcher do
+  import Kernel, only: [to_string: 1]
+
   def contains(a, b) do
     dispatch_contains(a, b)
   end
