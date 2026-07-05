@@ -1,4 +1,5 @@
 defmodule MsgAdapter do
+  import Kernel, except: [map: 2]
   import Enum, only: [map: 2, find_value: 2, join: 2]
 
   def to_ollama(%{role: "user", content: content}) when is_binary(content) do
