@@ -1,21 +1,27 @@
 ---
 name: wake
-description: Wake an agent with a message and return response
+description: Wake an agent with a message
 imports: 
 ---
 
 # Wake
 
-Wake an agent and get its response.
+Look up an agent in the registry and send it a message.
 
-Uses Agent.Router to handle agent dispatch with fallback to direct call if not registered.
+Dispatches by folder kind:
+- nil folder → markdown/Elita agent via Elita.call
+- binary folder → external session via Agent.Session.ask
 
-Returns the agent's response or error message.
+Returns the agent's response, or "agent not found" if not registered.
 
 ```elixir
-case Agent.Router.route(String.to_atom(agent), :ask, message) do
-  {:ok, response} -> response
-  {:error, :not_found} -> "agent not found"
-  other -> other
+case Agent.Registry.lookup(String.to_atom(agent)) do
+  {:ok, {_pid, nil}} ->
+    Elita.call(String.to_atom(agent), message)
+  {:ok, {pid, _folder}} ->
+    {:ok, response} = Agent.Session.ask(pid, message)
+    response
+  {:error, :not_found} ->
+    "agent not found"
 end
 ```

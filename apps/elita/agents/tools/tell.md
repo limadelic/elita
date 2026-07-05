@@ -6,16 +6,23 @@ imports:
 
 # Tell
 
-Tell an agent a message without waiting for response.
+Look up an agent in the registry and send it a message without waiting for response.
 
-Uses Agent.Router to handle agent dispatch with fallback to direct cast if not registered.
+Dispatches by folder kind:
+- nil folder → markdown/Elita agent via Elita.cast
+- binary folder → external session via Agent.Session.cast
 
-Returns acknowledgment or error.
+Returns acknowledgment: "message sent" or "agent not found" if not registered.
 
 ```elixir
-case Agent.Router.route(String.to_atom(recipient), :tell, message) do
-  :ok -> "message sent"
-  {:error, :not_found} -> "agent not found"
-  other -> other
+case Agent.Registry.lookup(String.to_atom(recipient)) do
+  {:ok, {_pid, nil}} ->
+    Elita.cast(String.to_atom(recipient), message)
+    "message sent"
+  {:ok, {pid, _folder}} ->
+    Agent.Session.cast(pid, message)
+    "message sent"
+  {:error, :not_found} ->
+    "agent not found"
 end
 ```

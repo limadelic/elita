@@ -2,10 +2,14 @@
   {
     "a": [
       {
+        "text": "I'll look up the greet agent, and if it's registered, wake it with your message.",
+        "type": "text"
+      },
+      {
         "caller": {
           "type": "direct"
         },
-        "id": "toolu_01U51WBSdbiCHxkzPFHfBpaN",
+        "id": "toolu_01WieqgqPoQLxpzQ3RHJDHuw",
         "input": {
           "name": "greet"
         },
@@ -27,14 +31,14 @@
   {
     "a": [
       {
-        "text": "Now I'll spawn the agent and then wake it with the message:",
+        "text": "The agent isn't registered, so I'll spawn it and then wake it with your message.",
         "type": "text"
       },
       {
         "caller": {
           "type": "direct"
         },
-        "id": "toolu_016qsaSdF8cjGu4B9SP1n2P4",
+        "id": "toolu_01N6mCV1f9JUwHtNpYnzTZ1j",
         "input": {
           "name": "greet"
         },
@@ -49,7 +53,7 @@
           "content": [
             {
               "content": "not found",
-              "tool_use_id": "toolu_01U51WBSdbiCHxkzPFHfBpaN",
+              "tool_use_id": "toolu_01WieqgqPoQLxpzQ3RHJDHuw",
               "type": "tool_result"
             }
           ],
@@ -65,7 +69,7 @@
         "caller": {
           "type": "direct"
         },
-        "id": "toolu_01U9qyQrEoHdzWbPZ6QRPSKh",
+        "id": "toolu_01QWwbWjJFd3ChZHWzS9Uk7C",
         "input": {
           "agent": "greet",
           "message": "hello"
@@ -81,7 +85,7 @@
           "content": [
             {
               "content": "spawned",
-              "tool_use_id": "toolu_016qsaSdF8cjGu4B9SP1n2P4",
+              "tool_use_id": "toolu_01N6mCV1f9JUwHtNpYnzTZ1j",
               "type": "tool_result"
             }
           ],
@@ -123,7 +127,7 @@
           "content": [
             {
               "content": "Who am I talking to?",
-              "tool_use_id": "toolu_01U9qyQrEoHdzWbPZ6QRPSKh",
+              "tool_use_id": "toolu_01QWwbWjJFd3ChZHWzS9Uk7C",
               "type": "tool_result"
             }
           ],
@@ -139,7 +143,7 @@
         "caller": {
           "type": "direct"
         },
-        "id": "toolu_01GTUw6W4UFzTHeE3ALTzfif",
+        "id": "toolu_01JiBVjJeU3SmprViW7ZTFP7",
         "input": {
           "agent": "greet",
           "message": "Mike"
@@ -162,7 +166,7 @@
   {
     "a": [
       {
-        "text": "I am Greeeet, and it's wonderful to meet you, Mike! 🎉 How can I help you today?",
+        "text": "I am Greeeet, and it's wonderful to meet you, Mike! 👋 How can I help you today?",
         "type": "text"
       }
     ],
@@ -180,7 +184,7 @@
   {
     "a": [
       {
-        "text": "I am Greeeet, and it's wonderful to meet you, Mike! 🎉 How can I help you today?",
+        "text": "I am Greeeet, and it's wonderful to meet you, Mike! 👋 How can I help you today?",
         "type": "text"
       }
     ],
@@ -190,8 +194,8 @@
         {
           "content": [
             {
-              "content": "I am Greeeet, and it's wonderful to meet you, Mike! 🎉 How can I help you today?",
-              "tool_use_id": "toolu_01GTUw6W4UFzTHeE3ALTzfif",
+              "content": "I am Greeeet, and it's wonderful to meet you, Mike! 👋 How can I help you today?",
+              "tool_use_id": "toolu_01JiBVjJeU3SmprViW7ZTFP7",
               "type": "tool_result"
             }
           ],
@@ -207,7 +211,7 @@
         "caller": {
           "type": "direct"
         },
-        "id": "toolu_01LjmnKW18RJQZCjBsS4skxe",
+        "id": "toolu_014aH438rqFQkPLZ7UhBwa8e",
         "input": {
           "agent": "greet",
           "message": "how are you"
@@ -230,7 +234,7 @@
   {
     "a": [
       {
-        "text": "I am Greeeet and I'm doing great, thanks for asking, Mike! I'm here and ready to chat with you. How are *you* doing today?",
+        "text": "I am Greeeet, and I'm doing great, thanks for asking! I'm here and ready to chat with you, Mike. How are *you* doing today?",
         "type": "text"
       }
     ],
@@ -248,7 +252,7 @@
   {
     "a": [
       {
-        "text": "I am Greeeet and I'm doing great, thanks for asking, Mike! I'm here and ready to chat with you. How are *you* doing today?",
+        "text": "I am Greeeet, and I'm doing great, thanks for asking! I'm here and ready to chat with you, Mike. How are *you* doing today?",
         "type": "text"
       }
     ],
@@ -260,8 +264,8 @@
           "content": [
             {
               "type": "tool_result",
-              "content": "I am Greeeet and I'm doing great, thanks for asking, Mike! I'm here and ready to chat with you. How are *you* doing today?",
-              "tool_use_id": "toolu_01LjmnKW18RJQZCjBsS4skxe"
+              "content": "I am Greeeet, and I'm doing great, thanks for asking! I'm here and ready to chat with you, Mike. How are *you* doing today?",
+              "tool_use_id": "toolu_014aH438rqFQkPLZ7UhBwa8e"
             }
           ]
         }

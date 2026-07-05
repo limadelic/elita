@@ -65,7 +65,10 @@ defmodule Tools.Sys.Spawn do
   end
 
   defp started({:ok, pid}, name), do: register(to_atom(name), nil, pid)
-  defp started({:error, {:already_started, _}}, _name), do: :ok
+
+  defp started({:error, {:already_started, pid}}, name) do
+    register(to_atom(name), nil, pid)
+  end
 
   defp log(name, [name]) do
     log("🚀", name, "", "", :green)
