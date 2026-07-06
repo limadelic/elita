@@ -48,16 +48,21 @@ defmodule El.Commands.Claude do
   defp maybe_parse_env(_, _), do: nil
 
   defp parse_env_size(rows, cols) do
-    with {row, ""} <- Integer.parse(rows),
-         {col, ""} <- Integer.parse(cols),
-         true <- row > 0 and col > 0 do
-      {row, col}
-    else
+    try do
+      Integer.parse(rows) |> check_row(cols)
+    rescue
       _ -> nil
     end
-  rescue
-    _ -> nil
   end
+
+  defp check_row({row, ""}, cols) do
+    {Integer.parse(cols), row} |> check_col()
+  end
+
+  defp check_row(_, _), do: nil
+
+  defp check_col({{col, ""}, row}) when row > 0 and col > 0, do: {row, col}
+  defp check_col(_), do: nil
 
   defp read_stty do
     System.cmd("sh", ["-c", "stty size < /dev/tty"], stderr_to_stdout: true)
