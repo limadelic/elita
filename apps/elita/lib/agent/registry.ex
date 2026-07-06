@@ -1,7 +1,10 @@
 defmodule Agent.Registry do
   def create do
-    :ets.new(table(), [:set, :public, :named_table])
+    table() |> :ets.info() |> build()
   end
+
+  defp build(:undefined), do: :ets.new(table(), [:set, :public, :named_table])
+  defp build(_info), do: table()
 
   def register(name, folder, pid) do
     :ets.insert(table(), {name, pid, folder})

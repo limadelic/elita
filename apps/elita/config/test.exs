@@ -11,7 +11,7 @@ clock_fn =
   case {System.get_env("TAPE"), System.get_env("LIVE")} do
     {"rec", _} -> nil
     {_, "1"} -> nil
-    {_, _} -> fn -> {{2025, 7, 2}, {23, 45, 30}} end
+    {_, _} -> fn -> {{2025, 7, 7}, {10, 0, 0}} end
   end
 
 config :elita, :tape_handler, tape_handler

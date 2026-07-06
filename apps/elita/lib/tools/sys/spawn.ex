@@ -1,8 +1,10 @@
 defmodule Tools.Sys.Spawn do
   import Elita, only: [start_link: 2]
+  import Agent.Registry, only: [register: 3]
   import Log, only: [log: 5]
   import Map, only: [get: 2, get: 3]
   import Enum, only: [join: 2]
+  import String, only: [to_atom: 1]
   alias Access
 
   def spec(name, state) do
@@ -58,8 +60,14 @@ defmodule Tools.Sys.Spawn do
 
   defp do_spawn(name, configs, state) do
     log(name, configs)
-    start_link(name, configs)
+    started(start_link(name, configs), name)
     {"spawned", state}
+  end
+
+  defp started({:ok, pid}, name), do: register(to_atom(name), nil, pid)
+
+  defp started({:error, {:already_started, pid}}, name) do
+    register(to_atom(name), nil, pid)
   end
 
   defp log(name, [name]) do

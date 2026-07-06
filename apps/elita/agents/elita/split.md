@@ -1,6 +1,6 @@
 ---
 name: split
-tools: spawn, tell, whoami, get, set
+tools: spawn, tell, get, set
 ---
 
 # Split Phase

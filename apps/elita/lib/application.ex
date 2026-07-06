@@ -8,9 +8,14 @@ defmodule Elita.Application do
 
   def start(_type, _args) do
     init_global()
+    boot()
+  end
+
+  defp boot do
     {:ok, _} = start_supervisor()
     create()
     start_agents()
+    {:ok, _} = Elita.start_link("el", ["el"])
     {:ok, self()}
   end
 

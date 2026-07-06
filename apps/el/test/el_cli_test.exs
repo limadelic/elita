@@ -21,4 +21,12 @@ defmodule ElCliTest do
 
     assert String.contains?(output, "Who am I talking to")
   end
+
+  test "el ls returns no sessions or list" do
+    output = capture_io(fn ->
+      El.CLI.main(["ls"])
+    end)
+
+    assert String.contains?(output, "sessions") or String.contains?(output, "claude_")
+  end
 end

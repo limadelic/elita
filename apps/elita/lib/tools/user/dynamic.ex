@@ -1,20 +1,22 @@
 defmodule Tools.User.Load.Schema do
   import Tools.User.Cfg, only: [parse: 1]
   import Tools.User.Def, only: [spec: 2]
+  import Tools.User.Validate, only: [check: 1]
   alias Path
   alias File
 
-  @app_root Path.expand("../..", __DIR__)
+  @app_root Path.expand("../../..", __DIR__)
 
   def get(name, state) do
     name
     |> path()
     |> load()
+    |> check()
     |> spec(state)
   end
 
   def tool(name) do
-    name |> path() |> load()
+    name |> path() |> load() |> check()
   end
 
   defp path(name) do

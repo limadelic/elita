@@ -21,15 +21,15 @@ end
 
 defmodule Tools.Sys.Ask do
   import Log, only: [log: 5]
-  import String, only: [to_atom: 1]
-  import Agent.Router, only: [route: 3]
+  import Agent.Registry, only: [lookup: 1]
+  import Agent.Session, only: [ask: 2]
+  import Tools.Sys.Safe, only: [call: 2]
 
   defdelegate spec(name, state), to: Tools.Sys.Ask.Schema, as: :get
 
   def exec(_, %{"recipient" => recipient, "question" => question}, %{name: sender} = state) do
     log("🤔", "#{sender} → #{recipient}", ": ", question, :green)
-    result = route(to_atom(recipient), :ask, question)
-    response = format_response(result, recipient)
+    response = route(recipient, question)
     {response, state}
   end
 
@@ -37,7 +37,25 @@ defmodule Tools.Sys.Ask do
     {"ask needs recipient and question", state}
   end
 
-  defp format_response({:ok, resp}, _recipient), do: resp
-  defp format_response({:error, :not_found}, recipient), do: "#{recipient} not found"
-  defp format_response(resp, _recipient), do: resp
+  defp route(recipient, question) do
+    lookup(String.to_atom(recipient))
+    |> handle(recipient, question)
+  end
+
+  defp handle({:ok, {_pid, nil}}, recipient, question) do
+    Elita.call(String.to_atom(recipient), question)
+  end
+
+  defp handle({:ok, {pid, _folder}}, _recipient, question) do
+    {:ok, response} = ask(pid, question)
+    response
+  end
+
+  defp handle({:error, :not_found}, recipient, question) do
+    guard(recipient, question)
+  end
+
+  defp guard(recipient, question) do
+    call(fn -> Elita.call(String.to_atom(recipient), question) end, "agent not found")
+  end
 end
