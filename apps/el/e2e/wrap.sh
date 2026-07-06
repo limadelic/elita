@@ -17,12 +17,15 @@ main() {
     echo "=== Claude Wrap E2E Test Suite ==="
     echo ""
 
+    local log="/tmp/wrap_test.txt"
+    rm -f "$log"
+
     local start=$(date +%s.%N)
 
     # ONE session - linear test with all beats
     ( expect <<'EXPECT_SCRIPT'
 set timeout 40
-log_file -a /tmp/wrap_test.txt
+log_file /tmp/wrap_test.txt
 
 spawn $::env(CLAUDE_BIN) claude
 
@@ -71,7 +74,6 @@ EXPECT_SCRIPT
     local wall_time=$(echo "$end - $start" | bc)
 
     # Verify all beats
-    local log="/tmp/wrap_test.txt"
     local pass=1
 
     echo "Verifying test execution..."
@@ -142,6 +144,25 @@ EXPECT_SCRIPT
         echo "⚠ Cleanup: $orphans survivors (aggressive cleanup)"
         pkill -9 -f "script.*stty" 2>/dev/null || true
         sleep 1
+    fi
+
+    echo ""
+
+    # Wall time check - must be >= 20s for real session
+    if (( $(echo "$wall_time < 20" | bc -l) )); then
+        echo "✗ Wall time too short: ${wall_time}s (< 20s, process likely crashed)"
+        pass=0
+    else
+        echo "✓ Wall time valid: ${wall_time}s"
+    fi
+
+    # Check for Elixir stacktraces (ArgumentError, RuntimeError, ** patterns)
+    if grep -qE "ArgumentError|RuntimeError|\*\*" "$log" 2>/dev/null; then
+        echo "✗ Elixir stacktrace detected in capture"
+        grep -nE "ArgumentError|RuntimeError" "$log" 2>/dev/null | head -3
+        pass=0
+    else
+        echo "✓ No Elixir stacktraces"
     fi
 
     echo ""
