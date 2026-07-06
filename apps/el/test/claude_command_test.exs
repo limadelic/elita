@@ -90,6 +90,21 @@ defmodule ClaudeCommandTest do
     assert translate_newline("a\nb\nc") == "a\rb\rc"
   end
 
+  test "node_collision? returns true when node is live" do
+    ping_fn = fn _node -> :pong end
+    assert node_collision?(:"el_claude@127.0.0.1", ping_fn) == true
+  end
+
+  test "node_collision? returns false when node is not live" do
+    ping_fn = fn _node -> :pang end
+    assert node_collision?(:"el_claude@127.0.0.1", ping_fn) == false
+  end
+
+  test "node_collision? handles ping errors gracefully" do
+    ping_fn = fn _node -> raise "network error" end
+    assert node_collision?(:"el_claude@127.0.0.1", ping_fn) == false
+  end
+
   # Helpers matching claude.ex logic
   defp parse_size({output, 0}) do
     String.trim(output)
@@ -128,5 +143,14 @@ defmodule ClaudeCommandTest do
 
   defp translate_newline(chunk) do
     String.replace(chunk, "\n", "\r")
+  end
+
+  defp node_collision?(node, ping_fn) do
+    case ping_fn.(node) do
+      :pong -> true
+      :pang -> false
+    end
+  rescue
+    _ -> false
   end
 end

@@ -5,6 +5,13 @@ defmodule El.Commands.Claude do
   import El.Distribution, only: [start: 0]
 
   def execute do
+    Node.set_cookie(:elita)
+
+    if node_collision?() do
+      IO.puts("session already live — use el tell claude, or /exit it first")
+      System.halt(1)
+    end
+
     get_size = &read_terminal_size/0
     input = &translate_newline/1
     cmd(~c"stty raw -echo -isig < /dev/tty")
@@ -68,5 +75,14 @@ defmodule El.Commands.Claude do
 
   defp translate_newline(chunk) do
     String.replace(chunk, "\n", "\r")
+  end
+
+  defp node_collision? do
+    case Node.ping(:"el_claude@127.0.0.1") do
+      :pong -> true
+      :pang -> false
+    end
+  rescue
+    _ -> false
   end
 end
