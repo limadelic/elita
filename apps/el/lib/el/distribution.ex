@@ -12,7 +12,7 @@ defmodule El.Distribution do
 
       {:error, {:already_started, _pid}} ->
         Node.set_cookie(:elita)
-        :ok
+        :taken
 
       {:error, reason} ->
         IO.write(:stderr, "Warning: Failed to start distribution: #{inspect(reason)}\n")

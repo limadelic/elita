@@ -91,30 +91,11 @@ defmodule ClaudeCommandTest do
     assert translate_newline("a\nb\nc") == "a\rb\rc"
   end
 
-  test "node_collision? returns true when node is live" do
-    ping_fn = fn _node -> :pong end
-    assert node_collision?(:"claude_elita@127.0.0.1", ping_fn) == true
-  end
-
-  test "node_collision? returns false when node is not live" do
-    ping_fn = fn _node -> :pang end
-    assert node_collision?(:"claude_elita@127.0.0.1", ping_fn) == false
-  end
-
-  test "node_collision? handles ping errors gracefully" do
-    ping_fn = fn _node -> raise "network error" end
-    assert node_collision?(:"claude_elita@127.0.0.1", ping_fn) == false
-  end
-
-  test "execute calls distribution_start before node_collision" do
+  test "execute handles distribution_start :ok" do
     deps = [
       distribution_start: fn _ ->
         send(self(), {:call, :distribution_start})
         :ok
-      end,
-      node_collision: fn _ ->
-        send(self(), {:call, :node_collision})
-        false
       end,
       cmd: fn _ -> :ok end,
       run: fn _, _ -> :ok end
@@ -124,9 +105,21 @@ defmodule ClaudeCommandTest do
       El.Commands.Claude.execute(:default, deps)
     end)
 
-    # Verify distribution_start was called before node_collision
     assert_receive {:call, :distribution_start}, 100
-    assert_receive {:call, :node_collision}, 100
+  end
+
+  test "execute exits when distribution_start returns :taken" do
+    deps = [
+      distribution_start: fn _ -> :taken end,
+      cmd: fn _ -> :ok end,
+      run: fn _, _ -> :ok end
+    ]
+
+    output = capture_io(fn ->
+      catch_exit(El.Commands.Claude.execute(:default, deps))
+    end)
+
+    assert String.contains?(output, "already live")
   end
 
   # Helpers matching claude.ex logic
@@ -167,14 +160,5 @@ defmodule ClaudeCommandTest do
 
   defp translate_newline(chunk) do
     String.replace(chunk, "\n", "\r")
-  end
-
-  defp node_collision?(node, ping_fn) do
-    case ping_fn.(node) do
-      :pong -> true
-      :pang -> false
-    end
-  rescue
-    _ -> false
   end
 end

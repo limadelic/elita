@@ -7,7 +7,6 @@ defmodule El.Commands.Claude do
   def execute(name \\ :default) do
     execute(name, [
       distribution_start: &Distribution.start/1,
-      node_collision: &node_collision?/1,
       cmd: &cmd/1,
       run: &run/2
     ])
@@ -15,15 +14,12 @@ defmodule El.Commands.Claude do
 
   def execute(name, deps) when is_list(deps) do
     session_name = resolve_session_name(name)
-    node_name = :"claude_#{session_name}@127.0.0.1"
     process_name = String.to_atom(session_name)
 
     distribution_start = Keyword.get(deps, :distribution_start)
-    distribution_start.(session_name)
+    result = distribution_start.(session_name)
 
-    node_collision = Keyword.get(deps, :node_collision)
-
-    if node_collision.(node_name) do
+    if result == :taken do
       IO.puts("session #{session_name} already live — el tell #{session_name} <msg>, or /exit it")
       System.halt(1)
     end
@@ -105,12 +101,4 @@ defmodule El.Commands.Claude do
     name
   end
 
-  defp node_collision?(node_name) do
-    case Node.ping(node_name) do
-      :pong -> true
-      :pang -> false
-    end
-  rescue
-    _ -> false
-  end
 end

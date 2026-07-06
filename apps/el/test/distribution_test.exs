@@ -1,12 +1,9 @@
 defmodule DistributionTest do
   use ExUnit.Case
 
-  test "start returns :ok when Node.start succeeds" do
-    assert El.Distribution.start() == :ok
-  end
-
-  test "start returns :ok even if already running" do
-    assert El.Distribution.start() == :ok
+  test "start returns :ok or :taken" do
+    result = El.Distribution.start()
+    assert result in [:ok, :taken]
   end
 
   test "cookie is set to :elita" do
