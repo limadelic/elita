@@ -92,17 +92,17 @@ defmodule ClaudeCommandTest do
 
   test "node_collision? returns true when node is live" do
     ping_fn = fn _node -> :pong end
-    assert node_collision?(:"el_claude@127.0.0.1", ping_fn) == true
+    assert node_collision?(:"claude_elita@127.0.0.1", ping_fn) == true
   end
 
   test "node_collision? returns false when node is not live" do
     ping_fn = fn _node -> :pang end
-    assert node_collision?(:"el_claude@127.0.0.1", ping_fn) == false
+    assert node_collision?(:"claude_elita@127.0.0.1", ping_fn) == false
   end
 
   test "node_collision? handles ping errors gracefully" do
     ping_fn = fn _node -> raise "network error" end
-    assert node_collision?(:"el_claude@127.0.0.1", ping_fn) == false
+    assert node_collision?(:"claude_elita@127.0.0.1", ping_fn) == false
   end
 
   # Helpers matching claude.ex logic
