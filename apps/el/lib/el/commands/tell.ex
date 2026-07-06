@@ -14,12 +14,22 @@ defmodule El.Commands.Tell do
   end
 
   defp inject(msg, target) do
-    text = if String.contains?(msg, "\n") do
-      "\e[200~#{msg}\e[201~\r"
-    else
-      "#{msg}\r"
+    text = cond do
+      String.contains?(msg, "\n") ->
+        "\e[200~#{msg}\e[201~\r"
+      is_control_sequence(msg) ->
+        msg
+      true ->
+        "#{msg}\r"
     end
     GenServer.cast({:claude, target}, {:inject, text})
+  end
+
+  defp is_control_sequence(msg) do
+    case :binary.at(msg, 0) do
+      nil -> false
+      byte -> byte < 32 or byte == 0x1B
+    end
   end
 
   defp default(agent, msg) do
