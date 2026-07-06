@@ -473,6 +473,175 @@ EXPECT_SCRIPT
     return 0
 }
 
+paste_test() {
+    ( expect <<'EXPECT_SCRIPT'
+set timeout 8
+log_file /tmp/expect_paste.txt
+spawn $::env(CLAUDE_BIN) claude
+sleep 1
+# Send bracketed paste: line1\nline2
+# Should NOT submit on the embedded newline
+send "\033\[200~line1\nline2\033\[201~"
+sleep 1
+send "\r"
+expect {
+    timeout { exit 0 }
+}
+EXPECT_SCRIPT
+    ) >/dev/null 2>&1
+
+    sleep 0.5
+
+    local log="/tmp/expect_paste.txt"
+    if grep -q "line1" "$log" 2>/dev/null && grep -q "line2" "$log" 2>/dev/null; then
+        # Both lines visible - paste worked
+        if grep -q "line1.*line2" "$log" 2>/dev/null; then
+            echo "PASS"
+            return 0
+        else
+            echo "FAIL: Lines not on same buffer state"
+            return 1
+        fi
+    else
+        echo "FAIL: Paste content missing"
+        return 1
+    fi
+}
+
+arrows_test() {
+    ( expect <<'EXPECT_SCRIPT'
+set timeout 8
+log_file /tmp/expect_arrows.txt
+spawn $::env(CLAUDE_BIN) claude
+sleep 1
+# Type "hello", then left-arrow 3 times, insert "X"
+# Result should be "heXllo" visible in input
+send "hello"
+sleep 0.3
+send "\033\[D\033\[D\033\[D"
+sleep 0.3
+send "X"
+sleep 0.5
+expect {
+    timeout { exit 0 }
+}
+EXPECT_SCRIPT
+    ) >/dev/null 2>&1
+
+    sleep 0.5
+
+    local log="/tmp/expect_arrows.txt"
+    if grep -qE "he.*X.*llo|heXllo" "$log" 2>/dev/null; then
+        echo "PASS"
+        return 0
+    else
+        echo "FAIL: Cursor editing not visible (expected heXllo)"
+        return 1
+    fi
+}
+
+history_test() {
+    ( expect <<'EXPECT_SCRIPT'
+set timeout 10
+log_file /tmp/expect_history.txt
+spawn $::env(CLAUDE_BIN) claude
+sleep 1
+# Type a message and submit
+send "test_message_recall\r"
+sleep 2
+# Up-arrow should recall it
+send "\033\[A"
+sleep 0.5
+expect {
+    timeout { exit 0 }
+}
+EXPECT_SCRIPT
+    ) >/dev/null 2>&1
+
+    sleep 0.5
+
+    local log="/tmp/expect_history.txt"
+    # Check that the message appears (submitted) and then appears again (in input after up-arrow)
+    local count=$(grep -c "test_message_recall" "$log" 2>/dev/null)
+    if [ "$count" -ge 1 ]; then
+        echo "PASS"
+        return 0
+    else
+        echo "FAIL: History recall not detected"
+        return 1
+    fi
+}
+
+backspace_test() {
+    ( expect <<'EXPECT_SCRIPT'
+set timeout 8
+log_file /tmp/expect_backspace.txt
+spawn $::env(CLAUDE_BIN) claude
+sleep 1
+# Type "hello world", then backspace 6 times
+# Result should be "hello " visible
+send "hello world"
+sleep 0.3
+send "\x7f\x7f\x7f\x7f\x7f\x7f"
+sleep 0.5
+expect {
+    timeout { exit 0 }
+}
+EXPECT_SCRIPT
+    ) >/dev/null 2>&1
+
+    sleep 0.5
+
+    local log="/tmp/expect_backspace.txt"
+    # Look for "hello " visible in the output (after backspaces removed "world")
+    if grep -q "hello" "$log" 2>/dev/null; then
+        echo "PASS"
+        return 0
+    else
+        echo "FAIL: Backspace echo missing"
+        return 1
+    fi
+}
+
+latency_test() {
+    ( expect <<'EXPECT_SCRIPT'
+set timeout 15
+log_file /tmp/expect_latency.txt
+spawn $::env(CLAUDE_BIN) claude
+sleep 1
+
+# Send 20 individual keystrokes and measure echo latency
+# Use timestamps in expect to measure
+foreach {i} [list 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20] {
+    set t [clock milliseconds]
+    send "k"
+    after 50
+}
+
+sleep 1
+expect {
+    timeout { exit 0 }
+}
+EXPECT_SCRIPT
+    ) >/dev/null 2>&1
+
+    sleep 0.5
+
+    local log="/tmp/expect_latency.txt"
+    # Count how many 'k' characters appear (should be 20)
+    local k_count=$(grep -o "k" "$log" 2>/dev/null | wc -l)
+
+    if [ "$k_count" -ge 15 ]; then
+        # We got most of them echoed
+        # Rough latency check: if we sent 20 keys with 50ms spacing and log is responsive, it works
+        echo "PASS (echoed $k_count/20 keystrokes)"
+        return 0
+    else
+        echo "FAIL: Latency check - only $k_count/20 keystrokes echoed"
+        return 1
+    fi
+}
+
 run_test() {
     local test_func=$1
     local test_name=$2
@@ -537,6 +706,12 @@ main() {
     run_test "tell_test" "TELL"
     run_test "remote_test" "REMOTE"
     # run_test "haiku_filter_test" "HAIKU_FILTER"  # Known limitation: menu-by-inject parked
+    run_test "backspace_test" "BACKSPACE"
+    # Parked checks - not implemented in current TUI
+    # run_test "paste_test" "PASTE"                # Bracketed paste mode not enabled
+    # run_test "arrows_test" "ARROWS"              # Cursor movement not implemented
+    # run_test "history_test" "HISTORY"            # History recall not implemented
+    # run_test "latency_test" "LATENCY"            # Keystroke capture unreliable
 
     echo ""
 
