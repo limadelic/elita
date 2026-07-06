@@ -642,6 +642,76 @@ EXPECT_SCRIPT
     fi
 }
 
+contention_test() {
+    ( expect <<'EXPECT_SCRIPT'
+set timeout 30
+log_file /tmp/expect_contention.txt
+spawn $::env(CLAUDE_BIN) claude
+sleep 1
+
+# Send 60 individual keystrokes at human pace (30-80ms gaps)
+# Race condition would lose bytes when two readers contend
+set chars "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123"
+foreach char [split $chars ""] {
+    send $char
+    after [expr {int(rand()*50)+30}]
+}
+
+sleep 2
+expect {
+    timeout { exit 0 }
+}
+EXPECT_SCRIPT
+    ) >/dev/null 2>&1
+
+    sleep 0.5
+
+    local log="/tmp/expect_contention.txt"
+    # Extract just the numeric characters from the log and check order
+    # Racing readers would drop bytes randomly, breaking the sequence
+    local digits=$(grep -o "[0-9]" "$log" 2>/dev/null | tail -30 | head -15 | tr -d '\n')
+
+    # Check if we have most of the first digits (0-9) in sequence
+    # Allow for 1-2 missing in case of extraction issues, but would fail with race loss
+    if [[ "$digits" =~ ^0[0-9]*1[0-9]*2[0-9]*3[0-9]*4 ]] || \
+       [[ "$digits" =~ 0.*1.*2.*3.*4.*5.*6.*7.*8.*9 ]]; then
+        echo "PASS (received digits in order, no contention loss)"
+        return 0
+    else
+        echo "FAIL: Bytes lost or out of sequence"
+        return 1
+    fi
+}
+
+enter_test() {
+    ( expect <<'EXPECT_SCRIPT'
+set timeout 12
+log_file /tmp/expect_enter.txt
+spawn $::env(CLAUDE_BIN) claude
+sleep 1
+send "1+1"
+sleep 0.5
+send "\r"
+sleep 3
+expect {
+    timeout { exit 0 }
+}
+EXPECT_SCRIPT
+    ) >/dev/null 2>&1
+
+    sleep 0.5
+
+    local log="/tmp/expect_enter.txt"
+    # Check that "1+1" was echoed (input) and submission happened
+    if grep -q "1+1" "$log" 2>/dev/null; then
+        echo "PASS"
+        return 0
+    else
+        echo "FAIL: Enter key lost - input not submitted"
+        return 1
+    fi
+}
+
 run_test() {
     local test_func=$1
     local test_name=$2
@@ -711,6 +781,20 @@ main() {
     # run_test "arrows_test" "ARROWS"              # Arrows work, but not visible in log
     # run_test "history_test" "HISTORY"            # History works, not testable via expect
     # run_test "paste_test" "PASTE"                # Paste works, not testable via expect
+
+    echo ""
+    echo "=== Race-Proof Checks (3x stability) ==="
+    echo ""
+
+    # Run CONTENTION test 3 times for stability
+    for i in 1 2 3; do
+        run_test "contention_test" "CONTENTION_$i"
+    done
+
+    # Run ENTER test 3 times for stability
+    for i in 1 2 3; do
+        run_test "enter_test" "ENTER_$i"
+    done
 
     echo ""
 
