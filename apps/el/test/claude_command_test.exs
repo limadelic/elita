@@ -7,9 +7,9 @@ defmodule ClaudeCommandTest do
     assert parse_size({"50 160\n", 0}) == {50, 160}
   end
 
-  test "parse_size returns default on error" do
-    assert parse_size({"error", 1}) == {24, 80}
-    assert parse_size({"", 0}) == {24, 80}
+  test "parse_size returns nil on error" do
+    assert parse_size({"error", 1}) == nil
+    assert parse_size({"", 0}) == nil
   end
 
   test "extract_size correctly parses row and col values" do
@@ -18,10 +18,48 @@ defmodule ClaudeCommandTest do
     assert extract_size(["50", "160"]) == {50, 160}
   end
 
-  test "extract_size returns default on invalid input" do
-    assert extract_size(["42"]) == {24, 80}
-    assert extract_size([]) == {24, 80}
-    assert extract_size(["not", "numbers"]) == {24, 80}
+  test "extract_size returns nil on invalid input" do
+    assert extract_size(["42"]) == nil
+    assert extract_size([]) == nil
+    assert extract_size(["not", "numbers"]) == nil
+  end
+
+  test "read_env returns size when both EL_ROWS and EL_COLS are valid integers" do
+    System.put_env("EL_ROWS", "42")
+    System.put_env("EL_COLS", "120")
+    assert read_env() == {42, 120}
+
+    System.put_env("EL_ROWS", "100")
+    System.put_env("EL_COLS", "160")
+    assert read_env() == {100, 160}
+  end
+
+  test "read_env returns nil when EL_ROWS is missing" do
+    System.delete_env("EL_ROWS")
+    System.put_env("EL_COLS", "120")
+    assert read_env() == nil
+  end
+
+  test "read_env returns nil when EL_COLS is missing" do
+    System.put_env("EL_ROWS", "42")
+    System.delete_env("EL_COLS")
+    assert read_env() == nil
+  end
+
+  test "read_env returns nil when values are not integers" do
+    System.put_env("EL_ROWS", "not_a_number")
+    System.put_env("EL_COLS", "120")
+    assert read_env() == nil
+
+    System.put_env("EL_ROWS", "42")
+    System.put_env("EL_COLS", "not_a_number")
+    assert read_env() == nil
+  end
+
+  test "read_env returns nil when values have trailing characters" do
+    System.put_env("EL_ROWS", "42x")
+    System.put_env("EL_COLS", "120")
+    assert read_env() == nil
   end
 
   # Helpers matching claude.ex logic
@@ -31,13 +69,28 @@ defmodule ClaudeCommandTest do
     |> extract_size()
   end
 
-  defp parse_size(_), do: {24, 80}
+  defp parse_size(_), do: nil
 
   defp extract_size([rows, cols]) do
     {String.to_integer(rows), String.to_integer(cols)}
   rescue
-    _ -> {24, 80}
+    _ -> nil
   end
 
-  defp extract_size(_), do: {24, 80}
+  defp extract_size(_), do: nil
+
+  defp read_env do
+    case {System.get_env("EL_ROWS"), System.get_env("EL_COLS")} do
+      {rows, cols} when is_binary(rows) and is_binary(cols) ->
+        with {row, ""} <- Integer.parse(rows),
+             {col, ""} <- Integer.parse(cols) do
+          {row, col}
+        else
+          _ -> nil
+        end
+
+      _ ->
+        nil
+    end
+  end
 end
