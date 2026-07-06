@@ -30,11 +30,16 @@ defmodule El.Commands.Tell do
   defp node_target(agent, host), do: :"claude_#{agent}@#{host}"
 
   defp attempt_inject(msg, target, agent, env_module) do
-    process_name = String.to_atom(agent)
-    case Node.connect(target) do
-      true -> inject(msg, target, process_name)
-      false -> fail_inject(agent, msg, env_module)
-    end
+    context = {msg, target, String.to_atom(agent), agent, env_module}
+    dispatch_by_connection(Node.connect(target), context)
+  end
+
+  defp dispatch_by_connection(true, {msg, target, process_name, _agent, _env_module}) do
+    inject(msg, target, process_name)
+  end
+
+  defp dispatch_by_connection(false, {msg, _target, _process_name, agent, env_module}) do
+    fail_inject(agent, msg, env_module)
   end
 
   defp fail_inject(agent, msg, env_module) do

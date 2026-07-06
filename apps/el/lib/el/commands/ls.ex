@@ -2,12 +2,14 @@ defmodule El.Commands.Ls do
   import IO, only: [puts: 1]
 
   def execute(opts \\ []) do
-    display(build_sessions(
-      safe_get_names(Keyword.get(opts, :net_adm, :net_adm), Keyword.get(opts, :host, nil)),
-      Keyword.get(opts, :filter, &default_filter/1),
-      Keyword.get(opts, :ping, &default_ping/1),
-      Keyword.get(opts, :extract, &default_extract/1)
-    ))
+    {Keyword.get(opts, :net_adm, :net_adm), Keyword.get(opts, :host, nil),
+     Keyword.get(opts, :filter, &default_filter/1), Keyword.get(opts, :ping, &default_ping/1),
+     Keyword.get(opts, :extract, &default_extract/1)}
+    |> call_build()
+  end
+
+  defp call_build({net_adm, host, filter, ping, extract}) do
+    display(build_sessions(safe_get_names(net_adm, host), filter, ping, extract))
   end
 
   defp build_sessions(names, filter, ping, extract) do
