@@ -25,79 +25,79 @@ defmodule Tools.User.Validate do
   end
 
   defp scan(code_list, allowed, name) do
-    reduce(code_list, :ok, &check_snippet(&1, allowed, name, &2))
+    reduce(code_list, :ok, &fold(&1, allowed, name, &2))
   end
 
-  defp check_snippet(_code, _allowed, _name, {:error, _} = err), do: err
+  defp fold(_code, _allowed, _name, {:error, _} = err), do: err
 
-  defp check_snippet(code, allowed, name, :ok) do
+  defp fold(code, allowed, name, :ok) do
     analyze(code, allowed, name)
   end
 
   defp analyze(code, allowed, name) do
     case string_to_quoted(code) do
-      {:ok, ast} -> check_vars(ast, allowed, name)
+      {:ok, ast} -> vet(ast, allowed, name)
       {:error, _} -> :ok
     end
   end
 
-  defp check_vars(ast, allowed, name) do
-    bound = collect_bound(ast)
-    refs = collect_refs(ast)
-    undefined = find(refs, &is_undefined?(&1, allowed, bound))
+  defp vet(ast, allowed, name) do
+    bound = bound(ast)
+    refs = refs(ast)
+    undefined = find(refs, &loose?(&1, allowed, bound))
 
     if undefined, do: {:error, name, undefined}, else: :ok
   end
 
-  defp is_undefined?(var, allowed, bound) do
+  defp loose?(var, allowed, bound) do
     not member?(allowed, var) and not member?(bound, var)
   end
 
-  defp collect_bound(ast) do
-    {_ast, bound} = prewalk(ast, [], &track_bound/2)
+  defp bound(ast) do
+    {_ast, bound} = prewalk(ast, [], &bind/2)
     bound
   end
 
-  defp track_bound({:=, _meta, [pattern, _expr]}, bound) do
-    {nil, extract_names(pattern, bound)}
+  defp bind({:=, _meta, [pattern, _expr]}, bound) do
+    {nil, names(pattern, bound)}
   end
 
-  defp track_bound(node, bound) do
+  defp bind(node, bound) do
     {node, bound}
   end
 
-  defp extract_names({name, _, nil}, acc)
+  defp names({name, _, nil}, acc)
        when is_atom(name) and name not in [:_, nil, true, false] do
     [Atom.to_string(name) | acc]
   end
 
-  defp extract_names({:_, _, nil}, acc), do: acc
+  defp names({:_, _, nil}, acc), do: acc
 
-  defp extract_names({_name, _, args}, acc) when is_list(args) do
-    reduce(args, acc, &extract_names/2)
+  defp names({_name, _, args}, acc) when is_list(args) do
+    reduce(args, acc, &names/2)
   end
 
-  defp extract_names({left, right}, acc) do
-    extract_names(left, extract_names(right, acc))
+  defp names({left, right}, acc) do
+    names(left, names(right, acc))
   end
 
-  defp extract_names(list, acc) when is_list(list) do
-    reduce(list, acc, &extract_names/2)
+  defp names(list, acc) when is_list(list) do
+    reduce(list, acc, &names/2)
   end
 
-  defp extract_names(_node, acc), do: acc
+  defp names(_node, acc), do: acc
 
-  defp collect_refs(ast) do
-    {_ast, refs} = prewalk(ast, [], &track_refs/2)
+  defp refs(ast) do
+    {_ast, refs} = prewalk(ast, [], &mark/2)
     refs
   end
 
-  defp track_refs({name, _meta, nil}, refs)
+  defp mark({name, _meta, nil}, refs)
        when is_atom(name) and name not in [nil, true, false] do
     {nil, [Atom.to_string(name) | refs]}
   end
 
-  defp track_refs(node, refs) do
+  defp mark(node, refs) do
     {node, refs}
   end
 
