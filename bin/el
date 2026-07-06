@@ -1,3 +1,3 @@
 #!/bin/sh
 size=$(stty size 2>/dev/null)
-EL_ROWS=${size% *} EL_COLS=${size#* } exec "$(dirname "$0")/../apps/el/el" "$@"
+EL_ROWS=${size% *} EL_COLS=${size#* } exec "$(dirname "$(readlink -f "$0")")/../apps/el/el" "$@"
