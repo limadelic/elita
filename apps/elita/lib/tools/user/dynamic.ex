@@ -1,6 +1,7 @@
 defmodule Tools.User.Load.Schema do
   import Tools.User.Cfg, only: [parse: 1]
   import Tools.User.Def, only: [spec: 2]
+  import Tools.User.Validate, only: [check: 1]
   alias Path
   alias File
 
@@ -10,11 +11,12 @@ defmodule Tools.User.Load.Schema do
     name
     |> path()
     |> load()
+    |> check()
     |> spec(state)
   end
 
   def tool(name) do
-    name |> path() |> load()
+    name |> path() |> load() |> check()
   end
 
   defp path(name) do
