@@ -73,6 +73,23 @@ defmodule ClaudeCommandTest do
     assert String.contains?(sequences, "\e[?25h")
   end
 
+  test "translate_newline converts newline to carriage return" do
+    assert translate_newline("\n") == "\r"
+  end
+
+  test "translate_newline leaves other bytes alone" do
+    assert translate_newline("a") == "a"
+    assert translate_newline("abc") == "abc"
+    assert translate_newline("\r") == "\r"
+    assert translate_newline(" ") == " "
+  end
+
+  test "translate_newline handles multi-byte chunk with embedded newline" do
+    assert translate_newline("a\nb") == "a\rb"
+    assert translate_newline("hello\nworld") == "hello\rworld"
+    assert translate_newline("a\nb\nc") == "a\rb\rc"
+  end
+
   # Helpers matching claude.ex logic
   defp parse_size({output, 0}) do
     String.trim(output)
@@ -107,5 +124,9 @@ defmodule ClaudeCommandTest do
 
   defp restore do
     "\e[?1000l\e[?1002l\e[?1003l\e[?1006l\e[?2004l\e[?1049l\e[?25h"
+  end
+
+  defp translate_newline(chunk) do
+    String.replace(chunk, "\n", "\r")
   end
 end

@@ -5,9 +5,10 @@ defmodule El.Commands.Claude do
 
   def execute do
     get_size = &read_terminal_size/0
+    input = &translate_newline/1
     cmd(~c"stty raw -echo -isig < /dev/tty")
     start()
-    run(:claude, get_size: get_size)
+    run(:claude, get_size: get_size, input: input)
   after
     restore()
     cmd(~c"stty sane < /dev/tty")
@@ -62,5 +63,9 @@ defmodule El.Commands.Claude do
     File.write!("/dev/tty", "\e[?1000l\e[?1002l\e[?1003l\e[?1006l\e[?2004l\e[?1049l\e[?25h")
   rescue
     _ -> :ok
+  end
+
+  defp translate_newline(chunk) do
+    String.replace(chunk, "\n", "\r")
   end
 end
