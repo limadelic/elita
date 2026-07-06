@@ -291,4 +291,160 @@ defmodule PtyTest do
 
     assert_receive {:DOWN, ^ref, :process, ^pid, :normal}, 1000
   end
+
+  test "input hook transforms stdin bytes before port.command", %{agent: agent} do
+    upcase = fn bytes -> String.upcase(bytes) end
+
+    {:ok, pid} = El.Pty.start_link(
+      :test_pty,
+      "mycmd",
+      file: FakeFile,
+      port: FakePort,
+      input: upcase
+    )
+
+    Process.sleep(50)
+    clear_calls(agent)
+
+    send(pid, {:stdin, "hello"})
+
+    Process.sleep(50)
+
+    calls = get_calls(agent)
+    assert Enum.any?(calls, fn
+      {:port_command, {:fake_port, "HELLO"}} -> true
+      _ -> false
+    end)
+
+    GenServer.stop(pid)
+  end
+
+  test "input :drop suppresses stdin bytes", %{agent: agent} do
+    drop_all = fn _bytes -> :drop end
+
+    {:ok, pid} = El.Pty.start_link(
+      :test_pty,
+      "mycmd",
+      file: FakeFile,
+      port: FakePort,
+      input: drop_all
+    )
+
+    Process.sleep(50)
+    clear_calls(agent)
+
+    send(pid, {:stdin, "data"})
+
+    Process.sleep(50)
+
+    calls = get_calls(agent)
+    assert !Enum.any?(calls, fn
+      {:port_command, {:fake_port, _}} -> true
+      _ -> false
+    end)
+
+    GenServer.stop(pid)
+  end
+
+  test "default input is identity", %{agent: agent} do
+    {:ok, pid} = El.Pty.start_link(
+      :test_pty,
+      "mycmd",
+      file: FakeFile,
+      port: FakePort
+    )
+
+    Process.sleep(50)
+    clear_calls(agent)
+
+    send(pid, {:stdin, "untouched"})
+
+    Process.sleep(50)
+
+    calls = get_calls(agent)
+    assert Enum.any?(calls, fn
+      {:port_command, {:fake_port, "untouched"}} -> true
+      _ -> false
+    end)
+
+    GenServer.stop(pid)
+  end
+
+  test "taps receive output chunks", %{agent: _agent} do
+    caller = self()
+
+    {:ok, pid} = El.Pty.start_link(
+      :test_pty,
+      "mycmd",
+      file: FakeFile,
+      port: FakePort,
+      taps: [caller]
+    )
+
+    Process.sleep(50)
+
+    send(pid, {:fake_port, {:data, "output"}})
+
+    Process.sleep(50)
+
+    assert_receive {:output, "output"}, 1000
+
+    GenServer.stop(pid)
+  end
+
+  test "inject bypasses input hook", %{agent: agent} do
+    upcase = fn bytes -> String.upcase(bytes) end
+
+    {:ok, pid} = El.Pty.start_link(
+      :test_pty,
+      "mycmd",
+      file: FakeFile,
+      port: FakePort,
+      input: upcase
+    )
+
+    Process.sleep(50)
+    clear_calls(agent)
+
+    El.Pty.inject(:test_pty, "injected")
+
+    Process.sleep(50)
+
+    calls = get_calls(agent)
+    assert Enum.any?(calls, fn
+      {:port_command, {:fake_port, "injected"}} -> true
+      _ -> false
+    end)
+
+    GenServer.stop(pid)
+  end
+
+  test "dsr responses unaffected by taps", %{agent: agent} do
+    caller = self()
+
+    {:ok, pid} = El.Pty.start_link(
+      :test_pty,
+      "mycmd",
+      file: FakeFile,
+      port: FakePort,
+      taps: [caller]
+    )
+
+    Process.sleep(50)
+    clear_calls(agent)
+
+    send(pid, {:fake_port, {:data, "\e[6n"}})
+
+    Process.sleep(50)
+
+    calls = get_calls(agent)
+    dsr_responses = Enum.filter(calls, fn
+      {:port_command, {:fake_port, _}} -> true
+      _ -> false
+    end)
+
+    assert length(dsr_responses) > 0
+
+    GenServer.stop(pid)
+  end
 end
