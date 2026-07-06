@@ -31,10 +31,11 @@ defmodule El.Pty do
   end
 
   defp setup(file, port, cmd, get_size) do
+    parent = self()
     pty = open_pty(port, cmd, get_size)
     {:ok, tty_out} = file.open("/dev/tty", [:write, :binary, :raw])
     Process.flag(:trap_exit, true)
-    spawn_link(fn -> start(file, self()) end)
+    spawn_link(fn -> start(file, parent) end)
     %{pty: pty, file: file, port: port, tty_out: tty_out}
   end
 
