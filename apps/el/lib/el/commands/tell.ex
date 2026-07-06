@@ -26,7 +26,7 @@ defmodule El.Commands.Tell do
     node_target(agent, env_module.get("EL_NODE"))
   end
 
-  defp node_target(agent, nil), do: nil
+  defp node_target(_agent, nil), do: nil
   defp node_target(agent, host), do: :"claude_#{agent}@#{host}"
 
   defp attempt_inject(msg, target, agent, env_module) do
