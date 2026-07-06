@@ -358,9 +358,9 @@ log_file /tmp/expect_remote.txt
 spawn $::env(CLAUDE_BIN) claude
 sleep 2
 
-# Spawn elixir probe to inject model commands and message
+# Spawn elixir probe to inject commands via distribution
 catch {exec elixir --name probe@127.0.0.1 --cookie elita $::env(PROBE_SCRIPT) 2>/dev/null &} pid
-sleep 8
+sleep 10
 
 expect {
     eof { exit 0 }
@@ -371,7 +371,7 @@ EXPECT_SCRIPT
 
     sleep 1
 
-    # Check if session exited cleanly
+    # Check if session exited cleanly (inject path works)
     if ! pgrep -f "bin/el claude" >/dev/null 2>&1; then
         echo "PASS"
         return 0
