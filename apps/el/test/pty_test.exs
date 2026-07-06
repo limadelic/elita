@@ -447,4 +447,39 @@ defmodule PtyTest do
 
     GenServer.stop(pid)
   end
+
+  test "pty_reader hex-logs data chunks to file" do
+    log_file = "/private/tmp/claude-501/-Users-mike-dev-self-elita/2afd908c-b2e0-44ec-857d-7d91bd975077/scratchpad/ptyreader.hex"
+    File.rm(log_file)
+
+    defmodule FakeFileLog do
+      @moduledoc false
+      def open(path, _opts) do
+        {:ok, {:fake_file, path}}
+      end
+
+      def read({:fake_file, "/dev/stdin"}, _bytes) do
+        Process.sleep(10)
+        {:ok, "test"}
+      end
+
+      def read(_handle, _bytes) do
+        {:ok, ""}
+      end
+
+      def close(_handle) do
+        :ok
+      end
+    end
+
+    parent = self()
+    spawn(fn ->
+      El.PtyReader.start(FakeFileLog, parent)
+    end)
+
+    Process.sleep(100)
+
+    {:ok, log} = File.read(log_file)
+    assert String.contains?(log, "74657374")
+  end
 end
