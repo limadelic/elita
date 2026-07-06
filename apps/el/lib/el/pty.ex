@@ -19,7 +19,7 @@ defmodule El.Pty do
     wait_exit(pid)
   end
 
-  defp build_options(opts, cmd) do
+  defp build_options(opts, _cmd) do
     clean = opts
       |> Keyword.delete(:input)
       |> Keyword.delete(:taps)
