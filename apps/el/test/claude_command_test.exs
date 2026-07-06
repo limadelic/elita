@@ -1,5 +1,6 @@
 defmodule ClaudeCommandTest do
   use ExUnit.Case
+  import ExUnit.CaptureIO
 
   test "parse_size handles valid stty output" do
     assert parse_size({"42 120\n", 0}) == {42, 120}
@@ -103,6 +104,29 @@ defmodule ClaudeCommandTest do
   test "node_collision? handles ping errors gracefully" do
     ping_fn = fn _node -> raise "network error" end
     assert node_collision?(:"claude_elita@127.0.0.1", ping_fn) == false
+  end
+
+  test "execute calls distribution_start before node_collision" do
+    deps = [
+      distribution_start: fn _ ->
+        send(self(), {:call, :distribution_start})
+        :ok
+      end,
+      node_collision: fn _ ->
+        send(self(), {:call, :node_collision})
+        false
+      end,
+      cmd: fn _ -> :ok end,
+      run: fn _, _ -> :ok end
+    ]
+
+    capture_io(fn ->
+      El.Commands.Claude.execute(:default, deps)
+    end)
+
+    # Verify distribution_start was called before node_collision
+    assert_receive {:call, :distribution_start}, 100
+    assert_receive {:call, :node_collision}, 100
   end
 
   # Helpers matching claude.ex logic

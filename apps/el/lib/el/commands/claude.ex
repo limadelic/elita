@@ -5,22 +5,37 @@ defmodule El.Commands.Claude do
   alias El.Distribution
 
   def execute(name \\ :default) do
+    execute(name, [
+      distribution_start: &Distribution.start/1,
+      node_collision: &node_collision?/1,
+      cmd: &cmd/1,
+      run: &run/2
+    ])
+  end
+
+  def execute(name, deps) when is_list(deps) do
     session_name = resolve_session_name(name)
     node_name = :"claude_#{session_name}@127.0.0.1"
     process_name = String.to_atom(session_name)
 
-    Node.set_cookie(:elita)
+    distribution_start = Keyword.get(deps, :distribution_start)
+    distribution_start.(session_name)
 
-    if node_collision?(node_name) do
+    node_collision = Keyword.get(deps, :node_collision)
+
+    if node_collision.(node_name) do
       IO.puts("session #{session_name} already live — el tell #{session_name} <msg>, or /exit it")
       System.halt(1)
     end
 
     get_size = &read_terminal_size/0
     input = &translate_newline/1
-    cmd(~c"stty raw -echo -isig < /dev/tty")
-    Distribution.start(session_name)
-    run(process_name, get_size: get_size, input: input)
+
+    cmd_fn = Keyword.get(deps, :cmd)
+    cmd_fn.(~c"stty raw -echo -isig < /dev/tty")
+
+    run_fn = Keyword.get(deps, :run)
+    run_fn.(process_name, get_size: get_size, input: input)
   after
     restore()
     cmd(~c"stty sane < /dev/tty")
