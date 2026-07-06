@@ -62,6 +62,17 @@ defmodule ClaudeCommandTest do
     assert read_env() == nil
   end
 
+  test "restore generates reset escape sequences" do
+    sequences = restore()
+    assert String.contains?(sequences, "\e[?1000l")
+    assert String.contains?(sequences, "\e[?1002l")
+    assert String.contains?(sequences, "\e[?1003l")
+    assert String.contains?(sequences, "\e[?1006l")
+    assert String.contains?(sequences, "\e[?2004l")
+    assert String.contains?(sequences, "\e[?1049l")
+    assert String.contains?(sequences, "\e[?25h")
+  end
+
   # Helpers matching claude.ex logic
   defp parse_size({output, 0}) do
     String.trim(output)
@@ -92,5 +103,9 @@ defmodule ClaudeCommandTest do
       _ ->
         nil
     end
+  end
+
+  defp restore do
+    "\e[?1000l\e[?1002l\e[?1003l\e[?1006l\e[?2004l\e[?1049l\e[?25h"
   end
 end

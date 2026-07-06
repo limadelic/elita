@@ -9,6 +9,7 @@ defmodule El.Commands.Claude do
     start()
     run(:claude, get_size: get_size)
   after
+    restore()
     cmd(~c"stty sane < /dev/tty")
   end
 
@@ -53,4 +54,10 @@ defmodule El.Commands.Claude do
   end
 
   defp extract_size(_), do: nil
+
+  defp restore do
+    File.write!("/dev/tty", "\e[?1000l\e[?1002l\e[?1003l\e[?1006l\e[?2004l\e[?1049l\e[?25h")
+  rescue
+    _ -> :ok
+  end
 end
