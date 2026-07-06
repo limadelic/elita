@@ -345,6 +345,43 @@ EXPECT_SCRIPT
     fi
 }
 
+remote_test() {
+    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    local probe_script="$script_dir/flagship_probe.exs"
+
+    (
+        CLAUDE_BIN="$CLAUDE_BIN" PROBE_SCRIPT="$probe_script" \
+        EL_ROWS=120 EL_COLS=40 expect -f /dev/stdin <<'EXPECT_SCRIPT'
+set timeout 65
+log_file /tmp/expect_remote.txt
+
+spawn $::env(CLAUDE_BIN) claude
+sleep 2
+
+# Spawn elixir probe to inject model commands and message
+catch {exec elixir --name probe@127.0.0.1 --cookie elita $::env(PROBE_SCRIPT) 2>/dev/null &} pid
+sleep 8
+
+expect {
+    eof { exit 0 }
+    timeout { exit 0 }
+}
+EXPECT_SCRIPT
+    ) >/dev/null 2>&1
+
+    sleep 1
+
+    # Check if session exited cleanly
+    if ! pgrep -f "bin/el claude" >/dev/null 2>&1; then
+        echo "PASS"
+        return 0
+    else
+        echo "FAIL: Session still running"
+        pkill -9 -f "bin/el claude" 2>/dev/null || true
+        return 1
+    fi
+}
+
 restore_test() {
     ( expect <<'EXPECT_SCRIPT'
 set timeout 7
@@ -395,12 +432,16 @@ run_test() {
     if echo "$output" | grep -q "^PASS"; then
         echo "✓ $test_name: $output"
         ((PASS_COUNT++))
-        return 0
     else
         echo "✗ $test_name: $output"
         ((FAIL_COUNT++))
-        return 1
     fi
+
+    # Aggressive cleanup after each test
+    sleep 0.5
+    pkill -9 -f "script.*stty rows" 2>/dev/null || true
+    pkill -9 -f "bin/el claude" 2>/dev/null || true
+    sleep 0.5
 }
 
 orphans_check() {
@@ -410,8 +451,8 @@ orphans_check() {
     local leaked=$((orphans - ORPHAN_LEAK_COUNT))
 
     if [ $leaked -gt 0 ]; then
-        echo "PASS: Found $leaked orphans (baseline: $ORPHAN_LEAK_COUNT, total: $orphans) - cleanup handles them on exit"
-        return 0
+        echo "FAIL: Found $leaked orphans (baseline: $ORPHAN_LEAK_COUNT, total: $orphans)"
+        return 1
     else
         echo "PASS: Zero new orphans from test run"
         return 0
@@ -440,6 +481,7 @@ main() {
     run_test "restore_test" "RESTORE"
     run_test "inject_test" "INJECT"
     run_test "tell_test" "TELL"
+    run_test "remote_test" "REMOTE"
 
     echo ""
 
