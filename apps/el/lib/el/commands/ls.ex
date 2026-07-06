@@ -9,7 +9,8 @@ defmodule El.Commands.Ls do
   end
 
   defp call_build({net_adm, host, filter, ping, extract}) do
-    display(build_sessions(safe_get_names(net_adm, host), filter, ping, extract))
+    names = safe_get_names(net_adm, host)
+    display(build_sessions(names, filter, ping, extract))
   end
 
   defp build_sessions(names, filter, ping, extract) do
@@ -23,17 +24,9 @@ defmodule El.Commands.Ls do
   defp display(sessions), do: Enum.each(sessions, &puts/1)
 
   defp safe_get_names(net_adm, host) do
-    wrap_call(fn -> handle_names(call_names(net_adm, host)) end)
-  end
-
-  defp wrap_call(fun) do
-    try do
-      fun.()
-    rescue
-      _ -> []
-    catch
-      _ -> []
-    end
+    call_names(net_adm, host) |> handle_names()
+  rescue
+    _ -> []
   end
 
   defp handle_names({:ok, names}), do: names
@@ -67,6 +60,7 @@ defmodule El.Commands.Ls do
 
   defp default_ping(name) do
     node_atom = node_to_atom(name)
+    Node.set_cookie(:elita)
     Node.ping(node_atom)
   end
 

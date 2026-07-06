@@ -101,4 +101,27 @@ defmodule LsTest do
       []
     end
   end
+
+  test "ping returns pang when nodes unreachable" do
+    # Demonstrates the symptom: when Node.ping fails (pang), nodes are filtered out
+    # This happens in real scenario when cookie is not set on probe node
+    output = capture_io(fn ->
+      El.Commands.Ls.execute(
+        net_adm: FakeNetAdm,
+        filter: fn {name, _port} ->
+          (is_binary(name) || is_list(name)) &&
+            (name |> to_string() |> String.starts_with?("claude_"))
+        end,
+        extract: fn {name, _port} ->
+          name |> to_string() |> String.replace_prefix("claude_", "")
+        end,
+        ping: fn _name ->
+          # Simulates Node.ping returning :pang (happens when cookie not set on probe)
+          :pang
+        end
+      )
+    end)
+
+    assert String.contains?(output, "no sessions")
+  end
 end
