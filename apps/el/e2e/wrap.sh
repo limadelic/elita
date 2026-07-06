@@ -441,12 +441,14 @@ run_test() {
     sleep 0.5
     pkill -9 -f "script.*stty rows" 2>/dev/null || true
     pkill -9 -f "bin/el claude" 2>/dev/null || true
-    sleep 0.5
+    sleep 1
 }
 
 orphans_check() {
     # Wait for processes to fully exit and cleanup handlers to run
-    sleep 2
+    sleep 3
+    pkill -9 -f "script.*stty rows" 2>/dev/null || true
+    sleep 1
     local orphans=$(ps aux 2>/dev/null | grep -E "script.*stty" | grep -v grep | wc -l)
     local leaked=$((orphans - ORPHAN_LEAK_COUNT))
 
