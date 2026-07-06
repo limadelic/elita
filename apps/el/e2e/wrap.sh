@@ -707,11 +707,10 @@ main() {
     run_test "remote_test" "REMOTE"
     # run_test "haiku_filter_test" "HAIKU_FILTER"  # Known limitation: menu-by-inject parked
     run_test "backspace_test" "BACKSPACE"
-    # Parked checks - not implemented in current TUI
-    # run_test "paste_test" "PASTE"                # Bracketed paste mode not enabled
-    # run_test "arrows_test" "ARROWS"              # Cursor movement not implemented
-    # run_test "history_test" "HISTORY"            # History recall not implemented
-    # run_test "latency_test" "LATENCY"            # Keystroke capture unreliable
+    # Parked checks - promote to critical path with escape fix
+    run_test "arrows_test" "ARROWS"              # Cursor movement now fixed
+    run_test "history_test" "HISTORY"            # History recall now fixed
+    run_test "paste_test" "PASTE"                # Bracketed paste mode now working
 
     echo ""
 
