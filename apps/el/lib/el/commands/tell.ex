@@ -1,4 +1,5 @@
 defmodule El.Commands.Tell do
+  @moduledoc false
   import Elita, only: [start_link: 2, cast: 2]
   import El.Distribution, only: [start: 0]
 
@@ -17,7 +18,7 @@ defmodule El.Commands.Tell do
     text = cond do
       String.contains?(msg, "\n") ->
         "\e[200~#{msg}\e[201~\r"
-      is_control_sequence(msg) ->
+      control_sequence?(msg) ->
         msg
       true ->
         "#{msg}\r"
@@ -25,7 +26,7 @@ defmodule El.Commands.Tell do
     GenServer.cast({:claude, target}, {:inject, text})
   end
 
-  defp is_control_sequence(msg) do
+  defp control_sequence?(msg) do
     case :binary.at(msg, 0) do
       nil -> false
       byte -> byte < 32 or byte == 0x1B
