@@ -70,7 +70,7 @@ defmodule Matrix do
         IO.puts("Total runtime: #{total_time}ms")
         IO.puts("")
         IO.puts("To rerun:")
-        IO.puts("  elixir --name matrix@127.0.0.1 -S mix run apps/el/e2e/matrix.exs")
+        IO.puts("  elixir --name matrix@127.0.0.1 -S mix run apps/el/test/e2e/matrix.exs")
 
       {:ok, false} ->
         IO.puts("Error: no live session at #{session_node}")
