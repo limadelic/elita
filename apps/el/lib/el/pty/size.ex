@@ -16,9 +16,16 @@ defmodule El.Pty.Size do
   defp extract([rows, cols]) do
     row = String.to_integer(rows)
     col = String.to_integer(cols)
-    if row > 0 and col > 0, do: {row, col}, else: {24, 80}
+    size_or_default(row, col)
   rescue
     _ -> {24, 80}
   end
   defp extract(_), do: {24, 80}
+
+  defp size_or_default(row, col) do
+    pick_size(row > 0 and col > 0, row, col)
+  end
+
+  defp pick_size(true, row, col), do: {row, col}
+  defp pick_size(false, _, _), do: {24, 80}
 end
