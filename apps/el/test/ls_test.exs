@@ -4,15 +4,21 @@ defmodule LsTest do
 
   defmodule FakeNetAdm do
     def names do
-      [{:claude_elita, 1}, {:claude_scratch, 2}]
+      {:ok, [{~c"claude_elita", 1}, {~c"claude_scratch", 2}]}
     end
 
     def names_empty do
-      []
+      {:ok, []}
     end
 
     def names_error do
       {:error, :eacces}
+    end
+  end
+
+  defmodule FakeNetAdmAtoms do
+    def names do
+      [{:claude_elita, 1}, {:claude_scratch, 2}]
     end
   end
 
@@ -30,14 +36,12 @@ defmodule LsTest do
     output = capture_io(fn ->
       El.Commands.Ls.execute(
         net_adm: FakeNetAdm,
-        node: FakeNode,
         filter: fn {name, _port} ->
-          Atom.to_string(name)
-          |> String.starts_with?("claude_")
+          (is_binary(name) || is_list(name)) &&
+            (name |> to_string() |> String.starts_with?("claude_"))
         end,
         extract: fn {name, _port} ->
-          Atom.to_string(name)
-          |> String.replace_prefix("claude_", "")
+          name |> to_string() |> String.replace_prefix("claude_", "")
         end,
         ping: fn _name -> :pong end
       )
@@ -51,14 +55,12 @@ defmodule LsTest do
     output = capture_io(fn ->
       El.Commands.Ls.execute(
         net_adm: __MODULE__.EmptyNetAdm,
-        node: FakeNode,
         filter: fn {name, _port} ->
-          Atom.to_string(name)
-          |> String.starts_with?("claude_")
+          (is_binary(name) || is_list(name)) &&
+            (name |> to_string() |> String.starts_with?("claude_"))
         end,
         extract: fn {name, _port} ->
-          Atom.to_string(name)
-          |> String.replace_prefix("claude_", "")
+          name |> to_string() |> String.replace_prefix("claude_", "")
         end,
         ping: fn _name -> :pong end
       )

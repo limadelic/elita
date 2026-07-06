@@ -23,10 +23,10 @@ defmodule El.Commands.Ls do
 
   defp safe_get_names(net_adm) do
     try do
-      if is_atom(net_adm) do
-        net_adm.names()
-      else
-        net_adm.names()
+      case net_adm.names() do
+        {:ok, names} -> names
+        names when is_list(names) -> names
+        _ -> []
       end
     rescue
       _ -> []
@@ -36,16 +36,43 @@ defmodule El.Commands.Ls do
   end
 
   defp default_filter({name, _port}) do
-    Atom.to_string(name)
+    name_string(name)
     |> String.starts_with?("claude_")
   end
 
   defp default_extract({name, _port}) do
-    Atom.to_string(name)
+    name_string(name)
     |> String.replace_prefix("claude_", "")
   end
 
+  defp name_string(name) when is_atom(name) do
+    Atom.to_string(name)
+  end
+
+  defp name_string(name) when is_list(name) do
+    List.to_string(name)
+  end
+
+  defp name_string(name) when is_binary(name) do
+    name
+  end
+
   defp default_ping(name) do
-    Node.ping(name)
+    node_atom = node_to_atom(name)
+    Node.ping(node_atom)
+  end
+
+  defp node_to_atom(name) when is_atom(name) do
+    name
+  end
+
+  defp node_to_atom(name) when is_list(name) do
+    name
+    |> List.to_string()
+    |> String.to_atom()
+  end
+
+  defp node_to_atom(name) when is_binary(name) do
+    String.to_atom(name)
   end
 end
