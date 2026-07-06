@@ -37,6 +37,7 @@ defmodule El.Pty do
     os_pid = capture_os_pid(port, pty)
     {:ok, tty_out} = file.open("/dev/tty", [:write, :binary, :raw])
     configure_and_start(file, parent)
+    monitor_port(pty)
     %{pty: pty, file: file, port: port, tty_out: tty_out, os_pid: os_pid}
   end
 
@@ -45,9 +46,24 @@ defmodule El.Pty do
     spawn_link(fn -> start(file, parent) end)
   end
 
+  defp monitor_port(pty) do
+    parent = self()
+    Process.spawn(fn -> port_closed_monitor(parent, pty) end, [])
+  end
+
+  defp port_closed_monitor(parent, pty) do
+    Process.sleep(500)
+    unless Port.info(pty) do
+      # Port is closed, signal cleanup
+      send(parent, {pty, :closed})
+    end
+  end
+
   defp capture_os_pid(port, pty) do
-    info = port.info(pty)
-    if is_list(info), do: Keyword.get(info, :os_pid), else: nil
+    case port.info(pty, :os_pid) do
+      {:os_pid, pid} -> pid
+      _ -> nil
+    end
   end
 
   defp open_pty(port, cmd, get_size) do
@@ -80,6 +96,11 @@ defmodule El.Pty do
   def handle_info({:EXIT, _pid, reason}, %{os_pid: os_pid} = state) do
     Cleanup.kill_group(os_pid)
     {:stop, reason, state}
+  end
+
+  def handle_info({pty, :closed}, %{pty: pty, os_pid: os_pid} = state) do
+    Cleanup.kill_group(os_pid)
+    {:stop, :normal, state}
   end
 
   def handle_info({:stdin, data}, %{pty: pty, port: port} = state) do

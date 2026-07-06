@@ -58,6 +58,11 @@ defmodule PtyTest do
       :ok
     end
 
+    def info(port, :os_pid) do
+      Call.track(:port_info, {port, :os_pid})
+      {:os_pid, 12345}
+    end
+
     def info(port) do
       Call.track(:port_info, port)
       [{:os_pid, 12345}]
@@ -280,7 +285,7 @@ defmodule PtyTest do
 
     calls = get_calls(agent)
     assert Enum.any?(calls, fn
-      {:port_info, :fake_port} -> true
+      {:port_info, {:fake_port, :os_pid}} -> true
       _ -> false
     end)
 

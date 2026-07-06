@@ -11,11 +11,15 @@ cleanup() {
     if [ -n "$TEMP_DIR" ] && [ -d "$TEMP_DIR" ]; then
         rm -rf "$TEMP_DIR" 2>/dev/null || true
     fi
+    # Final safety: kill any remaining processes (should be none if Pty cleanup works)
     pkill -9 -f "script.*stty rows" 2>/dev/null || true
     pkill -9 -f "bin/el claude" 2>/dev/null || true
 }
 
 trap cleanup EXIT INT TERM
+
+# Check for orphans after each test run (for diagnostics)
+ORPHAN_LEAK_COUNT=0
 
 TEMP_DIR=$(mktemp -d)
 
@@ -371,20 +375,25 @@ run_test() {
 }
 
 orphans_check() {
-    sleep 0.3
+    # Wait for processes to fully exit and cleanup handlers to run
+    sleep 2
     local orphans=$(ps aux 2>/dev/null | grep -E "script.*stty" | grep -v grep | wc -l)
-    if [ "$orphans" -gt 0 ]; then
-        # Report count; cleanup() will handle them on EXIT
-        echo "PASS: Found $orphans orphans (leak present but cleanup will handle)"
-        return 0
+    local leaked=$((orphans - ORPHAN_LEAK_COUNT))
+
+    if [ $leaked -gt 0 ]; then
+        echo "FAIL: Found $leaked new orphans (total: $orphans)"
+        return 1
     else
-        echo "PASS: Zero orphans detected"
+        echo "PASS: Zero new orphans from test run"
         return 0
     fi
 }
 
 main() {
     export CLAUDE_BIN
+
+    # Capture baseline orphan count
+    ORPHAN_LEAK_COUNT=$(ps aux 2>/dev/null | grep -E "script.*stty" | grep -v grep | wc -l)
 
     echo "=== Claude Wrap E2E Test Suite ==="
     echo ""
@@ -404,7 +413,7 @@ main() {
 
     echo ""
 
-    # Orphans check
+    # Orphans check (verify cleanup after full suite)
     local orphans_result
     orphans_result=$(orphans_check 2>&1)
     if echo "$orphans_result" | grep -q "^PASS"; then
