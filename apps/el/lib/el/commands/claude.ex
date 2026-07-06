@@ -1,4 +1,5 @@
 defmodule El.Commands.Claude do
+  @moduledoc false
   import :os, only: [cmd: 1]
   import El.Pty, only: [run: 2]
   import El.Distribution, only: [start: 0]
