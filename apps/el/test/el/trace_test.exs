@@ -70,4 +70,37 @@ defmodule El.TraceTest do
     lines = String.split(String.trim(content), "\n")
     assert length(lines) == 2
   end
+
+  test "logs header at startup with size and tty source", %{trace_file: trace_file} do
+    El.Trace.log_header({24, 80}, :tty)
+
+    content = File.read!(trace_file)
+    assert String.contains?(content, "start")
+    assert String.contains?(content, "24")
+    assert String.contains?(content, "80")
+    assert String.contains?(content, "tty")
+  end
+
+  test "logs header with fallback tty source", %{trace_file: trace_file} do
+    El.Trace.log_header({42, 100}, :user)
+
+    content = File.read!(trace_file)
+    assert String.contains?(content, "start")
+    assert String.contains?(content, "user")
+  end
+
+  test "logs eof event", %{trace_file: trace_file} do
+    El.Trace.log_event("stdin_eof")
+
+    content = File.read!(trace_file)
+    assert String.contains?(content, "stdin_eof")
+  end
+
+  test "logs error event with reason", %{trace_file: trace_file} do
+    El.Trace.log_event("stdin_error", "eio")
+
+    content = File.read!(trace_file)
+    assert String.contains?(content, "stdin_error")
+    assert String.contains?(content, "eio")
+  end
 end

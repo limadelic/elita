@@ -6,6 +6,45 @@ defmodule El.Trace do
     end
   end
 
+  def log_header(size, tty_source) do
+    case System.get_env("EL_TRACE") do
+      nil -> :ok
+      path -> write_header(path, size, tty_source)
+    end
+  end
+
+  def log_event(event) do
+    case System.get_env("EL_TRACE") do
+      nil -> :ok
+      path -> write_event(path, event)
+    end
+  end
+
+  def log_event(event, reason) do
+    case System.get_env("EL_TRACE") do
+      nil -> :ok
+      path -> write_event(path, event, reason)
+    end
+  end
+
+  defp write_header(path, {rows, cols}, tty_source) do
+    timestamp = System.monotonic_time(:millisecond)
+    line = "#{timestamp} start rows=#{rows} cols=#{cols} tty_source=#{tty_source}\n"
+    File.write(path, line, [:append])
+  end
+
+  defp write_event(path, event) do
+    timestamp = System.monotonic_time(:millisecond)
+    line = "#{timestamp} #{event}\n"
+    File.write(path, line, [:append])
+  end
+
+  defp write_event(path, event, reason) do
+    timestamp = System.monotonic_time(:millisecond)
+    line = "#{timestamp} #{event} reason=#{reason}\n"
+    File.write(path, line, [:append])
+  end
+
   defp write_trace(path, data) do
     timestamp = System.monotonic_time(:millisecond)
     hex = encode_hex(data)

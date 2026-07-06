@@ -452,6 +452,7 @@ defmodule PtyTest do
     GenServer.stop(pid)
   end
 
+
   test "traces stdin data when EL_TRACE set" do
     trace_file = Path.join(System.tmp_dir!(), "pty_trace_#{System.unique_integer()}.log")
     System.put_env("EL_TRACE", trace_file)

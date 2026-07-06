@@ -14,8 +14,9 @@ defmodule El.Pty do
   def run(name, opts \\ []) do
     input = Keyword.get(opts, :input, &identity/1)
     taps = Keyword.get(opts, :taps, [])
-    {:ok, pid} = start_link(name, "claude --dangerously-skip-permissions",
-      [input: input, taps: taps] ++ Keyword.delete(Keyword.delete(opts, :input), :taps))
+    cmd = Keyword.get(opts, :cmd, "claude --dangerously-skip-permissions")
+    {:ok, pid} = start_link(name, cmd,
+      [input: input, taps: taps] ++ Keyword.delete(Keyword.delete(Keyword.delete(opts, :input), :taps), :cmd))
     wait_for_exit(pid)
   end
 
@@ -40,9 +41,12 @@ defmodule El.Pty do
 
   defp setup(file, port, cmd, get_size, input, taps) do
     parent = self()
-    pty = open_pty(port, cmd, get_size)
+    size = get_size.()
+    pty = open_pty(port, cmd, size)
     os_pid = capture_os_pid(port, pty)
     {:ok, tty_out} = file.open("/dev/tty", [:write, :binary, :raw])
+    tty_source = determine_tty_source(file, parent)
+    El.Trace.log_header(size, tty_source)
     configure_and_start(file, parent)
     monitor_port(pty)
     %{pty: pty, file: file, port: port, tty_out: tty_out, os_pid: os_pid, input: input, taps: taps}
@@ -73,8 +77,8 @@ defmodule El.Pty do
     end
   end
 
-  defp open_pty(port, cmd, get_size) do
-    {rows, cols} = get_size.()
+  defp open_pty(port, cmd, size) do
+    {rows, cols} = size
     stty_cmd = "stty rows #{rows} cols #{cols}; stty raw -echo -isig;"
     args = ["-q", "/dev/null", "sh", "-c", "#{stty_cmd} exec #{cmd}"]
     port.open({:spawn_executable, "/usr/bin/script"}, [:binary, :stream, :exit_status, {:args, args}])
@@ -86,6 +90,16 @@ defmodule El.Pty do
 
   defp capture_size(%{pty: _pty}) do
     Size.get_default()
+  end
+
+  defp determine_tty_source(file, _parent) do
+    case file.open("/dev/tty", [:read, :binary, :raw]) do
+      {:ok, fd} ->
+        file.close(fd)
+        :tty
+      {:error, _} ->
+        :user
+    end
   end
 
   @impl true

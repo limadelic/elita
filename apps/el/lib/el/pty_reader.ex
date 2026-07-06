@@ -14,12 +14,13 @@ defmodule El.PtyReader do
   defp loop_user(file, parent) do
     case file.read(:user, 1024) do
       {:ok, data} ->
-        log_hex(data)
         send(parent, {:stdin, data})
         loop_user(file, parent)
       :eof ->
+        El.Trace.log_event("stdin_eof")
         :ok
-      {:error, _} ->
+      {:error, reason} ->
+        El.Trace.log_event("stdin_error", inspect(reason))
         :ok
     end
   end
@@ -30,16 +31,17 @@ defmodule El.PtyReader do
   end
 
   defp handle_read({:ok, data}, file, stdin, parent) do
-    log_hex(data)
     send(parent, {:stdin, data})
     loop(file, stdin, parent)
   end
 
-  defp handle_read(_, file, stdin, _parent) do
+  defp handle_read({:error, reason}, file, stdin, _parent) do
+    El.Trace.log_event("stdin_error", inspect(reason))
     file.close(stdin)
   end
 
-  defp log_hex(_data) do
-    :ok
+  defp handle_read(:eof, file, stdin, _parent) do
+    El.Trace.log_event("stdin_eof")
+    file.close(stdin)
   end
 end
