@@ -68,7 +68,7 @@ defmodule El.Pty do
 
   defp open_pty(port, cmd, get_size) do
     {rows, cols} = get_size.()
-    stty_cmd = "stty rows #{rows} cols #{cols}; stty raw -echo -isig;"
+    stty_cmd = "stty rows #{rows} cols #{cols};"
     args = ["-q", "/dev/null", "sh", "-c", "#{stty_cmd} exec #{cmd}"]
     port.open({:spawn_executable, "/usr/bin/script"}, [:binary, :stream, :exit_status, {:args, args}])
   end
