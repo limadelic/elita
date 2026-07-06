@@ -1,4 +1,6 @@
 defmodule El.Pty.Size do
+  @moduledoc false
+
   def get_default do
     System.cmd("sh", ["-c", "stty size < /dev/tty"], stderr_to_stdout: true)
     |> parse()
