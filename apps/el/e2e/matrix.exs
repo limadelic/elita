@@ -1,6 +1,6 @@
 defmodule Matrix do
   defp cast_char(char) when is_binary(char) do
-    GenServer.cast({:claude, :"el_claude@127.0.0.1"}, {:inject, char})
+    GenServer.cast({:elita, :"claude_elita@127.0.0.1"}, {:inject, char})
   end
 
   defp random_delay do
@@ -31,7 +31,7 @@ defmodule Matrix do
     Node.set_cookie(:elita)
 
     # Attempt connection with timeout
-    task = Task.async(fn -> Node.connect(:"el_claude@127.0.0.1") end)
+    task = Task.async(fn -> Node.connect(:"claude_elita@127.0.0.1") end)
 
     case Task.yield(task, 10000) || Task.shutdown(task) do
       {:ok, true} ->
@@ -65,7 +65,7 @@ defmodule Matrix do
         IO.puts("  elixir --name matrix@127.0.0.1 -S mix run apps/el/e2e/matrix.exs")
 
       {:ok, false} ->
-        IO.puts("Error: no live session at el_claude@127.0.0.1")
+        IO.puts("Error: no live session at claude_elita@127.0.0.1")
         System.halt(1)
 
       nil ->
