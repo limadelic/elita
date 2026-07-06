@@ -23,7 +23,11 @@ defmodule El.CLI do
   end
 
   defp parse(["claude"]) do
-    :claude
+    {:claude, :default}
+  end
+
+  defp parse(["claude", name]) do
+    {:claude, name}
   end
 
   defp parse(_) do
@@ -34,7 +38,7 @@ defmodule El.CLI do
     puts("Usage:")
     puts("  el ask <agent> <message>")
     puts("  el tell <agent> <message>")
-    puts("  el claude")
+    puts("  el claude [name]")
   end
 
   defp execute({:ask, agent, msg}) do
@@ -45,7 +49,7 @@ defmodule El.CLI do
     Tell.execute(agent, msg)
   end
 
-  defp execute(:claude) do
-    Claude.execute()
+  defp execute({:claude, name}) do
+    Claude.execute(name)
   end
 end

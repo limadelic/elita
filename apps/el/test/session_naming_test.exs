@@ -1,5 +1,6 @@
 defmodule SessionNamingTest do
   use ExUnit.Case
+  @moduletag :main
 
   test "parse_name returns default name when no argument provided" do
     assert parse_name([]) == :default

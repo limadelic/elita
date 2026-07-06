@@ -2,21 +2,25 @@ defmodule El.Commands.Claude do
   @moduledoc false
   import :os, only: [cmd: 1]
   import El.Pty, only: [run: 2]
-  import El.Distribution, only: [start: 0]
+  alias El.Distribution
 
-  def execute do
+  def execute(name \\ :default) do
+    session_name = resolve_session_name(name)
+    node_name = :"claude_#{session_name}@127.0.0.1"
+    process_name = String.to_atom(session_name)
+
     Node.set_cookie(:elita)
 
-    if node_collision?() do
-      IO.puts("session already live — use el tell claude, or /exit it first")
+    if node_collision?(node_name) do
+      IO.puts("session #{session_name} already live — el tell #{session_name} <msg>, or /exit it")
       System.halt(1)
     end
 
     get_size = &read_terminal_size/0
     input = &translate_newline/1
     cmd(~c"stty raw -echo -isig < /dev/tty")
-    start()
-    run(:claude, get_size: get_size, input: input)
+    Distribution.start(session_name)
+    run(process_name, get_size: get_size, input: input)
   after
     restore()
     cmd(~c"stty sane < /dev/tty")
@@ -77,8 +81,17 @@ defmodule El.Commands.Claude do
     String.replace(chunk, "\n", "\r")
   end
 
-  defp node_collision? do
-    case Node.ping(:"el_claude@127.0.0.1") do
+  defp resolve_session_name(:default) do
+    File.cwd!()
+    |> Path.basename()
+  end
+
+  defp resolve_session_name(name) when is_binary(name) do
+    name
+  end
+
+  defp node_collision?(node_name) do
+    case Node.ping(node_name) do
       :pong -> true
       :pang -> false
     end
