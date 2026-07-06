@@ -1,4 +1,4 @@
-defmodule Tools.Sys.Cast.Schema do
+defmodule Tools.Sys.Become.Schema do
   import Enum, only: [drop: 2, map: 2, join: 2]
 
   def get(name, state) do
@@ -25,12 +25,12 @@ defmodule Tools.Sys.Cast.Schema do
   end
 end
 
-defmodule Tools.Sys.Cast do
+defmodule Tools.Sys.Become do
   import Log, only: [log: 5]
   import Map, only: [put: 3]
   import Enum, only: [map: 2]
 
-  defdelegate spec(name, state), to: Tools.Sys.Cast.Schema, as: :get
+  defdelegate spec(name, state), to: Tools.Sys.Become.Schema, as: :get
 
   def exec(_, %{"role" => role}, state) do
     log("🎭", state.name, " as ", role, :magenta)
@@ -38,7 +38,7 @@ defmodule Tools.Sys.Cast do
   end
 
   def exec(_, _args, state) do
-    {"cast needs role", state}
+    {"become needs role", state}
   end
 
   defp switch(state, role) do
