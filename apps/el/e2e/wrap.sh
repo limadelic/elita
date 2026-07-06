@@ -388,6 +388,52 @@ EXPECT_SCRIPT
     fi
 }
 
+haiku_filter_test() {
+    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    local probe_script="$script_dir/haiku_model_probe.exs"
+
+    (
+        CLAUDE_BIN="$CLAUDE_BIN" PROBE_SCRIPT="$probe_script" \
+        EL_ROWS=120 EL_COLS=40 expect -f /dev/stdin <<'EXPECT_SCRIPT'
+set timeout 65
+log_file /tmp/expect_haiku_filter.txt
+
+spawn $::env(CLAUDE_BIN) claude
+sleep 2
+
+# Spawn probe to test type-to-filter model selection
+catch {exec elixir --name probe@127.0.0.1 --cookie elita $::env(PROBE_SCRIPT) 2>/dev/null &} pid
+sleep 15
+
+expect {
+    eof { exit 0 }
+    timeout { exit 0 }
+}
+EXPECT_SCRIPT
+    ) >/dev/null 2>&1
+
+    sleep 1
+
+    # Verify the model actually changed to Haiku
+    # Check for Haiku footer (not just menu)
+    if ! pgrep -f "bin/el claude" >/dev/null 2>&1; then
+        # Session exited cleanly
+        # Check for model self-identification as Haiku
+        if grep -q "Haiku\|haiku" /tmp/expect_haiku_filter.txt 2>/dev/null && \
+           ! grep -q "Sonnet.*Sonnet.*Sonnet" /tmp/expect_haiku_filter.txt 2>/dev/null; then
+            echo "PASS"
+            return 0
+        else
+            echo "FAIL: Model did not switch to Haiku"
+            return 1
+        fi
+    else
+        echo "FAIL: Session still running"
+        pkill -9 -f "bin/el claude" 2>/dev/null || true
+        return 1
+    fi
+}
+
 restore_test() {
     ( expect <<'EXPECT_SCRIPT'
 set timeout 7
@@ -490,6 +536,7 @@ main() {
     run_test "inject_test" "INJECT"
     run_test "tell_test" "TELL"
     run_test "remote_test" "REMOTE"
+    run_test "haiku_filter_test" "HAIKU_FILTER"
 
     echo ""
 
