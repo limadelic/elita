@@ -1,5 +1,6 @@
 defmodule El.Commands.Ls do
   import IO, only: [puts: 1]
+  import El.Host, only: [host: 0]
 
   def execute(opts \\ []) do
     {Keyword.get(opts, :net_adm, :net_adm), Keyword.get(opts, :host, nil),
@@ -15,8 +16,12 @@ defmodule El.Commands.Ls do
 
   defp build_sessions(names, host, filter, ping, extract) do
     names
-    |> Enum.filter(fn entry -> filter.(entry) && ping.(elem(entry, 0), host) == :pong end)
+    |> Enum.filter(fn entry -> alive?(entry, filter, host, ping) end)
     |> Enum.map(extract)
+  end
+
+  defp alive?(entry, filter, host, ping) do
+    filter.(entry) && ping.(elem(entry, 0), host) == :pong
   end
 
   defp display([]), do: puts("no sessions")
@@ -63,17 +68,13 @@ defmodule El.Commands.Ls do
     Node.ping(node_atom)
   end
 
-  defp node_to_atom(name, host) when is_atom(name) do
-    name_str = Atom.to_string(name)
-    if host, do: String.to_atom("#{name_str}@#{host}"), else: name
+  defp node_to_atom(name, nil) do
+    name_str = name_string(name)
+    String.to_atom("#{name_str}@#{host()}")
   end
 
-  defp node_to_atom(name, host) when is_list(name) do
-    name_str = List.to_string(name)
-    if host, do: String.to_atom("#{name_str}@#{host}"), else: String.to_atom(name_str)
-  end
-
-  defp node_to_atom(name, host) when is_binary(name) do
-    if host, do: String.to_atom("#{name}@#{host}"), else: String.to_atom(name)
+  defp node_to_atom(name, host) do
+    name_str = name_string(name)
+    String.to_atom("#{name_str}@#{host}")
   end
 end

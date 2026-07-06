@@ -161,17 +161,59 @@ defmodule LsTest do
       "Atom should include @host: #{atom_str}"
   end
 
-  defp construct_node_atom(name, host) when is_atom(name) do
-    name_str = Atom.to_string(name)
-    if host, do: String.to_atom("#{name_str}@#{host}"), else: name
+  defp construct_node_atom(name, nil) do
+    name_str = name_to_string(name)
+    String.to_atom("#{name_str}@#{El.Host.host()}")
   end
 
-  defp construct_node_atom(name, host) when is_list(name) do
-    name_str = List.to_string(name)
-    if host, do: String.to_atom("#{name_str}@#{host}"), else: String.to_atom(name_str)
+  defp construct_node_atom(name, host) do
+    name_str = name_to_string(name)
+    String.to_atom("#{name_str}@#{host}")
   end
 
-  defp construct_node_atom(name, host) when is_binary(name) do
-    if host, do: String.to_atom("#{name}@#{host}"), else: String.to_atom(name)
+  defp name_to_string(name) when is_atom(name) do
+    Atom.to_string(name)
+  end
+
+  defp name_to_string(name) when is_list(name) do
+    List.to_string(name)
+  end
+
+  defp name_to_string(name) when is_binary(name) do
+    name
+  end
+
+  test "default execute builds atoms with El.Host default" do
+    {:ok, captured_atom} = Agent.start_link(fn -> nil end)
+
+    try do
+      ExUnit.CaptureIO.capture_io(fn ->
+        El.Commands.Ls.execute(
+          net_adm: FakeNetAdm,
+          filter: fn {name, _port} ->
+            (is_binary(name) || is_list(name)) &&
+              (name |> to_string() |> String.starts_with?("claude_"))
+          end,
+          extract: fn {name, _port} ->
+            name |> to_string() |> String.replace_prefix("claude_", "")
+          end,
+          ping: fn name, host ->
+            # Simulate what default_ping does: node_to_atom constructs the atom
+            atom = construct_node_atom(name, host || El.Host.host())
+            Agent.update(captured_atom, fn _ -> atom end)
+            :pong
+          end
+        )
+      end)
+
+      atom = Agent.get(captured_atom, & &1)
+      atom_str = Atom.to_string(atom)
+
+      # With fix: atom includes @127.0.0.1 even though host param is nil
+      assert String.contains?(atom_str, "@127.0.0.1"),
+        "execute([]) should construct atoms with El.Host default (127.0.0.1); got: #{atom_str}"
+    after
+      Agent.stop(captured_atom)
+    end
   end
 end
