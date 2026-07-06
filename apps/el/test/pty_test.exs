@@ -79,7 +79,28 @@ defmodule PtyTest do
 
     calls = get_calls(agent)
     assert Enum.any?(calls, fn
-      {:port_open, {{:spawn, cmd}, _}} -> String.contains?(cmd, "script -q /dev/null mycmd")
+      {:port_open, {{:spawn, cmd}, _}} -> String.contains?(cmd, "script -q /dev/null")
+      _ -> false
+    end)
+
+    GenServer.stop(pid)
+  end
+
+  test "init applies terminal size via stty", %{agent: agent} do
+    {:ok, pid} = El.Pty.start_link(
+      :test_pty,
+      "mycmd",
+      file: FakeFile,
+      port: FakePort,
+      get_size: fn -> {42, 100} end
+    )
+
+    Process.sleep(50)
+
+    calls = get_calls(agent)
+    assert Enum.any?(calls, fn
+      {:port_open, {{:spawn, cmd}, _}} ->
+        String.contains?(cmd, "stty rows 42 cols 100") and String.contains?(cmd, "exec mycmd")
       _ -> false
     end)
 
