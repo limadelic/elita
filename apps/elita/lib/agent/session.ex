@@ -68,7 +68,7 @@ defmodule Agent.Session do
     receive do
       {^port, msg} -> handle_port_msg(msg, port, acc)
     after
-      30000 -> on_timeout(acc)
+      30000 -> on_timeout(port, acc)
     end
   end
 
@@ -80,9 +80,17 @@ defmodule Agent.Session do
     trim(acc)
   end
 
-  defp on_timeout(acc) do
+  defp on_timeout(port, acc) do
+    kill_port_process(port)
     warning("Claude port timeout")
     acc
+  end
+
+  defp kill_port_process(port) do
+    {:os_pid, pid} = :erlang.port_info(port, :os_pid)
+    System.cmd("kill", [to_string(pid)])
+  rescue
+    _ -> :ok
   end
 
   defp find_claude do
