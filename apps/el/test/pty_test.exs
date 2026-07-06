@@ -452,4 +452,56 @@ defmodule PtyTest do
     GenServer.stop(pid)
   end
 
+  test "traces stdin data when EL_TRACE set" do
+    trace_file = Path.join(System.tmp_dir!(), "pty_trace_#{System.unique_integer()}.log")
+    System.put_env("EL_TRACE", trace_file)
+
+    {:ok, pid} = El.Pty.start_link(
+      :test_pty,
+      "mycmd",
+      file: FakeFile,
+      port: FakePort
+    )
+
+    Process.sleep(50)
+
+    send(pid, {:stdin, "traced"})
+
+    Process.sleep(50)
+
+    assert File.exists?(trace_file)
+    content = File.read!(trace_file)
+    assert String.contains?(content, "traced")
+
+    GenServer.stop(pid)
+    System.delete_env("EL_TRACE")
+    File.rm(trace_file)
+  end
+
+  test "traces inject data when EL_TRACE set" do
+    trace_file = Path.join(System.tmp_dir!(), "pty_inject_trace_#{System.unique_integer()}.log")
+    System.put_env("EL_TRACE", trace_file)
+
+    {:ok, pid} = El.Pty.start_link(
+      :test_pty,
+      "mycmd",
+      file: FakeFile,
+      port: FakePort
+    )
+
+    Process.sleep(50)
+
+    El.Pty.inject(:test_pty, "injected")
+
+    Process.sleep(50)
+
+    assert File.exists?(trace_file)
+    content = File.read!(trace_file)
+    assert String.contains?(content, "injected")
+
+    GenServer.stop(pid)
+    System.delete_env("EL_TRACE")
+    File.rm(trace_file)
+  end
+
 end

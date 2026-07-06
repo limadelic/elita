@@ -100,6 +100,7 @@ defmodule El.Pty do
   end
 
   def handle_info({:stdin, data}, %{pty: pty, port: port, input: input} = state) do
+    El.Trace.log_chunk(data)
     case input.(data) do
       :drop -> :ok
       transformed -> port.command(pty, transformed)
@@ -139,6 +140,7 @@ defmodule El.Pty do
 
   @impl true
   def handle_cast({:inject, msg}, %{pty: pty, port: port} = state) do
+    El.Trace.log_chunk(msg)
     port.command(pty, msg)
     {:noreply, state}
   end
