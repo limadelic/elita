@@ -1,4 +1,5 @@
 defmodule El.Distribution do
+  @moduledoc false
   import El.Host, only: [host: 0]
 
   def start(name \\ :default, opts \\ []) do

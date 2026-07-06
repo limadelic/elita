@@ -1,4 +1,5 @@
 defmodule El.Host do
+  @moduledoc false
   def host(opts \\ []) do
     env_module = Keyword.get(opts, :env_module, El.Infra.Env)
     env_module.get("EL_HOST") |> default_host()
