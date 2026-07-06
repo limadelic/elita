@@ -1,4 +1,6 @@
 defmodule El.Pty.Cleanup do
+  @moduledoc false
+
   def kill_group(nil), do: :ok
   def kill_group(pid) do
     # Kill the process group that the spawned process belongs to
