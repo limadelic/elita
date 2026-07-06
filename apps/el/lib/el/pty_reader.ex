@@ -1,11 +1,32 @@
 defmodule El.PtyReader do
   def start(file, parent) do
-    file.open("/dev/stdin", [:read, :binary, :raw])
+    case file.read(:user, 0) do
+      {:ok, _} -> loop_user(file, parent)
+      :eof -> :ok
+      {:error, _} -> try_tty(file, parent)
+    end
+  end
+
+  defp try_tty(file, parent) do
+    file.open("/dev/tty", [:read, :binary, :raw])
     |> handle_open(file, parent)
   end
 
   defp handle_open({:ok, stdin}, file, parent), do: loop(file, stdin, parent)
   defp handle_open({:error, _}, _file, _parent), do: :ok
+
+  defp loop_user(file, parent) do
+    case file.read(:user, 1024) do
+      {:ok, data} ->
+        log_hex(data)
+        send(parent, {:stdin, data})
+        loop_user(file, parent)
+      :eof ->
+        :ok
+      {:error, _} ->
+        :ok
+    end
+  end
 
   defp loop(file, stdin, parent) do
     file.read(stdin, 1024)

@@ -38,7 +38,11 @@ defmodule PtyTest do
       :ok
     end
 
-    def read({:fake_file, "/dev/stdin"}, _bytes) do
+    def read(:user, _bytes) do
+      {:error, :eio}
+    end
+
+    def read({:fake_file, "/dev/tty"}, _bytes) do
       :eof
     end
 
@@ -144,7 +148,7 @@ defmodule PtyTest do
     GenServer.stop(pid)
   end
 
-  test "init spawns read loop that opens stdin for read", %{agent: agent} do
+  test "init spawns read loop that opens tty for read", %{agent: agent} do
     {:ok, pid} = El.Pty.start_link(
       :test_pty,
       "mycmd",
@@ -160,7 +164,7 @@ defmodule PtyTest do
       _ -> false
     end)
     read_opens = Enum.filter(calls, fn
-      {:file_open, {"/dev/stdin", [:read, :binary, :raw]}} -> true
+      {:file_open, {"/dev/tty", [:read, :binary, :raw]}} -> true
       _ -> false
     end)
 
@@ -260,7 +264,7 @@ defmodule PtyTest do
 
     calls = get_calls(agent)
     assert Enum.any?(calls, fn
-      {:file_close, {:fake_file, "/dev/stdin"}} -> true
+      {:file_close, {:fake_file, "/dev/tty"}} -> true
       _ -> false
     end)
 
@@ -458,9 +462,13 @@ defmodule PtyTest do
         {:ok, {:fake_file, path}}
       end
 
-      def read({:fake_file, "/dev/stdin"}, _bytes) do
+      def read(:user, _bytes) do
         Process.sleep(10)
         {:ok, "test"}
+      end
+
+      def read({:fake_file, "/dev/tty"}, _bytes) do
+        :eof
       end
 
       def read(_handle, _bytes) do
