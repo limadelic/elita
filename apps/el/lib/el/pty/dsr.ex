@@ -1,4 +1,6 @@
 defmodule El.Pty.Dsr do
+  @moduledoc false
+
   def scan(data, rows, cols, buffer \\ ""), do: extract_query(buffer <> data, rows, cols)
 
   defp extract_query(chunk, rows, cols) do
