@@ -64,12 +64,12 @@ defmodule PtyTest do
 
     def info(port, :os_pid) do
       Call.track(:port_info, {port, :os_pid})
-      {:os_pid, 12345}
+      {:os_pid, 12_345}
     end
 
     def info(port) do
       Call.track(:port_info, port)
-      [{:os_pid, 12345}]
+      [{:os_pid, 12_345}]
     end
   end
 
@@ -168,8 +168,8 @@ defmodule PtyTest do
       _ -> false
     end)
 
-    assert length(write_opens) > 0
-    assert length(read_opens) > 0
+    assert write_opens != []
+    assert read_opens != []
 
     GenServer.stop(pid)
   end
@@ -447,11 +447,10 @@ defmodule PtyTest do
       _ -> false
     end)
 
-    assert length(dsr_responses) > 0
+    assert dsr_responses != []
 
     GenServer.stop(pid)
   end
-
 
   test "traces stdin data when EL_TRACE set" do
     trace_file = Path.join(System.tmp_dir!(), "pty_trace_#{System.unique_integer()}.log")
