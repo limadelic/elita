@@ -1,5 +1,6 @@
 defmodule El.PtyReader do
   @moduledoc false
+  import El.Trace
 
   def start(file, parent) do
     try_tty(file, parent)
@@ -14,17 +15,22 @@ defmodule El.PtyReader do
   defp handle_open({:error, _}, file, parent), do: loop_user(file, parent)
 
   defp loop_user(file, parent) do
-    case file.read(:user, 1024) do
-      {:ok, data} ->
-        send(parent, {:stdin, data})
-        loop_user(file, parent)
-      :eof ->
-        El.Trace.log_event("stdin_eof")
-        :ok
-      {:error, reason} ->
-        El.Trace.log_event("stdin_error", inspect(reason))
-        :ok
-    end
+    file.read(:user, 1024) |> handle_user_read(file, parent)
+  end
+
+  defp handle_user_read({:ok, data}, file, parent) do
+    send(parent, {:stdin, data})
+    loop_user(file, parent)
+  end
+
+  defp handle_user_read(:eof, _file, _parent) do
+    log_event("stdin_eof")
+    :ok
+  end
+
+  defp handle_user_read({:error, reason}, _file, _parent) do
+    log_event("stdin_error", inspect(reason))
+    :ok
   end
 
   defp loop(file, stdin, parent) do
@@ -38,12 +44,12 @@ defmodule El.PtyReader do
   end
 
   defp handle_read({:error, reason}, file, stdin, _parent) do
-    El.Trace.log_event("stdin_error", inspect(reason))
+    log_event("stdin_error", inspect(reason))
     file.close(stdin)
   end
 
   defp handle_read(:eof, file, stdin, _parent) do
-    El.Trace.log_event("stdin_eof")
+    log_event("stdin_eof")
     file.close(stdin)
   end
 end
