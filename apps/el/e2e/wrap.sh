@@ -21,17 +21,18 @@ TEMP_DIR=$(mktemp -d)
 render_test() {
     local output_file="$TEMP_DIR/render.txt"
 
-    expect -c "
-        set timeout 16
-        log_file $output_file
-        spawn $CLAUDE_BIN claude
-        expect {
-            \"Claude Code\" { exit 0 }
-            timeout { exit 1 }
-        }
-    " 2>/dev/null
+    ( expect <<'EXPECT_SCRIPT'
+set timeout 16
+log_file /tmp/expect_render.txt
+spawn $::env(CLAUDE_BIN) claude
+expect {
+    "Claude Code" { exit 0 }
+    timeout { exit 1 }
+}
+EXPECT_SCRIPT
+    ) >/dev/null 2>&1
 
-    if [ $? -eq 0 ]; then
+    if grep -q "Claude Code" /tmp/expect_render.txt 2>/dev/null; then
         echo "PASS"
         return 0
     else
@@ -41,18 +42,17 @@ render_test() {
 }
 
 size_test() {
-    local output_file="$TEMP_DIR/size_120x40.txt"
+    ( EL_ROWS=120 EL_COLS=40 expect <<'EXPECT_SCRIPT'
+set timeout 5
+log_file /tmp/expect_size.txt
+spawn $::env(CLAUDE_BIN) claude
+expect {
+    timeout { exit 0 }
+}
+EXPECT_SCRIPT
+    ) >/dev/null 2>&1
 
-    EL_ROWS=120 EL_COLS=40 expect -c "
-        set timeout 5
-        log_file $output_file
-        spawn $CLAUDE_BIN claude
-        expect {
-            timeout { exit 0 }
-        }
-    " 2>/dev/null
-
-    if grep -q "─" "$output_file" 2>/dev/null; then
+    if grep -q "─" /tmp/expect_size.txt 2>/dev/null; then
         echo "PASS"
         return 0
     else
@@ -62,18 +62,17 @@ size_test() {
 }
 
 size_test_80x24() {
-    local output_file="$TEMP_DIR/size_80x24.txt"
+    ( EL_ROWS=24 EL_COLS=80 expect <<'EXPECT_SCRIPT'
+set timeout 4
+log_file /tmp/expect_size2.txt
+spawn $::env(CLAUDE_BIN) claude
+expect {
+    timeout { exit 0 }
+}
+EXPECT_SCRIPT
+    ) >/dev/null 2>&1
 
-    EL_ROWS=24 EL_COLS=80 expect -c "
-        set timeout 4
-        log_file $output_file
-        spawn $CLAUDE_BIN claude
-        expect {
-            timeout { exit 0 }
-        }
-    " 2>/dev/null
-
-    if grep -q "─" "$output_file" 2>/dev/null; then
+    if grep -q "─" /tmp/expect_size2.txt 2>/dev/null; then
         echo "PASS"
         return 0
     else
@@ -83,20 +82,19 @@ size_test_80x24() {
 }
 
 input_test() {
-    local output_file="$TEMP_DIR/input.txt"
+    ( expect <<'EXPECT_SCRIPT'
+set timeout 8
+log_file /tmp/expect_input.txt
+spawn $::env(CLAUDE_BIN) claude
+sleep 1
+send "test_input_\r"
+expect {
+    timeout { exit 0 }
+}
+EXPECT_SCRIPT
+    ) >/dev/null 2>&1
 
-    expect -c "
-        set timeout 8
-        log_file $output_file
-        spawn $CLAUDE_BIN claude
-        sleep 1
-        send \"hello\r\"
-        expect {
-            timeout { exit 0 }
-        }
-    " 2>/dev/null
-
-    if grep -q "hello" "$output_file" 2>/dev/null; then
+    if grep -q "test_input_" /tmp/expect_input.txt 2>/dev/null; then
         echo "PASS"
         return 0
     else
@@ -106,22 +104,21 @@ input_test() {
 }
 
 submit_test() {
-    local output_file="$TEMP_DIR/submit.txt"
+    ( expect <<'EXPECT_SCRIPT'
+set timeout 12
+log_file /tmp/expect_submit.txt
+spawn $::env(CLAUDE_BIN) claude
+sleep 1
+send "hi\r"
+sleep 3
+send "\x03"
+expect {
+    timeout { exit 0 }
+}
+EXPECT_SCRIPT
+    ) >/dev/null 2>&1
 
-    expect -c "
-        set timeout 12
-        log_file $output_file
-        spawn $CLAUDE_BIN claude
-        sleep 1
-        send \"hi\r\"
-        sleep 3
-        send \"\x03\"
-        expect {
-            timeout { exit 0 }
-        }
-    " 2>/dev/null
-
-    if grep -q "hi" "$output_file" 2>/dev/null; then
+    if grep -q "hi" /tmp/expect_submit.txt 2>/dev/null; then
         echo "PASS"
         return 0
     else
@@ -131,18 +128,19 @@ submit_test() {
 }
 
 kill_test() {
-    expect -c "
-        set timeout 7
-        spawn $CLAUDE_BIN claude
-        sleep 1
-        send \"\x03\"
-        sleep 0.3
-        send \"\x03\"
-        sleep 1
-        expect {
-            timeout { exit 0 }
-        }
-    " 2>/dev/null
+    ( expect <<'EXPECT_SCRIPT'
+set timeout 7
+spawn $::env(CLAUDE_BIN) claude
+sleep 1
+send "\x03"
+sleep 0.3
+send "\x03"
+sleep 1
+expect {
+    timeout { exit 0 }
+}
+EXPECT_SCRIPT
+    ) >/dev/null 2>&1
 
     sleep 0.3
 
@@ -157,18 +155,19 @@ kill_test() {
 }
 
 clean_test() {
-    expect -c "
-        set timeout 5
-        spawn $CLAUDE_BIN claude
-        sleep 1
-        send \"\x03\"
-        sleep 0.3
-        send \"\x03\"
-        sleep 1
-        expect {
-            timeout { exit 0 }
-        }
-    " 2>/dev/null
+    ( expect <<'EXPECT_SCRIPT'
+set timeout 5
+spawn $::env(CLAUDE_BIN) claude
+sleep 1
+send "\x03"
+sleep 0.3
+send "\x03"
+sleep 1
+expect {
+    timeout { exit 0 }
+}
+EXPECT_SCRIPT
+    ) >/dev/null 2>&1
 
     sleep 0.5
 
@@ -204,6 +203,8 @@ run_test() {
 }
 
 main() {
+    export CLAUDE_BIN
+
     echo "=== Claude Wrap E2E Test Suite ==="
     echo ""
 
