@@ -26,7 +26,7 @@ defmodule El.PtyReader do
   end
 
   defp loop(file, stdin, parent) do
-    file.read(stdin, 1024)
+    file.read(stdin, 1)
     |> handle_read(file, stdin, parent)
   end
 
