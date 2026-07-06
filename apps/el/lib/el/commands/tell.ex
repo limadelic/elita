@@ -1,37 +1,46 @@
 defmodule El.Commands.Tell do
   @moduledoc false
   import Elita, only: [start_link: 2, cast: 2]
+  import :binary, only: [at: 2]
   alias El.Distribution
 
   def execute(agent, msg, opts \\ []) do
     Distribution.start()
     env_module = Keyword.get(opts, :env_module, El.Infra.Env)
+    route(agent, msg, env_module)
+  end
 
-    case remote_target(agent, env_module: env_module) do
-      nil -> default(agent, msg)
-      target -> attempt_inject(msg, target, agent, env_module)
-    end
+  defp route(agent, msg, env_module) do
+    target = remote_target(agent, env_module: env_module)
+    route_to(agent, msg, env_module, target)
+  end
+
+  defp route_to(agent, msg, _env_module, nil), do: default(agent, msg)
+
+  defp route_to(agent, msg, env_module, target) do
+    attempt_inject(msg, target, agent, env_module)
   end
 
   def remote_target(agent, opts \\ []) do
     env_module = Keyword.get(opts, :env_module, El.Infra.Env)
-
-    case env_module.get("EL_NODE") do
-      nil -> nil
-      host -> :"claude_#{agent}@#{host}"
-    end
+    node_target(agent, env_module.get("EL_NODE"))
   end
+
+  defp node_target(agent, nil), do: nil
+  defp node_target(agent, host), do: :"claude_#{agent}@#{host}"
 
   defp attempt_inject(msg, target, agent, env_module) do
     process_name = String.to_atom(agent)
-
-    if Node.connect(target) do
-      inject(msg, target, process_name)
-    else
-      host = env_module.get("EL_NODE")
-      remote_unreachable(agent, host)
-      default(agent, msg)
+    case Node.connect(target) do
+      true -> inject(msg, target, process_name)
+      false -> fail_inject(agent, msg, env_module)
     end
+  end
+
+  defp fail_inject(agent, msg, env_module) do
+    host = env_module.get("EL_NODE")
+    remote_unreachable(agent, host)
+    default(agent, msg)
   end
 
   def remote_unreachable(agent, host) do
@@ -39,23 +48,31 @@ defmodule El.Commands.Tell do
   end
 
   defp inject(msg, target, process_name) do
-    text = cond do
-      String.contains?(msg, "\n") ->
-        "\e[200~#{msg}\e[201~\r"
-      control_sequence?(msg) ->
-        msg
-      true ->
-        "#{msg}\r"
-    end
+    text = format_text(msg)
     GenServer.cast({process_name, target}, {:inject, text})
   end
 
-  defp control_sequence?(msg) do
-    case :binary.at(msg, 0) do
-      nil -> false
-      byte -> byte < 32 or byte == 0x1B
-    end
+  defp format_text(msg) do
+    pick_format(String.contains?(msg, "\n"), msg)
   end
+
+  defp pick_format(true, msg), do: bracket_paste(msg)
+  defp pick_format(false, msg), do: pick_format_alt(control_sequence?(msg), msg)
+
+  defp pick_format_alt(true, msg), do: msg
+  defp pick_format_alt(false, msg), do: append_return(msg)
+
+  defp bracket_paste(msg), do: "\e[200~#{msg}\e[201~\r"
+  defp append_return(msg), do: "#{msg}\r"
+
+  defp control_sequence?(msg) do
+    is_special_byte(at(msg, 0))
+  end
+
+  defp is_special_byte(nil), do: false
+  defp is_special_byte(byte) when byte < 32, do: true
+  defp is_special_byte(0x1B), do: true
+  defp is_special_byte(_), do: false
 
   defp default(agent, msg) do
     {:ok, _pid} = start_link(agent, [agent])

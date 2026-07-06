@@ -2,33 +2,31 @@ defmodule El.Commands.Ls do
   import IO, only: [puts: 1]
 
   def execute(opts \\ []) do
-    net_adm = Keyword.get(opts, :net_adm, :net_adm)
-    host = Keyword.get(opts, :host, nil)
-    filter = Keyword.get(opts, :filter, &default_filter/1)
-    extract = Keyword.get(opts, :extract, &default_extract/1)
-    ping = Keyword.get(opts, :ping, &default_ping/1)
+    display(build_sessions(
+      safe_get_names(Keyword.get(opts, :net_adm, :net_adm), Keyword.get(opts, :host, nil)),
+      Keyword.get(opts, :filter, &default_filter/1),
+      Keyword.get(opts, :ping, &default_ping/1),
+      Keyword.get(opts, :extract, &default_extract/1)
+    ))
+  end
 
-    names = safe_get_names(net_adm, host)
-
-    sessions = names
+  defp build_sessions(names, filter, ping, extract) do
+    names
     |> Enum.filter(filter)
     |> Enum.filter(fn entry -> ping.(elem(entry, 0)) == :pong end)
     |> Enum.map(extract)
-
-    if Enum.empty?(sessions) do
-      puts("no sessions")
-    else
-      Enum.each(sessions, &puts/1)
-    end
   end
 
+  defp display([]), do: puts("no sessions")
+  defp display(sessions), do: Enum.each(sessions, &puts/1)
+
   defp safe_get_names(net_adm, host) do
+    wrap_call(fn -> handle_names(call_names(net_adm, host)) end)
+  end
+
+  defp wrap_call(fun) do
     try do
-      case call_names(net_adm, host) do
-        {:ok, names} -> names
-        names when is_list(names) -> names
-        _ -> []
-      end
+      fun.()
     rescue
       _ -> []
     catch
@@ -36,13 +34,12 @@ defmodule El.Commands.Ls do
     end
   end
 
-  defp call_names(net_adm, nil) do
-    net_adm.names()
-  end
+  defp handle_names({:ok, names}), do: names
+  defp handle_names(names) when is_list(names), do: names
+  defp handle_names(_), do: []
 
-  defp call_names(net_adm, host) do
-    net_adm.names(host)
-  end
+  defp call_names(net_adm, nil), do: net_adm.names()
+  defp call_names(net_adm, host), do: net_adm.names(host)
 
   defp default_filter({name, _port}) do
     name_string(name)
