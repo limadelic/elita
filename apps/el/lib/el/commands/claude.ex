@@ -5,6 +5,7 @@ defmodule El.Commands.Claude do
 
   def execute do
     get_size = &read_terminal_size/0
+    cmd(~c"stty raw -echo -isig < /dev/tty")
     start()
     run(:claude, get_size: get_size)
   after
