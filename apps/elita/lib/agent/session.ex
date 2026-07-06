@@ -8,17 +8,9 @@ defmodule Agent.Session do
   import Logger, only: [error: 1, warning: 1]
   import Keyword, only: [fetch!: 2, get: 3]
 
-  def start_link(opts) do
-    start_link(__MODULE__, opts, [])
-  end
-
-  def ask(pid, message) do
-    call(pid, {:ask, message}, :infinity)
-  end
-
-  def cast(pid, message) do
-    GenServer.cast(pid, {:cast, message})
-  end
+  def start_link(opts), do: start_link(__MODULE__, opts, [])
+  def ask(pid, message), do: call(pid, {:ask, message}, :infinity)
+  def cast(pid, message), do: GenServer.cast(pid, {:cast, message})
 
   @impl true
   def init(opts) do
@@ -41,12 +33,14 @@ defmodule Agent.Session do
   end
 
   defp default_runner(message, folder) do
-    path = find_claude()
-
-    {:spawn_executable, path}
+    {:spawn_executable, path()}
     |> open(port_opts(message, folder))
     |> handle_port()
   end
+
+  defp path, do: found(find_executable("claude"))
+  defp found(nil), do: raise("claude executable not found")
+  defp found(path), do: path
 
   defp handle_port({:error, reason}) do
     error("Failed to open Claude port: #{inspect(reason)}")
@@ -72,13 +66,8 @@ defmodule Agent.Session do
     end
   end
 
-  defp handle_port_msg({:data, data}, port, acc) do
-    read_response(port, acc <> data)
-  end
-
-  defp handle_port_msg({:exit_status, _}, _port, acc) do
-    trim(acc)
-  end
+  defp handle_port_msg({:data, data}, port, acc), do: read_response(port, acc <> data)
+  defp handle_port_msg({:exit_status, _}, _port, acc), do: trim(acc)
 
   defp on_timeout(port, acc) do
     kill_port_process(port)
@@ -92,13 +81,6 @@ defmodule Agent.Session do
   rescue
     _ -> :ok
   end
-
-  defp find_claude do
-    find_executable("claude") |> require_executable()
-  end
-
-  defp require_executable(nil), do: raise("claude executable not found")
-  defp require_executable(path), do: path
 
   defp close_safe(port) do
     close(port)

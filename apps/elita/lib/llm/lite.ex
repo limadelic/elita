@@ -7,9 +7,7 @@ defmodule Lite do
   import Map, only: [put: 3, delete: 2]
   import Req, only: [post: 2]
   import Application, only: [get_env: 3]
-
   @cache_key %{type: "ephemeral"}
-
   def llm(%{config: config, history: history, name: agent_name} = state) do
     composed = compose(config)
     body = build(composed, history, state)
@@ -50,19 +48,18 @@ defmodule Lite do
 
   defp add_tools(base, [%{function_declarations: defs}]) do
     tools = map(defs, &schema/1)
-    {last, init} = List.pop_at(tools, -1)
-
-    cached =
-      if last do
-        init ++ [put(last, :cache_control, @cache_key)]
-      else
-        tools
-      end
-
-    put(base, :tools, cached)
+    put(base, :tools, cache(tools))
   end
 
   defp add_tools(base, _), do: base
+
+  defp cache(tools) do
+    {last, init} = List.pop_at(tools, -1)
+    apply_cache(last, init, tools)
+  end
+
+  defp apply_cache(nil, _init, tools), do: tools
+  defp apply_cache(last, init, _tools), do: init ++ [put(last, :cache_control, @cache_key)]
 
   defp schema(%{parameters: params} = tool),
     do: tool |> delete(:parameters) |> put(:input_schema, params)
@@ -72,7 +69,6 @@ defmodule Lite do
 
   defp parts(list) when is_list(list), do: map(list, &part/1)
   defp parts({:error, _} = err), do: err
-
   defp part(%{"type" => "text", "text" => text}), do: %{"text" => text}
 
   defp part(%{"type" => "tool_use", "id" => id, "name" => name, "input" => input}),
@@ -81,31 +77,19 @@ defmodule Lite do
   defp part(other), do: other
 
   defp request(text) do
-    %{
-      model: model(),
-      max_tokens: 4096,
-      messages: [%{role: "user", content: text}]
-    }
+    %{model: model(), max_tokens: 4096, messages: [%{role: "user", content: text}]}
   end
 
   defp url, do: "#{get_env("ANTHROPIC_BASE_URL", "https://api.anthropic.com")}/v1/messages"
   defp model, do: "claude-haiku-4-5"
 
-  defp headers do
-    [
-      {"x-api-key", token()},
-      {"anthropic-version", "2023-06-01"}
-    ]
-  end
+  defp headers, do: [{"x-api-key", token()}, {"anthropic-version", "2023-06-01"}]
 
   defp connect, do: ssl(get_env("NODE_EXTRA_CA_CERTS"))
   defp ssl(nil), do: []
   defp ssl(path), do: [transport_opts: [cacertfile: path]]
 
-  defp token do
-    ["ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_API_KEY"]
-    |> find_value(&get_env/1)
-  end
+  defp token, do: ["ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_API_KEY"] |> find_value(&get_env/1)
 
   defp resp({:ok, %{status: 200, body: %{"content" => content}}}), do: content
   defp resp({:ok, %{status: code, body: body}}), do: {:error, "HTTP #{code}: #{inspect(body)}"}

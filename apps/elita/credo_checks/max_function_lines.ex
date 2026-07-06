@@ -6,7 +6,7 @@ defmodule Elita.Credo.MaxFunctionLines do
   alias Elita.Credo.LineCheck
 
   def param_defaults do
-    [max_lines: 5, exclude: []]
+    [max_lines: 5]
   end
 
   @check_desc "Functions should be small and focused."
@@ -18,30 +18,17 @@ defmodule Elita.Credo.MaxFunctionLines do
 
   def run(%SourceFile{} = source_file, params) do
     max_lines = Keyword.get(params, :max_lines, 5)
-    exclude = Keyword.get(params, :exclude, [])
     filename = source_file.filename
-    Code.prewalk(source_file, &check_function(&1, &2, max_lines, filename, exclude))
+    Code.prewalk(source_file, &check_function(&1, &2, max_lines, filename))
   end
 
-  defp check_function({type, meta, [_head | _tail]} = ast, issues, max_lines, filename, exclude)
+  defp check_function({type, meta, [_head | _tail]} = ast, issues, max_lines, filename)
        when type in [:def, :defp, :defmacro] do
-    if excluded?(filename, exclude) do
-      {ast, issues}
-    else
-      {ast, maybe_add_issue(max_lines, meta, issues, filename)}
-    end
+    {ast, maybe_add_issue(max_lines, meta, issues, filename)}
   end
 
-  defp check_function(ast, issues, _max_lines, _filename, _exclude) do
+  defp check_function(ast, issues, _max_lines, _filename) do
     {ast, issues}
-  end
-
-  defp excluded?(filename, exclude) do
-    Enum.any?(exclude, fn mod ->
-      name = mod |> Atom.to_string() |> String.replace_prefix("Elixir.", "")
-      path = name |> String.replace(".", "/") |> String.downcase()
-      String.contains?(filename, path)
-    end)
   end
 
   defp maybe_add_issue(max_lines, meta, issues, filename) do
