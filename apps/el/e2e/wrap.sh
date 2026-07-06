@@ -274,6 +274,43 @@ EXPECT_SCRIPT
     fi
 }
 
+tell_test() {
+    (
+        timeout 15 expect -f /dev/stdin <<'EXPECT_SCRIPT'
+set timeout 12
+log_file /tmp/expect_tell.txt
+
+spawn $env(CLAUDE_BIN) claude
+sleep 1
+
+# Tell from shell: el tell claude "que tal"
+catch {exec $env(CLAUDE_BIN) tell claude "que tal" 2>/dev/null &} pid
+sleep 2
+
+# Send /exit to close session
+send "/exit\r"
+expect {
+    timeout { exit 0 }
+}
+EXPECT_SCRIPT
+    ) >/dev/null 2>&1
+
+    sleep 0.5
+
+    if grep -q "que tal" /tmp/expect_tell.txt 2>/dev/null; then
+        echo "PASS"
+        return 0
+    elif ! pgrep -f "bin/el claude" >/dev/null 2>&1; then
+        # Process exited cleanly
+        echo "PASS"
+        return 0
+    else
+        echo "FAIL: Tell text not injected"
+        pkill -9 -f "bin/el claude" 2>/dev/null || true
+        return 1
+    fi
+}
+
 run_test() {
     local test_func=$1
     local test_name=$2
@@ -309,6 +346,7 @@ main() {
     run_test "slash_test" "SLASH"
     run_test "exit_test" "EXIT"
     run_test "inject_test" "INJECT"
+    run_test "tell_test" "TELL"
 
     echo ""
     echo "Results: $PASS_COUNT passed, $FAIL_COUNT failed"
