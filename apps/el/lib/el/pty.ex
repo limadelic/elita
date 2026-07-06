@@ -42,8 +42,8 @@ defmodule El.Pty do
   defp open_pty(port, cmd, get_size) do
     {rows, cols} = get_size.()
     stty_cmd = "stty rows #{rows} cols #{cols};"
-    wrapped_cmd = "script -q /dev/null sh -c '#{stty_cmd} exec #{cmd}'"
-    port.open({:spawn, wrapped_cmd}, [:binary, :stream, :exit_status])
+    args = ["-q", "/dev/null", "sh", "-c", "#{stty_cmd} exec #{cmd}"]
+    port.open({:spawn_executable, "/usr/bin/script"}, [:binary, :stream, :exit_status, {:args, args}])
   end
 
   defp default_get_size do

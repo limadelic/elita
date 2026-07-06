@@ -79,7 +79,11 @@ defmodule PtyTest do
 
     calls = get_calls(agent)
     assert Enum.any?(calls, fn
-      {:port_open, {{:spawn, cmd}, _}} -> String.contains?(cmd, "script -q /dev/null")
+      {:port_open, {{:spawn_executable, "/usr/bin/script"}, opts}} ->
+        Enum.any?(opts, fn
+          {:args, ["-q", "/dev/null", "sh", "-c", _]} -> true
+          _ -> false
+        end)
       _ -> false
     end)
 
@@ -99,8 +103,12 @@ defmodule PtyTest do
 
     calls = get_calls(agent)
     assert Enum.any?(calls, fn
-      {:port_open, {{:spawn, cmd}, _}} ->
-        String.contains?(cmd, "stty rows 42 cols 100") and String.contains?(cmd, "exec mycmd")
+      {:port_open, {{:spawn_executable, "/usr/bin/script"}, opts}} ->
+        Enum.any?(opts, fn
+          {:args, ["-q", "/dev/null", "sh", "-c", cmd]} ->
+            String.contains?(cmd, "stty rows 42 cols 100") and String.contains?(cmd, "exec mycmd")
+          _ -> false
+        end)
       _ -> false
     end)
 
