@@ -183,6 +183,58 @@ EXPECT_SCRIPT
     fi
 }
 
+slash_test() {
+    ( expect <<'EXPECT_SCRIPT'
+set timeout 10
+log_file /tmp/expect_slash.txt
+spawn $::env(CLAUDE_BIN) claude
+sleep 1
+send "/effort\r"
+expect {
+    timeout { exit 0 }
+}
+EXPECT_SCRIPT
+    ) >/dev/null 2>&1
+
+    sleep 0.5
+
+    if grep -q "/effort" /tmp/expect_slash.txt 2>/dev/null; then
+        echo "PASS"
+        return 0
+    else
+        echo "FAIL: Slash command not echoed"
+        pkill -9 -f "bin/el claude" 2>/dev/null || true
+        return 1
+    fi
+}
+
+exit_test() {
+    ( expect <<'EXPECT_SCRIPT'
+set timeout 10
+log_file /tmp/expect_exit.txt
+spawn $::env(CLAUDE_BIN) claude
+expect {
+    "Claude Code" { send "/exit\r"; sleep 1 }
+    timeout { exit 1 }
+}
+expect {
+    timeout { exit 0 }
+}
+EXPECT_SCRIPT
+    ) >/dev/null 2>&1
+
+    sleep 0.5
+
+    if pgrep -f "bin/el claude" >/dev/null 2>&1; then
+        pkill -9 -f "bin/el claude" 2>/dev/null || true
+        echo "FAIL: Process still running after /exit"
+        return 1
+    else
+        echo "PASS"
+        return 0
+    fi
+}
+
 run_test() {
     local test_func=$1
     local test_name=$2
@@ -215,6 +267,8 @@ main() {
     run_test "submit_test" "SUBMIT"
     run_test "kill_test" "KILL"
     run_test "clean_test" "CLEAN"
+    run_test "slash_test" "SLASH"
+    run_test "exit_test" "EXIT"
 
     echo ""
     echo "Results: $PASS_COUNT passed, $FAIL_COUNT failed"
