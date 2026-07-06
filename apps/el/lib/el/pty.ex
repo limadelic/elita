@@ -31,6 +31,7 @@ defmodule El.Pty do
   defp setup(file, port, cmd) do
     pty = open_pty(port, cmd)
     {:ok, tty_out} = file.open("/dev/tty", [:write, :binary, :raw])
+    Process.flag(:trap_exit, true)
     spawn_link(fn -> read_loop(file, self()) end)
     %{pty: pty, file: file, port: port, tty_out: tty_out}
   end
@@ -51,6 +52,14 @@ defmodule El.Pty do
     {:stop, :normal, state}
   end
 
+  def handle_info({:EXIT, _pid, :normal}, state) do
+    {:noreply, state}
+  end
+
+  def handle_info({:EXIT, _pid, reason}, state) do
+    {:stop, reason, state}
+  end
+
   def handle_info({:stdin, data}, %{pty: pty, port: port} = state) do
     port.command(pty, data)
     {:noreply, state}
@@ -63,8 +72,10 @@ defmodule El.Pty do
   end
 
   defp read_loop(file, parent) do
-    {:ok, tty_in} = file.open("/dev/tty", [:read, :binary, :raw])
-    read_until_eof(file, tty_in, parent)
+    case file.open("/dev/stdin", [:read, :binary, :raw]) do
+      {:ok, stdin} -> read_until_eof(file, stdin, parent)
+      {:error, _} -> :ok
+    end
   end
 
   defp read_until_eof(file, tty_in, parent) do
