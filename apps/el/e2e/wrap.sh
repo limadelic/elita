@@ -213,6 +213,35 @@ EXPECT_SCRIPT
     fi
 }
 
+model_test() {
+    ( expect <<'EXPECT_SCRIPT'
+set timeout 10
+log_file /tmp/expect_model.txt
+spawn $::env(CLAUDE_BIN) claude
+sleep 1
+send "/model\r"
+sleep 1
+send "\[B"
+sleep 0.5
+send "\r"
+expect {
+    timeout { exit 0 }
+}
+EXPECT_SCRIPT
+    ) >/dev/null 2>&1
+
+    sleep 0.5
+
+    if grep -q "Sonnet\|Opus\|Haiku" /tmp/expect_model.txt 2>/dev/null; then
+        echo "PASS"
+        return 0
+    else
+        echo "FAIL: Model menu not rendered"
+        pkill -9 -f "bin/el claude" 2>/dev/null || true
+        return 1
+    fi
+}
+
 exit_test() {
     ( expect <<'EXPECT_SCRIPT'
 set timeout 10
@@ -406,6 +435,7 @@ main() {
     run_test "kill_test" "KILL"
     run_test "clean_test" "CLEAN"
     run_test "slash_test" "SLASH"
+    run_test "model_test" "MODEL"
     run_test "exit_test" "EXIT"
     run_test "restore_test" "RESTORE"
     run_test "inject_test" "INJECT"
