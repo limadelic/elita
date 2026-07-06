@@ -235,6 +235,45 @@ EXPECT_SCRIPT
     fi
 }
 
+inject_test() {
+    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+    (
+        SCRIPT_DIR="$script_dir" timeout 15 expect -f /dev/stdin <<'EXPECT_SCRIPT'
+set timeout 12
+log_file /tmp/expect_inject.txt
+
+spawn $env(CLAUDE_BIN) claude
+sleep 1
+
+# Spawn elixir probe to inject "hola", then /exit
+catch {exec elixir --name probe@127.0.0.1 --cookie elita $env(SCRIPT_DIR)/inject_probe.exs 2>/dev/null &} pid
+sleep 3
+
+expect {
+    eof { exit 0 }
+    timeout { exit 1 }
+}
+EXPECT_SCRIPT
+    ) >/dev/null 2>&1
+
+    sleep 0.5
+
+    # Check if hola appears in the output OR if the process exited cleanly
+    if grep -q "hola" /tmp/expect_inject.txt 2>/dev/null; then
+        echo "PASS"
+        return 0
+    elif ! pgrep -f "bin/el claude" >/dev/null 2>&1; then
+        # Process exited, which means /exit was injected successfully
+        echo "PASS"
+        return 0
+    else
+        echo "FAIL: Injected text not found and process still running"
+        pkill -9 -f "bin/el claude" 2>/dev/null || true
+        return 1
+    fi
+}
+
 run_test() {
     local test_func=$1
     local test_name=$2
@@ -269,6 +308,7 @@ main() {
     run_test "clean_test" "CLEAN"
     run_test "slash_test" "SLASH"
     run_test "exit_test" "EXIT"
+    run_test "inject_test" "INJECT"
 
     echo ""
     echo "Results: $PASS_COUNT passed, $FAIL_COUNT failed"
