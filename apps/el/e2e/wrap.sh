@@ -371,10 +371,16 @@ EXPECT_SCRIPT
 
     sleep 1
 
-    # Check if session exited cleanly (inject path works)
+    # Check if session exited cleanly and model menu rendered with Haiku option
+    # (proves remote escape sequences and model navigation work)
     if ! pgrep -f "bin/el claude" >/dev/null 2>&1; then
-        echo "PASS"
-        return 0
+        if grep -q "Haiku.*4.5" /tmp/expect_remote.txt 2>/dev/null; then
+            echo "PASS"
+            return 0
+        else
+            echo "FAIL: Haiku option not found in model menu"
+            return 1
+        fi
     else
         echo "FAIL: Session still running"
         pkill -9 -f "bin/el claude" 2>/dev/null || true
