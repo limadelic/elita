@@ -4,9 +4,9 @@ defmodule PuppetTest do
   use Tester
   @moduletag :live
 
-  describe "puppet session" do
+  describe "calculator session" do
     setup do
-      System.put_env("AGENT_REGISTRATIONS", "puppet:/Users/mike/dude")
+      System.put_env("AGENT_REGISTRATIONS", "calculator:/Users/mike/dude")
 
       on_exit(fn ->
         try do
@@ -20,26 +20,26 @@ defmodule PuppetTest do
       end)
 
       spawn(:el)
-      boot_puppet()
+      boot_calculator()
       :ok
     end
 
-    defp boot_puppet do
+    defp boot_calculator do
       Agent.Config.load()
-      |> Enum.each(&start_puppet_session/1)
+      |> Enum.each(&start_calculator_session/1)
     end
 
-    defp start_puppet_session({:puppet, _folder}) do
-      # Boot el claude as a puppet session
-      # TODO: Implement puppet session startup
+    defp start_calculator_session({:calculator, _folder}) do
+      # Boot el claude as a calculator session
+      # TODO: Implement calculator session startup
       :ok
     end
 
-    defp start_puppet_session(_), do: :ok
+    defp start_calculator_session(_), do: :ok
 
     @tag timeout: 300_000
-    test "el routes ask to puppet session" do
-      verify(:el, "2", "ask puppet 1 + 1")
+    test "el routes ask to calculator session" do
+      verify(:el, "2", "ask calculator 1 + 1")
     end
   end
 end
