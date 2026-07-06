@@ -3,11 +3,12 @@ defmodule El.Commands.Ls do
 
   def execute(opts \\ []) do
     net_adm = Keyword.get(opts, :net_adm, :net_adm)
+    host = Keyword.get(opts, :host, nil)
     filter = Keyword.get(opts, :filter, &default_filter/1)
     extract = Keyword.get(opts, :extract, &default_extract/1)
     ping = Keyword.get(opts, :ping, &default_ping/1)
 
-    names = safe_get_names(net_adm)
+    names = safe_get_names(net_adm, host)
 
     sessions = names
     |> Enum.filter(filter)
@@ -21,9 +22,9 @@ defmodule El.Commands.Ls do
     end
   end
 
-  defp safe_get_names(net_adm) do
+  defp safe_get_names(net_adm, host) do
     try do
-      case net_adm.names() do
+      case call_names(net_adm, host) do
         {:ok, names} -> names
         names when is_list(names) -> names
         _ -> []
@@ -33,6 +34,14 @@ defmodule El.Commands.Ls do
     catch
       _ -> []
     end
+  end
+
+  defp call_names(net_adm, nil) do
+    net_adm.names()
+  end
+
+  defp call_names(net_adm, host) do
+    net_adm.names(host)
   end
 
   defp default_filter({name, _port}) do

@@ -7,6 +7,10 @@ defmodule LsTest do
       {:ok, [{~c"claude_elita", 1}, {~c"claude_scratch", 2}]}
     end
 
+    def names(_host) do
+      {:ok, [{~c"claude_remote", 3}]}
+    end
+
     def names_empty do
       {:ok, []}
     end
@@ -69,8 +73,31 @@ defmodule LsTest do
     assert String.contains?(output, "no sessions")
   end
 
+  test "lists remote sessions when host provided" do
+    output = capture_io(fn ->
+      El.Commands.Ls.execute(
+        host: "home.local",
+        net_adm: FakeNetAdm,
+        filter: fn {name, _port} ->
+          (is_binary(name) || is_list(name)) &&
+            (name |> to_string() |> String.starts_with?("claude_"))
+        end,
+        extract: fn {name, _port} ->
+          name |> to_string() |> String.replace_prefix("claude_", "")
+        end,
+        ping: fn _name -> :pong end
+      )
+    end)
+
+    assert String.contains?(output, "remote")
+  end
+
   defmodule EmptyNetAdm do
     def names do
+      []
+    end
+
+    def names(_host) do
       []
     end
   end
