@@ -61,7 +61,13 @@ defmodule El.Pty do
 
   defp parse_size(_), do: {24, 80}
 
-  defp extract_size([rows, cols]), do: {String.to_integer(rows), String.to_integer(cols)}
+  defp extract_size([rows, cols]) do
+    row = String.to_integer(rows)
+    col = String.to_integer(cols)
+    if row > 0 and col > 0, do: {row, col}, else: {24, 80}
+  rescue
+    _ -> {24, 80}
+  end
   defp extract_size(_), do: {24, 80}
 
   @impl true

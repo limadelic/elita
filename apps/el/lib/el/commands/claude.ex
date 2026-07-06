@@ -21,7 +21,8 @@ defmodule El.Commands.Claude do
     case {System.get_env("EL_ROWS"), System.get_env("EL_COLS")} do
       {rows, cols} when is_binary(rows) and is_binary(cols) ->
         with {row, ""} <- Integer.parse(rows),
-             {col, ""} <- Integer.parse(cols) do
+             {col, ""} <- Integer.parse(cols),
+             true <- row > 0 and col > 0 do
           {row, col}
         else
           _ -> nil
@@ -48,7 +49,9 @@ defmodule El.Commands.Claude do
   defp parse_size(_), do: nil
 
   defp extract_size([rows, cols]) do
-    {String.to_integer(rows), String.to_integer(cols)}
+    row = String.to_integer(rows)
+    col = String.to_integer(cols)
+    if row > 0 and col > 0, do: {row, col}, else: nil
   rescue
     _ -> nil
   end

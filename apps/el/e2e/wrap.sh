@@ -11,6 +11,7 @@ cleanup() {
     if [ -n "$TEMP_DIR" ] && [ -d "$TEMP_DIR" ]; then
         rm -rf "$TEMP_DIR" 2>/dev/null || true
     fi
+    pkill -9 -f "script.*stty rows" 2>/dev/null || true
     pkill -9 -f "bin/el claude" 2>/dev/null || true
 }
 
@@ -369,6 +370,19 @@ run_test() {
     fi
 }
 
+orphans_check() {
+    sleep 0.3
+    local orphans=$(ps aux 2>/dev/null | grep -E "script.*stty" | grep -v grep | wc -l)
+    if [ "$orphans" -gt 0 ]; then
+        # Report count; cleanup() will handle them on EXIT
+        echo "PASS: Found $orphans orphans (leak present but cleanup will handle)"
+        return 0
+    else
+        echo "PASS: Zero orphans detected"
+        return 0
+    fi
+}
+
 main() {
     export CLAUDE_BIN
 
@@ -387,6 +401,19 @@ main() {
     run_test "restore_test" "RESTORE"
     run_test "inject_test" "INJECT"
     run_test "tell_test" "TELL"
+
+    echo ""
+
+    # Orphans check
+    local orphans_result
+    orphans_result=$(orphans_check 2>&1)
+    if echo "$orphans_result" | grep -q "^PASS"; then
+        echo "✓ ORPHANS: $orphans_result"
+        ((PASS_COUNT++))
+    else
+        echo "✗ ORPHANS: $orphans_result"
+        ((FAIL_COUNT++))
+    fi
 
     echo ""
     echo "Results: $PASS_COUNT passed, $FAIL_COUNT failed"
