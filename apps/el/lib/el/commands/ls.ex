@@ -3,20 +3,19 @@ defmodule El.Commands.Ls do
 
   def execute(opts \\ []) do
     {Keyword.get(opts, :net_adm, :net_adm), Keyword.get(opts, :host, nil),
-     Keyword.get(opts, :filter, &default_filter/1), Keyword.get(opts, :ping, &default_ping/1),
+     Keyword.get(opts, :filter, &default_filter/1), Keyword.get(opts, :ping, &default_ping/2),
      Keyword.get(opts, :extract, &default_extract/1)}
     |> call_build()
   end
 
   defp call_build({net_adm, host, filter, ping, extract}) do
     names = safe_get_names(net_adm, host)
-    display(build_sessions(names, filter, ping, extract))
+    display(build_sessions(names, host, filter, ping, extract))
   end
 
-  defp build_sessions(names, filter, ping, extract) do
+  defp build_sessions(names, host, filter, ping, extract) do
     names
-    |> Enum.filter(filter)
-    |> Enum.filter(fn entry -> ping.(elem(entry, 0)) == :pong end)
+    |> Enum.filter(fn entry -> filter.(entry) && ping.(elem(entry, 0), host) == :pong end)
     |> Enum.map(extract)
   end
 
@@ -58,23 +57,23 @@ defmodule El.Commands.Ls do
     name
   end
 
-  defp default_ping(name) do
-    node_atom = node_to_atom(name)
+  defp default_ping(name, host) do
+    node_atom = node_to_atom(name, host)
     Node.set_cookie(:elita)
     Node.ping(node_atom)
   end
 
-  defp node_to_atom(name) when is_atom(name) do
-    name
+  defp node_to_atom(name, host) when is_atom(name) do
+    name_str = Atom.to_string(name)
+    if host, do: String.to_atom("#{name_str}@#{host}"), else: name
   end
 
-  defp node_to_atom(name) when is_list(name) do
-    name
-    |> List.to_string()
-    |> String.to_atom()
+  defp node_to_atom(name, host) when is_list(name) do
+    name_str = List.to_string(name)
+    if host, do: String.to_atom("#{name_str}@#{host}"), else: String.to_atom(name_str)
   end
 
-  defp node_to_atom(name) when is_binary(name) do
-    String.to_atom(name)
+  defp node_to_atom(name, host) when is_binary(name) do
+    if host, do: String.to_atom("#{name}@#{host}"), else: String.to_atom(name)
   end
 end
