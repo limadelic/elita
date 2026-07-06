@@ -75,5 +75,18 @@ defmodule Tools.User.ValidateUnitTest do
       result = Tools.User.Validate.check(tool)
       assert result == tool
     end
+
+    test "snippet with side effects does not execute" do
+      tool = %{
+        name: "side_effect_tool",
+        body: "A tool that would send a message",
+        params: "name",
+        code: ["send(self(), :boom); name"]
+      }
+
+      result = Tools.User.Validate.check(tool)
+      assert result == tool
+      refute_received :boom
+    end
   end
 end
