@@ -45,6 +45,24 @@ defmodule SessionNamingTest do
     assert String.contains?(msg, "/exit")
   end
 
+  test "tell target routing builds correct node name" do
+    assert tell_target("elita") == :"claude_elita@127.0.0.1"
+    assert tell_target("myapp") == :"claude_myapp@127.0.0.1"
+  end
+
+  test "tell process name extracted correctly" do
+    assert tell_process("elita") == :elita
+    assert tell_process("myapp") == :myapp
+  end
+
+  defp tell_target(agent) do
+    :"claude_#{agent}@127.0.0.1"
+  end
+
+  defp tell_process(agent) do
+    String.to_atom(agent)
+  end
+
   # Helper functions matching module logic
   defp parse_name(args) do
     case args do
