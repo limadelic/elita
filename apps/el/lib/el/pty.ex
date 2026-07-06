@@ -2,7 +2,10 @@ defmodule El.Pty do
   @moduledoc false
   use GenServer
   import El.Trace
-  alias El.Pty.{Cleanup, Dsr, Init, Size}
+  alias El.Pty.Cleanup
+  alias El.Pty.Dsr
+  alias El.Pty.Init
+  alias El.Pty.Size
 
   def start_link(name, cmd, opts \\ []) do
     GenServer.start_link(__MODULE__, {cmd, opts}, name: name)
