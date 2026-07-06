@@ -5,6 +5,7 @@ defmodule El.CLI do
   alias El.Commands.Ask
   alias El.Commands.Tell
   alias El.Commands.Claude
+  alias El.Commands.Ls
 
   def main(argv) do
     ensure_all_started(:elita)
@@ -30,6 +31,10 @@ defmodule El.CLI do
     {:claude, name}
   end
 
+  defp parse(["ls"]) do
+    :ls
+  end
+
   defp parse(_) do
     :usage
   end
@@ -39,6 +44,7 @@ defmodule El.CLI do
     puts("  el ask <agent> <message>")
     puts("  el tell <agent> <message>")
     puts("  el claude [name]")
+    puts("  el ls")
   end
 
   defp execute({:ask, agent, msg}) do
@@ -51,5 +57,9 @@ defmodule El.CLI do
 
   defp execute({:claude, name}) do
     Claude.execute(name)
+  end
+
+  defp execute(:ls) do
+    Ls.execute()
   end
 end
