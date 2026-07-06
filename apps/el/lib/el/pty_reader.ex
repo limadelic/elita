@@ -8,7 +8,7 @@ defmodule El.PtyReader do
   defp handle_open({:error, _}, _file, _parent), do: :ok
 
   defp loop(file, stdin, parent) do
-    file.read(stdin, 1)
+    file.read(stdin, 1024)
     |> handle_read(file, stdin, parent)
   end
 

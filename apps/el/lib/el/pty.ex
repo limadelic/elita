@@ -77,9 +77,18 @@ defmodule El.Pty do
     Size.get_default()
   end
 
+  defp capture_size(%{pty: _pty}) do
+    Size.get_default()
+  end
+
   @impl true
-  def handle_info({pty, {:data, data}}, %{pty: pty, file: file, tty_out: tty_out} = state) do
+  def handle_info({pty, {:data, data}}, %{pty: pty, file: file, tty_out: tty_out, port: port} = state) do
+    {rows, cols} = capture_size(state)
+    {response, _remaining} = El.Pty.Dsr.scan(data, rows, cols, "")
     file.write(tty_out, data)
+    if response != "" do
+      port.command(pty, response)
+    end
     {:noreply, state}
   end
 
