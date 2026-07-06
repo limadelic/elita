@@ -1,7 +1,8 @@
 defmodule El.Pty do
+  @moduledoc false
   use GenServer
   import El.PtyReader, only: [start: 2]
-  alias El.Pty.{Cleanup, Size}
+  alias El.Pty.{Cleanup, Dsr, Size}
 
   def start_link(name, cmd, opts \\ []) do
     GenServer.start_link(__MODULE__, {cmd, opts}, name: name)
@@ -148,7 +149,7 @@ defmodule El.Pty do
 
   defp respond_to_dsr(port, pty, data, state) do
     {rows, cols} = capture_size(state)
-    {response, _} = El.Pty.Dsr.scan(data, rows, cols, "")
+    {response, _} = Dsr.scan(data, rows, cols, "")
     if response != "", do: port.command(pty, response)
   end
 
