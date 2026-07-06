@@ -57,6 +57,11 @@ defmodule PtyTest do
       Call.track(:port_command, {port, data})
       :ok
     end
+
+    def info(port) do
+      Call.track(:port_info, port)
+      [{:os_pid, 12345}]
+    end
   end
 
   defp get_calls(agent) do
@@ -251,6 +256,31 @@ defmodule PtyTest do
     calls = get_calls(agent)
     assert Enum.any?(calls, fn
       {:file_close, {:fake_file, "/dev/stdin"}} -> true
+      _ -> false
+    end)
+
+    assert_receive {:DOWN, ^ref, :process, ^pid, :normal}, 1000
+  end
+
+  test "exit_status captures and kills process group", %{agent: agent} do
+    {:ok, pid} = El.Pty.start_link(
+      :test_pty,
+      "mycmd",
+      file: FakeFile,
+      port: FakePort
+    )
+
+    Process.sleep(50)
+
+    ref = Process.monitor(pid)
+
+    send(pid, {:fake_port, {:exit_status, 0}})
+
+    Process.sleep(50)
+
+    calls = get_calls(agent)
+    assert Enum.any?(calls, fn
+      {:port_info, :fake_port} -> true
       _ -> false
     end)
 

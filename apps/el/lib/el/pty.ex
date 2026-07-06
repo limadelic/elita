@@ -1,6 +1,7 @@
 defmodule El.Pty do
   use GenServer
   import El.PtyReader, only: [start: 2]
+  alias El.Pty.{Cleanup, Size}
 
   def start_link(name, cmd, opts \\ []) do
     GenServer.start_link(__MODULE__, {cmd, opts}, name: name)
@@ -33,10 +34,20 @@ defmodule El.Pty do
   defp setup(file, port, cmd, get_size) do
     parent = self()
     pty = open_pty(port, cmd, get_size)
+    os_pid = capture_os_pid(port, pty)
     {:ok, tty_out} = file.open("/dev/tty", [:write, :binary, :raw])
+    configure_and_start(file, parent)
+    %{pty: pty, file: file, port: port, tty_out: tty_out, os_pid: os_pid}
+  end
+
+  defp configure_and_start(file, parent) do
     Process.flag(:trap_exit, true)
     spawn_link(fn -> start(file, parent) end)
-    %{pty: pty, file: file, port: port, tty_out: tty_out}
+  end
+
+  defp capture_os_pid(port, pty) do
+    info = port.info(pty)
+    if is_list(info), do: Keyword.get(info, :os_pid), else: nil
   end
 
   defp open_pty(port, cmd, get_size) do
@@ -47,28 +58,8 @@ defmodule El.Pty do
   end
 
   defp default_get_size do
-    System.cmd("sh", ["-c", "stty size < /dev/tty"], stderr_to_stdout: true)
-    |> parse_size()
-  rescue
-    _ -> {24, 80}
+    Size.get_default()
   end
-
-  defp parse_size({output, 0}) do
-    String.trim(output)
-    |> String.split()
-    |> extract_size()
-  end
-
-  defp parse_size(_), do: {24, 80}
-
-  defp extract_size([rows, cols]) do
-    row = String.to_integer(rows)
-    col = String.to_integer(cols)
-    if row > 0 and col > 0, do: {row, col}, else: {24, 80}
-  rescue
-    _ -> {24, 80}
-  end
-  defp extract_size(_), do: {24, 80}
 
   @impl true
   def handle_info({pty, {:data, data}}, %{pty: pty, file: file, tty_out: tty_out} = state) do
@@ -76,7 +67,8 @@ defmodule El.Pty do
     {:noreply, state}
   end
 
-  def handle_info({pty, {:exit_status, _}}, %{pty: pty, file: file, tty_out: tty_out} = state) do
+  def handle_info({pty, {:exit_status, _}}, %{pty: pty, file: file, tty_out: tty_out, os_pid: os_pid} = state) do
+    Cleanup.kill_group(os_pid)
     file.close(tty_out)
     {:stop, :normal, state}
   end
@@ -85,7 +77,8 @@ defmodule El.Pty do
     {:noreply, state}
   end
 
-  def handle_info({:EXIT, _pid, reason}, state) do
+  def handle_info({:EXIT, _pid, reason}, %{os_pid: os_pid} = state) do
+    Cleanup.kill_group(os_pid)
     {:stop, reason, state}
   end
 
