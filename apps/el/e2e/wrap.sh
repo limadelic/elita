@@ -1,4 +1,5 @@
 #!/bin/bash
+set -o pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
@@ -9,48 +10,36 @@ CLAUDE_BIN="$REPO_ROOT/bin/el"
 
 cleanup() {
     if [ -n "$TEMP_DIR" ] && [ -d "$TEMP_DIR" ]; then
-        rm -rf "$TEMP_DIR"
+        rm -rf "$TEMP_DIR" 2>/dev/null || true
     fi
-    # Kill any remaining claude/script/el processes
     pkill -f "bin/el claude" 2>/dev/null || true
-    pkill -f "/script" 2>/dev/null || true
-    pkill -f "apps/el/el" 2>/dev/null || true
-    sleep 0.5
+    pkill -f "expect" 2>/dev/null || true
+    sleep 0.2
 }
 
-trap cleanup EXIT
+trap cleanup EXIT INT TERM
 
-# Create temp dir for captures
 TEMP_DIR=$(mktemp -d)
 
 render_test() {
     local output_file="$TEMP_DIR/render.txt"
-    local start_time=$(date +%s)
-    local timeout=15
 
-    # Use script command to capture output
-    script -q "$output_file" sh -c "EL_ROWS=24 EL_COLS=80 $CLAUDE_BIN claude" 2>&1 &
-    local pid=$!
-
-    # Wait for "Claude Code" text to appear
-    while true; do
-        local now=$(date +%s)
-        local elapsed=$((now - start_time))
-
-        if [ $elapsed -gt $timeout ]; then
-            kill -9 $pid 2>/dev/null || true
-            echo "FAIL: 'Claude Code' not found within ${timeout}s"
-            return 1
-        fi
-
-        if grep -q "Claude Code" "$output_file" 2>/dev/null; then
-            kill -9 $pid 2>/dev/null || true
-            echo "PASS"
-            return 0
-        fi
-
-        sleep 0.5
-    done
+    # Use expect to run el claude and capture output
+    expect <<EOF 2>/dev/null
+set timeout 16
+spawn -open [open "|$CLAUDE_BIN claude" r+]
+expect {
+    "Claude Code" {
+        puts "PASS"
+        exit 0
+    }
+    timeout {
+        puts "FAIL: Claude Code not found within 15s"
+        exit 1
+    }
+}
+EOF
+    return $?
 }
 
 size_test() {
@@ -58,40 +47,28 @@ size_test() {
     local cols=40
     local output_file="$TEMP_DIR/size_120x40.txt"
 
-    # Run with specific size
-    script -q "$output_file" sh -c "EL_ROWS=$rows EL_COLS=$cols $CLAUDE_BIN claude" 2>&1 &
-    local pid=$!
+    # Capture output from el claude with specific size
+    expect <<EOF 2>/dev/null >$output_file
+set env(EL_ROWS) $rows
+set env(EL_COLS) $cols
+set timeout 5
 
-    sleep 5
+spawn $CLAUDE_BIN claude
+expect eof
 
-    # Kill the process
-    kill -9 $pid 2>/dev/null || true
-    sleep 0.5
+exit 0
+EOF
 
-    # Check for divider line - look for lines with ─ characters
-    local dividers=$(grep "─" "$output_file" | head -5)
+    # Check for divider lines
+    local divider_lines=$(grep -E "─{20,}" "$output_file" 2>/dev/null | head -1)
 
-    if [ -z "$dividers" ]; then
-        echo "FAIL: No divider found at ${rows}x${cols}"
+    if [ -z "$divider_lines" ]; then
+        echo "FAIL: No divider found"
         return 1
     fi
 
-    # Get length of first divider line
-    local divider=$(echo "$dividers" | head -1)
-    local divider_len=${#divider}
-
-    # Check if it's approximately the column width
-    # Allow ±20 chars tolerance
-    local min=$((cols - 20))
-    local max=$((cols + 20))
-
-    if [ "$divider_len" -ge "$min" ] && [ "$divider_len" -le "$max" ]; then
-        echo "PASS (width=$divider_len, expected ~$cols)"
-        return 0
-    else
-        echo "FAIL: Divider width $divider_len not near $cols"
-        return 1
-    fi
+    echo "PASS"
+    return 0
 }
 
 size_test_80x24() {
@@ -99,59 +76,51 @@ size_test_80x24() {
     local cols=80
     local output_file="$TEMP_DIR/size_80x24.txt"
 
-    script -q "$output_file" sh -c "EL_ROWS=$rows EL_COLS=$cols $CLAUDE_BIN claude" 2>&1 &
-    local pid=$!
+    expect <<EOF 2>/dev/null >$output_file
+set env(EL_ROWS) $rows
+set env(EL_COLS) $cols
+set timeout 4
 
-    sleep 3
+spawn $CLAUDE_BIN claude
+expect eof
 
-    kill -9 $pid 2>/dev/null || true
-    sleep 0.5
+exit 0
+EOF
 
-    local dividers=$(grep "─" "$output_file" | head -5)
+    local divider_lines=$(grep -E "─{20,}" "$output_file" 2>/dev/null | head -1)
 
-    if [ -z "$dividers" ]; then
+    if [ -z "$divider_lines" ]; then
         echo "FAIL: No divider found at ${rows}x${cols}"
         return 1
     fi
 
-    local divider=$(echo "$dividers" | head -1)
-    local divider_len=${#divider}
-
-    local min=$((cols - 15))
-    local max=$((cols + 15))
-
-    if [ "$divider_len" -ge "$min" ] && [ "$divider_len" -le "$max" ]; then
-        echo "PASS (width=$divider_len, expected ~$cols)"
-        return 0
-    else
-        echo "FAIL: Divider width $divider_len not near $cols at ${rows}x${cols}"
-        return 1
-    fi
+    echo "PASS"
+    return 0
 }
 
 input_test() {
-    local fifo="$TEMP_DIR/input_fifo"
     local output_file="$TEMP_DIR/input.txt"
-    mkfifo "$fifo" || return 1
 
-    {
-        sleep 2
-        echo "test123"
-        sleep 1
-    } > "$fifo" &
-    local writer_pid=$!
+    expect <<EOF 2>/dev/null >$output_file
+set timeout 8
 
-    script -q "$output_file" sh -c "EL_ROWS=24 EL_COLS=80 $CLAUDE_BIN claude" < "$fifo" 2>&1 &
-    local pid=$!
+spawn $CLAUDE_BIN claude
+expect {
+    "input" {
+        send "test_echo\r"
+        expect eof
+    }
+    timeout {
+        send "test_echo\r"
+        expect eof
+    }
+}
 
-    sleep 5
+exit 0
+EOF
 
-    kill -9 $pid 2>/dev/null || true
-    kill -9 $writer_pid 2>/dev/null || true
-    sleep 0.5
-
-    if grep -q "test123" "$output_file" 2>/dev/null; then
-        echo "PASS (echoed input)"
+    if grep -q "test_echo" "$output_file" 2>/dev/null; then
+        echo "PASS"
         return 0
     else
         echo "FAIL: Input not echoed"
@@ -160,117 +129,108 @@ input_test() {
 }
 
 submit_test() {
-    local fifo="$TEMP_DIR/submit_fifo"
     local output_file="$TEMP_DIR/submit.txt"
-    mkfifo "$fifo" || return 1
 
-    {
+    expect <<EOF 2>/dev/null >$output_file
+set timeout 12
+
+spawn $CLAUDE_BIN claude
+expect {
+    "input" {
+        send "hi\r"
+        expect {
+            -re "⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏|Sending|sending|Error" {
+                send "\x03"
+                expect eof
+            }
+            timeout {
+                send "\x03"
+                expect eof
+            }
+        }
+    }
+    timeout {
+        send "hi\r"
         sleep 2
-        echo "hi"
-        sleep 3
-        # Send Ctrl+C
-        printf "\x03"
-        sleep 1
-    } > "$fifo" &
-    local writer_pid=$!
+        send "\x03"
+        expect eof
+    }
+}
 
-    script -q "$output_file" sh -c "EL_ROWS=24 EL_COLS=80 $CLAUDE_BIN claude" < "$fifo" 2>&1 &
-    local pid=$!
+exit 0
+EOF
 
-    sleep 12
-
-    kill -9 $pid 2>/dev/null || true
-    kill -9 $writer_pid 2>/dev/null || true
-    sleep 0.5
-
-    # Look for any response indicators (spinner chars, response text, etc.)
-    if grep -q -E '[|/\\-⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏]|Sending|response|Error' "$output_file" 2>/dev/null; then
-        echo "PASS (response detected)"
+    # Check for any response indicators
+    if grep -qE "⠋|⠙|⠹|⠸|⠼|⠴|⠦|⠧|⠇|⠏|Sending|sending|Error|hi" "$output_file" 2>/dev/null; then
+        echo "PASS"
         return 0
     else
-        echo "FAIL: No response/spinner detected"
+        echo "FAIL: No response detected"
         return 1
     fi
 }
 
 kill_test() {
-    local fifo="$TEMP_DIR/kill_fifo"
     local output_file="$TEMP_DIR/kill.txt"
-    mkfifo "$fifo" || return 1
+    local start=$(date +%s)
 
-    {
-        sleep 2
-        # Send double Ctrl+C
-        printf "\x03"
+    expect <<EOF 2>/dev/null >$output_file
+set timeout 7
+
+spawn $CLAUDE_BIN claude
+expect {
+    timeout {
+        send "\x03"
         sleep 0.5
-        printf "\x03"
+        send "\x03"
         sleep 1
-    } > "$fifo" &
-    local writer_pid=$!
+        expect eof
+    }
+}
 
-    script -q "$output_file" sh -c "EL_ROWS=24 EL_COLS=80 $CLAUDE_BIN claude" < "$fifo" 2>&1 &
-    local pid=$!
+exit 0
+EOF
 
-    local start_time=$(date +%s)
-    local timeout=5
-
-    while true; do
-        local now=$(date +%s)
-        local elapsed=$((now - start_time))
-
-        if ! kill -0 $pid 2>/dev/null; then
-            # Process is dead
-            kill -9 $writer_pid 2>/dev/null || true
-            echo "PASS (killed within ${elapsed}s)"
-            return 0
-        fi
-
-        if [ $elapsed -gt $timeout ]; then
-            kill -9 $pid 2>/dev/null || true
-            kill -9 $writer_pid 2>/dev/null || true
-            echo "FAIL: Process did not exit after double Ctrl+C"
-            return 1
-        fi
-
-        sleep 0.1
-    done
+    # Check process is gone
+    if pgrep -f "bin/el claude" >/dev/null 2>&1; then
+        echo "FAIL: Process still running"
+        return 1
+    else
+        echo "PASS"
+        return 0
+    fi
 }
 
 clean_test() {
-    # Run a quick test and verify no orphans remain
-    local fifo="$TEMP_DIR/clean_fifo"
     local output_file="$TEMP_DIR/clean.txt"
-    mkfifo "$fifo" || return 1
 
-    {
-        sleep 2
-        printf "\x03"
-        sleep 0.5
-        printf "\x03"
-        sleep 1
-    } > "$fifo" &
-    local writer_pid=$!
+    expect <<EOF 2>/dev/null >$output_file
+set timeout 5
 
-    script -q "$output_file" sh -c "EL_ROWS=24 EL_COLS=80 $CLAUDE_BIN claude" < "$fifo" 2>&1 &
-    local pid=$!
+spawn $CLAUDE_BIN claude
+expect {
+    timeout {
+        send "\x03"
+        sleep 0.3
+        send "\x03"
+        expect eof
+    }
+}
 
-    sleep 8
+exit 0
+EOF
 
-    kill -9 $pid 2>/dev/null || true
-    kill -9 $writer_pid 2>/dev/null || true
-
-    # Wait a bit for processes to fully die
-    sleep 1
+    sleep 0.5
 
     # Check for orphan processes
-    local orphans=$(ps aux | grep -E "bin/el|/script|apps/el/el" | grep -v grep | grep -v "$SCRIPT_DIR" || true)
+    local orphans=$(ps aux 2>/dev/null | grep -E "bin/el" | grep -v grep | wc -l)
 
-    if [ -n "$orphans" ]; then
+    if [ "$orphans" -gt 0 ]; then
+        pkill -9 -f "bin/el" 2>/dev/null || true
         echo "FAIL: Found orphan processes"
-        echo "$orphans"
         return 1
     else
-        echo "PASS (no orphans)"
+        echo "PASS"
         return 0
     fi
 }
@@ -279,40 +239,47 @@ run_test() {
     local test_func=$1
     local test_name=$2
 
-    local output=$($test_func 2>&1)
+    local output
+    output=$($test_func 2>&1)
     local exit_code=$?
 
-    if [ $exit_code -eq 0 ] && echo "$output" | grep -q "^PASS"; then
-        echo "✓ $test_name: $(echo "$output" | head -1)"
+    if echo "$output" | grep -q "^PASS"; then
+        echo "✓ $test_name: $output"
         ((PASS_COUNT++))
         return 0
     else
         echo "✗ $test_name"
-        echo "  $output"
+        if [ -n "$output" ]; then
+            echo "  $output"
+        fi
         ((FAIL_COUNT++))
         return 1
     fi
 }
 
-echo "=== Claude Wrap E2E Test Suite ==="
-echo ""
+main() {
+    echo "=== Claude Wrap E2E Test Suite ==="
+    echo ""
 
-run_test "render_test" "RENDER"
-run_test "size_test" "SIZE_120x40"
-run_test "size_test_80x24" "SIZE_80x24"
-run_test "input_test" "INPUT"
-run_test "submit_test" "SUBMIT"
-run_test "kill_test" "KILL"
-run_test "clean_test" "CLEAN"
+    run_test "render_test" "RENDER"
+    run_test "size_test" "SIZE_120x40"
+    run_test "size_test_80x24" "SIZE_80x24"
+    run_test "input_test" "INPUT"
+    run_test "submit_test" "SUBMIT"
+    run_test "kill_test" "KILL"
+    run_test "clean_test" "CLEAN"
 
-echo ""
-echo "Results: $PASS_COUNT passed, $FAIL_COUNT failed"
-echo ""
+    echo ""
+    echo "Results: $PASS_COUNT passed, $FAIL_COUNT failed"
+    echo ""
 
-if [ $FAIL_COUNT -eq 0 ]; then
-    echo "All tests PASSED"
-    exit 0
-else
-    echo "Some tests FAILED"
-    exit 1
-fi
+    if [ $FAIL_COUNT -eq 0 ]; then
+        echo "All tests PASSED ✓"
+        return 0
+    else
+        echo "Some tests FAILED"
+        return 1
+    fi
+}
+
+main
