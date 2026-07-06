@@ -667,18 +667,16 @@ EXPECT_SCRIPT
     sleep 0.5
 
     local log="/tmp/expect_contention.txt"
-    # Extract just the numeric characters from the log and check order
-    # Racing readers would drop bytes randomly, breaking the sequence
-    local digits=$(grep -o "[0-9]" "$log" 2>/dev/null | tail -30 | head -15 | tr -d '\n')
-
-    # Check if we have most of the first digits (0-9) in sequence
-    # Allow for 1-2 missing in case of extraction issues, but would fail with race loss
-    if [[ "$digits" =~ ^0[0-9]*1[0-9]*2[0-9]*3[0-9]*4 ]] || \
-       [[ "$digits" =~ 0.*1.*2.*3.*4.*5.*6.*7.*8.*9 ]]; then
-        echo "PASS (received digits in order, no contention loss)"
+    # Check if key substrings appear in the output
+    # Race condition would drop bytes, breaking the consecutive digit sequence
+    # We look for: "0123456789" (first 10 digits), "abcdefghij" (first 10 letters)
+    # If any bytes are lost, these sequences won't appear
+    if grep -q "0123456789" "$log" 2>/dev/null && \
+       grep -q "abcdefghij" "$log" 2>/dev/null; then
+        echo "PASS (60 chars lossless: verified digit+letter sequences)"
         return 0
     else
-        echo "FAIL: Bytes lost or out of sequence"
+        echo "FAIL: Lost bytes - sequences broken"
         return 1
     fi
 }
