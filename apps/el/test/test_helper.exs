@@ -1,3 +1,14 @@
-ExUnit.start()
+Logger.configure(level: :warning)
+
+include_tags = if System.get_env("LIVE") == "1", do: [:main, :live], else: [:main]
+
+timeout = if System.get_env("LIVE") == "1", do: 300_000, else: 60_000
+
+ExUnit.start(
+  timeout: timeout,
+  max_cases: 1,
+  exclude: [:live],
+  include: include_tags
+)
 
 {:ok, _} = Tape.Writer.start_link(nil)
