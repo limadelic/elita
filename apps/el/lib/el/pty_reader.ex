@@ -1,4 +1,6 @@
 defmodule El.PtyReader do
+  @moduledoc false
+
   def start(file, parent) do
     try_tty(file, parent)
   end
