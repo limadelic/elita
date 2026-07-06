@@ -21,7 +21,7 @@ defmodule El.Commands.Ls do
   end
 
   defp alive?(entry, filter, host, ping) do
-    filter.(entry) && ping.(elem(entry, 0), host) == :pong
+    Enum.all?([filter.(entry), ping.(elem(entry, 0), host) == :pong])
   end
 
   defp display([]), do: puts("no sessions")
