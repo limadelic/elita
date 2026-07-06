@@ -1,10 +1,12 @@
 defmodule El.Commands.Claude do
   import :os, only: [cmd: 1]
   import El.Pty, only: [run: 2]
+  import El.Distribution, only: [start: 0]
 
   def execute do
     get_size = &read_terminal_size/0
     cmd(~c"stty raw -echo -isig < /dev/tty")
+    start()
     run(:claude, get_size: get_size)
   after
     cmd(~c"stty sane < /dev/tty")
