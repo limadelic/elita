@@ -2,11 +2,11 @@ defmodule El.Commands.Address.World do
   import Agent.Config, only: [load: 0]
   import El.Standpoint, only: [get: 0]
 
-  def build(nodes \\ &connected_nodes/0) do
+  def build(nodes \\ &peers/0) do
     folders = load() |> Enum.map(&entry/1)
     files = Enum.flat_map(folders, &scan/1)
     unique_files = Enum.uniq_by(files, &{&1.name, &1.path})
-    remote = nodes.() |> Enum.map(&remote_entry/1)
+    remote = nodes.() |> Enum.map(&remote/1)
     folders ++ unique_files ++ remote
   end
 
@@ -42,11 +42,11 @@ defmodule El.Commands.Address.World do
     %{name: name, path: folder, file_path: file_path, kind: :file}
   end
 
-  defp connected_nodes do
+  defp peers do
     [Node.self() | Node.list()]
   end
 
-  defp remote_entry(node) do
+  defp remote(node) do
     %{name: Atom.to_string(node), path: nil, kind: :node, file_path: nil}
   end
 end

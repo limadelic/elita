@@ -11,7 +11,8 @@ defmodule El.Peers do
   end
 
   def record(peer) do
-    load() |> Enum.uniq([peer]) |> persist(path())
+    unique = [peer | load()] |> Enum.uniq()
+    persist(path(), unique)
     :ok
   rescue
     _ -> :ok
@@ -27,13 +28,15 @@ defmodule El.Peers do
     |> split("\n")
     |> Enum.map(&trim/1)
     |> Enum.reject(&(&1 == ""))
+    |> Enum.map(&String.to_atom/1)
   end
 
   defp parse({:error, _}), do: []
 
   defp persist(file, lines) do
     File.mkdir_p!(Path.dirname(file))
-    content = Enum.join(lines, "\n")
+    strs = lines |> Enum.map(&Atom.to_string/1)
+    content = Enum.join(strs, "\n")
     File.write!(file, content)
   end
 end

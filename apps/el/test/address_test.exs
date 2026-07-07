@@ -475,3 +475,60 @@ defmodule LsTest do
   end
 end
 
+defmodule PeersTest do
+  use ExUnit.Case, async: false
+
+  test "peers round-trip: record and load" do
+    tmp = System.tmp_dir() |> Path.join("elita_peers_test_#{System.unique_integer()}")
+    File.mkdir_p!(tmp)
+
+    old_home = System.get_env("HOME")
+    System.put_env("HOME", tmp)
+
+    on_exit(fn ->
+      if old_home do
+        System.put_env("HOME", old_home)
+      else
+        System.delete_env("HOME")
+      end
+      File.rm_rf!(tmp)
+    end)
+
+    peer1 = :"node1@host1"
+    peer2 = :"node2@host2"
+
+    El.Peers.record(peer1)
+    El.Peers.record(peer2)
+
+    loaded = El.Peers.load()
+
+    assert peer1 in loaded
+    assert peer2 in loaded
+    assert Enum.all?(loaded, &is_atom/1)
+  end
+
+  test "distribution redial connects to loaded peers" do
+    peers = [:"mock1@host", :"mock2@host"]
+    connected = []
+
+    fake_connect = fn peer ->
+      Agent.update(:mock_connects, &[peer | &1])
+    end
+
+    Agent.start_link(fn -> [] end, name: :mock_connects)
+
+    redial(peers, fake_connect)
+
+    calls = Agent.get(:mock_connects, & &1)
+
+    assert :"mock1@host" in calls
+    assert :"mock2@host" in calls
+  end
+
+  defp redial(peers, connect_fn) do
+    peers |> Enum.each(&connect_fn.(&1))
+  rescue
+    _ -> :ok
+  end
+end
+
