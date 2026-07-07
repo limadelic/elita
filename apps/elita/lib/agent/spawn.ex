@@ -28,7 +28,7 @@ defmodule Agent.Spawn do
   end
 
   defp setup(message, folder) do
-    [{:args, ["-p", message, "--allowedTools", ""]}, {:cd, String.to_charlist(folder)}] ++
+    [{:args, ["-p", message, "--allowedTools", ""]}, {:cd, to_charlist(folder)}] ++
       [:binary, :exit_status, :use_stdio]
   end
 
@@ -51,7 +51,7 @@ defmodule Agent.Spawn do
 
   defp slay(port) do
     {:os_pid, pid} = :erlang.port_info(port, :os_pid)
-    System.cmd("kill", [to_string(pid)])
+    System.cmd("kill", [pid |> to_string])
   rescue
     _ -> :ok
   end
