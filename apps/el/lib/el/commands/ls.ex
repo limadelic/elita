@@ -17,10 +17,9 @@ defmodule El.Commands.Ls do
   end
 
   defp render(path) do
-    world = build()
-    here = cwd()
-    target = normalize(path, here)
-    world |> entries(target) |> sort_by(& &1.name) |> format_output()
+    target = normalize(path, cwd())
+    visible = entries(build(), target)
+    (visible ++ harvest(visible)) |> sort_by(& &1.name) |> format_output()
   end
 
   defp entries(world, nil), do: world
@@ -52,6 +51,23 @@ defmodule El.Commands.Ls do
   defp map_status([_ | _]), do: "active"
   defp map_status([]), do: "asleep"
 
+  defp harvest(visible) do
+    names = map(visible, & &1.name)
+    ElitaRegistry
+    |> Registry.select([{{:"$1", :_, %{kind: :headless}}, [], [:"$1"]}])
+    |> filter(&not_in?(names, &1))
+    |> map(&entry/1)
+  end
+
+  defp not_in?(list, name) do
+    !Enum.any?(list, fn n -> String.downcase(to_string(n)) == String.downcase(to_string(name)) end)
+  end
+
+  defp entry(name) do
+    %{name: to_string(name), path: nil, kind: :session}
+  end
+
   defp kind_label(:file), do: "file"
   defp kind_label(:folder), do: "folder"
+  defp kind_label(:session), do: "session"
 end

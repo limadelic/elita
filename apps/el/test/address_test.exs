@@ -265,6 +265,37 @@ defmodule AddressTest do
     active_ward = Registry.lookup(ElitaRegistry, "ward")
     assert active_ward != []
     assert length(active_ward) == 1
+
+    # Test channel semantics: ward addressed twice lands same session with state
+    [{pid_ward_before, _}] = Registry.lookup(ElitaRegistry, "ward")
+    Agent.start_link(fn -> [] end, name: :channel_test_log)
+
+    System.put_env("TEST_AGENT_RUNNER", "StubRunner")
+    capture_io(fn -> El.Commands.Ask.execute("ward", "msg1", env_module: FakeEnv) end)
+    if old_runner do
+      System.put_env("TEST_AGENT_RUNNER", old_runner)
+    else
+      System.delete_env("TEST_AGENT_RUNNER")
+    end
+
+    [{pid_ward_after1, _}] = Registry.lookup(ElitaRegistry, "ward")
+    assert pid_ward_before == pid_ward_after1
+
+    System.put_env("TEST_AGENT_RUNNER", "StubRunner")
+    capture_io(fn -> El.Commands.Ask.execute("ward", "msg2", env_module: FakeEnv) end)
+    if old_runner do
+      System.put_env("TEST_AGENT_RUNNER", old_runner)
+    else
+      System.delete_env("TEST_AGENT_RUNNER")
+    end
+
+    [{pid_ward_after2, _}] = Registry.lookup(ElitaRegistry, "ward")
+    assert pid_ward_before == pid_ward_after2
+
+    # Test ls shows ward active
+    output_ls_ward = capture_io(fn -> El.Commands.Ls.execute() end)
+    assert String.contains?(output_ls_ward, "ward")
+    assert String.contains?(output_ls_ward, "active")
   end
 end
 

@@ -3,13 +3,14 @@ defmodule El.Commands.Spawn do
   import String, only: [downcase: 1]
   import Agent.Session, only: [start_link: 1]
   import El.Commands.Address.World, only: [build: 0, cwd: 0]
+  import Resolver, only: [resolve: 3]
   alias El.Distribution
 
   def execute(session, agent) do
     Distribution.start()
     world = build()
     cwd = cwd()
-    result = Resolver.resolve(agent, world, cwd)
+    result = resolve(agent, world, cwd)
     handle(result, session, agent)
   end
 
