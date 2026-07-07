@@ -22,7 +22,7 @@ defmodule El.Commands.Address do
 
   defp handle({:ok, entry}, _recipient, msg, :tell) do
     rouse(entry)
-    send_tell(entry.name, msg)
+    tell(entry.name, msg)
   end
 
   defp handle({:many, _entries}, _recipient, _msg, :ask) do
@@ -35,24 +35,24 @@ defmodule El.Commands.Address do
     |> Enum.each(fn e -> rouse(e) end)
     entries
     |> Enum.uniq_by(&{&1.name, &1.path})
-    |> Enum.each(fn e -> send_tell(e.name, msg) end)
+    |> Enum.each(fn e -> tell(e.name, msg) end)
   end
 
-  defp send_tell(agent, msg) do
-    agent |> downcase |> lookup_and_dispatch(msg)
+  defp tell(agent, msg) do
+    agent |> downcase |> find(msg)
   end
 
-  defp lookup_and_dispatch(normalized, msg) do
+  defp find(normalized, msg) do
     Registry.lookup(ElitaRegistry, normalized) |> dispatch(msg)
   end
 
   defp dispatch([], _msg), do: :ok
   defp dispatch(pids, msg) do
-    Enum.each(pids, fn {pid, meta} -> cast_msg(pid, meta[:kind], msg) end)
+    Enum.each(pids, fn {pid, meta} -> send(pid, meta[:kind], msg) end)
   end
 
-  defp cast_msg(pid, :native, msg), do: GenServer.cast(pid, {:act, msg})
-  defp cast_msg(pid, _, msg), do: GenServer.cast(pid, {:cast, msg})
+  defp send(pid, :native, msg), do: GenServer.cast(pid, {:act, msg})
+  defp send(pid, _, msg), do: GenServer.cast(pid, {:cast, msg})
   defp rouse(%{kind: :file, name: n, path: p}) do
     stir(asleep?(n), n, p)
   end
@@ -61,27 +61,26 @@ defmodule El.Commands.Address do
 
   defp stir(false, _name, _folder), do: :ok
   defp stir(true, name, folder) do
-    runner = System.get_env("TEST_AGENT_RUNNER") |> grab() || stub_runner()
-    start_link([name: name, folder: folder, runner: runner])
+    rune = System.get_env("TEST_AGENT_RUNNER") |> pick()
+    opts = [name: name, folder: folder]
+    start_link(wire(opts, rune))
   end
 
-  defp stub_runner do
-    fn _msg, _folder -> "stub response" end
-  end
-
-  defp grab(nil), do: nil
-  defp grab(name) do
-    wrap_runner(String.to_atom(name))
+  defp pick(nil), do: nil
+  defp pick(name) do
+    atom = String.to_atom("Elixir." <> name)
+    if Code.ensure_compiled?(atom) && Kernel.function_exported?(atom, :run, 2) do
+      atom
+    else
+      nil
+    end
   rescue
     _ -> nil
   end
 
-  defp wrap_runner(atom) do
-    if Code.ensure_compiled?(atom) && Kernel.function_exported?(atom, :run, 2) do
-      fn m, f -> apply(atom, :run, [m, f]) end
-    else
-      nil
-    end
+  defp wire(opts, nil), do: opts
+  defp wire(opts, rune) do
+    Keyword.put(opts, :runner, fn m, f -> apply(rune, :run, [m, f]) end)
   end
 
   defp asleep?(name) do
