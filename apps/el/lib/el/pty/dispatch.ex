@@ -6,8 +6,8 @@ defmodule El.Pty.Dispatch do
   alias El.Pty.Handler
 
   def info({pty, {:data, data}}, state) do
-    %{port: port, file: file, tty_out: tty_out, taps: taps} = state
-    file.write(tty_out, data)
+    %{port: port, file: file, out: out, taps: taps} = state
+    file.write(out, data)
     broadcast(taps, data)
     Handler.handle_dsr_response(port, pty, data, state)
     {:noreply, state}
@@ -21,9 +21,9 @@ defmodule El.Pty.Dispatch do
 
   def info(
         {pty, {:exit_status, _}},
-        %{pty: pty, file: file, tty_out: tty_out, os_pid: os_pid} = state
+        %{pty: pty, file: file, out: out, os_pid: os_pid} = state
       ) do
-    close_stream(os_pid, file, tty_out)
+    cleanup(os_pid, file, out)
     {:stop, :normal, state}
   end
 
@@ -59,8 +59,8 @@ defmodule El.Pty.Dispatch do
     Enum.each(taps, fn pid -> send(pid, {:output, data}) end)
   end
 
-  defp close_stream(os_pid, file, tty_out) do
+  defp cleanup(os_pid, file, out) do
     Cleanup.kill_group(os_pid)
-    file.close(tty_out)
+    file.close(out)
   end
 end

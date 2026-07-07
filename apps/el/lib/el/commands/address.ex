@@ -7,8 +7,8 @@ defmodule El.Commands.Address do
   import String, only: [downcase: 1]
 
   def route(recipient, msg, mode \\ :ask, tool \\ nil) do
-    world_builder = Application.get_env(:el, :world_builder, &build/0)
-    world = world_builder.()
+    world_fn = Application.get_env(:el, :world, &build/0)
+    world = world_fn.()
     result = resolve(recipient, world, cwd())
     handle(result, recipient, msg, mode, tool)
   end

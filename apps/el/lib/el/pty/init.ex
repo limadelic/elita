@@ -5,24 +5,24 @@ defmodule El.Pty.Init do
 
   def call(cfg) do
     size = cfg[:get_size].()
-    {pty, os_pid, tty_out} = init_pty(cfg, size)
-    post_init(cfg, pty, size, tty_out, os_pid)
+    {pty, os_pid, out} = init_pty(cfg, size)
+    post_init(cfg, pty, size, out, os_pid)
   end
 
   defp init_pty(cfg, size) do
     {pty, os_pid} = pty_and_pid(cfg[:port], cfg[:cmd], size)
-    {:ok, tty_out} = cfg[:file].open("/dev/tty", [:write, :binary, :raw])
-    {pty, os_pid, tty_out}
+    {:ok, out} = cfg[:file].open("/dev/tty", [:write, :binary, :raw])
+    {pty, os_pid, out}
   end
 
-  defp post_init(cfg, pty, size, tty_out, os_pid) do
+  defp post_init(cfg, pty, size, out, os_pid) do
     setup(cfg[:file], pty, size)
     monitor_port(pty)
-    core(pty, tty_out, os_pid) |> attach(cfg)
+    core(pty, out, os_pid) |> attach(cfg)
   end
 
-  defp core(pty, tty_out, os_pid) do
-    %{pty: pty, tty_out: tty_out, os_pid: os_pid}
+  defp core(pty, out, os_pid) do
+    %{pty: pty, out: out, os_pid: os_pid}
   end
 
   defp attach(state, cfg) do
