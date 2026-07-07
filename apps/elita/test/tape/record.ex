@@ -9,6 +9,10 @@ defmodule Tape.Record do
 
   defp sparse(body, name) do
     messages = Map.get(body, :messages, [])
+    build(name, messages)
+  end
+
+  defp build(name, messages) do
     %{"agent" => name, "messages" => last_only(messages), "n" => length(messages)}
   end
 
