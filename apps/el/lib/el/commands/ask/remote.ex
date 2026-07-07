@@ -5,12 +5,12 @@ defmodule El.Commands.Ask.Remote do
 
   alias El.Answer
 
-  def remote_ask(msg, target, process_name, tool) do
-    wrap = fn -> print_answer(msg, target, process_name) end
+  def ask(msg, target, process_name, tool) do
+    wrap = fn -> print(msg, target, process_name) end
     tap(target, process_name, wrap, tool)
   end
 
-  defp print_answer(msg, target, process_name) do
+  defp print(msg, target, process_name) do
     result = answer(msg, target, process_name)
     IO.puts(result)
   end

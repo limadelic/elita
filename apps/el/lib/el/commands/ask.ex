@@ -1,7 +1,7 @@
 defmodule El.Commands.Ask do
   @moduledoc false
   import El.Commands.Address, only: [route: 4]
-  import El.Commands.Ask.Remote, only: [remote_ask: 4]
+  import El.Commands.Ask.Remote, only: [ask: 4]
   import El.Commands.Lookup, only: [local: 4]
   import String, only: [contains?: 2]
 
@@ -55,7 +55,7 @@ defmodule El.Commands.Ask do
          true,
          {msg, target, process_name, _agent, _env_module, tool}
        ) do
-    remote_ask(msg, target, process_name, tool)
+    ask(msg, target, process_name, tool)
   end
 
   defp forward(
