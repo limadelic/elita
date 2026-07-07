@@ -3,14 +3,13 @@ defmodule El.Pty do
   use GenServer
   import El.Trace
   alias El.Pty.Cleanup
-  alias El.Pty.Dsr
+  alias El.Pty.Handler
   alias El.Pty.Init
   alias El.Pty.Size
 
   def start_link(name, cmd, opts \\ []) do
     GenServer.start_link(__MODULE__, {cmd, opts}, name: name)
   end
-
   def inject(name, message) do
     GenServer.cast(name, {:inject, message})
   end
@@ -54,13 +53,13 @@ defmodule El.Pty do
   def handle_info({pty, {:data, data}}, %{pty: pty, port: port, file: file, tty_out: tty_out, taps: taps} = state) do
     file.write(tty_out, data)
     Enum.each(taps, fn pid -> send(pid, {:output, data}) end)
-    handle_dsr_response(port, pty, data, state)
+    Handler.handle_dsr_response(port, pty, data, state)
     {:noreply, state}
   end
 
   def handle_info({:stdin, data}, %{pty: pty, port: port, input: input} = state) do
     log_chunk(data)
-    process_input(port, pty, input.(data))
+    Handler.process_input(port, pty, input.(data))
     {:noreply, state}
   end
 
@@ -83,20 +82,6 @@ defmodule El.Pty do
     Cleanup.kill_group(os_pid)
     {:stop, :normal, state}
   end
-
-  defp process_input(_port, _pty, :drop), do: :ok
-  defp process_input(port, pty, transformed), do: port.command(pty, transformed)
-
-  defp handle_dsr_response(port, pty, data, _state) do
-    {rows, cols} = Size.get_default()
-    send_if_response(port, pty, Dsr.scan(data, rows, cols, ""))
-  end
-
-  defp send_if_response(port, pty, {response, _}) when response != "" do
-    port.command(pty, response)
-  end
-  defp send_if_response(_, _, _), do: :ok
-
   @impl true
   def handle_call({:tap, pid}, _from, %{taps: taps} = state) do
     {:reply, :ok, %{state | taps: [pid | taps]}}
