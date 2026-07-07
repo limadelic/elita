@@ -8,11 +8,15 @@ defmodule StubAgent do
   end
 end
 
+defmodule StubRunner do
+  def run(_msg, _folder), do: "stub runner response"
+end
+
 defmodule AddressTest do
   use ExUnit.Case, async: false
   import ExUnit.CaptureIO
 
-  test "ask with address forms (bare, relative, absolute, unknown, ambiguous)" do
+  test "ask with address forms (bare, relative, absolute, unknown, ambiguous, file wake)" do
     # Setup: Create tmp folder structure
     base = System.tmp_dir() |> Path.join("elita_address_test_#{System.unique_integer()}")
     File.mkdir_p!(base)
@@ -66,7 +70,40 @@ defmodule AddressTest do
     # Test 5: ambiguous address (matches multiple)
     output5 = capture_io(fn -> El.Commands.Ask.execute("agent1@/**", "msg") end)
     assert String.contains?(output5, "ask requires one target")
+
+    # Test 6: file wake - create a file agent, no live process
+    File.write!(Path.join(bare_folder, "doctor.exs"), "# stub agent file")
+
+    # Verify the file agent is not live before ask
+    assert Registry.lookup(ElitaRegistry, "doctor") == []
+
+    # Set test runner environment variable
+    old_runner = System.get_env("TEST_AGENT_RUNNER")
+    System.put_env("TEST_AGENT_RUNNER", "StubRunner")
+
+    # Call ask with stub runner to avoid spawning claude
+    output6 = capture_io(fn ->
+      El.Commands.Ask.execute("doctor@#{bare_folder}", "msg",
+        env_module: FakeEnv)
+    end)
+
+    # Restore environment
+    if old_runner do
+      System.put_env("TEST_AGENT_RUNNER", old_runner)
+    else
+      System.delete_env("TEST_AGENT_RUNNER")
+    end
+
+    # Verify session was started
+    assert Registry.lookup(ElitaRegistry, "doctor") != []
+
+    # Verify it didn't return unknown
+    refute String.contains?(output6, "unknown: doctor")
   end
+end
+
+defmodule FakeEnv do
+  def get(_), do: "fake_node@fake_host"
 end
 
 

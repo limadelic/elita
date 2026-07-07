@@ -18,7 +18,6 @@ defmodule Agent.Session do
 
   def ask(pid, message), do: call(pid, {:ask, message}, :infinity)
   def cast(pid, message), do: GenServer.cast(pid, {:cast, message})
-
   @impl true
   def init(opts) do
     name = fetch!(opts, :name)
@@ -33,6 +32,11 @@ defmodule Agent.Session do
     {:reply, {:ok, response}, state}
   end
 
+  def handle_call({:act, message}, _from, state) do
+    response = state.runner.(message, state.folder)
+    {:reply, response, state}
+  end
+
   @impl true
   def handle_cast({:cast, message}, state) do
     state.runner.(message, state.folder)
@@ -40,14 +44,13 @@ defmodule Agent.Session do
   end
 
   defp default_runner(message, folder) do
-    {:spawn_executable, path()}
-    |> open(port_opts(message, folder))
-    |> handle_port()
+    spawn_cmd = {:spawn_executable, exec_path()}
+    open(spawn_cmd, port_opts(message, folder)) |> handle_port()
   end
 
-  defp path, do: found(find_executable("claude"))
-  defp found(nil), do: raise("claude executable not found")
-  defp found(path), do: path
+  defp exec_path, do: handle_exec(find_executable("claude"))
+  defp handle_exec(nil), do: raise("no claude")
+  defp handle_exec(path), do: path
 
   defp handle_port({:error, reason}) do
     error("Failed to open Claude port: #{inspect(reason)}")
