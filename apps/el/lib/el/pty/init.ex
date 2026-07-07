@@ -28,10 +28,10 @@ defmodule El.Pty.Init do
   end
 
   defp attach(state, cfg) do
-    merge(state, extra_config(cfg))
+    merge(state, extras(cfg))
   end
 
-  defp extra_config(cfg) do
+  defp extras(cfg) do
     %{file: cfg[:file], port: cfg[:port], input: cfg[:input], taps: cfg[:taps]}
   end
 
