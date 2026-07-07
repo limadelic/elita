@@ -23,9 +23,13 @@ defmodule Tools.Sys.Get do
   defp parameters do
     %{
       type: "object",
-      properties: %{key: %{type: "string", description: "The key to retrieve data for"}},
+      properties: props(),
       required: ["key"]
     }
+  end
+
+  defp props do
+    %{key: %{type: "string", description: "The key to retrieve data for"}}
   end
 
   defp fetch(key) do
