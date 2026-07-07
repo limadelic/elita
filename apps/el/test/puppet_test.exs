@@ -87,16 +87,41 @@ defmodule PuppetTest do
       []
     end
 
-    {output, exit_code} = System.cmd(
+    {output, exit_code} = run_el_with_timeout(
       el_path,
       ["ask", @session, "1 + 1"],
-      env: env,
-      stderr_to_stdout: true
+      env,
+      50_000
     )
 
     assert exit_code == 0, "el ask failed with exit code #{exit_code}: #{output}"
     assert String.contains?(output, "2"),
       "Expected '2' in output, got: #{inspect(output)}"
+  end
+
+  defp run_el_with_timeout(el_path, args, env, timeout_ms) do
+    port = Port.open({:spawn_executable, el_path}, [
+      {:args, args},
+      {:env, env},
+      :use_stdio,
+      :exit_status,
+      :binary
+    ])
+
+    receive_port_output(port, timeout_ms, "")
+  end
+
+  defp receive_port_output(port, timeout_ms, acc) do
+    receive do
+      {^port, {:exit_status, exit_code}} ->
+        {acc, exit_code}
+      {^port, {:data, data}} ->
+        receive_port_output(port, timeout_ms, acc <> data)
+    after
+      timeout_ms ->
+        Port.close(port)
+        {acc, 124}
+    end
   end
 end
 
