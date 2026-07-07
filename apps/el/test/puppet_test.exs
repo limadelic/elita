@@ -28,6 +28,8 @@ defmodule PuppetTest do
 
     spawn_background_process(boot_script_path, el_path)
     wait_for_connection()
+    tell_model(el_path, "haiku")
+    Process.sleep(2000)
   end
 
   defp spawn_background_process(boot_script, el_path) do
@@ -54,6 +56,24 @@ defmodule PuppetTest do
         Process.sleep(500)
         attempt_connect(node, attempts + 1)
     end
+  end
+
+  defp tell_model(el_path, model) do
+    System.cmd(
+      el_path,
+      ["tell", @session, "/model #{model}"],
+      env: [{"EL_NODE", "127.0.0.1"}],
+      stderr_to_stdout: true
+    )
+  end
+
+  defp tell_exit(el_path) do
+    System.cmd(
+      el_path,
+      ["tell", @session, "/exit"],
+      env: [{"EL_NODE", "127.0.0.1"}],
+      stderr_to_stdout: true
+    )
   end
 
   defp boot_fake_session do
@@ -97,6 +117,10 @@ defmodule PuppetTest do
     assert exit_code == 0, "el ask failed with exit code #{exit_code}: #{output}"
     assert String.contains?(output, "2"),
       "Expected '2' in output, got: #{inspect(output)}"
+
+    if live? do
+      tell_exit(el_path)
+    end
   end
 end
 
