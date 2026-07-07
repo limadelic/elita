@@ -1,19 +1,25 @@
 defmodule El.CLI.DaemonConnector do
   @moduledoc "Connects to daemon and executes commands via RPC."
+  import :rpc, only: [call: 4]
 
   def connect_and_rpc(command, args) do
     daemon_node = :"elita@127.0.0.1"
-    case Node.connect(daemon_node) do
-      true -> rpc_call(command, args, daemon_node)
-      false -> :local
-    end
+    Node.connect(daemon_node) |> handle_connect(command, args, daemon_node)
+  end
+
+  defp handle_connect(true, command, args, node) do
+    rpc_call(command, args, node)
+  end
+
+  defp handle_connect(false, _command, _args, _node) do
+    :local
   end
 
   defp rpc_call(command, args, node) do
-    try do
-      :rpc.call(node, El.CLI, :dispatch, [command, args])
-    catch
-      _ -> :local
-    end
+    call(node, El.CLI, :dispatch, [command, args])
+  rescue
+    _ -> :local
+  catch
+    _ -> :local
   end
 end
