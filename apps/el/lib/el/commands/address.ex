@@ -35,11 +35,11 @@ defmodule El.Commands.Address do
   end
 
   defp ping(agent, msg) do
-    normalized = agent |> downcase
-    Registry.lookup(ElitaRegistry, normalized) |> fire(agent, msg)
+    Registry.lookup(ElitaRegistry, agent |> downcase) |> deliver(agent, msg)
   end
-  defp fire([], agent, _msg), do: IO.puts("unknown: #{agent}")
-  defp fire([_ | _], agent, msg), do: cast(agent, msg)
+
+  defp deliver([], agent, _), do: IO.puts("unknown: #{agent}")
+  defp deliver([_ | _], agent, msg), do: cast(agent, msg)
   defp rouse(%{kind: :file, name: n, path: p}) do
     stir(asleep?(n), n, p)
   end
