@@ -2,17 +2,20 @@ defmodule El.Commands.Ls do
   @moduledoc "Lists agents in the current folder with their registration status."
 
   import El.Commands.Address.World, only: [build: 0, cwd: 0]
-  import Enum, only: [map: 2, sort_by: 2, filter: 2, join: 2]
+  import Enum, only: [map: 2, sort_by: 2, filter: 2, join: 2, any?: 2]
   import IO, only: [puts: 1]
+  import Keyword, only: [get: 2]
+  import Registry, only: [lookup: 2, select: 2]
   import Resolver, only: [normalize: 2, glob: 2]
+  import String, only: [downcase: 1]
 
   def execute(opts \\ []) do
-    path = Keyword.get(opts, :path)
+    path = get(opts, :path)
     render(path) |> puts()
   end
 
   def remote(opts \\ []) do
-    path = Keyword.get(opts, :path)
+    path = get(opts, :path)
     render(path)
   end
 
@@ -57,8 +60,8 @@ defmodule El.Commands.Ls do
   end
 
   defp status(name) do
-    normalized = String.downcase(to_string(name))
-    Registry.lookup(ElitaRegistry, normalized) |> map_status()
+    normalized = downcase(to_string(name))
+    lookup(ElitaRegistry, normalized) |> map_status()
   end
 
   defp map_status([_ | _]), do: "active"
@@ -71,13 +74,13 @@ defmodule El.Commands.Ls do
 
   defp headless(names) do
     ElitaRegistry
-    |> Registry.select([{{:"$1", :_, %{kind: :headless}}, [], [:"$1"]}])
+    |> select([{{:"$1", :_, %{kind: :headless}}, [], [:"$1"]}])
     |> filter(&not_in?(names, &1))
   end
 
   defp not_in?(list, name) do
-    !Enum.any?(list, fn n ->
-      String.downcase(to_string(n)) == String.downcase(to_string(name))
+    !any?(list, fn n ->
+      downcase(to_string(n)) == downcase(to_string(name))
     end)
   end
 
