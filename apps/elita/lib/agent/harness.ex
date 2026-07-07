@@ -30,6 +30,11 @@ defmodule Agent.Harness do
     response
   end
 
+  defp handle_ask([{pid, %{kind: :puppet}}], _recipient, message) do
+    {:ok, response} = ask(pid, message)
+    response
+  end
+
   defp handle_ask([], recipient, _message) do
     "unknown: #{recipient}"
   end
@@ -39,6 +44,10 @@ defmodule Agent.Harness do
   end
 
   defp handle_tell([{pid, %{kind: :headless}}], _recipient, message) do
+    cast(pid, message)
+  end
+
+  defp handle_tell([{pid, %{kind: :puppet}}], _recipient, message) do
     cast(pid, message)
   end
 

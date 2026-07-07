@@ -126,9 +126,12 @@ end
 
 defmodule FakeSession do
   use GenServer
+  import String, only: [downcase: 1]
 
   def start_link(name) do
-    GenServer.start_link(__MODULE__, name, name: String.to_atom(name))
+    normalized = name |> downcase()
+    via_name = {:via, Registry, {ElitaRegistry, normalized, %{kind: :puppet, folder: "."}}}
+    GenServer.start_link(__MODULE__, name, name: via_name)
   end
 
   def init(name) do
