@@ -1,29 +1,24 @@
 defmodule El.Pty.Dispatch do
   @moduledoc false
   import El.Trace
-
-  alias El.Pty.Cleanup
-  alias El.Pty.Handler
+  import El.Pty.Handler
+  import El.Pty.Cleanup
+  import List
+  import Enum
 
   def info({pty, {:data, data}}, state) do
-    %{port: port, file: file, out: out, taps: taps} = state
-    file.write(out, data)
-    broadcast(taps, data)
-    Handler.handle_dsr_response(port, pty, data, state)
+    process(pty, data, state)
     {:noreply, state}
   end
 
   def info({:stdin, data}, %{pty: pty, port: port, input: input} = state) do
     log_chunk(data)
-    Handler.process_input(port, pty, input.(data))
+    process_input(port, pty, input.(data))
     {:noreply, state}
   end
 
-  def info(
-        {pty, {:exit_status, _}},
-        %{pty: pty, file: file, out: out, os_pid: os_pid} = state
-      ) do
-    cleanup(os_pid, file, out)
+  def info({pty, {:exit_status, _}}, %{pty: pty} = state) do
+    handle_exit_status(state)
     {:stop, :normal, state}
   end
 
@@ -32,12 +27,12 @@ defmodule El.Pty.Dispatch do
   end
 
   def info({:EXIT, _pid, reason}, %{os_pid: os_pid} = state) do
-    Cleanup.kill_group(os_pid)
+    kill_group(os_pid)
     {:stop, reason, state}
   end
 
   def info({pty, :closed}, %{pty: pty, os_pid: os_pid} = state) do
-    Cleanup.kill_group(os_pid)
+    kill_group(os_pid)
     {:stop, :normal, state}
   end
 
@@ -46,7 +41,7 @@ defmodule El.Pty.Dispatch do
   end
 
   def call({:untap, pid}, %{taps: taps} = state) do
-    {:reply, :ok, %{state | taps: List.delete(taps, pid)}}
+    {:reply, :ok, %{state | taps: delete(taps, pid)}}
   end
 
   def cast({:inject, msg}, %{pty: pty, port: port} = state) do
@@ -56,11 +51,21 @@ defmodule El.Pty.Dispatch do
   end
 
   defp broadcast(taps, data) do
-    Enum.each(taps, fn pid -> send(pid, {:output, data}) end)
+    each(taps, fn pid -> send(pid, {:output, data}) end)
   end
 
   defp cleanup(os_pid, file, out) do
-    Cleanup.kill_group(os_pid)
+    kill_group(os_pid)
     file.close(out)
+  end
+
+  defp process(pty, data, %{port: port, file: file, out: out, taps: taps} = state) do
+    file.write(out, data)
+    broadcast(taps, data)
+    handle_dsr_response(port, pty, data, state)
+  end
+
+  defp handle_exit_status(%{os_pid: os_pid, file: file, out: out}) do
+    cleanup(os_pid, file, out)
   end
 end
