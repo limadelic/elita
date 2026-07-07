@@ -1,10 +1,18 @@
 defmodule Tools.Sys.Tell.Schema do
   def get(name, _state) do
-    %{name: name, description: "Send message to another agent", parameters: params()}
+    %{
+      name: name,
+      description: "Send message to another agent",
+      parameters: params()
+    }
   end
 
   defp params do
-    %{type: "object", properties: properties(), required: ["recipient", "message"]}
+    %{
+      type: "object",
+      properties: properties(),
+      required: ["recipient", "message"]
+    }
   end
 
   defp properties do
@@ -16,14 +24,15 @@ defmodule Tools.Sys.Tell.Schema do
 end
 
 defmodule Tools.Sys.Tell do
-  import Log, only: [log: 5]
   import Agent.Harness, only: [dispatch: 3]
+  import Log, only: [log: 5]
 
   defdelegate spec(name, state), to: Tools.Sys.Tell.Schema, as: :get
 
   def exec(_, %{"recipient" => recipient, "message" => message}, %{name: sender} = state) do
+    msg = "[from #{sender}] #{message}"
     log("📢", "#{sender} → #{recipient}", ": ", message, :yellow)
-    dispatch(recipient, "[from #{sender}] #{message}", :tell)
+    dispatch(recipient, msg, :tell)
     {"sent", state}
   end
 
