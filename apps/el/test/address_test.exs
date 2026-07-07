@@ -119,6 +119,27 @@ defmodule AddressTest do
     sent = Agent.get(:msg_log, & &1)
     recipients = sent |> Enum.map(&elem(&1, 0)) |> Enum.sort()
     assert recipients == ["agent1", "agent3"]
+
+    # Test cd command
+    El.Commands.Cd.execute("sub")
+    cwd_after_cd = El.Commands.Address.World.cwd()
+    assert String.ends_with?(cwd_after_cd, "sub")
+
+    output_after_cd = capture_io(fn -> El.Commands.Ls.execute() end)
+    assert String.contains?(output_after_cd, "agent1")
+    assert String.contains?(output_after_cd, "agent3")
+
+    # Test cd ~ (home/birth folder)
+    birth_folder = El.Standpoint.birth()
+    El.Commands.Cd.execute("~")
+    cwd_home = El.Commands.Address.World.cwd()
+    assert cwd_home == birth_folder
+
+    # Test cd .. (parent directory)
+    El.Commands.Cd.execute("sub")
+    El.Commands.Cd.execute("..")
+    cwd_after_up = El.Commands.Address.World.cwd()
+    assert cwd_after_up == birth_folder
   end
 end
 

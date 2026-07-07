@@ -1,5 +1,6 @@
 defmodule El.Commands.Address.World do
   import Agent.Config, only: [load: 0]
+  import El.Standpoint, only: [get: 0]
 
   def build do
     folders = load() |> Enum.map(&entry/1)
@@ -9,7 +10,7 @@ defmodule El.Commands.Address.World do
   end
 
   def cwd do
-    File.cwd!() |> trim()
+    get()
   end
 
   defp entry({name, folder}) do
@@ -29,7 +30,4 @@ defmodule El.Commands.Address.World do
     file_path = Path.join(folder, filename)
     %{name: name, path: folder, file_path: file_path, kind: :file}
   end
-
-  defp trim("/private" <> rest), do: rest
-  defp trim(path), do: path
 end
