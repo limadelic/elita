@@ -25,9 +25,9 @@ defmodule Resolver do
     address |> split("@", parts: 2) |> unpack()
   end
 
-  defp normalize(nil, _cwd), do: nil
-  defp normalize("/" <> _ = path, _cwd), do: path
-  defp normalize(path, cwd), do: cwd |> join(path) |> expand()
+  def normalize(nil, _cwd), do: nil
+  def normalize("/" <> _ = path, _cwd), do: path
+  def normalize(path, cwd), do: cwd |> join(path) |> expand()
 
   defp path(world, search_path), do: filter(world, &matches_path?(&1, search_path))
 
@@ -46,21 +46,21 @@ defmodule Resolver do
 
   defp glob?(pattern), do: contains?(pattern, ["*", "**"])
 
-  defp glob(entry_path, pattern) do
+  def glob(entry_path, pattern) do
     match(split(entry_path), split(pattern))
   end
 
-  defp match(_, []), do: true
-  defp match([], ["**" | t]), do: match([], t)
-  defp match([], _), do: false
-  defp match(e, ["**" | t]), do: check_double(match(e, t), e, t)
-  defp match([_ | et], ["*" | pt]), do: match(et, pt)
-  defp match([eh | et], [eh | pt]), do: match(et, pt)
-  defp match([_ | _], [_ | _]), do: false
+  def match(_, []), do: true
+  def match([], ["**" | t]), do: match([], t)
+  def match([], _), do: false
+  def match(e, ["**" | t]), do: check_double(match(e, t), e, t)
+  def match([_ | et], ["*" | pt]), do: match(et, pt)
+  def match([eh | et], [eh | pt]), do: match(et, pt)
+  def match([_ | _], [_ | _]), do: false
 
-  defp check_double(true, _e, _t), do: true
-  defp check_double(false, [_ | et], t), do: match(et, ["**" | t])
-  defp check_double(false, [], _t), do: false
+  def check_double(true, _e, _t), do: true
+  def check_double(false, [_ | et], t), do: match(et, ["**" | t])
+  def check_double(false, [], _t), do: false
 
   defp named(entries, nil, _fanout), do: entries
   defp named(entries, name, false), do: filter(entries, &(&1.name == name))
