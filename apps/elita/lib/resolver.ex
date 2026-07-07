@@ -12,27 +12,27 @@ defmodule Resolver do
 
   def resolve(address, world, cwd) do
     node_match = check_node(address, world)
+    resolve_with(node_match, address, world, cwd)
+  end
 
-    if node_match != nil do
-      node_match
-    else
-      {name, path, fanout} = unpack(address)
-      absolute_path = normalize(path, cwd)
-      matches = world |> path(absolute_path) |> named(name, fanout)
-      rank(matches)
-    end
+  defp resolve_with({:ok, _} = ok, _address, _world, _cwd), do: ok
+  defp resolve_with({:many, _} = many, _address, _world, _cwd), do: many
+
+  defp resolve_with(nil, address, world, cwd) do
+    {name, path, fanout} = unpack(address)
+    world |> path(normalize(path, cwd)) |> named(name, fanout) |> rank()
   end
 
   defp check_node(address, world) do
-    node_entries = filter(world, &(&1.kind == :node))
-    match = filter(node_entries, &(&1.name == address))
-
-    case match do
-      [entry] -> {:ok, entry}
-      [] -> nil
-      entries -> {:many, entries}
-    end
+    world
+    |> filter(&(&1.kind == :node))
+    |> filter(&(&1.name == address))
+    |> node_result()
   end
+
+  defp node_result([entry]), do: {:ok, entry}
+  defp node_result([]), do: nil
+  defp node_result(entries), do: {:many, entries}
 
   defp unpack([name]), do: {name, nil, false}
   defp unpack(["", path]), do: {nil, path, true}
