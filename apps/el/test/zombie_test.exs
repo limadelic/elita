@@ -36,7 +36,6 @@ defmodule ZombieTest do
 
     defp start_dude_session(_), do: :ok
 
-    @tag timeout: 300_000
     test "el routes ask to dude session" do
       verify(:el, "dude", "ask dude what is your name")
     end

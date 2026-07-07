@@ -5,7 +5,6 @@ defmodule PuppetTest do
   import ExUnit.Assertions
 
   @moduletag :live
-  @moduletag timeout: 180_000
   @session "dude"
 
   setup do
@@ -78,7 +77,6 @@ defmodule PuppetTest do
     end
   end
 
-  @tag timeout: 120_000
   test "el ask dude 1 + 1 contains 2" do
     el_path = Path.expand("../el", __DIR__)
     live? = System.get_env("LIVE") == "1"
