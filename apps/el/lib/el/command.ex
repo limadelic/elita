@@ -18,9 +18,9 @@ defmodule El.Command do
   end
 
   defp reach({:ok, output}, _path), do: handle({:ok, output})
-  defp reach(:error, path), do: spawn_daemon(path)
+  defp reach(:error, path), do: hatch(path)
 
-  defp spawn_daemon(path) do
+  defp hatch(path) do
     System.get_env("EL_DAEMON_SPAWN") |> gate(path)
   end
 
@@ -75,13 +75,13 @@ defmodule El.Command do
 
   defp fetch(true, path) do
     cwd = File.cwd!()
-    cmd = pick_cmd(path)
+    cmd = route(path)
     output = call(:"elita@127.0.0.1", RPC, :dispatch, [cmd, cwd])
     {:ok, output}
   end
 
   defp fetch(_, _), do: :error
 
-  defp pick_cmd(nil), do: ["ls"]
-  defp pick_cmd(path), do: ["ls", path]
+  defp route(nil), do: ["ls"]
+  defp route(path), do: ["ls", path]
 end

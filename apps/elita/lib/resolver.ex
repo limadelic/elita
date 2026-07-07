@@ -53,14 +53,14 @@ defmodule Resolver do
   def match(_, []), do: true
   def match([], ["**" | t]), do: match([], t)
   def match([], _), do: false
-  def match(e, ["**" | t]), do: check_double(match(e, t), e, t)
+  def match(e, ["**" | t]), do: unwind(match(e, t), e, t)
   def match([_ | et], ["*" | pt]), do: match(et, pt)
   def match([eh | et], [eh | pt]), do: match(et, pt)
   def match([_ | _], [_ | _]), do: false
 
-  def check_double(true, _e, _t), do: true
-  def check_double(false, [_ | et], t), do: match(et, ["**" | t])
-  def check_double(false, [], _t), do: false
+  def unwind(true, _e, _t), do: true
+  def unwind(false, [_ | et], t), do: match(et, ["**" | t])
+  def unwind(false, [], _t), do: false
 
   defp named(entries, nil, _fanout), do: entries
   defp named(entries, name, false), do: filter(entries, &(&1.name == name))
