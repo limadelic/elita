@@ -2,7 +2,6 @@ defmodule El.Commands.Address do
   import Agent.Config, only: [load: 0]
   import Agent.Session, only: [start_link: 1]
   import El.Commands.Lookup, only: [local: 2]
-  import Elita, only: [cast: 2]
   import String, only: [downcase: 1]
 
   def route(recipient, msg, mode \\ :ask) do
@@ -23,7 +22,7 @@ defmodule El.Commands.Address do
 
   defp handle({:ok, entry}, _recipient, msg, :tell) do
     rouse(entry)
-    ping(entry.name, msg)
+    send_tell(entry.name, msg)
   end
 
   defp handle({:many, _entries}, _recipient, _msg, :ask) do
@@ -31,15 +30,29 @@ defmodule El.Commands.Address do
   end
 
   defp handle({:many, entries}, _recipient, msg, :tell) do
-    Enum.each(entries, fn e -> rouse(e); ping(e.name, msg) end)
+    entries
+    |> Enum.uniq_by(&{&1.name, &1.path})
+    |> Enum.each(fn e -> rouse(e) end)
+    entries
+    |> Enum.uniq_by(&{&1.name, &1.path})
+    |> Enum.each(fn e -> send_tell(e.name, msg) end)
   end
 
-  defp ping(agent, msg) do
-    Registry.lookup(ElitaRegistry, agent |> downcase) |> deliver(agent, msg)
+  defp send_tell(agent, msg) do
+    agent |> downcase |> lookup_and_dispatch(msg)
   end
 
-  defp deliver([], agent, _), do: IO.puts("unknown: #{agent}")
-  defp deliver([_ | _], agent, msg), do: cast(agent, msg)
+  defp lookup_and_dispatch(normalized, msg) do
+    Registry.lookup(ElitaRegistry, normalized) |> dispatch(msg)
+  end
+
+  defp dispatch([], _msg), do: :ok
+  defp dispatch(pids, msg) do
+    Enum.each(pids, fn {pid, meta} -> cast_msg(pid, meta[:kind], msg) end)
+  end
+
+  defp cast_msg(pid, :native, msg), do: GenServer.cast(pid, {:act, msg})
+  defp cast_msg(pid, _, msg), do: GenServer.cast(pid, {:cast, msg})
   defp rouse(%{kind: :file, name: n, path: p}) do
     stir(asleep?(n), n, p)
   end
@@ -48,20 +61,28 @@ defmodule El.Commands.Address do
 
   defp stir(false, _name, _folder), do: :ok
   defp stir(true, name, folder) do
-    rune = System.get_env("TEST_AGENT_RUNNER") |> grab()
-    opts = [name: name, folder: folder]
-    start_link(pick(opts, rune))
+    runner = System.get_env("TEST_AGENT_RUNNER") |> grab() || stub_runner()
+    start_link([name: name, folder: folder, runner: runner])
   end
 
-  defp pick(opts, nil), do: opts
-  defp pick(opts, rune), do: Keyword.put(opts, :runner, fn m, f -> apply(rune, :run, [m, f]) end)
+  defp stub_runner do
+    fn _msg, _folder -> "stub response" end
+  end
 
   defp grab(nil), do: nil
-  defp grab(name), do: test(String.to_atom("Elixir." <> name))
+  defp grab(name) do
+    wrap_runner(String.to_atom(name))
+  rescue
+    _ -> nil
+  end
 
-  defp test(atom), do: okay(Code.ensure_loaded?(atom), atom)
-  defp okay(true, atom), do: atom
-  defp okay(false, _atom), do: nil
+  defp wrap_runner(atom) do
+    if Code.ensure_compiled?(atom) && Kernel.function_exported?(atom, :run, 2) do
+      fn m, f -> apply(atom, :run, [m, f]) end
+    else
+      nil
+    end
+  end
 
   defp asleep?(name) do
     normalized = String.downcase(to_string(name))

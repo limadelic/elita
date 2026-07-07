@@ -1,11 +1,18 @@
-import ExUnit.CaptureIO
+base = File.cwd!() <> "/tmp_test"
+File.mkdir_p!(base)
 
-output = capture_io(fn ->
-  El.CLI.main(["ls"])
-end)
+bare_folder = Path.expand(Path.join(base, "agent1"))
+sub_folder = Path.expand(Path.join(base, "sub"))
+File.mkdir_p!(bare_folder)
+File.mkdir_p!(sub_folder)
 
-IO.puts("========== CAPTURED OUTPUT ==========")
-IO.inspect(output)
-IO.puts("Length: #{byte_size(output)}")
-IO.puts("Contains 'sessions': #{String.contains?(output, "sessions")}")
-IO.puts("Contains 'claude_': #{String.contains?(output, "claude_")}")
+File.cd!(base)
+
+registrations = "agent1:#{bare_folder},agent3:#{sub_folder}"
+System.put_env("AGENT_REGISTRATIONS", registrations)
+
+result = capture_io(fn -> El.Commands.Ask.execute("*@/**", "msg") end)
+IO.puts("Result for *@/**:")
+IO.inspect(result)
+
+File.rm_rf!(base)

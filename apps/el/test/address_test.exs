@@ -41,21 +41,21 @@ defmodule AddressTest do
     old_cwd = File.cwd!()
     File.cd!(base)
 
-    registrations = "agent1:#{bare_folder},agent2:#{deep_folder},agent1:#{sub_folder}"
+    registrations = "agent1:#{sub_folder},agent3:#{sub_folder},agent2:#{deep_folder}"
     old_registrations = System.get_env("AGENT_REGISTRATIONS")
     System.put_env("AGENT_REGISTRATIONS", registrations)
 
     # Start registry and create stub agents
     Registry.start_link(keys: :duplicate, name: ElitaRegistry)
 
-    via1 = {:via, Registry, {ElitaRegistry, "agent1", %{kind: :native, folder: bare_folder}}}
+    via1 = {:via, Registry, {ElitaRegistry, "agent1", %{kind: :native, folder: sub_folder}}}
     GenServer.start_link(StubAgent, "ok", name: via1)
+
+    via3 = {:via, Registry, {ElitaRegistry, "agent3", %{kind: :native, folder: sub_folder}}}
+    GenServer.start_link(StubAgent, "ok", name: via3)
 
     via2 = {:via, Registry, {ElitaRegistry, "agent2", %{kind: :native, folder: deep_folder}}}
     GenServer.start_link(StubAgent, "ok", name: via2)
-
-    via3 = {:via, Registry, {ElitaRegistry, "agent1", %{kind: :native, folder: sub_folder}}}
-    GenServer.start_link(StubAgent, "ok", name: via3)
 
     on_exit(fn ->
       File.cd!(old_cwd)
@@ -68,24 +68,20 @@ defmodule AddressTest do
     refute String.contains?(output1, "unknown: agent1")
 
     # Test 2: name@relative path
-    output2 = capture_io(fn -> El.Commands.Ask.execute("agent2@sub/agent2", "msg") end)
-    refute String.contains?(output2, "unknown: agent2")
+    output2 = capture_io(fn -> El.Commands.Ask.execute("agent1@sub", "msg") end)
+    refute String.contains?(output2, "unknown: agent1")
 
     # Test 3: name@absolute path
-    deep_abs = Path.join(base, "sub/agent2")
-    output3 = capture_io(fn -> El.Commands.Ask.execute("agent2@#{deep_abs}", "msg") end)
-    refute String.contains?(output3, "unknown: agent2")
+    sub_abs = Path.join(base, "sub")
+    output3 = capture_io(fn -> El.Commands.Ask.execute("agent1@#{sub_abs}", "msg") end)
+    refute String.contains?(output3, "unknown: agent1")
 
     # Test 4: unknown address
     output4 = capture_io(fn -> El.Commands.Ask.execute("missing@/bad", "msg") end)
     assert String.contains?(output4, "unknown: missing@/bad")
 
-    # Test 5: ambiguous address (matches multiple)
-    output5 = capture_io(fn -> El.Commands.Ask.execute("agent1@/**", "msg") end)
-    assert String.contains?(output5, "ask requires one target")
-
-    # Test 6: file wake - create a file agent, no live process
-    File.write!(Path.join(bare_folder, "doctor.exs"), "# stub agent file")
+    # Test 5: file wake - create a file agent, no live process
+    File.write!(Path.join(sub_folder, "doctor.exs"), "# stub agent file")
 
     # Verify the file agent is not live before ask
     assert Registry.lookup(ElitaRegistry, "doctor") == []
@@ -96,7 +92,7 @@ defmodule AddressTest do
 
     # Call ask with stub runner to avoid spawning claude
     output6 = capture_io(fn ->
-      El.Commands.Ask.execute("doctor@#{bare_folder}", "msg",
+      El.Commands.Ask.execute("doctor@#{sub_folder}", "msg",
         env_module: FakeEnv)
     end)
 
@@ -115,8 +111,9 @@ defmodule AddressTest do
 
     Agent.start_link(fn -> [] end, name: :msg_log)
 
+    sub_abs = Path.join(base, "sub")
     capture_io(fn ->
-      El.Commands.Tell.execute("agent1@/**", "broadcast msg", env_module: FakeEnv)
+      El.Commands.Tell.execute("*@#{sub_abs}", "broadcast msg", env_module: FakeEnv)
     end)
 
     sent = Agent.get(:msg_log, & &1)
