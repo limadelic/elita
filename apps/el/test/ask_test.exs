@@ -35,7 +35,6 @@ defmodule AskTest do
     :ok
   end
 
-  @tag :live
   test "el routes ask to greet" do
     verify(:el, "Who am I talking to", "ask greet hello")
   end
