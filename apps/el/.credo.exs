@@ -23,7 +23,9 @@
         #
         included: [
           "lib/",
-          "test/tape/"
+          "test/",
+          "config/",
+          "mix.exs"
         ],
         excluded: [~r"/_build/", ~r"/deps/", ~r"/node_modules/"]
       },

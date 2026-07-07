@@ -23,7 +23,10 @@
         #
         included: [
           "lib/",
-          "test/tape/"
+          "test/",
+          "config/",
+          "mix.exs",
+          "credo_checks/"
         ],
         excluded: [~r"/_build/", ~r"/deps/", ~r"/node_modules/"]
       },
