@@ -99,6 +99,14 @@ defmodule AddressTest do
 
     # Verify it didn't return unknown
     refute String.contains?(output6, "unknown: doctor")
+
+    # Test 7: tell with glob fanout - dispatch to all matches
+    output7 = capture_io(fn ->
+      El.Commands.Tell.execute("agent1@/**", "broadcast msg", env_module: FakeEnv)
+    end)
+
+    # Tell with glob should not error out
+    refute String.contains?(output7, "unknown:")
   end
 end
 

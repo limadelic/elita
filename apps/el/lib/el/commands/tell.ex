@@ -1,21 +1,25 @@
 defmodule El.Commands.Tell do
   @moduledoc false
-  import Elita, only: [start_link: 2, cast: 2]
+  import String, only: [contains?: 2]
   import :binary, only: [at: 2]
+  import El.Commands.Address, only: [route: 3]
   alias El.Distribution
 
   def execute(agent, msg, opts \\ []) do
     Distribution.start()
     env_module = Keyword.get(opts, :env_module, El.Infra.Env)
-    route(agent, msg, env_module)
+    dispatch(contains?(agent, "@"), agent, msg, env_module)
   end
 
-  defp route(agent, msg, env_module) do
+  defp dispatch(true, agent, msg, _env_module), do: route(agent, msg, :tell)
+  defp dispatch(false, agent, msg, env_module), do: via_route(agent, msg, env_module)
+
+  defp via_route(agent, msg, env_module) do
     target = remote_target(agent, env_module: env_module)
     route_to(agent, msg, env_module, target)
   end
 
-  defp route_to(agent, msg, _env_module, nil), do: default(agent, msg)
+  defp route_to(agent, msg, _env_module, nil), do: route(agent, msg, :tell)
 
   defp route_to(agent, msg, env_module, target) do
     attempt_inject(msg, target, agent, env_module)
@@ -45,7 +49,7 @@ defmodule El.Commands.Tell do
   defp fail_inject(agent, msg, env_module) do
     host = env_module.get("EL_NODE")
     remote_unreachable(agent, host)
-    default(agent, msg)
+    route(agent, msg, :tell)
   end
 
   def remote_unreachable(agent, host) do
@@ -58,7 +62,7 @@ defmodule El.Commands.Tell do
   end
 
   defp format_text(msg) do
-    pick_format(String.contains?(msg, "\n"), msg)
+    pick_format(contains?(msg, "\n"), msg)
   end
 
   defp pick_format(true, msg), do: bracket_paste(msg)
@@ -78,9 +82,4 @@ defmodule El.Commands.Tell do
   defp is_special_byte(byte) when byte < 32, do: true
   defp is_special_byte(0x1B), do: true
   defp is_special_byte(_), do: false
-
-  defp default(agent, msg) do
-    {:ok, _pid} = start_link(agent, [agent])
-    cast(agent, msg)
-  end
 end

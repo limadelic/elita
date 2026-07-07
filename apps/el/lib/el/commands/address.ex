@@ -2,61 +2,67 @@ defmodule El.Commands.Address do
   import Agent.Config, only: [load: 0]
   import Agent.Session, only: [start_link: 1]
   import El.Commands.Lookup, only: [local: 2]
+  import Enum, only: [each: 2]
 
-  def route(recipient, msg) do
+  def route(recipient, msg, mode \\ :ask) do
     world = world()
     cwd = cwd()
     result = Resolver.resolve(recipient, world, cwd)
-    handle(result, recipient, msg)
+    handle(result, recipient, msg, mode)
   end
 
-  defp handle({:error, :unknown}, recipient, _msg) do
+  defp handle({:error, :unknown}, recipient, _msg, _mode) do
     IO.puts("unknown: #{recipient}")
   end
 
-  defp handle({:ok, entry}, _recipient, msg) do
+  defp handle({:ok, entry}, _recipient, msg, _mode) do
+    send_to(entry, msg)
+  end
+
+  defp handle({:many, _entries}, _recipient, _msg, :ask) do
+    IO.puts("ask requires one target")
+  end
+
+  defp handle({:many, entries}, _recipient, msg, :tell) do
+    each(entries, &send_to(&1, msg))
+  end
+
+  defp send_to(entry, msg) do
     rouse(entry)
     local(entry.name, msg)
   end
 
-  defp handle({:many, _}, _recipient, _msg) do
-    IO.puts("ask requires one target")
-  end
-
   defp rouse(%{kind: :file, name: n, path: p}) do
-    stir(asleep?(n), n, p)
+    boot_if_asleep(n, p)
   end
 
   defp rouse(_), do: :ok
 
-  defp stir(true, name, folder), do: boot(name, folder)
-  defp stir(false, _, _), do: :ok
+  defp boot_if_asleep(name, folder) do
+    start_session(asleep?(name), name, folder)
+  end
 
-  defp boot(name, folder) do
+  defp start_session(false, _name, _folder), do: :ok
+
+  defp start_session(true, name, folder) do
+    runner = runner_mod(System.get_env("TEST_AGENT_RUNNER"))
     opts = [name: name, folder: folder]
-    rune = runner()
-    start_link(mix(opts, rune))
+    opts = add_runner(opts, runner)
+    start_link(opts)
   end
 
-  defp mix(opts, nil), do: opts
-  defp mix(opts, mod) do
-    Keyword.put(opts, :runner, fn m, f -> apply(mod, :run, [m, f]) end)
+  defp add_runner(opts, nil), do: opts
+
+  defp add_runner(opts, runner) do
+    Keyword.put(opts, :runner, fn m, f -> apply(runner, :run, [m, f]) end)
   end
 
-  defp runner do
-    env_name = System.get_env("TEST_AGENT_RUNNER")
-    fetch(env_name)
-  end
+  defp runner_mod(nil), do: nil
+  defp runner_mod(name), do: get_runner(String.to_atom("Elixir." <> name))
 
-  defp fetch(nil), do: nil
-  defp fetch(name) do
-    atom = String.to_atom("Elixir." <> name)
-    test(atom)
-  end
-
-  defp test(atom), do: okay(atom, Code.ensure_loaded?(atom))
-  defp okay(atom, true), do: atom
-  defp okay(_atom, false), do: nil
+  defp get_runner(atom), do: pick_module(Code.ensure_loaded?(atom), atom)
+  defp pick_module(true, atom), do: atom
+  defp pick_module(false, _atom), do: nil
 
   defp asleep?(name) do
     normalized = String.downcase(to_string(name))
