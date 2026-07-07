@@ -64,6 +64,36 @@ defmodule DaemonBoundaryTest do
       "Expected 'agent_one file asleep' in output, got: #{inspect(output)}"
   end
 
+  test "ls auto-spawns daemon on cold start", %{testdir: testdir} do
+    File.write!(Path.join(testdir, "agent_one"), "")
+    el_path = Path.expand("../el", __DIR__)
+
+    kill_daemon()
+    Process.sleep(200)
+
+    System.put_env("EL_DAEMON_SPAWN", "true")
+
+    {output1, exit_code1} = System.cmd(
+      "sh",
+      ["-c", "cd #{testdir} && #{el_path} ls"],
+      stderr_to_stdout: true
+    )
+
+    assert exit_code1 == 0, "first ls failed with exit code #{exit_code1}: #{output1}"
+    assert String.contains?(output1, "agent_one file asleep"),
+      "Expected 'agent_one file asleep' in output, got: #{inspect(output1)}"
+
+    {output2, exit_code2} = System.cmd(
+      "sh",
+      ["-c", "cd #{testdir} && #{el_path} ls"],
+      stderr_to_stdout: true
+    )
+
+    assert exit_code2 == 0, "second ls failed with exit code #{exit_code2}: #{output2}"
+    assert String.contains?(output2, "agent_one file asleep"),
+      "Expected 'agent_one file asleep' in output, got: #{inspect(output2)}"
+  end
+
   defp start_daemon(el_path) do
     spawn(fn ->
       System.cmd(el_path, ["daemon"], stderr_to_stdout: true)
