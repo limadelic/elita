@@ -433,5 +433,45 @@ defmodule LsTest do
     assert String.contains?(output4, "deep_agent")
     assert String.contains?(output4, "asleep")
   end
+
+  test "ls // shows connected nodes" do
+    base = System.tmp_dir() |> Path.join("elita_nodes_test_#{System.unique_integer()}")
+    File.mkdir_p!(base)
+    base = Path.expand(base)
+
+    old_cwd = File.cwd!()
+    File.cd!(base)
+
+    old_registrations = System.get_env("AGENT_REGISTRATIONS")
+    System.put_env("AGENT_REGISTRATIONS", "")
+
+    Registry.start_link(keys: :duplicate, name: ElitaRegistry)
+
+    on_exit(fn ->
+      File.cd!(old_cwd)
+      System.put_env("AGENT_REGISTRATIONS", old_registrations || "")
+      File.rm_rf!(base)
+    end)
+
+    output = capture_io(fn ->
+      El.Commands.Ls.execute(path: "//")
+    end)
+
+    node_self = Node.self() |> Atom.to_string()
+    assert String.contains?(output, node_self)
+    assert String.contains?(output, "node")
+  end
+
+  test "world with injected nodes shows entries" do
+    nodes_list = [:"node1@host", :"node2@host"]
+    world = El.Commands.Address.World.build(fn -> nodes_list end)
+
+    node_kinds = world
+      |> Enum.filter(&(&1.kind == :node))
+      |> Enum.map(& &1.name)
+
+    assert "node1@host" in node_kinds
+    assert "node2@host" in node_kinds
+  end
 end
 

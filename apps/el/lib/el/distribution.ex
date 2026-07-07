@@ -2,6 +2,7 @@ defmodule El.Distribution do
   @moduledoc false
   import El.Host, only: [host: 0]
   import Application, only: [ensure_all_started: 1]
+  import El.Peers, only: [load: 0]
 
   def start(name \\ :default, opts \\ []) do
     node_name = build_node_name(name, opts)
@@ -13,7 +14,14 @@ defmodule El.Distribution do
   def daemon do
     start_node(:"elita@127.0.0.1", :longnames)
     ensure_all_started(:elita)
+    redial()
     Process.sleep(:infinity)
+  end
+
+  defp redial do
+    load() |> Enum.each(&Node.connect/1)
+  rescue
+    _ -> :ok
   end
 
   defp build_node_name(name, opts) do

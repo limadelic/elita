@@ -16,9 +16,17 @@ defmodule El.Commands.Ls do
     render(path)
   end
 
+  defp render("//") do
+    build()
+    |> filter(&(&1.kind == :node))
+    |> sort_by(& &1.name)
+    |> format_output()
+  end
+
   defp render(path) do
     target = normalize(path, cwd())
-    visible = entries(build(), target)
+    world = build() |> filter(&(&1.kind != :node))
+    visible = entries(world, target)
     (visible ++ harvest(visible)) |> sort_by(& &1.name) |> format_output()
   end
 
@@ -37,6 +45,10 @@ defmodule El.Commands.Ls do
 
   defp format_output(entries) do
     entries |> map(&format/1) |> join("\n")
+  end
+
+  defp format(%{kind: :node} = entry) do
+    "#{entry.name} #{kind_label(entry.kind)}"
   end
 
   defp format(entry) do
@@ -70,4 +82,5 @@ defmodule El.Commands.Ls do
   defp kind_label(:file), do: "file"
   defp kind_label(:folder), do: "folder"
   defp kind_label(:session), do: "session"
+  defp kind_label(:node), do: "node"
 end

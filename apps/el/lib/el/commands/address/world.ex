@@ -2,11 +2,12 @@ defmodule El.Commands.Address.World do
   import Agent.Config, only: [load: 0]
   import El.Standpoint, only: [get: 0]
 
-  def build do
+  def build(nodes \\ &connected_nodes/0) do
     folders = load() |> Enum.map(&entry/1)
     files = Enum.flat_map(folders, &scan/1)
     unique_files = Enum.uniq_by(files, &{&1.name, &1.path})
-    folders ++ unique_files
+    remote = nodes.() |> Enum.map(&remote_entry/1)
+    folders ++ unique_files ++ remote
   end
 
   def cwd do
@@ -39,5 +40,13 @@ defmodule El.Commands.Address.World do
     name = String.trim_trailing(filename, ".exs")
     file_path = Path.join(folder, filename)
     %{name: name, path: folder, file_path: file_path, kind: :file}
+  end
+
+  defp connected_nodes do
+    [Node.self() | Node.list()]
+  end
+
+  defp remote_entry(node) do
+    %{name: Atom.to_string(node), path: nil, kind: :node, file_path: nil}
   end
 end
