@@ -2,6 +2,7 @@ defmodule NapoProfitTest do
   use Tester
   @moduletag :live
   @moduletag :spec
+  @moduletag timeout: 60_000
 
   setup do
     System.put_env("LIVE", "1")

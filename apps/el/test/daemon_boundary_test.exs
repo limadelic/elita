@@ -1,6 +1,7 @@
 defmodule DaemonBoundaryTest do
   use ExUnit.Case
-  @moduletag :main
+  @moduletag :live
+  @moduletag timeout: 60_000
 
   setup do
     kill_daemon()

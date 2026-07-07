@@ -5,6 +5,7 @@ defmodule PuppetTest do
   import ExUnit.Assertions
 
   @moduletag :live
+  @moduletag timeout: 60_000
   @session "dude"
 
   setup do

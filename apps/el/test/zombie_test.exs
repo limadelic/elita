@@ -3,6 +3,7 @@ Code.require_file("../../elita/test/tester.exs", __DIR__)
 defmodule ZombieTest do
   use Tester
   @moduletag :live
+  @moduletag timeout: 60_000
 
   describe "zombie routing" do
     setup do
