@@ -11,24 +11,24 @@ defmodule El.Commands.Ask do
   def execute(agent, msg, opts \\ []) do
     Distribution.start()
     env_module = Keyword.get(opts, :env_module, El.Infra.Env)
-    daemon_result = try_daemon_first(agent, msg)
-    delegate_execute(daemon_result, agent, msg, env_module)
+    daemon_result = daemon(agent, msg)
+    dispatch(daemon_result, agent, msg, env_module)
   end
 
-  defp delegate_execute(result, _agent, _msg, _env_module) when result != nil do
+  defp dispatch(result, _agent, _msg, _env_module) when result != nil do
     result
   end
 
-  defp delegate_execute(nil, agent, msg, env_module) do
+  defp dispatch(nil, agent, msg, env_module) do
     route(agent, msg, env_module)
   end
 
-  defp try_daemon_first(agent, msg) do
-    DaemonConnector.connect_and_rpc(["ask", agent, msg], []) |> check_rpc()
+  defp daemon(agent, msg) do
+    DaemonConnector.connect_and_rpc(["ask", agent, msg], []) |> check()
   end
 
-  defp check_rpc(:local), do: nil
-  defp check_rpc(result), do: result
+  defp check(:local), do: nil
+  defp check(result), do: result
 
   defp route(agent, msg, env_module) do
     target = Tell.remote_target(agent, env_module: env_module)

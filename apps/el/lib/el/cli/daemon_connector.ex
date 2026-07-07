@@ -4,14 +4,14 @@ defmodule El.CLI.DaemonConnector do
 
   def connect_and_rpc(command, args) do
     daemon_node = :"elita@127.0.0.1"
-    Node.connect(daemon_node) |> handle_connect(command, args, daemon_node)
+    Node.connect(daemon_node) |> connect(command, args, daemon_node)
   end
 
-  defp handle_connect(true, command, args, node) do
+  defp connect(true, command, args, node) do
     rpc_call(command, args, node)
   end
 
-  defp handle_connect(false, _command, _args, _node) do
+  defp connect(false, _command, _args, _node) do
     :local
   end
 
