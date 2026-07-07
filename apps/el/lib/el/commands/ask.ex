@@ -1,25 +1,34 @@
 defmodule El.Commands.Ask do
   @moduledoc false
-  import :binary, only: [at: 2]
   import Elita, only: [call: 2]
   import String, only: [downcase: 1]
   alias El.Answer
   alias El.Commands.Tell
   alias El.Distribution
   alias El.CLI.DaemonConnector
+  alias El.TextFormat
 
   def execute(agent, msg, opts \\ []) do
     Distribution.start()
     env_module = Keyword.get(opts, :env_module, El.Infra.Env)
-    try_daemon_first(agent, msg) || route(agent, msg, env_module)
+    daemon_result = try_daemon_first(agent, msg)
+    delegate_execute(daemon_result, agent, msg, env_module)
+  end
+
+  defp delegate_execute(result, _agent, _msg, _env_module) when result != nil do
+    result
+  end
+
+  defp delegate_execute(nil, agent, msg, env_module) do
+    route(agent, msg, env_module)
   end
 
   defp try_daemon_first(agent, msg) do
-    case DaemonConnector.connect_and_rpc(["ask", agent, msg], []) do
-      :local -> nil
-      result -> result
-    end
+    DaemonConnector.connect_and_rpc(["ask", agent, msg], []) |> check_rpc()
   end
+
+  defp check_rpc(:local), do: nil
+  defp check_rpc(result), do: result
 
   defp route(agent, msg, env_module) do
     target = Tell.remote_target(agent, env_module: env_module)
@@ -60,7 +69,7 @@ defmodule El.Commands.Ask do
   end
 
   defp get_answer(msg, target, process_name) do
-    text = format_text(msg)
+    text = TextFormat.format(msg)
     GenServer.cast({process_name, target}, {:inject, text})
     Answer.collect(30_000)
   end
@@ -81,26 +90,4 @@ defmodule El.Commands.Ask do
   defp handle_lookup([{_pid, _meta}], agent, msg) do
     call(agent, msg) |> IO.puts()
   end
-
-  defp format_text(msg) do
-    pick_format(String.contains?(msg, "\n"), msg)
-  end
-
-  defp pick_format(true, msg), do: bracket_paste(msg)
-  defp pick_format(false, msg), do: pick_format_alt(control_sequence?(msg), msg)
-
-  defp pick_format_alt(true, msg), do: msg
-  defp pick_format_alt(false, msg), do: append_return(msg)
-
-  defp bracket_paste(msg), do: "\e[200~#{msg}\e[201~\r"
-  defp append_return(msg), do: "#{msg}\r"
-
-  defp control_sequence?(msg) do
-    is_special_byte(at(msg, 0))
-  end
-
-  defp is_special_byte(nil), do: false
-  defp is_special_byte(byte) when byte < 32, do: true
-  defp is_special_byte(0x1B), do: true
-  defp is_special_byte(_), do: false
 end
