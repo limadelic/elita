@@ -1,4 +1,6 @@
 defmodule Agent.Harness do
+  @moduledoc "Routes ask/tell messages to agents based on registration kind."
+
   import Agent.Session, only: [ask: 2, cast: 2]
   import String, only: [to_atom: 1, downcase: 1]
 
