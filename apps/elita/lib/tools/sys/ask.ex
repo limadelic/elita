@@ -39,6 +39,7 @@ defmodule Tools.Sys.Ask do
 
   defp route(recipient, question) do
     normalized = recipient |> to_atom |> to_string |> downcase
+
     Registry.lookup(ElitaRegistry, normalized)
     |> handle(recipient, question)
   end

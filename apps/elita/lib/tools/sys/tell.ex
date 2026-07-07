@@ -35,6 +35,7 @@ defmodule Tools.Sys.Tell do
 
   defp route(recipient, message) do
     normalized = recipient |> to_atom |> to_string |> downcase
+
     Registry.lookup(ElitaRegistry, normalized)
     |> handle(recipient, message)
   end

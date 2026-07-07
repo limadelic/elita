@@ -14,7 +14,8 @@ defmodule Resolver do
     {name, path, fanout} = parse(address)
     absolute_path = normalize(path, cwd)
 
-    matches = world
+    matches =
+      world
       |> path(absolute_path)
       |> named(name, fanout)
 
@@ -35,6 +36,7 @@ defmodule Resolver do
 
   defp normalize(nil, _cwd), do: nil
   defp normalize("/" <> _ = path, _cwd), do: path
+
   defp normalize(path, cwd) do
     cwd
     |> join(path)
@@ -46,6 +48,7 @@ defmodule Resolver do
   end
 
   defp match_path(_entry, nil), do: true
+
   defp match_path(%{path: entry_path}, search_path) do
     if entry_path == search_path do
       true
@@ -74,10 +77,10 @@ defmodule Resolver do
 
   defp match(entries, ["**" | pattern_t]) do
     match(entries, pattern_t) ||
-    case entries do
-      [_h | entry_t] -> match(entry_t, ["**" | pattern_t])
-      [] -> false
-    end
+      case entries do
+        [_h | entry_t] -> match(entry_t, ["**" | pattern_t])
+        [] -> false
+      end
   end
 
   defp match([_entry_h | entry_t], ["*" | pattern_t]) do
@@ -111,6 +114,7 @@ defmodule Resolver do
   end
 
   defp rule({_key, [single]}), do: [single]
+
   defp rule({_key, multiple}) do
     files = filter(multiple, &(&1.kind == :file))
     if empty?(files), do: multiple, else: files

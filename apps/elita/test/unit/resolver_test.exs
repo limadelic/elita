@@ -17,6 +17,7 @@ defmodule ResolverUnitTest do
         %{name: "doc", path: "/work/dev", kind: :file},
         %{name: "doc", path: "/home/user", kind: :file}
       ]
+
       assert {:many, entries} = Resolver.resolve("doc", world, "/")
       assert length(entries) == 2
     end
@@ -28,6 +29,7 @@ defmodule ResolverUnitTest do
         %{name: "doc", path: "/work", kind: :folder},
         %{name: "doc", path: "/work", kind: :file}
       ]
+
       {:ok, entry} = Resolver.resolve("doc", world, "/")
       assert entry.kind == :file
     end
@@ -39,6 +41,7 @@ defmodule ResolverUnitTest do
         %{name: "doc", path: "/work/dev/rec", kind: :file},
         %{name: "doc", path: "/work/prod/rec", kind: :file}
       ]
+
       assert {:many, entries} = Resolver.resolve("doc@/work/*/rec", world, "/")
       assert length(entries) == 2
     end
@@ -49,6 +52,7 @@ defmodule ResolverUnitTest do
         %{name: "doctor", path: "/work/prod/services/rec", kind: :file},
         %{name: "other", path: "/home/work", kind: :file}
       ]
+
       assert {:many, entries} = Resolver.resolve("doctor@/work/**", world, "/")
       assert length(entries) == 2
     end
@@ -58,6 +62,7 @@ defmodule ResolverUnitTest do
         %{name: "x", path: "/a", kind: :file},
         %{name: "x", path: "/a/b", kind: :file}
       ]
+
       assert {:many, entries} = Resolver.resolve("x@/a/**", world, "/")
       assert length(entries) == 2
     end
@@ -67,6 +72,7 @@ defmodule ResolverUnitTest do
         %{name: "x", path: "/x", kind: :file},
         %{name: "x", path: "/a/x", kind: :file}
       ]
+
       assert {:many, entries} = Resolver.resolve("x@/**/x", world, "/")
       assert length(entries) == 2
     end
@@ -76,6 +82,7 @@ defmodule ResolverUnitTest do
         %{name: "doc", path: "/a/b", kind: :file},
         %{name: "doc", path: "/x/y/z", kind: :file}
       ]
+
       assert {:many, entries} = Resolver.resolve("doc@/**", world, "/")
       assert length(entries) == 2
     end
