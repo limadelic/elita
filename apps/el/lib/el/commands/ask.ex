@@ -53,7 +53,7 @@ defmodule El.Commands.Ask do
   defp get_answer(msg, target, process_name) do
     text = format_text(msg)
     GenServer.cast({process_name, target}, {:inject, text})
-    Answer.collect(120_000)
+    Answer.collect(30_000)
   end
 
   defp fail_call(agent, msg, env_module) do
