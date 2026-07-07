@@ -42,7 +42,8 @@ defmodule Elita.Credo.MaxModuleLines do
     [create_issue(lines, max, meta, filename) | issues]
   end
 
-  defp add_issue(_, _, _, issues, _filename), do: issues
+  defp add_issue({:ok, _}, _, _, issues, _), do: issues
+  defp add_issue(:error, _, _, issues, _), do: issues
 
   defp create_issue(body_lines, max_lines, meta, filename) do
     LineCheck.issue_for(__MODULE__, "Module", body_lines, max_lines, {meta, filename})
