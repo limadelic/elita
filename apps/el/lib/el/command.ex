@@ -12,24 +12,24 @@ defmodule El.Command do
   alias El.Distribution
   alias El.RPC
 
-  def ls do
+  def ls(path \\ nil) do
     Distribution.start()
-    query() |> reach()
+    query(path) |> reach(path)
   end
 
-  defp reach({:ok, output}), do: handle({:ok, output})
-  defp reach(:error), do: spawn()
+  defp reach({:ok, output}, _path), do: handle({:ok, output})
+  defp reach(:error, path), do: spawn_daemon(path)
 
-  defp spawn do
-    System.get_env("EL_DAEMON_SPAWN") |> gate()
+  defp spawn_daemon(path) do
+    System.get_env("EL_DAEMON_SPAWN") |> gate(path)
   end
 
-  defp gate("1") do
+  defp gate("1", path) do
     init()
-    wait(0)
+    wait(0, path)
   end
 
-  defp gate(_), do: handle(:error)
+  defp gate(_, path), do: handle(:error, path)
 
   defp init do
     exe = pick()
@@ -43,41 +43,45 @@ defmodule El.Command do
   defp resolve(nil), do: "#{File.cwd!()}/../../apps/el/el"
   defp resolve(path), do: path
 
-  defp wait(n) when n >= 10 do
-    handle(:error)
+  defp wait(n, path) when n >= 10 do
+    handle(:error, path)
   end
 
-  defp wait(n) do
+  defp wait(n, path) do
     Process.sleep(50 * (n + 1))
-    query() |> settle(n)
+    query(path) |> settle(n, path)
   end
 
-  defp settle({:ok, output}, _n), do: handle({:ok, output})
-  defp settle(:error, n), do: wait(n + 1)
+  defp settle({:ok, output}, _n, _path), do: handle({:ok, output})
+  defp settle(:error, n, path), do: wait(n + 1, path)
 
   defp handle({:ok, output}), do: puts(output)
-  defp handle(:error), do: Ls.execute()
+  defp handle(:error, path), do: Ls.execute(path: path)
 
   def ask(agent, msg), do: Ask.execute(agent, msg)
   def tell(agent, msg), do: Tell.execute(agent, msg)
   def claude(name), do: Claude.execute(name)
   def daemon, do: Distribution.daemon()
 
-  defp query do
-    connect(:"elita@127.0.0.1") |> guard()
+  defp query(path) do
+    connect(:"elita@127.0.0.1") |> guard(path)
   end
 
-  defp guard(bool) do
-    fetch(bool)
+  defp guard(bool, path) do
+    fetch(bool, path)
   rescue
     _ -> :error
   end
 
-  defp fetch(true) do
+  defp fetch(true, path) do
     cwd = File.cwd!()
-    output = call(:"elita@127.0.0.1", RPC, :dispatch, [["ls"], cwd])
+    cmd = pick_cmd(path)
+    output = call(:"elita@127.0.0.1", RPC, :dispatch, [cmd, cwd])
     {:ok, output}
   end
 
-  defp fetch(_), do: :error
+  defp fetch(_, _), do: :error
+
+  defp pick_cmd(nil), do: ["ls"]
+  defp pick_cmd(path), do: ["ls", path]
 end

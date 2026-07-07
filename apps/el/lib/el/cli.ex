@@ -25,7 +25,8 @@ defmodule El.CLI do
   defp parse(["tell", agent, msg]), do: {:tell, agent, msg}
   defp parse(["claude"]), do: {:claude, :default}
   defp parse(["claude", name]), do: {:claude, name}
-  defp parse(["ls"]), do: :ls
+  defp parse(["ls"]), do: {:ls, nil}
+  defp parse(["ls", path]), do: {:ls, path}
   defp parse(["daemon"]), do: :daemon
   defp parse(_), do: :usage
 
@@ -36,6 +37,6 @@ defmodule El.CLI do
   defp run({:ask, agent, msg}), do: Command.ask(agent, msg)
   defp run({:tell, agent, msg}), do: Command.tell(agent, msg)
   defp run({:claude, name}), do: Command.claude(name)
-  defp run(:ls), do: Command.ls()
+  defp run({:ls, path}), do: Command.ls(path)
   defp run(:daemon), do: Command.daemon()
 end

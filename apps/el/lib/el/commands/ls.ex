@@ -2,23 +2,65 @@ defmodule El.Commands.Ls do
   @moduledoc "Lists agents in the current folder with their registration status."
 
   import IO, only: [puts: 1]
-  import File, only: [ls!: 1]
-  import Enum, only: [map: 2, sort_by: 2, reject: 2, join: 2]
-  import String, only: [starts_with?: 2]
+  import Enum, only: [map: 2, sort_by: 2, filter: 2, join: 2]
+  import El.Commands.Address.World, only: [build: 0, cwd: 0]
 
   def execute(opts \\ []) do
-    cwd = Keyword.get(opts, :cwd, File.cwd!())
-    render(cwd) |> puts()
+    path = Keyword.get(opts, :path, nil)
+    render(path) |> puts()
   end
 
   def remote(opts \\ []) do
-    cwd = Keyword.get(opts, :cwd, File.cwd!())
-    render(cwd)
+    path = Keyword.get(opts, :path, nil)
+    render(path)
   end
 
-  defp render(cwd) do
-    build(cwd) |> format_output()
+  defp render(path) do
+    world = build()
+    here = cwd()
+    target = resolve_path(path, here)
+    world |> filter_path(target) |> sort_by(& &1.name) |> format_output()
   end
+
+  defp resolve_path(nil, _cwd), do: nil
+  defp resolve_path("/" <> _ = path, _cwd), do: path
+  defp resolve_path(path, cwd), do: cwd |> Path.join(path) |> Path.expand()
+
+  defp filter_path(world, nil), do: world
+  defp filter_path(world, target) do
+    world |> filter(&matches_path?(&1, target))
+  end
+
+  defp matches_path?(%{path: p}, t) when p == t, do: true
+  defp matches_path?(%{path: p}, t), do: glob_match(p, t)
+  defp matches_path?(_, _), do: false
+
+  defp glob_match(entry_path, pattern) do
+    skip_glob(has_glob?(pattern), entry_path, pattern)
+  end
+
+  defp skip_glob(false, _entry_path, _pattern), do: false
+  defp skip_glob(true, entry_path, pattern), do: glob(entry_path, pattern)
+
+  defp has_glob?(pattern) do
+    String.contains?(pattern, ["*", "**"])
+  end
+
+  defp glob(entry_path, pattern) do
+    match(String.split(entry_path, "/"), String.split(pattern, "/"))
+  end
+
+  defp match(_, []), do: true
+  defp match([], ["**" | t]), do: match([], t)
+  defp match([], _), do: false
+  defp match(e, ["**" | t]), do: check_double(match(e, t), e, t)
+  defp match([_ | et], ["*" | pt]), do: match(et, pt)
+  defp match([eh | et], [eh | pt]), do: match(et, pt)
+  defp match([_ | _], [_ | _]), do: false
+
+  defp check_double(true, _e, _t), do: true
+  defp check_double(false, [_ | et], t), do: match(et, ["**" | t])
+  defp check_double(false, [], _t), do: false
 
   defp format_output([]) do
     "no agents"
@@ -28,36 +70,13 @@ defmodule El.Commands.Ls do
     entries |> map(&format/1) |> join("\n")
   end
 
-  defp build(path) do
-    path
-    |> ls!()
-    |> reject(&hidden/1)
-    |> map(&entry(path, &1))
-    |> sort_by(& &1.name)
-  end
-
-  defp hidden(name) do
-    starts_with?(name, ".")
-  end
-
-  defp entry(path, name) do
-    full = Path.join(path, name)
-    %{name: name, path: full, kind: guess_kind(full)}
-  end
-
-  defp guess_kind(path) do
-    File.dir?(path) |> choose_kind()
-  end
-
-  defp choose_kind(true), do: :folder
-  defp choose_kind(false), do: :file
-
   defp format(entry) do
     "#{entry.name} #{kind_label(entry.kind)} #{status(entry.name)}"
   end
 
   defp status(name) do
-    Registry.lookup(ElitaRegistry, name) |> map_status()
+    normalized = String.downcase(to_string(name))
+    Registry.lookup(ElitaRegistry, normalized) |> map_status()
   end
 
   defp map_status([_ | _]), do: "active"
