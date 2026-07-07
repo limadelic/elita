@@ -23,7 +23,7 @@ defmodule PuppetTest do
 
   defp boot_real_session do
     El.Distribution.start("puppet", host: "127.0.0.1")
-    boot_script_path = Path.expand("e2e/boot_session.sh", __DIR__)
+    boot_script_path = Path.expand("boot_session.sh", __DIR__)
     el_path = Path.expand("../el", __DIR__)
 
     spawn_background_process(boot_script_path, el_path)
