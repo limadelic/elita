@@ -13,8 +13,8 @@ defmodule Tester do
       import Kernel, except: [spawn: 1, spawn: 2]
       import Tester
 
-      setup do
-        if @moduletag[:live] do
+      setup context do
+        if context[:live] do
           System.put_env("LIVE", "1")
           on_exit(fn -> System.delete_env("LIVE") end)
         end
