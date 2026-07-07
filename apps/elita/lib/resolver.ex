@@ -6,15 +6,19 @@ defmodule Resolver do
   bare names, paths, globs, and fanout patterns.
   """
 
+  import String, only: [split: 3, contains?: 2]
+  import Path, only: [join: 2, expand: 1, split: 1]
+  import Enum, only: [filter: 2, group_by: 2, flat_map: 2, empty?: 1]
+
   def resolve(address, world, cwd) do
     {name, path, fanout} = parse(address)
-    absolute_path = normalize_path(path, cwd)
+    absolute_path = normalize(path, cwd)
 
     matches = world
-      |> filter_by_path(absolute_path)
-      |> filter_by_name(name, fanout)
+      |> path(absolute_path)
+      |> named(name, fanout)
 
-    case apply_precedence(matches) do
+    case precedence(matches) do
       [] -> {:error, :unknown}
       [entry] -> {:ok, entry}
       entries -> {:many, entries}
@@ -22,93 +26,93 @@ defmodule Resolver do
   end
 
   defp parse(address) do
-    case String.split(address, "@", parts: 2) do
+    case split(address, "@", parts: 2) do
       [name] -> {name, nil, false}
       ["", path] -> {nil, path, true}
       [name, path] -> {name, path, false}
     end
   end
 
-  defp normalize_path(nil, _cwd), do: nil
-  defp normalize_path(path, cwd) do
-    if String.starts_with?(path, "/") do
-      path
+  defp normalize(nil, _cwd), do: nil
+  defp normalize("/" <> _ = path, _cwd), do: path
+  defp normalize(path, cwd) do
+    cwd
+    |> join(path)
+    |> expand()
+  end
+
+  defp path(world, search_path) do
+    filter(world, &match_path(&1, search_path))
+  end
+
+  defp match_path(_entry, nil), do: true
+  defp match_path(%{path: entry_path}, search_path) do
+    if entry_path == search_path do
+      true
     else
-      cwd
-      |> Path.join(path)
-      |> Path.expand()
+      if glob?(search_path) do
+        glob(entry_path, search_path)
+      else
+        false
+      end
     end
   end
 
-  defp filter_by_path(world, search_path) do
-    world
-    |> Enum.filter(&matches_path(&1, search_path))
+  defp glob?(pattern) do
+    contains?(pattern, ["*", "**"])
   end
 
-  defp matches_path(_entry, nil), do: true
-  defp matches_path(%{path: entry_path}, search_path) do
-    path_matches(entry_path, search_path)
+  defp glob(entry_path, pattern) do
+    entry_parts = split(entry_path)
+    pattern_parts = split(pattern)
+    match(entry_parts, pattern_parts)
   end
 
-  defp path_matches(entry_path, search_path) do
-    cond do
-      entry_path == search_path -> true
-      contains_glob?(search_path) -> glob_match(entry_path, search_path)
-      true -> false
+  defp match(_, []), do: true
+  defp match([], ["**" | pattern_t]), do: match([], pattern_t)
+  defp match([], _), do: false
+
+  defp match(entries, ["**" | pattern_t]) do
+    match(entries, pattern_t) ||
+    case entries do
+      [_h | entry_t] -> match(entry_t, ["**" | pattern_t])
+      [] -> false
     end
-end
-
-  defp contains_glob?(path) do
-    String.contains?(path, ["*", "**"])
   end
 
-  defp glob_match(entry_path, pattern) do
-    entry_parts = Path.split(entry_path)
-    pattern_parts = Path.split(pattern)
-    match_parts(entry_parts, pattern_parts)
+  defp match([_entry_h | entry_t], ["*" | pattern_t]) do
+    match(entry_t, pattern_t)
   end
 
-  defp match_parts(_, []), do: true
-  defp match_parts([], _), do: false
-
-  defp match_parts([_entry_h | entry_t], ["**" | pattern_t]) do
-    match_parts(entry_t, pattern_t) ||
-    match_parts(entry_t, ["**" | pattern_t])
-  end
-
-  defp match_parts([_entry_h | entry_t], ["*" | pattern_t]) do
-    match_parts(entry_t, pattern_t)
-  end
-
-  defp match_parts([entry_h | entry_t], [pattern_h | pattern_t]) do
+  defp match([entry_h | entry_t], [pattern_h | pattern_t]) do
     if entry_h == pattern_h do
-      match_parts(entry_t, pattern_t)
+      match(entry_t, pattern_t)
     else
       false
     end
   end
 
-  defp filter_by_name(entries, nil, _fanout) do
+  defp named(entries, nil, _fanout) do
     entries
   end
 
-  defp filter_by_name(entries, name, false) do
-    Enum.filter(entries, &(&1.name == name))
+  defp named(entries, name, false) do
+    filter(entries, &(&1.name == name))
   end
 
-  defp filter_by_name(entries, _name, true) do
+  defp named(entries, _name, true) do
     entries
   end
 
-  defp apply_precedence(entries) do
+  defp precedence(entries) do
     entries
-    |> Enum.group_by(&{&1.name, &1.path})
-    |> Enum.flat_map(&precedence_rule/1)
+    |> group_by(&{&1.name, &1.path})
+    |> flat_map(&rule/1)
   end
 
-  defp precedence_rule({_key, [single]}), do: [single]
-  defp precedence_rule({_key, multiple}) do
-    files = Enum.filter(multiple, &(&1.kind == :file))
-    if Enum.empty?(files), do: multiple, else: files
+  defp rule({_key, [single]}), do: [single]
+  defp rule({_key, multiple}) do
+    files = filter(multiple, &(&1.kind == :file))
+    if empty?(files), do: multiple, else: files
   end
 end

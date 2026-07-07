@@ -52,5 +52,32 @@ defmodule ResolverUnitTest do
       assert {:many, entries} = Resolver.resolve("doctor@/work/**", world, "/")
       assert length(entries) == 2
     end
+
+    test "** at end matches zero segments (exact path)" do
+      world = [
+        %{name: "x", path: "/a", kind: :file},
+        %{name: "x", path: "/a/b", kind: :file}
+      ]
+      assert {:many, entries} = Resolver.resolve("x@/a/**", world, "/")
+      assert length(entries) == 2
+    end
+
+    test "** at start matches zero segments at root" do
+      world = [
+        %{name: "x", path: "/x", kind: :file},
+        %{name: "x", path: "/a/x", kind: :file}
+      ]
+      assert {:many, entries} = Resolver.resolve("x@/**/x", world, "/")
+      assert length(entries) == 2
+    end
+
+    test "bare ** matches all paths" do
+      world = [
+        %{name: "doc", path: "/a/b", kind: :file},
+        %{name: "doc", path: "/x/y/z", kind: :file}
+      ]
+      assert {:many, entries} = Resolver.resolve("doc@/**", world, "/")
+      assert length(entries) == 2
+    end
   end
 end
