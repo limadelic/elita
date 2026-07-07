@@ -3,13 +3,13 @@ defmodule El.Command do
 
   import IO, only: [puts: 1]
   import Node, only: [connect: 1]
+  import :erpc, only: [call: 4]
 
   alias El.Commands.Ask
   alias El.Commands.Tell
   alias El.Commands.Claude
   alias El.Commands.Ls
   alias El.Distribution
-  alias El.Erpc
   alias El.RPC
 
   def ls do
@@ -37,7 +37,7 @@ defmodule El.Command do
 
   defp fetch(true) do
     cwd = File.cwd!()
-    output = Erpc.call(:"elita@127.0.0.1", RPC, :dispatch, [["ls"], cwd])
+    output = call(:"elita@127.0.0.1", RPC, :dispatch, [["ls"], cwd])
     {:ok, output}
   end
 
