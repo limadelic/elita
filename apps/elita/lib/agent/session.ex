@@ -12,7 +12,11 @@ defmodule Agent.Session do
     folder = Keyword.fetch!(opts, :folder)
     name = Keyword.fetch!(opts, :name)
     normalized = name |> to_string |> String.downcase()
-    via_name = {:via, Registry, {ElitaRegistry, normalized, %{kind: :headless, folder: folder}}}
+
+    via_name =
+      {:via, Registry,
+       {ElitaRegistry, normalized, %{kind: :headless, folder: folder}}}
+
     start_link(__MODULE__, opts, name: via_name)
   end
 
