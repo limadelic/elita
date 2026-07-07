@@ -26,6 +26,26 @@ defmodule Agent.HarnessTest do
     GenServer.stop(stub)
   end
 
+  test "dispatch routes ask to headless session" do
+    {:ok, _pid} = Agent.Session.start_link(name: :dude, folder: System.tmp_dir!())
+    result = Agent.Harness.dispatch("dude", "hello", :ask)
+    assert is_binary(result)
+  end
+
+  test "dispatch with uppercase in recipient" do
+    stub = start_stub("TestAgent", :puppet)
+    result = Agent.Harness.dispatch("TestAgent", "msg", :ask)
+    assert result == "hello response"
+    GenServer.stop(stub)
+  end
+
+  test "dispatch ask with nil input" do
+    stub = start_stub("test_nil", :puppet)
+    result = Agent.Harness.dispatch("test_nil", nil, :ask)
+    assert result == "hello response"
+    GenServer.stop(stub)
+  end
+
   defp start_stub(name, kind) do
     {:ok, pid} = TestStub.start_link(name: name, kind: kind)
     pid
