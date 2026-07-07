@@ -8,12 +8,12 @@ defmodule StubAgent do
   end
 
   def handle_cast({:inject, msg}, state) do
-    Agent.update(:msg_log, &[msg | &1])
+    Agent.update(:msg_log, &[{state, msg} | &1])
     {:noreply, state}
   end
 
   def handle_cast({:act, msg}, state) do
-    Agent.update(:msg_log, &[msg | &1])
+    Agent.update(:msg_log, &[{state, msg} | &1])
     {:noreply, state}
   end
 end
@@ -49,13 +49,13 @@ defmodule AddressTest do
     Registry.start_link(keys: :duplicate, name: ElitaRegistry)
 
     via1 = {:via, Registry, {ElitaRegistry, "agent1", %{kind: :native, folder: sub_folder}}}
-    GenServer.start_link(StubAgent, "ok", name: via1)
+    GenServer.start_link(StubAgent, "agent1", name: via1)
 
     via3 = {:via, Registry, {ElitaRegistry, "agent3", %{kind: :native, folder: sub_folder}}}
-    GenServer.start_link(StubAgent, "ok", name: via3)
+    GenServer.start_link(StubAgent, "agent3", name: via3)
 
     via2 = {:via, Registry, {ElitaRegistry, "agent2", %{kind: :native, folder: deep_folder}}}
-    GenServer.start_link(StubAgent, "ok", name: via2)
+    GenServer.start_link(StubAgent, "agent2", name: via2)
 
     on_exit(fn ->
       File.cd!(old_cwd)
@@ -117,7 +117,8 @@ defmodule AddressTest do
     end)
 
     sent = Agent.get(:msg_log, & &1)
-    assert length(sent) >= 1
+    recipients = sent |> Enum.map(&elem(&1, 0)) |> Enum.sort()
+    assert recipients == ["agent1", "agent3"]
   end
 end
 

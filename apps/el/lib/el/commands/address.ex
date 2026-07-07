@@ -31,11 +31,11 @@ defmodule El.Commands.Address do
 
   defp handle({:many, entries}, _recipient, msg, :tell) do
     unique = Enum.uniq_by(entries, &{&1.name, &1.path})
-    rouse_all(unique)
+    blast(unique)
     echo(unique, msg)
   end
 
-  defp rouse_all(entries), do: Enum.each(entries, &rouse/1)
+  defp blast(entries), do: Enum.each(entries, &rouse/1)
   defp echo(entries, msg), do: Enum.each(entries, fn e -> tell(e.name, msg) end)
 
   defp tell(agent, msg) do
