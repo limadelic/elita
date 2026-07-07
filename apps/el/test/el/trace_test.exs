@@ -59,15 +59,7 @@ defmodule El.TraceTest do
     assert !File.exists?(trace_file)
   end
 
-  test "appends to existing trace file" do
-    trace_file = Path.join(System.tmp_dir!(), "append_trace_#{System.unique_integer()}.log")
-    System.put_env("EL_TRACE", trace_file)
-
-    on_exit(fn ->
-      System.delete_env("EL_TRACE")
-      if File.exists?(trace_file), do: File.rm(trace_file)
-    end)
-
+  test "appends to existing trace file", %{trace_file: trace_file} do
     El.Trace.log_chunk("first")
     El.Trace.log_chunk("second")
 
