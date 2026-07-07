@@ -1,22 +1,29 @@
 defmodule Mlm do
   import Compose, only: [compose: 1]
-  import Tools, only: [tools: 2]
-  import System, only: [get_env: 2]
-  import Req, only: [post: 2]
   import Map, only: [put: 3]
+  import Req, only: [post: 2]
+  import System, only: [get_env: 2]
+  import Tools, only: [tools: 2]
 
-  alias Shape
   alias Adapt
+  alias Shape
 
   @url "http://#{get_env("MLM_HOST", "localhost")}:11434/api/chat"
 
   def llm(text) when is_binary(text) do
+    body(text) |> req() |> Adapt.resp() |> Adapt.text()
+  end
+
+  defp body(text) do
     messages = [%{role: "user", content: "/no_think #{text}"}]
-    %{model: model(), messages: messages, stream: false} |> req |> Adapt.resp() |> Adapt.text()
+    %{model: model(), messages: messages, stream: false}
   end
 
   def llm(%{config: config, history: history} = state) do
-    {build_body(compose(config), history, state) |> req |> Adapt.resp() |> Adapt.parts(), state}
+    {build_body(compose(config), history, state)
+     |> req()
+     |> Adapt.resp()
+     |> Adapt.parts(), state}
   end
 
   defp build_body(composed, history, state) do
