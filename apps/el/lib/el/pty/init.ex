@@ -18,38 +18,34 @@ defmodule El.Pty.Init do
   defp post_init(cfg, pty, size, tty_out, os_pid) do
     setup(cfg[:file], pty, size)
     monitor_port(pty)
-    make_state(pty, cfg, tty_out, os_pid)
+    core(pty, tty_out, os_pid) |> attach(cfg)
   end
 
-  defp make_state(pty, cfg, tty_out, os_pid) do
-    %{
-      pty: pty,
-      file: cfg[:file],
-      port: cfg[:port],
-      tty_out: tty_out,
-      os_pid: os_pid,
-      input: cfg[:input],
-      taps: cfg[:taps]
-    }
+  defp core(pty, tty_out, os_pid) do
+    %{pty: pty, tty_out: tty_out, os_pid: os_pid}
+  end
+
+  defp attach(state, cfg) do
+    Map.merge(state, %{file: cfg[:file], port: cfg[:port], input: cfg[:input], taps: cfg[:taps]})
   end
 
   defp pty_and_pid(port, cmd, size) do
-    pty = open_pty(port, cmd, size)
+    pty = spawn_cmd(port, cmd, size)
     {pty, extract_pid(port.info(pty, :os_pid))}
   end
 
   defp extract_pid({:os_pid, pid}), do: pid
   defp extract_pid(_), do: nil
 
-  defp open_pty(port, cmd, size) do
-    {rows, cols} = size
-    stty = "stty rows #{rows} cols #{cols}; stty raw -echo -isig;"
-    args = ["-q", "/dev/null", "sh", "-c", "#{stty} exec #{cmd}"]
+  defp spawn_cmd(port, cmd, size) do
+    args = build_args(size, cmd)
+    opts = [:binary, :stream, :exit_status, {:args, args}]
+    port.open({:spawn_executable, "/usr/bin/script"}, opts)
+  end
 
-    port.open(
-      {:spawn_executable, "/usr/bin/script"},
-      [:binary, :stream, :exit_status, {:args, args}]
-    )
+  defp build_args({rows, cols}, cmd) do
+    stty = "stty rows #{rows} cols #{cols}; stty raw -echo -isig;"
+    ["-q", "/dev/null", "sh", "-c", "#{stty} exec #{cmd}"]
   end
 
   defp setup(file, _pty, size) do
