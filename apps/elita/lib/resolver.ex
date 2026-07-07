@@ -1,4 +1,11 @@
 defmodule Resolver do
+  @moduledoc """
+  Pure address resolver for agent discovery.
+
+  Matches addresses against a tree snapshot with support for
+  bare names, paths, globs, and fanout patterns.
+  """
+
   def resolve(address, world, cwd) do
     {name, path, fanout} = parse(address)
     absolute_path = normalize_path(path, cwd)
