@@ -1,29 +1,17 @@
 defmodule El.Commands.Address do
   import :erpc, only: [call: 4]
-  import Agent.Session, only: [start_link: 1]
   import El.Commands.Address.World, only: [build: 0, cwd: 0]
+  import El.Commands.Address.Wake, only: [up: 1]
   import El.Commands.Lookup, only: [local: 4]
+  import Resolver, only: [resolve: 3]
   import String, only: [downcase: 1]
 
   def route(recipient, msg, mode \\ :ask, tool \\ nil) do
-    result = Resolver.resolve(recipient, build(), cwd())
+    world_builder = Application.get_env(:el, :world_builder, &build/0)
+    world = world_builder.()
+    result = resolve(recipient, world, cwd())
     handle(result, recipient, msg, mode, tool)
   end
-
-  @doc false
-  def route(recipient, msg, mode, tool, opts) do
-    rpc = opts[:rpc]
-    world = env(opts[:world])
-    save(rpc)
-    result = Resolver.resolve(recipient, world, cwd())
-    handle(result, recipient, msg, mode, tool)
-  end
-
-  defp env(nil), do: build()
-  defp env(w), do: w
-
-  defp save(nil), do: :ok
-  defp save(rpc), do: Application.put_env(:el, :rpc, rpc)
 
   defp handle({:error, :unknown}, recipient, _msg, _mode, _tool),
     do: IO.puts("unknown: #{recipient}")
@@ -36,7 +24,7 @@ defmodule El.Commands.Address do
 
   defp handle({:many, entries}, _recipient, msg, :tell, tool) do
     unique = Enum.uniq_by(entries, &{&1.name, &1.path})
-    Enum.each(unique, &rouse/1)
+    Enum.each(unique, &up/1)
     Enum.each(unique, fn e -> tell(e.name, msg, tool) end)
   end
 
@@ -69,12 +57,12 @@ defmodule El.Commands.Address do
   end
 
   defp exec(entry, msg, :ask, tool) do
-    rouse(entry)
+    up(entry)
     local(entry.name, msg, tool, [])
   end
 
   defp exec(entry, msg, :tell, tool) do
-    rouse(entry)
+    up(entry)
     tell(entry.name, msg, tool)
   end
 
@@ -101,34 +89,4 @@ defmodule El.Commands.Address do
 
   defp pack(:native, msg), do: {:act, msg}
   defp pack(_, msg), do: {:cast, msg}
-
-  defp rouse(%{kind: k, name: n, path: p} = entry) when k in [:file, :folder] do
-    key = n |> to_string() |> String.downcase()
-    sleep = Registry.lookup(ElitaRegistry, key) |> Enum.empty?()
-    stir(sleep, n, p, Map.get(entry, :file_path))
-  end
-
-  defp rouse(_), do: :ok
-
-  defp stir(false, _name, _folder, _self), do: :ok
-
-  defp stir(true, name, folder, self) do
-    rune = System.get_env("TEST_AGENT_RUNNER") |> pick()
-    start_link(wire([name: name, folder: folder, self: self], rune))
-  end
-
-  defp pick(nil), do: nil
-
-  defp pick(name) do
-    atom = String.to_atom("Elixir." <> name)
-    load(Code.ensure_loaded?(atom), atom)
-  end
-
-  defp load(true, a), do: a
-  defp load(false, _), do: nil
-
-  defp wire(opts, nil), do: opts
-
-  defp wire(opts, rune),
-    do: Keyword.put(opts, :runner, fn m, f -> apply(rune, :run, [m, f]) end)
 end

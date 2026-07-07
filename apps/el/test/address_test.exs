@@ -671,12 +671,15 @@ defmodule RelayTest do
     nodes = [:peer1@host]
     world = El.Commands.Address.World.build(fn -> nodes end)
 
+    Application.put_env(:el, :rpc, fake_rpc)
+    Application.put_env(:el, :world_builder, fn -> world end)
+
     capture_io(fn ->
-      El.Commands.Address.route("peer1@host", "test msg", :ask, nil,
-        rpc: fake_rpc,
-        world: world
-      )
+      El.Commands.Address.route("peer1@host", "test msg", :ask, nil)
     end)
+
+    Application.delete_env(:el, :rpc)
+    Application.delete_env(:el, :world_builder)
 
     calls = Agent.get(:relay_log, & &1)
     assert calls != []
@@ -727,12 +730,15 @@ defmodule RelayTest do
 
     world = El.Commands.Address.World.build(fn -> [] end)
 
+    Application.put_env(:el, :rpc, fake_rpc)
+    Application.put_env(:el, :world_builder, fn -> world end)
+
     capture_io(fn ->
-      El.Commands.Address.route("agent1", "test msg", :ask, nil,
-        rpc: fake_rpc,
-        world: world
-      )
+      El.Commands.Address.route("agent1", "test msg", :ask, nil)
     end)
+
+    Application.delete_env(:el, :rpc)
+    Application.delete_env(:el, :world_builder)
 
     calls = Agent.get(:relay_log, & &1)
     assert calls == []
@@ -771,12 +777,15 @@ defmodule RelayTest do
     nodes = [:peer1@host]
     world = El.Commands.Address.World.build(fn -> nodes end)
 
+    Application.put_env(:el, :rpc, fake_rpc)
+    Application.put_env(:el, :world_builder, fn -> world end)
+
     capture_io(fn ->
-      El.Commands.Address.route("peer1@host", "test msg", :tell, nil,
-        rpc: fake_rpc,
-        world: world
-      )
+      El.Commands.Address.route("peer1@host", "test msg", :tell, nil)
     end)
+
+    Application.delete_env(:el, :rpc)
+    Application.delete_env(:el, :world_builder)
 
     calls = Agent.get(:relay_log, & &1)
     assert calls != []
