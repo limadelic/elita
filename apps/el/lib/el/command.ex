@@ -18,18 +18,18 @@ defmodule El.Command do
   end
 
   defp reach({:ok, output}), do: handle({:ok, output})
-  defp reach(:error), do: attempt_spawn()
+  defp reach(:error), do: spawn()
 
-  defp attempt_spawn do
-    System.get_env("EL_DAEMON_SPAWN") |> spawn_check()
+  defp spawn do
+    System.get_env("EL_DAEMON_SPAWN") |> gate()
   end
 
-  defp spawn_check("1") do
+  defp gate("1") do
     init()
     wait(0)
   end
 
-  defp spawn_check(_), do: handle(:error)
+  defp gate(_), do: handle(:error)
 
   defp init do
     exe = pick()
@@ -37,11 +37,11 @@ defmodule El.Command do
   end
 
   defp pick do
-    System.find_executable("el") |> pick_result()
+    System.find_executable("el") |> resolve()
   end
 
-  defp pick_result(nil), do: "#{File.cwd!()}/../../apps/el/el"
-  defp pick_result(path), do: path
+  defp resolve(nil), do: "#{File.cwd!()}/../../apps/el/el"
+  defp resolve(path), do: path
 
   defp wait(n) when n >= 10 do
     handle(:error)
@@ -49,11 +49,11 @@ defmodule El.Command do
 
   defp wait(n) do
     Process.sleep(50 * (n + 1))
-    query() |> wait_result(n)
+    query() |> settle(n)
   end
 
-  defp wait_result({:ok, output}, _n), do: handle({:ok, output})
-  defp wait_result(:error, n), do: wait(n + 1)
+  defp settle({:ok, output}, _n), do: handle({:ok, output})
+  defp settle(:error, n), do: wait(n + 1)
 
   defp handle({:ok, output}), do: puts(output)
   defp handle(:error), do: Ls.execute()
