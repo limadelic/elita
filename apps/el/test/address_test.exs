@@ -126,4 +126,65 @@ defmodule FakeEnv do
   def get(_), do: "fake_node@fake_host"
 end
 
+defmodule LsTest do
+  use ExUnit.Case, async: false
+  import ExUnit.CaptureIO
+
+  test "ls with path forms (bare, relative, absolute, glob)" do
+    base = System.tmp_dir() |> Path.join("elita_ls_test_#{System.unique_integer()}")
+    File.mkdir_p!(base)
+    base = Path.expand(base)
+
+    sub = Path.expand(Path.join(base, "sub"))
+    deep = Path.expand(Path.join(sub, "deep"))
+    File.mkdir_p!(deep)
+
+    File.write!(Path.join(base, "root_agent.exs"), "# root")
+    File.write!(Path.join(sub, "sub_agent.exs"), "# sub")
+    File.write!(Path.join(deep, "deep_agent.exs"), "# deep")
+
+    old_cwd = File.cwd!()
+    File.cd!(base)
+
+    registrations = "root_agent:#{base},sub_agent:#{sub},deep_agent:#{deep}"
+    old_registrations = System.get_env("AGENT_REGISTRATIONS")
+    System.put_env("AGENT_REGISTRATIONS", registrations)
+
+    Registry.start_link(keys: :duplicate, name: ElitaRegistry)
+
+    via1 = {:via, Registry, {ElitaRegistry, "root_agent", %{kind: :file, path: base}}}
+    GenServer.start_link(StubAgent, "root_agent", name: via1)
+
+    via2 = {:via, Registry, {ElitaRegistry, "sub_agent", %{kind: :file, path: sub}}}
+    GenServer.start_link(StubAgent, "sub_agent", name: via2)
+
+    on_exit(fn ->
+      File.cd!(old_cwd)
+      System.put_env("AGENT_REGISTRATIONS", old_registrations || "")
+      File.rm_rf!(base)
+    end)
+
+    # Test 1: bare ls (current directory)
+    output1 = capture_io(fn -> El.Commands.Ls.execute() end)
+    assert String.contains?(output1, "root_agent")
+    assert String.contains?(output1, "active")
+
+    # Test 2: ls relative path
+    output2 = capture_io(fn -> El.Commands.Ls.execute(path: "sub") end)
+    assert String.contains?(output2, "sub_agent")
+    assert String.contains?(output2, "active")
+    refute String.contains?(output2, "root_agent")
+
+    # Test 3: ls absolute path
+    output3 = capture_io(fn -> El.Commands.Ls.execute(path: sub) end)
+    assert String.contains?(output3, "sub_agent")
+    refute String.contains?(output3, "root_agent")
+
+    # Test 4: ls with glob
+    output4 = capture_io(fn -> El.Commands.Ls.execute(path: "**") end)
+    assert String.contains?(output4, "sub_agent")
+    assert String.contains?(output4, "deep_agent")
+    assert String.contains?(output4, "asleep")
+  end
+end
 
