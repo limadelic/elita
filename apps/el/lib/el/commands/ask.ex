@@ -46,27 +46,27 @@ defmodule El.Commands.Ask do
     dial(msg, target, agent, env, tool)
   end
 
-  defp dial(msg, target, agent, env_module, tool) do
-    context = {msg, target, String.to_atom(agent), agent, env_module, tool}
+  defp dial(msg, target, agent, env, tool) do
+    context = {msg, target, String.to_atom(agent), agent, env, tool}
     forward(Node.connect(target), context)
   end
 
   defp forward(
          true,
-         {msg, target, process_name, _agent, _env_module, tool}
+         {msg, target, proc, _agent, _env, tool}
        ) do
-    ask(msg, target, process_name, tool)
+    ask(msg, target, proc, tool)
   end
 
   defp forward(
          _result,
-         {msg, _target, _process_name, agent, env_module, tool}
+         {msg, _target, _proc, agent, env, tool}
        ) do
-    fallback(agent, msg, env_module, tool)
+    fallback(agent, msg, env, tool)
   end
 
-  defp fallback(agent, msg, env_module, tool) do
-    host = env_module.get("EL_NODE")
+  defp fallback(agent, msg, env, tool) do
+    host = env.get("EL_NODE")
     Tell.remote_unreachable(agent, host)
     local(agent, msg, tool, [])
   end

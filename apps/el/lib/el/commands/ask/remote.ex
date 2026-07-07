@@ -5,28 +5,28 @@ defmodule El.Commands.Ask.Remote do
 
   alias El.Answer
 
-  def ask(msg, target, process_name, tool) do
-    wrap = fn -> print(msg, target, process_name) end
-    tap(target, process_name, wrap, tool)
+  def ask(msg, target, proc, tool) do
+    wrap = fn -> print(msg, target, proc) end
+    tap(target, proc, wrap, tool)
   end
 
-  defp print(msg, target, process_name) do
-    result = answer(msg, target, process_name)
+  defp print(msg, target, proc) do
+    result = answer(msg, target, proc)
     IO.puts(result)
   end
 
-  defp tap(target, process_name, fun, _tool) do
-    :ok = GenServer.call({process_name, target}, {:tap, self()})
+  defp tap(target, proc, fun, _tool) do
+    :ok = GenServer.call({proc, target}, {:tap, self()})
     result = fun.()
-    :ok = GenServer.call({process_name, target}, {:untap, self()})
+    :ok = GenServer.call({proc, target}, {:untap, self()})
     result
   end
 
-  defp answer(msg, target, process_name) do
+  defp answer(msg, target, proc) do
     text = format(msg)
     ref = make_ref()
-    reply_to = {ref, self()}
-    GenServer.cast({process_name, target}, {:inject, text, reply_to: reply_to})
+    reply = {ref, self()}
+    GenServer.cast({proc, target}, {:inject, text, reply: reply})
     Answer.await(ref, 30_000)
   end
 
