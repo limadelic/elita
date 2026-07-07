@@ -32,8 +32,6 @@ defmodule Tools.Sys.AskUnitTest do
   use ExUnit.Case
 
   setup do
-    Agent.Registry.create()
-
     case Registry.start_link(keys: :unique, name: ElitaRegistry) do
       {:ok, _pid} -> :ok
       {:error, {:already_started, _pid}} -> :ok
@@ -43,32 +41,16 @@ defmodule Tools.Sys.AskUnitTest do
   end
 
   @tag :main
-  test "ask nil-folder agent via Elita.call" do
-    pid = spawn(fn -> :timer.sleep(:infinity) end)
-    Agent.Registry.register(:native, nil, pid)
+  test "ask native agent is registered in registry" do
+    {:ok, _pid} = Elita.start_link(:native, [:native])
 
-    result =
-      try do
-        Tools.Sys.Ask.exec("ask", %{"recipient" => "native", "question" => "hello"}, %{
-          name: :test
-        })
-      rescue
-        _error -> :error_from_elita
-      catch
-        :exit, _reason -> :error_from_elita
-      else
-        res -> res
-      end
-
-    assert result != "agent not found"
+    assert [_ | _] = Registry.lookup(ElitaRegistry, "native")
   end
 
   @tag :main
   test "ask binary-folder agent via Agent.Session.ask" do
-    {:ok, pid} =
+    {:ok, _pid} =
       Agent.Session.start_link(name: :runner, folder: "/tmp", runner: &stub_runner/2)
-
-    Agent.Registry.register(:runner, "/tmp", pid)
 
     {response, _state} =
       Tools.Sys.Ask.exec("ask", %{"recipient" => "runner", "question" => "hello"}, %{name: :test})

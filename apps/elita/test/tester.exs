@@ -35,18 +35,15 @@ defmodule Tester do
   end
 
   defp via(name) do
-    {:via, Registry, {ElitaRegistry, name}}
+    normalized = name |> downcase
+    {:via, Registry, {ElitaRegistry, normalized, %{kind: :native, folder: nil}}}
   end
 
   defp setup do
-    el_entry = :ets.lookup(:agent_registry, :el)
-    :ets.delete_all_objects(:agent_registry)
-
-    if el_entry != [] do
-      :ets.insert(:agent_registry, el_entry)
+    case Registry.start_link(keys: :unique, name: ElitaRegistry) do
+      {:ok, _pid} -> :ok
+      {:error, {:already_started, _pid}} -> :ok
     end
-
-    :ok
   end
 
   defp name(n), do: to_string(n)

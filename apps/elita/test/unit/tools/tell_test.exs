@@ -2,8 +2,6 @@ defmodule Tools.Sys.TellUnitTest do
   use ExUnit.Case
 
   setup do
-    Agent.Registry.create()
-
     case Registry.start_link(keys: :unique, name: ElitaRegistry) do
       {:ok, _pid} -> :ok
       {:error, {:already_started, _pid}} -> :ok
@@ -13,8 +11,7 @@ defmodule Tools.Sys.TellUnitTest do
   end
 
   test "tell nil-folder agent via Elita.cast" do
-    pid = spawn(fn -> :timer.sleep(:infinity) end)
-    Agent.Registry.register(:native, nil, pid)
+    {:ok, _pid} = Elita.start_link(:native, [:native])
 
     result =
       try do
@@ -34,10 +31,8 @@ defmodule Tools.Sys.TellUnitTest do
   end
 
   test "tell binary-folder agent via Agent.Session.cast" do
-    {:ok, pid} =
+    {:ok, _pid} =
       Agent.Session.start_link(name: :runner, folder: "/tmp", runner: &stub_runner/2)
-
-    Agent.Registry.register(:runner, "/tmp", pid)
 
     {response, _state} =
       Tools.Sys.Tell.exec("tell", %{"recipient" => "runner", "message" => "hello"}, %{name: :test})

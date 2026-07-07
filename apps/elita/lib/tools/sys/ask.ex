@@ -21,9 +21,9 @@ end
 
 defmodule Tools.Sys.Ask do
   import Log, only: [log: 5]
-  import Agent.Registry, only: [lookup: 1]
   import Agent.Session, only: [ask: 2]
   import Tools.Sys.Safe, only: [call: 2]
+  import String, only: [to_atom: 1, downcase: 1]
 
   defdelegate spec(name, state), to: Tools.Sys.Ask.Schema, as: :get
 
@@ -38,20 +38,21 @@ defmodule Tools.Sys.Ask do
   end
 
   defp route(recipient, question) do
-    lookup(String.to_atom(recipient))
+    normalized = recipient |> to_atom |> to_string |> downcase
+    Registry.lookup(ElitaRegistry, normalized)
     |> handle(recipient, question)
   end
 
-  defp handle({:ok, {_pid, nil}}, recipient, question) do
-    Elita.call(String.to_atom(recipient), question)
+  defp handle([{_pid, %{kind: :native}}], recipient, question) do
+    Elita.call(to_atom(recipient), question)
   end
 
-  defp handle({:ok, {pid, _folder}}, _recipient, question) do
+  defp handle([{pid, %{kind: :headless}}], _recipient, question) do
     {:ok, response} = ask(pid, question)
     response
   end
 
-  defp handle({:error, :not_found}, recipient, question) do
+  defp handle([], recipient, question) do
     guard(recipient, question)
   end
 

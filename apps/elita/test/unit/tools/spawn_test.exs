@@ -2,7 +2,11 @@ defmodule Tools.Sys.SpawnUnitTest do
   use ExUnit.Case
 
   setup do
-    Agent.Registry.create()
+    case Registry.start_link(keys: :unique, name: ElitaRegistry) do
+      {:ok, _pid} -> :ok
+      {:error, {:already_started, _pid}} -> :ok
+    end
+
     :ok
   end
 
@@ -12,7 +16,7 @@ defmodule Tools.Sys.SpawnUnitTest do
       Tools.Sys.Spawn.exec("spawn", %{"name" => "spawned_agent"}, %{})
 
     assert response == "spawned"
-    assert {:ok, _} = Agent.Registry.lookup(:spawned_agent)
+    assert [_ | _] = Registry.lookup(ElitaRegistry, "spawned_agent")
   end
 
   @tag :main
@@ -26,6 +30,6 @@ defmodule Tools.Sys.SpawnUnitTest do
       Tools.Sys.Spawn.exec("spawn", %{"name" => "duplicate_agent"}, %{})
 
     assert response2 == "spawned"
-    assert {:ok, _} = Agent.Registry.lookup(:duplicate_agent)
+    assert [_ | _] = Registry.lookup(ElitaRegistry, "duplicate_agent")
   end
 end

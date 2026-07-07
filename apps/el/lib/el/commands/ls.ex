@@ -5,7 +5,6 @@ defmodule El.Commands.Ls do
   import File, only: [ls!: 1]
   import Enum, only: [map: 2, sort_by: 2, each: 2, reject: 2]
   import String, only: [starts_with?: 2]
-  import Agent.Registry, only: [lookup: 1]
 
   def execute(opts \\ []) do
     cwd = Keyword.get(opts, :cwd, File.cwd!())
@@ -47,11 +46,11 @@ defmodule El.Commands.Ls do
   end
 
   defp status(name) do
-    lookup(name) |> map_status()
+    Registry.lookup(ElitaRegistry, name) |> map_status()
   end
 
-  defp map_status({:ok, _}), do: "active"
-  defp map_status({:error, _}), do: "asleep"
+  defp map_status([_ | _]), do: "active"
+  defp map_status([]), do: "asleep"
 
   defp kind_label(:file), do: "file"
   defp kind_label(:folder), do: "folder"

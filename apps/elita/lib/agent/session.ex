@@ -11,7 +11,8 @@ defmodule Agent.Session do
   def start_link(opts) do
     folder = Keyword.fetch!(opts, :folder)
     name = Keyword.fetch!(opts, :name)
-    via_name = {:via, Registry, {ElitaRegistry, name, %{kind: :headless, folder: folder}}}
+    normalized = name |> to_string |> String.downcase
+    via_name = {:via, Registry, {ElitaRegistry, normalized, %{kind: :headless, folder: folder}}}
     start_link(__MODULE__, opts, [name: via_name])
   end
   def ask(pid, message), do: call(pid, {:ask, message}, :infinity)

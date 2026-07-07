@@ -30,8 +30,7 @@ defmodule ZombieTest do
     end
 
     defp start_dude_session({:dude, folder}) do
-      {:ok, pid} = Agent.Session.start_link(name: :dude, folder: folder)
-      Agent.Registry.register(:dude, folder, pid)
+      {:ok, _pid} = Agent.Session.start_link(name: :dude, folder: folder)
     end
 
     defp start_dude_session(_), do: :ok

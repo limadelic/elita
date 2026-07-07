@@ -3,7 +3,11 @@ defmodule LsTest do
   import ExUnit.CaptureIO
 
   setup do
-    Agent.Registry.create()
+    case Registry.start_link(keys: :unique, name: ElitaRegistry) do
+      {:ok, _pid} -> :ok
+      {:error, {:already_started, _pid}} -> :ok
+    end
+
     tmpdir = Path.join(System.tmp_dir!(), "elita_ls_test_#{unique_id()}")
     File.mkdir_p!(tmpdir)
 
@@ -32,7 +36,7 @@ defmodule LsTest do
 
   test "marks registered agents as active", %{tmpdir: tmpdir} do
     File.write!(Path.join(tmpdir, "work"), "")
-    Agent.Registry.register("work", tmpdir, spawn(fn -> :ok end))
+    {:ok, _pid} = Elita.start_link(:work, [:work])
 
     output = capture_io(fn ->
       El.Commands.Ls.execute(cwd: tmpdir)
