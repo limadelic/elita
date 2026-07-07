@@ -100,9 +100,9 @@ defmodule PuppetTest do
   end
 
   defp run_el_with_timeout(el_path, args, env, timeout_ms) do
-    port = Port.open({:spawn_executable, el_path}, [
-      {:args, args},
-      {:env, env},
+    port = Port.open({:spawn_executable, String.to_charlist(el_path)}, [
+      {:args, Enum.map(args, &String.to_charlist/1)},
+      {:env, Enum.map(env, fn {k, v} -> {String.to_charlist(k), String.to_charlist(v)} end)},
       :use_stdio,
       :exit_status,
       :binary
