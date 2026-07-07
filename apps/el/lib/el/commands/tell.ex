@@ -2,24 +2,27 @@ defmodule El.Commands.Tell do
   @moduledoc false
   import :binary, only: [at: 2]
   import El.Commands.Address, only: [route: 4]
-  import String, only: [contains?: 2]
-
-  alias El.Distribution
+  import El.Distribution, only: [start: 0]
+  import GenServer, only: [cast: 2]
+  import IO, only: [write: 2]
+  import Keyword, only: [get: 3]
+  import Node, only: [connect: 1]
+  import String, only: [contains?: 2, to_atom: 1]
 
   def execute(agent, msg, tool \\ nil, opts \\ []) do
-    Distribution.start()
+    start()
     {t, o, env} = args(tool, opts)
     ctx = %{agent: agent, msg: msg, tool: t, env: env, opts: o}
     dispatch(ctx, contains?(agent, "@"))
   end
 
   defp args(tool, _opts) when is_list(tool) do
-    env = Keyword.get(tool, :env_module, El.Infra.Env)
+    env = get(tool, :env_module, El.Infra.Env)
     {nil, tool, env}
   end
 
   defp args(tool, opts) do
-    env = Keyword.get(opts, :env_module, El.Infra.Env)
+    env = get(opts, :env_module, El.Infra.Env)
     {tool, opts, env}
   end
 
@@ -38,8 +41,8 @@ defmodule El.Commands.Tell do
   end
 
   defp send_via(target, {agent, msg, tool, env}) do
-    ctx = {msg, target, String.to_atom(agent), agent, env, tool}
-    act(Node.connect(target), ctx)
+    ctx = {msg, target, to_atom(agent), agent, env, tool}
+    act(connect(target), ctx)
   end
 
   defp act(true, {msg, target, process_name, _agent, _env_module, tool}) do
@@ -54,11 +57,11 @@ defmodule El.Commands.Tell do
 
   defp inject(msg, target, process_name, _tool) do
     text = format_text(msg)
-    GenServer.cast({process_name, target}, {:inject, text})
+    cast({process_name, target}, {:inject, text})
   end
 
   def remote_target(agent, opts \\ []) do
-    env_module = Keyword.get(opts, :env_module, El.Infra.Env)
+    env_module = get(opts, :env_module, El.Infra.Env)
     node_target(agent, env_module.get("EL_NODE"))
   end
 
@@ -66,7 +69,7 @@ defmodule El.Commands.Tell do
   defp node_target(agent, host), do: :"claude_#{agent}@#{host}"
 
   def remote_unreachable(agent, host) do
-    IO.write(:stderr, "session #{agent} unreachable at #{host}\n")
+    write(:stderr, "session #{agent} unreachable at #{host}\n")
   end
 
   defp format_text(msg) do
