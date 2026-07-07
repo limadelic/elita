@@ -1,80 +1,50 @@
 defmodule El.Commands.Ls do
   import IO, only: [puts: 1]
-  import El.Host, only: [host: 0]
+  import File, only: [ls!: 1]
+  import Enum, only: [map: 2, sort_by: 2, each: 2]
+  import Agent.Registry, only: [lookup: 1]
 
   def execute(opts \\ []) do
-    {Keyword.get(opts, :net_adm, :net_adm), Keyword.get(opts, :host, nil),
-     Keyword.get(opts, :filter, &default_filter/1), Keyword.get(opts, :ping, &default_ping/2),
-     Keyword.get(opts, :extract, &default_extract/1)}
-    |> call_build()
+    cwd = Keyword.get(opts, :cwd, File.cwd!())
+    build(cwd) |> show()
   end
 
-  defp call_build({net_adm, host, filter, ping, extract}) do
-    names = safe_get_names(net_adm, host)
-    display(build_sessions(names, host, filter, ping, extract))
+  defp build(path) do
+    path
+    |> ls!()
+    |> map(&entry(path, &1))
+    |> sort_by(& &1.name)
   end
 
-  defp build_sessions(names, host, filter, ping, extract) do
-    names
-    |> Enum.filter(fn entry -> alive?(entry, filter, host, ping) end)
-    |> Enum.map(extract)
+  defp entry(path, name) do
+    full = Path.join(path, name)
+    %{name: name, path: full, kind: guess_kind(full)}
   end
 
-  defp alive?(entry, filter, host, ping) do
-    Enum.all?([filter.(entry), ping.(elem(entry, 0), host) == :pong])
+  defp guess_kind(path) do
+    File.dir?(path) |> choose_kind()
   end
 
-  defp display([]), do: puts("no sessions")
-  defp display(sessions), do: Enum.each(sessions, &puts/1)
+  defp choose_kind(true), do: :folder
+  defp choose_kind(false), do: :file
 
-  defp safe_get_names(net_adm, host) do
-    call_names(net_adm, host) |> handle_names()
-  rescue
-    _ -> []
+  defp show([]), do: puts("no agents")
+
+  defp show(entries) do
+    entries |> map(&format/1) |> each(&puts/1)
   end
 
-  defp handle_names({:ok, names}), do: names
-  defp handle_names(names) when is_list(names), do: names
-  defp handle_names(_), do: []
-
-  defp call_names(net_adm, nil), do: net_adm.names()
-  defp call_names(net_adm, host), do: net_adm.names(host)
-
-  defp default_filter({name, _port}) do
-    name_string(name)
-    |> String.starts_with?("claude_")
+  defp format(entry) do
+    "#{entry.name} #{kind_label(entry.kind)} #{status(entry.name)}"
   end
 
-  defp default_extract({name, _port}) do
-    name_string(name)
-    |> String.replace_prefix("claude_", "")
+  defp status(name) do
+    lookup(name) |> map_status()
   end
 
-  defp name_string(name) when is_atom(name) do
-    Atom.to_string(name)
-  end
+  defp map_status({:ok, _}), do: "active"
+  defp map_status({:error, _}), do: "asleep"
 
-  defp name_string(name) when is_list(name) do
-    List.to_string(name)
-  end
-
-  defp name_string(name) when is_binary(name) do
-    name
-  end
-
-  defp default_ping(name, host) do
-    node_atom = node_to_atom(name, host)
-    Node.set_cookie(:elita)
-    Node.ping(node_atom)
-  end
-
-  defp node_to_atom(name, nil) do
-    name_str = name_string(name)
-    String.to_atom("#{name_str}@#{host()}")
-  end
-
-  defp node_to_atom(name, host) do
-    name_str = name_string(name)
-    String.to_atom("#{name_str}@#{host}")
-  end
+  defp kind_label(:file), do: "file"
+  defp kind_label(:folder), do: "folder"
 end
