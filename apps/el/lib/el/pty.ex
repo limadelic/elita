@@ -7,14 +7,22 @@ defmodule El.Pty do
   alias El.Pty.Init
   alias El.Pty.Size
 
-  def start_link(name, cmd, opts \\ []),
-    do: GenServer.start_link(__MODULE__, {cmd, opts}, name: name)
-  def inject(name, message),
-    do: GenServer.cast(name, {:inject, message})
-  def tap(name, pid),
-    do: GenServer.call(name, {:tap, pid})
-  def untap(name, pid),
-    do: GenServer.call(name, {:untap, pid})
+  def start_link(name, cmd, opts \\ []) do
+    GenServer.start_link(__MODULE__, {cmd, opts}, name: name)
+  end
+
+  def inject(name, message) do
+    GenServer.cast(name, {:inject, message})
+  end
+
+  def tap(name, pid) do
+    GenServer.call(name, {:tap, pid})
+  end
+
+  def untap(name, pid) do
+    GenServer.call(name, {:untap, pid})
+  end
+
   def run(name, opts \\ []) do
     cmd = Keyword.get(opts, :cmd, "claude --dangerously-skip-permissions")
     full_opts = build_options(opts, cmd)
@@ -23,18 +31,25 @@ defmodule El.Pty do
   end
 
   defp build_options(opts, _cmd) do
-    clean = opts |> Keyword.delete(:input) |> Keyword.delete(:taps) |> Keyword.delete(:cmd)
+    clean = opts
+      |> Keyword.delete(:input)
+      |> Keyword.delete(:taps)
+      |> Keyword.delete(:cmd)
     clean ++ [input: Keyword.get(opts, :input, fn x -> x end), taps: Keyword.get(opts, :taps, [])]
   end
 
   defp wait_exit(pid) do
     ref = Process.monitor(pid)
-    receive do {:DOWN, ^ref, :process, ^pid, _} -> :ok end
+    receive do
+      {:DOWN, ^ref, :process, ^pid, _} -> :ok
+    end
   end
 
   @impl true
-  def init({cmd, opts}),
-    do: {:ok, Init.call([file: Keyword.get(opts, :file, :file), port: Keyword.get(opts, :port, Port), cmd: cmd, get_size: Keyword.get(opts, :get_size, &Size.get_default/0), input: Keyword.get(opts, :input, fn x -> x end), taps: Keyword.get(opts, :taps, [])])}
+  def init({cmd, opts}) do
+    {:ok, Init.call([file: Keyword.get(opts, :file, :file), port: Keyword.get(opts, :port, Port), cmd: cmd, get_size: Keyword.get(opts, :get_size, &Size.get_default/0), input: Keyword.get(opts, :input, fn x -> x end), taps: Keyword.get(opts, :taps, [])])}
+  end
+
   @impl true
   def handle_info({pty, {:data, data}}, %{pty: pty, port: port, file: file, tty_out: tty_out, taps: taps} = state) do
     file.write(tty_out, data)
