@@ -4,35 +4,60 @@ defmodule El.Commands.Address do
   import String, only: [downcase: 1]
   import El.Commands.Address.World, only: [build: 0, cwd: 0]
 
-  def route(recipient, msg, mode \\ :ask, tool \\ nil) do
-    world = build()
-    cwd = cwd()
-    result = Resolver.resolve(recipient, world, cwd)
-    handle(result, recipient, msg, mode, tool)
+  def route(recipient, msg, mode \\ :ask, tool \\ nil, rpc_fn \\ &:erpc.call/4) do
+    route(recipient, msg, mode, tool, rpc_fn, nil)
   end
 
-  defp handle({:error, :unknown}, recipient, _msg, _mode, _tool) do
+  def route(recipient, msg, mode, tool, rpc_fn, world) do
+    w = world || build()
+    cwd = cwd()
+    result = Resolver.resolve(recipient, w, cwd)
+    handle(result, recipient, msg, mode, tool, rpc_fn)
+  end
+
+  defp handle({:error, :unknown}, recipient, _msg, _mode, _tool, _rpc_fn) do
     IO.puts("unknown: #{recipient}")
   end
 
-  defp handle({:ok, entry}, _recipient, msg, :ask, tool) do
+  defp handle({:ok, entry}, _recipient, msg, :ask, tool, rpc_fn) do
+    dispatch(entry, msg, :ask, tool, rpc_fn)
+  end
+
+  defp handle({:ok, entry}, _recipient, msg, :tell, tool, rpc_fn) do
+    dispatch(entry, msg, :tell, tool, rpc_fn)
+  end
+
+  defp handle({:many, _entries}, _recipient, _msg, :ask, _tool, _rpc_fn) do
+    IO.puts("ask requires one target")
+  end
+
+  defp handle({:many, entries}, _recipient, msg, :tell, tool, _rpc_fn) do
+    unique = Enum.uniq_by(entries, &{&1.name, &1.path})
+    blast(unique)
+    echo(unique, msg, tool)
+  end
+
+  defp dispatch(%{kind: :node, name: node_str} = entry, msg, mode, tool, rpc_fn) do
+    node = String.to_atom(node_str)
+    if node != Node.self() do
+      rpc_fn.(node, El.Commands.Address, :route, [node_str, msg, mode, tool])
+    else
+      handle_local(entry, msg, mode, tool)
+    end
+  end
+
+  defp dispatch(entry, msg, mode, tool, _rpc_fn) do
+    handle_local(entry, msg, mode, tool)
+  end
+
+  defp handle_local(entry, msg, :ask, tool) do
     rouse(entry)
     local(entry.name, msg, tool, [])
   end
 
-  defp handle({:ok, entry}, _recipient, msg, :tell, tool) do
+  defp handle_local(entry, msg, :tell, tool) do
     rouse(entry)
     tell(entry.name, msg, tool)
-  end
-
-  defp handle({:many, _entries}, _recipient, _msg, :ask, _tool) do
-    IO.puts("ask requires one target")
-  end
-
-  defp handle({:many, entries}, _recipient, msg, :tell, tool) do
-    unique = Enum.uniq_by(entries, &{&1.name, &1.path})
-    blast(unique)
-    echo(unique, msg, tool)
   end
 
   defp blast(entries), do: Enum.each(entries, &rouse/1)

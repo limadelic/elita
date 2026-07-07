@@ -532,3 +532,135 @@ defmodule PeersTest do
   end
 end
 
+defmodule RelayTest do
+  use ExUnit.Case, async: false
+  import ExUnit.CaptureIO
+
+  test "peer node relays via rpc function" do
+    base = System.tmp_dir() |> Path.join("elita_relay_test_#{System.unique_integer()}")
+    File.mkdir_p!(base)
+    base = Path.expand(base)
+
+    old_cwd = File.cwd!()
+    File.cd!(base)
+
+    registrations = ""
+    old_registrations = System.get_env("AGENT_REGISTRATIONS")
+    System.put_env("AGENT_REGISTRATIONS", registrations)
+
+    Registry.start_link(keys: :duplicate, name: ElitaRegistry)
+
+    on_exit(fn ->
+      File.cd!(old_cwd)
+      System.put_env("AGENT_REGISTRATIONS", old_registrations || "")
+      File.rm_rf!(base)
+    end)
+
+    Agent.start_link(fn -> [] end, name: :relay_log)
+
+    fake_rpc = fn node, module, func, args ->
+      Agent.update(:relay_log, &[{node, module, func, args} | &1])
+      :ok
+    end
+
+    nodes = [:"peer1@host"]
+    world = El.Commands.Address.World.build(fn -> nodes end)
+
+    capture_io(fn ->
+      El.Commands.Address.route("peer1@host", "test msg", :ask, nil, fake_rpc, world)
+    end)
+
+    calls = Agent.get(:relay_log, & &1)
+    assert calls != []
+
+    [{captured_node, captured_module, captured_func, _captured_args}] = calls
+    assert captured_node == :"peer1@host"
+    assert captured_module == El.Commands.Address
+    assert captured_func == :route
+  end
+
+  test "local entry does not touch rpc function" do
+    base = System.tmp_dir() |> Path.join("elita_local_test_#{System.unique_integer()}")
+    File.mkdir_p!(base)
+    base = Path.expand(base)
+
+    folder = Path.expand(Path.join(base, "agent1"))
+    File.mkdir_p!(folder)
+
+    old_cwd = File.cwd!()
+    File.cd!(base)
+
+    registrations = "agent1:#{folder}"
+    old_registrations = System.get_env("AGENT_REGISTRATIONS")
+    System.put_env("AGENT_REGISTRATIONS", registrations)
+
+    Registry.start_link(keys: :duplicate, name: ElitaRegistry)
+
+    via1 = {:via, Registry, {ElitaRegistry, "agent1", %{kind: :native, folder: folder}}}
+    GenServer.start_link(StubAgent, "agent1", name: via1)
+
+    on_exit(fn ->
+      File.cd!(old_cwd)
+      System.put_env("AGENT_REGISTRATIONS", old_registrations || "")
+      File.rm_rf!(base)
+    end)
+
+    Agent.start_link(fn -> [] end, name: :relay_log)
+
+    fake_rpc = fn node, module, func, args ->
+      Agent.update(:relay_log, &[{node, module, func, args} | &1])
+      :ok
+    end
+
+    world = El.Commands.Address.World.build(fn -> [] end)
+
+    capture_io(fn ->
+      El.Commands.Address.route("agent1", "test msg", :ask, nil, fake_rpc, world)
+    end)
+
+    calls = Agent.get(:relay_log, & &1)
+    assert calls == []
+  end
+
+  test "tell mode relays via rpc function" do
+    base = System.tmp_dir() |> Path.join("elita_tell_relay_test_#{System.unique_integer()}")
+    File.mkdir_p!(base)
+    base = Path.expand(base)
+
+    old_cwd = File.cwd!()
+    File.cd!(base)
+
+    registrations = ""
+    old_registrations = System.get_env("AGENT_REGISTRATIONS")
+    System.put_env("AGENT_REGISTRATIONS", registrations)
+
+    Registry.start_link(keys: :duplicate, name: ElitaRegistry)
+
+    on_exit(fn ->
+      File.cd!(old_cwd)
+      System.put_env("AGENT_REGISTRATIONS", old_registrations || "")
+      File.rm_rf!(base)
+    end)
+
+    Agent.start_link(fn -> [] end, name: :relay_log)
+
+    fake_rpc = fn node, module, func, args ->
+      Agent.update(:relay_log, &[{node, module, func, args} | &1])
+      :ok
+    end
+
+    nodes = [:"peer1@host"]
+    world = El.Commands.Address.World.build(fn -> nodes end)
+
+    capture_io(fn ->
+      El.Commands.Address.route("peer1@host", "test msg", :tell, nil, fake_rpc, world)
+    end)
+
+    calls = Agent.get(:relay_log, & &1)
+    assert calls != []
+
+    [{_captured_node, _captured_module, _captured_func, captured_args}] = calls
+    assert !Enum.empty?(captured_args)
+  end
+end
+

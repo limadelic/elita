@@ -11,10 +11,25 @@ defmodule Resolver do
   import Enum, only: [filter: 2, group_by: 2, flat_map: 2]
 
   def resolve(address, world, cwd) do
-    {name, path, fanout} = unpack(address)
-    absolute_path = normalize(path, cwd)
-    matches = world |> path(absolute_path) |> named(name, fanout)
-    rank(matches)
+    node_match = check_node(address, world)
+    if node_match != nil do
+      node_match
+    else
+      {name, path, fanout} = unpack(address)
+      absolute_path = normalize(path, cwd)
+      matches = world |> path(absolute_path) |> named(name, fanout)
+      rank(matches)
+    end
+  end
+
+  defp check_node(address, world) do
+    node_entries = filter(world, &(&1.kind == :node))
+    match = filter(node_entries, &(&1.name == address))
+    case match do
+      [entry] -> {:ok, entry}
+      [] -> nil
+      entries -> {:many, entries}
+    end
   end
 
   defp unpack([name]), do: {name, nil, false}
