@@ -1,8 +1,7 @@
 defmodule El.CLI do
   import Application, only: [ensure_all_started: 1]
   import IO, only: [puts: 1]
-
-  alias El.Command
+  import El.Command
 
   @usage """
   Usage:
@@ -21,10 +20,11 @@ defmodule El.CLI do
 
   def main(argv) do
     ensure_all_started(:elita)
+    dispatch(argv)
+  end
 
-    argv
-    |> parse()
-    |> run()
+  defp dispatch(argv) do
+    argv |> parse() |> run()
   end
 
   defp parse(["ask", agent, msg]), do: {:ask, nil, agent, msg}
@@ -55,14 +55,14 @@ defmodule El.CLI do
   end
 
   defp run({:unknown_tool, tool}) do
-    IO.puts("unknown tool: #{tool}")
+    puts("unknown tool: #{tool}")
   end
 
-  defp run({:ask, tool, agent, msg}), do: Command.ask(agent, msg, tool)
-  defp run({:tell, tool, agent, msg}), do: Command.tell(agent, msg, tool)
-  defp run({:spawn, name, agent}), do: Command.spawn(name, agent)
-  defp run({:claude, name}), do: Command.claude(name)
-  defp run({:ls, path}), do: Command.ls(path)
-  defp run({:cd, path}), do: Command.cd(path)
-  defp run(:daemon), do: Command.daemon()
+  defp run({:ask, tool, agent, msg}), do: ask(agent, msg, tool)
+  defp run({:tell, tool, agent, msg}), do: tell(agent, msg, tool)
+  defp run({:spawn, name, agent}), do: spawn(name, agent)
+  defp run({:claude, name}), do: claude(name)
+  defp run({:ls, path}), do: ls(path)
+  defp run({:cd, path}), do: cd(path)
+  defp run(:daemon), do: daemon()
 end
