@@ -39,7 +39,7 @@ defmodule El.Commands.Address do
     Registry.lookup(ElitaRegistry, normalized) |> fire(agent, msg)
   end
   defp fire([], agent, _msg), do: IO.puts("unknown: #{agent}")
-  defp fire(matches, agent, msg), do: Enum.each(matches, fn _ -> cast(agent, msg) end)
+  defp fire([_ | _], agent, msg), do: cast(agent, msg)
   defp rouse(%{kind: :file, name: n, path: p}) do
     stir(asleep?(n), n, p)
   end
