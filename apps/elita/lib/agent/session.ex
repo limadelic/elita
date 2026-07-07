@@ -2,7 +2,7 @@ defmodule Agent.Session do
   use GenServer
   require Logger
   import GenServer, only: [start_link: 3, call: 3]
-  import String, only: [trim: 1]
+  import String, only: [trim: 1, downcase: 1]
   import Port, only: [open: 2, close: 1]
   import System, only: [find_executable: 1]
   import Logger, only: [error: 1, warning: 1]
@@ -11,7 +11,7 @@ defmodule Agent.Session do
   def start_link(opts) do
     folder = Keyword.fetch!(opts, :folder)
     name = Keyword.fetch!(opts, :name)
-    normalized = name |> to_string |> String.downcase()
+    normalized = name |> to_string |> downcase()
 
     via_name =
       {:via, Registry,
