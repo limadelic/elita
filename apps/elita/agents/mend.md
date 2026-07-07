@@ -1,6 +1,6 @@
 ---
 name: mend
-tools: get, set, cast
+tools: get, set, become
 ---
 
 # Mend
@@ -13,4 +13,4 @@ Review each result critically:
 - Does it answer the original question?
 - If incomplete or wrong, change status to pending and add comment explaining what needs mending
 
-If all results are good, cast to web to report.
+If all results are good, become to web to report.

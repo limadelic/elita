@@ -47,7 +47,7 @@ defmodule LsTest do
         extract: fn {name, _port} ->
           name |> to_string() |> String.replace_prefix("claude_", "")
         end,
-        ping: fn _name -> :pong end
+        ping: fn _name, _host -> :pong end
       )
     end)
 
@@ -66,7 +66,7 @@ defmodule LsTest do
         extract: fn {name, _port} ->
           name |> to_string() |> String.replace_prefix("claude_", "")
         end,
-        ping: fn _name -> :pong end
+        ping: fn _name, _host -> :pong end
       )
     end)
 
@@ -85,7 +85,7 @@ defmodule LsTest do
         extract: fn {name, _port} ->
           name |> to_string() |> String.replace_prefix("claude_", "")
         end,
-        ping: fn _name -> :pong end
+        ping: fn _name, _host -> :pong end
       )
     end)
 

@@ -1,6 +1,6 @@
 ---
 name: tplan
-tools: set, cast
+tools: set, become
 ---
 
 # Plan Phase
@@ -17,4 +17,4 @@ Create test scenarios as simple structured data with:
 - **status**: pending
 
 Use the set tool to store the scenarios.  
-Then cast to texec to execute them.  
+Then become to texec to execute them.  

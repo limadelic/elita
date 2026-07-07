@@ -1,6 +1,6 @@
 ---
 name: attempt
-tools: ask, set, get, cast, tell
+tools: ask, set, get, become, tell
 ---
 
 # Attempt Phase
@@ -28,7 +28,7 @@ You are in the attempt phase. Solve the problem yourself, then validate with jud
    
    HARD CAP: If new attempts >= 3, you are FORBIDDEN to attempt again.
      - get depth
-     - If depth < 2: cast to role "split" (must split the problem)
+     - If depth < 2: become to role "split" (must split the problem)
      - If depth >= 2: return your best answer (you are a leaf)
    
    If new attempts < 3:

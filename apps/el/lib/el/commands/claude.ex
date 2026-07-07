@@ -3,6 +3,7 @@ defmodule El.Commands.Claude do
   import :os, only: [cmd: 1]
   import El.Pty, only: [run: 2]
   alias El.Distribution
+  alias El.Commands.Size
 
   def execute(name \\ :default) do
     execute(name, [
@@ -13,74 +14,44 @@ defmodule El.Commands.Claude do
   end
 
   def execute(name, deps) when is_list(deps) do
-    session_name = resolve_session_name(name)
-    process_name = String.to_atom(session_name)
-
-    distribution_start = Keyword.get(deps, :distribution_start)
-    result = distribution_start.(session_name)
-
-    if result == :taken do
-      IO.puts("session #{session_name} already live — el tell #{session_name} <msg>, or /exit it")
-      System.halt(1)
-    end
-
-    get_size = &read_terminal_size/0
-    input = &translate_newline/1
-
-    cmd_fn = Keyword.get(deps, :cmd)
-    cmd_fn.(~c"stty raw -echo -isig < /dev/tty")
-
-    run_fn = Keyword.get(deps, :run)
-    run_fn.(process_name, get_size: get_size, input: input)
+    run_with_cleanup(resolve_session_name(name), deps)
   after
     restore()
     cmd(~c"stty sane < /dev/tty")
   end
 
-  defp read_terminal_size do
-    read_env() || read_stty() || {24, 80}
+  defp run_with_cleanup(session_name, deps) do
+    ensure_available(deps, session_name)
+    start_session(String.to_atom(session_name), deps)
   end
 
-  defp read_env do
-    case {System.get_env("EL_ROWS"), System.get_env("EL_COLS")} do
-      {rows, cols} when is_binary(rows) and is_binary(cols) ->
-        with {row, ""} <- Integer.parse(rows),
-             {col, ""} <- Integer.parse(cols),
-             true <- row > 0 and col > 0 do
-          {row, col}
-        else
-          _ -> nil
-        end
-
-      _ ->
-        nil
-    end
+  defp ensure_available(deps, session_name) do
+    Keyword.get(deps, :distribution_start).(session_name)
+    |> check_available(session_name)
   end
 
-  defp read_stty do
-    System.cmd("sh", ["-c", "stty size < /dev/tty"], stderr_to_stdout: true)
-    |> parse_size()
-  rescue
-    _ -> nil
+  defp check_available(:taken, session_name) do
+    IO.puts("session #{session_name} already live — el tell #{session_name} <msg>, or /exit it")
+    System.halt(1)
   end
 
-  defp parse_size({output, 0}) do
-    String.trim(output)
-    |> String.split()
-    |> extract_size()
+  defp check_available(_, _), do: :ok
+
+  defp start_session(process_name, deps) do
+    raw_mode(deps)
+    run_session(process_name, deps)
   end
 
-  defp parse_size(_), do: nil
-
-  defp extract_size([rows, cols]) do
-    row = String.to_integer(rows)
-    col = String.to_integer(cols)
-    if row > 0 and col > 0, do: {row, col}, else: nil
-  rescue
-    _ -> nil
+  defp raw_mode(deps) do
+    cmd_fn = Keyword.get(deps, :cmd)
+    cmd_fn.(~c"stty raw -echo -isig < /dev/tty")
   end
 
-  defp extract_size(_), do: nil
+  defp run_session(name, deps) do
+    run_fn = Keyword.get(deps, :run)
+    opts = [get_size: &Size.read_terminal_size/0, input: &translate_newline/1]
+    run_fn.(name, opts)
+  end
 
   defp restore do
     File.write!("/dev/tty", "\e[?1000l\e[?1002l\e[?1003l\e[?1006l\e[?2004l\e[?1049l\e[?25h")
@@ -92,13 +63,7 @@ defmodule El.Commands.Claude do
     String.replace(chunk, "\n", "\r")
   end
 
-  defp resolve_session_name(:default) do
-    File.cwd!()
-    |> Path.basename()
-  end
-
-  defp resolve_session_name(name) when is_binary(name) do
-    name
-  end
+  defp resolve_session_name(:default), do: File.cwd!() |> Path.basename()
+  defp resolve_session_name(name) when is_binary(name), do: name
 
 end

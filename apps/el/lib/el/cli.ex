@@ -6,6 +6,7 @@ defmodule El.CLI do
   alias El.Commands.Tell
   alias El.Commands.Claude
   alias El.Commands.Ls
+  alias El.Distribution
 
   def main(argv) do
     ensure_all_started(:elita)
@@ -60,6 +61,7 @@ defmodule El.CLI do
   end
 
   defp execute(:ls) do
+    Distribution.start()
     Ls.execute()
   end
 end

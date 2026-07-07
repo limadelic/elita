@@ -1,5 +1,5 @@
 defmodule El.TraceTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: false
 
   setup do
     trace_file = Path.join(System.tmp_dir!(), "test_trace_#{System.unique_integer()}.log")
@@ -62,6 +62,11 @@ defmodule El.TraceTest do
   test "appends to existing trace file" do
     trace_file = Path.join(System.tmp_dir!(), "append_trace_#{System.unique_integer()}.log")
     System.put_env("EL_TRACE", trace_file)
+
+    on_exit(fn ->
+      System.delete_env("EL_TRACE")
+      if File.exists?(trace_file), do: File.rm(trace_file)
+    end)
 
     El.Trace.log_chunk("first")
     El.Trace.log_chunk("second")
