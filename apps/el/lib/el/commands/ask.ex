@@ -1,8 +1,10 @@
 defmodule El.Commands.Ask do
   @moduledoc false
+  import :binary, only: [at: 2]
   import Elita, only: [start_link: 2, call: 2]
-  alias El.Distribution
+  alias El.Answer
   alias El.Commands.Tell
+  alias El.Distribution
 
   def execute(agent, msg, opts \\ []) do
     Distribution.start()
@@ -26,13 +28,21 @@ defmodule El.Commands.Ask do
     dispatch_by_connection(Node.connect(target), context)
   end
 
-  defp dispatch_by_connection(true, {_msg, _target, _process_name, _agent, _env_module}) do
-    IO.puts("ask: no answer channel yet")
-    System.halt(1)
+  defp dispatch_by_connection(true, {msg, target, process_name, _agent, _env_module}) do
+    remote_ask(msg, target, process_name)
   end
 
   defp dispatch_by_connection(false, {msg, _target, _process_name, agent, env_module}) do
     fail_call(agent, msg, env_module)
+  end
+
+  defp remote_ask(msg, target, process_name) do
+    :ok = GenServer.call({process_name, target}, {:tap, self()})
+    text = format_text(msg)
+    GenServer.cast({process_name, target}, {:inject, text})
+    answer = Answer.collect(120_000)
+    :ok = GenServer.call({process_name, target}, {:untap, self()})
+    IO.puts(answer)
   end
 
   defp fail_call(agent, msg, env_module) do
@@ -46,4 +56,26 @@ defmodule El.Commands.Ask do
     result = call(agent, msg)
     IO.puts(result)
   end
+
+  defp format_text(msg) do
+    pick_format(String.contains?(msg, "\n"), msg)
+  end
+
+  defp pick_format(true, msg), do: bracket_paste(msg)
+  defp pick_format(false, msg), do: pick_format_alt(control_sequence?(msg), msg)
+
+  defp pick_format_alt(true, msg), do: msg
+  defp pick_format_alt(false, msg), do: append_return(msg)
+
+  defp bracket_paste(msg), do: "\e[200~#{msg}\e[201~\r"
+  defp append_return(msg), do: "#{msg}\r"
+
+  defp control_sequence?(msg) do
+    is_special_byte(at(msg, 0))
+  end
+
+  defp is_special_byte(nil), do: false
+  defp is_special_byte(byte) when byte < 32, do: true
+  defp is_special_byte(0x1B), do: true
+  defp is_special_byte(_), do: false
 end
