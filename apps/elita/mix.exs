@@ -13,7 +13,9 @@ defmodule Elita.MixProject do
       build_path: "../../_build",
       config_path: "../../config/config.exs",
       deps_path: "../../deps",
-      lockfile: "../../mix.lock"
+      lockfile: "../../mix.lock",
+      compilers: [:yecc, :leex, :erlang, :elixir, :app],
+      elixirc_options: [warnings_as_errors: true]
     ]
   end
 
@@ -25,7 +27,7 @@ defmodule Elita.MixProject do
     ]
   end
 
-  defp paths(:test), do: ["lib", "test/support", "test/tape"]
+  defp paths(:test), do: ["lib", "test/support"]
   defp paths(_), do: ["lib"]
 
   # Run "mix help deps" to learn about dependencies.
