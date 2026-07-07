@@ -37,11 +37,12 @@ defmodule El.Trace do
 
   defp write_header(path, {rows, cols}, tty_source) do
     timestamp = System.monotonic_time(:millisecond)
-
-    line =
-      "#{timestamp} start rows=#{rows} cols=#{cols} tty_source=#{tty_source}\n"
-
+    line = header_line(timestamp, rows, cols, tty_source)
     File.write(path, line, [:append])
+  end
+
+  defp header_line(ts, rows, cols, src) do
+    "#{ts} start rows=#{rows} cols=#{cols} tty_source=#{src}\n"
   end
 
   defp write_event(path, event) do

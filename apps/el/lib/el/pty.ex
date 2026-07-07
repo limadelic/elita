@@ -2,10 +2,7 @@ defmodule El.Pty do
   @moduledoc false
   use GenServer
 
-  import El.Trace
-
-  alias El.Pty.Cleanup
-  alias El.Pty.Handler
+  alias El.Pty.Dispatch
   alias El.Pty.Init
   alias El.Pty.Size
 
@@ -33,15 +30,15 @@ defmodule El.Pty do
   end
 
   defp build_options(opts, _cmd) do
-    clean =
-      opts
-      |> Keyword.drop([:input, :taps, :cmd])
+    clean = opts |> Keyword.drop([:input, :taps, :cmd])
+    clean ++ defaults(opts)
+  end
 
-    clean ++
-      [
-        input: Keyword.get(opts, :input, fn x -> x end),
-        taps: Keyword.get(opts, :taps, [])
-      ]
+  defp defaults(opts) do
+    [
+      input: Keyword.get(opts, :input, fn x -> x end),
+      taps: Keyword.get(opts, :taps, [])
+    ]
   end
 
   defp wait_exit(pid) do
@@ -66,59 +63,17 @@ defmodule El.Pty do
   end
 
   @impl true
-  def handle_info(
-        {pty, {:data, data}},
-        %{pty: pty, port: port, file: file, tty_out: tty_out, taps: taps} =
-          state
-      ) do
-    file.write(tty_out, data)
-    Enum.each(taps, fn pid -> send(pid, {:output, data}) end)
-    Handler.handle_dsr_response(port, pty, data, state)
-    {:noreply, state}
-  end
-
-  def handle_info({:stdin, data}, %{pty: pty, port: port, input: input} = state) do
-    log_chunk(data)
-    Handler.process_input(port, pty, input.(data))
-    {:noreply, state}
-  end
-
-  def handle_info(
-        {pty, {:exit_status, _}},
-        %{pty: pty, file: file, tty_out: tty_out, os_pid: os_pid} = state
-      ) do
-    Cleanup.kill_group(os_pid)
-    file.close(tty_out)
-    {:stop, :normal, state}
-  end
-
-  def handle_info({:EXIT, _pid, :normal}, state) do
-    {:noreply, state}
-  end
-
-  def handle_info({:EXIT, _pid, reason}, %{os_pid: os_pid} = state) do
-    Cleanup.kill_group(os_pid)
-    {:stop, reason, state}
-  end
-
-  def handle_info({pty, :closed}, %{pty: pty, os_pid: os_pid} = state) do
-    Cleanup.kill_group(os_pid)
-    {:stop, :normal, state}
+  def handle_info(msg, state) do
+    Dispatch.info(msg, state)
   end
 
   @impl true
-  def handle_call({:tap, pid}, _from, %{taps: taps} = state) do
-    {:reply, :ok, %{state | taps: [pid | taps]}}
-  end
-
-  def handle_call({:untap, pid}, _from, %{taps: taps} = state) do
-    {:reply, :ok, %{state | taps: List.delete(taps, pid)}}
+  def handle_call(msg, _from, state) do
+    Dispatch.call(msg, state)
   end
 
   @impl true
-  def handle_cast({:inject, msg}, %{pty: pty, port: port} = state) do
-    log_chunk(msg)
-    port.command(pty, msg)
-    {:noreply, state}
+  def handle_cast(msg, state) do
+    Dispatch.cast(msg, state)
   end
 end

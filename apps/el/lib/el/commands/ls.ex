@@ -66,11 +66,13 @@ defmodule El.Commands.Ls do
 
   defp harvest(visible) do
     names = map(visible, & &1.name)
+    headless(names) |> map(&entry/1)
+  end
 
+  defp headless(names) do
     ElitaRegistry
     |> Registry.select([{{:"$1", :_, %{kind: :headless}}, [], [:"$1"]}])
     |> filter(&not_in?(names, &1))
-    |> map(&entry/1)
   end
 
   defp not_in?(list, name) do

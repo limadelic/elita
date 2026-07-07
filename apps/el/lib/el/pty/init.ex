@@ -67,15 +67,12 @@ defmodule El.Pty.Init do
   end
 
   defp monitor_port(pty) do
-    parent = self()
+    Process.spawn(fn -> wait_and_check(self(), pty) end, [])
+  end
 
-    Process.spawn(
-      fn ->
-        Process.sleep(500)
-        check_port(parent, pty)
-      end,
-      []
-    )
+  defp wait_and_check(parent, pty) do
+    Process.sleep(500)
+    check_port(parent, pty)
   end
 
   defp check_port(parent, pty) do

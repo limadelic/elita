@@ -45,12 +45,12 @@ defmodule El.Distribution do
   end
 
   defp apply_start({:error, reason}, _node_name, _mode) do
-    IO.write(
-      :stderr,
-      "Warning: Failed to start distribution: #{inspect(reason)}\n"
-    )
-
+    log_error(reason)
     :ok
+  end
+
+  defp log_error(reason) do
+    IO.write(:stderr, "Warning: Failed to start distribution: #{inspect(reason)}\n")
   end
 
   defp mode_from_host(h) do

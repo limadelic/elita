@@ -56,12 +56,13 @@ defmodule El.Commands.Claude do
   end
 
   defp restore do
-    File.write!(
-      "/dev/tty",
-      "\e[?1000l\e[?1002l\e[?1003l\e[?1006l\e[?2004l\e[?1049l\e[?25h"
-    )
+    write_sequence()
   rescue
     _ -> :ok
+  end
+
+  defp write_sequence do
+    File.write!("/dev/tty", "\e[?1000l\e[?1002l\e[?1003l\e[?1006l\e[?2004l\e[?1049l\e[?25h")
   end
 
   defp translate_newline(chunk) do

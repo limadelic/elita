@@ -34,8 +34,10 @@ defmodule El.Command do
   defp gate(_, path), do: handle(:error, path)
 
   defp init do
-    exe = pick()
+    pick() |> spawn_daemon()
+  end
 
+  defp spawn_daemon(exe) do
     Port.open({:spawn_executable, "/bin/sh"}, [
       {:args, ["-c", "#{exe} daemon &"]},
       :exit_status
