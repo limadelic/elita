@@ -8,7 +8,11 @@ defmodule Tools.Sys.Ask.Schema do
   end
 
   defp params do
-    %{type: "object", properties: properties(), required: ["recipient", "question"]}
+    %{
+      type: "object",
+      properties: properties(),
+      required: ["recipient", "question"]
+    }
   end
 
   defp properties do
@@ -20,15 +24,14 @@ defmodule Tools.Sys.Ask.Schema do
 end
 
 defmodule Tools.Sys.Ask do
-  import Log, only: [log: 5]
   import Agent.Harness, only: [dispatch: 3]
+  import Log, only: [log: 5]
 
   defdelegate spec(name, state), to: Tools.Sys.Ask.Schema, as: :get
 
   def exec(_, %{"recipient" => recipient, "question" => question}, %{name: sender} = state) do
     log("🤔", "#{sender} → #{recipient}", ": ", question, :green)
-    response = dispatch(recipient, question, :ask)
-    {response, state}
+    {dispatch(recipient, question, :ask), state}
   end
 
   def exec(_, _args, state) do
