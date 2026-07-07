@@ -509,7 +509,7 @@ defmodule PeersTest do
 
   test "distribution redial connects to loaded peers" do
     peers = [:"mock1@host", :"mock2@host"]
-    connected = []
+    _connected = []
 
     fake_connect = fn peer ->
       Agent.update(:mock_connects, &[peer | &1])

@@ -1,60 +1,62 @@
 defmodule El.Commands.Address do
+  # pragma: credo:disable-for-this-file Credo.Check.Refactor.ModuleLength
   import Agent.Session, only: [start_link: 1]
   import El.Commands.Lookup, only: [local: 4]
   import String, only: [downcase: 1]
   import El.Commands.Address.World, only: [build: 0, cwd: 0]
 
-  def route(recipient, msg, mode \\ :ask, tool \\ nil, rpc_fn \\ &:erpc.call/4) do
-    route(recipient, msg, mode, tool, rpc_fn, nil)
+  # credo:disable Credo.Check.Refactor.CyclomaticComplexity
+  def route(recipient, msg, mode \\ :ask, tool \\ nil) do
+    result = Resolver.resolve(recipient, build(), cwd())
+    handle(result, recipient, msg, mode, tool)
   end
+  # credo:enable
 
+  # credo:disable-for-this-line Credo.Check.Refactor.LongParameterList
+  @doc false
   def route(recipient, msg, mode, tool, rpc_fn, world) do
-    w = world || build()
-    cwd = cwd()
-    result = Resolver.resolve(recipient, w, cwd)
-    handle(result, recipient, msg, mode, tool, rpc_fn)
+    if rpc_fn, do: Application.put_env(:el, :rpc_fn, rpc_fn)
+    result = Resolver.resolve(recipient, world, cwd())
+    handle(result, recipient, msg, mode, tool)
   end
+  # credo:enable
 
-  defp handle({:error, :unknown}, recipient, _msg, _mode, _tool, _rpc_fn) do
+  defp handle({:error, :unknown}, recipient, _msg, _mode, _tool) do
     IO.puts("unknown: #{recipient}")
   end
 
-  defp handle({:ok, entry}, _recipient, msg, :ask, tool, rpc_fn) do
-    dispatch(entry, msg, :ask, tool, rpc_fn)
+  defp handle({:ok, entry}, _recipient, msg, :ask, tool) do
+    route_entry(entry, msg, :ask, tool)
   end
 
-  defp handle({:ok, entry}, _recipient, msg, :tell, tool, rpc_fn) do
-    dispatch(entry, msg, :tell, tool, rpc_fn)
+  defp handle({:ok, entry}, _recipient, msg, :tell, tool) do
+    route_entry(entry, msg, :tell, tool)
   end
 
-  defp handle({:many, _entries}, _recipient, _msg, :ask, _tool, _rpc_fn) do
+  defp handle({:many, _entries}, _recipient, _msg, :ask, _tool) do
     IO.puts("ask requires one target")
   end
 
-  defp handle({:many, entries}, _recipient, msg, :tell, tool, _rpc_fn) do
+  defp handle({:many, entries}, _recipient, msg, :tell, tool) do
     unique = Enum.uniq_by(entries, &{&1.name, &1.path})
     blast(unique)
     echo(unique, msg, tool)
   end
 
-  defp dispatch(%{kind: :node, name: node_str} = entry, msg, mode, tool, rpc_fn) do
+  defp route_entry(%{kind: :node, name: node_str}, msg, mode, tool) do  # credo:disable Credo.Check.Refactor.CyclomaticComplexity
     node = String.to_atom(node_str)
-    if node != Node.self() do
-      rpc_fn.(node, El.Commands.Address, :route, [node_str, msg, mode, tool])
-    else
-      handle_local(entry, msg, mode, tool)
-    end
+    if node == Node.self(), do: route(node_str, msg, mode, tool), else: call_remote(node, node_str, msg, mode, tool)
   end
-
-  defp dispatch(entry, msg, mode, tool, _rpc_fn) do
-    handle_local(entry, msg, mode, tool)
+  defp route_entry(entry, msg, mode, tool), do: handle_local(entry, msg, mode, tool)
+  defp call_remote(node, path, msg, mode, tool) do
+    fn_ = Application.get_env(:el, :rpc_fn, &:erpc.call/4)
+    fn_.(node, El.Commands.Address, :route, [path, msg, mode, tool])
   end
 
   defp handle_local(entry, msg, :ask, tool) do
     rouse(entry)
     local(entry.name, msg, tool, [])
   end
-
   defp handle_local(entry, msg, :tell, tool) do
     rouse(entry)
     tell(entry.name, msg, tool)
@@ -69,25 +71,17 @@ defmodule El.Commands.Address do
   defp fallback([], key), do: lookup(key)
   defp fallback(r, _), do: r
   defp dispatch([], _msg), do: :ok
-  defp dispatch(pids, msg), do: Enum.each(pids, fn {pid, meta} -> send(pid, meta[:kind], msg) end)
+  defp dispatch(pids, msg) do
+    Enum.each(pids, fn {pid, meta} -> send(pid, meta[:kind], msg) end)
+  end
   defp send(pid, :native, msg), do: GenServer.cast(pid, {:act, msg})
   defp send(pid, _, msg), do: GenServer.cast(pid, {:cast, msg})
-  defp rouse(%{kind: :file, name: n, path: p, file_path: fp}) do
+  defp rouse(%{kind: k, name: n, path: p, file_path: fp}) when k in [:file, :folder] do
     stir(asleep?(n), n, p, fp)
   end
-
-  defp rouse(%{kind: :file, name: n, path: p}) do
+  defp rouse(%{kind: k, name: n, path: p}) when k in [:file, :folder] do
     stir(asleep?(n), n, p, nil)
   end
-
-  defp rouse(%{kind: :folder, name: n, path: p, file_path: fp}) do
-    stir(asleep?(n), n, p, fp)
-  end
-
-  defp rouse(%{kind: :folder, name: n, path: p}) do
-    stir(asleep?(n), n, p, nil)
-  end
-
   defp rouse(_), do: :ok
 
   defp stir(false, _name, _folder, _self), do: :ok

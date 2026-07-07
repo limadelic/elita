@@ -11,28 +11,20 @@ defmodule Resolver do
   import Enum, only: [filter: 2, group_by: 2, flat_map: 2]
 
   def resolve(address, world, cwd) do
-    node_match = check_node(address, world)
-    resolve_with(node_match, address, world, cwd)
+    world
+    |> filter(&(&1.kind == :node))
+    |> filter(&(&1.name == address))
+    |> maybe_node(address, world, cwd)
   end
 
-  defp resolve_with({:ok, _} = ok, _address, _world, _cwd), do: ok
-  defp resolve_with({:many, _} = many, _address, _world, _cwd), do: many
+  defp maybe_node([entry], _address, _world, _cwd), do: {:ok, entry}
 
-  defp resolve_with(nil, address, world, cwd) do
+  defp maybe_node([], address, world, cwd) do
     {name, path, fanout} = unpack(address)
     world |> path(normalize(path, cwd)) |> named(name, fanout) |> rank()
   end
 
-  defp check_node(address, world) do
-    world
-    |> filter(&(&1.kind == :node))
-    |> filter(&(&1.name == address))
-    |> node_result()
-  end
-
-  defp node_result([entry]), do: {:ok, entry}
-  defp node_result([]), do: nil
-  defp node_result(entries), do: {:many, entries}
+  defp maybe_node(entries, _address, _world, _cwd), do: {:many, entries}
 
   defp unpack([name]), do: {name, nil, false}
   defp unpack(["", path]), do: {nil, path, true}
