@@ -2,6 +2,8 @@ defmodule El.Commands.Address do
   import Agent.Config, only: [load: 0]
   import Agent.Session, only: [start_link: 1]
   import El.Commands.Lookup, only: [local: 2]
+  import Elita, only: [cast: 2]
+  import String, only: [downcase: 1]
   import Enum, only: [each: 2]
 
   def route(recipient, msg, mode \\ :ask) do
@@ -15,8 +17,14 @@ defmodule El.Commands.Address do
     IO.puts("unknown: #{recipient}")
   end
 
-  defp handle({:ok, entry}, _recipient, msg, _mode) do
-    send_to(entry, msg)
+  defp handle({:ok, entry}, _recipient, msg, :ask) do
+    rouse(entry)
+    local(entry.name, msg)
+  end
+
+  defp handle({:ok, entry}, _recipient, msg, :tell) do
+    rouse(entry)
+    ping(entry.name, msg)
   end
 
   defp handle({:many, _entries}, _recipient, _msg, :ask) do
@@ -24,45 +32,37 @@ defmodule El.Commands.Address do
   end
 
   defp handle({:many, entries}, _recipient, msg, :tell) do
-    each(entries, &send_to(&1, msg))
+    Enum.each(entries, fn e -> rouse(e); ping(e.name, msg) end)
   end
 
-  defp send_to(entry, msg) do
-    rouse(entry)
-    local(entry.name, msg)
+  defp ping(agent, msg) do
+    normalized = agent |> downcase
+    Registry.lookup(ElitaRegistry, normalized) |> fire(agent, msg)
   end
-
+  defp fire([], agent, _msg), do: IO.puts("unknown: #{agent}")
+  defp fire(_matches, agent, msg), do: Enum.each(_matches, fn _ -> cast(agent, msg) end)
   defp rouse(%{kind: :file, name: n, path: p}) do
-    boot_if_asleep(n, p)
+    stir(asleep?(n), n, p)
   end
 
   defp rouse(_), do: :ok
 
-  defp boot_if_asleep(name, folder) do
-    start_session(asleep?(name), name, folder)
-  end
-
-  defp start_session(false, _name, _folder), do: :ok
-
-  defp start_session(true, name, folder) do
-    runner = runner_mod(System.get_env("TEST_AGENT_RUNNER"))
+  defp stir(false, _name, _folder), do: :ok
+  defp stir(true, name, folder) do
+    rune = System.get_env("TEST_AGENT_RUNNER") |> grab()
     opts = [name: name, folder: folder]
-    opts = add_runner(opts, runner)
-    start_link(opts)
+    start_link(pick(opts, rune))
   end
 
-  defp add_runner(opts, nil), do: opts
+  defp pick(opts, nil), do: opts
+  defp pick(opts, rune), do: Keyword.put(opts, :runner, fn m, f -> apply(rune, :run, [m, f]) end)
 
-  defp add_runner(opts, runner) do
-    Keyword.put(opts, :runner, fn m, f -> apply(runner, :run, [m, f]) end)
-  end
+  defp grab(nil), do: nil
+  defp grab(name), do: load_it(String.to_atom("Elixir." <> name))
 
-  defp runner_mod(nil), do: nil
-  defp runner_mod(name), do: get_runner(String.to_atom("Elixir." <> name))
-
-  defp get_runner(atom), do: pick_module(Code.ensure_loaded?(atom), atom)
-  defp pick_module(true, atom), do: atom
-  defp pick_module(false, _atom), do: nil
+  defp load_it(atom), do: pick_atom(Code.ensure_loaded?(atom), atom)
+  defp pick_atom(true, atom), do: atom
+  defp pick_atom(false, _atom), do: nil
 
   defp asleep?(name) do
     normalized = String.downcase(to_string(name))

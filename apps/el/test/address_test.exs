@@ -6,6 +6,16 @@ defmodule StubAgent do
   def handle_call({:act, _msg}, _from, state) do
     {:reply, "stub response", state}
   end
+
+  def handle_cast({:inject, msg}, state) do
+    Agent.update(:msg_log, &[msg | &1])
+    {:noreply, state}
+  end
+
+  def handle_cast({:act, msg}, state) do
+    Agent.update(:msg_log, &[msg | &1])
+    {:noreply, state}
+  end
 end
 
 defmodule StubRunner do
@@ -36,13 +46,16 @@ defmodule AddressTest do
     System.put_env("AGENT_REGISTRATIONS", registrations)
 
     # Start registry and create stub agents
-    Registry.start_link(keys: :unique, name: ElitaRegistry)
+    Registry.start_link(keys: :duplicate, name: ElitaRegistry)
 
     via1 = {:via, Registry, {ElitaRegistry, "agent1", %{kind: :native, folder: bare_folder}}}
     GenServer.start_link(StubAgent, "ok", name: via1)
 
     via2 = {:via, Registry, {ElitaRegistry, "agent2", %{kind: :native, folder: deep_folder}}}
     GenServer.start_link(StubAgent, "ok", name: via2)
+
+    via3 = {:via, Registry, {ElitaRegistry, "agent1", %{kind: :native, folder: sub_folder}}}
+    GenServer.start_link(StubAgent, "ok", name: via3)
 
     on_exit(fn ->
       File.cd!(old_cwd)
@@ -100,13 +113,14 @@ defmodule AddressTest do
     # Verify it didn't return unknown
     refute String.contains?(output6, "unknown: doctor")
 
-    # Test 7: tell with glob fanout - dispatch to all matches
-    output7 = capture_io(fn ->
+    Agent.start_link(fn -> [] end, name: :msg_log)
+
+    capture_io(fn ->
       El.Commands.Tell.execute("agent1@/**", "broadcast msg", env_module: FakeEnv)
     end)
 
-    # Tell with glob should not error out
-    refute String.contains?(output7, "unknown:")
+    sent = Agent.get(:msg_log, & &1)
+    assert length(sent) == 2
   end
 end
 

@@ -12,9 +12,8 @@ defmodule El.Commands.Tell do
   end
 
   defp dispatch(true, agent, msg, _env_module), do: route(agent, msg, :tell)
-  defp dispatch(false, agent, msg, env_module), do: via_route(agent, msg, env_module)
 
-  defp via_route(agent, msg, env_module) do
+  defp dispatch(false, agent, msg, env_module) do
     target = remote_target(agent, env_module: env_module)
     route_to(agent, msg, env_module, target)
   end
