@@ -22,7 +22,7 @@ defmodule Agent.Session do
   def init(opts) do
     name = fetch!(opts, :name)
     folder = fetch!(opts, :folder)
-    runner = get(opts, :runner, &default_runner/2)
+    runner = get(opts, :runner, &spawn/2)
     {:ok, %{name: name, folder: folder, runner: runner}}
   end
 
@@ -43,56 +43,56 @@ defmodule Agent.Session do
     {:noreply, state}
   end
 
-  defp default_runner(message, folder) do
-    spawn_cmd = {:spawn_executable, exec_path()}
-    open(spawn_cmd, port_opts(message, folder)) |> handle_port()
+  defp spawn(message, folder) do
+    cmd = {:spawn_executable, exe()}
+    open(cmd, setup(message, folder)) |> drain()
   end
 
-  defp exec_path, do: handle_exec(find_executable("claude"))
-  defp handle_exec(nil), do: raise("no claude")
-  defp handle_exec(path), do: path
+  defp exe, do: exec(find_executable("claude"))
+  defp exec(nil), do: raise("no claude")
+  defp exec(path), do: path
 
-  defp handle_port({:error, reason}) do
+  defp drain({:error, reason}) do
     error("Failed to open Claude port: #{inspect(reason)}")
     "ERROR: Could not start Claude"
   end
 
-  defp handle_port(port) do
-    read_response(port, "")
+  defp drain(port) do
+    read(port, "")
   after
-    close_safe(port)
+    seal(port)
   end
 
-  defp port_opts(message, folder) do
+  defp setup(message, folder) do
     [{:args, ["-p", message, "--allowedTools", ""]}, {:cd, String.to_charlist(folder)}] ++
       [:binary, :exit_status, :use_stdio]
   end
 
-  defp read_response(port, acc) do
+  defp read(port, acc) do
     receive do
-      {^port, msg} -> handle_port_msg(msg, port, acc)
+      {^port, msg} -> recv(msg, port, acc)
     after
-      30000 -> on_timeout(port, acc)
+      30000 -> stall(port, acc)
     end
   end
 
-  defp handle_port_msg({:data, data}, port, acc), do: read_response(port, acc <> data)
-  defp handle_port_msg({:exit_status, _}, _port, acc), do: trim(acc)
+  defp recv({:data, data}, port, acc), do: read(port, acc <> data)
+  defp recv({:exit_status, _}, _port, acc), do: trim(acc)
 
-  defp on_timeout(port, acc) do
-    kill_port_process(port)
+  defp stall(port, acc) do
+    slay(port)
     warning("Claude port timeout")
     acc
   end
 
-  defp kill_port_process(port) do
+  defp slay(port) do
     {:os_pid, pid} = :erlang.port_info(port, :os_pid)
     System.cmd("kill", [to_string(pid)])
   rescue
     _ -> :ok
   end
 
-  defp close_safe(port) do
+  defp seal(port) do
     close(port)
   rescue
     _ -> :ok
