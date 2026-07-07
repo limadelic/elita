@@ -140,6 +140,55 @@ defmodule AddressTest do
     El.Commands.Cd.execute("..")
     cwd_after_up = El.Commands.Address.World.cwd()
     assert cwd_after_up == birth_folder
+
+    # Test folder ask WITH agent.md
+    folder_with_md = Path.join(base, "crew")
+    File.mkdir_p!(folder_with_md)
+    agent_md = Path.join(folder_with_md, "agent.md")
+    File.write!(agent_md, "# crew agent\nI am a crew receptionist")
+
+    registrations =
+      registrations <> ",crew:#{folder_with_md}"
+
+    System.put_env("AGENT_REGISTRATIONS", registrations)
+
+    old_runner = System.get_env("TEST_AGENT_RUNNER")
+    System.put_env("TEST_AGENT_RUNNER", "StubRunner")
+
+    output_crew = capture_io(fn ->
+      El.Commands.Ask.execute("crew@#{folder_with_md}", "msg", env_module: FakeEnv)
+    end)
+
+    if old_runner do
+      System.put_env("TEST_AGENT_RUNNER", old_runner)
+    else
+      System.delete_env("TEST_AGENT_RUNNER")
+    end
+
+    refute String.contains?(output_crew, "unknown: crew")
+    assert Registry.lookup(ElitaRegistry, "crew") != []
+
+    # Test folder ask WITHOUT agent.md
+    folder_no_md = Path.join(base, "team")
+    File.mkdir_p!(folder_no_md)
+
+    registrations =
+      registrations <> ",team:#{folder_no_md}"
+
+    System.put_env("AGENT_REGISTRATIONS", registrations)
+    System.put_env("TEST_AGENT_RUNNER", "StubRunner")
+
+    output_team = capture_io(fn ->
+      El.Commands.Ask.execute("team@#{folder_no_md}", "msg", env_module: FakeEnv)
+    end)
+
+    if old_runner do
+      System.put_env("TEST_AGENT_RUNNER", old_runner)
+    else
+      System.delete_env("TEST_AGENT_RUNNER")
+    end
+
+    refute String.contains?(output_team, "unknown: team")
   end
 end
 

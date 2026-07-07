@@ -57,6 +57,10 @@ defmodule El.Commands.Address do
     stir(asleep?(n), n, p)
   end
 
+  defp rouse(%{kind: :folder, name: n, path: p}) do
+    stir(asleep?(n), n, p)
+  end
+
   defp rouse(_), do: :ok
 
   defp stir(false, _name, _folder), do: :ok
