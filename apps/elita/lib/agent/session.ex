@@ -8,7 +8,12 @@ defmodule Agent.Session do
   import Logger, only: [error: 1, warning: 1]
   import Keyword, only: [fetch!: 2, get: 3]
 
-  def start_link(opts), do: start_link(__MODULE__, opts, [])
+  def start_link(opts) do
+    folder = Keyword.fetch!(opts, :folder)
+    name = Keyword.fetch!(opts, :name)
+    via_name = {:via, Registry, {ElitaRegistry, name, %{kind: :headless, folder: folder}}}
+    start_link(__MODULE__, opts, [name: via_name])
+  end
   def ask(pid, message), do: call(pid, {:ask, message}, :infinity)
   def cast(pid, message), do: GenServer.cast(pid, {:cast, message})
 
