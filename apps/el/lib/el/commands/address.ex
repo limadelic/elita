@@ -14,8 +14,8 @@ defmodule El.Commands.Address do
 
   # credo:disable-for-this-line Credo.Check.Refactor.LongParameterList
   @doc false
-  def route(recipient, msg, mode, tool, rpc_fn, world) do
-    if rpc_fn, do: Application.put_env(:el, :rpc_fn, rpc_fn)
+  def route(recipient, msg, mode, tool, rpc, world) do
+    if rpc, do: Application.put_env(:el, :rpc, rpc)
     result = Resolver.resolve(recipient, world, cwd())
     handle(result, recipient, msg, mode, tool)
   end
@@ -26,11 +26,11 @@ defmodule El.Commands.Address do
   end
 
   defp handle({:ok, entry}, _recipient, msg, :ask, tool) do
-    route_entry(entry, msg, :ask, tool)
+    steer(entry, msg, :ask, tool)
   end
 
   defp handle({:ok, entry}, _recipient, msg, :tell, tool) do
-    route_entry(entry, msg, :tell, tool)
+    steer(entry, msg, :tell, tool)
   end
 
   defp handle({:many, _entries}, _recipient, _msg, :ask, _tool) do
@@ -43,13 +43,13 @@ defmodule El.Commands.Address do
     echo(unique, msg, tool)
   end
 
-  defp route_entry(%{kind: :node, name: node_str}, msg, mode, tool) do  # credo:disable Credo.Check.Refactor.CyclomaticComplexity
+  defp steer(%{kind: :node, name: node_str}, msg, mode, tool) do  # credo:disable Credo.Check.Refactor.CyclomaticComplexity
     node = String.to_atom(node_str)
     if node == Node.self(), do: route(node_str, msg, mode, tool), else: call_remote(node, node_str, msg, mode, tool)
   end
-  defp route_entry(entry, msg, mode, tool), do: handle_local(entry, msg, mode, tool)
+  defp steer(entry, msg, mode, tool), do: handle_local(entry, msg, mode, tool)
   defp call_remote(node, path, msg, mode, tool) do
-    fn_ = Application.get_env(:el, :rpc_fn, &:erpc.call/4)
+    fn_ = Application.get_env(:el, :rpc, &:erpc.call/4)
     fn_.(node, El.Commands.Address, :route, [path, msg, mode, tool])
   end
 
