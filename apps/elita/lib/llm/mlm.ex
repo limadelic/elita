@@ -14,16 +14,16 @@ defmodule Mlm do
     body(text) |> req() |> Adapt.resp() |> Adapt.text()
   end
 
-  defp body(text) do
-    messages = [%{role: "user", content: "/no_think #{text}"}]
-    %{model: model(), messages: messages, stream: false}
-  end
-
   def llm(%{config: config, history: history} = state) do
     {build_body(compose(config), history, state)
      |> req()
      |> Adapt.resp()
      |> Adapt.parts(), state}
+  end
+
+  defp body(text) do
+    messages = [%{role: "user", content: "/no_think #{text}"}]
+    %{model: model(), messages: messages, stream: false}
   end
 
   defp build_body(composed, history, state) do
