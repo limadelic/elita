@@ -1,8 +1,9 @@
 defmodule El.Commands.Ask do
   @moduledoc false
   import :binary, only: [at: 2]
-  import Elita, only: [call: 2]
-  import String, only: [downcase: 1, contains?: 2]
+  import String, only: [contains?: 2]
+  import El.Commands.Address, only: [route: 2]
+  import El.Commands.Lookup, only: [local: 2]
   alias El.Answer
   alias El.Commands.Tell
   alias El.Distribution
@@ -10,24 +11,18 @@ defmodule El.Commands.Ask do
   def execute(agent, msg, opts \\ []) do
     Distribution.start()
     env_module = Keyword.get(opts, :env_module, El.Infra.Env)
-    route_request(contains?(agent, "@"), agent, msg, env_module)
+    dispatch(contains?(agent, "@"), agent, msg, env_module)
   end
 
-  defp route_request(true, agent, msg, _env_module) do
-    El.Commands.Address.route(agent, msg)
-  end
+  defp dispatch(true, agent, msg, _env_module), do: route(agent, msg)
+  defp dispatch(false, agent, msg, env_module), do: via_route(agent, msg, env_module)
 
-  defp route_request(false, agent, msg, env_module) do
-    route(agent, msg, env_module)
-  end
-
-  defp route(agent, msg, env_module) do
+  defp via_route(agent, msg, env_module) do
     target = Tell.remote_target(agent, env_module: env_module)
     route_to(agent, msg, env_module, target)
   end
 
   defp route_to(agent, msg, _env_module, nil), do: local(agent, msg)
-
   defp route_to(agent, msg, env_module, target) do
     attempt_call(msg, target, agent, env_module)
   end
@@ -71,31 +66,16 @@ defmodule El.Commands.Ask do
     local(agent, msg)
   end
 
-  defp local(agent, msg) do
-    local_by_name(agent, msg)
-  end
+  defp format_text(msg), do: apply_format(String.contains?(msg, "\n"), msg)
 
-  def local_by_name(agent, msg) do
-    agent |> downcase |> lookup_and_call(agent, msg)
-  end
+  defp apply_format(true, msg), do: "\e[200~#{msg}\e[201~\r"
+  defp apply_format(false, msg), do: maybe_return(special_byte?(at(msg, 0)), msg)
 
-  defp lookup_and_call(normalized, agent, msg) do
-    Registry.lookup(ElitaRegistry, normalized) |> dispatch(agent, msg)
-  end
+  defp maybe_return(true, msg), do: msg
+  defp maybe_return(false, msg), do: "#{msg}\r"
 
-  defp dispatch([], agent, _msg), do: IO.puts("unknown: #{agent}")
-  defp dispatch([{_pid, _meta}], agent, msg), do: call(agent, msg) |> IO.puts()
-
-  defp format_text(msg) do
-    cond do
-      String.contains?(msg, "\n") -> "\e[200~#{msg}\e[201~\r"
-      control_sequence?(msg) -> msg
-      true -> "#{msg}\r"
-    end
-  end
-
-  defp control_sequence?(msg) do
-    b = at(msg, 0)
-    b && (b < 32 || b == 0x1B)
-  end
+  defp special_byte?(nil), do: false
+  defp special_byte?(0x1B), do: true
+  defp special_byte?(b) when b < 32, do: true
+  defp special_byte?(_), do: false
 end

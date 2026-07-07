@@ -1,5 +1,6 @@
 defmodule El.Commands.Address do
   import Agent.Config, only: [load: 0]
+  import El.Commands.Lookup, only: [local: 2]
 
   def route(recipient, msg) do
     world = world()
@@ -8,17 +9,9 @@ defmodule El.Commands.Address do
     handle(result, recipient, msg)
   end
 
-  defp handle({:error, :unknown}, recipient, _msg) do
-    IO.puts("unknown: #{recipient}")
-  end
-
-  defp handle({:ok, entry}, _recipient, msg) do
-    El.Commands.Ask.local_by_name(entry.name, msg)
-  end
-
-  defp handle({:many, _}, _recipient, _msg) do
-    IO.puts("ask requires one target")
-  end
+  defp handle({:error, :unknown}, recipient, _msg), do: IO.puts("unknown: #{recipient}")
+  defp handle({:ok, entry}, _recipient, msg), do: local(entry.name, msg)
+  defp handle({:many, _}, _recipient, _msg), do: IO.puts("ask requires one target")
 
   defp world do
     load()
