@@ -4,7 +4,11 @@ defmodule El.Command do
   import :erpc, only: [call: 4]
   import IO, only: [puts: 1]
   import Node, only: [connect: 1]
-
+  import El.Distribution, only: [start: 0]
+  import System, only: [get_env: 1, find_executable: 1]
+  import Port, only: [open: 2, close: 1]
+  import File, only: [cwd!: 0]
+  import Process, only: [sleep: 1]
   alias El.Commands.Ask
   alias El.Commands.Cd
   alias El.Commands.Claude
@@ -15,7 +19,7 @@ defmodule El.Command do
   alias El.RPC
 
   def ls(path \\ nil) do
-    Distribution.start()
+    start()
     query(path) |> reach(path)
   end
 
@@ -23,7 +27,7 @@ defmodule El.Command do
   defp reach(:error, path), do: hatch(path)
 
   defp hatch(path) do
-    System.get_env("EL_DAEMON_SPAWN") |> gate(path)
+    get_env("EL_DAEMON_SPAWN") |> gate(path)
   end
 
   defp gate("1", path) do
@@ -38,18 +42,18 @@ defmodule El.Command do
   end
 
   defp boot(exe) do
-    Port.open({:spawn_executable, "/bin/sh"}, [
+    open({:spawn_executable, "/bin/sh"}, [
       {:args, ["-c", "#{exe} daemon &"]},
       :exit_status
     ])
-    |> Port.close()
+    |> close()
   end
 
   defp pick do
-    System.find_executable("el") |> resolve()
+    find_executable("el") |> resolve()
   end
 
-  defp resolve(nil), do: "#{File.cwd!()}/../../apps/el/el"
+  defp resolve(nil), do: "#{cwd!()}/../../apps/el/el"
   defp resolve(path), do: path
 
   defp wait(n, path) when n >= 10 do
@@ -57,7 +61,7 @@ defmodule El.Command do
   end
 
   defp wait(n, path) do
-    Process.sleep(50 * (n + 1))
+    sleep(50 * (n + 1))
     query(path) |> settle(n, path)
   end
 
@@ -85,7 +89,7 @@ defmodule El.Command do
   end
 
   defp fetch(true, path) do
-    cwd = File.cwd!()
+    cwd = cwd!()
     cmd = route(path)
     output = call(:"elita@127.0.0.1", RPC, :dispatch, [cmd, cwd])
     {:ok, output}
