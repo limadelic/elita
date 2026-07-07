@@ -567,7 +567,7 @@ defmodule RelayTest do
     world = El.Commands.Address.World.build(fn -> nodes end)
 
     capture_io(fn ->
-      El.Commands.Address.route("peer1@host", "test msg", :ask, nil, fake_rpc, world)
+      El.Commands.Address.route("peer1@host", "test msg", :ask, nil, rpc: fake_rpc, world: world)
     end)
 
     calls = Agent.get(:relay_log, & &1)
@@ -615,7 +615,7 @@ defmodule RelayTest do
     world = El.Commands.Address.World.build(fn -> [] end)
 
     capture_io(fn ->
-      El.Commands.Address.route("agent1", "test msg", :ask, nil, fake_rpc, world)
+      El.Commands.Address.route("agent1", "test msg", :ask, nil, rpc: fake_rpc, world: world)
     end)
 
     calls = Agent.get(:relay_log, & &1)
@@ -653,7 +653,7 @@ defmodule RelayTest do
     world = El.Commands.Address.World.build(fn -> nodes end)
 
     capture_io(fn ->
-      El.Commands.Address.route("peer1@host", "test msg", :tell, nil, fake_rpc, world)
+      El.Commands.Address.route("peer1@host", "test msg", :tell, nil, rpc: fake_rpc, world: world)
     end)
 
     calls = Agent.get(:relay_log, & &1)

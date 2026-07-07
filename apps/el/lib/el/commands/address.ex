@@ -11,12 +11,16 @@ defmodule El.Commands.Address do
   end
 
   @doc false
-  def route(recipient, msg, mode, tool, rpc, world) do
+  def route(recipient, msg, mode, tool, opts) do
+    rpc = opts[:rpc]
+    world = env(opts[:world])
     save(rpc)
     result = Resolver.resolve(recipient, world, cwd())
     handle(result, recipient, msg, mode, tool)
   end
 
+  defp env(nil), do: build()
+  defp env(w), do: w
   defp save(nil), do: :ok
   defp save(rpc), do: Application.put_env(:el, :rpc, rpc)
   defp handle({:error, :unknown}, recipient, _msg, _mode, _tool), do: IO.puts("unknown: #{recipient}")
@@ -28,10 +32,10 @@ defmodule El.Commands.Address do
     Enum.each(unique, fn e -> tell(e.name, msg, tool) end)
   end
   defp steer(%{kind: :node, name: node_str}, msg, mode, tool) do
-    route_node(String.to_atom(node_str), node_str, msg, mode, tool)
+    node(String.to_atom(node_str), node_str, msg, mode, tool)
   end
-  defp steer(entry, msg, mode, tool), do: handle_local(entry, msg, mode, tool)
-  defp route_node(node, path, msg, mode, tool) do
+  defp steer(entry, msg, mode, tool), do: exec(entry, msg, mode, tool)
+  defp node(node, path, msg, mode, tool) do
     args = [path, msg, mode, tool]
     decide(node == Node.self(), node, args)
   end
@@ -48,10 +52,10 @@ defmodule El.Commands.Address do
   defp invoke(rpc, node, [path, msg, mode, tool]) do
     rpc.(node, El.Commands.Address, :route, [path, msg, mode, tool])
   end
-  defp handle_local(entry, msg, :ask, tool) do
+  defp exec(entry, msg, :ask, tool) do
     rouse(entry); local(entry.name, msg, tool, [])
   end
-  defp handle_local(entry, msg, :tell, tool) do
+  defp exec(entry, msg, :tell, tool) do
     rouse(entry); tell(entry.name, msg, tool)
   end
   defp tell(agent, msg, tool), do: downcase(agent) |> find(msg, tool)
@@ -64,11 +68,11 @@ defmodule El.Commands.Address do
   defp dispatch([], _msg), do: :ok
   defp dispatch(pids, msg) do
     Enum.each(pids, fn {pid, meta} ->
-      GenServer.cast(pid, kind_msg(meta[:kind], msg))
+      GenServer.cast(pid, pack(meta[:kind], msg))
     end)
   end
-  defp kind_msg(:native, msg), do: {:act, msg}
-  defp kind_msg(_, msg), do: {:cast, msg}
+  defp pack(:native, msg), do: {:act, msg}
+  defp pack(_, msg), do: {:cast, msg}
   defp rouse(%{kind: k, name: n, path: p} = entry) when k in [:file, :folder] do
     key = n |> to_string |> String.downcase
     sleep = Registry.lookup(ElitaRegistry, key) |> Enum.empty?
