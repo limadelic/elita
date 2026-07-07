@@ -60,12 +60,12 @@ defmodule El.Pty do
 
   defp config(cmd, opts) do
     [file: file(opts), port: port(opts), cmd: cmd] ++
-      [get_size: get_size(opts), input: input(opts), taps: taps(opts)]
+      [get_size: size(opts), input: input(opts), taps: taps(opts)]
   end
 
   defp file(opts), do: Keyword.get(opts, :file, :file)
   defp port(opts), do: Keyword.get(opts, :port, Port)
-  defp get_size(opts), do: Keyword.get(opts, :get_size, &Size.get_default/0)
+  defp size(opts), do: Keyword.get(opts, :get_size, &Size.get_default/0)
   defp input(opts), do: Keyword.get(opts, :input, fn x -> x end)
   defp taps(opts), do: Keyword.get(opts, :taps, [])
 
