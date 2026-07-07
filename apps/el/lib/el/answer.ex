@@ -8,7 +8,7 @@ defmodule El.Answer do
     result
   end
 
-  def wait_reply(ref, timeout) do
+  def await(ref, timeout) do
     receive do
       {^ref, answer} -> answer
     after

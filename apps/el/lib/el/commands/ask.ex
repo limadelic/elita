@@ -81,7 +81,7 @@ defmodule El.Commands.Ask do
     ref = make_ref()
     reply_to = {ref, self()}
     GenServer.cast({process_name, target}, {:inject, text, reply_to: reply_to})
-    Answer.wait_reply(ref, 30_000)
+    Answer.await(ref, 30_000)
   end
   defp format_text(msg), do: apply_format(String.contains?(msg, "\n"), msg)
 
