@@ -8,6 +8,7 @@ defmodule El.CLI do
   Usage:
     el ask <agent> <message>
     el tell <agent> <message>
+    el spawn <name> <agent>
     el [tool] ask <agent> <message>
     el [tool] tell <agent> <message>
     el claude [name]
@@ -28,6 +29,7 @@ defmodule El.CLI do
 
   defp parse(["ask", agent, msg]), do: {:ask, nil, agent, msg}
   defp parse(["tell", agent, msg]), do: {:tell, nil, agent, msg}
+  defp parse(["spawn", name, agent]), do: {:spawn, name, agent}
   defp parse([tool, "ask", agent, msg]) do
     check(tool, {:ask, tool, agent, msg})
   end
@@ -55,6 +57,7 @@ defmodule El.CLI do
 
   defp run({:ask, tool, agent, msg}), do: Command.ask(agent, msg, tool)
   defp run({:tell, tool, agent, msg}), do: Command.tell(agent, msg, tool)
+  defp run({:spawn, name, agent}), do: Command.spawn(name, agent)
   defp run({:claude, name}), do: Command.claude(name)
   defp run({:ls, path}), do: Command.ls(path)
   defp run({:cd, path}), do: Command.cd(path)

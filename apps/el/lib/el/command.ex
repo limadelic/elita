@@ -10,6 +10,7 @@ defmodule El.Command do
   alias El.Commands.Claude
   alias El.Commands.Ls
   alias El.Commands.Cd
+  alias El.Commands.Spawn
   alias El.Distribution
   alias El.RPC
 
@@ -61,6 +62,7 @@ defmodule El.Command do
 
   def ask(agent, msg, tool \\ nil), do: Ask.execute(agent, msg, tool)
   def tell(agent, msg, tool \\ nil), do: Tell.execute(agent, msg, tool)
+  def spawn(name, agent), do: Spawn.execute(name, agent)
   def claude(name), do: Claude.execute(name)
   def cd(path), do: Cd.execute(path)
   def daemon, do: Distribution.daemon()

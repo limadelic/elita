@@ -198,6 +198,73 @@ defmodule AddressTest do
     [{pid_no_md, _meta}] = Registry.lookup(ElitaRegistry, "team")
     state_no_md = Agent.Session.fetch(pid_no_md)
     assert state_no_md.self == nil
+
+    # Test spawn named session
+    System.put_env("TEST_AGENT_RUNNER", "StubRunner")
+
+    # spawn ward doctor
+    output_spawn1 = capture_io(fn ->
+      El.Commands.Spawn.execute("ward", "agent1")
+    end)
+
+    if old_runner do
+      System.put_env("TEST_AGENT_RUNNER", old_runner)
+    else
+      System.delete_env("TEST_AGENT_RUNNER")
+    end
+
+    refute String.contains?(output_spawn1, "error")
+    [{pid_ward, _meta}] = Registry.lookup(ElitaRegistry, "ward")
+    assert pid_ward != nil
+
+    # spawn p1 doctor and spawn p2 doctor are different sessions
+    System.put_env("TEST_AGENT_RUNNER", "StubRunner")
+
+    output_spawn2 = capture_io(fn ->
+      El.Commands.Spawn.execute("p1", "agent1")
+    end)
+
+    if old_runner do
+      System.put_env("TEST_AGENT_RUNNER", old_runner)
+    else
+      System.delete_env("TEST_AGENT_RUNNER")
+    end
+
+    refute String.contains?(output_spawn2, "error")
+    [{pid_p1, _meta}] = Registry.lookup(ElitaRegistry, "p1")
+
+    System.put_env("TEST_AGENT_RUNNER", "StubRunner")
+
+    output_spawn3 = capture_io(fn ->
+      El.Commands.Spawn.execute("p2", "agent1")
+    end)
+
+    if old_runner do
+      System.put_env("TEST_AGENT_RUNNER", old_runner)
+    else
+      System.delete_env("TEST_AGENT_RUNNER")
+    end
+
+    refute String.contains?(output_spawn3, "error")
+    [{pid_p2, _meta}] = Registry.lookup(ElitaRegistry, "p2")
+    refute pid_p1 == pid_p2
+
+    # spawn duplicate name errors
+    output_dup = capture_io(fn ->
+      El.Commands.Spawn.execute("ward", "agent1")
+    end)
+    assert String.contains?(output_dup, "error")
+
+    # spawn for unknown agent errors
+    output_unknown = capture_io(fn ->
+      El.Commands.Spawn.execute("xyz", "missing_agent")
+    end)
+    assert String.contains?(output_unknown, "error")
+
+    # verify ward is registered and active
+    active_ward = Registry.lookup(ElitaRegistry, "ward")
+    assert active_ward != []
+    assert length(active_ward) == 1
   end
 end
 
