@@ -67,16 +67,12 @@ defmodule El.Commands.Address do
   end
 
   defp pick(nil), do: nil
-  defp pick(name) do
-    atom = String.to_atom("Elixir." <> name)
-    if Code.ensure_compiled?(atom) && Kernel.function_exported?(atom, :run, 2) do
-      atom
-    else
-      nil
-    end
-  rescue
-    _ -> nil
-  end
+  defp pick(name), do: test(String.to_atom("Elixir." <> name))
+
+  defp test(atom), do: okay(Code.ensure_loaded?(atom), atom)
+
+  defp okay(true, atom), do: atom
+  defp okay(false, _atom), do: nil
 
   defp wire(opts, nil), do: opts
   defp wire(opts, rune) do
