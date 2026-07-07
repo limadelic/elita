@@ -18,7 +18,8 @@ defmodule Utils.File do
   end
 
   defp paths(name) do
-    map(@paths, fn path -> join(Path.join(@app_root, path), name) end) ++ nested(name)
+    map(@paths, fn path -> join(Path.join(@app_root, path), name) end) ++
+      nested(name)
   end
 
   defp nested(name) do

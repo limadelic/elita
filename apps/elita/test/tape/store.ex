@@ -1,7 +1,7 @@
 defmodule Tape.Store do
   import File, only: [write: 2, read!: 1, exists?: 1, mkdir_p: 1]
-  import System, only: [get_env: 1]
   import Jason
+  import System, only: [get_env: 1]
   import Tape.Writer, only: [acquire: 1]
 
   @app_root Path.expand("../..", __DIR__)

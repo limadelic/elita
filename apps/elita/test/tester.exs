@@ -1,15 +1,17 @@
 defmodule Tester do
-  require Logger
-  import ExUnit.Assertions
   import Elita, only: [start_link: 2, cast: 2, call: 2]
-  import String, only: [contains?: 2, downcase: 1]
   import Enum, only: [map: 2]
+  import ExUnit.Assertions
   import GenServer, only: [stop: 1]
   import Log, only: [log: 5]
+  import String, only: [contains?: 2, downcase: 1]
+
+  require Logger
 
   defmacro __using__(_opts) do
     quote do
       use ExUnit.Case
+
       import Kernel, except: [spawn: 1, spawn: 2]
       import Tester
 
@@ -44,7 +46,7 @@ defmodule Tester do
   end
 
   defp via(name) do
-    normalized = name |> downcase
+    normalized = name |> downcase()
     {:via, Registry, {ElitaRegistry, normalized, %{kind: :native, folder: nil}}}
   end
 
@@ -80,7 +82,8 @@ defmodule Tester do
     prompt = "Result: #{result}\n\nExpectation: #{expectation}"
     verdict = ask(:judge, prompt)
 
-    assert is_binary(verdict), "Expected binary verdict, got: #{inspect(verdict)}"
+    assert is_binary(verdict),
+           "Expected binary verdict, got: #{inspect(verdict)}"
 
     assert downcase(verdict) == "yes",
            "Judge said: #{verdict}. Expectation failed: #{expectation}"

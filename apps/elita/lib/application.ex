@@ -1,9 +1,10 @@
 defmodule Elita.Application do
   use Application
-  import Mem, only: [init_global: 0]
-  import Supervisor, only: [start_link: 2]
+
   import Agent.Manager, only: [start_agents: 0]
+  import Mem, only: [init_global: 0]
   import Registry, only: [child_spec: 1]
+  import Supervisor, only: [start_link: 2]
 
   def start(_type, _args) do
     init_global()

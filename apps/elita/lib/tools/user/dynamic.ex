@@ -2,8 +2,9 @@ defmodule Tools.User.Load.Schema do
   import Tools.User.Cfg, only: [parse: 1]
   import Tools.User.Def, only: [spec: 2]
   import Tools.User.Validate, only: [check: 1]
-  alias Path
+
   alias File
+  alias Path
 
   @app_root Path.expand("../../..", __DIR__)
 

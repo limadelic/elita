@@ -4,7 +4,7 @@ defmodule Cfgs do
 
   def config(names) when is_list(names) do
     names
-    |> expand
+    |> expand()
     |> map(&Cfg.config/1)
   end
 

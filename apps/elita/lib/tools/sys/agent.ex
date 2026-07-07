@@ -17,8 +17,8 @@ defmodule Tools.Sys.Agent.Schema do
 end
 
 defmodule Tools.Sys.Agent do
-  import Utils.File, only: [file: 1]
   import Log, only: [log: 5]
+  import Utils.File, only: [file: 1]
 
   defdelegate spec(name, state), to: Tools.Sys.Agent.Schema, as: :get
 

@@ -6,18 +6,18 @@ defmodule Agent.Harness do
 
   def dispatch(recipient, message, :ask) do
     recipient
-    |> lookup
+    |> lookup()
     |> handle_ask(recipient, message)
   end
 
   def dispatch(recipient, message, :tell) do
     recipient
-    |> lookup
+    |> lookup()
     |> handle_tell(recipient, message)
   end
 
   defp lookup(recipient) do
-    normalized = recipient |> to_atom |> Kernel.to_string() |> downcase
+    normalized = recipient |> to_atom() |> Kernel.to_string() |> downcase()
     Registry.lookup(ElitaRegistry, normalized)
   end
 

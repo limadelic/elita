@@ -4,7 +4,10 @@ defmodule Shape do
   import MsgAdapter, only: [to_ollama: 1]
 
   def messages(system, history) do
-    [%{role: "system", content: "/no_think\n#{system}"} | map(history, &to_ollama/1)]
+    [
+      %{role: "system", content: "/no_think\n#{system}"}
+      | map(history, &to_ollama/1)
+    ]
   end
 
   def add_tools(body, [%{function_declarations: defs}]) do

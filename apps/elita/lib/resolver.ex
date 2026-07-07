@@ -6,9 +6,9 @@ defmodule Resolver do
   bare names, paths, globs, and fanout patterns.
   """
 
-  import String, only: [split: 3, contains?: 2]
-  import Path, only: [join: 2, expand: 1, split: 1]
   import Enum, only: [filter: 2, group_by: 2, flat_map: 2]
+  import Path, only: [join: 2, expand: 1, split: 1]
+  import String, only: [split: 3, contains?: 2]
 
   def resolve(address, world, cwd) do
     world
@@ -38,7 +38,8 @@ defmodule Resolver do
   def normalize("/" <> _ = path, _cwd), do: path
   def normalize(path, cwd), do: cwd |> join(path) |> expand()
 
-  defp path(world, search_path), do: filter(world, &matches_path?(&1, search_path))
+  defp path(world, search_path),
+    do: filter(world, &matches_path?(&1, search_path))
 
   defp matches_path?(_entry, nil), do: true
   defp matches_path?(%{path: p}, s), do: path_match(p, s)

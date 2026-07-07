@@ -5,7 +5,10 @@ defmodule MsgAdapter do
     %{role: "user", content: "/no_think #{content}"}
   end
 
-  def to_ollama(%{role: "user", content: [%{type: "tool_result"} | _] = content}) do
+  def to_ollama(%{
+        role: "user",
+        content: [%{type: "tool_result"} | _] = content
+      }) do
     %{role: "tool", content: find_value(content, &tool_result/1)}
   end
 

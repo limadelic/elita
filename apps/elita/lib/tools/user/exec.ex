@@ -1,8 +1,8 @@
 defmodule Tools.User.Exec do
-  import String, only: [split: 2, trim: 1]
-  import Enum, only: [map: 2, join: 2, at: 2]
   import Code, only: [eval_string: 2]
+  import Enum, only: [map: 2, join: 2, at: 2]
   import Log, only: [log: 5]
+  import String, only: [split: 2, trim: 1]
 
   def exec(tool, args) when tool != nil do
     log("🛠️", tool.name, ": ", args, :red)
@@ -17,8 +17,8 @@ defmodule Tools.User.Exec do
 
   defp first([code | _], tool, args) do
     tool.imports
-    |> modules
-    |> imports
+    |> modules()
+    |> imports()
     |> plus(code)
     |> eval(args, tool.name)
   end

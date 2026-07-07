@@ -1,8 +1,8 @@
 defmodule Agent.Spawn do
-  import Port, only: [open: 2, close: 1]
-  import System, only: [find_executable: 1]
   import Logger, only: [error: 1, warning: 1]
+  import Port, only: [open: 2, close: 1]
   import String, only: [trim: 1]
+  import System, only: [find_executable: 1]
 
   def run(message, folder) do
     cmd = {:spawn_executable, exe()}
@@ -51,7 +51,7 @@ defmodule Agent.Spawn do
 
   defp slay(port) do
     {:os_pid, pid} = :erlang.port_info(port, :os_pid)
-    System.cmd("kill", [pid |> to_string])
+    System.cmd("kill", [pid |> to_string()])
   rescue
     _ -> :ok
   end

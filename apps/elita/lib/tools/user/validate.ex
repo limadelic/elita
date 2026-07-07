@@ -1,8 +1,8 @@
 defmodule Tools.User.Validate do
-  import String, only: [split: 2, trim: 1]
-  import Enum, only: [map: 2, reduce: 3, find: 2, member?: 2]
   import Code, only: [string_to_quoted: 1]
+  import Enum, only: [map: 2, reduce: 3, find: 2, member?: 2]
   import Macro, only: [prewalk: 3]
+  import String, only: [split: 2, trim: 1]
 
   def check(tool) do
     tool[:code]

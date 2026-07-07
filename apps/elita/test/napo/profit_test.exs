@@ -1,5 +1,6 @@
 defmodule NapoProfitTest do
   use Tester
+
   @moduletag :live
   @moduletag :spec
   @moduletag timeout: 60_000
@@ -8,7 +9,7 @@ defmodule NapoProfitTest do
     System.put_env("LIVE", "1")
     System.put_env("CASSETTE", "profit")
 
-    unless System.get_env("TAPE") do
+    if !System.get_env("TAPE") do
       System.put_env("TAPE", "replay")
     end
 
@@ -44,7 +45,9 @@ defmodule NapoProfitTest do
 
     reply = ask(:napo, problem)
     assert is_binary(reply), "Expected binary reply, got: #{inspect(reply)}"
-    assert String.length(reply) > 50, "Sample 1 should provide root-cause analysis"
+
+    assert String.length(reply) > 50,
+           "Sample 1 should provide root-cause analysis"
   end
 
   test "sample 2: retail chain profit decline" do
@@ -53,7 +56,9 @@ defmodule NapoProfitTest do
 
     reply = ask(:napo, problem)
     assert is_binary(reply), "Expected binary reply, got: #{inspect(reply)}"
-    assert String.length(reply) > 50, "Sample 2 should analyze retail profit decline"
+
+    assert String.length(reply) > 50,
+           "Sample 2 should analyze retail profit decline"
   end
 
   test "sample 3: tech company margin compression" do
@@ -62,6 +67,8 @@ defmodule NapoProfitTest do
 
     reply = ask(:napo, problem)
     assert is_binary(reply), "Expected binary reply, got: #{inspect(reply)}"
-    assert String.length(reply) > 50, "Sample 3 should analyze tech company margin compression"
+
+    assert String.length(reply) > 50,
+           "Sample 3 should analyze tech company margin compression"
   end
 end

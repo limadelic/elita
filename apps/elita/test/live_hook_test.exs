@@ -2,6 +2,7 @@ Code.require_file("tester.exs", __DIR__)
 
 defmodule LiveHookTest do
   use Tester
+
   @moduletag :main
 
   @tag live: true

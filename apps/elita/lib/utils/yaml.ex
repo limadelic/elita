@@ -1,9 +1,9 @@
 defmodule Utils.Yaml do
-  import String, only: [replace_prefix: 3, to_atom: 1, replace: 3]
-  import Map, only: [new: 2]
   import Enum, only: [map: 2]
-  import Ymlr, only: [document!: 1]
   import Jason, only: [decode: 1]
+  import Map, only: [new: 2]
+  import String, only: [replace_prefix: 3, to_atom: 1, replace: 3]
+  import Ymlr, only: [document!: 1]
 
   def yaml(args) when is_map(args) do
     encode_yaml(args)

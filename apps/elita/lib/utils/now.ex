@@ -1,6 +1,6 @@
 defmodule Now do
-  import Application, only: [get_env: 3]
   import :calendar, only: [local_time: 0]
+  import Application, only: [get_env: 3]
 
   def time do
     get_env(:elita, :clock, &default/0).()

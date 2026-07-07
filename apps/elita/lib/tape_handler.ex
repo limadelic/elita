@@ -1,7 +1,8 @@
 defmodule TapeHandler do
-  alias Tape.Record
-  alias Tape.Play
   import System, only: [get_env: 1]
+
+  alias Tape.Play
+  alias Tape.Record
 
   def handle(body, name, fun) do
     route(body, name, fun, get_env("TAPE"), get_env("LIVE"))

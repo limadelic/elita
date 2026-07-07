@@ -1,7 +1,7 @@
 defmodule Tools.Sys.Set do
   import Log, only: [log: 5]
-  import Mem, only: [depth_table: 0, table: 0]
   import Map, only: [put: 3]
+  import Mem, only: [depth_table: 0, table: 0]
 
   def spec(name, _state) do
     spec(name)

@@ -1,14 +1,14 @@
 defmodule Tools.User.Cfg do
-  import String, only: [split: 2, trim: 1]
-  import File, only: [read!: 1]
   import Enum, only: [join: 2, map: 2, reduce: 3]
-  import Regex, only: [scan: 3]
+  import File, only: [read!: 1]
   import Map, only: [put: 3]
+  import Regex, only: [scan: 3]
+  import String, only: [split: 2, trim: 1]
 
   @code ~r/```elixir\n(.*?)\n```/s
 
   def parse(path) do
-    path |> read! |> sever |> extract
+    path |> read!() |> sever() |> extract()
   end
 
   defp sever(content) do
@@ -17,7 +17,7 @@ defmodule Tools.User.Cfg do
 
   defp extract([_, header | rest]) do
     yaml(header)
-    |> atomize
+    |> atomize()
     |> with_blocks(rest)
     |> with_body(rest)
   end

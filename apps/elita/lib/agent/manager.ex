@@ -1,7 +1,8 @@
 defmodule Agent.Manager do
-  require Logger
   import Agent.Config, only: [load: 0]
   import Agent.Session, only: [start_link: 1]
+
+  require Logger
 
   def start_agents do
     load()

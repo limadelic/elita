@@ -1,6 +1,6 @@
 defmodule Tools.User.Def.Schema do
-  import String, only: [split: 2, trim: 1]
   import Enum, only: [map: 2]
+  import String, only: [split: 2, trim: 1]
 
   def get(tool, _state) when tool != nil do
     spec = %{name: tool.name, description: tool.body}

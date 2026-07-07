@@ -14,6 +14,7 @@ end
 
 defmodule Tools.Sys.Spec do
   import Log, only: [log: 5]
+
   alias Cfg
 
   defdelegate spec(name, state), to: Tools.Sys.Spec.Schema, as: :get

@@ -1,13 +1,14 @@
 defmodule Agent.Session do
   use GenServer
-  import GenServer, only: [start_link: 3, call: 3]
-  import String, only: [downcase: 1]
-  import Keyword, only: [fetch!: 2, get: 3]
+
   import Agent.Spawn, only: [run: 2]
+  import GenServer, only: [start_link: 3, call: 3]
+  import Keyword, only: [fetch!: 2, get: 3]
+  import String, only: [downcase: 1]
 
   def start_link(opts) do
     folder = Keyword.fetch!(opts, :folder)
-    normalized = Keyword.fetch!(opts, :name) |> to_string |> downcase()
+    normalized = Keyword.fetch!(opts, :name) |> to_string() |> downcase()
     metadata = %{kind: :headless, folder: folder}
     via_name = {:via, Registry, {ElitaRegistry, normalized, metadata}}
     start_link(__MODULE__, opts, name: via_name)

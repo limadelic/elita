@@ -1,5 +1,6 @@
 defmodule MaskedRelayUnitTest do
   use Tester
+
   @moduletag :main
   @moduletag :prose
 
@@ -49,6 +50,9 @@ defmodule MaskedRelayUnitTest do
 
     spawned([:relay, :scout_price, :scout_friction, :scout_desire, :auditor])
 
-    judge(result, "result shows consensus across price friction and desire considerations")
+    judge(
+      result,
+      "result shows consensus across price friction and desire considerations"
+    )
   end
 end
