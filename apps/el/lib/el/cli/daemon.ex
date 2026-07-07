@@ -1,4 +1,6 @@
 defmodule El.CLI.Daemon do
+  @moduledoc "Starts and maintains the daemon node."
+
   def execute do
     Distribution.start_daemon()
     boot_app()
