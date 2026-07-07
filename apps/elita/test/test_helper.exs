@@ -1,10 +1,15 @@
 Logger.configure(level: :warning)
 
 # Include :live tests only when LIVE=1 is set
-include_tags = if System.get_env("LIVE") == "1", do: [:main, :live], else: [:main]
+live? = System.get_env("LIVE") == "1"
+include_tags = if live?, do: [:main, :live], else: [:main]
 
-# Live tests need longer timeout for agent orchestration
-timeout = if System.get_env("LIVE") == "1", do: 600_000, else: 300_000
+# Live tests need longer timeout and real backend
+if live? do
+  System.put_env("LIVE", "1")
+end
+
+timeout = if live?, do: 600_000, else: 300_000
 
 ExUnit.start(
   timeout: timeout,

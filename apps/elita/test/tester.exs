@@ -12,6 +12,15 @@ defmodule Tester do
       use ExUnit.Case
       import Kernel, except: [spawn: 1, spawn: 2]
       import Tester
+
+      setup do
+        if @moduletag[:live] do
+          System.put_env("LIVE", "1")
+          on_exit(fn -> System.delete_env("LIVE") end)
+        end
+
+        :ok
+      end
     end
   end
 
