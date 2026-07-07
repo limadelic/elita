@@ -8,6 +8,14 @@ defmodule El.Answer do
     result
   end
 
+  def wait_reply(ref, timeout) do
+    receive do
+      {^ref, answer} -> answer
+    after
+      timeout -> collect(0)
+    end
+  end
+
   defp receive_answer(acc, timer) do
     receive do
       {:output, data} -> process_output(acc, timer, data)

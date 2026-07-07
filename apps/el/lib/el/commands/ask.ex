@@ -78,8 +78,10 @@ defmodule El.Commands.Ask do
 
   defp get_answer(msg, target, process_name) do
     text = format_text(msg)
-    GenServer.cast({process_name, target}, {:inject, text})
-    Answer.collect(30_000)
+    ref = make_ref()
+    reply_to = {ref, self()}
+    GenServer.cast({process_name, target}, {:inject, text, reply_to: reply_to})
+    Answer.wait_reply(ref, 30_000)
   end
   defp format_text(msg), do: apply_format(String.contains?(msg, "\n"), msg)
 

@@ -12,6 +12,12 @@ defmodule StubAgent do
     {:noreply, state}
   end
 
+  def handle_cast({:inject, msg, reply_to: {ref, caller_pid}}, state) do
+    Agent.update(:msg_log, &[{state, msg} | &1])
+    send(caller_pid, {ref, "immediate answer"})
+    {:noreply, state}
+  end
+
   def handle_cast({:act, msg}, state) do
     Agent.update(:msg_log, &[{state, msg} | &1])
     {:noreply, state}
@@ -296,6 +302,27 @@ defmodule AddressTest do
     output_ls_ward = capture_io(fn -> El.Commands.Ls.execute() end)
     assert String.contains?(output_ls_ward, "ward")
     assert String.contains?(output_ls_ward, "active")
+  end
+
+  test "tell-based ask receives reply directly instead of timeout" do
+    ref = make_ref()
+    caller = self()
+
+    spawn_link(fn ->
+      Process.sleep(10)
+      send(caller, {ref, "prompt response"})
+    end)
+
+    start_time = System.monotonic_time(:millisecond)
+    received = receive do
+      {^ref, answer} -> answer
+    after
+      5000 -> :timeout
+    end
+    elapsed = System.monotonic_time(:millisecond) - start_time
+
+    assert received == "prompt response"
+    assert elapsed < 500, "reply should arrive promptly, got #{elapsed}ms"
   end
 end
 
