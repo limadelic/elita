@@ -75,11 +75,11 @@ defmodule El.Commands.Address do
   defp pick(nil), do: nil
   defp pick(name) do
     atom = String.to_atom("Elixir." <> name)
-    resolve_atom(Code.ensure_loaded?(atom), atom)
+    exist(Code.ensure_loaded?(atom), atom)
   end
 
-  defp resolve_atom(true, atom), do: atom
-  defp resolve_atom(false, _), do: nil
+  defp exist(true, atom), do: atom
+  defp exist(false, _), do: nil
 
   defp wire(opts, nil), do: opts
   defp wire(opts, rune) do
@@ -87,10 +87,7 @@ defmodule El.Commands.Address do
   end
 
   defp asleep?(name) do
-    String.downcase(to_string(name)) |> lookup_empty?()
-  end
-
-  defp lookup_empty?(normalized) do
+    normalized = String.downcase(to_string(name))
     Registry.lookup(ElitaRegistry, normalized) |> Enum.empty?()
   end
 end

@@ -10,23 +10,19 @@ defmodule El.Commands.Ask do
 
   def execute(agent, msg, tool \\ nil, opts \\ []) do
     Distribution.start()
-    {actual_tool, actual_opts, env_module} = parse_args(tool, opts)
-    ctx = build_ctx(agent, msg, actual_tool, env_module, actual_opts)
+    {t, o, env} = args(tool, opts)
+    ctx = %{agent: agent, msg: msg, tool: t, env: env, opts: o}
     dispatch(ctx, contains?(agent, "@"))
   end
 
-  defp build_ctx(agent, msg, tool, env, opts) do
-    %{agent: agent, msg: msg, tool: tool, env: env, opts: opts}
+  defp args(tool, _opts) when is_list(tool) do
+    env = Keyword.get(tool, :env_module, El.Infra.Env)
+    {nil, tool, env}
   end
 
-  defp parse_args(tool, opts) when is_list(tool) do
-    env_module = Keyword.get(tool, :env_module, El.Infra.Env)
-    {nil, tool, env_module}
-  end
-
-  defp parse_args(tool, opts) do
-    env_module = Keyword.get(opts, :env_module, El.Infra.Env)
-    {tool, opts, env_module}
+  defp args(tool, opts) do
+    env = Keyword.get(opts, :env_module, El.Infra.Env)
+    {tool, opts, env}
   end
 
   defp dispatch(ctx, true) do

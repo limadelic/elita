@@ -16,6 +16,8 @@ defmodule El.CLI do
     el daemon
   """
 
+  @known_tools ["claude", "codex"]
+
   def main(argv) do
     ensure_all_started(:elita)
 
@@ -26,8 +28,12 @@ defmodule El.CLI do
 
   defp parse(["ask", agent, msg]), do: {:ask, nil, agent, msg}
   defp parse(["tell", agent, msg]), do: {:tell, nil, agent, msg}
-  defp parse([tool, "ask", agent, msg]), do: {:ask, tool, agent, msg}
-  defp parse([tool, "tell", agent, msg]), do: {:tell, tool, agent, msg}
+  defp parse([tool, "ask", agent, msg]) do
+    check(tool, {:ask, tool, agent, msg})
+  end
+  defp parse([tool, "tell", agent, msg]) do
+    check(tool, {:tell, tool, agent, msg})
+  end
   defp parse(["claude"]), do: {:claude, :default}
   defp parse(["claude", name]), do: {:claude, name}
   defp parse(["ls"]), do: {:ls, nil}
@@ -36,8 +42,15 @@ defmodule El.CLI do
   defp parse(["daemon"]), do: :daemon
   defp parse(_), do: :usage
 
+  defp check(tool, cmd) when tool in @known_tools, do: cmd
+  defp check(tool, _cmd), do: {:unknown_tool, tool}
+
   defp run(:usage) do
     @usage |> puts()
+  end
+
+  defp run({:unknown_tool, tool}) do
+    IO.puts("unknown tool: #{tool}")
   end
 
   defp run({:ask, tool, agent, msg}), do: Command.ask(agent, msg, tool)

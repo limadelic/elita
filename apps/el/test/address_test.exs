@@ -262,6 +262,13 @@ defmodule ToolPrefixTest do
     assert Registry.lookup(ElitaRegistry, "agent1:codex") != []
     assert Registry.lookup(ElitaRegistry, "agent1:claude") != Registry.lookup(ElitaRegistry, "agent1:codex")
   end
+
+  test "unknown tool prefix produces instant error" do
+    output = capture_io(fn ->
+      El.CLI.main(["badtool", "ask", "agent1", "msg"])
+    end)
+    assert String.contains?(output, "unknown tool: badtool")
+  end
 end
 
 defmodule FakeEnv do

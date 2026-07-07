@@ -7,23 +7,19 @@ defmodule El.Commands.Tell do
 
   def execute(agent, msg, tool \\ nil, opts \\ []) do
     Distribution.start()
-    {actual_tool, actual_opts, env_module} = parse_args(tool, opts)
-    ctx = build_ctx(agent, msg, actual_tool, env_module, actual_opts)
+    {t, o, env} = args(tool, opts)
+    ctx = %{agent: agent, msg: msg, tool: t, env: env, opts: o}
     dispatch(ctx, contains?(agent, "@"))
   end
 
-  defp parse_args(tool, opts) when is_list(tool) do
-    env_module = Keyword.get(tool, :env_module, El.Infra.Env)
-    {nil, tool, env_module}
+  defp args(tool, _opts) when is_list(tool) do
+    env = Keyword.get(tool, :env_module, El.Infra.Env)
+    {nil, tool, env}
   end
 
-  defp parse_args(tool, opts) do
-    env_module = Keyword.get(opts, :env_module, El.Infra.Env)
-    {tool, opts, env_module}
-  end
-
-  defp build_ctx(agent, msg, tool, env, opts) do
-    %{agent: agent, msg: msg, tool: tool, env: env, opts: opts}
+  defp args(tool, opts) do
+    env = Keyword.get(opts, :env_module, El.Infra.Env)
+    {tool, opts, env}
   end
 
   defp dispatch(ctx, true) do
@@ -42,18 +38,14 @@ defmodule El.Commands.Tell do
 
   defp send_via(target, {agent, msg, tool, env}) do
     ctx = {msg, target, String.to_atom(agent), agent, env, tool}
-    handle_inject(Node.connect(target), ctx)
+    act(Node.connect(target), ctx)
   end
 
-  defp handle_inject(true, {msg, target, process_name, _agent, _env_module, tool}) do
+  defp act(true, {msg, target, process_name, _agent, _env_module, tool}) do
     inject(msg, target, process_name, tool)
   end
 
-  defp handle_inject(false, {msg, _target, _process_name, agent, env_module, tool}) do
-    fail_inject(agent, msg, env_module, tool)
-  end
-
-  defp fail_inject(agent, msg, env_module, tool) do
+  defp act(false, {msg, _target, _process_name, agent, env_module, tool}) do
     host = env_module.get("EL_NODE")
     remote_unreachable(agent, host)
     route(agent, msg, :tell, tool)
