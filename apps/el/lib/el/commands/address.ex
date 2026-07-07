@@ -53,20 +53,28 @@ defmodule El.Commands.Address do
 
   defp send(pid, :native, msg), do: GenServer.cast(pid, {:act, msg})
   defp send(pid, _, msg), do: GenServer.cast(pid, {:cast, msg})
+  defp rouse(%{kind: :file, name: n, path: p, file_path: fp}) do
+    stir(asleep?(n), n, p, fp)
+  end
+
   defp rouse(%{kind: :file, name: n, path: p}) do
-    stir(asleep?(n), n, p)
+    stir(asleep?(n), n, p, nil)
+  end
+
+  defp rouse(%{kind: :folder, name: n, path: p, file_path: fp}) do
+    stir(asleep?(n), n, p, fp)
   end
 
   defp rouse(%{kind: :folder, name: n, path: p}) do
-    stir(asleep?(n), n, p)
+    stir(asleep?(n), n, p, nil)
   end
 
   defp rouse(_), do: :ok
 
-  defp stir(false, _name, _folder), do: :ok
-  defp stir(true, name, folder) do
+  defp stir(false, _name, _folder, _self), do: :ok
+  defp stir(true, name, folder, self) do
     rune = System.get_env("TEST_AGENT_RUNNER") |> pick()
-    opts = [name: name, folder: folder]
+    opts = [name: name, folder: folder, self: self]
     start_link(wire(opts, rune))
   end
 

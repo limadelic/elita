@@ -14,8 +14,18 @@ defmodule El.Commands.Address.World do
   end
 
   defp entry({name, folder}) do
-    %{name: Atom.to_string(name), path: Path.expand(folder), kind: :folder}
+    folder = Path.expand(folder)
+    self = check(folder)
+    %{name: Atom.to_string(name), path: folder, kind: :folder, file_path: self}
   end
+
+  defp check(folder) do
+    agent = Path.join(folder, "agent.md")
+    pick(File.exists?(agent), agent)
+  end
+
+  defp pick(true, path), do: path
+  defp pick(false, _path), do: nil
 
   defp scan(%{path: folder}) do
     File.ls!(folder)

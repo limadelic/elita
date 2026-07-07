@@ -168,6 +168,10 @@ defmodule AddressTest do
     refute String.contains?(output_crew, "unknown: crew")
     assert Registry.lookup(ElitaRegistry, "crew") != []
 
+    [{pid, _meta}] = Registry.lookup(ElitaRegistry, "crew")
+    state_with_md = Agent.Session.fetch(pid)
+    assert state_with_md.self == agent_md
+
     # Test folder ask WITHOUT agent.md
     folder_no_md = Path.join(base, "team")
     File.mkdir_p!(folder_no_md)
@@ -189,6 +193,11 @@ defmodule AddressTest do
     end
 
     refute String.contains?(output_team, "unknown: team")
+    assert Registry.lookup(ElitaRegistry, "team") != []
+
+    [{pid_no_md, _meta}] = Registry.lookup(ElitaRegistry, "team")
+    state_no_md = Agent.Session.fetch(pid_no_md)
+    assert state_no_md.self == nil
   end
 end
 
