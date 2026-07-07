@@ -2,6 +2,8 @@ defmodule El.Pty.Init do
   @moduledoc false
   import El.PtyReader
   import El.Trace
+  import Map
+  import Process, except: [alias: 1]
 
   def call(cfg) do
     size = cfg[:get_size].()
@@ -26,12 +28,17 @@ defmodule El.Pty.Init do
   end
 
   defp attach(state, cfg) do
-    Map.merge(state, %{file: cfg[:file], port: cfg[:port], input: cfg[:input], taps: cfg[:taps]})
+    merge(state, extra_config(cfg))
+  end
+
+  defp extra_config(cfg) do
+    %{file: cfg[:file], port: cfg[:port], input: cfg[:input], taps: cfg[:taps]}
   end
 
   defp pty_and_pid(port, cmd, size) do
     pty = spawn_cmd(port, cmd, size)
-    {pty, extract_pid(port.info(pty, :os_pid))}
+    os_pid = port.info(pty, :os_pid)
+    {pty, extract_pid(os_pid)}
   end
 
   defp extract_pid({:os_pid, pid}), do: pid
@@ -51,7 +58,7 @@ defmodule El.Pty.Init do
   defp setup(file, _pty, size) do
     {:ok, fd} = file.open("/dev/tty", [:read, :binary, :raw])
     log_header(size, tty_or_user(fd, file))
-    Process.flag(:trap_exit, true)
+    flag(:trap_exit, true)
     spawn_link(fn -> start(file, self()) end)
   end
 
@@ -63,11 +70,11 @@ defmodule El.Pty.Init do
   end
 
   defp monitor_port(pty) do
-    Process.spawn(fn -> wait_and_check(self(), pty) end, [])
+    spawn(fn -> wait_and_check(self(), pty) end, [])
   end
 
   defp wait_and_check(parent, pty) do
-    Process.sleep(500)
+    sleep(500)
     check_port(parent, pty)
   end
 
