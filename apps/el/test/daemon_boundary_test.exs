@@ -78,4 +78,36 @@ defmodule DaemonBoundaryTest do
     ])
     |> Port.close()
   end
+
+  @tag :spawn
+  test "auto-spawn daemon on cold start", %{testdir: testdir} do
+    if System.get_env("EL_DAEMON_SPAWN") != "1" do
+      :skip
+    else
+      File.write!(Path.join(testdir, "agent_one"), "")
+      el_path = Path.expand("../el", __DIR__)
+
+      {output1, exit_code1} = System.cmd(
+        "sh",
+        ["-c", "cd #{testdir} && #{el_path} ls"],
+        stderr_to_stdout: true
+      )
+
+      assert exit_code1 == 0, "first ls failed: #{inspect(output1)}"
+      assert String.contains?(output1, "agent_one file asleep"),
+        "Expected 'agent_one file asleep' in output, got: #{inspect(output1)}"
+
+      {output2, exit_code2} = System.cmd(
+        "sh",
+        ["-c", "cd #{testdir} && #{el_path} ls"],
+        stderr_to_stdout: true
+      )
+
+      assert exit_code2 == 0, "second ls failed: #{inspect(output2)}"
+      assert String.contains?(output2, "elita@"),
+        "Expected 'elita@' marker in second ls (daemon should be up), got: #{inspect(output2)}"
+      assert String.contains?(output2, "agent_one file asleep"),
+        "Expected 'agent_one file asleep' in output, got: #{inspect(output2)}"
+    end
+  end
 end
