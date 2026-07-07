@@ -49,18 +49,18 @@ defmodule El.Commands.Ask do
 
   defp attempt_call(msg, target, agent, env_module, tool) do
     context = {msg, target, String.to_atom(agent), agent, env_module, tool}
-    dispatch_by_connection(Node.connect(target), context)
+    forward(Node.connect(target), context)
   end
 
-  defp dispatch_by_connection(
+  defp forward(
          true,
          {msg, target, process_name, _agent, _env_module, tool}
        ) do
     remote_ask(msg, target, process_name, tool)
   end
 
-  defp dispatch_by_connection(
-         false,
+  defp forward(
+         _result,
          {msg, _target, _process_name, agent, env_module, tool}
        ) do
     fail_call(agent, msg, env_module, tool)
