@@ -2,7 +2,7 @@ Logger.configure(level: :warning)
 
 include_tags = if System.get_env("LIVE") == "1", do: [:main, :live], else: [:main]
 
-timeout = 180_000
+timeout = 60_000
 
 ExUnit.start(
   timeout: timeout,

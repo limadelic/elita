@@ -37,12 +37,23 @@ defmodule El.Commands.Ask do
   end
 
   defp remote_ask(msg, target, process_name) do
+    with_tap(target, process_name, fn ->
+      answer = get_answer(msg, target, process_name)
+      IO.puts(answer)
+    end)
+  end
+
+  defp with_tap(target, process_name, fun) do
     :ok = GenServer.call({process_name, target}, {:tap, self()})
+    result = fun.()
+    :ok = GenServer.call({process_name, target}, {:untap, self()})
+    result
+  end
+
+  defp get_answer(msg, target, process_name) do
     text = format_text(msg)
     GenServer.cast({process_name, target}, {:inject, text})
-    answer = Answer.collect(120_000)
-    :ok = GenServer.call({process_name, target}, {:untap, self()})
-    IO.puts(answer)
+    Answer.collect(120_000)
   end
 
   defp fail_call(agent, msg, env_module) do
