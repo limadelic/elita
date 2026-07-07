@@ -3,7 +3,8 @@ defmodule El.Commands.Ls do
 
   import IO, only: [puts: 1]
   import File, only: [ls!: 1]
-  import Enum, only: [map: 2, sort_by: 2, each: 2]
+  import Enum, only: [map: 2, sort_by: 2, each: 2, reject: 2]
+  import String, only: [starts_with?: 2]
   import Agent.Registry, only: [lookup: 1]
 
   def execute(opts \\ []) do
@@ -14,8 +15,13 @@ defmodule El.Commands.Ls do
   defp build(path) do
     path
     |> ls!()
+    |> reject(&hidden/1)
     |> map(&entry(path, &1))
     |> sort_by(& &1.name)
+  end
+
+  defp hidden(name) do
+    starts_with?(name, ".")
   end
 
   defp entry(path, name) do
