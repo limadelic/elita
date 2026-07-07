@@ -4,15 +4,14 @@ defmodule El.Command.Ls do
   import IO, only: [puts: 1]
   import System, only: [get_env: 1]
   import Process, only: [sleep: 1]
-
-  alias El.Commands.Ls
-  alias El.Distribution
-  alias El.Command.Ls.Query
-  alias El.Command.Ls.Boot
+  import El.Distribution, only: [start: 0]
+  import El.Command.Ls.Query, only: [fetch: 1]
+  import El.Command.Ls.Boot, only: [spawn: 0]
+  import El.Commands.Ls, only: [execute: 1]
 
   def run(path \\ nil) do
-    Distribution.start()
-    Query.fetch(path) |> reach(path)
+    start()
+    fetch(path) |> reach(path)
   end
 
   defp reach({:ok, output}, _path), do: puts(output)
@@ -23,19 +22,19 @@ defmodule El.Command.Ls do
   end
 
   defp gate("1", path) do
-    Boot.spawn()
+    spawn()
     wait(0, path)
   end
 
-  defp gate(_, path), do: Ls.execute(path: path)
+  defp gate(_, path), do: execute(path: path)
 
   defp wait(n, path) when n >= 10 do
-    Ls.execute(path: path)
+    execute(path: path)
   end
 
   defp wait(n, path) do
     sleep(50 * (n + 1))
-    Query.fetch(path) |> settle(n, path)
+    fetch(path) |> settle(n, path)
   end
 
   defp settle({:ok, output}, _n, _path), do: puts(output)
