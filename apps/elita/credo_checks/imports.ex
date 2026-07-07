@@ -42,9 +42,12 @@ defmodule Elita.Credo.Imports do
     issues
   end
 
-  defp maybe_add_issue({:__aliases__, _meta1, [_module]}, _meta2, issues, _allowlist, _filename) do
-    # Single-segment aliases (e.g., Record.handle via alias Tape.Record) are OK
-    issues
+  defp maybe_add_issue({:__aliases__, _meta_alias, [module]}, meta, issues, allowlist, filename) when is_atom(module) do
+    if should_report?(module, allowlist) do
+      [create_issue(module, meta, filename) | issues]
+    else
+      issues
+    end
   end
 
   defp maybe_add_issue({:__aliases__, _meta, parts}, meta, issues, allowlist, filename)

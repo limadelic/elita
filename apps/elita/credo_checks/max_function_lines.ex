@@ -19,21 +19,22 @@ defmodule Elita.Credo.MaxFunctionLines do
   def run(%SourceFile{} = source_file, params) do
     max_lines = Keyword.get(params, :max_lines, 5)
     filename = source_file.filename
-    Code.prewalk(source_file, &check_function(&1, &2, max_lines, filename))
+    source = File.read!(filename)
+    Code.prewalk(source_file, &check_function(&1, &2, max_lines, filename, source))
   end
 
-  defp check_function({type, meta, [_head | _tail]} = ast, issues, max_lines, filename)
+  defp check_function({type, meta, [_head | _tail]} = ast, issues, max_lines, filename, source)
        when type in [:def, :defp, :defmacro] do
-    {ast, maybe_add_issue(max_lines, meta, issues, filename)}
+    {ast, maybe_add_issue(max_lines, meta, issues, filename, source)}
   end
 
-  defp check_function(ast, issues, _max_lines, _filename) do
+  defp check_function(ast, issues, _max_lines, _filename, _source) do
     {ast, issues}
   end
 
-  defp maybe_add_issue(max_lines, meta, issues, filename) do
+  defp maybe_add_issue(max_lines, meta, issues, filename, source) do
     meta
-    |> LineCheck.find_body_lines()
+    |> LineCheck.find_body_lines(source)
     |> add_issue(max_lines, meta, issues, filename)
   end
 
