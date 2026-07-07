@@ -6,11 +6,19 @@ defmodule El.Commands.Ask do
   alias El.Answer
   alias El.Commands.Tell
   alias El.Distribution
+  alias El.CLI.DaemonConnector
 
   def execute(agent, msg, opts \\ []) do
     Distribution.start()
     env_module = Keyword.get(opts, :env_module, El.Infra.Env)
-    route(agent, msg, env_module)
+    try_daemon_first(agent, msg) || route(agent, msg, env_module)
+  end
+
+  defp try_daemon_first(agent, msg) do
+    case DaemonConnector.connect_and_rpc(["ask", agent, msg], []) do
+      :local -> nil
+      result -> result
+    end
   end
 
   defp route(agent, msg, env_module) do

@@ -3,11 +3,19 @@ defmodule El.Commands.Tell do
   import Elita, only: [start_link: 2, cast: 2]
   import :binary, only: [at: 2]
   alias El.Distribution
+  alias El.CLI.DaemonConnector
 
   def execute(agent, msg, opts \\ []) do
     Distribution.start()
     env_module = Keyword.get(opts, :env_module, El.Infra.Env)
-    route(agent, msg, env_module)
+    try_daemon_first(agent, msg) || route(agent, msg, env_module)
+  end
+
+  defp try_daemon_first(agent, msg) do
+    case DaemonConnector.connect_and_rpc(["tell", agent, msg], []) do
+      :local -> nil
+      result -> result
+    end
   end
 
   defp route(agent, msg, env_module) do

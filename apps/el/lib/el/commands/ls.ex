@@ -5,8 +5,20 @@ defmodule El.Commands.Ls do
   import File, only: [ls!: 1]
   import Enum, only: [map: 2, sort_by: 2, each: 2, reject: 2]
   import String, only: [starts_with?: 2]
+  alias El.CLI.DaemonConnector
 
   def execute(opts \\ []) do
+    try_daemon_first() || local_execute(opts)
+  end
+
+  defp try_daemon_first do
+    case DaemonConnector.connect_and_rpc(["ls"], []) do
+      :local -> nil
+      result -> result
+    end
+  end
+
+  defp local_execute(opts) do
     cwd = Keyword.get(opts, :cwd, File.cwd!())
     build(cwd) |> show()
   end

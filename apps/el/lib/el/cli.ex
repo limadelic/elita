@@ -2,10 +2,11 @@ defmodule El.CLI do
   import Application, only: [ensure_all_started: 1]
   import IO, only: [puts: 1]
 
+  alias El.CLI.Daemon
   alias El.Commands.Ask
-  alias El.Commands.Tell
   alias El.Commands.Claude
   alias El.Commands.Ls
+  alias El.Commands.Tell
   alias El.Distribution
 
   def main(argv) do
@@ -36,6 +37,10 @@ defmodule El.CLI do
     :ls
   end
 
+  defp parse(["daemon"]) do
+    :daemon
+  end
+
   defp parse(_) do
     :usage
   end
@@ -63,5 +68,9 @@ defmodule El.CLI do
   defp execute(:ls) do
     Distribution.start()
     Ls.execute()
+  end
+
+  defp execute(:daemon) do
+    Daemon.execute()
   end
 end

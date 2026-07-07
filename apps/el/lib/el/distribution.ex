@@ -9,6 +9,11 @@ defmodule El.Distribution do
     start_node(node_name, mode)
   end
 
+  def start_daemon do
+    start_node(:"elita@127.0.0.1", :shortnames)
+    Node.set_cookie(:elita)
+  end
+
   defp build_node_name(name, opts) do
     session_name = resolve_session_name(name)
     host_value = build_host(opts)
