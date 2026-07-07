@@ -1,6 +1,6 @@
 defmodule Agent.Harness do
   import Agent.Session, only: [ask: 2, cast: 2]
-  import String, only: [to_atom: 1, to_string: 1, downcase: 1]
+  import String, only: [to_atom: 1, downcase: 1]
 
   def dispatch(recipient, message, :ask) do
     recipient
@@ -15,7 +15,7 @@ defmodule Agent.Harness do
   end
 
   defp lookup(recipient) do
-    normalized = recipient |> to_atom |> to_string |> downcase
+    normalized = recipient |> to_atom |> Kernel.to_string() |> downcase
     Registry.lookup(ElitaRegistry, normalized)
   end
 
