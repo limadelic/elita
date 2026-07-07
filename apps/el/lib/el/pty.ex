@@ -50,7 +50,6 @@ defmodule El.Pty do
 
   defp wait_exit(pid) do
     ref = monitor(pid)
-
     receive do
       {:DOWN, ^ref, :process, ^pid, _} -> :ok
     end

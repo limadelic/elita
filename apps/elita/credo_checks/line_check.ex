@@ -12,18 +12,7 @@ defmodule Elita.Credo.LineCheck do
   end
   defp to_result(_end_line, _meta), do: :error
 
-  defp extract_end_line(_meta, source) do
-    source
-    |> Code.string_to_quoted(token_metadata: true, columns: true)
-    |> end_line_from_result()
-  end
-
-  defp end_line_from_result({:ok, {_type, node_meta, _children}}) do
-    extract_end(node_meta)
-  end
-  defp end_line_from_result(_), do: nil
-
-  defp extract_end(meta) do
+  defp extract_end_line(meta, _source) do
     case Keyword.get(meta, :end) do
       end_meta when is_list(end_meta) -> Keyword.get(end_meta, :line)
       _ -> nil
