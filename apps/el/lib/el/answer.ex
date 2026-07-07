@@ -10,17 +10,24 @@ defmodule El.Answer do
 
   defp receive_answer(acc, timer) do
     receive do
-      {:output, data} ->
-        combined = acc <> data
-        if done?(combined, acc) do
-          strip_ansi(combined)
-        else
-          receive_answer(combined, timer)
-        end
-
-      :timeout ->
-        strip_ansi(acc)
+      {:output, data} -> process_output(acc, timer, data)
+      :timeout -> strip_ansi(acc)
     end
+  end
+
+  defp process_output(acc, timer, data) do
+    combined = acc <> data
+    combined
+    |> done?(acc)
+    |> finish_or_continue(combined, timer)
+  end
+
+  defp finish_or_continue(true, combined, _timer) do
+    strip_ansi(combined)
+  end
+
+  defp finish_or_continue(false, combined, timer) do
+    receive_answer(combined, timer)
   end
 
   defp done?(_combined, ""), do: false
