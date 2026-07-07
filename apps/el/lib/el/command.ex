@@ -9,6 +9,7 @@ defmodule El.Command do
   alias El.Commands.Claude
   alias El.Commands.Ls
   alias El.Distribution
+  alias El.Erpc
   alias El.RPC
 
   def ls do
@@ -22,13 +23,13 @@ defmodule El.Command do
   def ask(agent, msg), do: Ask.execute(agent, msg)
   def tell(agent, msg), do: Tell.execute(agent, msg)
   def claude(name), do: Claude.execute(name)
-  def daemon, do: Distribution.boot_daemon()
+  def daemon, do: Distribution.daemon()
 
   defp query do
-    connect(:"elita@127.0.0.1") |> safe_fetch()
+    connect(:"elita@127.0.0.1") |> guard()
   end
 
-  defp safe_fetch(bool) do
+  defp guard(bool) do
     fetch(bool)
   rescue
     _ -> :error
@@ -36,7 +37,7 @@ defmodule El.Command do
 
   defp fetch(true) do
     cwd = File.cwd!()
-    output = :erpc.call(:"elita@127.0.0.1", RPC, :dispatch, [["ls"], cwd])
+    output = Erpc.call(:"elita@127.0.0.1", RPC, :dispatch, [["ls"], cwd])
     {:ok, output}
   end
 

@@ -8,21 +8,18 @@ defmodule El.RPC do
 
   def dispatch(command, cwd \\ File.cwd!()) do
     ensure_all_started(:elita)
-    output = safe_execute(command, cwd)
-    "#{marker()}\n#{output || ""}"
+    build(safe(command, cwd))
   end
 
-  defp safe_execute(command, cwd) do
-    try do
-      execute(command, cwd)
-    rescue
-      _ -> ""
-    end
+  defp build(output) do
+    "#{marker()}\n#{output}"
   end
 
-  defp execute(["ls"], cwd), do: Ls.execute_remote(cwd: cwd)
-  defp execute(["ask", agent, msg], _cwd), do: Ask.execute(agent, msg)
-  defp execute(_, _cwd), do: ""
+  defp safe(command, cwd), do: handle(command, cwd)
+
+  defp handle(["ls"], cwd), do: Ls.remote(cwd: cwd)
+  defp handle(["ask", agent, msg], _cwd), do: Ask.execute(agent, msg)
+  defp handle(_, _cwd), do: ""
 
   defp marker, do: "node: #{Node.self()}"
 end

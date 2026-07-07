@@ -11,7 +11,7 @@ defmodule El.Commands.Ls do
     render(cwd) |> puts()
   end
 
-  def execute_remote(opts \\ []) do
+  def remote(opts \\ []) do
     cwd = Keyword.get(opts, :cwd, File.cwd!())
     render(cwd)
   end

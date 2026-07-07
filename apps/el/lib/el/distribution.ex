@@ -10,7 +10,7 @@ defmodule El.Distribution do
     start_node(node_name, mode)
   end
 
-  def boot_daemon do
+  def daemon do
     start_node(:"elita@127.0.0.1", :longnames)
     ensure_all_started(:elita)
     Process.sleep(:infinity)
