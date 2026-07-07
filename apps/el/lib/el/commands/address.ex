@@ -1,11 +1,11 @@
 defmodule El.Commands.Address do
-  import Agent.Config, only: [load: 0]
   import Agent.Session, only: [start_link: 1]
   import El.Commands.Lookup, only: [local: 2]
   import String, only: [downcase: 1]
+  import El.Commands.Address.World, only: [build: 0, cwd: 0]
 
   def route(recipient, msg, mode \\ :ask) do
-    world = world()
+    world = build()
     cwd = cwd()
     result = Resolver.resolve(recipient, world, cwd)
     handle(result, recipient, msg, mode)
@@ -30,13 +30,13 @@ defmodule El.Commands.Address do
   end
 
   defp handle({:many, entries}, _recipient, msg, :tell) do
-    entries
-    |> Enum.uniq_by(&{&1.name, &1.path})
-    |> Enum.each(fn e -> rouse(e) end)
-    entries
-    |> Enum.uniq_by(&{&1.name, &1.path})
-    |> Enum.each(fn e -> tell(e.name, msg) end)
+    unique = Enum.uniq_by(entries, &{&1.name, &1.path})
+    rouse_all(unique)
+    echo(unique, msg)
   end
+
+  defp rouse_all(entries), do: Enum.each(entries, &rouse/1)
+  defp echo(entries, msg), do: Enum.each(entries, fn e -> tell(e.name, msg) end)
 
   defp tell(agent, msg) do
     agent |> downcase |> find(msg)
@@ -83,35 +83,4 @@ defmodule El.Commands.Address do
     normalized = String.downcase(to_string(name))
     Registry.lookup(ElitaRegistry, normalized) |> Enum.empty?()
   end
-
-  defp world do
-    folders = load() |> Enum.map(&entry/1)
-    files = Enum.flat_map(folders, &scan/1)
-    folders ++ files
-  end
-
-  defp entry({name, folder}) do
-    %{name: Atom.to_string(name), path: Path.expand(folder), kind: :folder}
-  end
-
-  defp scan(%{path: folder}) do
-    File.ls!(folder)
-    |> Enum.filter(&String.ends_with?(&1, ".exs"))
-    |> Enum.map(&file(folder, &1))
-  rescue
-    _ -> []
-  end
-
-  defp file(folder, filename) do
-    name = String.trim_trailing(filename, ".exs")
-    file_path = Path.join(folder, filename)
-    %{name: name, path: folder, file_path: file_path, kind: :file}
-  end
-
-  defp cwd do
-    File.cwd!() |> trim()
-  end
-
-  defp trim("/private" <> rest), do: rest
-  defp trim(path), do: path
 end

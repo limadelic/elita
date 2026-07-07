@@ -113,7 +113,7 @@ defmodule AddressTest do
 
     sub_abs = Path.join(base, "sub")
     capture_io(fn ->
-      El.Commands.Tell.execute("*@#{sub_abs}", "broadcast msg", env_module: FakeEnv)
+      El.Commands.Tell.execute("@#{sub_abs}", "broadcast msg", env_module: FakeEnv)
     end)
 
     sent = Agent.get(:msg_log, & &1)
