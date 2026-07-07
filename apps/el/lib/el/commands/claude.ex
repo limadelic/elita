@@ -12,10 +12,10 @@ defmodule El.Commands.Claude do
   import Path, only: [basename: 1]
 
   def execute(name \\ :default) do
-    execute(name, default_deps())
+    execute(name, deps())
   end
 
-  defp default_deps, do: [distribution_start: &start/1, cmd: &cmd/1, run: &run/2]
+  defp deps, do: [distribution_start: &start/1, cmd: &cmd/1, run: &run/2]
 
   def execute(name, deps) when is_list(deps) do
     run_with_cleanup(resolve_session_name(name), deps)
