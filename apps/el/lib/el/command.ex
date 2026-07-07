@@ -1,20 +1,14 @@
 defmodule El.Command do
   @moduledoc false
 
-  alias El.Commands.Ask
-  alias El.Commands.Cd
-  alias El.Commands.Claude
-  alias El.Commands.Spawn
-  alias El.Commands.Tell
-  alias El.Distribution
   alias El.Command.Ls
+  alias El.Command.Delegator
 
-  def ls(path \\ nil), do: Ls.run(path)
-
-  def ask(agent, msg, tool \\ nil), do: Ask.execute(agent, msg, tool)
-  def tell(agent, msg, tool \\ nil), do: Tell.execute(agent, msg, tool)
-  def spawn(name, agent), do: Spawn.execute(name, agent)
-  def claude(name), do: Claude.execute(name)
-  def cd(path), do: Cd.execute(path)
-  def daemon, do: Distribution.daemon()
+  defdelegate ls(path), to: Ls, as: :run
+  defdelegate ask(agent, msg, tool \\ nil), to: Delegator
+  defdelegate tell(agent, msg, tool \\ nil), to: Delegator
+  defdelegate spawn(name, agent), to: Delegator
+  defdelegate claude(name), to: Delegator
+  defdelegate cd(path), to: Delegator
+  defdelegate daemon(), to: Delegator
 end
