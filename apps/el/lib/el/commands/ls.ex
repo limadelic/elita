@@ -8,15 +8,24 @@ defmodule El.Commands.Ls do
   alias El.CLI.DaemonConnector
 
   def execute(opts \\ []) do
-    try_daemon_first() || local_execute(opts)
+    daemon_result = try_daemon_first()
+    delegate_execute(daemon_result, opts)
+  end
+
+  defp delegate_execute(result, _opts) when result != nil do
+    result
+  end
+
+  defp delegate_execute(nil, opts) do
+    local_execute(opts)
   end
 
   defp try_daemon_first do
-    case DaemonConnector.connect_and_rpc(["ls"], []) do
-      :local -> nil
-      result -> result
-    end
+    DaemonConnector.connect_and_rpc(["ls"], []) |> check_rpc()
   end
+
+  defp check_rpc(:local), do: nil
+  defp check_rpc(result), do: result
 
   defp local_execute(opts) do
     cwd = Keyword.get(opts, :cwd, File.cwd!())
