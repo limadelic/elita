@@ -15,6 +15,14 @@ defmodule El.Pty do
     GenServer.cast(name, {:inject, message})
   end
 
+  def tap(name, pid) do
+    GenServer.call(name, {:tap, pid})
+  end
+
+  def untap(name, pid) do
+    GenServer.call(name, {:untap, pid})
+  end
+
   def run(name, opts \\ []) do
     cmd = Keyword.get(opts, :cmd, "claude --dangerously-skip-permissions")
     full_opts = build_options(opts, cmd)
@@ -88,6 +96,15 @@ defmodule El.Pty do
     port.command(pty, response)
   end
   defp send_if_response(_, _, _), do: :ok
+
+  @impl true
+  def handle_call({:tap, pid}, _from, %{taps: taps} = state) do
+    {:reply, :ok, %{state | taps: [pid | taps]}}
+  end
+
+  def handle_call({:untap, pid}, _from, %{taps: taps} = state) do
+    {:reply, :ok, %{state | taps: List.delete(taps, pid)}}
+  end
 
   @impl true
   def handle_cast({:inject, msg}, %{pty: pty, port: port} = state) do
