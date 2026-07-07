@@ -23,7 +23,7 @@ defmodule El.MixProject do
 
   defp aliases do
     [
-      lint: ["credo --strict"]
+      lint: ["format --check-formatted", "credo --strict"]
     ]
   end
 

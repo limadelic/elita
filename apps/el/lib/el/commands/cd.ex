@@ -1,7 +1,7 @@
 defmodule El.Commands.Cd do
-  import Resolver, only: [normalize: 2]
   import El.Commands.Address.World, only: [cwd: 0]
   import El.Standpoint, only: [set: 1, birth: 0]
+  import Resolver, only: [normalize: 2]
 
   def execute(path) do
     here = cwd()

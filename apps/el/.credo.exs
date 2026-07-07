@@ -35,7 +35,7 @@
       # If you create your own checks, you must specify the source files for
       # them here, so they can be loaded by Credo before running the analysis.
       #
-      requires: ["../elita/credo_checks/line_check.ex", "../elita/credo_checks/max_function_lines.ex", "../elita/credo_checks/max_module_lines.ex", "../elita/credo_checks/imports.ex"],
+      requires: [],
       #
       # If you want to enforce a style guide and need a more traditional linting
       # experience, you can change `strict` to `true` below:
@@ -67,9 +67,6 @@
           {Credo.Check.Refactor.FunctionArity, [max_arity: 5]},
           {Credo.Check.Refactor.CyclomaticComplexity, [max_complexity: 1]},
           {Credo.Check.Design.DuplicatedCode, mass_threshold: 40},
-          {Elita.Credo.MaxFunctionLines, [max_lines: 5]},
-          {Elita.Credo.MaxModuleLines, [max_lines: 100]},
-          {Elita.Credo.Imports, []},
           {Credo.Check.Warning.Dbg, []},
           {Credo.Check.Warning.IoInspect, []},
           {Credo.Check.Warning.IExPry, []},

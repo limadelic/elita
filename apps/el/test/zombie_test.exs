@@ -2,6 +2,7 @@ Code.require_file("../../elita/test/tester.exs", __DIR__)
 
 defmodule ZombieTest do
   use Tester
+
   @moduletag :live
   @moduletag timeout: 60_000
 
@@ -17,6 +18,7 @@ defmodule ZombieTest do
         catch
           :exit, _ -> :ok
         end
+
         System.delete_env("AGENT_REGISTRATIONS")
       end)
 

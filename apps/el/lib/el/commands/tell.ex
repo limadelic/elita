@@ -1,8 +1,9 @@
 defmodule El.Commands.Tell do
   @moduledoc false
-  import String, only: [contains?: 2]
   import :binary, only: [at: 2]
   import El.Commands.Address, only: [route: 4]
+  import String, only: [contains?: 2]
+
   alias El.Distribution
 
   def execute(agent, msg, tool \\ nil, opts \\ []) do

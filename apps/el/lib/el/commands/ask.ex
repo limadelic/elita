@@ -1,9 +1,10 @@
 defmodule El.Commands.Ask do
   @moduledoc false
   import :binary, only: [at: 2]
-  import String, only: [contains?: 2]
   import El.Commands.Address, only: [route: 4]
   import El.Commands.Lookup, only: [local: 4]
+  import String, only: [contains?: 2]
+
   alias El.Answer
   alias El.Commands.Tell
   alias El.Distribution
@@ -30,7 +31,10 @@ defmodule El.Commands.Ask do
     route(agent, msg, :ask, tool)
   end
 
-  defp dispatch(%{agent: agent, msg: msg, tool: tool, env: env, opts: opts}, false) do
+  defp dispatch(
+         %{agent: agent, msg: msg, tool: tool, env: env, opts: opts},
+         false
+       ) do
     target = Tell.remote_target(agent, env_module: env)
     send_via(target, {agent, msg, tool, env, opts})
   end
@@ -48,19 +52,30 @@ defmodule El.Commands.Ask do
     dispatch_by_connection(Node.connect(target), context)
   end
 
-  defp dispatch_by_connection(true, {msg, target, process_name, _agent, _env_module, tool}) do
+  defp dispatch_by_connection(
+         true,
+         {msg, target, process_name, _agent, _env_module, tool}
+       ) do
     remote_ask(msg, target, process_name, tool)
   end
 
-  defp dispatch_by_connection(false, {msg, _target, _process_name, agent, env_module, tool}) do
+  defp dispatch_by_connection(
+         false,
+         {msg, _target, _process_name, agent, env_module, tool}
+       ) do
     fail_call(agent, msg, env_module, tool)
   end
 
   defp remote_ask(msg, target, process_name, tool) do
-    with_tap(target, process_name, fn ->
-      answer = get_answer(msg, target, process_name)
-      IO.puts(answer)
-    end, tool)
+    with_tap(
+      target,
+      process_name,
+      fn ->
+        answer = get_answer(msg, target, process_name)
+        IO.puts(answer)
+      end,
+      tool
+    )
   end
 
   defp with_tap(target, process_name, fun, _tool) do
@@ -83,10 +98,13 @@ defmodule El.Commands.Ask do
     GenServer.cast({process_name, target}, {:inject, text, reply_to: reply_to})
     Answer.await(ref, 30_000)
   end
+
   defp format_text(msg), do: apply_format(String.contains?(msg, "\n"), msg)
 
   defp apply_format(true, msg), do: "\e[200~#{msg}\e[201~\r"
-  defp apply_format(false, msg), do: maybe_return(special_byte?(at(msg, 0)), msg)
+
+  defp apply_format(false, msg),
+    do: maybe_return(special_byte?(at(msg, 0)), msg)
 
   defp maybe_return(true, msg), do: msg
   defp maybe_return(false, msg), do: "#{msg}\r"

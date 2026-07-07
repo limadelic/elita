@@ -2,15 +2,16 @@ defmodule El.Commands.Claude do
   @moduledoc false
   import :os, only: [cmd: 1]
   import El.Pty, only: [run: 2]
-  alias El.Distribution
+
   alias El.Commands.Size
+  alias El.Distribution
 
   def execute(name \\ :default) do
-    execute(name, [
+    execute(name,
       distribution_start: &Distribution.start/1,
       cmd: &cmd/1,
       run: &run/2
-    ])
+    )
   end
 
   def execute(name, deps) when is_list(deps) do
@@ -32,6 +33,7 @@ defmodule El.Commands.Claude do
 
   defp check_available(:taken, session_name) do
     IO.puts("session #{session_name} already live — el tell #{session_name} <msg>, or /exit it")
+
     System.halt(1)
   end
 
@@ -54,7 +56,10 @@ defmodule El.Commands.Claude do
   end
 
   defp restore do
-    File.write!("/dev/tty", "\e[?1000l\e[?1002l\e[?1003l\e[?1006l\e[?2004l\e[?1049l\e[?25h")
+    File.write!(
+      "/dev/tty",
+      "\e[?1000l\e[?1002l\e[?1003l\e[?1006l\e[?2004l\e[?1049l\e[?25h"
+    )
   rescue
     _ -> :ok
   end
@@ -65,5 +70,4 @@ defmodule El.Commands.Claude do
 
   defp resolve_session_name(:default), do: File.cwd!() |> Path.basename()
   defp resolve_session_name(name) when is_binary(name), do: name
-
 end

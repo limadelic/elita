@@ -1,16 +1,16 @@
 defmodule El.Command do
   @moduledoc false
 
+  import :erpc, only: [call: 4]
   import IO, only: [puts: 1]
   import Node, only: [connect: 1]
-  import :erpc, only: [call: 4]
 
   alias El.Commands.Ask
-  alias El.Commands.Tell
+  alias El.Commands.Cd
   alias El.Commands.Claude
   alias El.Commands.Ls
-  alias El.Commands.Cd
   alias El.Commands.Spawn
+  alias El.Commands.Tell
   alias El.Distribution
   alias El.RPC
 
@@ -35,7 +35,12 @@ defmodule El.Command do
 
   defp init do
     exe = pick()
-    Port.open({:spawn_executable, "/bin/sh"}, [{:args, ["-c", "#{exe} daemon &"]}, :exit_status]) |> Port.close()
+
+    Port.open({:spawn_executable, "/bin/sh"}, [
+      {:args, ["-c", "#{exe} daemon &"]},
+      :exit_status
+    ])
+    |> Port.close()
   end
 
   defp pick do

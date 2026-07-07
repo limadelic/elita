@@ -1,5 +1,6 @@
 defmodule LsBoundaryTest do
   use ExUnit.Case
+
   @moduletag :main
 
   setup do
@@ -23,17 +24,20 @@ defmodule LsBoundaryTest do
 
     el_path = Path.expand("../el", __DIR__)
 
-    {output, exit_code} = System.cmd(
-      "sh",
-      ["-c", "cd #{testdir} && #{el_path} ls"],
-      stderr_to_stdout: true
-    )
+    {output, exit_code} =
+      System.cmd(
+        "sh",
+        ["-c", "cd #{testdir} && #{el_path} ls"],
+        stderr_to_stdout: true
+      )
 
     assert exit_code == 0, "el ls failed with exit code #{exit_code}: #{output}"
+
     assert String.contains?(output, "agent_one file asleep"),
-      "Expected 'agent_one file asleep' in output, got: #{inspect(output)}"
+           "Expected 'agent_one file asleep' in output, got: #{inspect(output)}"
+
     assert String.contains?(output, "agent_two folder asleep"),
-      "Expected 'agent_two folder asleep' in output, got: #{inspect(output)}"
+           "Expected 'agent_two folder asleep' in output, got: #{inspect(output)}"
   end
 
   test "el ls boundary test hides dotfiles", %{testdir: testdir} do
@@ -42,30 +46,37 @@ defmodule LsBoundaryTest do
 
     el_path = Path.expand("../el", __DIR__)
 
-    {output, exit_code} = System.cmd(
-      "sh",
-      ["-c", "cd #{testdir} && #{el_path} ls"],
-      stderr_to_stdout: true
-    )
+    {output, exit_code} =
+      System.cmd(
+        "sh",
+        ["-c", "cd #{testdir} && #{el_path} ls"],
+        stderr_to_stdout: true
+      )
 
     assert exit_code == 0, "el ls failed with exit code #{exit_code}: #{output}"
+
     assert String.contains?(output, "visible file asleep"),
-      "Expected 'visible' in output, got: #{inspect(output)}"
+           "Expected 'visible' in output, got: #{inspect(output)}"
+
     refute String.contains?(output, ".hidden"),
-      "Dotfiles should be hidden, but '.hidden' found in: #{inspect(output)}"
+           "Dotfiles should be hidden, but '.hidden' found in: #{inspect(output)}"
   end
 
-  test "el ls boundary test shows no agents for empty folder", %{testdir: testdir} do
+  test "el ls boundary test shows no agents for empty folder", %{
+    testdir: testdir
+  } do
     el_path = Path.expand("../el", __DIR__)
 
-    {output, exit_code} = System.cmd(
-      "sh",
-      ["-c", "cd #{testdir} && #{el_path} ls"],
-      stderr_to_stdout: true
-    )
+    {output, exit_code} =
+      System.cmd(
+        "sh",
+        ["-c", "cd #{testdir} && #{el_path} ls"],
+        stderr_to_stdout: true
+      )
 
     assert exit_code == 0, "el ls failed with exit code #{exit_code}: #{output}"
+
     assert String.contains?(output, "no agents"),
-      "Expected 'no agents' for empty folder, got: #{inspect(output)}"
+           "Expected 'no agents' for empty folder, got: #{inspect(output)}"
   end
 end

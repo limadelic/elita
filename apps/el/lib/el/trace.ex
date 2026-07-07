@@ -15,7 +15,9 @@ defmodule El.Trace do
   end
 
   defp log_header_maybe(nil, _size, _tty_source), do: :ok
-  defp log_header_maybe(path, size, tty_source), do: write_header(path, size, tty_source)
+
+  defp log_header_maybe(path, size, tty_source),
+    do: write_header(path, size, tty_source)
 
   def log_event(event) do
     log_event_maybe(System.get_env("EL_TRACE"), event)
@@ -29,11 +31,16 @@ defmodule El.Trace do
   end
 
   defp log_event_maybe(nil, _event, _reason), do: :ok
-  defp log_event_maybe(path, event, reason), do: write_event(path, event, reason)
+
+  defp log_event_maybe(path, event, reason),
+    do: write_event(path, event, reason)
 
   defp write_header(path, {rows, cols}, tty_source) do
     timestamp = System.monotonic_time(:millisecond)
-    line = "#{timestamp} start rows=#{rows} cols=#{cols} tty_source=#{tty_source}\n"
+
+    line =
+      "#{timestamp} start rows=#{rows} cols=#{cols} tty_source=#{tty_source}\n"
+
     File.write(path, line, [:append])
   end
 

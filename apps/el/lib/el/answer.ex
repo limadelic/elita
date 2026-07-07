@@ -25,6 +25,7 @@ defmodule El.Answer do
 
   defp process_output(acc, timer, data) do
     combined = acc <> data
+
     combined
     |> done?(acc)
     |> finish_or_continue(combined, timer)

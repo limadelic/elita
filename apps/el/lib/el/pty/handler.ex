@@ -14,5 +14,6 @@ defmodule El.Pty.Handler do
   defp send_if_response(port, pty, {response, _}) when response != "" do
     port.command(pty, response)
   end
+
   defp send_if_response(_, _, _), do: :ok
 end

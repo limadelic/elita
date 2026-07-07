@@ -1,7 +1,7 @@
 defmodule El.Distribution do
   @moduledoc false
-  import El.Host, only: [host: 0]
   import Application, only: [ensure_all_started: 1]
+  import El.Host, only: [host: 0]
   import El.Peers, only: [load: 0]
 
   def start(name \\ :default, opts \\ []) do
@@ -45,7 +45,11 @@ defmodule El.Distribution do
   end
 
   defp apply_start({:error, reason}, _node_name, _mode) do
-    IO.write(:stderr, "Warning: Failed to start distribution: #{inspect(reason)}\n")
+    IO.write(
+      :stderr,
+      "Warning: Failed to start distribution: #{inspect(reason)}\n"
+    )
+
     :ok
   end
 

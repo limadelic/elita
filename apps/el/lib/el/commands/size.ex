@@ -34,7 +34,7 @@ defmodule El.Commands.Size do
   end
 
   defp parse_stty({output, 0}) do
-    extract_pair(String.trim(output) |> String.split())
+    String.trim(output) |> String.split() |> extract_pair()
   end
 
   defp parse_stty(_), do: nil

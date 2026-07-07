@@ -12,7 +12,9 @@ defmodule El.Commands.Lookup do
   end
 
   defp find(normalized, agent, msg, tool) do
-    lookup("#{normalized}:#{tool}") |> fallback(normalized) |> dispatch(agent, msg)
+    lookup("#{normalized}:#{tool}")
+    |> fallback(normalized)
+    |> dispatch(agent, msg)
   end
 
   defp lookup(key), do: Registry.lookup(ElitaRegistry, key)

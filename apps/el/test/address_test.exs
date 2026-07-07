@@ -30,11 +30,15 @@ end
 
 defmodule AddressTest do
   use ExUnit.Case, async: false
+
   import ExUnit.CaptureIO
 
   test "ask with address forms (bare, relative, absolute, unknown, ambiguous, file wake)" do
     # Setup: Create tmp folder structure
-    base = System.tmp_dir() |> Path.join("elita_address_test_#{System.unique_integer()}")
+    base =
+      System.tmp_dir()
+      |> Path.join("elita_address_test_#{System.unique_integer()}")
+
     File.mkdir_p!(base)
     base = Path.expand(base)
 
@@ -47,20 +51,28 @@ defmodule AddressTest do
     old_cwd = File.cwd!()
     File.cd!(base)
 
-    registrations = "agent1:#{sub_folder},agent3:#{sub_folder},agent2:#{deep_folder}"
+    registrations =
+      "agent1:#{sub_folder},agent3:#{sub_folder},agent2:#{deep_folder}"
+
     old_registrations = System.get_env("AGENT_REGISTRATIONS")
     System.put_env("AGENT_REGISTRATIONS", registrations)
 
     # Start registry and create stub agents
     Registry.start_link(keys: :duplicate, name: ElitaRegistry)
 
-    via1 = {:via, Registry, {ElitaRegistry, "agent1", %{kind: :native, folder: sub_folder}}}
+    via1 =
+      {:via, Registry, {ElitaRegistry, "agent1", %{kind: :native, folder: sub_folder}}}
+
     GenServer.start_link(StubAgent, "agent1", name: via1)
 
-    via3 = {:via, Registry, {ElitaRegistry, "agent3", %{kind: :native, folder: sub_folder}}}
+    via3 =
+      {:via, Registry, {ElitaRegistry, "agent3", %{kind: :native, folder: sub_folder}}}
+
     GenServer.start_link(StubAgent, "agent3", name: via3)
 
-    via2 = {:via, Registry, {ElitaRegistry, "agent2", %{kind: :native, folder: deep_folder}}}
+    via2 =
+      {:via, Registry, {ElitaRegistry, "agent2", %{kind: :native, folder: deep_folder}}}
+
     GenServer.start_link(StubAgent, "agent2", name: via2)
 
     on_exit(fn ->
@@ -79,11 +91,16 @@ defmodule AddressTest do
 
     # Test 3: name@absolute path
     sub_abs = Path.join(base, "sub")
-    output3 = capture_io(fn -> El.Commands.Ask.execute("agent1@#{sub_abs}", "msg") end)
+
+    output3 =
+      capture_io(fn -> El.Commands.Ask.execute("agent1@#{sub_abs}", "msg") end)
+
     refute String.contains?(output3, "unknown: agent1")
 
     # Test 4: unknown address
-    output4 = capture_io(fn -> El.Commands.Ask.execute("missing@/bad", "msg") end)
+    output4 =
+      capture_io(fn -> El.Commands.Ask.execute("missing@/bad", "msg") end)
+
     assert String.contains?(output4, "unknown: missing@/bad")
 
     # Test 5: file wake - create a file agent, no live process
@@ -97,10 +114,10 @@ defmodule AddressTest do
     System.put_env("TEST_AGENT_RUNNER", "StubRunner")
 
     # Call ask with stub runner to avoid spawning claude
-    output6 = capture_io(fn ->
-      El.Commands.Ask.execute("doctor@#{sub_folder}", "msg",
-        env_module: FakeEnv)
-    end)
+    output6 =
+      capture_io(fn ->
+        El.Commands.Ask.execute("doctor@#{sub_folder}", "msg", env_module: FakeEnv)
+      end)
 
     # Restore environment
     if old_runner do
@@ -118,6 +135,7 @@ defmodule AddressTest do
     Agent.start_link(fn -> [] end, name: :msg_log)
 
     sub_abs = Path.join(base, "sub")
+
     capture_io(fn ->
       El.Commands.Tell.execute("@#{sub_abs}", "broadcast msg", env_module: FakeEnv)
     end)
@@ -161,9 +179,10 @@ defmodule AddressTest do
     old_runner = System.get_env("TEST_AGENT_RUNNER")
     System.put_env("TEST_AGENT_RUNNER", "StubRunner")
 
-    output_crew = capture_io(fn ->
-      El.Commands.Ask.execute("crew@#{folder_with_md}", "msg", env_module: FakeEnv)
-    end)
+    output_crew =
+      capture_io(fn ->
+        El.Commands.Ask.execute("crew@#{folder_with_md}", "msg", env_module: FakeEnv)
+      end)
 
     if old_runner do
       System.put_env("TEST_AGENT_RUNNER", old_runner)
@@ -188,9 +207,10 @@ defmodule AddressTest do
     System.put_env("AGENT_REGISTRATIONS", registrations)
     System.put_env("TEST_AGENT_RUNNER", "StubRunner")
 
-    output_team = capture_io(fn ->
-      El.Commands.Ask.execute("team@#{folder_no_md}", "msg", env_module: FakeEnv)
-    end)
+    output_team =
+      capture_io(fn ->
+        El.Commands.Ask.execute("team@#{folder_no_md}", "msg", env_module: FakeEnv)
+      end)
 
     if old_runner do
       System.put_env("TEST_AGENT_RUNNER", old_runner)
@@ -209,9 +229,10 @@ defmodule AddressTest do
     System.put_env("TEST_AGENT_RUNNER", "StubRunner")
 
     # spawn ward doctor
-    output_spawn1 = capture_io(fn ->
-      El.Commands.Spawn.execute("ward", "agent1")
-    end)
+    output_spawn1 =
+      capture_io(fn ->
+        El.Commands.Spawn.execute("ward", "agent1")
+      end)
 
     if old_runner do
       System.put_env("TEST_AGENT_RUNNER", old_runner)
@@ -226,9 +247,10 @@ defmodule AddressTest do
     # spawn p1 doctor and spawn p2 doctor are different sessions
     System.put_env("TEST_AGENT_RUNNER", "StubRunner")
 
-    output_spawn2 = capture_io(fn ->
-      El.Commands.Spawn.execute("p1", "agent1")
-    end)
+    output_spawn2 =
+      capture_io(fn ->
+        El.Commands.Spawn.execute("p1", "agent1")
+      end)
 
     if old_runner do
       System.put_env("TEST_AGENT_RUNNER", old_runner)
@@ -241,9 +263,10 @@ defmodule AddressTest do
 
     System.put_env("TEST_AGENT_RUNNER", "StubRunner")
 
-    output_spawn3 = capture_io(fn ->
-      El.Commands.Spawn.execute("p2", "agent1")
-    end)
+    output_spawn3 =
+      capture_io(fn ->
+        El.Commands.Spawn.execute("p2", "agent1")
+      end)
 
     if old_runner do
       System.put_env("TEST_AGENT_RUNNER", old_runner)
@@ -256,15 +279,19 @@ defmodule AddressTest do
     refute pid_p1 == pid_p2
 
     # spawn duplicate name errors
-    output_dup = capture_io(fn ->
-      El.Commands.Spawn.execute("ward", "agent1")
-    end)
+    output_dup =
+      capture_io(fn ->
+        El.Commands.Spawn.execute("ward", "agent1")
+      end)
+
     assert String.contains?(output_dup, "error")
 
     # spawn for unknown agent errors
-    output_unknown = capture_io(fn ->
-      El.Commands.Spawn.execute("xyz", "missing_agent")
-    end)
+    output_unknown =
+      capture_io(fn ->
+        El.Commands.Spawn.execute("xyz", "missing_agent")
+      end)
+
     assert String.contains?(output_unknown, "error")
 
     # verify ward is registered and active
@@ -277,7 +304,11 @@ defmodule AddressTest do
     Agent.start_link(fn -> [] end, name: :channel_test_log)
 
     System.put_env("TEST_AGENT_RUNNER", "StubRunner")
-    capture_io(fn -> El.Commands.Ask.execute("ward", "msg1", env_module: FakeEnv) end)
+
+    capture_io(fn ->
+      El.Commands.Ask.execute("ward", "msg1", env_module: FakeEnv)
+    end)
+
     if old_runner do
       System.put_env("TEST_AGENT_RUNNER", old_runner)
     else
@@ -288,7 +319,11 @@ defmodule AddressTest do
     assert pid_ward_before == pid_ward_after1
 
     System.put_env("TEST_AGENT_RUNNER", "StubRunner")
-    capture_io(fn -> El.Commands.Ask.execute("ward", "msg2", env_module: FakeEnv) end)
+
+    capture_io(fn ->
+      El.Commands.Ask.execute("ward", "msg2", env_module: FakeEnv)
+    end)
+
     if old_runner do
       System.put_env("TEST_AGENT_RUNNER", old_runner)
     else
@@ -314,11 +349,14 @@ defmodule AddressTest do
     end)
 
     start_time = System.monotonic_time(:millisecond)
-    received = receive do
-      {^ref, answer} -> answer
-    after
-      5000 -> :timeout
-    end
+
+    received =
+      receive do
+        {^ref, answer} -> answer
+      after
+        5000 -> :timeout
+      end
+
     elapsed = System.monotonic_time(:millisecond) - start_time
 
     assert received == "prompt response"
@@ -328,10 +366,14 @@ end
 
 defmodule ToolPrefixTest do
   use ExUnit.Case, async: false
+
   import ExUnit.CaptureIO
 
   test "tool prefix selects harness session (claude vs codex)" do
-    base = System.tmp_dir() |> Path.join("elita_tool_test_#{System.unique_integer()}")
+    base =
+      System.tmp_dir()
+      |> Path.join("elita_tool_test_#{System.unique_integer()}")
+
     File.mkdir_p!(base)
     base = Path.expand(base)
 
@@ -347,7 +389,9 @@ defmodule ToolPrefixTest do
 
     Registry.start_link(keys: :duplicate, name: ElitaRegistry)
 
-    via_base = {:via, Registry, {ElitaRegistry, "agent1", %{kind: :native, folder: folder}}}
+    via_base =
+      {:via, Registry, {ElitaRegistry, "agent1", %{kind: :native, folder: folder}}}
+
     GenServer.start_link(StubAgent, "agent1", name: via_base)
 
     on_exit(fn ->
@@ -359,39 +403,53 @@ defmodule ToolPrefixTest do
     System.put_env("TEST_AGENT_RUNNER", "StubRunner")
 
     # Test 1: bare ask should work (no tool prefix)
-    output1 = capture_io(fn ->
-      El.Commands.Ask.execute("agent1", "msg", nil, env_module: FakeEnv)
-    end)
+    output1 =
+      capture_io(fn ->
+        El.Commands.Ask.execute("agent1", "msg", nil, env_module: FakeEnv)
+      end)
+
     refute String.contains?(output1, "unknown: agent1")
 
     # Test 2: claude tool prefix (falls back to bare if tool session not found)
-    output2 = capture_io(fn ->
-      El.Commands.Ask.execute("agent1", "msg", "claude", env_module: FakeEnv)
-    end)
+    output2 =
+      capture_io(fn ->
+        El.Commands.Ask.execute("agent1", "msg", "claude", env_module: FakeEnv)
+      end)
+
     refute String.contains?(output2, "unknown: agent1")
 
     # Test 3: codex tool prefix (falls back to bare if tool session not found)
-    output3 = capture_io(fn ->
-      El.Commands.Ask.execute("agent1", "msg", "codex", env_module: FakeEnv)
-    end)
+    output3 =
+      capture_io(fn ->
+        El.Commands.Ask.execute("agent1", "msg", "codex", env_module: FakeEnv)
+      end)
+
     refute String.contains?(output3, "unknown: agent1")
 
     # Test 4: verify claude and codex sessions can coexist for same agent
-    via_claude = {:via, Registry, {ElitaRegistry, "agent1:claude", %{kind: :native, folder: folder}}}
+    via_claude =
+      {:via, Registry, {ElitaRegistry, "agent1:claude", %{kind: :native, folder: folder}}}
+
     GenServer.start_link(StubAgent, "agent1:claude", name: via_claude)
 
-    via_codex = {:via, Registry, {ElitaRegistry, "agent1:codex", %{kind: :native, folder: folder}}}
+    via_codex =
+      {:via, Registry, {ElitaRegistry, "agent1:codex", %{kind: :native, folder: folder}}}
+
     GenServer.start_link(StubAgent, "agent1:codex", name: via_codex)
 
     assert Registry.lookup(ElitaRegistry, "agent1:claude") != []
     assert Registry.lookup(ElitaRegistry, "agent1:codex") != []
-    assert Registry.lookup(ElitaRegistry, "agent1:claude") != Registry.lookup(ElitaRegistry, "agent1:codex")
+
+    assert Registry.lookup(ElitaRegistry, "agent1:claude") !=
+             Registry.lookup(ElitaRegistry, "agent1:codex")
   end
 
   test "unknown tool prefix produces instant error" do
-    output = capture_io(fn ->
-      El.CLI.main(["badtool", "ask", "agent1", "msg"])
-    end)
+    output =
+      capture_io(fn ->
+        El.CLI.main(["badtool", "ask", "agent1", "msg"])
+      end)
+
     assert String.contains?(output, "unknown tool: badtool")
   end
 end
@@ -402,10 +460,13 @@ end
 
 defmodule LsTest do
   use ExUnit.Case, async: false
+
   import ExUnit.CaptureIO
 
   test "ls with path forms (bare, relative, absolute, glob)" do
-    base = System.tmp_dir() |> Path.join("elita_ls_test_#{System.unique_integer()}")
+    base =
+      System.tmp_dir() |> Path.join("elita_ls_test_#{System.unique_integer()}")
+
     File.mkdir_p!(base)
     base = Path.expand(base)
 
@@ -426,10 +487,14 @@ defmodule LsTest do
 
     Registry.start_link(keys: :duplicate, name: ElitaRegistry)
 
-    via1 = {:via, Registry, {ElitaRegistry, "root_agent", %{kind: :file, path: base}}}
+    via1 =
+      {:via, Registry, {ElitaRegistry, "root_agent", %{kind: :file, path: base}}}
+
     GenServer.start_link(StubAgent, "root_agent", name: via1)
 
-    via2 = {:via, Registry, {ElitaRegistry, "sub_agent", %{kind: :file, path: sub}}}
+    via2 =
+      {:via, Registry, {ElitaRegistry, "sub_agent", %{kind: :file, path: sub}}}
+
     GenServer.start_link(StubAgent, "sub_agent", name: via2)
 
     on_exit(fn ->
@@ -462,7 +527,10 @@ defmodule LsTest do
   end
 
   test "ls // shows connected nodes" do
-    base = System.tmp_dir() |> Path.join("elita_nodes_test_#{System.unique_integer()}")
+    base =
+      System.tmp_dir()
+      |> Path.join("elita_nodes_test_#{System.unique_integer()}")
+
     File.mkdir_p!(base)
     base = Path.expand(base)
 
@@ -480,9 +548,10 @@ defmodule LsTest do
       File.rm_rf!(base)
     end)
 
-    output = capture_io(fn ->
-      El.Commands.Ls.execute(path: "//")
-    end)
+    output =
+      capture_io(fn ->
+        El.Commands.Ls.execute(path: "//")
+      end)
 
     node_self = Node.self() |> Atom.to_string()
     assert String.contains?(output, node_self)
@@ -490,10 +559,11 @@ defmodule LsTest do
   end
 
   test "world with injected nodes shows entries" do
-    nodes_list = [:"node1@host", :"node2@host"]
+    nodes_list = [:node1@host, :node2@host]
     world = El.Commands.Address.World.build(fn -> nodes_list end)
 
-    node_kinds = world
+    node_kinds =
+      world
       |> Enum.filter(&(&1.kind == :node))
       |> Enum.map(& &1.name)
 
@@ -506,7 +576,10 @@ defmodule PeersTest do
   use ExUnit.Case, async: false
 
   test "peers round-trip: record and load" do
-    tmp = System.tmp_dir() |> Path.join("elita_peers_test_#{System.unique_integer()}")
+    tmp =
+      System.tmp_dir()
+      |> Path.join("elita_peers_test_#{System.unique_integer()}")
+
     File.mkdir_p!(tmp)
 
     old_home = System.get_env("HOME")
@@ -518,11 +591,12 @@ defmodule PeersTest do
       else
         System.delete_env("HOME")
       end
+
       File.rm_rf!(tmp)
     end)
 
-    peer1 = :"node1@host1"
-    peer2 = :"node2@host2"
+    peer1 = :node1@host1
+    peer2 = :node2@host2
 
     El.Peers.record(peer1)
     El.Peers.record(peer2)
@@ -535,7 +609,7 @@ defmodule PeersTest do
   end
 
   test "distribution redial connects to loaded peers" do
-    peers = [:"mock1@host", :"mock2@host"]
+    peers = [:mock1@host, :mock2@host]
     _connected = []
 
     fake_connect = fn peer ->
@@ -548,12 +622,12 @@ defmodule PeersTest do
 
     calls = Agent.get(:mock_connects, & &1)
 
-    assert :"mock1@host" in calls
-    assert :"mock2@host" in calls
+    assert :mock1@host in calls
+    assert :mock2@host in calls
   end
 
   defp redial(peers, connect_fn) do
-    peers |> Enum.each(&connect_fn.(&1))
+    peers |> Enum.each(connect_fn)
   rescue
     _ -> :ok
   end
@@ -561,10 +635,14 @@ end
 
 defmodule RelayTest do
   use ExUnit.Case, async: false
+
   import ExUnit.CaptureIO
 
   test "peer node relays via rpc function" do
-    base = System.tmp_dir() |> Path.join("elita_relay_test_#{System.unique_integer()}")
+    base =
+      System.tmp_dir()
+      |> Path.join("elita_relay_test_#{System.unique_integer()}")
+
     File.mkdir_p!(base)
     base = Path.expand(base)
 
@@ -590,24 +668,30 @@ defmodule RelayTest do
       :ok
     end
 
-    nodes = [:"peer1@host"]
+    nodes = [:peer1@host]
     world = El.Commands.Address.World.build(fn -> nodes end)
 
     capture_io(fn ->
-      El.Commands.Address.route("peer1@host", "test msg", :ask, nil, rpc: fake_rpc, world: world)
+      El.Commands.Address.route("peer1@host", "test msg", :ask, nil,
+        rpc: fake_rpc,
+        world: world
+      )
     end)
 
     calls = Agent.get(:relay_log, & &1)
     assert calls != []
 
     [{captured_node, captured_module, captured_func, _captured_args}] = calls
-    assert captured_node == :"peer1@host"
+    assert captured_node == :peer1@host
     assert captured_module == El.Commands.Address
     assert captured_func == :route
   end
 
   test "local entry does not touch rpc function" do
-    base = System.tmp_dir() |> Path.join("elita_local_test_#{System.unique_integer()}")
+    base =
+      System.tmp_dir()
+      |> Path.join("elita_local_test_#{System.unique_integer()}")
+
     File.mkdir_p!(base)
     base = Path.expand(base)
 
@@ -623,7 +707,9 @@ defmodule RelayTest do
 
     Registry.start_link(keys: :duplicate, name: ElitaRegistry)
 
-    via1 = {:via, Registry, {ElitaRegistry, "agent1", %{kind: :native, folder: folder}}}
+    via1 =
+      {:via, Registry, {ElitaRegistry, "agent1", %{kind: :native, folder: folder}}}
+
     GenServer.start_link(StubAgent, "agent1", name: via1)
 
     on_exit(fn ->
@@ -642,7 +728,10 @@ defmodule RelayTest do
     world = El.Commands.Address.World.build(fn -> [] end)
 
     capture_io(fn ->
-      El.Commands.Address.route("agent1", "test msg", :ask, nil, rpc: fake_rpc, world: world)
+      El.Commands.Address.route("agent1", "test msg", :ask, nil,
+        rpc: fake_rpc,
+        world: world
+      )
     end)
 
     calls = Agent.get(:relay_log, & &1)
@@ -650,7 +739,10 @@ defmodule RelayTest do
   end
 
   test "tell mode relays via rpc function" do
-    base = System.tmp_dir() |> Path.join("elita_tell_relay_test_#{System.unique_integer()}")
+    base =
+      System.tmp_dir()
+      |> Path.join("elita_tell_relay_test_#{System.unique_integer()}")
+
     File.mkdir_p!(base)
     base = Path.expand(base)
 
@@ -676,18 +768,20 @@ defmodule RelayTest do
       :ok
     end
 
-    nodes = [:"peer1@host"]
+    nodes = [:peer1@host]
     world = El.Commands.Address.World.build(fn -> nodes end)
 
     capture_io(fn ->
-      El.Commands.Address.route("peer1@host", "test msg", :tell, nil, rpc: fake_rpc, world: world)
+      El.Commands.Address.route("peer1@host", "test msg", :tell, nil,
+        rpc: fake_rpc,
+        world: world
+      )
     end)
 
     calls = Agent.get(:relay_log, & &1)
     assert calls != []
 
     [{_captured_node, _captured_module, _captured_func, captured_args}] = calls
-    assert !Enum.empty?(captured_args)
+    refute Enum.empty?(captured_args)
   end
 end
-

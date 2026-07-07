@@ -1,7 +1,7 @@
 defmodule El.Pty.Init do
   @moduledoc false
-  import El.Trace
   import El.PtyReader
+  import El.Trace
 
   def call(cfg) do
     size = cfg[:get_size].()
@@ -22,8 +22,15 @@ defmodule El.Pty.Init do
   end
 
   defp make_state(pty, cfg, tty_out, os_pid) do
-    %{pty: pty, file: cfg[:file], port: cfg[:port], tty_out: tty_out,
-      os_pid: os_pid, input: cfg[:input], taps: cfg[:taps]}
+    %{
+      pty: pty,
+      file: cfg[:file],
+      port: cfg[:port],
+      tty_out: tty_out,
+      os_pid: os_pid,
+      input: cfg[:input],
+      taps: cfg[:taps]
+    }
   end
 
   defp pty_and_pid(port, cmd, size) do
@@ -38,8 +45,11 @@ defmodule El.Pty.Init do
     {rows, cols} = size
     stty = "stty rows #{rows} cols #{cols}; stty raw -echo -isig;"
     args = ["-q", "/dev/null", "sh", "-c", "#{stty} exec #{cmd}"]
-    port.open({:spawn_executable, "/usr/bin/script"},
-      [:binary, :stream, :exit_status, {:args, args}])
+
+    port.open(
+      {:spawn_executable, "/usr/bin/script"},
+      [:binary, :stream, :exit_status, {:args, args}]
+    )
   end
 
   defp setup(file, _pty, size) do
@@ -58,10 +68,14 @@ defmodule El.Pty.Init do
 
   defp monitor_port(pty) do
     parent = self()
-    Process.spawn(fn ->
-      Process.sleep(500)
-      check_port(parent, pty)
-    end, [])
+
+    Process.spawn(
+      fn ->
+        Process.sleep(500)
+        check_port(parent, pty)
+      end,
+      []
+    )
   end
 
   defp check_port(parent, pty) do

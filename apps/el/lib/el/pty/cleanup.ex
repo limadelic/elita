@@ -2,6 +2,7 @@ defmodule El.Pty.Cleanup do
   @moduledoc false
 
   def kill_group(nil), do: :ok
+
   def kill_group(pid) do
     kill_sequence(pid)
   rescue

@@ -11,6 +11,7 @@ defmodule El.Pty.Size do
   defp parse({output, 0}) do
     output |> String.trim() |> String.split() |> extract()
   end
+
   defp parse(_), do: {24, 80}
 
   defp extract([rows, cols]) do
@@ -20,6 +21,7 @@ defmodule El.Pty.Size do
   rescue
     _ -> {24, 80}
   end
+
   defp extract(_), do: {24, 80}
 
   defp size_or_default(row, col) when row > 0, do: check_col(col, row)

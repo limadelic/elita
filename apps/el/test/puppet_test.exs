@@ -2,6 +2,7 @@ Code.require_file("../../elita/test/tester.exs", __DIR__)
 
 defmodule PuppetTest do
   use ExUnit.Case
+
   import ExUnit.Assertions
 
   @moduletag :live
@@ -52,7 +53,9 @@ defmodule PuppetTest do
 
   defp attempt_connect(node, attempts) do
     case Node.connect(node) do
-      true -> :ok
+      true ->
+        :ok
+
       false ->
         Process.sleep(500)
         attempt_connect(node, attempts + 1)
@@ -85,7 +88,9 @@ defmodule PuppetTest do
   defp teardown_session do
     if System.get_env("LIVE") == "1" do
       System.cmd("pkill", ["-f", "expect.*boot_session"], stderr_to_stdout: true)
+
       System.cmd("pkill", ["-f", "el.*claude.*#{@session}"], stderr_to_stdout: true)
+
       Process.sleep(200)
     else
       try do
@@ -102,22 +107,26 @@ defmodule PuppetTest do
     el_path = Path.expand("../el", __DIR__)
     live? = System.get_env("LIVE") == "1"
 
-    env = if live? do
-      [{"EL_NODE", "127.0.0.1"}]
-    else
-      []
-    end
+    env =
+      if live? do
+        [{"EL_NODE", "127.0.0.1"}]
+      else
+        []
+      end
 
-    {output, exit_code} = System.cmd(
-      el_path,
-      ["ask", @session, "1 + 1"],
-      env: env,
-      stderr_to_stdout: true
-    )
+    {output, exit_code} =
+      System.cmd(
+        el_path,
+        ["ask", @session, "1 + 1"],
+        env: env,
+        stderr_to_stdout: true
+      )
 
-    assert exit_code == 0, "el ask failed with exit code #{exit_code}: #{output}"
+    assert exit_code == 0,
+           "el ask failed with exit code #{exit_code}: #{output}"
+
     assert String.contains?(output, "2"),
-      "Expected '2' in output, got: #{inspect(output)}"
+           "Expected '2' in output, got: #{inspect(output)}"
 
     if live? do
       tell_exit(el_path)
@@ -127,11 +136,15 @@ end
 
 defmodule FakeSession do
   use GenServer
+
   import String, only: [downcase: 1]
 
   def start_link(name) do
     normalized = name |> downcase()
-    via_name = {:via, Registry, {ElitaRegistry, normalized, %{kind: :puppet, folder: "."}}}
+
+    via_name =
+      {:via, Registry, {ElitaRegistry, normalized, %{kind: :puppet, folder: "."}}}
+
     GenServer.start_link(__MODULE__, name, name: via_name)
   end
 

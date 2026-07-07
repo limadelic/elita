@@ -2,10 +2,11 @@ Code.require_file("../../elita/test/tester.exs", __DIR__)
 
 defmodule AskTest do
   use Tester
+
   @moduletag :main
 
   setup do
-    unless System.get_env("LIVE") || System.get_env("TAPE") == "rec" do
+    if !(System.get_env("LIVE") || System.get_env("TAPE") == "rec") do
       System.put_env("TAPE", "replay")
     end
 
@@ -19,6 +20,7 @@ defmodule AskTest do
       catch
         :exit, _ -> :ok
       end
+
       try do
         halt(:greet)
       rescue
@@ -26,6 +28,7 @@ defmodule AskTest do
       catch
         :exit, _ -> :ok
       end
+
       System.delete_env("TAPE")
       System.delete_env("CASSETTE")
     end)
