@@ -1,4 +1,6 @@
 defmodule El.Commands.Ls do
+  @moduledoc "Lists agents in the current folder with their registration status."
+
   import IO, only: [puts: 1]
   import File, only: [ls!: 1]
   import Enum, only: [map: 2, sort_by: 2, each: 2]
