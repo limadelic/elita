@@ -51,16 +51,23 @@ defmodule El.Pty do
 
   @impl true
   def init({cmd, opts}) do
-    {:ok,
-     Init.call(
-       file: Keyword.get(opts, :file, :file),
-       port: Keyword.get(opts, :port, Port),
-       cmd: cmd,
-       get_size: Keyword.get(opts, :get_size, &Size.get_default/0),
-       input: Keyword.get(opts, :input, fn x -> x end),
-       taps: Keyword.get(opts, :taps, [])
-     )}
+    {:ok, build(cmd, opts)}
   end
+
+  defp build(cmd, opts) do
+    Init.call(config(cmd, opts))
+  end
+
+  defp config(cmd, opts) do
+    [file: file(opts), port: port(opts), cmd: cmd] ++
+      [get_size: get_size(opts), input: input(opts), taps: taps(opts)]
+  end
+
+  defp file(opts), do: Keyword.get(opts, :file, :file)
+  defp port(opts), do: Keyword.get(opts, :port, Port)
+  defp get_size(opts), do: Keyword.get(opts, :get_size, &Size.get_default/0)
+  defp input(opts), do: Keyword.get(opts, :input, fn x -> x end)
+  defp taps(opts), do: Keyword.get(opts, :taps, [])
 
   @impl true
   def handle_info(msg, state) do
