@@ -37,6 +37,10 @@ defmodule DaemonBoundaryTest do
     )
 
     assert exit_code1 == 0, "first ls failed with exit code #{exit_code1}: #{output1}"
+    assert String.contains?(output1, "elita@"),
+      "Expected daemon marker 'elita@' in first ls output, got: #{inspect(output1)}"
+    assert String.contains?(output1, "agent_one file asleep"),
+      "Expected 'agent_one file asleep' in output, got: #{inspect(output1)}"
 
     {output2, exit_code2} = System.cmd(
       "sh",
@@ -45,6 +49,8 @@ defmodule DaemonBoundaryTest do
     )
 
     assert exit_code2 == 0, "second ls failed with exit code #{exit_code2}: #{output2}"
+    assert String.contains?(output2, "elita@"),
+      "Expected daemon marker 'elita@' in second ls output, got: #{inspect(output2)}"
     assert String.contains?(output2, "agent_one file asleep"),
       "Expected 'agent_one file asleep' in output, got: #{inspect(output2)}"
   end
@@ -55,11 +61,13 @@ defmodule DaemonBoundaryTest do
 
     {output, exit_code} = System.cmd(
       "sh",
-      ["-c", "cd #{testdir} && #{el_path} ls"],
+      ["-c", "cd #{testdir} && EL_DAEMON_SPAWN=false #{el_path} ls"],
       stderr_to_stdout: true
     )
 
     assert exit_code == 0, "ls failed with exit code #{exit_code}: #{output}"
+    assert String.contains?(output, "local:"),
+      "Expected local marker 'local:' in output, got: #{inspect(output)}"
     assert String.contains?(output, "agent_one file asleep"),
       "Expected 'agent_one file asleep' in output, got: #{inspect(output)}"
   end
@@ -80,6 +88,8 @@ defmodule DaemonBoundaryTest do
     )
 
     assert exit_code1 == 0, "first ls failed with exit code #{exit_code1}: #{output1}"
+    assert String.contains?(output1, "elita@"),
+      "Expected daemon marker 'elita@' in first ls output, got: #{inspect(output1)}"
     assert String.contains?(output1, "agent_one file asleep"),
       "Expected 'agent_one file asleep' in output, got: #{inspect(output1)}"
 
@@ -90,6 +100,8 @@ defmodule DaemonBoundaryTest do
     )
 
     assert exit_code2 == 0, "second ls failed with exit code #{exit_code2}: #{output2}"
+    assert String.contains?(output2, "elita@"),
+      "Expected daemon marker 'elita@' in second ls output, got: #{inspect(output2)}"
     assert String.contains?(output2, "agent_one file asleep"),
       "Expected 'agent_one file asleep' in output, got: #{inspect(output2)}"
   end

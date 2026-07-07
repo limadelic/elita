@@ -4,14 +4,27 @@ defmodule El.CLI.DaemonConnector do
 
   def connect_and_rpc(command, args) do
     daemon_node = :"elita@127.0.0.1"
-    Node.connect(daemon_node) |> connect(command, args, daemon_node)
+    result = Node.connect(daemon_node)
+    handle_connect(result, command, args, daemon_node)
   end
 
-  defp connect(true, command, args, node) do
+  defp handle_connect(true, command, args, node) do
     rpc_call(command, args, node)
   end
 
-  defp connect(false, command, args, node) do
+  defp handle_connect(:ok, command, args, node) do
+    rpc_call(command, args, node)
+  end
+
+  defp handle_connect(:ignored, command, args, node) do
+    rpc_call(command, args, node)
+  end
+
+  defp handle_connect(false, command, args, node) do
+    should_spawn?() |> handle_spawn(command, args, node)
+  end
+
+  defp handle_connect(:error, command, args, node) do
     should_spawn?() |> handle_spawn(command, args, node)
   end
 
@@ -34,7 +47,8 @@ defmodule El.CLI.DaemonConnector do
 
   defp retry_loop(command, args, node, retries) when retries > 0 do
     Process.sleep(500)
-    Node.connect(node) |> handle_retry(command, args, node, retries)
+    result = Node.connect(node)
+    handle_retry(result, command, args, node, retries)
   end
 
   defp retry_loop(_command, _args, _node, _retries) do
@@ -45,7 +59,19 @@ defmodule El.CLI.DaemonConnector do
     rpc_call(command, args, node)
   end
 
+  defp handle_retry(:ok, command, args, node, _retries) do
+    rpc_call(command, args, node)
+  end
+
+  defp handle_retry(:ignored, command, args, node, _retries) do
+    rpc_call(command, args, node)
+  end
+
   defp handle_retry(false, command, args, node, retries) do
+    retry_loop(command, args, node, retries - 1)
+  end
+
+  defp handle_retry(:error, command, args, node, retries) do
     retry_loop(command, args, node, retries - 1)
   end
 
