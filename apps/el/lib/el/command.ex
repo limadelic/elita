@@ -1,75 +1,15 @@
 defmodule El.Command do
   @moduledoc false
 
-  import :erpc, only: [call: 4]
-  import IO, only: [puts: 1]
-  import Node, only: [connect: 1]
-  import El.Distribution, only: [start: 0]
-  import System, only: [get_env: 1, find_executable: 1]
-  import Port, only: [open: 2, close: 1]
-  import File, only: [cwd!: 0]
-  import Process, only: [sleep: 1]
   alias El.Commands.Ask
   alias El.Commands.Cd
   alias El.Commands.Claude
-  alias El.Commands.Ls
   alias El.Commands.Spawn
   alias El.Commands.Tell
   alias El.Distribution
-  alias El.RPC
+  alias El.Command.Ls
 
-  def ls(path \\ nil) do
-    start()
-    query(path) |> reach(path)
-  end
-
-  defp reach({:ok, output}, _path), do: handle({:ok, output})
-  defp reach(:error, path), do: hatch(path)
-
-  defp hatch(path) do
-    get_env("EL_DAEMON_SPAWN") |> gate(path)
-  end
-
-  defp gate("1", path) do
-    init()
-    wait(0, path)
-  end
-
-  defp gate(_, path), do: handle(:error, path)
-
-  defp init do
-    pick() |> boot()
-  end
-
-  defp boot(exe) do
-    open({:spawn_executable, "/bin/sh"}, [
-      {:args, ["-c", "#{exe} daemon &"]},
-      :exit_status
-    ])
-    |> close()
-  end
-
-  defp pick do
-    find_executable("el") |> resolve()
-  end
-
-  defp resolve(nil), do: "#{cwd!()}/../../apps/el/el"
-  defp resolve(path), do: path
-
-  defp wait(n, path) when n >= 10 do
-    handle(:error, path)
-  end
-
-  defp wait(n, path) do
-    sleep(50 * (n + 1))
-    query(path) |> settle(n, path)
-  end
-
-  defp settle({:ok, output}, _n, _path), do: handle({:ok, output})
-  defp settle(:error, n, path), do: wait(n + 1, path)
-
-  defp handle({:ok, output}), do: puts(output)
-  defp handle(:error, path), do: Ls.execute(path: path)
+  def ls(path \\ nil), do: Ls.run(path)
 
   def ask(agent, msg, tool \\ nil), do: Ask.execute(agent, msg, tool)
   def tell(agent, msg, tool \\ nil), do: Tell.execute(agent, msg, tool)
@@ -77,26 +17,4 @@ defmodule El.Command do
   def claude(name), do: Claude.execute(name)
   def cd(path), do: Cd.execute(path)
   def daemon, do: Distribution.daemon()
-
-  defp query(path) do
-    connect(:"elita@127.0.0.1") |> guard(path)
-  end
-
-  defp guard(bool, path) do
-    fetch(bool, path)
-  rescue
-    _ -> :error
-  end
-
-  defp fetch(true, path) do
-    cwd = cwd!()
-    cmd = route(path)
-    output = call(:"elita@127.0.0.1", RPC, :dispatch, [cmd, cwd])
-    {:ok, output}
-  end
-
-  defp fetch(_, _), do: :error
-
-  defp route(nil), do: ["ls"]
-  defp route(path), do: ["ls", path]
 end
