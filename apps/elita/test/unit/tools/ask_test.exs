@@ -63,7 +63,7 @@ defmodule Tools.Sys.AskUnitTest do
     {response, _state} =
       Tools.Sys.Ask.exec("ask", %{"recipient" => "unknown", "question" => "hello"}, %{name: :test})
 
-    assert response == "agent not found"
+    assert response == "unknown: unknown"
   end
 
   defp stub_runner(_message, _folder) do

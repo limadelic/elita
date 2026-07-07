@@ -1,7 +1,8 @@
 defmodule El.Commands.Ask do
   @moduledoc false
   import :binary, only: [at: 2]
-  import Elita, only: [start_link: 2, call: 2]
+  import Elita, only: [call: 2]
+  import String, only: [downcase: 1]
   alias El.Answer
   alias El.Commands.Tell
   alias El.Distribution
@@ -63,9 +64,14 @@ defmodule El.Commands.Ask do
   end
 
   defp local(agent, msg) do
-    {:ok, _pid} = start_link(agent, [agent])
-    result = call(agent, msg)
-    IO.puts(result)
+    normalized = agent |> downcase
+    Registry.lookup(ElitaRegistry, normalized) |> handle_lookup(agent, msg)
+  end
+
+  defp handle_lookup([], agent, _msg), do: IO.puts("unknown: #{agent}")
+
+  defp handle_lookup([{_pid, _meta}], agent, msg) do
+    call(agent, msg) |> IO.puts()
   end
 
   defp format_text(msg) do
