@@ -4,7 +4,6 @@ defmodule El.Commands.Address do
   import El.Commands.Lookup, only: [local: 2]
   import Elita, only: [cast: 2]
   import String, only: [downcase: 1]
-  import Enum, only: [each: 2]
 
   def route(recipient, msg, mode \\ :ask) do
     world = world()
@@ -40,7 +39,7 @@ defmodule El.Commands.Address do
     Registry.lookup(ElitaRegistry, normalized) |> fire(agent, msg)
   end
   defp fire([], agent, _msg), do: IO.puts("unknown: #{agent}")
-  defp fire(_matches, agent, msg), do: Enum.each(_matches, fn _ -> cast(agent, msg) end)
+  defp fire(matches, agent, msg), do: Enum.each(matches, fn _ -> cast(agent, msg) end)
   defp rouse(%{kind: :file, name: n, path: p}) do
     stir(asleep?(n), n, p)
   end
@@ -58,11 +57,11 @@ defmodule El.Commands.Address do
   defp pick(opts, rune), do: Keyword.put(opts, :runner, fn m, f -> apply(rune, :run, [m, f]) end)
 
   defp grab(nil), do: nil
-  defp grab(name), do: load_it(String.to_atom("Elixir." <> name))
+  defp grab(name), do: test(String.to_atom("Elixir." <> name))
 
-  defp load_it(atom), do: pick_atom(Code.ensure_loaded?(atom), atom)
-  defp pick_atom(true, atom), do: atom
-  defp pick_atom(false, _atom), do: nil
+  defp test(atom), do: okay(Code.ensure_loaded?(atom), atom)
+  defp okay(true, atom), do: atom
+  defp okay(false, _atom), do: nil
 
   defp asleep?(name) do
     normalized = String.downcase(to_string(name))

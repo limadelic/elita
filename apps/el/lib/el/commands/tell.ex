@@ -61,14 +61,14 @@ defmodule El.Commands.Tell do
   end
 
   defp format_text(msg) do
-    pick_format(contains?(msg, "\n"), msg)
+    wrap(contains?(msg, "\n"), msg)
   end
 
-  defp pick_format(true, msg), do: bracket_paste(msg)
-  defp pick_format(false, msg), do: pick_format_alt(control_sequence?(msg), msg)
+  defp wrap(true, msg), do: bracket_paste(msg)
+  defp wrap(false, msg), do: finish(control_sequence?(msg), msg)
 
-  defp pick_format_alt(true, msg), do: msg
-  defp pick_format_alt(false, msg), do: append_return(msg)
+  defp finish(true, msg), do: msg
+  defp finish(false, msg), do: append_return(msg)
 
   defp bracket_paste(msg), do: "\e[200~#{msg}\e[201~\r"
   defp append_return(msg), do: "#{msg}\r"
