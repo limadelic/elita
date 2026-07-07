@@ -2,7 +2,7 @@ defmodule El.Commands.Ask do
   @moduledoc false
   import :binary, only: [at: 2]
   import Elita, only: [call: 2]
-  import String, only: [downcase: 1]
+  import String, only: [downcase: 1, contains?: 2]
   alias El.Answer
   alias El.Commands.Tell
   alias El.Distribution
@@ -10,6 +10,14 @@ defmodule El.Commands.Ask do
   def execute(agent, msg, opts \\ []) do
     Distribution.start()
     env_module = Keyword.get(opts, :env_module, El.Infra.Env)
+    route_request(contains?(agent, "@"), agent, msg, env_module)
+  end
+
+  defp route_request(true, agent, msg, _env_module) do
+    El.Commands.Address.route(agent, msg)
+  end
+
+  defp route_request(false, agent, msg, env_module) do
     route(agent, msg, env_module)
   end
 
@@ -64,35 +72,30 @@ defmodule El.Commands.Ask do
   end
 
   defp local(agent, msg) do
-    normalized = agent |> downcase
-    Registry.lookup(ElitaRegistry, normalized) |> handle_lookup(agent, msg)
+    local_by_name(agent, msg)
   end
 
-  defp handle_lookup([], agent, _msg), do: IO.puts("unknown: #{agent}")
-
-  defp handle_lookup([{_pid, _meta}], agent, msg) do
-    call(agent, msg) |> IO.puts()
+  def local_by_name(agent, msg) do
+    agent |> downcase |> lookup_and_call(agent, msg)
   end
+
+  defp lookup_and_call(normalized, agent, msg) do
+    Registry.lookup(ElitaRegistry, normalized) |> dispatch(agent, msg)
+  end
+
+  defp dispatch([], agent, _msg), do: IO.puts("unknown: #{agent}")
+  defp dispatch([{_pid, _meta}], agent, msg), do: call(agent, msg) |> IO.puts()
 
   defp format_text(msg) do
-    pick_format(String.contains?(msg, "\n"), msg)
+    cond do
+      String.contains?(msg, "\n") -> "\e[200~#{msg}\e[201~\r"
+      control_sequence?(msg) -> msg
+      true -> "#{msg}\r"
+    end
   end
-
-  defp pick_format(true, msg), do: bracket_paste(msg)
-  defp pick_format(false, msg), do: pick_format_alt(control_sequence?(msg), msg)
-
-  defp pick_format_alt(true, msg), do: msg
-  defp pick_format_alt(false, msg), do: append_return(msg)
-
-  defp bracket_paste(msg), do: "\e[200~#{msg}\e[201~\r"
-  defp append_return(msg), do: "#{msg}\r"
 
   defp control_sequence?(msg) do
-    is_special_byte(at(msg, 0))
+    b = at(msg, 0)
+    b && (b < 32 || b == 0x1B)
   end
-
-  defp is_special_byte(nil), do: false
-  defp is_special_byte(byte) when byte < 32, do: true
-  defp is_special_byte(0x1B), do: true
-  defp is_special_byte(_), do: false
 end
