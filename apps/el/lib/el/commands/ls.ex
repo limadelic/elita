@@ -3,12 +3,29 @@ defmodule El.Commands.Ls do
 
   import IO, only: [puts: 1]
   import File, only: [ls!: 1]
-  import Enum, only: [map: 2, sort_by: 2, each: 2, reject: 2]
+  import Enum, only: [map: 2, sort_by: 2, reject: 2, join: 2]
   import String, only: [starts_with?: 2]
 
   def execute(opts \\ []) do
     cwd = Keyword.get(opts, :cwd, File.cwd!())
-    build(cwd) |> show()
+    render(cwd) |> puts()
+  end
+
+  def execute_remote(opts \\ []) do
+    cwd = Keyword.get(opts, :cwd, File.cwd!())
+    render(cwd)
+  end
+
+  defp render(cwd) do
+    build(cwd) |> format_output()
+  end
+
+  defp format_output([]) do
+    "no agents"
+  end
+
+  defp format_output(entries) do
+    entries |> map(&format/1) |> join("\n")
   end
 
   defp build(path) do
@@ -34,12 +51,6 @@ defmodule El.Commands.Ls do
 
   defp choose_kind(true), do: :folder
   defp choose_kind(false), do: :file
-
-  defp show([]), do: puts("no agents")
-
-  defp show(entries) do
-    entries |> map(&format/1) |> each(&puts/1)
-  end
 
   defp format(entry) do
     "#{entry.name} #{kind_label(entry.kind)} #{status(entry.name)}"

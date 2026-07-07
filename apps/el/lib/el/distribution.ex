@@ -1,12 +1,19 @@
 defmodule El.Distribution do
   @moduledoc false
   import El.Host, only: [host: 0]
+  import Application, only: [ensure_all_started: 1]
 
   def start(name \\ :default, opts \\ []) do
     node_name = build_node_name(name, opts)
     host_value = build_host(opts)
     mode = mode_from_host(host_value)
     start_node(node_name, mode)
+  end
+
+  def boot_daemon do
+    start_node(:"elita@127.0.0.1", :longnames)
+    ensure_all_started(:elita)
+    Process.sleep(:infinity)
   end
 
   defp build_node_name(name, opts) do
