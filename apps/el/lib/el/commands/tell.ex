@@ -1,31 +1,14 @@
 defmodule El.Commands.Tell do
   @moduledoc false
   import Elita, only: [start_link: 2, cast: 2]
+  import :binary, only: [at: 2]
   alias El.Distribution
-  alias El.CLI.DaemonConnector
-  alias El.TextFormat
 
   def execute(agent, msg, opts \\ []) do
     Distribution.start()
     env_module = Keyword.get(opts, :env_module, El.Infra.Env)
-    daemon_result = daemon(agent, msg)
-    dispatch(daemon_result, agent, msg, env_module)
-  end
-
-  defp dispatch(result, _agent, _msg, _env_module) when result != nil do
-    result
-  end
-
-  defp dispatch(nil, agent, msg, env_module) do
     route(agent, msg, env_module)
   end
-
-  defp daemon(agent, msg) do
-    DaemonConnector.connect_and_rpc(["tell", agent, msg], []) |> check()
-  end
-
-  defp check(:local), do: nil
-  defp check(result), do: result
 
   defp route(agent, msg, env_module) do
     target = remote_target(agent, env_module: env_module)
@@ -70,9 +53,31 @@ defmodule El.Commands.Tell do
   end
 
   defp inject(msg, target, process_name) do
-    text = TextFormat.format(msg)
+    text = format_text(msg)
     GenServer.cast({process_name, target}, {:inject, text})
   end
+
+  defp format_text(msg) do
+    pick_format(String.contains?(msg, "\n"), msg)
+  end
+
+  defp pick_format(true, msg), do: bracket_paste(msg)
+  defp pick_format(false, msg), do: pick_format_alt(control_sequence?(msg), msg)
+
+  defp pick_format_alt(true, msg), do: msg
+  defp pick_format_alt(false, msg), do: append_return(msg)
+
+  defp bracket_paste(msg), do: "\e[200~#{msg}\e[201~\r"
+  defp append_return(msg), do: "#{msg}\r"
+
+  defp control_sequence?(msg) do
+    is_special_byte(at(msg, 0))
+  end
+
+  defp is_special_byte(nil), do: false
+  defp is_special_byte(byte) when byte < 32, do: true
+  defp is_special_byte(0x1B), do: true
+  defp is_special_byte(_), do: false
 
   defp default(agent, msg) do
     {:ok, _pid} = start_link(agent, [agent])
