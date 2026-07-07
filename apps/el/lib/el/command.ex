@@ -59,8 +59,8 @@ defmodule El.Command do
   defp handle({:ok, output}), do: puts(output)
   defp handle(:error, path), do: Ls.execute(path: path)
 
-  def ask(agent, msg), do: Ask.execute(agent, msg)
-  def tell(agent, msg), do: Tell.execute(agent, msg)
+  def ask(agent, msg, tool \\ nil), do: Ask.execute(agent, msg, tool)
+  def tell(agent, msg, tool \\ nil), do: Tell.execute(agent, msg, tool)
   def claude(name), do: Claude.execute(name)
   def cd(path), do: Cd.execute(path)
   def daemon, do: Distribution.daemon()

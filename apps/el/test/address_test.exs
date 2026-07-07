@@ -201,6 +201,69 @@ defmodule AddressTest do
   end
 end
 
+defmodule ToolPrefixTest do
+  use ExUnit.Case, async: false
+  import ExUnit.CaptureIO
+
+  test "tool prefix selects harness session (claude vs codex)" do
+    base = System.tmp_dir() |> Path.join("elita_tool_test_#{System.unique_integer()}")
+    File.mkdir_p!(base)
+    base = Path.expand(base)
+
+    folder = Path.expand(Path.join(base, "agent1"))
+    File.mkdir_p!(folder)
+
+    old_cwd = File.cwd!()
+    File.cd!(base)
+
+    registrations = "agent1:#{folder}"
+    old_registrations = System.get_env("AGENT_REGISTRATIONS")
+    System.put_env("AGENT_REGISTRATIONS", registrations)
+
+    Registry.start_link(keys: :duplicate, name: ElitaRegistry)
+
+    via_base = {:via, Registry, {ElitaRegistry, "agent1", %{kind: :native, folder: folder}}}
+    GenServer.start_link(StubAgent, "agent1", name: via_base)
+
+    on_exit(fn ->
+      File.cd!(old_cwd)
+      System.put_env("AGENT_REGISTRATIONS", old_registrations || "")
+      File.rm_rf!(base)
+    end)
+
+    System.put_env("TEST_AGENT_RUNNER", "StubRunner")
+
+    # Test 1: bare ask should work (no tool prefix)
+    output1 = capture_io(fn ->
+      El.Commands.Ask.execute("agent1", "msg", nil, env_module: FakeEnv)
+    end)
+    refute String.contains?(output1, "unknown: agent1")
+
+    # Test 2: claude tool prefix (falls back to bare if tool session not found)
+    output2 = capture_io(fn ->
+      El.Commands.Ask.execute("agent1", "msg", "claude", env_module: FakeEnv)
+    end)
+    refute String.contains?(output2, "unknown: agent1")
+
+    # Test 3: codex tool prefix (falls back to bare if tool session not found)
+    output3 = capture_io(fn ->
+      El.Commands.Ask.execute("agent1", "msg", "codex", env_module: FakeEnv)
+    end)
+    refute String.contains?(output3, "unknown: agent1")
+
+    # Test 4: verify claude and codex sessions can coexist for same agent
+    via_claude = {:via, Registry, {ElitaRegistry, "agent1:claude", %{kind: :native, folder: folder}}}
+    GenServer.start_link(StubAgent, "agent1:claude", name: via_claude)
+
+    via_codex = {:via, Registry, {ElitaRegistry, "agent1:codex", %{kind: :native, folder: folder}}}
+    GenServer.start_link(StubAgent, "agent1:codex", name: via_codex)
+
+    assert Registry.lookup(ElitaRegistry, "agent1:claude") != []
+    assert Registry.lookup(ElitaRegistry, "agent1:codex") != []
+    assert Registry.lookup(ElitaRegistry, "agent1:claude") != Registry.lookup(ElitaRegistry, "agent1:codex")
+  end
+end
+
 defmodule FakeEnv do
   def get(_), do: "fake_node@fake_host"
 end

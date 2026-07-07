@@ -2,56 +2,82 @@ defmodule El.Commands.Ask do
   @moduledoc false
   import :binary, only: [at: 2]
   import String, only: [contains?: 2]
-  import El.Commands.Address, only: [route: 2]
-  import El.Commands.Lookup, only: [local: 2]
+  import El.Commands.Address, only: [route: 4]
+  import El.Commands.Lookup, only: [local: 4]
   alias El.Answer
   alias El.Commands.Tell
   alias El.Distribution
 
-  def execute(agent, msg, opts \\ []) do
+  def execute(agent, msg, tool \\ nil, opts \\ []) do
     Distribution.start()
+    {actual_tool, actual_opts, env_module} = parse_args(tool, opts)
+    ctx = build_ctx(agent, msg, actual_tool, env_module, actual_opts)
+    dispatch(ctx, contains?(agent, "@"))
+  end
+
+  defp build_ctx(agent, msg, tool, env, opts) do
+    %{agent: agent, msg: msg, tool: tool, env: env, opts: opts}
+  end
+
+  defp parse_args(tool, opts) when is_list(tool) do
+    env_module = Keyword.get(tool, :env_module, El.Infra.Env)
+    {nil, tool, env_module}
+  end
+
+  defp parse_args(tool, opts) do
     env_module = Keyword.get(opts, :env_module, El.Infra.Env)
-    dispatch(contains?(agent, "@"), agent, msg, env_module)
+    {tool, opts, env_module}
   end
 
-  defp dispatch(true, agent, msg, _env_module), do: route(agent, msg)
-  defp dispatch(false, agent, msg, env_module), do: via_route(agent, msg, env_module)
-
-  defp via_route(agent, msg, env_module) do
-    target = Tell.remote_target(agent, env_module: env_module)
-    route_to(agent, msg, env_module, target)
+  defp dispatch(ctx, true) do
+    %{agent: agent, msg: msg, tool: tool} = ctx
+    route(agent, msg, :ask, tool)
   end
 
-  defp route_to(agent, msg, _env_module, nil), do: local(agent, msg)
-  defp route_to(agent, msg, env_module, target) do
-    attempt_call(msg, target, agent, env_module)
+  defp dispatch(%{agent: agent, msg: msg, tool: tool, env: env, opts: opts}, false) do
+    target = Tell.remote_target(agent, env_module: env)
+    send_via(target, {agent, msg, tool, env, opts})
   end
 
-  defp attempt_call(msg, target, agent, env_module) do
-    context = {msg, target, String.to_atom(agent), agent, env_module}
+  defp send_via(nil, {agent, msg, tool, _, opts}) do
+    local(agent, msg, tool, opts)
+  end
+
+  defp send_via(target, {agent, msg, tool, env, _}) do
+    attempt_call(msg, target, agent, env, tool)
+  end
+
+  defp attempt_call(msg, target, agent, env_module, tool) do
+    context = {msg, target, String.to_atom(agent), agent, env_module, tool}
     dispatch_by_connection(Node.connect(target), context)
   end
 
-  defp dispatch_by_connection(true, {msg, target, process_name, _agent, _env_module}) do
-    remote_ask(msg, target, process_name)
+  defp dispatch_by_connection(true, {msg, target, process_name, _agent, _env_module, tool}) do
+    remote_ask(msg, target, process_name, tool)
   end
 
-  defp dispatch_by_connection(false, {msg, _target, _process_name, agent, env_module}) do
-    fail_call(agent, msg, env_module)
+  defp dispatch_by_connection(false, {msg, _target, _process_name, agent, env_module, tool}) do
+    fail_call(agent, msg, env_module, tool)
   end
 
-  defp remote_ask(msg, target, process_name) do
+  defp remote_ask(msg, target, process_name, tool) do
     with_tap(target, process_name, fn ->
       answer = get_answer(msg, target, process_name)
       IO.puts(answer)
-    end)
+    end, tool)
   end
 
-  defp with_tap(target, process_name, fun) do
+  defp with_tap(target, process_name, fun, _tool) do
     :ok = GenServer.call({process_name, target}, {:tap, self()})
     result = fun.()
     :ok = GenServer.call({process_name, target}, {:untap, self()})
     result
+  end
+
+  defp fail_call(agent, msg, env_module, tool) do
+    host = env_module.get("EL_NODE")
+    Tell.remote_unreachable(agent, host)
+    local(agent, msg, tool, [])
   end
 
   defp get_answer(msg, target, process_name) do
@@ -59,13 +85,6 @@ defmodule El.Commands.Ask do
     GenServer.cast({process_name, target}, {:inject, text})
     Answer.collect(30_000)
   end
-
-  defp fail_call(agent, msg, env_module) do
-    host = env_module.get("EL_NODE")
-    Tell.remote_unreachable(agent, host)
-    local(agent, msg)
-  end
-
   defp format_text(msg), do: apply_format(String.contains?(msg, "\n"), msg)
 
   defp apply_format(true, msg), do: "\e[200~#{msg}\e[201~\r"
