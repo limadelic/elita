@@ -12,13 +12,12 @@ export EL_BIN
 export SESSION_NAME
 export LOG_FILE="/tmp/puppet_session_$SESSION_NAME.log"
 
-( expect <<'EXPECT_SCRIPT'
+nohup setsid expect <<'EXPECT_SCRIPT' > /dev/null 2>&1 &
 set timeout 999999
 log_file $::env(LOG_FILE)
 spawn $::env(EL_BIN) claude $::env(SESSION_NAME)
 expect eof
 EXPECT_SCRIPT
-) &
 
 # Give the node time to start and register itself
 sleep 2
