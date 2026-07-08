@@ -28,12 +28,14 @@ defmodule El.REPL do
   defp show_prompt(agent), do: write("#{agent}> ")
 
   defp process(:eof, _agent), do: :ok
+
   defp process(line, agent) do
     handle(agent, trim(line))
     loop(agent)
   end
 
   defp handle(_agent, ""), do: :ok
+
   defp handle(agent, input) do
     call(agent, input) |> puts()
   end
