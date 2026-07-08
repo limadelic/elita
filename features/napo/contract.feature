@@ -12,4 +12,7 @@ Feature: Napo contract
       | 📢 contract_lead → ipassign    | Claims all personal projects as company property  |
       | 📢 contract_lead → arbitration | Forced arbitration at employee's expense          |
       | ✨ contract_lead                | spawned four specialized analysis agents          |
-      | ✨ el                           | red flags across all four                         |
+      | ✨ el                           | Violates FLSA if you're non-exempt                |
+      | ✨ el                           | Enforceability varies by state                    |
+      | ✨ el                           | Likely unenforceable if created outside work      |
+      | ✨ el                           | Often unenforceable under unconscionability       |
