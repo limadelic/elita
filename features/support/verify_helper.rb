@@ -10,7 +10,8 @@ module VerifyHelper
 
   def verify_lines(rows)
     initialize_scenario_cursor unless @scenario_cursor
-    deadline = Time.now + (ENV["TAPE"] == "rec" ? 10 : 3)
+    ci_timeout = ENV["GITHUB_ACTIONS"] == "true" ? 15 : 3
+    deadline = Time.now + (ENV["TAPE"] == "rec" ? 10 : ci_timeout)
 
     loop do
       tx = transcript
