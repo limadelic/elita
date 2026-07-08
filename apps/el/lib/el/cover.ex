@@ -16,6 +16,7 @@ defmodule El.Cover do
   def run(argv) do
     ensure_all_started(:elita)
     start()
+    clear_env()
     call_cli(argv)
     export()
   end
@@ -29,6 +30,10 @@ defmodule El.Cover do
   def export_unique(name) do
     path = expand(name) |> to_charlist()
     report_export(:cover.export(path))
+  end
+
+  defp clear_env do
+    System.delete_env("COVER")
   end
 
   defp load do

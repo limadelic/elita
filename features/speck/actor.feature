@@ -10,8 +10,9 @@ Feature: Actor
       | 🤔 speck → actor_v2 | name                               |
       | ✨ actor_v2          | the violinist with missing fingers |
       | 📢 speck → actor_v3 | medieval knight                    |
-      | 🤔 speck → actor_v3 | knight                             |
+      | 🤔 speck → actor_v3 | are you really a knight            |
       | ✨ actor_v3          | I'm Claude, an AI assistant        |
+      | 👀 scenario_3       | broke character completely         |
       | 📢 speck → actor_v4 | cynical private detective          |
       | 🤔 speck → actor_v4 | testified against                  |
       | ✨ actor_v4          | Why are you telling me this now    |
