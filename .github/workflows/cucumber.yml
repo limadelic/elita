@@ -27,13 +27,13 @@ jobs:
         run: |
           cd apps/el
           mix deps.get
-          mix credo --strict
+          mix lint
 
       - name: Lint elita
         run: |
           cd apps/elita
           mix deps.get
-          mix credo --strict
+          mix lint
 
   test:
     runs-on: ubuntu-latest

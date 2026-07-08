@@ -3,9 +3,11 @@ defmodule El.Cover do
   import Application, only: [ensure_all_started: 1]
   import File, only: [exists?: 1, ls!: 1, read!: 1, dir?: 1]
   import Path, only: [expand: 1, join: 2]
-  import Enum, only: [filter: 2, each: 2]
-  import String, except: [to_charlist: 1]
+  import Enum, only: [filter: 2, each: 2, map: 2]
+  import String, only: [ends_with?: 2]
+  import IO, only: [puts: 1]
   import Mix, only: [env: 0]
+  import El.CLI, only: [main: 1]
 
   @moduledoc false
 
@@ -13,56 +15,67 @@ defmodule El.Cover do
 
   def run(argv) do
     ensure_all_started(:elita)
-    start_coverage()
-    El.CLI.main(argv)
-    save_coverage()
+    start()
+    call_cli(argv)
+    export()
   end
 
-  defp start_coverage do
+  defp start do
     :cover.start()
-    load_previous_coverage()
-    compile_all_beams()
+    load()
+    compile()
   end
 
-  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
-  defp load_previous_coverage do
+  defp load do
     path = expand(@datafile)
-    exists?(path) && :cover.import(read!(path))
+    load_from(path, exists?(path))
   end
 
-  defp compile_all_beams do
-    beams() |> each(&compile_beam_dir/1)
+  defp load_from(_path, false), do: :ok
+  defp load_from(path, true), do: :cover.import(read!(path))
+
+  defp compile do
+    beam_dirs() |> each(&load_dir/1)
   end
 
-  defp beams do
+  defp beam_dirs do
     ["_build/#{env()}/lib/el/ebin", "_build/#{env()}/lib/elita/ebin"]
   end
 
-  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
-  defp compile_beam_dir(path) do
-    full = expand(path)
-    dir?(full) && compile_beam_files(full)
+  defp load_dir(dir) do
+    full = expand(dir)
+    load_if_dir(full, dir?(full))
   end
 
-  defp compile_beam_files(dir) do
-    dir |> ls!() |> filter(&beam_file?/1) |> each(&compile_beam(dir, &1))
+  defp load_if_dir(_full, false), do: :ok
+  defp load_if_dir(full, true), do: load_beams(full)
+
+  defp load_beams(dir) do
+    beams(dir) |> each(&load_beam(dir, &1))
   end
 
-  defp beam_file?(file) do
+  defp beams(dir) do
+    dir |> ls!() |> filter(&is_beam/1)
+  end
+
+  defp is_beam(file) do
     ends_with?(file, ".beam")
   end
 
-  defp compile_beam(dir, beam) do
-    :cover.compile_beam(dir |> join(beam) |> Kernel.to_charlist())
+  defp load_beam(dir, file) do
+    dir |> join(file) |> to_charlist() |> :cover.compile_beam()
   end
 
-  defp save_coverage do
-    path = expand(@datafile) |> Kernel.to_charlist()
-
-    case :cover.export(path) do
-      :ok -> :ok
-      {:ok, data} -> data
-      error -> IO.puts("Warning: cover export returned #{inspect(error)}")
-    end
+  defp call_cli(argv) do
+    main(argv)
   end
+
+  defp export do
+    path = expand(@datafile) |> to_charlist()
+    report_export(:cover.export(path))
+  end
+
+  defp report_export(:ok), do: :ok
+  defp report_export({:ok, _data}), do: :ok
+  defp report_export(error), do: puts("Warning: cover export returned #{inspect(error)}")
 end
