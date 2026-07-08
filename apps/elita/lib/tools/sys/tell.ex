@@ -1,18 +1,18 @@
 defmodule Tools.Sys.Tell.Schema do
   def get(name, _state) do
-    %{
-      name: name,
-      description: "Send message to another agent",
-      parameters: params()
-    }
+    %{name: name, description: description(), parameters: params()}
+  end
+
+  defp description do
+    "Send message to another agent"
   end
 
   defp params do
-    %{
-      type: "object",
-      properties: properties(),
-      required: ["recipient", "message"]
-    }
+    %{type: "object", properties: properties(), required: required()}
+  end
+
+  defp required do
+    ["recipient", "message"]
   end
 
   defp properties do

@@ -1,18 +1,18 @@
 defmodule Tools.Sys.Ask.Schema do
   def get(name, _state) do
-    %{
-      name: name,
-      description: "Ask question to another agent and get response",
-      parameters: params()
-    }
+    %{name: name, description: description(), parameters: params()}
+  end
+
+  defp description do
+    "Ask question to another agent and get response"
   end
 
   defp params do
-    %{
-      type: "object",
-      properties: properties(),
-      required: ["recipient", "question"]
-    }
+    %{type: "object", properties: properties(), required: required()}
+  end
+
+  defp required do
+    ["recipient", "question"]
   end
 
   defp properties do

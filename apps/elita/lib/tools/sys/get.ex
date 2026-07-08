@@ -7,11 +7,11 @@ defmodule Tools.Sys.Get do
   end
 
   defp spec(name) do
-    %{
-      name: name,
-      description: "Retrieve data by key",
-      parameters: parameters()
-    }
+    %{name: name, description: description(), parameters: parameters()}
+  end
+
+  defp description do
+    "Retrieve data by key"
   end
 
   def exec(_, %{"key" => key}, state) do
@@ -21,11 +21,11 @@ defmodule Tools.Sys.Get do
   end
 
   defp parameters do
-    %{
-      type: "object",
-      properties: props(),
-      required: ["key"]
-    }
+    %{type: "object", properties: props(), required: required()}
+  end
+
+  defp required do
+    ["key"]
   end
 
   defp props do

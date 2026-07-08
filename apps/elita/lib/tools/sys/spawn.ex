@@ -7,11 +7,11 @@ defmodule Tools.Sys.Spawn do
   alias Access
 
   def spec(name, state) do
-    %{
-      name: name,
-      description: "Spawn a new agent.#{help(state)}",
-      parameters: parameters()
-    }
+    %{name: name, description: description(state), parameters: parameters()}
+  end
+
+  defp description(state) do
+    "Spawn a new agent.#{help(state)}"
   end
 
   def exec(_, %{"name" => %{"name" => name} = inner}, state) do
@@ -42,11 +42,15 @@ defmodule Tools.Sys.Spawn do
   end
 
   defp configs_prop do
-    %{
-      type: "array",
-      items: %{type: "string"},
-      description: "Configs for the agent, defaults to [name]"
-    }
+    %{type: "array", items: items(), description: description_configs()}
+  end
+
+  defp items do
+    %{type: "string"}
+  end
+
+  defp description_configs do
+    "Configs for the agent, defaults to [name]"
   end
 
   defp fetch_configs([_ | _] = list, _name) do
