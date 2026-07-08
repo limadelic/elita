@@ -9,5 +9,4 @@ Feature: Birth
     * verify
       | 📢 el → mother | time |
       | 🤔 el → baby | feel |
-      | ✨ baby | waaahhhhh |
-      | ✨ mother | gasps |
+      | ✨ baby | cry |

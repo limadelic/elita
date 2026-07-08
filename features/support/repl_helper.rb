@@ -20,7 +20,8 @@ module ReplHelper
     base_cmd = "cd apps/elita/agents/elita && TAPE=#{tape} CASSETTE=#{@cassette} MIX_ENV=test #{escript_path} #{args}"
     full_cmd = ENV["COVER"] == "1" ? cover_cmd(args, tape) : base_cmd
     output = ""
-    timeout = Time.now + 30
+    duration = ENV["COVER"] == "1" ? 180 : 30
+    timeout = Time.now + duration
 
     begin
       reader, writer, pid = PTY.spawn("/bin/sh", "-c", full_cmd)
@@ -74,7 +75,13 @@ module ReplHelper
 
   def wait_for_prompt(prompt_word)
     output = ""
-    duration = ENV["TAPE"] == "rec" ? 300 : 30
+    duration = if ENV["COVER"] == "1"
+      180
+    elsif ENV["TAPE"] == "rec"
+      300
+    else
+      30
+    end
     timeout = Time.now + duration
     pattern = "#{prompt_word}>"
 

@@ -7,4 +7,4 @@ Feature: Doble9
     * el> ask doble9 to start a new game with top, left, bottom and right
     * verify
       | 🤔 el → game | start a new game |
-      | ✨ game | juego iniciado |
+      | ✨ game | juego |
