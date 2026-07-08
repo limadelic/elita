@@ -1,5 +1,7 @@
 defmodule El.Infra.Env do
-  def get, do: System.get_env()
+  import System, only: [get_env: 0, get_env: 1]
 
-  def get(name), do: System.get_env(name)
+  def get, do: get_env()
+
+  def get(name), do: get_env(name)
 end
