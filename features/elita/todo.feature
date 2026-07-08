@@ -4,11 +4,15 @@ Feature: Todo
   Scenario: Todo marks tasks complete
     * > el todo
     * todo> Add call dentist to my list
-      | added |
     * todo> Mark call dentist as done
-      | marked |
     * todo> What do I need to do?
-      | no |
+    * verify
+      | 👀 todo | (empty) |
+      | ✏️ todo | call dentist |
+      | ✨ todo | added "call dentist" |
+      | 👀 todo | call dentist |
+      | ✨ todo | marked "call dentist" as complete |
+      | ✨ todo | no tasks |
 
   Scenario: Todo remembers tasks
     * > el todo

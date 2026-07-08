@@ -6,9 +6,12 @@ Feature: Boss
     * el> have a boss manage a dev and a qa
     * el> tell the boss we need more tests
     * el> ask the dev do you have a task from boss
-      | no |
     * el> ask the qa do you have a task from boss
-      | yes |
+    * verify
+      | 📢 el → boss | we need more tests |
+      | 📢 boss → qa | we need more tests |
+      | ✨ dev | no, i don't have a task from boss |
+      | ✨ qa | yes. i have a task from boss |
 
   @cascade
   Scenario: Boss delegates down the chain

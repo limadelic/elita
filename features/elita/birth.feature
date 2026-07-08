@@ -6,4 +6,8 @@ Feature: Birth
     * el> get me a mother ready to give birth
     * el> tell the mother it's time
     * el> ask the baby how does it feel to be born
-      | cry |
+    * verify
+      | 📢 el → mother | it's time |
+      | 🤔 el → baby | how does it feel to be born |
+      | ✨ baby | i'm baby! i cry |
+      | ✨ mother | welcome to the world, my precious child |

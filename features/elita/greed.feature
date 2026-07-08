@@ -5,6 +5,9 @@ Feature: Greed
     * > el
     * el> get me a greed player
     * el> ask greed - table [3,5], dominoes [9,9] [2,3] [9,6] [4,5], your move
-      | [4,5] |
     * el> ask greed - table [1,3], dominoes [2,4] [5,6] [0,0], your move
-      | knock |
+    * verify
+      | 🤔 el → greed | table [3,5] |
+      | ✨ greed | play [2,3] on 3 |
+      | 🤔 el → greed | table [1,3] |
+      | ✨ greed | knock knock |

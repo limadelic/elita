@@ -5,4 +5,7 @@ Feature: Clockwatcher
     * > el
     * el> get me a clockwatcher
     * el> ask the clockwatcher to file a report
-      | no start |
+    * verify
+      | 🤔 el → clockwatcher | file a report |
+      | ✨ clockwatcher | i don't start until 9 am |
+      | ✨ el | 1:29 in the morning |

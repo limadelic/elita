@@ -17,9 +17,9 @@ module VerifyHelper
 
       (cursor...folded.size).each do |idx|
         full_line = folded[idx]
+        line_prefix, line_text = split_line(full_line)
 
-        if full_line.include?(": ")
-          line_prefix, line_text = full_line.split(": ", 2)
+        if line_prefix && line_text
           prefix_match = line_prefix == want_prefix
           text_match = want_text.empty? || line_text.downcase.include?(want_text)
 
@@ -38,6 +38,25 @@ module VerifyHelper
   end
 
   private
+
+  def split_line(line)
+    colon_idx = line.index(": ")
+    equals_idx = line.index(" = ")
+
+    if colon_idx && equals_idx
+      if colon_idx < equals_idx
+        [line[0...colon_idx], line[colon_idx + 2..-1]]
+      else
+        [line[0...equals_idx], line[equals_idx + 3..-1]]
+      end
+    elsif colon_idx
+      [line[0...colon_idx], line[colon_idx + 2..-1]]
+    elsif equals_idx
+      [line[0...equals_idx], line[equals_idx + 3..-1]]
+    else
+      [nil, nil]
+    end
+  end
 
   def fold_continuation_lines(lines)
     result = []
