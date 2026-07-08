@@ -51,7 +51,15 @@
     "q": {
       "messages": [
         {
-          "content": "Email 1: Subject: Urgent payment overdue. Body: Your billing is past due.\nEmail 2: Subject: Claim your free prize! Body: You've won a promotional offer!\nEmail 3: Subject: New feature request. Body: Please add dark mode to the app.\n",
+          "content": [
+            {
+              "type": "text",
+              "text": "Email 1: Subject: Urgent payment overdue. Body: Your billing is past due.\nEmail 2: Subject: Claim your free prize! Body: You've won a promotional offer!\nEmail 3: Subject: New feature request. Body: Please add dark mode to the app.\n",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -125,7 +133,15 @@
     "q": {
       "messages": [
         {
-          "content": "Classify this email: Subject: Urgent payment overdue. Body: Your billing is past due.",
+          "content": [
+            {
+              "type": "text",
+              "text": "Classify this email: Subject: Urgent payment overdue. Body: Your billing is past due.",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -141,7 +157,15 @@
     "q": {
       "messages": [
         {
-          "content": "Classify this email: Subject: Claim your free prize! Body: You've won a promotional offer!",
+          "content": [
+            {
+              "type": "text",
+              "text": "Classify this email: Subject: Claim your free prize! Body: You've won a promotional offer!",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -157,7 +181,15 @@
     "q": {
       "messages": [
         {
-          "content": "Classify this email: Subject: New feature request. Body: Please add dark mode to the app.",
+          "content": [
+            {
+              "type": "text",
+              "text": "Classify this email: Subject: New feature request. Body: Please add dark mode to the app.",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -195,7 +227,15 @@
     "q": {
       "messages": [
         {
-          "content": "Result: **Email Triage Summary:**\n\nurgent (payment), spam (promotion), feature (request)\n\nExpectation: summary lists urgent as a classification",
+          "content": [
+            {
+              "type": "text",
+              "text": "Result: **Email Triage Summary:**\n\nurgent (payment), spam (promotion), feature (request)\n\nExpectation: summary lists urgent as a classification",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -211,7 +251,15 @@
     "q": {
       "messages": [
         {
-          "content": "Result: **Email Triage Summary:**\n\nurgent (payment), spam (promotion), feature (request)\n\nExpectation: summary lists spam as a classification",
+          "content": [
+            {
+              "type": "text",
+              "text": "Result: **Email Triage Summary:**\n\nurgent (payment), spam (promotion), feature (request)\n\nExpectation: summary lists spam as a classification",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -227,7 +275,15 @@
     "q": {
       "messages": [
         {
-          "content": "Result: **Email Triage Summary:**\n\nurgent (payment), spam (promotion), feature (request)\n\nExpectation: summary lists feature as a classification",
+          "content": [
+            {
+              "type": "text",
+              "text": "Result: **Email Triage Summary:**\n\nurgent (payment), spam (promotion), feature (request)\n\nExpectation: summary lists feature as a classification",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]

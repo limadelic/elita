@@ -9,7 +9,15 @@
     "q": {
       "messages": [
         {
-          "content": "you manage a software development team with a dev and a qa",
+          "content": [
+            {
+              "type": "text",
+              "text": "you manage a software development team with a dev and a qa",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -33,7 +41,15 @@
     "q": {
       "messages": [
         {
-          "content": "we need more test created",
+          "content": [
+            {
+              "type": "text",
+              "text": "we need more test created",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -71,7 +87,15 @@
     "q": {
       "messages": [
         {
-          "content": "did you receive a task from boss?",
+          "content": [
+            {
+              "type": "text",
+              "text": "did you receive a task from boss?",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -87,7 +111,15 @@
     "q": {
       "messages": [
         {
-          "content": "[from boss] We need more tests created. Please prioritize creating additional test cases and expand our test coverage. Let me know what you need to get this done.",
+          "content": [
+            {
+              "type": "text",
+              "text": "[from boss] We need more tests created. Please prioritize creating additional test cases and expand our test coverage. Let me know what you need to get this done.",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -103,7 +135,15 @@
     "q": {
       "messages": [
         {
-          "content": "did you receive a task from boss?",
+          "content": [
+            {
+              "type": "text",
+              "text": "did you receive a task from boss?",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -119,7 +159,15 @@
     "q": {
       "messages": [
         {
-          "content": "you manage a software development team with a dev and a qa",
+          "content": [
+            {
+              "type": "text",
+              "text": "you manage a software development team with a dev and a qa",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -143,7 +191,15 @@
     "q": {
       "messages": [
         {
-          "content": "we need more test created",
+          "content": [
+            {
+              "type": "text",
+              "text": "we need more test created",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -181,7 +237,15 @@
     "q": {
       "messages": [
         {
-          "content": "did you receive a task from boss?",
+          "content": [
+            {
+              "type": "text",
+              "text": "did you receive a task from boss?",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -197,7 +261,15 @@
     "q": {
       "messages": [
         {
-          "content": "[from boss] We need more tests created. Please prioritize expanding our test coverage and creating additional test cases. Let me know what areas you'd like to focus on and any support you need from the dev team.",
+          "content": [
+            {
+              "type": "text",
+              "text": "[from boss] We need more tests created. Please prioritize expanding our test coverage and creating additional test cases. Let me know what areas you'd like to focus on and any support you need from the dev team.",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -213,7 +285,15 @@
     "q": {
       "messages": [
         {
-          "content": "did you receive a task from boss?",
+          "content": [
+            {
+              "type": "text",
+              "text": "did you receive a task from boss?",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]

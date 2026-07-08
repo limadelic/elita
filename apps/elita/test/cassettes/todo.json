@@ -16,7 +16,15 @@
     "q": {
       "messages": [
         {
-          "content": "Add call dentist to my list",
+          "content": [
+            {
+              "type": "text",
+              "text": "Add call dentist to my list",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -135,7 +143,15 @@
           "role": "assistant"
         },
         {
-          "content": "Mark call dentist as done",
+          "content": [
+            {
+              "type": "text",
+              "text": "Mark call dentist as done",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -254,7 +270,15 @@
           "role": "assistant"
         },
         {
-          "content": "What do I need to do?",
+          "content": [
+            {
+              "type": "text",
+              "text": "What do I need to do?",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -316,7 +340,15 @@
     "q": {
       "messages": [
         {
-          "content": "Add buy groceries to my list",
+          "content": [
+            {
+              "type": "text",
+              "text": "Add buy groceries to my list",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -439,7 +471,15 @@
           "role": "assistant"
         },
         {
-          "content": "What do I need to do?",
+          "content": [
+            {
+              "type": "text",
+              "text": "What do I need to do?",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -497,7 +537,15 @@
     "q": {
       "messages": [
         {
-          "content": "Add buy milk to my list",
+          "content": [
+            {
+              "type": "text",
+              "text": "Add buy milk to my list",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -616,7 +664,15 @@
           "role": "assistant"
         },
         {
-          "content": "Add walk dog to my list",
+          "content": [
+            {
+              "type": "text",
+              "text": "Add walk dog to my list",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -735,7 +791,15 @@
           "role": "assistant"
         },
         {
-          "content": "What do I need to do?",
+          "content": [
+            {
+              "type": "text",
+              "text": "What do I need to do?",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -802,7 +866,15 @@
           "role": "assistant"
         },
         {
-          "content": "What do I need to do?",
+          "content": [
+            {
+              "type": "text",
+              "text": "What do I need to do?",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]

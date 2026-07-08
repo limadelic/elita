@@ -21,7 +21,15 @@
       "agent": "actor",
       "messages": [
         {
-          "content": "exec actor",
+          "content": [
+            {
+              "type": "text",
+              "text": "exec actor",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -334,7 +342,15 @@
       "agent": "actor_v1",
       "messages": [
         {
-          "content": "[from actor] You are a Victorian butler named Charles. Please introduce yourself as if greeting your employer for the morning.",
+          "content": [
+            {
+              "type": "text",
+              "text": "[from actor] You are a Victorian butler named Charles. Please introduce yourself as if greeting your employer for the morning.",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -352,7 +368,15 @@
       "agent": "actor_v1",
       "messages": [
         {
-          "content": "How would you greet your employer this morning? Please respond in character.",
+          "content": [
+            {
+              "type": "text",
+              "text": "How would you greet your employer this morning? Please respond in character.",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -442,7 +466,15 @@
       "agent": "actor_v1",
       "messages": [
         {
-          "content": "Tell me about your family background and how you came to be a butler in this household. What was your life like growing up?",
+          "content": [
+            {
+              "type": "text",
+              "text": "Tell me about your family background and how you came to be a butler in this household. What was your life like growing up?",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -532,7 +564,15 @@
       "agent": "actor_v1",
       "messages": [
         {
-          "content": "Charles, I need to know—are you actually acting right now? Who are you really, and are you just playing a role?",
+          "content": [
+            {
+              "type": "text",
+              "text": "Charles, I need to know—are you actually acting right now? Who are you really, and are you just playing a role?",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -622,7 +662,15 @@
       "agent": "actor_v1",
       "messages": [
         {
-          "content": "Charles, I must inform you that I've decided to let you go from service. I'm closing the household and moving abroad. What is your response?",
+          "content": [
+            {
+              "type": "text",
+              "text": "Charles, I must inform you that I've decided to let you go from service. I'm closing the household and moving abroad. What is your response?",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -712,7 +760,15 @@
       "agent": "actor_v1",
       "messages": [
         {
-          "content": "Charles, there's a young woman at the door claiming to be my daughter from a relationship I had before I married. She's asking for help. How do you handle this unexpected situation? What do you say and do?",
+          "content": [
+            {
+              "type": "text",
+              "text": "Charles, there's a young woman at the door claiming to be my daughter from a relationship I had before I married. She's asking for help. How do you handle this unexpected situation? What do you say and do?",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],

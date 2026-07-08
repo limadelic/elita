@@ -44,7 +44,15 @@
       "agent": "doctor",
       "messages": [
         {
-          "content": "exec doctor",
+          "content": [
+            {
+              "type": "text",
+              "text": "exec doctor",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -441,7 +449,15 @@
       "agent": "doctor_v1",
       "messages": [
         {
-          "content": "[from doctor] Please diagnose the patient named patient_v1. Ask them about their symptoms and provide a diagnosis. Start with one clear symptom question.",
+          "content": [
+            {
+              "type": "text",
+              "text": "[from doctor] Please diagnose the patient named patient_v1. Ask them about their symptoms and provide a diagnosis. Start with one clear symptom question.",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -495,7 +511,15 @@
       "agent": "patient_v1",
       "messages": [
         {
-          "content": "What is your main complaint or symptom that brought you in today?",
+          "content": [
+            {
+              "type": "text",
+              "text": "What is your main complaint or symptom that brought you in today?",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -537,7 +561,15 @@
       "agent": "doctor_v1",
       "messages": [
         {
-          "content": "What diagnosis did you provide for the patient? Please share the questions you asked and the responses you received.",
+          "content": [
+            {
+              "type": "text",
+              "text": "What diagnosis did you provide for the patient? Please share the questions you asked and the responses you received.",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -655,7 +687,15 @@
       "agent": "patient_v2",
       "messages": [
         {
-          "content": "[from doctor] You are a patient with a fever of 102°F and a sore throat. When the doctor asks you questions, answer honestly about your symptoms. Answer with simple, direct responses about having a fever and sore throat.",
+          "content": [
+            {
+              "type": "text",
+              "text": "[from doctor] You are a patient with a fever of 102°F and a sore throat. When the doctor asks you questions, answer honestly about your symptoms. Answer with simple, direct responses about having a fever and sore throat.",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -721,7 +761,15 @@
       "agent": "doctor_v2",
       "messages": [
         {
-          "content": "[from doctor] You need to diagnose the patient named patient_v2. Use the ask tool to ask them one question at a time about their symptoms. Start by asking: \"What is your main symptom today?\" Then based on their response, determine the diagnosis. When you have enough information, provide your diagnosis.",
+          "content": [
+            {
+              "type": "text",
+              "text": "[from doctor] You need to diagnose the patient named patient_v2. Use the ask tool to ask them one question at a time about their symptoms. Start by asking: \"What is your main symptom today?\" Then based on their response, determine the diagnosis. When you have enough information, provide your diagnosis.",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -739,7 +787,15 @@
       "agent": "patient_v2",
       "messages": [
         {
-          "content": "What is your main symptom today?",
+          "content": [
+            {
+              "type": "text",
+              "text": "What is your main symptom today?",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -793,7 +849,15 @@
       "agent": "patient_v2",
       "messages": [
         {
-          "content": "Do you see any white or yellow coating on your throat or tonsils, or any swelling?",
+          "content": [
+            {
+              "type": "text",
+              "text": "Do you see any white or yellow coating on your throat or tonsils, or any swelling?",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -847,7 +911,15 @@
       "agent": "patient_v2",
       "messages": [
         {
-          "content": "Do you have any swollen lymph nodes or glands in your neck, and are you experiencing any body aches or headache?",
+          "content": [
+            {
+              "type": "text",
+              "text": "Do you have any swollen lymph nodes or glands in your neck, and are you experiencing any body aches or headache?",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -901,7 +973,15 @@
       "agent": "patient_v2",
       "messages": [
         {
-          "content": "How long have you had these symptoms, and did this come on suddenly or gradually?",
+          "content": [
+            {
+              "type": "text",
+              "text": "How long have you had these symptoms, and did this come on suddenly or gradually?",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -943,7 +1023,15 @@
       "agent": "doctor_v2",
       "messages": [
         {
-          "content": "Please describe the diagnostic process you went through with patient_v2. What questions did you ask, what responses did you get, and what diagnosis did you provide?",
+          "content": [
+            {
+              "type": "text",
+              "text": "Please describe the diagnostic process you went through with patient_v2. What questions did you ask, what responses did you get, and what diagnosis did you provide?",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -1057,7 +1145,15 @@
       "agent": "patient_v3",
       "messages": [
         {
-          "content": "[from doctor] You are a patient with a simple symptom: high fever. When the doctor asks you a question, respond that you have a high fever. Keep responses very brief.",
+          "content": [
+            {
+              "type": "text",
+              "text": "[from doctor] You are a patient with a simple symptom: high fever. When the doctor asks you a question, respond that you have a high fever. Keep responses very brief.",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -1107,7 +1203,15 @@
       "agent": "doctor_v3",
       "messages": [
         {
-          "content": "[from doctor] Diagnose patient_v3. Ask them ONE question: \"Do you have a fever?\" Then, based on their answer, provide your diagnosis immediately. Stop after diagnosis.",
+          "content": [
+            {
+              "type": "text",
+              "text": "[from doctor] Diagnose patient_v3. Ask them ONE question: \"Do you have a fever?\" Then, based on their answer, provide your diagnosis immediately. Stop after diagnosis.",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -1125,7 +1229,15 @@
       "agent": "doctor_v3",
       "messages": [
         {
-          "content": "Describe what happened: What question did you ask patient_v3, what was their response, and what diagnosis did you provide?",
+          "content": [
+            {
+              "type": "text",
+              "text": "Describe what happened: What question did you ask patient_v3, what was their response, and what diagnosis did you provide?",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -1179,7 +1291,15 @@
       "agent": "doctor_v2",
       "messages": [
         {
-          "content": "Can you use the ask tool? What tools do you have available?",
+          "content": [
+            {
+              "type": "text",
+              "text": "Can you use the ask tool? What tools do you have available?",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],

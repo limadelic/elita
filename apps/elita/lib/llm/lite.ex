@@ -45,10 +45,29 @@ defmodule Lite do
   end
 
   defp decorate(base, text, history) do
+    messages = cache_messages(history)
+
     base
     |> put(:system, [%{type: "text", text: text, cache_control: @cache_key}])
-    |> put(:messages, history)
+    |> put(:messages, messages)
   end
+
+  defp cache_messages([]), do: []
+
+  defp cache_messages(messages) do
+    {last, init} = pop_at(messages, -1)
+    init ++ [apply_content_cache(last)]
+  end
+
+  defp apply_content_cache(%{content: str} = m) when is_binary(str),
+    do: put(m, :content, [%{type: "text", text: str, cache_control: @cache_key}])
+
+  defp apply_content_cache(%{content: blocks} = m) when is_list(blocks) do
+    {block, rest} = pop_at(blocks, -1)
+    put(m, :content, rest ++ [put(block, :cache_control, @cache_key)])
+  end
+
+  defp apply_content_cache(msg), do: msg
 
   defp add_tools(base, [%{function_declarations: defs}]) do
     tools = map(defs, &schema/1)

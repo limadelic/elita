@@ -38,7 +38,15 @@
     "q": {
       "messages": [
         {
-          "content": "{\n  \"price\": \"high cost\",\n  \"friction\": \"complex workflow\",\n  \"desire\": \"low interest\"\n}\n",
+          "content": [
+            {
+              "type": "text",
+              "text": "{\n  \"price\": \"high cost\",\n  \"friction\": \"complex workflow\",\n  \"desire\": \"low interest\"\n}\n",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -112,7 +120,15 @@
     "q": {
       "messages": [
         {
-          "content": "What is the price facet? The price is: high cost",
+          "content": [
+            {
+              "type": "text",
+              "text": "What is the price facet? The price is: high cost",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -128,7 +144,15 @@
     "q": {
       "messages": [
         {
-          "content": "What is the friction facet? The friction is: complex workflow",
+          "content": [
+            {
+              "type": "text",
+              "text": "What is the friction facet? The friction is: complex workflow",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -144,7 +168,15 @@
     "q": {
       "messages": [
         {
-          "content": "What is the desire facet? The desire is: low interest",
+          "content": [
+            {
+              "type": "text",
+              "text": "What is the desire facet? The desire is: low interest",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -230,7 +262,15 @@
     "q": {
       "messages": [
         {
-          "content": "Synthesize these three verdicts: price concerns high, friction concerns high, desire weak. What is your overall verdict?",
+          "content": [
+            {
+              "type": "text",
+              "text": "Synthesize these three verdicts: price concerns high, friction concerns high, desire weak. What is your overall verdict?",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -268,7 +308,15 @@
     "q": {
       "messages": [
         {
-          "content": "Result: consensus: price-high friction-high desire-weak\n\nExpectation: result shows consensus across price friction and desire considerations",
+          "content": [
+            {
+              "type": "text",
+              "text": "Result: consensus: price-high friction-high desire-weak\n\nExpectation: result shows consensus across price friction and desire considerations",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -322,7 +370,15 @@
     "q": {
       "messages": [
         {
-          "content": "{\n  \"price\": \"expensive at $99/month\",\n  \"friction\": \"smooth onboarding process\",\n  \"desire\": \"strong customer demand\"\n}\n",
+          "content": [
+            {
+              "type": "text",
+              "text": "{\n  \"price\": \"expensive at $99/month\",\n  \"friction\": \"smooth onboarding process\",\n  \"desire\": \"strong customer demand\"\n}\n",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -392,7 +448,15 @@
     "q": {
       "messages": [
         {
-          "content": "What is your assessment of the price facet: expensive at $99/month?",
+          "content": [
+            {
+              "type": "text",
+              "text": "What is your assessment of the price facet: expensive at $99/month?",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -408,7 +472,15 @@
     "q": {
       "messages": [
         {
-          "content": "What is your assessment of the friction facet: smooth onboarding process?",
+          "content": [
+            {
+              "type": "text",
+              "text": "What is your assessment of the friction facet: smooth onboarding process?",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -424,7 +496,15 @@
     "q": {
       "messages": [
         {
-          "content": "What is your assessment of the desire facet: strong customer demand?",
+          "content": [
+            {
+              "type": "text",
+              "text": "What is your assessment of the desire facet: strong customer demand?",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -502,7 +582,15 @@
     "q": {
       "messages": [
         {
-          "content": "Synthesize these three verdicts: price concerns high, friction acceptable, desire strong. What is your overall verdict?",
+          "content": [
+            {
+              "type": "text",
+              "text": "Synthesize these three verdicts: price concerns high, friction acceptable, desire strong. What is your overall verdict?",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -540,7 +628,15 @@
     "q": {
       "messages": [
         {
-          "content": "Result: consensus: price-high friction-acceptable desire-strong\n\nExpectation: result discusses the price aspect",
+          "content": [
+            {
+              "type": "text",
+              "text": "Result: consensus: price-high friction-acceptable desire-strong\n\nExpectation: result discusses the price aspect",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -556,7 +652,15 @@
     "q": {
       "messages": [
         {
-          "content": "Result: consensus: price-high friction-acceptable desire-strong\n\nExpectation: result discusses the friction aspect",
+          "content": [
+            {
+              "type": "text",
+              "text": "Result: consensus: price-high friction-acceptable desire-strong\n\nExpectation: result discusses the friction aspect",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -572,7 +676,15 @@
     "q": {
       "messages": [
         {
-          "content": "Result: consensus: price-high friction-acceptable desire-strong\n\nExpectation: result discusses the desire aspect",
+          "content": [
+            {
+              "type": "text",
+              "text": "Result: consensus: price-high friction-acceptable desire-strong\n\nExpectation: result discusses the desire aspect",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -588,7 +700,15 @@
     "q": {
       "messages": [
         {
-          "content": "Result: consensus: price-high friction-acceptable desire-strong\n\nExpectation: result includes a consensus viewpoint",
+          "content": [
+            {
+              "type": "text",
+              "text": "Result: consensus: price-high friction-acceptable desire-strong\n\nExpectation: result includes a consensus viewpoint",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]

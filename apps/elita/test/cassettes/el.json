@@ -17,7 +17,15 @@
       "agent": "el",
       "messages": [
         {
-          "content": "ask greet hello",
+          "content": [
+            {
+              "type": "text",
+              "text": "ask greet hello",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -102,7 +110,15 @@
       "agent": "greet",
       "messages": [
         {
-          "content": "hello",
+          "content": [
+            {
+              "type": "text",
+              "text": "hello",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -152,7 +168,15 @@
       "agent": "el",
       "messages": [
         {
-          "content": "ask greet Mike",
+          "content": [
+            {
+              "type": "text",
+              "text": "ask greet Mike",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -170,7 +194,15 @@
       "agent": "greet",
       "messages": [
         {
-          "content": "Mike",
+          "content": [
+            {
+              "type": "text",
+              "text": "Mike",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -220,7 +252,15 @@
       "agent": "el",
       "messages": [
         {
-          "content": "ask greet how are you",
+          "content": [
+            {
+              "type": "text",
+              "text": "ask greet how are you",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -238,7 +278,15 @@
       "agent": "greet",
       "messages": [
         {
-          "content": "how are you",
+          "content": [
+            {
+              "type": "text",
+              "text": "how are you",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -288,7 +336,15 @@
       "agent": "el",
       "messages": [
         {
-          "content": "ask greet hello",
+          "content": [
+            {
+              "type": "text",
+              "text": "ask greet hello",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -306,7 +362,15 @@
       "agent": "greet",
       "messages": [
         {
-          "content": "hello",
+          "content": [
+            {
+              "type": "text",
+              "text": "hello",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -356,7 +420,15 @@
       "agent": "el",
       "messages": [
         {
-          "content": "ask greet Mike",
+          "content": [
+            {
+              "type": "text",
+              "text": "ask greet Mike",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -374,7 +446,15 @@
       "agent": "greet",
       "messages": [
         {
-          "content": "Mike",
+          "content": [
+            {
+              "type": "text",
+              "text": "Mike",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -424,7 +504,15 @@
       "agent": "el",
       "messages": [
         {
-          "content": "ask greet how are you",
+          "content": [
+            {
+              "type": "text",
+              "text": "ask greet how are you",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -442,7 +530,15 @@
       "agent": "greet",
       "messages": [
         {
-          "content": "how are you",
+          "content": [
+            {
+              "type": "text",
+              "text": "how are you",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],

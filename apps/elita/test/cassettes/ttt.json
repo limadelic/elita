@@ -9,7 +9,15 @@
     "q": {
       "messages": [
         {
-          "content": "alice is gonna be your opponent, wait for her move",
+          "content": [
+            {
+              "type": "text",
+              "text": "alice is gonna be your opponent, wait for her move",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -33,7 +41,15 @@
     "q": {
       "messages": [
         {
-          "content": "start a game with bob, you are X, play first",
+          "content": [
+            {
+              "type": "text",
+              "text": "start a game with bob, you are X, play first",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -83,7 +99,15 @@
     "q": {
       "messages": [
         {
-          "content": "[from alice] I'll start the tic-tac-toe game! I'm X and I'll play first.\n\nHere's my opening move:\n\nX | _ | _\n_ | _ | _\n_ | _ | _\n\nYour turn! You're O.",
+          "content": [
+            {
+              "type": "text",
+              "text": "[from alice] I'll start the tic-tac-toe game! I'm X and I'll play first.\n\nHere's my opening move:\n\nX | _ | _\n_ | _ | _\n_ | _ | _\n\nYour turn! You're O.",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -124,7 +148,15 @@
     "q": {
       "messages": [
         {
-          "content": "[from bob] X | _ | _\n_ | O | _\n_ | _ | _\n\nYour turn!",
+          "content": [
+            {
+              "type": "text",
+              "text": "[from bob] X | _ | _\n_ | O | _\n_ | _ | _\n\nYour turn!",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -174,7 +206,15 @@
     "q": {
       "messages": [
         {
-          "content": "[from alice] Great move! Here's my response:\n\nX | _ | _\n_ | O | _\n_ | _ | X\n\nYour turn!",
+          "content": [
+            {
+              "type": "text",
+              "text": "[from alice] Great move! Here's my response:\n\nX | _ | _\n_ | O | _\n_ | _ | X\n\nYour turn!",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -220,7 +260,15 @@
     "q": {
       "messages": [
         {
-          "content": "[from bob] X | _ | O\n_ | O | _\n_ | _ | X\n\nYour turn!",
+          "content": [
+            {
+              "type": "text",
+              "text": "[from bob] X | _ | O\n_ | O | _\n_ | _ | X\n\nYour turn!",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -270,7 +318,15 @@
     "q": {
       "messages": [
         {
-          "content": "[from alice] I'll block your diagonal! Here's my move:\n\nX | _ | O\n_ | O | _\nX | _ | X\n\nYour turn!",
+          "content": [
+            {
+              "type": "text",
+              "text": "[from alice] I'll block your diagonal! Here's my move:\n\nX | _ | O\n_ | O | _\nX | _ | X\n\nYour turn!",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -316,7 +372,15 @@
     "q": {
       "messages": [
         {
-          "content": "[from bob] X | _ | O\n_ | O | _\nX | O | X\n\nYour turn!",
+          "content": [
+            {
+              "type": "text",
+              "text": "[from bob] X | _ | O\n_ | O | _\nX | O | X\n\nYour turn!",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -366,7 +430,15 @@
     "q": {
       "messages": [
         {
-          "content": "[from alice] I'll take the top-middle to block your winning move:\n\nX | X | O\n_ | O | _\nX | O | X\n\nYour turn!",
+          "content": [
+            {
+              "type": "text",
+              "text": "[from alice] I'll take the top-middle to block your winning move:\n\nX | X | O\n_ | O | _\nX | O | X\n\nYour turn!",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -412,7 +484,15 @@
     "q": {
       "messages": [
         {
-          "content": "[from bob] X | X | O\nO | O | _\nX | O | X\n\nYour turn!",
+          "content": [
+            {
+              "type": "text",
+              "text": "[from bob] X | X | O\nO | O | _\nX | O | X\n\nYour turn!",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -450,7 +530,15 @@
     "q": {
       "messages": [
         {
-          "content": "[from alice] I take the last remaining space:\n\nX | X | O\nO | O | X\nX | O | X\n\nGame Over! It's a tie - all spaces are filled with no winner.",
+          "content": [
+            {
+              "type": "text",
+              "text": "[from alice] I take the last remaining space:\n\nX | X | O\nO | O | X\nX | O | X\n\nGame Over! It's a tie - all spaces are filled with no winner.",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -466,7 +554,15 @@
     "q": {
       "messages": [
         {
-          "content": "did the game finish",
+          "content": [
+            {
+              "type": "text",
+              "text": "did the game finish",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]
@@ -482,7 +578,15 @@
     "q": {
       "messages": [
         {
-          "content": "Result: Yes, the game finished and it was a **tie**. \n\nAll 9 spaces on the board were filled with no three-in-a-row for either player:\n\n```\nX | X | O\nO | O | X\nX | O | X\n```\n\nNeither X (me) nor O (Bob) achieved three in a row, so it ended in a draw.\n\nExpectation: the game finished with a winner or a tie",
+          "content": [
+            {
+              "type": "text",
+              "text": "Result: Yes, the game finished and it was a **tie**. \n\nAll 9 spaces on the board were filled with no three-in-a-row for either player:\n\n```\nX | X | O\nO | O | X\nX | O | X\n```\n\nNeither X (me) nor O (Bob) achieved three in a row, so it ended in a draw.\n\nExpectation: the game finished with a winner or a tie",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ]

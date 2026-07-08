@@ -32,7 +32,15 @@
       "agent": "mother",
       "messages": [
         {
-          "content": "exec mother",
+          "content": [
+            {
+              "type": "text",
+              "text": "exec mother",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -307,7 +315,15 @@
       "agent": "mother_sut",
       "messages": [
         {
-          "content": "[from mother] It's time to give birth!",
+          "content": [
+            {
+              "type": "text",
+              "text": "[from mother] It's time to give birth!",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -451,7 +467,15 @@
       "agent": "baby_v1",
       "messages": [
         {
-          "content": "What do you do as a newborn baby?",
+          "content": [
+            {
+              "type": "text",
+              "text": "What do you do as a newborn baby?",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -597,7 +621,15 @@
       "agent": "baby_v2",
       "messages": [
         {
-          "content": "Are you crying?",
+          "content": [
+            {
+              "type": "text",
+              "text": "Are you crying?",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -615,7 +647,15 @@
       "agent": "baby_v3",
       "messages": [
         {
-          "content": "Are you a baby?",
+          "content": [
+            {
+              "type": "text",
+              "text": "Are you a baby?",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -725,7 +765,15 @@
       "agent": "baby_v3",
       "messages": [
         {
-          "content": "[from mother] baby_v3, please identify yourself",
+          "content": [
+            {
+              "type": "text",
+              "text": "[from mother] baby_v3, please identify yourself",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -743,7 +791,15 @@
       "agent": "baby_v2",
       "messages": [
         {
-          "content": "[from mother] baby_v2, please identify yourself",
+          "content": [
+            {
+              "type": "text",
+              "text": "[from mother] baby_v2, please identify yourself",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -793,7 +849,15 @@
       "agent": "baby_v1",
       "messages": [
         {
-          "content": "[from mother] baby_v1, please identify yourself",
+          "content": [
+            {
+              "type": "text",
+              "text": "[from mother] baby_v1, please identify yourself",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],

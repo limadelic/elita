@@ -21,7 +21,15 @@
       "agent": "todo",
       "messages": [
         {
-          "content": "exec todo",
+          "content": [
+            {
+              "type": "text",
+              "text": "exec todo",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -327,7 +335,15 @@
       "agent": "todo_v1",
       "messages": [
         {
-          "content": "[from todo] Add the task 'buy groceries' to the todo list",
+          "content": [
+            {
+              "type": "text",
+              "text": "[from todo] Add the task 'buy groceries' to the todo list",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -345,7 +361,15 @@
       "agent": "todo_v1",
       "messages": [
         {
-          "content": "What tasks are on the todo list?",
+          "content": [
+            {
+              "type": "text",
+              "text": "What tasks are on the todo list?",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -399,7 +423,15 @@
       "agent": "todo_v1",
       "messages": [
         {
-          "content": "You are a Todo agent with access to set/get tools. Please use the get tool with key \"todo\" to retrieve the current task list",
+          "content": [
+            {
+              "type": "text",
+              "text": "You are a Todo agent with access to set/get tools. Please use the get tool with key \"todo\" to retrieve the current task list",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -498,7 +530,15 @@
       "agent": "todo_s1",
       "messages": [
         {
-          "content": "Add the task 'buy groceries' to your todo list",
+          "content": [
+            {
+              "type": "text",
+              "text": "Add the task 'buy groceries' to your todo list",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -619,7 +659,15 @@
       "agent": "todo_s1",
       "messages": [
         {
-          "content": "What tasks are currently on your todo list?",
+          "content": [
+            {
+              "type": "text",
+              "text": "What tasks are currently on your todo list?",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -790,7 +838,15 @@
       "agent": "todo_s2",
       "messages": [
         {
-          "content": "[from todo] Add the task 'buy milk' to your todo list",
+          "content": [
+            {
+              "type": "text",
+              "text": "[from todo] Add the task 'buy milk' to your todo list",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -911,7 +967,15 @@
       "agent": "todo_s2",
       "messages": [
         {
-          "content": "[from todo] Add the task 'walk dog' to your todo list",
+          "content": [
+            {
+              "type": "text",
+              "text": "[from todo] Add the task 'walk dog' to your todo list",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -1000,7 +1064,15 @@
       "agent": "todo_s2",
       "messages": [
         {
-          "content": "What tasks are currently on your todo list?",
+          "content": [
+            {
+              "type": "text",
+              "text": "What tasks are currently on your todo list?",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -1167,7 +1239,15 @@
       "agent": "todo_s3",
       "messages": [
         {
-          "content": "[from todo] Add the task 'call dentist' to your todo list",
+          "content": [
+            {
+              "type": "text",
+              "text": "[from todo] Add the task 'call dentist' to your todo list",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -1284,7 +1364,15 @@
       "agent": "todo_s3",
       "messages": [
         {
-          "content": "[from todo] Add the task 'buy milk' to your todo list",
+          "content": [
+            {
+              "type": "text",
+              "text": "[from todo] Add the task 'buy milk' to your todo list",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -1369,7 +1457,15 @@
       "agent": "todo_s3",
       "messages": [
         {
-          "content": "What tasks are currently on your todo list?",
+          "content": [
+            {
+              "type": "text",
+              "text": "What tasks are currently on your todo list?",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -1482,7 +1578,15 @@
       "agent": "todo_s3",
       "messages": [
         {
-          "content": "[from todo] Mark the task 'call dentist' as complete and remove it from the todo list",
+          "content": [
+            {
+              "type": "text",
+              "text": "[from todo] Mark the task 'call dentist' as complete and remove it from the todo list",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -1567,7 +1671,15 @@
       "agent": "todo_s3",
       "messages": [
         {
-          "content": "What tasks remain on your todo list?",
+          "content": [
+            {
+              "type": "text",
+              "text": "What tasks remain on your todo list?",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -1722,7 +1834,15 @@
       "agent": "todo_s4",
       "messages": [
         {
-          "content": "What tasks are currently on your todo list?",
+          "content": [
+            {
+              "type": "text",
+              "text": "What tasks are currently on your todo list?",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -1921,7 +2041,15 @@
       "agent": "todo_s5",
       "messages": [
         {
-          "content": "[from todo] Add the task 'pay bills' to your todo list",
+          "content": [
+            {
+              "type": "text",
+              "text": "[from todo] Add the task 'pay bills' to your todo list",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -2006,7 +2134,15 @@
       "agent": "todo_s5",
       "messages": [
         {
-          "content": "[from todo] Add the task 'fix broken window' to your todo list",
+          "content": [
+            {
+              "type": "text",
+              "text": "[from todo] Add the task 'fix broken window' to your todo list",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -2091,7 +2227,15 @@
       "agent": "todo_s5",
       "messages": [
         {
-          "content": "What tasks are currently on your todo list?",
+          "content": [
+            {
+              "type": "text",
+              "text": "What tasks are currently on your todo list?",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -2204,7 +2348,15 @@
       "agent": "todo_s5",
       "messages": [
         {
-          "content": "[from todo] Add the task 'water plants' to your todo list",
+          "content": [
+            {
+              "type": "text",
+              "text": "[from todo] Add the task 'water plants' to your todo list",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
@@ -2289,7 +2441,15 @@
       "agent": "todo_s5",
       "messages": [
         {
-          "content": "What tasks are now on your todo list?",
+          "content": [
+            {
+              "type": "text",
+              "text": "What tasks are now on your todo list?",
+              "cache_control": {
+                "type": "ephemeral"
+              }
+            }
+          ],
           "role": "user"
         }
       ],
