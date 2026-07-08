@@ -4,7 +4,6 @@ Feature: Inbox triage
     * > el triage
 
     * triage> email 1 says urgent payment overdue, your billing is past due. email 2 says claim your free prize, you have won a promotional offer. email 3 says new feature request, please add dark mode to the app
-      | 🤔 el → triage           | urgent payment overdue                            |
       | 🤔 triage → classifier_1 | urgent payment overdue                            |
       | ✨ classifier_1           | urgent                                            |
       | 🤔 triage → classifier_2 | claim your free prize                             |
