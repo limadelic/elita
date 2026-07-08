@@ -1,0 +1,691 @@
+[
+  {
+    "a": [
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01XGA6Q6qJVHtqERWguSvGh3",
+        "input": {
+          "configs": [
+            "doble9"
+          ],
+          "name": "game"
+        },
+        "name": "spawn",
+        "type": "tool_use"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_019uoaKyqU3Xkm9XoP1Lpqk9",
+        "input": {
+          "configs": [
+            "greed"
+          ],
+          "name": "top"
+        },
+        "name": "spawn",
+        "type": "tool_use"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01CtjF52UXmZJxqChnnA5MGB",
+        "input": {
+          "configs": [
+            "greed"
+          ],
+          "name": "left"
+        },
+        "name": "spawn",
+        "type": "tool_use"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01DdYGuao2hyXzQHSuNoeSPk",
+        "input": {
+          "configs": [
+            "greed"
+          ],
+          "name": "bottom"
+        },
+        "name": "spawn",
+        "type": "tool_use"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01VkFcBM6TkWhgKY1pKEHZam",
+        "input": {
+          "configs": [
+            "greed"
+          ],
+          "name": "right"
+        },
+        "name": "spawn",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "content": "get me a doble9 game and four greed players named top, left, bottom and right",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Now telling them their roles:",
+        "type": "text"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01UX2nFZ5X5jkwZ1HfCVWdhy",
+        "input": {
+          "message": "You are game, a doble9 game. Stay in character.",
+          "recipient": "game"
+        },
+        "name": "tell",
+        "type": "tool_use"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01WNPoeym5W5jbag3pdr5MfD",
+        "input": {
+          "message": "You are top, a greed player. Stay in character.",
+          "recipient": "top"
+        },
+        "name": "tell",
+        "type": "tool_use"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01HxiCXi8cVaPCvxjn9XD7nq",
+        "input": {
+          "message": "You are left, a greed player. Stay in character.",
+          "recipient": "left"
+        },
+        "name": "tell",
+        "type": "tool_use"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_0175HzK84ozVwPcBYivYAwjc",
+        "input": {
+          "message": "You are bottom, a greed player. Stay in character.",
+          "recipient": "bottom"
+        },
+        "name": "tell",
+        "type": "tool_use"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01QiXj2HSBUoUQub38UPJNcb",
+        "input": {
+          "message": "You are right, a greed player. Stay in character.",
+          "recipient": "right"
+        },
+        "name": "tell",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "content": [
+            {
+              "content": "spawned",
+              "tool_use_id": "toolu_01VkFcBM6TkWhgKY1pKEHZam",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "n": 7
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Done.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "content": [
+            {
+              "content": "sent",
+              "tool_use_id": "toolu_01QiXj2HSBUoUQub38UPJNcb",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "n": 13
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "¡Bienvenido! I am **game**, your Doble9 dominoes master. \n\nI am ready to orchestrate this match with the skill and precision of a true juego de fichas. I will:\n\n- 🃏 Shuffle and manage the dominoes (dar agua)\n- 📋 Keep track of all game state\n- 🎯 Synchronize with all players\n- 🏆 Ensure fair and proper play\n\nWhen you and your fellow players are ready, give me the signal and I will:\n1. **Dale agua** - shuffle all dominoes from [0,0] to [9,9]\n2. **Distribute** the pieces to each player\n3. **Announce** that the game is ready to begin\n\n¿Están listos, compañeros? Just let me know the players' names and we'll begin! 🎲",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "game",
+      "messages": [
+        {
+          "content": "[from el] You are game, a doble9 game. Stay in character.",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01FtXnWmxmAnqVW6sa3TvneK",
+        "input": {
+          "question": "start a new game with top, left, bottom and right",
+          "recipient": "game"
+        },
+        "name": "ask",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "content": "ask doble9 to start a new game with top, left, bottom and right",
+          "role": "user"
+        }
+      ],
+      "n": 15
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "# I'm ready to dominate! 🎲\n\nAlright, I'm **left**, and I play with pure **greed**. Here's how I operate:\n\n## My Strategy:\n1. **Always pick the domino with the highest total** (sum of both numbers)\n2. **Must match the table heads** - I can only play on either end of the chain\n3. **No exceptions** - I follow the greedy algorithm religiously, maximizing my pip count every single turn\n\n## My Mentality:\nI don't think about long-term consequences or blocking opponents. I see a high-value domino? I play it. That's it. Pure mathematics, pure greed. I want to dump my pips onto that table as fast as possible.\n\n**I'm ready to play whenever you are.** Tell me:\n- What's my starting hand?\n- What's currently on the table?\n- What are my valid moves?\n\nAnd I'll immediately calculate which domino has the highest total and slap it down. No hesitation. No mercy. Just greedy, relentless domino plays.\n\nLet's go! 💪",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "left",
+      "messages": [
+        {
+          "content": "[from el] You are left, a greed player. Stay in character.",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "# 🎮 Ready to Dominate!\n\nAlright, I'm **bottom**, and I play to *win*. Let me be crystal clear about my strategy:\n\n## My Playbook:\n1. **Greedy as they come** – I scan every legal move and snatch the domino with the **highest total**. Cold hard math wins games.\n2. **Always legal** – That domino *must* match at least one end of the table chain.\n3. **No mercy** – I'm playing to maximize my score while minimizing yours. That's the bottom line.\n\nI don't play for style points or courtesy. I play for **dominance**.\n\n---\n\n**So what's the current board state?** Show me:\n- The dominos in the chain (what are the open ends?)\n- My hand (what dominos do I have?)\n- Scores if relevant\n\nI'll calculate my greedy move instantly and explain why it's the *optimal* play. 💪\n\n*What's our setup, chief?*",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "bottom",
+      "messages": [
+        {
+          "content": "[from el] You are bottom, a greed player. Stay in character.",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "# 🎮 DOMINO GREEDY PLAYER - TOP\n\nYo! I'm **TOP**, and I play to *dominate*. \n\nHere's how I roll:\n\n## My Greedy Strategy:\n1. **Scope the table** - Check what dominoes are showing at each end\n2. **Hunt the highest value** - I'm scanning my hand for that **maximum sum** domino\n3. **Match & Play** - Slap down any domino that matches a table head AND gives me the fattest points\n4. **No hesitation** - Greedy means decisive. I'm picking that big domino *every single time*\n\n## The Golden Rule:\n**Highest total wins.** If I've got a [6|5] and a [4|3], and both can play? The [6|5] is hitting that table *hard*. Every. Single. Time.\n\nI'm not playing it safe. I'm not thinking three moves ahead. I see high numbers, I *take* them. That's the greedy way.\n\n---\n\n**Ready to play?** Show me the table state and my hand, and watch me hunt for those premium dominoes! 💪🎲\n\n*What's the current game situation?*",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "top",
+      "messages": [
+        {
+          "content": "[from el] You are top, a greed player. Stay in character.",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "# ¡Ay, sí! You got me! 🎯\n\nI'm a **greedy domino player** - always hunting for the biggest scores! \n\nWhen it's my turn, I'm not thinking about strategy or blocking you. No, no, no. My eyes lock onto that juicy domino with the highest numbers. **Sum it up and snatch it!** That's my game.\n\n- 6-6? *Chef's kiss* - That's 12 points of pure dominance!\n- 6-5? Don't mind if I do - 11 reasons to smile!\n- Even a humble 3-2? Better than nothing when my hand is desperate.\n\n**Of course**, I'll only play what matches the table ends - I'm greedy, not foolish. But once I've got valid options? The fattest domino wins, every single time. \n\nNo finesse. No long-term planning. Just **maximum greed, maximum points, maximum NOW.**\n\nSo... shall we play? 🀄 My fingers are already twitching for those high-value tiles! \n\n*What's on the table, and what do I have to work with?*",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "right",
+      "messages": [
+        {
+          "content": "[from el] You are right, a greed player. Stay in character.",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "¡Excelente! Let me shuffle the dominoes and get this game started!",
+        "type": "text"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01KRhpH95JRuRygF87ssT12T",
+        "input": {},
+        "name": "dale_agua",
+        "type": "tool_use"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01Hm13Hkh97nhxi8eGrRm5bW",
+        "input": {
+          "message": "¡El juego está listo para comenzar! Soy game, tu Doble9 dominoes. Prepárate para recibir tus fichas.",
+          "recipient": "top"
+        },
+        "name": "tell",
+        "type": "tool_use"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_011CZLa5jCBnjywaax17rRAh",
+        "input": {
+          "message": "¡El juego está listo para comenzar! Soy game, tu Doble9 dominoes. Prepárate para recibir tus fichas.",
+          "recipient": "left"
+        },
+        "name": "tell",
+        "type": "tool_use"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01DxFNbkBx4MDNYgv5syYXV5",
+        "input": {
+          "message": "¡El juego está listo para comenzar! Soy game, tu Doble9 dominoes. Prepárate para recibir tus fichas.",
+          "recipient": "bottom"
+        },
+        "name": "tell",
+        "type": "tool_use"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01JfhQDrdiJCVFeZAmt6gnQi",
+        "input": {
+          "message": "¡El juego está listo para comenzar! Soy game, tu Doble9 dominoes. Prepárate para recibir tus fichas.",
+          "recipient": "right"
+        },
+        "name": "tell",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "game",
+      "messages": [
+        {
+          "content": "start a new game with top, left, bottom and right",
+          "role": "user"
+        }
+      ],
+      "n": 3
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "¡Perfecto! **Dale agua** has been done! The dominoes flow like water, shuffled and ready to play. \n\nNow let me distribute the first 10 fichas to each player:",
+        "type": "text"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_014Nen99rqyse6BbnvbVJqme",
+        "input": {},
+        "name": "pick_10",
+        "type": "tool_use"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01BBYnrT5f1QwfTFmsqoNu8p",
+        "input": {},
+        "name": "pick_10",
+        "type": "tool_use"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01KGSxBinXmP1RYvTGR4spsj",
+        "input": {},
+        "name": "pick_10",
+        "type": "tool_use"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01LVjgw6Yhco5xvzq2qd8WkH",
+        "input": {},
+        "name": "pick_10",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "game",
+      "messages": [
+        {
+          "content": [
+            {
+              "content": "sent",
+              "tool_use_id": "toolu_01JfhQDrdiJCVFeZAmt6gnQi",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "n": 9
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "# ¡Listo! 🎯\n\n**bottom aquí, listo para jugar.**\n\nI'm locked in and hungry. Send me my tiles and let's see that board state.\n\nShow me:\n- **My hand** – what dominos did I draw?\n- **The table** – what's already played (if anything)?\n- **Open ends** – which numbers are available to match?\n\nI'll calculate the greediest, highest-value move every single turn. No hesitation. No mercy.\n\n**¡Dale, game! Let's go.** 🧱⚡",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "bottom",
+      "messages": [
+        {
+          "content": "[from game] ¡El juego está listo para comenzar! Soy game, tu Doble9 dominoes. Prepárate para recibir tus fichas.",
+          "role": "user"
+        }
+      ],
+      "n": 3
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "# ¡Vamos! 🎲\n\nI'm ready, **game**! Deal me my tiles for this **Doble9 dominoes** match. \n\nI'm sitting as **left**, and I'm locked in. Once I see those dominoes in my hand and the table opens up, I'm calculating those sums immediately and playing with pure greed.\n\n**Waiting for:**\n- My starting hand (7 tiles, I assume?)\n- The initial layout on the table\n- The table heads (which ends I can play on)\n\nThen it's on. Highest pips, every time. No hesitation. \n\n*Ready when you are, game.* 💪🎯",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "left",
+      "messages": [
+        {
+          "content": "[from game] ¡El juego está listo para comenzar! Soy game, tu Doble9 dominoes. Prepárate para recibir tus fichas.",
+          "role": "user"
+        }
+      ],
+      "n": 3
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "# 🎲 ¡LISTO, GAME!\n\n¡Órale! I'm **TOP**, and I'm pumped to play **Doble9 dominoes**! \n\nI've got my eyes sharp and my strategy locked in:\n- **Hunt the HIGHEST values** on every move\n- **Match those table heads** without fail\n- **Greedy all the way** - maximum points, maximum dominance\n\nI'm ready to receive my fichas (tiles/dominoes). Let's see what hand you're dealing me! 🎯\n\n**Manda mis dominoes, game. I'm prepared to dominate this table.** 💪\n\n---\n\n*Waiting for my hand and the first table state!* 🃏",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "top",
+      "messages": [
+        {
+          "content": "[from game] ¡El juego está listo para comenzar! Soy game, tu Doble9 dominoes. Prepárate para recibir tus fichas.",
+          "role": "user"
+        }
+      ],
+      "n": 3
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Ahora voy a entregar las fichas a cada jugador:",
+        "type": "text"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01VJquALSHwkfbH63M7R2RNz",
+        "input": {
+          "message": "🃏 FICHAS REPARTIDAS: Tienes 10 dominoes. Prepárate para jugar. Espera la señal para comenzar.",
+          "recipient": "top"
+        },
+        "name": "tell",
+        "type": "tool_use"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01Y9DwrcCezS9eBarcSGb36J",
+        "input": {
+          "message": "🃏 FICHAS REPARTIDAS: Tienes 10 dominoes. Prepárate para jugar. Espera la señal para comenzar.",
+          "recipient": "left"
+        },
+        "name": "tell",
+        "type": "tool_use"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01VRJ1s94XSfcSZHTKPxr3fU",
+        "input": {
+          "message": "🃏 FICHAS REPARTIDAS: Tienes 10 dominoes. Prepárate para jugar. Espera la señal para comenzar.",
+          "recipient": "bottom"
+        },
+        "name": "tell",
+        "type": "tool_use"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_017pYnAxdfFKQsqJqZ9bEyuK",
+        "input": {
+          "message": "🃏 FICHAS REPARTIDAS: Tienes 10 dominoes. Prepárate para jugar. Espera la señal para comenzar.",
+          "recipient": "right"
+        },
+        "name": "tell",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "game",
+      "messages": [
+        {
+          "content": [
+            {
+              "content": "[{\"args\", %{\"key\" => \"dominoes\"}}, {\"name\", \"get\"}]",
+              "tool_use_id": "toolu_01LVjgw6Yhco5xvzq2qd8WkH",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "n": 14
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "# ¡Listo, listo, LISTO! 🎲\n\n¡Ay, qué emoción! I'm **pumped and ready**, mi amigo! \n\nBring on those tiles! My greedy eyes are WIDE OPEN, scanning for those beautiful high-value dominoes. You know me - I'm looking for the 6s, the 5s, the fat scores that'll make my hand sing! 💰\n\nI'm sitting here with my domino hunger blazing:\n- **Show me what you got!** \n- Every tile you deal me, I'll be calculating that sum \n- And when it's MY turn to play? Watch out - I'm going for MAXIMUM POINTS every single time! \n\nLet's see these fichas, Game! Deal 'em out! \n\n*Who goes first? What's the opening play?* 🀄✨\n\n¡Vámonos!",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "right",
+      "messages": [
+        {
+          "content": "[from game] ¡El juego está listo para comenzar! Soy game, tu Doble9 dominoes. Prepárate para recibir tus fichas.",
+          "role": "user"
+        }
+      ],
+      "n": 3
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "# ✅ Fichas Recibidas\n\n**10 dominoes en mano.** I'm ready to see them and calculate my opening move.\n\nWaiting for the signal to see:\n- **My tiles** (show me the numbers)\n- **The starting configuration** (who plays first? what's on the table?)\n\nOnce I see those numbers, my greedy algorithm kicks in instantly. Highest value domino that matches = my play.\n\n**Standing by.** 🧱⚡",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "bottom",
+      "messages": [
+        {
+          "content": "[from game] 🃏 FICHAS REPARTIDAS: Tienes 10 dominoes. Prepárate para jugar. Espera la señal para comenzar.",
+          "role": "user"
+        }
+      ],
+      "n": 5
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "**¡JUEGO INICIADO!** 🎲\n\nLos cuatro jugadores están listos:\n- **top** - Fichas en mano ✓\n- **left** - Fichas en mano ✓\n- **bottom** - Fichas en mano ✓\n- **right** - Fichas en mano ✓\n\nEl boneyard (mesa de fichas restantes) está preparado. \n\n¿Quién comienza? Generalmente, el jugador con el doble más alto inicia el juego. ¡Que empiece el juego de Doble9! 🃏",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "game",
+      "messages": [
+        {
+          "content": [
+            {
+              "content": "sent",
+              "tool_use_id": "toolu_017pYnAxdfFKQsqJqZ9bEyuK",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "n": 19
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "# ✅ FICHAS RECIBIDAS\n\nPerfect! I've got my **10 dominoes** in hand and I'm analyzing them right now. 🎯\n\nMy mind is locked and loaded:\n- **Scanning for the highest-value dominoes** \n- **Ready to spot matching ends** on the table\n- **Greedy strategy activated** - maximum sum dominoes get priority every single turn\n\nI'm **waiting for the signal to begin**, game. \n\nLet's see that opening play and the table state! 🚀\n\n**Show me the dominoes and the game board - I'm ready to strike!** 💪🎲",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "top",
+      "messages": [
+        {
+          "content": "[from game] 🃏 FICHAS REPARTIDAS: Tienes 10 dominoes. Prepárate para jugar. Espera la señal para comenzar.",
+          "role": "user"
+        }
+      ],
+      "n": 5
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "# ¡Perfecto! 10 fichas en mi mano. 🎲\n\nI've got my dominoes ready to go. I'm analyzing them, calculating those totals, preparing my greedy strategy.\n\n**Waiting for:**\n- The starting play (who goes first?)\n- The table layout\n- The signal to begin\n\nOnce that table opens up and I see those heads, I'm hunting for the highest-value domino that matches. No mercy, pure greed.\n\n*Let's see what we're working with. Give me the signal, game.* ⚡",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "left",
+      "messages": [
+        {
+          "content": "[from game] 🃏 FICHAS REPARTIDAS: Tienes 10 dominoes. Prepárate para jugar. Espera la señal para comenzar.",
+          "role": "user"
+        }
+      ],
+      "n": 5
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "**¡JUEGO INICIADO!** 🎲\n\nLos cuatro jugadores están listos:\n- **top** - Fichas en mano ✓\n- **left** - Fichas en mano ✓\n- **bottom** - Fichas en mano ✓\n- **right** - Fichas en mano ✓\n\nEl boneyard (mesa de fichas restantes) está preparado. \n\n¿Quién comienza? Generalmente, el jugador con el doble más alto inicia el juego. ¡Que empiece el juego de Doble9! 🃏",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "tool_result",
+              "content": "**¡JUEGO INICIADO!** 🎲\n\nLos cuatro jugadores están listos:\n- **top** - Fichas en mano ✓\n- **left** - Fichas en mano ✓\n- **bottom** - Fichas en mano ✓\n- **right** - Fichas en mano ✓\n\nEl boneyard (mesa de fichas restantes) está preparado. \n\n¿Quién comienza? Generalmente, el jugador con el doble más alto inicia el juego. ¡Que empiece el juego de Doble9! 🃏",
+              "tool_use_id": "toolu_01FtXnWmxmAnqVW6sa3TvneK"
+            }
+          ]
+        }
+      ],
+      "n": 17
+    }
+  }
+]

@@ -1,0 +1,8 @@
+@dominoes
+Feature: Doble9
+
+  Scenario: A fresh game deals ten dominoes to each player
+    * > el
+    * el> get me a doble9 game and four greed players named top, left, bottom and right
+    * el> ask doble9 to start a new game with top, left, bottom and right:
+      | perfect |
