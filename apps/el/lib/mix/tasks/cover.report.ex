@@ -1,14 +1,15 @@
 defmodule Mix.Tasks.Cover.Report do
+  @compile {:no_warn_undefined, :cover}
+
   def run(_argv) do
     coverdata_path = Path.expand("coverdata.ets")
 
     unless File.exists?(coverdata_path) do
       IO.puts("No coverdata.ets found. Run with COVER=1 to generate coverage data.")
-      return
+    else
+      :cover.import(File.read!(coverdata_path))
+      generate_reports()
     end
-
-    :cover.import(File.read!(coverdata_path))
-    generate_reports()
   end
 
   defp generate_reports do
@@ -46,7 +47,7 @@ defmodule Mix.Tasks.Cover.Report do
     html = index_html(modules)
     File.write!(Path.join(report_dir, "index.html"), html)
 
-    color = if coverage >= 80, do: "brightgreen", else: if coverage >= 60, do: "yellow", else: "red"
+    color = if coverage >= 80, do: "brightgreen", else: if(coverage >= 60, do: "yellow", else: "red")
     badge = ~s({"schemaVersion":1,"label":"coverage","message":"#{coverage}%","color":"#{color}"})
     File.write!(Path.join(report_dir, "badge.json"), badge)
 

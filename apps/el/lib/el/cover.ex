@@ -3,7 +3,7 @@ defmodule El.Cover do
   import Application, only: [ensure_all_started: 1]
   import File, only: [exists?: 1, ls!: 1, read!: 1, dir?: 1]
   import Path, only: [expand: 1, join: 2]
-  import Enum, only: [filter: 2, each: 2, map: 2]
+  import Enum, only: [filter: 2, each: 2]
   import String, only: [ends_with?: 2]
   import IO, only: [puts: 1]
   import Mix, only: [env: 0]

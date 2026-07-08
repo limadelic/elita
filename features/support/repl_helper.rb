@@ -59,14 +59,18 @@ module ReplHelper
     base_cmd = "cd apps/elita/agents/elita && #{escript_path} #{args}"
 
     if ENV["COVER"] == "1"
-      "cd /Users/mike/dev/self/elita-qa && mix cover -- #{args}"
+      cover_cmd_boot(args)
     else
       base_cmd
     end.strip
   end
 
+  def cover_cmd_boot(args)
+    "cd /Users/mike/dev/self/elita-qa && TAPE=#{ENV['TAPE'] || 'replay'} CASSETTE=#{@cassette} MIX_ENV=test mix cover #{args}"
+  end
+
   def cover_cmd(args, tape)
-    "cd /Users/mike/dev/self/elita-qa && TAPE=#{tape} CASSETTE=#{@cassette} MIX_ENV=test mix cover -- #{args}"
+    "cd /Users/mike/dev/self/elita-qa && TAPE=#{tape} CASSETTE=#{@cassette} MIX_ENV=test mix cover #{args}"
   end
 
   def strip_ansi(text)
