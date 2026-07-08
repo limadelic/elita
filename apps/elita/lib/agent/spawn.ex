@@ -33,6 +33,10 @@ defmodule Agent.Spawn do
   end
 
   defp read(port, acc) do
+    listen(port, acc)
+  end
+
+  defp listen(port, acc) do
     receive do
       {^port, msg} -> recv(msg, port, acc)
     after
