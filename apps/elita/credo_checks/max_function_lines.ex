@@ -25,17 +25,28 @@ defmodule Elita.Credo.MaxFunctionLines do
 
   defp check_function({type, meta, [_head | _tail]} = ast, issues, max_lines, filename, source)
        when type in [:def, :defp, :defmacro] do
-    {ast, maybe_add_issue(max_lines, meta, issues, filename, source)}
+    {ast, maybe_add_issue(max_lines, meta, issues, filename, source, ast)}
   end
 
   defp check_function(ast, issues, _max_lines, _filename, _source) do
     {ast, issues}
   end
 
-  defp maybe_add_issue(max_lines, meta, issues, filename, source) do
-    meta
-    |> LineCheck.find_body_lines(source)
-    |> add_issue(max_lines, meta, issues, filename)
+  defp maybe_add_issue(max_lines, meta, issues, filename, source, ast) do
+    if is_receive_body?(ast) do
+      issues
+    else
+      meta
+      |> LineCheck.find_body_lines(source)
+      |> add_issue(max_lines, meta, issues, filename)
+    end
+  end
+
+  defp is_receive_body?({_type, _meta, [_head | tail]}) do
+    case tail do
+      [[do: {:receive, _, _}]] -> true
+      _ -> false
+    end
   end
 
   defp add_issue({:ok, lines}, max, meta, issues, filename)
