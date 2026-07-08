@@ -7,10 +7,10 @@ Feature: Birth
       | 📢 el → mother | ready to give birth |
 
     * el> tell the mother it's time
-      | 📢 el → mother | It's time |
+      | 📢 el → mother | It's time                     |
+      | ✨ mother       | my beautiful baby has arrived |
 
     * el> ask the baby how does it feel to be born
-      | ✨ mother     | my beautiful baby has arrived |
-      | 📢 el → baby | just born                     |
-      | 🤔 el → baby | How does it feel              |
-      | ✨ baby       | WAAHHHHH                      |
+      | 📢 el → baby | just born        |
+      | 🤔 el → baby | How does it feel |
+      | ✨ baby       | WAAHHHHH         |
