@@ -2,9 +2,10 @@ defmodule El.Commands.Address.Send do
   import Enum, only: [each: 2]
   import GenServer, only: [cast: 2]
   import Registry, only: [lookup: 2]
+  import String, only: [downcase: 1]
 
   def tell(agent, msg, tool) do
-    agent |> String.downcase() |> find(msg, tool)
+    agent |> downcase() |> find(msg, tool)
   end
 
   defp find(n, msg, tool) do
