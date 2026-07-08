@@ -14,11 +14,11 @@ defmodule El.Cover do
   @datafile "coverdata.ets"
 
   defp datafile_path do
-    get_env("COVER_DIR") |> datafile_for_dir(@datafile)
+    case get_env("COVER_DIR") do
+      nil -> Path.expand(@datafile)
+      dir -> Path.join(dir, @datafile)
+    end
   end
-
-  defp datafile_for_dir(nil, file), do: Path.expand(file)
-  defp datafile_for_dir(dir, file), do: Path.join(dir, file)
 
   def run(argv) do
     setup()
@@ -47,11 +47,6 @@ defmodule El.Cover do
     beam_dirs() |> each(&load_dir/1)
   end
 
-  def export_unique(name) do
-    path = expand(name) |> to_charlist()
-    report_export(:cover.export(path))
-  end
-
   defp load do
     path = datafile_path()
     load_from(path, exists?(path))
@@ -70,33 +65,24 @@ defmodule El.Cover do
     Path.join(base, "_build/#{env}/lib/#{app}/ebin")
   end
 
-  defp env_name, do: pick_env(get_env("MIX_ENV"))
-
-  defp pick_env(nil), do: "test"
-  defp pick_env(env), do: env
+  defp env_name do
+    case get_env("MIX_ENV") do
+      nil -> "test"
+      env -> env
+    end
+  end
 
   defp load_dir(dir) do
-    full = make_absolute(dir)
-    load_beams_if(full, dir?(full))
+    full = if String.starts_with?(dir, "/"), do: dir, else: expand(dir)
+    if dir?(full), do: load_beams(full)
   end
-
-  defp make_absolute(path) do
-    if String.starts_with?(path, "/"), do: path, else: expand(path)
-  end
-
-  defp load_beams_if(_full, false), do: :ok
-  defp load_beams_if(full, true), do: load_beams(full)
 
   defp load_beams(dir) do
     beams(dir) |> each(&load_beam(dir, &1))
   end
 
   defp beams(dir) do
-    dir |> ls!() |> filter(&is_beam/1)
-  end
-
-  defp is_beam(file) do
-    ends_with?(file, ".beam")
+    dir |> ls!() |> filter(fn f -> ends_with?(f, ".beam") end)
   end
 
   defp load_beam(dir, file) do
