@@ -1,6 +1,9 @@
 defmodule El.Pty.Cleanup do
   @moduledoc false
 
+  import Process, only: [sleep: 1]
+  import System, only: [cmd: 2]
+
   def kill_group(nil), do: :ok
 
   def kill_group(pid) do
@@ -11,13 +14,13 @@ defmodule El.Pty.Cleanup do
 
   defp kill_sequence(pid) do
     signal(pid, "-TERM")
-    Process.sleep(100)
+    sleep(100)
     signal(pid, "-9")
     :ok
   end
 
   defp signal(pid, sig) do
-    System.cmd("kill", [sig, "-#{pid}"])
+    cmd("kill", [sig, "-#{pid}"])
   rescue
     _ -> :ok
   end
