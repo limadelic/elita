@@ -43,21 +43,18 @@ defmodule Elita.MixProject do
 
   defp aliases do
     [
-      t: ["test --no-start"],
-      prose: ["test --only prose"],
+      test: [&test/1],
+      t: [&test/1],
       lint: ["format --check-formatted", "credo --strict"],
-      tape: [&tape/1],
-      live: [&live/1]
+      tape: [&tape/1]
     ]
   end
 
-  defp tape(args) do
-    cmd = "TAPE=rec mix test #{Enum.join(args, " ")}"
-    Mix.shell().cmd(cmd)
+  defp test(_args) do
+    Mix.shell().cmd("cd ../.. && TAPE=replay bundle exec cucumber")
   end
 
-  defp live(args) do
-    cmd = "LIVE=1 mix test #{Enum.join(args, " ")}"
-    Mix.shell().cmd(cmd)
+  defp tape(args) do
+    Mix.shell().cmd("cd ../.. && TAPE=rec bundle exec cucumber #{Enum.join(args, " ")}")
   end
 end
