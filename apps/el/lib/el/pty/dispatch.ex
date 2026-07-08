@@ -18,7 +18,7 @@ defmodule El.Pty.Dispatch do
   end
 
   def info({pty, {:exit_status, _}}, %{pty: pty} = state) do
-    handle_exit_status(state)
+    finish(state)
     {:stop, :normal, state}
   end
 
@@ -65,7 +65,7 @@ defmodule El.Pty.Dispatch do
     handle_dsr_response(port, pty, data, state)
   end
 
-  defp handle_exit_status(%{os_pid: os_pid, file: file, out: out}) do
+  defp finish(%{os_pid: os_pid, file: file, out: out}) do
     cleanup(os_pid, file, out)
   end
 end
