@@ -3,6 +3,7 @@ defmodule Tools.Sys.Spawn do
   import Enum, only: [join: 2]
   import Log, only: [log: 5]
   import Map, only: [get: 2, get: 3]
+  import Utils.World, only: [agents: 0]
 
   alias Access
 
@@ -27,7 +28,9 @@ defmodule Tools.Sys.Spawn do
   end
 
   defp help(_state) do
-    "\nExamples:\n- spawn agent: spawn(name: \"my_agent\")\n- spawn named agent: spawn(name: \"agent_name\", configs: [\"config\"])\n- spawn multi role: spawn(name: \"hybrid\", configs: [\"config1\", \"config2\"])"
+    available = agents() |> join(", ")
+
+    "\nAvailable: #{available}\nExamples:\n- spawn agent: spawn(name: \"my_agent\")\n- spawn named agent: spawn(name: \"agent_name\", configs: [\"config\"])\n- spawn multi role: spawn(name: \"hybrid\", configs: [\"config1\", \"config2\"])"
   end
 
   defp parameters do
@@ -36,7 +39,7 @@ defmodule Tools.Sys.Spawn do
 
   defp props do
     %{
-      name: %{type: "string", description: "Name for the new agent"},
+      name: %{type: "string", description: "Name for the new agent", enum: agents()},
       configs: configs()
     }
   end
