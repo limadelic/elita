@@ -15,7 +15,7 @@ Feature: Actor
       | 📢 speck → actor_v4 | cynical private detective |
       | 🤔 speck → actor_v4 | testified against         |
       | ✨ actor_v4          | Jesus Christ              |
-      | 📢 speck → actor_v5 | gossipy hairdresser       |
+      | 📢 speck → actor_v5 | brenda                    |
       | 🤔 speck → actor_v5 | california people         |
       | ✨ actor_v5          | oh my stars               |
       | 👀 scenario_5       | Sustained Performance     |
