@@ -8,7 +8,7 @@ rescue Timeout::Error
 end
 
 Before do |scenario|
-  @cassette = scenario.tags.map(&:name).grep(/^@(\w+)$/) { $1 }.first || "greet"
+  @cassette = scenario.tags.map(&:name).grep(/^@(\w+)$/) { $1 }.last || "greet"
 end
 
 After do
