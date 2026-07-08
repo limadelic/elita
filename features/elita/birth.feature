@@ -5,5 +5,5 @@ Feature: Birth
     * > el
     * el> get me a mother ready to give birth
     * el> tell the mother it's time
-    * el> ask the baby how does it feel to be born:
+    * el> ask the baby how does it feel to be born
       | cry |

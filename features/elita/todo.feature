@@ -3,26 +3,26 @@ Feature: Todo
 
   Scenario: Todo marks tasks complete
     * > el todo
-    * todo> Add call dentist to my list:
+    * todo> Add call dentist to my list
       | added |
-    * todo> Mark call dentist as done:
+    * todo> Mark call dentist as done
       | marked |
-    * todo> What do I need to do?:
+    * todo> What do I need to do?
       | no |
 
   Scenario: Todo remembers tasks
     * > el todo
-    * todo> Add buy groceries to my list:
+    * todo> Add buy groceries to my list
       | added |
-    * todo> What do I need to do?:
+    * todo> What do I need to do?
       | groceries |
 
   Scenario: Todo handles multiple tasks
     * > el todo
-    * todo> Add buy milk to my list:
+    * todo> Add buy milk to my list
       | added |
-    * todo> Add walk dog to my list:
+    * todo> Add walk dog to my list
       | added |
-    * todo> What do I need to do?:
+    * todo> What do I need to do?
       | milk |
       | dog |

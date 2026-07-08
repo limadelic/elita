@@ -3,9 +3,9 @@ Feature: Greet
 
   Scenario: Greeeet learns your name
     * > el greet
-    * greet> hello:
+    * greet> hello
       | who am i talking to |
-    * greet> Mike:
+    * greet> Mike
       | mike |
-    * greet> how are you?:
+    * greet> how are you?
       | i am greeeet |
