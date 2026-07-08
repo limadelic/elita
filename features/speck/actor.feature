@@ -1,4 +1,3 @@
-@tape:actor
 Feature: Actor
 
   Scenario: Actor plays different characters

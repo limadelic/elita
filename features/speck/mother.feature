@@ -1,4 +1,3 @@
-@tape:mother
 Feature: Mother
 
   Scenario: Mother gives birth to babies
