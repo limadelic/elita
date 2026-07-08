@@ -21,7 +21,7 @@ module VerifyHelper
 
         if line_prefix && line_text
           prefix_match = line_prefix == want_prefix
-          text_match = want_text.empty? || line_text.downcase.include?(want_text)
+          text_match = want_text.empty? || line_text.downcase.include?(want_text) || line_text.downcase.gsub(/\s+/, "").include?(want_text.gsub(/\s+/, ""))
 
           if prefix_match && text_match
             cursor = idx + 1

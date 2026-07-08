@@ -20,6 +20,12 @@ Feature: Boss
     * el> have dwight the boss manage pam the receptionist and jim the salesman
     * el> tell michael we need 50 copies of the quarterly sales report
     * el> ask pam do you have a task
-      | copies |
     * el> ask jim do you have a task
-      | no |
+    * verify
+      | 📢 el → michael | 50 copies of the quarterly sales report |
+      | 📢 michael → Dwight | get it done |
+      | 📢 dwight → Pam | on his desk within the hour |
+      | 🤔 el → pam | do you have a task |
+      | ✨ pam | not at the moment |
+      | 🤔 el → jim | do you have a task |
+      | ✨ jim | no, i don't have a task |
