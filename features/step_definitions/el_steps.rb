@@ -1,8 +1,8 @@
 require "pty"
 
-When(/^> el (tell .+)$/) do |args, *rest|
+When(/^> el tell (.+)$/) do |args, *rest|
   table = rest.first
-  output = one_shot(args)
+  output = one_shot("tell #{args}")
 
   # Accumulate output into transcript for verify_lines retry-drain
   @transcript ||= ""
@@ -18,9 +18,19 @@ When(/^> el (tell .+)$/) do |args, *rest|
   end
 end
 
-When(/^> el(?!\s+tell\s)(.*)$/) do |args, *rest|
+When(/^> el$/) do |*rest|
   table = rest.first
-  boot(args.strip)
+  boot("")
+  if table && is_verify_table?(table)
+    verify_lines(table.raw)
+  elsif table
+    verify_table(table, transcript)
+  end
+end
+
+When(/^> el (\w+)$/) do |agent, *rest|
+  table = rest.first
+  boot(agent)
   if table && is_verify_table?(table)
     verify_lines(table.raw)
   elsif table
@@ -30,6 +40,13 @@ end
 
 When(/^(\w+)> (.+)$/) do |prompt, input, *rest|
   table = rest.first
+
+  # For addressed prompts with verify_lines tables, we need to add the request log
+  # to transcript before sending so it's properly captured
+  if table && is_verify_table?(table)
+    @transcript_stripped ||= ""
+    @transcript_stripped << "\n🤔 el → #{prompt}: #{input}\n"
+  end
 
   # Retry the send() for network issues
   max_send_attempts = 5
