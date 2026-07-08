@@ -10,7 +10,6 @@ defmodule El.Cover do
   import El.CLI, only: [main: 1]
 
   @moduledoc false
-
   @datafile "coverdata.ets"
 
   defp datafile_path, do: file_in_dir(get_env("COVER_DIR"), @datafile)
@@ -64,7 +63,6 @@ defmodule El.Cover do
   end
 
   defp env_name, do: or_default(get_env("MIX_ENV"), "test")
-
   defp or_default(nil, default), do: default
   defp or_default(value, _), do: value
 
