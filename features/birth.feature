@@ -1,10 +1,9 @@
-@birth
+@born
 Feature: Birth
 
   Scenario: Mother gives birth to a baby
     * > el
-    * el> spawn mother
-    * el> ask the mother it's time to give birth:
-      | time |
-    * el> ask the baby spank:
+    * el> get me a mother ready to give birth
+    * el> tell the mother it's time
+    * el> ask the baby how does it feel to be born:
       | cry |

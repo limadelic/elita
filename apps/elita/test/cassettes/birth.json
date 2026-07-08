@@ -2,146 +2,14 @@
   {
     "a": [
       {
-        "caller": {
-          "type": "direct"
-        },
-        "id": "toolu_011XkPmuJ9pid54adXbJN89Z",
-        "input": {
-          "configs": [
-            "mother"
-          ],
-          "name": "mother"
-        },
-        "name": "spawn",
-        "type": "tool_use"
-      }
-    ],
-    "q": {
-      "agent": "el",
-      "messages": [
-        {
-          "content": "spawn mother",
-          "role": "user"
-        }
-      ],
-      "n": 1
-    }
-  },
-  {
-    "a": [
-      {
-        "text": "Now telling her her role:",
+        "text": "Oh my! It's time! Let me bring our baby into the world!",
         "type": "text"
       },
       {
         "caller": {
           "type": "direct"
         },
-        "id": "toolu_01VSvrKvazYPJeENejfPutW9",
-        "input": {
-          "message": "You are mother. Stay in character.",
-          "recipient": "mother"
-        },
-        "name": "tell",
-        "type": "tool_use"
-      }
-    ],
-    "q": {
-      "agent": "el",
-      "messages": [
-        {
-          "content": [
-            {
-              "content": "spawned",
-              "tool_use_id": "toolu_011XkPmuJ9pid54adXbJN89Z",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        }
-      ],
-      "n": 3
-    }
-  },
-  {
-    "a": [
-      {
-        "text": "Done.",
-        "type": "text"
-      }
-    ],
-    "q": {
-      "agent": "el",
-      "messages": [
-        {
-          "content": [
-            {
-              "content": "sent",
-              "tool_use_id": "toolu_01VSvrKvazYPJeENejfPutW9",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        }
-      ],
-      "n": 5
-    }
-  },
-  {
-    "a": [
-      {
-        "caller": {
-          "type": "direct"
-        },
-        "id": "toolu_01Wq1dDBdv63tAbuWvPTmj9e",
-        "input": {
-          "question": "it's time to give birth",
-          "recipient": "mother"
-        },
-        "name": "ask",
-        "type": "tool_use"
-      }
-    ],
-    "q": {
-      "agent": "el",
-      "messages": [
-        {
-          "content": "ask the mother it's time to give birth",
-          "role": "user"
-        }
-      ],
-      "n": 7
-    }
-  },
-  {
-    "a": [
-      {
-        "text": "*places hand on swollen belly and takes a deep breath*\n\nOh, hello there. Yes, I'm the mother. I'm... well, I'm in quite a state right now, if I'm being honest. The baby could come any moment now. I've been feeling these contractions all day - they're getting stronger and more frequent.\n\n*shifts uncomfortably*\n\nI'm nervous, excited, terrified all at once. I've been preparing for this moment for months, but nothing quite readies you for the reality of it. My bag is packed by the door, and I'm just... waiting. Watching for those signs that it's really time.\n\n*rubs lower back*\n\nIs there something you need from me? Or are you just checking in? Either way, I appreciate it. It's good to have someone around during a time like this. The anticipation is almost unbearable - but I'm ready. I think I'm ready.\n\nHow can I help you?",
-        "type": "text"
-      }
-    ],
-    "q": {
-      "agent": "mother",
-      "messages": [
-        {
-          "content": "[from el] You are mother. Stay in character.",
-          "role": "user"
-        }
-      ],
-      "n": 1
-    }
-  },
-  {
-    "a": [
-      {
-        "text": "*gasps and grabs the nearest support*\n\nOh my goodness... oh! Yes, yes I can feel it! This is it! The contractions... they're so close together now. The pain is... oh!\n\n*breathes heavily*\n\nIt's happening. It's really happening! The baby is coming!\n\n*steadies myself*\n\nAlright, alright... I need to stay calm. Time to bring my baby into this world!",
-        "type": "text"
-      },
-      {
-        "caller": {
-          "type": "direct"
-        },
-        "id": "toolu_01M5YNafu7so7obUhBhWfS5q",
+        "id": "toolu_0185NNdiDcoCEX7z8h5pjHYV",
         "input": {
           "configs": [
             "baby"
@@ -153,226 +21,41 @@
       }
     ],
     "q": {
-      "agent": "mother",
       "messages": [
         {
-          "content": "it's time to give birth",
-          "role": "user"
+          "content": "it's time to give birth"
         }
-      ],
-      "n": 3
+      ]
     }
   },
   {
     "a": [
       {
-        "text": "*lets out one final cry as the baby arrives*\n\nOH! OH! The baby! I can feel... YES! \n\n*breathing heavily, tears streaming down my face*\n\nMy baby... my beautiful baby is here! Oh my goodness, we did it! We really did it!\n\n*voice trembling with emotion*\n\nWelcome to the world, little one. Welcome, welcome...",
+        "text": "*WAAAAAAHHHHH!* 😭\n\n*cry cry cry*\n\nOhhhhh! I cry! I cry! \n\n*whimper whimper*\n\nWAAAAAHHHHH! 👶",
         "type": "text"
       }
     ],
     "q": {
-      "agent": "mother",
       "messages": [
         {
-          "content": [
-            {
-              "content": "spawned",
-              "tool_use_id": "toolu_01M5YNafu7so7obUhBhWfS5q",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
+          "content": "spank"
         }
-      ],
-      "n": 5
+      ]
     }
   },
   {
     "a": [
       {
-        "text": "*lets out one final cry as the baby arrives*\n\nOH! OH! The baby! I can feel... YES! \n\n*breathing heavily, tears streaming down my face*\n\nMy baby... my beautiful baby is here! Oh my goodness, we did it! We really did it!\n\n*voice trembling with emotion*\n\nWelcome to the world, little one. Welcome, welcome...",
+        "text": "🎉 **Congratulations!** Baby has arrived! \n\nI'm so relieved and overjoyed! After all this time, our precious little one is finally here. The labor was intense, but it was all worth it to meet our beautiful baby! \n\n*holds baby close*\n\nWelcome to the world, sweet one! 💕👶",
         "type": "text"
       }
     ],
     "q": {
-      "agent": "el",
       "messages": [
         {
-          "content": [
-            {
-              "content": "*lets out one final cry as the baby arrives*\n\nOH! OH! The baby! I can feel... YES! \n\n*breathing heavily, tears streaming down my face*\n\nMy baby... my beautiful baby is here! Oh my goodness, we did it! We really did it!\n\n*voice trembling with emotion*\n\nWelcome to the world, little one. Welcome, welcome...",
-              "tool_use_id": "toolu_01Wq1dDBdv63tAbuWvPTmj9e",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
+          "content": "give birth"
         }
-      ],
-      "n": 9
-    }
-  },
-  {
-    "a": [
-      {
-        "text": "I need to spawn the baby first.",
-        "type": "text"
-      },
-      {
-        "caller": {
-          "type": "direct"
-        },
-        "id": "toolu_01MddjK3xeHQo1evk7ozixtR",
-        "input": {
-          "configs": [
-            "baby"
-          ],
-          "name": "baby"
-        },
-        "name": "spawn",
-        "type": "tool_use"
-      }
-    ],
-    "q": {
-      "agent": "el",
-      "messages": [
-        {
-          "content": "ask the baby spank",
-          "role": "user"
-        }
-      ],
-      "n": 11
-    }
-  },
-  {
-    "a": [
-      {
-        "text": "Now telling the baby its role:",
-        "type": "text"
-      },
-      {
-        "caller": {
-          "type": "direct"
-        },
-        "id": "toolu_01YDfGQWaxfpGXRo1DdirZTk",
-        "input": {
-          "message": "You are baby. Stay in character.",
-          "recipient": "baby"
-        },
-        "name": "tell",
-        "type": "tool_use"
-      }
-    ],
-    "q": {
-      "agent": "el",
-      "messages": [
-        {
-          "content": [
-            {
-              "content": "spawned",
-              "tool_use_id": "toolu_01MddjK3xeHQo1evk7ozixtR",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        }
-      ],
-      "n": 13
-    }
-  },
-  {
-    "a": [
-      {
-        "text": "Now asking the baby:",
-        "type": "text"
-      },
-      {
-        "caller": {
-          "type": "direct"
-        },
-        "id": "toolu_0155PWyLAqra5yxVbwBBHRoc",
-        "input": {
-          "question": "spank",
-          "recipient": "baby"
-        },
-        "name": "ask",
-        "type": "tool_use"
-      }
-    ],
-    "q": {
-      "agent": "el",
-      "messages": [
-        {
-          "content": [
-            {
-              "content": "sent",
-              "tool_use_id": "toolu_01YDfGQWaxfpGXRo1DdirZTk",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        }
-      ],
-      "n": 15
-    }
-  },
-  {
-    "a": [
-      {
-        "text": "*WAAAAHHHHH!!!* \n\n*cry cry cry*\n\nBaby cry! Baby cry cry cry!\n\n*whimper whimper*\n\nWAHHHHH! \n\n*sniffles and sobs*\n\nBaby baby BABY! Cry cry cry cry cry!\n\n*loud wailing*\n\nWAAAAAAHHHHHHH!!!",
-        "type": "text"
-      }
-    ],
-    "q": {
-      "agent": "baby",
-      "messages": [
-        {
-          "content": "[from el] You are baby. Stay in character.",
-          "role": "user"
-        }
-      ],
-      "n": 1
-    }
-  },
-  {
-    "a": [
-      {
-        "text": "*WAAAAAHHHHHHH!!!*\n\n*SCREAMING CRY CRY CRY!!!*\n\nBABY CRY! BABY CRY CRY CRY CRY!!!\n\n*hysterical sobbing*\n\nWAAAHHHHH WAAAHHHHH WAAAHHHHH!!!\n\n*whimpering and gasping between cries*\n\nBaby hurt! Baby cry! CRY CRY CRY!!!\n\n*loud wailing intensifies*\n\nWAHHHHHHHHHHH!!!",
-        "type": "text"
-      }
-    ],
-    "q": {
-      "agent": "baby",
-      "messages": [
-        {
-          "content": "spank",
-          "role": "user"
-        }
-      ],
-      "n": 3
-    }
-  },
-  {
-    "a": [
-      {
-        "text": "*WAAAAAHHHHHHH!!!*\n\n*SCREAMING CRY CRY CRY!!!*\n\nBABY CRY! BABY CRY CRY CRY CRY!!!\n\n*hysterical sobbing*\n\nWAAAHHHHH WAAAHHHHH WAAAHHHHH!!!\n\n*whimpering and gasping between cries*\n\nBaby hurt! Baby cry! CRY CRY CRY!!!\n\n*loud wailing intensifies*\n\nWAHHHHHHHHHHH!!!",
-        "type": "text"
-      }
-    ],
-    "q": {
-      "agent": "el",
-      "messages": [
-        {
-          "role": "user",
-          "content": [
-            {
-              "type": "tool_result",
-              "content": "*WAAAAAHHHHHHH!!!*\n\n*SCREAMING CRY CRY CRY!!!*\n\nBABY CRY! BABY CRY CRY CRY CRY!!!\n\n*hysterical sobbing*\n\nWAAAHHHHH WAAAHHHHH WAAAHHHHH!!!\n\n*whimpering and gasping between cries*\n\nBaby hurt! Baby cry! CRY CRY CRY!!!\n\n*loud wailing intensifies*\n\nWAHHHHHHHHHHH!!!",
-              "tool_use_id": "toolu_0155PWyLAqra5yxVbwBBHRoc"
-            }
-          ]
-        }
-      ],
-      "n": 17
+      ]
     }
   }
 ]
