@@ -1,4 +1,8 @@
 module ReplHelper
+  def cassette_dir
+    File.expand_path("../cassettes", __dir__)
+  end
+
   def boot(args)
     @cassette = @cassette || "greet"
     @transcript = ""
@@ -6,6 +10,7 @@ module ReplHelper
     env = {
       "TAPE" => ENV["TAPE"] || "replay",
       "CASSETTE" => @cassette,
+      "CASSETTE_DIR" => cassette_dir,
       "MIX_ENV" => "test"
     }
     cmd = spawn_cmd(args)
@@ -77,7 +82,7 @@ module ReplHelper
 
   def spawn_cmd(args)
     escript_path = "../../../../apps/el/el"
-    base_cmd = "cd apps/elita/agents/elita && TAPE=#{ENV['TAPE'] || 'replay'} CASSETTE=#{@cassette} MIX_ENV=test #{escript_path} #{args}"
+    base_cmd = "cd apps/elita/agents/elita && TAPE=#{ENV['TAPE'] || 'replay'} CASSETTE=#{@cassette} CASSETTE_DIR=#{cassette_dir} MIX_ENV=test #{escript_path} #{args}"
 
     if ENV["COVER"] == "1"
       cover_cmd_boot(args)
@@ -87,11 +92,11 @@ module ReplHelper
   end
 
   def cover_cmd_boot(args)
-    "cd /Users/mike/dev/self/elita-qa && TAPE=#{ENV['TAPE'] || 'replay'} CASSETTE=#{@cassette} MIX_ENV=test mix cover #{args}"
+    "cd /Users/mike/dev/self/elita-qa && TAPE=#{ENV['TAPE'] || 'replay'} CASSETTE=#{@cassette} CASSETTE_DIR=#{cassette_dir} MIX_ENV=test mix cover #{args}"
   end
 
   def cover_cmd(args, tape)
-    "cd /Users/mike/dev/self/elita-qa && TAPE=#{tape} CASSETTE=#{@cassette} MIX_ENV=test mix cover #{args}"
+    "cd /Users/mike/dev/self/elita-qa && TAPE=#{tape} CASSETTE=#{@cassette} CASSETTE_DIR=#{cassette_dir} MIX_ENV=test mix cover #{args}"
   end
 
   def strip_ansi(text)
