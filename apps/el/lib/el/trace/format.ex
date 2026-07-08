@@ -27,8 +27,7 @@ defmodule El.Trace.Format do
   end
 
   defp ascii_data(data) do
-    (for <<byte <- data>>, do: byte)
-    |> map_join("", &safe_char/1)
+    bin_to_list(data) |> map_join("", &safe_char/1)
   end
 
   defp safe_char(byte) when byte in 32..126, do: <<byte>>
