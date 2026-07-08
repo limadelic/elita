@@ -27,7 +27,8 @@ Feature: Boss
       | 📢 el → michael     | 50 copies of the quarterly sales report |
       | 📢 michael → Dwight | get it done                             |
       | 📢 dwight → Pam     | 50 copies of the quarterly sales report |
-      | ✨ pam               | get these done right away               |
+      | ✨ pam               | got it. 50 copies of the quarterly sales report |
+      | ✨ dwight            | Pam will have those copies ready        |
 
     * el> ask pam do you have a task
       | 🤔 el → pam | do you have a task |
