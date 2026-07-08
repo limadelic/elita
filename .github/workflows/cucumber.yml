@@ -90,8 +90,9 @@ jobs:
           ruby << 'RUBY'
             require 'json'
             data = JSON.parse(File.read('reports/cucumber.json'))
-            passed = data.count { |scenario| scenario['steps'].all? { |s| s['result']['status'] == 'passed' } }
-            total = data.length
+            scenarios = data.flat_map { |f| f['elements'] || [] }
+            passed = scenarios.count { |sc| (sc['steps'] || []).all? { |s| s.dig('result','status') == 'passed' } }
+            total = scenarios.length
             color = passed == total ? '23D96C' : 'e05d44'
             badge = {
               schemaVersion: 1,
