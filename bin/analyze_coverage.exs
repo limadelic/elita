@@ -18,39 +18,21 @@ File.cd!(base_dir)
 
 modules = :cover.imported_modules() |> Enum.sort()
 
-IO.puts("\n=== COVERAGE SUMMARY ===")
-IO.puts("Total modules: #{length(modules)}\n")
-
-module_stats = modules
+all_stats = modules
   |> Enum.map(fn mod ->
-    result = try do :cover.analyse(mod) rescue _ -> nil end
-    case result do
+    case :cover.analyse(mod) do
       {:ok, lines} ->
-        covered = lines |> Enum.filter(fn {_, {c, _}} -> c > 0 end) |> length()
+        covered = lines |> Enum.filter(fn {_fn, {c, _}} -> c > 0 end) |> length()
         total = length(lines)
         pct = if total > 0, do: Float.round(covered / total * 100, 2), else: 0.0
-        {mod, pct, covered, total}
-      _ -> nil
+        {mod, pct}
+      _ -> {mod, 0.0}
     end
   end)
-  |> Enum.filter(& &1)
-  |> Enum.sort_by(fn {_, p, _, _} -> p end, :desc)
-
-module_stats |> Enum.each(fn {mod, pct, _, _} ->
-  IO.puts("#{mod}: #{pct}%")
-end)
-
-total_pct = if length(module_stats) > 0 do
-  sum = module_stats |> Enum.map(fn {_, p, _, _} -> p end) |> Enum.sum()
-  (sum / length(module_stats)) |> Float.round(2)
-else
-  0.0
-end
-
-IO.puts("\n=== TOTAL COVERAGE: #{total_pct}% ===\n")
+  |> Enum.sort_by(fn {_, p} -> p end, :desc)
 
 File.mkdir_p!("cover")
-module_stats |> Enum.each(fn {mod, _, _, _} ->
+all_stats |> Enum.each(fn {mod, _} ->
   try do
     :cover.analyse_to_file(mod, Path.join("cover", "#{mod}.html") |> to_charlist(), [:html])
   rescue
@@ -58,7 +40,14 @@ module_stats |> Enum.each(fn {mod, _, _, _} ->
   end
 end)
 
-rows = module_stats |> Enum.map(fn {m, p, _, _} ->
+percentages = all_stats |> Enum.map(fn {_, p} -> p end)
+total_pct = if length(percentages) > 0 do
+  (Enum.sum(percentages) / length(percentages)) |> Float.round(2)
+else
+  0.0
+end
+
+rows = all_stats |> Enum.map(fn {m, p} ->
   class = cond do p >= 80 -> "high"; p >= 50 -> "medium"; true -> "low" end
   "<tr class=\"#{class}\"><td>#{m}</td><td>#{p}%</td><td><a href=\"#{m}.html\">View</a></td></tr>"
 end) |> Enum.join("\n")
@@ -76,4 +65,3 @@ th,td{padding:8px;text-align:left;border-bottom:1px solid #ddd}th{background:#f2
 """
 
 File.write!("cover/index.html", index_html)
-IO.puts("Reports: cover/index.html")
