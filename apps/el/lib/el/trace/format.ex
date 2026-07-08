@@ -1,7 +1,6 @@
 defmodule El.Trace.Format do
   @moduledoc false
 
-  import :binary, only: [bin_to_list: 1]
   import System
   import String, only: [pad_leading: 3]
   import Enum
@@ -24,9 +23,8 @@ defmodule El.Trace.Format do
     |> pad_leading(2, "0")
   end
 
-  defp bytes(data) do
-    bin_to_list(data)
-  end
+  defp bytes(<<>>), do: []
+  defp bytes(<<byte, rest::binary>>), do: [byte | bytes(rest)]
 
   defp ascii_data(data) do
     bytes(data) |> map_join("", &safe_char/1)
