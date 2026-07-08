@@ -52,6 +52,25 @@ module ReplHelper
     @transcript_stripped || ""
   end
 
+  def drain_pty
+    return unless @reader
+
+    begin
+      while true
+        ready = IO.select([@reader], nil, nil, 0.1)
+        if ready
+          chunk = @reader.readpartial(4096)
+          @transcript << chunk if @transcript
+          stripped_chunk = strip_ansi(chunk)
+          @transcript_stripped << stripped_chunk if @transcript_stripped
+        else
+          break
+        end
+      end
+    rescue EOFError
+    end
+  end
+
   private
 
   def spawn_cmd(args)

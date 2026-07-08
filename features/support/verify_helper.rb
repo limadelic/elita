@@ -10,35 +10,54 @@ module VerifyHelper
 
   def verify_lines(rows)
     initialize_scenario_cursor unless @scenario_cursor
-    tx = transcript
-    tx = tx.force_encoding("UTF-8") if tx.respond_to?(:force_encoding)
-    lines = tx.split("\n").map { |l| l.strip.force_encoding("UTF-8") rescue l.strip }.reject(&:empty?)
-    @folded_lines = fold_continuation_lines(lines)
+    deadline = Time.now + (ENV["TAPE"] == "rec" ? 10 : 3)
 
-    rows.each do |row|
-      want_prefix = row[0].strip.force_encoding("UTF-8") rescue row[0].strip
-      want_text = row[1].strip.downcase.force_encoding("UTF-8") rescue row[1].strip.downcase
-      found = false
+    loop do
+      tx = transcript
+      tx = tx.force_encoding("UTF-8") if tx.respond_to?(:force_encoding)
+      lines = tx.split("\n").map { |l| l.strip.force_encoding("UTF-8") rescue l.strip }.reject(&:empty?)
+      @folded_lines = fold_continuation_lines(lines)
 
-      (@scenario_cursor...@folded_lines.size).each do |idx|
-        full_line = @folded_lines[idx]
-        line_prefix, line_text = split_line(full_line)
+      all_found = true
+      rows.each do |row|
+        want_prefix = row[0].strip.force_encoding("UTF-8") rescue row[0].strip
+        want_text = row[1].strip.downcase.force_encoding("UTF-8") rescue row[1].strip.downcase
+        found = false
 
-        if line_prefix && line_text
-          prefix_match = line_prefix == want_prefix
-          text_match = want_text.empty? || line_text.downcase.include?(want_text) || line_text.downcase.gsub(/\s+/, "").include?(want_text.gsub(/\s+/, ""))
+        (@scenario_cursor...@folded_lines.size).each do |idx|
+          full_line = @folded_lines[idx]
+          line_prefix, line_text = split_line(full_line)
 
-          if prefix_match && text_match
-            @scenario_cursor = idx + 1
-            found = true
+          if line_prefix && line_text
+            prefix_match = line_prefix == want_prefix
+            text_match = want_text.empty? || line_text.downcase.include?(want_text) || line_text.downcase.gsub(/\s+/, "").include?(want_text.gsub(/\s+/, ""))
+
+            if prefix_match && text_match
+              @scenario_cursor = idx + 1
+              found = true
+              break
+            end
+          end
+        end
+
+        unless found
+          if Time.now < deadline
+            all_found = false
             break
+          else
+            raise "No match for prefix='#{want_prefix}' text='#{want_text}'\n\nTranscript:\n#{tx}"
           end
         end
       end
 
-      unless found
-        raise "No match for prefix='#{want_prefix}' text='#{want_text}'\n\nTranscript:\n#{tx}"
+      return if all_found
+
+      if Time.now >= deadline
+        raise "Timeout waiting for all rows to match.\n\nTranscript:\n#{transcript}"
       end
+
+      drain_pty
+      sleep 0.05
     end
   end
 
