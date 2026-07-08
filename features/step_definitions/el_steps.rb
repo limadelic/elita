@@ -8,3 +8,7 @@ When(/^(\w+)> ([^:]+):$/) do |prompt, input, table|
   output = send(input, prompt)
   verify_table(table, output)
 end
+
+When(/^(\w+)> ([^:]+)$/) do |prompt, input|
+  send(input, prompt)
+end

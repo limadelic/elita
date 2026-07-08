@@ -10,10 +10,11 @@ defmodule Utils.World do
     |> sort()
   end
 
-  defp filter_md(result) do
-    case result do
-      {:ok, files} -> map(files, &basename(&1, ".md"))
-      {:error, _} -> []
-    end
+  defp filter_md({:ok, files}) do
+    map(files, &basename(&1, ".md"))
+  end
+
+  defp filter_md({:error, _}) do
+    []
   end
 end
