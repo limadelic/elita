@@ -1,8 +1,10 @@
 defmodule Agent.Config do
+  import Enum, only: [map: 2, reject: 2]
   import String, only: [to_atom: 1, split: 3, trim: 1]
+  import System, only: [get_env: 1]
 
   def load do
-    System.get_env("AGENT_REGISTRATIONS")
+    get_env("AGENT_REGISTRATIONS")
     |> load_entries()
   end
 
@@ -12,8 +14,8 @@ defmodule Agent.Config do
   defp parse(value) do
     value
     |> split(",", [])
-    |> Enum.map(&parse_entry/1)
-    |> Enum.reject(&is_nil/1)
+    |> map(&parse_entry/1)
+    |> reject(&is_nil/1)
   end
 
   defp parse_entry(entry) do
