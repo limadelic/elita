@@ -9,10 +9,10 @@ Feature: Ttt
     * el> ask alice did the game finish and was it a win or a tie
     * verify
       | 📢 el → alice | character |
-      | 📢 alice → el | board |
+      | 📢 alice → el | opening |
       | ✨ bob | ready |
       | 📢 el → bob | alice |
-      | 📢 bob → Alice | Your move |
-      | 📢 alice → bob | Your turn |
+      | 📢 bob → Alice | move |
+      | 📢 alice → bob | turn |
       | 🤔 el → alice | finish |
       | ✨ alice | WIN |
