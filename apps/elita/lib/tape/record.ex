@@ -1,14 +1,16 @@
 defmodule Tape.Record do
-  alias Tape.Store
+  import Tape.Store, only: [append_live: 2]
+  import Map, only: [get: 3]
+  import List, only: [last: 1]
 
   def handle(body, name, fun) do
     response = fun.()
-    Store.append_live(sparse(body, name), response)
+    append_live(sparse(body, name), response)
     response
   end
 
   defp sparse(body, name) do
-    messages = Map.get(body, :messages, [])
+    messages = get(body, :messages, [])
     build(name, messages)
   end
 
@@ -17,5 +19,5 @@ defmodule Tape.Record do
   end
 
   defp last_only([]), do: []
-  defp last_only(messages), do: [List.last(messages)]
+  defp last_only(messages), do: [last(messages)]
 end

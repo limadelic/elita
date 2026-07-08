@@ -1,5 +1,6 @@
 defmodule Tape.Writer do
-  import Agent
+  import Agent, only: [start_link: 2, get_and_update: 2]
+  import Map, only: [get: 3, put: 3]
 
   def start_link(_) do
     start_link(fn -> %{} end, name: __MODULE__)
@@ -22,17 +23,17 @@ defmodule Tape.Writer do
   end
 
   defp check_claim(state, key, "always") do
-    count = Map.get(state, key, 0)
-    {true, Map.put(state, key, count + 1)}
+    count = get(state, key, 0)
+    {true, put(state, key, count + 1)}
   end
 
   defp check_claim(state, key, times) do
-    count = Map.get(state, key, 0)
+    count = get(state, key, 0)
     claim_if_available(state, key, count, count < times)
   end
 
   defp claim_if_available(state, key, count, true) do
-    {true, Map.put(state, key, count + 1)}
+    {true, put(state, key, count + 1)}
   end
 
   defp claim_if_available(state, _key, _count, false) do
