@@ -10,7 +10,8 @@ Feature: Napo profit
       | ✨ napo | orchestrator |
       | 🤔 napo → judge | root-cause |
       | ✨ judge | No |
-      | 🚀 grocery | napo |
-      | 📢 napo → grocery | root-cause tree |
+      | 📢 napo → grocery | grocery |
+      | 📢 napo → stream | stream |
+      | 📢 napo → logistics | logistics |
       | ✨ napo | Split Phase Complete |
       | ✨ el | Listen Phase |
