@@ -7,14 +7,15 @@ defmodule Mix.Tasks.Cover.Report do
   @compile {:no_warn_undefined, :cover}
 
   def run(_argv) do
-    process_or_warn(expand("coverdata.ets"))
+    path = expand("coverdata.ets")
+    handle_path(path, exists?(path))
   end
 
-  defp process_or_warn(path) when exists?(path) do
+  defp handle_path(path, true) do
     process_coverage(path)
   end
 
-  defp process_or_warn(_path) do
+  defp handle_path(_path, false) do
     puts("No coverdata.ets found. Run with COVER=1 to generate coverage data.")
   end
 
