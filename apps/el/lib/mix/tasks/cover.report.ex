@@ -1,9 +1,8 @@
 defmodule Mix.Tasks.Cover.Report do
-  import Path
-  import File
-  import IO
-  import Enum
-
+  import File, only: [exists?: 1, read!: 1, write!: 2, mkdir_p!: 1]
+  import IO, only: [puts: 1]
+  import Enum, only: [map: 2, map_join: 3, reduce: 3, sum: 1]
+  import Path, only: [expand: 1, join: 2]
   @compile {:no_warn_undefined, :cover}
 
   def run(_argv) do
