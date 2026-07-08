@@ -6,91 +6,77 @@ require 'rexml/document'
 LEGEND_CSS = <<~CSS
   <style>
     .legend-container {
+      position: fixed;
+      bottom: 1.5em;
+      right: 1.5em;
       background: var(--cucumber-panel-background-color, oklch(96.8% 0.007 247.896deg));
       border: 1px solid var(--cucumber-panel-accent-color, oklch(92.9% 0.013 255.508deg));
-      border-radius: 4px;
-      padding: 1em;
-      margin: 0 1em 1.5em 1em;
+      border-radius: 6px;
+      padding: 0.75em;
       color: var(--cucumber-panel-text-color, oklch(27.9% 0.041 260.031deg));
-    }
-    .legend-intro {
-      font-size: 0.95em;
-      line-height: 1.5;
-      margin-bottom: 1em;
-    }
-    .legend-intro code {
-      background: var(--cucumber-code-background-color, oklch(98.4% 0.003 247.858deg));
-      color: var(--cucumber-code-text-color, oklch(27.9% 0.041 260.031deg));
-      padding: 0.1em 0.3em;
-      border-radius: 2px;
-      font-size: 0.95em;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      font-size: 0.85em;
+      z-index: 10000;
+      width: auto;
+      max-width: 200px;
     }
     .legend-items {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1.5em;
-      font-size: 0.95em;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75em 1em;
     }
     .legend-item {
       display: flex;
-      gap: 0.5em;
-      align-items: baseline;
+      gap: 0.4em;
+      align-items: center;
+      white-space: nowrap;
     }
     .legend-label {
-      font-weight: 600;
-      min-width: 2em;
       font-size: 1.1em;
+      flex-shrink: 0;
     }
     .legend-meaning {
-      opacity: 0.85;
-    }
-    @media (max-width: 768px) {
-      .legend-items {
-        flex-direction: column;
-        gap: 0.75em;
-      }
+      font-size: 0.8em;
+      opacity: 0.8;
+      line-height: 1.2;
     }
   </style>
 CSS
 
 LEGEND_HTML = <<~HTML
   <div class="legend-container">
-    <div class="legend-intro">
-      <code>> el &lt;agent&gt;</code> enters elita's REPL (like iex/pry) addressed at an agent; the prompt becomes <code>&lt;agent&gt;></code>. Lines read as a terminal transcript. <code>&amp;</code> fires commands without waiting.
-    </div>
     <div class="legend-items">
       <div class="legend-item">
         <span class="legend-label">🤔</span>
-        <span class="legend-meaning">Ask: question to agent</span>
+        <span class="legend-meaning">Ask</span>
       </div>
       <div class="legend-item">
         <span class="legend-label">📢</span>
-        <span class="legend-meaning">Tell: delegation</span>
+        <span class="legend-meaning">Tell</span>
       </div>
       <div class="legend-item">
         <span class="legend-label">✨</span>
-        <span class="legend-meaning">Agent reply</span>
+        <span class="legend-meaning">Reply</span>
       </div>
       <div class="legend-item">
         <span class="legend-label">👀</span>
-        <span class="legend-meaning">Get: retrieve data</span>
+        <span class="legend-meaning">Get</span>
       </div>
       <div class="legend-item">
         <span class="legend-label">✏️</span>
-        <span class="legend-meaning">Set: store data</span>
+        <span class="legend-meaning">Set</span>
       </div>
       <div class="legend-item">
         <span class="legend-label">🚀</span>
-        <span class="legend-meaning">Spawn: create agent</span>
+        <span class="legend-meaning">Spawn</span>
       </div>
       <div class="legend-item">
         <span class="legend-label">🧪</span>
-        <span class="legend-meaning">Spec: read config</span>
+        <span class="legend-meaning">Spec</span>
       </div>
       <div class="legend-item">
         <span class="legend-label">🎭</span>
-        <span class="legend-meaning">Become: switch role</span>
+        <span class="legend-meaning">Become</span>
       </div>
     </div>
   </div>
