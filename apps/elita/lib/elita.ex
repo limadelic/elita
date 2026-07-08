@@ -69,11 +69,7 @@ defmodule Elita do
   end
 
   defp act(state) do
-    state
-    |> llm()
-    |> exec()
-    |> record()
-    |> done()
+    state |> llm() |> exec() |> record() |> done()
   end
 
   defp done({:act, state}) do
