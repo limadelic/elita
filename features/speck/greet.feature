@@ -1,7 +1,7 @@
 @tape:speckgreet
-Feature: Speck greet
+Feature: Greet
 
-  Scenario: Speck verifies greet meets its spec
+  Scenario: Greet greets a user
     * > el speck
     * speck> exec greet
     * verify
