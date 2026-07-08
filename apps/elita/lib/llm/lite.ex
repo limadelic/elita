@@ -5,32 +5,32 @@ defmodule Lite do
   import Enum, only: [map: 2, find_value: 2]
   import System, only: [get_env: 1, get_env: 2]
   import Map, only: [put: 3, delete: 2]
-  import List, only: [pop_at: 2]
   import Req, only: [post: 2]
   import Application, only: [get_env: 3]
-  @cache_key %{type: "ephemeral"}
+  import Cache, only: [sys: 1, messages: 1, tools: 1]
+  import Request, only: [direct: 1]
+
   def llm(%{config: config, history: history, name: agent_name} = state) do
     composed = compose(config)
     body = build(composed, history, state)
-
-    live = fn ->
-      body
-      |> put(:system, sys_cache(body[:system]))
-      |> put(:messages, msg_cache(body[:messages]))
-      |> put(:tools, tool_cache(body[:tools]))
-      |> req()
-      |> resp()
-    end
-
-    result = tape(body, agent_name, live)
+    result = tape(body, agent_name, fn -> live(body) end)
     {parts(result), state}
   end
 
   def llm(text) when is_binary(text) do
-    body = request(text)
+    body = direct(text)
     result = tape(body, "direct", fn -> req(body) |> resp end)
     result |> text
   end
+
+  defp live(body),
+    do:
+      body
+      |> put(:system, sys(body[:system]))
+      |> put(:messages, messages(body[:messages]))
+      |> put(:tools, tools(body[:tools]))
+      |> req()
+      |> resp()
 
   defp tape(body, agent_name, fun),
     do: get_env(:elita, :tape_handler, &thru/3).(body, agent_name, fun)
@@ -60,35 +60,6 @@ defmodule Lite do
     |> put(:messages, history)
   end
 
-  defp sys_cache([%{type: "text"} = m | rest]),
-    do: [put(m, :cache_control, @cache_key) | rest]
-
-  defp sys_cache(other), do: other
-
-  defp tool_cache([]), do: []
-
-  defp tool_cache(tools) do
-    {last, init} = pop_at(tools, -1)
-    init ++ [put(last, :cache_control, @cache_key)]
-  end
-
-  defp msg_cache([]), do: []
-
-  defp msg_cache(messages) do
-    {last, init} = pop_at(messages, -1)
-    init ++ [wrap_msg(last)]
-  end
-
-  defp wrap_msg(%{content: str} = m) when is_binary(str),
-    do: put(m, :content, [%{type: "text", text: str, cache_control: @cache_key}])
-
-  defp wrap_msg(%{content: blocks} = m) when is_list(blocks) do
-    {block, rest} = pop_at(blocks, -1)
-    put(m, :content, rest ++ [put(block, :cache_control, @cache_key)])
-  end
-
-  defp wrap_msg(msg), do: msg
-
   defp add_tools(base, [%{function_declarations: defs}]) do
     tools = map(defs, &schema/1)
     put(base, :tools, tools)
@@ -110,10 +81,6 @@ defmodule Lite do
     do: %{"tool_use" => %{"id" => id, "name" => name, "input" => input}}
 
   defp part(other), do: other
-
-  defp request(text) do
-    %{model: model(), max_tokens: 4096, messages: [%{role: "user", content: text}]}
-  end
 
   defp url, do: "#{get_env("ANTHROPIC_BASE_URL", "https://api.anthropic.com")}/v1/messages"
   defp model, do: "claude-haiku-4-5"
