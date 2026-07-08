@@ -3,7 +3,8 @@ defmodule El.Pty.Init do
   import El.PtyReader
   import El.Trace
   import Map
-  import Process, except: [alias: 1]
+  import Process, except: [alias: 1, info: 1]
+  import Port, only: [info: 1]
 
   def call(cfg) do
     size = cfg[:get_size].()
@@ -79,7 +80,7 @@ defmodule El.Pty.Init do
   end
 
   defp check_port(parent, pty) do
-    handle_port(Port.info(pty), parent, pty)
+    handle_port(info(pty), parent, pty)
   end
 
   defp handle_port(false, parent, pty), do: send(parent, {pty, :closed})

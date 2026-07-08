@@ -33,7 +33,7 @@ defmodule El.Commands.Address.Route do
     do: route_or_remote(target == self(), {target, path, msg, mode, tool})
 
   def route_or_remote(true, {_target, path, msg, mode, tool}),
-    do: El.Commands.Address.route(path, msg, mode, tool)
+    do: route(path, msg, mode, tool)
 
   def route_or_remote(false, {target, path, msg, mode, tool}),
     do: remote(target, path, msg, mode, tool)
