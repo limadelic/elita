@@ -12,6 +12,7 @@ module VerifyHelper
     initialize_scenario_cursor unless @scenario_cursor
     ci_timeout = ENV["GITHUB_ACTIONS"] == "true" ? 60 : 3
     deadline = Time.now + (ENV["TAPE"] == "rec" ? 10 : ci_timeout)
+    last_newline_sent = Time.now - 2  # Allow immediate first send
 
     loop do
       tx = transcript
@@ -64,8 +65,23 @@ module VerifyHelper
       end
 
       drain_pty
+
+      # After ~1s without a match, nudge PTY with newline to flush cascade output (replay only)
+      if ENV["TAPE"] != "rec" && Time.now - last_newline_sent >= 1.0
+        nudge_pty
+        last_newline_sent = Time.now
+      end
+
       sleep 0.05
     end
+  end
+
+  def nudge_pty
+    return unless @writer
+    @writer.write("\n")
+    @writer.flush
+  rescue IOError
+    # PTY might be closed, ignore
   end
 
   def is_verify_table?(table)
