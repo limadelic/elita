@@ -1,10 +1,8 @@
 defmodule El.CLI do
   import Application, only: [ensure_all_started: 1]
   import IO, only: [puts: 1]
-  import System, only: [get_env: 1]
   import El.Command
   alias El.REPL
-  alias El.Cover
 
   @usage """
   Usage:
@@ -23,19 +21,6 @@ defmodule El.CLI do
 
   def main(argv) do
     ensure_all_started(:elita)
-    maybe_cover(get_env("COVER"), argv)
-  end
-
-  defp maybe_cover("1", argv) do
-    Cover.start()
-    dispatch(argv)
-  end
-
-  defp maybe_cover(_other, argv) do
-    dispatch(argv)
-  end
-
-  defp dispatch(argv) do
     argv |> parse() |> run()
   end
 

@@ -1,6 +1,5 @@
 .idea/
 /_build/
-/cover/
 /deps/
 /doc/
 erl_crash.dump
@@ -14,8 +13,6 @@ status.json
 .claude/worktrees/
 /reports/
 node_modules/
-coverdata*.ets
-featurescoverdata*.ets
 test_*.exs
 test_*.ets
 
