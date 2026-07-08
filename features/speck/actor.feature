@@ -1,6 +1,7 @@
+@tape:actor
 Feature: Actor
 
-  Scenario: Actor plays different characters
+  Scenario: speck reads, writes, and runs actor scenarios
     * > el speck
     * speck> exec actor
       | 📢 speck → actor_v1 | Victorian butler                   |
