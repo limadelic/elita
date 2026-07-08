@@ -1,28 +1,31 @@
 defmodule El.Pty.Size do
   @moduledoc false
 
+  import System
+  import String
+
   def get_default do
-    System.cmd("sh", ["-c", "stty size < /dev/tty"], stderr_to_stdout: true)
+    cmd("sh", ["-c", "stty size < /dev/tty"], stderr_to_stdout: true)
     |> parse()
   rescue
     _ -> {24, 80}
   end
 
   defp parse({output, 0}) do
-    output |> String.trim() |> String.split() |> extract()
+    output |> trim() |> split() |> extract()
   end
 
   defp parse(_), do: {24, 80}
 
   defp extract([rows, cols]) do
-    row = String.to_integer(rows)
-    col = String.to_integer(cols)
-    size_or_default(row, col)
+    size_or_default(to_int(rows), to_int(cols))
   rescue
     _ -> {24, 80}
   end
 
   defp extract(_), do: {24, 80}
+
+  defp to_int(str), do: to_integer(str)
 
   defp size_or_default(row, col) when row > 0, do: check_col(col, row)
   defp size_or_default(_, _), do: {24, 80}
