@@ -1,7 +1,7 @@
 @tape:speckboss
 Feature: Boss
 
-  Scenario: Boss delegates tasks to workers
+  Scenario: Boss delegates tasks - workers accept, QA refuses out-of-domain work
     * > el speck
     * speck> exec boss
       | 📢 speck → boss_v1                    | assign them the task    |
