@@ -23,15 +23,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "it's time to give birth",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ]
+          "content": "it's time to give birth"
         }
       ]
     }
@@ -46,15 +38,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "spank",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ]
+          "content": "spank"
         }
       ]
     }
@@ -69,15 +53,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "give birth",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ]
+          "content": "give birth"
         }
       ]
     }

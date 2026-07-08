@@ -17,15 +17,7 @@
       "agent": "el",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "ask greet hello",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "ask greet hello",
           "role": "user"
         }
       ],
@@ -110,15 +102,7 @@
       "agent": "greet",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "hello",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "hello",
           "role": "user"
         }
       ],
@@ -168,15 +152,7 @@
       "agent": "el",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "ask greet hello",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "ask greet hello",
           "role": "user"
         }
       ],
@@ -194,15 +170,7 @@
       "agent": "greet",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "hello",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "hello",
           "role": "user"
         }
       ],

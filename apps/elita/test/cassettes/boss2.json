@@ -9,15 +9,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "you manage pam the receptionist and jim the salesman",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "you manage pam the receptionist and jim the salesman",
           "role": "user"
         }
       ]
@@ -33,15 +25,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "you manage dwight the assistant regional manager",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "you manage dwight the assistant regional manager",
           "role": "user"
         }
       ]
@@ -65,15 +49,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "we need 50 copies of the quarterly sales report",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "we need 50 copies of the quarterly sales report",
           "role": "user"
         }
       ]
@@ -97,15 +73,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "[from michael] Dwight, I need you to make 50 copies of the quarterly sales report. Get this done right away.",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "[from michael] Dwight, I need you to make 50 copies of the quarterly sales report. Get this done right away.",
           "role": "user"
         }
       ]
@@ -165,15 +133,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "[from dwight] Pam, I need you to make 50 copies of the quarterly sales report right away. This is a priority.",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "[from dwight] Pam, I need you to make 50 copies of the quarterly sales report right away. This is a priority.",
           "role": "user"
         }
       ]
@@ -189,15 +149,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "are you ready?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "are you ready?",
           "role": "user"
         }
       ]
@@ -213,15 +165,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "did you receive a task to make 50 copies?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "did you receive a task to make 50 copies?",
           "role": "user"
         }
       ]
@@ -237,15 +181,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Result: Yes, I did. Dwight asked me to make 50 copies of the quarterly sales report right away because it's a priority task.\n\nExpectation: confirms they did receive a task to make 50 copies",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Result: Yes, I did. Dwight asked me to make 50 copies of the quarterly sales report right away because it's a priority task.\n\nExpectation: confirms they did receive a task to make 50 copies",
           "role": "user"
         }
       ]
@@ -261,15 +197,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "did you receive a task?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "did you receive a task?",
           "role": "user"
         }
       ]

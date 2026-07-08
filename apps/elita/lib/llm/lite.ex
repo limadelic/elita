@@ -12,7 +12,17 @@ defmodule Lite do
   def llm(%{config: config, history: history, name: agent_name} = state) do
     composed = compose(config)
     body = build(composed, history, state)
-    result = tape(body, agent_name, fn -> req(body) |> resp end)
+
+    live = fn ->
+      body
+      |> put(:system, sys_cache(body[:system]))
+      |> put(:messages, msg_cache(body[:messages]))
+      |> put(:tools, tool_cache(body[:tools]))
+      |> req()
+      |> resp()
+    end
+
+    result = tape(body, agent_name, live)
     {parts(result), state}
   end
 
@@ -45,44 +55,46 @@ defmodule Lite do
   end
 
   defp decorate(base, text, history) do
-    messages = cache_messages(history)
-
     base
-    |> put(:system, [%{type: "text", text: text, cache_control: @cache_key}])
-    |> put(:messages, messages)
+    |> put(:system, [%{type: "text", text: text}])
+    |> put(:messages, history)
   end
 
-  defp cache_messages([]), do: []
+  defp sys_cache([%{type: "text"} = m | rest]),
+    do: [put(m, :cache_control, @cache_key) | rest]
 
-  defp cache_messages(messages) do
+  defp sys_cache(other), do: other
+
+  defp tool_cache([]), do: []
+
+  defp tool_cache(tools) do
+    {last, init} = pop_at(tools, -1)
+    init ++ [put(last, :cache_control, @cache_key)]
+  end
+
+  defp msg_cache([]), do: []
+
+  defp msg_cache(messages) do
     {last, init} = pop_at(messages, -1)
-    init ++ [apply_content_cache(last)]
+    init ++ [wrap_msg(last)]
   end
 
-  defp apply_content_cache(%{content: str} = m) when is_binary(str),
+  defp wrap_msg(%{content: str} = m) when is_binary(str),
     do: put(m, :content, [%{type: "text", text: str, cache_control: @cache_key}])
 
-  defp apply_content_cache(%{content: blocks} = m) when is_list(blocks) do
+  defp wrap_msg(%{content: blocks} = m) when is_list(blocks) do
     {block, rest} = pop_at(blocks, -1)
     put(m, :content, rest ++ [put(block, :cache_control, @cache_key)])
   end
 
-  defp apply_content_cache(msg), do: msg
+  defp wrap_msg(msg), do: msg
 
   defp add_tools(base, [%{function_declarations: defs}]) do
     tools = map(defs, &schema/1)
-    put(base, :tools, cache(tools))
+    put(base, :tools, tools)
   end
 
   defp add_tools(base, _), do: base
-
-  defp cache(tools) do
-    {last, init} = pop_at(tools, -1)
-    apply_cache(last, init, tools)
-  end
-
-  defp apply_cache(nil, _init, tools), do: tools
-  defp apply_cache(last, init, _tools), do: init ++ [put(last, :cache_control, @cache_key)]
 
   defp schema(%{parameters: params} = tool),
     do: tool |> delete(:parameters) |> put(:input_schema, params)

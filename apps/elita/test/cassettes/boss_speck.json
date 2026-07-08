@@ -32,15 +32,7 @@
       "agent": "boss",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "exec boss",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "exec boss",
           "role": "user"
         }
       ],
@@ -360,15 +352,7 @@
       "agent": "boss_v1",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Please delegate this task to worker_v1: Fix the critical bug in the authentication module",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Please delegate this task to worker_v1: Fix the critical bug in the authentication module",
           "role": "user"
         }
       ],
@@ -410,15 +394,7 @@
       "agent": "worker_v1",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "[from boss_v1] Fix the critical bug in the authentication module",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "[from boss_v1] Fix the critical bug in the authentication module",
           "role": "user"
         }
       ],
@@ -472,15 +448,7 @@
       "agent": "worker_v1",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Did you receive a task about fixing a critical bug? If yes, describe what you were asked to do.",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Did you receive a task about fixing a critical bug? If yes, describe what you were asked to do.",
           "role": "user"
         }
       ],
@@ -652,15 +620,7 @@
       "agent": "boss_v2",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "I have two tasks for your team. Please delegate to worker_v2: Review the API documentation. And delegate to worker_v3: Update the unit tests for the payment module.",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "I have two tasks for your team. Please delegate to worker_v2: Review the API documentation. And delegate to worker_v3: Update the unit tests for the payment module.",
           "role": "user"
         }
       ],
@@ -702,15 +662,7 @@
       "agent": "worker_v2",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "[from boss_v2] Review the API documentation.",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "[from boss_v2] Review the API documentation.",
           "role": "user"
         }
       ],
@@ -728,15 +680,7 @@
       "agent": "worker_v3",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "[from boss_v2] Update the unit tests for the payment module.",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "[from boss_v2] Update the unit tests for the payment module.",
           "role": "user"
         }
       ],
@@ -802,15 +746,7 @@
       "agent": "worker_v2",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Did you receive a task? If yes, what was assigned to you?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Did you receive a task? If yes, what was assigned to you?",
           "role": "user"
         }
       ],
@@ -828,15 +764,7 @@
       "agent": "worker_v3",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Did you receive a task? If yes, what was assigned to you?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Did you receive a task? If yes, what was assigned to you?",
           "role": "user"
         }
       ],
@@ -982,15 +910,7 @@
       "agent": "boss_v3",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Delegate this task to worker_v4: Implement caching mechanism for database queries to improve performance",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Delegate this task to worker_v4: Implement caching mechanism for database queries to improve performance",
           "role": "user"
         }
       ],
@@ -1064,15 +984,7 @@
       "agent": "worker_v4",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "[from boss_v3] Please implement a caching mechanism for database queries to improve performance. This should help reduce database load and speed up query response times. Let me know when you've completed this task.",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "[from boss_v3] Please implement a caching mechanism for database queries to improve performance. This should help reduce database load and speed up query response times. Let me know when you've completed this task.",
           "role": "user"
         }
       ],
@@ -1090,15 +1002,7 @@
       "agent": "worker_v4",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "What task were you assigned? Please provide all factual details about what you need to do.",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "What task were you assigned? Please provide all factual details about what you need to do.",
           "role": "user"
         }
       ],
@@ -1244,15 +1148,7 @@
       "agent": "boss_v4",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Delegate this task to worker_v5: Setup continuous integration pipeline for the project",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Delegate this task to worker_v5: Setup continuous integration pipeline for the project",
           "role": "user"
         }
       ],
@@ -1294,15 +1190,7 @@
       "agent": "worker_v5",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "[from boss_v4] Please setup continuous integration pipeline for the project",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "[from boss_v4] Please setup continuous integration pipeline for the project",
           "role": "user"
         }
       ],

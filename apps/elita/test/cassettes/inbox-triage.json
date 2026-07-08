@@ -51,15 +51,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Email 1: Subject: Urgent payment overdue. Body: Your billing is past due.\nEmail 2: Subject: Claim your free prize! Body: You've won a promotional offer!\nEmail 3: Subject: New feature request. Body: Please add dark mode to the app.\n",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Email 1: Subject: Urgent payment overdue. Body: Your billing is past due.\nEmail 2: Subject: Claim your free prize! Body: You've won a promotional offer!\nEmail 3: Subject: New feature request. Body: Please add dark mode to the app.\n",
           "role": "user"
         }
       ]
@@ -133,15 +125,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Classify this email: Subject: Urgent payment overdue. Body: Your billing is past due.",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Classify this email: Subject: Urgent payment overdue. Body: Your billing is past due.",
           "role": "user"
         }
       ]
@@ -157,15 +141,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Classify this email: Subject: Claim your free prize! Body: You've won a promotional offer!",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Classify this email: Subject: Claim your free prize! Body: You've won a promotional offer!",
           "role": "user"
         }
       ]
@@ -181,15 +157,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Classify this email: Subject: New feature request. Body: Please add dark mode to the app.",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Classify this email: Subject: New feature request. Body: Please add dark mode to the app.",
           "role": "user"
         }
       ]
@@ -227,15 +195,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Result: **Email Triage Summary:**\n\nurgent (payment), spam (promotion), feature (request)\n\nExpectation: summary lists urgent as a classification",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Result: **Email Triage Summary:**\n\nurgent (payment), spam (promotion), feature (request)\n\nExpectation: summary lists urgent as a classification",
           "role": "user"
         }
       ]
@@ -251,15 +211,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Result: **Email Triage Summary:**\n\nurgent (payment), spam (promotion), feature (request)\n\nExpectation: summary lists spam as a classification",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Result: **Email Triage Summary:**\n\nurgent (payment), spam (promotion), feature (request)\n\nExpectation: summary lists spam as a classification",
           "role": "user"
         }
       ]
@@ -275,15 +227,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Result: **Email Triage Summary:**\n\nurgent (payment), spam (promotion), feature (request)\n\nExpectation: summary lists feature as a classification",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Result: **Email Triage Summary:**\n\nurgent (payment), spam (promotion), feature (request)\n\nExpectation: summary lists feature as a classification",
           "role": "user"
         }
       ]

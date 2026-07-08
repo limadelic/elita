@@ -9,15 +9,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "hello",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ]
+          "content": "hello"
         }
       ]
     }
@@ -32,15 +24,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Mike",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ]
+          "content": "Mike"
         }
       ]
     }
@@ -55,15 +39,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "how are you",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ]
+          "content": "how are you"
         }
       ]
     }

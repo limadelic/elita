@@ -51,15 +51,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "What makes a city good for remote work?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "What makes a city good for remote work?",
           "role": "user"
         }
       ]
@@ -133,15 +125,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "What infrastructure and connectivity factors make a city suitable for remote work (internet speed, coworking spaces, cafes with wifi)?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "What infrastructure and connectivity factors make a city suitable for remote work (internet speed, coworking spaces, cafes with wifi)?",
           "role": "user"
         }
       ]
@@ -157,15 +141,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "How do quality of life factors in a city support remote workers (cost of living, safety, healthcare, leisure activities)?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "How do quality of life factors in a city support remote workers (cost of living, safety, healthcare, leisure activities)?",
           "role": "user"
         }
       ]
@@ -181,15 +157,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "What social and professional environment features attract remote workers to a city (community, networking opportunities, timezone advantages)?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "What social and professional environment features attract remote workers to a city (community, networking opportunities, timezone advantages)?",
           "role": "user"
         }
       ]
@@ -227,15 +195,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Result: ## What Makes a City Good for Remote Work\n\nA truly remote-work-friendly city requires a synthesis of three interdependent dimensions:\n\n**Infrastructure & Connectivity** forms the essential foundation. Cities need minimum broadband speeds of 100 Mbps download (ideally 300+ Mbps for video conferencing), widespread 4G/5G backup coverage, and fiber-optic availability. This must be paired with dense coworking infrastructure—roughly 1 space per 50,000-100,000 residents with hot-desking at $10-25/day—plus 200+ WiFi-enabled cafes and public spaces. Redundant power systems and low latency (<50ms) for real-time collaboration are also critical to reliability.\n\n**Quality of Life & Financial Sustainability** significantly differentiates successful remote work cities. Lower cost of living enables remote workers earning in strong currencies to maximize savings while maintaining comfort. Beyond affordability, cities must offer robust public safety, accessible healthcare, and diverse leisure amenities (parks, cultural venues, restaurants, fitness facilities). Remote workers prioritize these factors even more heavily than traditional office workers since they're not trading commute time for office amenities.\n\n**Social & Professional Community** often determines whether remote workers stay long-term. The most attractive cities combine active professional ecosystems with networking events, coworking cultures that facilitate collaboration, and strong digital nomad or expat communities that combat the isolation of remote work. Timezone alignment matters—US Mountain/Pacific zones and Lisbon-Barcelona positions attract workers seeking client overlap—but professional development opportunities and genuine social connection networks rank equally or above logistical efficiency.\n\nCities like **Lisbon, Austin, and Denver** succeed because they balance all three: reliable gigabit-capable internet, 30-50% lower living costs than major tech hubs, vibrant tech communities, and thriving social scenes. The message is clear: remote work-friendly cities aren't built on connectivity alone, but on the combination of reliable infrastructure, affordable living, and intentional community-building that enables both productive work and genuine connection.\n\nExpectation: synthesis includes analysis of internet infrastructure or connectivity for remote workers",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Result: ## What Makes a City Good for Remote Work\n\nA truly remote-work-friendly city requires a synthesis of three interdependent dimensions:\n\n**Infrastructure & Connectivity** forms the essential foundation. Cities need minimum broadband speeds of 100 Mbps download (ideally 300+ Mbps for video conferencing), widespread 4G/5G backup coverage, and fiber-optic availability. This must be paired with dense coworking infrastructure—roughly 1 space per 50,000-100,000 residents with hot-desking at $10-25/day—plus 200+ WiFi-enabled cafes and public spaces. Redundant power systems and low latency (<50ms) for real-time collaboration are also critical to reliability.\n\n**Quality of Life & Financial Sustainability** significantly differentiates successful remote work cities. Lower cost of living enables remote workers earning in strong currencies to maximize savings while maintaining comfort. Beyond affordability, cities must offer robust public safety, accessible healthcare, and diverse leisure amenities (parks, cultural venues, restaurants, fitness facilities). Remote workers prioritize these factors even more heavily than traditional office workers since they're not trading commute time for office amenities.\n\n**Social & Professional Community** often determines whether remote workers stay long-term. The most attractive cities combine active professional ecosystems with networking events, coworking cultures that facilitate collaboration, and strong digital nomad or expat communities that combat the isolation of remote work. Timezone alignment matters—US Mountain/Pacific zones and Lisbon-Barcelona positions attract workers seeking client overlap—but professional development opportunities and genuine social connection networks rank equally or above logistical efficiency.\n\nCities like **Lisbon, Austin, and Denver** succeed because they balance all three: reliable gigabit-capable internet, 30-50% lower living costs than major tech hubs, vibrant tech communities, and thriving social scenes. The message is clear: remote work-friendly cities aren't built on connectivity alone, but on the combination of reliable infrastructure, affordable living, and intentional community-building that enables both productive work and genuine connection.\n\nExpectation: synthesis includes analysis of internet infrastructure or connectivity for remote workers",
           "role": "user"
         }
       ]
@@ -251,15 +211,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Result: ## What Makes a City Good for Remote Work\n\nA truly remote-work-friendly city requires a synthesis of three interdependent dimensions:\n\n**Infrastructure & Connectivity** forms the essential foundation. Cities need minimum broadband speeds of 100 Mbps download (ideally 300+ Mbps for video conferencing), widespread 4G/5G backup coverage, and fiber-optic availability. This must be paired with dense coworking infrastructure—roughly 1 space per 50,000-100,000 residents with hot-desking at $10-25/day—plus 200+ WiFi-enabled cafes and public spaces. Redundant power systems and low latency (<50ms) for real-time collaboration are also critical to reliability.\n\n**Quality of Life & Financial Sustainability** significantly differentiates successful remote work cities. Lower cost of living enables remote workers earning in strong currencies to maximize savings while maintaining comfort. Beyond affordability, cities must offer robust public safety, accessible healthcare, and diverse leisure amenities (parks, cultural venues, restaurants, fitness facilities). Remote workers prioritize these factors even more heavily than traditional office workers since they're not trading commute time for office amenities.\n\n**Social & Professional Community** often determines whether remote workers stay long-term. The most attractive cities combine active professional ecosystems with networking events, coworking cultures that facilitate collaboration, and strong digital nomad or expat communities that combat the isolation of remote work. Timezone alignment matters—US Mountain/Pacific zones and Lisbon-Barcelona positions attract workers seeking client overlap—but professional development opportunities and genuine social connection networks rank equally or above logistical efficiency.\n\nCities like **Lisbon, Austin, and Denver** succeed because they balance all three: reliable gigabit-capable internet, 30-50% lower living costs than major tech hubs, vibrant tech communities, and thriving social scenes. The message is clear: remote work-friendly cities aren't built on connectivity alone, but on the combination of reliable infrastructure, affordable living, and intentional community-building that enables both productive work and genuine connection.\n\nExpectation: synthesis includes information about cost of living or affordability for remote workers",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Result: ## What Makes a City Good for Remote Work\n\nA truly remote-work-friendly city requires a synthesis of three interdependent dimensions:\n\n**Infrastructure & Connectivity** forms the essential foundation. Cities need minimum broadband speeds of 100 Mbps download (ideally 300+ Mbps for video conferencing), widespread 4G/5G backup coverage, and fiber-optic availability. This must be paired with dense coworking infrastructure—roughly 1 space per 50,000-100,000 residents with hot-desking at $10-25/day—plus 200+ WiFi-enabled cafes and public spaces. Redundant power systems and low latency (<50ms) for real-time collaboration are also critical to reliability.\n\n**Quality of Life & Financial Sustainability** significantly differentiates successful remote work cities. Lower cost of living enables remote workers earning in strong currencies to maximize savings while maintaining comfort. Beyond affordability, cities must offer robust public safety, accessible healthcare, and diverse leisure amenities (parks, cultural venues, restaurants, fitness facilities). Remote workers prioritize these factors even more heavily than traditional office workers since they're not trading commute time for office amenities.\n\n**Social & Professional Community** often determines whether remote workers stay long-term. The most attractive cities combine active professional ecosystems with networking events, coworking cultures that facilitate collaboration, and strong digital nomad or expat communities that combat the isolation of remote work. Timezone alignment matters—US Mountain/Pacific zones and Lisbon-Barcelona positions attract workers seeking client overlap—but professional development opportunities and genuine social connection networks rank equally or above logistical efficiency.\n\nCities like **Lisbon, Austin, and Denver** succeed because they balance all three: reliable gigabit-capable internet, 30-50% lower living costs than major tech hubs, vibrant tech communities, and thriving social scenes. The message is clear: remote work-friendly cities aren't built on connectivity alone, but on the combination of reliable infrastructure, affordable living, and intentional community-building that enables both productive work and genuine connection.\n\nExpectation: synthesis includes information about cost of living or affordability for remote workers",
           "role": "user"
         }
       ]
@@ -275,15 +227,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Result: ## What Makes a City Good for Remote Work\n\nA truly remote-work-friendly city requires a synthesis of three interdependent dimensions:\n\n**Infrastructure & Connectivity** forms the essential foundation. Cities need minimum broadband speeds of 100 Mbps download (ideally 300+ Mbps for video conferencing), widespread 4G/5G backup coverage, and fiber-optic availability. This must be paired with dense coworking infrastructure—roughly 1 space per 50,000-100,000 residents with hot-desking at $10-25/day—plus 200+ WiFi-enabled cafes and public spaces. Redundant power systems and low latency (<50ms) for real-time collaboration are also critical to reliability.\n\n**Quality of Life & Financial Sustainability** significantly differentiates successful remote work cities. Lower cost of living enables remote workers earning in strong currencies to maximize savings while maintaining comfort. Beyond affordability, cities must offer robust public safety, accessible healthcare, and diverse leisure amenities (parks, cultural venues, restaurants, fitness facilities). Remote workers prioritize these factors even more heavily than traditional office workers since they're not trading commute time for office amenities.\n\n**Social & Professional Community** often determines whether remote workers stay long-term. The most attractive cities combine active professional ecosystems with networking events, coworking cultures that facilitate collaboration, and strong digital nomad or expat communities that combat the isolation of remote work. Timezone alignment matters—US Mountain/Pacific zones and Lisbon-Barcelona positions attract workers seeking client overlap—but professional development opportunities and genuine social connection networks rank equally or above logistical efficiency.\n\nCities like **Lisbon, Austin, and Denver** succeed because they balance all three: reliable gigabit-capable internet, 30-50% lower living costs than major tech hubs, vibrant tech communities, and thriving social scenes. The message is clear: remote work-friendly cities aren't built on connectivity alone, but on the combination of reliable infrastructure, affordable living, and intentional community-building that enables both productive work and genuine connection.\n\nExpectation: synthesis discusses community culture or social aspects that matter to remote workers",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Result: ## What Makes a City Good for Remote Work\n\nA truly remote-work-friendly city requires a synthesis of three interdependent dimensions:\n\n**Infrastructure & Connectivity** forms the essential foundation. Cities need minimum broadband speeds of 100 Mbps download (ideally 300+ Mbps for video conferencing), widespread 4G/5G backup coverage, and fiber-optic availability. This must be paired with dense coworking infrastructure—roughly 1 space per 50,000-100,000 residents with hot-desking at $10-25/day—plus 200+ WiFi-enabled cafes and public spaces. Redundant power systems and low latency (<50ms) for real-time collaboration are also critical to reliability.\n\n**Quality of Life & Financial Sustainability** significantly differentiates successful remote work cities. Lower cost of living enables remote workers earning in strong currencies to maximize savings while maintaining comfort. Beyond affordability, cities must offer robust public safety, accessible healthcare, and diverse leisure amenities (parks, cultural venues, restaurants, fitness facilities). Remote workers prioritize these factors even more heavily than traditional office workers since they're not trading commute time for office amenities.\n\n**Social & Professional Community** often determines whether remote workers stay long-term. The most attractive cities combine active professional ecosystems with networking events, coworking cultures that facilitate collaboration, and strong digital nomad or expat communities that combat the isolation of remote work. Timezone alignment matters—US Mountain/Pacific zones and Lisbon-Barcelona positions attract workers seeking client overlap—but professional development opportunities and genuine social connection networks rank equally or above logistical efficiency.\n\nCities like **Lisbon, Austin, and Denver** succeed because they balance all three: reliable gigabit-capable internet, 30-50% lower living costs than major tech hubs, vibrant tech communities, and thriving social scenes. The message is clear: remote work-friendly cities aren't built on connectivity alone, but on the combination of reliable infrastructure, affordable living, and intentional community-building that enables both productive work and genuine connection.\n\nExpectation: synthesis discusses community culture or social aspects that matter to remote workers",
           "role": "user"
         }
       ]

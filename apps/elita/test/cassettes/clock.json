@@ -9,15 +9,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "what hour is it?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ]
+          "content": "what hour is it?"
         }
       ]
     }
@@ -32,15 +24,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "states the current hour",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ]
+          "content": "states the current hour"
         }
       ]
     }

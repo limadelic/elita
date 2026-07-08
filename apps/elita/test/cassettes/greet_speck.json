@@ -44,15 +44,7 @@
       "agent": "greet",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "exec greet",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "exec greet",
           "role": "user"
         }
       ],
@@ -305,15 +297,7 @@
       "agent": "greet_v1",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Hello!",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Hello!",
           "role": "user"
         }
       ],
@@ -403,15 +387,7 @@
       "agent": "greet_v1",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "My name is Mike.",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "My name is Mike.",
           "role": "user"
         }
       ],
@@ -501,15 +477,7 @@
       "agent": "greet_v1",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "What's your name again?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "What's your name again?",
           "role": "user"
         }
       ],
@@ -599,15 +567,7 @@
       "agent": "greet_v1",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Actually, call me Michael now.",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Actually, call me Michael now.",
           "role": "user"
         }
       ],
@@ -697,15 +657,7 @@
       "agent": "greet_v1",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Tell me something interesting.",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Tell me something interesting.",
           "role": "user"
         }
       ],

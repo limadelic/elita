@@ -18,15 +18,7 @@
       "agent": "el",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "ask dude hello",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "ask dude hello",
           "role": "user"
         }
       ],
@@ -52,15 +44,7 @@
       "agent": "el",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "ask dude hello",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "ask dude hello",
           "role": "user"
         }
       ],
@@ -110,15 +94,7 @@
       "agent": "el",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "ask dude what is your name",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "ask dude what is your name",
           "role": "user"
         }
       ],
@@ -168,15 +144,7 @@
       "agent": "el",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "ask dude what is your name",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "ask dude what is your name",
           "role": "user"
         }
       ],

@@ -60,6 +60,12 @@ defmodule Tape.Play do
   defp get_times(_), do: 1
 
   defp cassette_key, do: get_env("CASSETTE")
-  defp normalize(req), do: req |> encode!() |> decode!()
-  defp request(body), do: take(body, [:system, :messages, :tools])
+
+  defp normalize(req) do
+    req |> encode!() |> decode!()
+  end
+
+  defp request(body) do
+    take(body, [:system, :messages, :tools])
+  end
 end

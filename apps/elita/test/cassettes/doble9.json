@@ -62,15 +62,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "start a new game with players: top, left, bottom, right",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ]
+          "content": "start a new game with players: top, left, bottom, right"
         }
       ]
     }
@@ -90,15 +82,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "i need 10 dominoes",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ]
+          "content": "i need 10 dominoes"
         }
       ]
     }
@@ -128,15 +112,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "[from doble9] Game is ready to start! The dominoes have been shuffled. Waiting for players to draw their tiles.",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "[from doble9] Game is ready to start! The dominoes have been shuffled. Waiting for players to draw their tiles.",
           "role": "user"
         }
       ]

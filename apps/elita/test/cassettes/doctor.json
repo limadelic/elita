@@ -9,15 +9,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "you are a patient with appendicitis\n- sharp right abdominal pain, nausea, fever.\nImprovise realistic details.\n",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "you are a patient with appendicitis\n- sharp right abdominal pain, nausea, fever.\nImprovise realistic details.\n",
           "role": "user"
         }
       ]
@@ -45,15 +37,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "diagnose patient",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "diagnose patient",
           "role": "user"
         }
       ]
@@ -69,15 +53,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "What is your main symptom or complaint today?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "What is your main symptom or complaint today?",
           "role": "user"
         }
       ]
@@ -139,15 +115,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "How long have you had this pain - when exactly did it start?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "How long have you had this pain - when exactly did it start?",
           "role": "user"
         }
       ]
@@ -163,15 +131,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Have you had any recent bowel movements? Any changes in your bowel habits, diarrhea, or constipation?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Have you had any recent bowel movements? Any changes in your bowel habits, diarrhea, or constipation?",
           "role": "user"
         }
       ]
@@ -233,15 +193,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "How high is your fever? Do you know your temperature?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "How high is your fever? Do you know your temperature?",
           "role": "user"
         }
       ]
@@ -257,15 +209,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Have you experienced any pain that radiates to your groin, back, or other parts of your body, or is it strictly localized to the lower right side?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Have you experienced any pain that radiates to your groin, back, or other parts of your body, or is it strictly localized to the lower right side?",
           "role": "user"
         }
       ]
@@ -339,15 +283,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Have you had any recent urinary symptoms - pain with urination, frequent urination, or blood in your urine?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Have you had any recent urinary symptoms - pain with urination, frequent urination, or blood in your urine?",
           "role": "user"
         }
       ]
@@ -363,15 +299,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Have you recently had a stomach bug or been around anyone who was sick? Any recent travel?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Have you recently had a stomach bug or been around anyone who was sick? Any recent travel?",
           "role": "user"
         }
       ]
@@ -387,15 +315,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Have you had any injuries to your abdomen recently, or any surgeries in the past?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Have you had any injuries to your abdomen recently, or any surgeries in the past?",
           "role": "user"
         }
       ]
@@ -445,15 +365,7 @@
     "q": {
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "When you press on the lower right side of your abdomen and then suddenly release your hand, does that release of pressure cause additional sharp pain?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "When you press on the lower right side of your abdomen and then suddenly release your hand, does that release of pressure cause additional sharp pain?",
           "role": "user"
         }
       ]

@@ -10,15 +10,7 @@
       "agent": "clockwatcher",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "can you handle this task?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "can you handle this task?",
           "role": "user"
         }
       ],
@@ -37,15 +29,7 @@
       "messages": [
         {
           "role": "user",
-          "content": [
-            {
-              "type": "text",
-              "text": "Result: Let me check the current time first.\n\n**Current time: 2025-07-07 10:00:00 (Monday, 10:00 AM)**\n\nYes, I can help! It's 10 AM on a Monday, which is during my work hours (9 AM to 5 PM). I'm available and ready to assist with your task. What do you need?\n\nExpectation: accepts or handles the task since it is within work hours",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ]
+          "content": "Result: Let me check the current time first.\n\n**Current time: 2025-07-07 10:00:00 (Monday, 10:00 AM)**\n\nYes, I can help! It's 10 AM on a Monday, which is during my work hours (9 AM to 5 PM). I'm available and ready to assist with your task. What do you need?\n\nExpectation: accepts or handles the task since it is within work hours"
         }
       ],
       "n": 1

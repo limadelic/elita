@@ -47,15 +47,7 @@
       "agent": "napo",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Our conglomerate's profit declined 30% this year across three very different divisions: grocery retail, streaming media, and industrial logistics. Build the complete root-cause tree for EACH division — every driver decomposed to concrete checkable causes with the specific data you would pull for each. All three divisions fully worked out; a summary or a single generic tree is not acceptable.",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Our conglomerate's profit declined 30% this year across three very different divisions: grocery retail, streaming media, and industrial logistics. Build the complete root-cause tree for EACH division — every driver decomposed to concrete checkable causes with the specific data you would pull for each. All three divisions fully worked out; a summary or a single generic tree is not acceptable.",
           "role": "user"
         }
       ],
@@ -349,15 +341,7 @@
       "agent": "judge",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Result: Comprehensive framework identifying margin compression drivers through (1) Revenue Quality Decline: ASP erosion, customer mix deterioration, discount escalation; (2) Cost Structure Inflation: COGS growth rate, supply chain cost index, labor/manufacturing cost; (3) Product Mix Shifts: margin by product line, geographic mix, go-to-market model changes; (4) Operational Inefficiencies: SG&A ratios, headcount productivity, process waste metrics. Includes concrete metrics (bps impact analysis, YoY rate comparisons, per-unit economics) and data sources (P&L by segment, procurement systems, sales ops, manufacturing dashboards). Expectation: Provides actionable framework to identify all four drivers with measurable, sourceable metrics for technology company margin compression. True?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Result: Comprehensive framework identifying margin compression drivers through (1) Revenue Quality Decline: ASP erosion, customer mix deterioration, discount escalation; (2) Cost Structure Inflation: COGS growth rate, supply chain cost index, labor/manufacturing cost; (3) Product Mix Shifts: margin by product line, geographic mix, go-to-market model changes; (4) Operational Inefficiencies: SG&A ratios, headcount productivity, process waste metrics. Includes concrete metrics (bps impact analysis, YoY rate comparisons, per-unit economics) and data sources (P&L by segment, procurement systems, sales ops, manufacturing dashboards). Expectation: Provides actionable framework to identify all four drivers with measurable, sourceable metrics for technology company margin compression. True?",
           "role": "user"
         }
       ],
@@ -1136,15 +1120,7 @@
       "agent": "judge",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Result: Complete root-cause tree decomposing industrial logistics division's 30% profit decline with five main branches (Revenue, COGS, OpEx, SG&A, Operational Metrics), each with 4-6 sub-drivers, each leaf specifying checkable data points and metrics to pull. Expectation: provides exhaustive tree covering all revenue impact factors, cost drivers (fuel, labor, asset utilization), and operational metrics. True?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Result: Complete root-cause tree decomposing industrial logistics division's 30% profit decline with five main branches (Revenue, COGS, OpEx, SG&A, Operational Metrics), each with 4-6 sub-drivers, each leaf specifying checkable data points and metrics to pull. Expectation: provides exhaustive tree covering all revenue impact factors, cost drivers (fuel, labor, asset utilization), and operational metrics. True?",
           "role": "user"
         }
       ],
@@ -1198,15 +1174,7 @@
       "agent": "judge",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Result: [Complete root-cause tree with 10 major categories: Revenue (subscribers, churn, pricing), Content Costs (licensed, original, ROI), Infrastructure (cloud, CDN, tech), Customer Acquisition (marketing CAC, partnerships, support), Operating Expenses, Engagement Metrics, Competitive Factors, Macroeconomic Drivers, with 40+ specific data points to pull under each category]. Expectation: Provides exhaustive decomposition of all revenue impact factors (subscribers/pricing/churn), cost drivers (content/infrastructure), and operational metrics; shows concrete checkable causes with specific data to pull. True?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Result: [Complete root-cause tree with 10 major categories: Revenue (subscribers, churn, pricing), Content Costs (licensed, original, ROI), Infrastructure (cloud, CDN, tech), Customer Acquisition (marketing CAC, partnerships, support), Operating Expenses, Engagement Metrics, Competitive Factors, Macroeconomic Drivers, with 40+ specific data points to pull under each category]. Expectation: Provides exhaustive decomposition of all revenue impact factors (subscribers/pricing/churn), cost drivers (content/infrastructure), and operational metrics; shows concrete checkable causes with specific data to pull. True?",
           "role": "user"
         }
       ],
@@ -1461,15 +1429,7 @@
       "agent": "judge",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Result: I have built a comprehensive root-cause tree for the grocery retail division's 30% profit decline. The tree decomposes the problem into four main pillars: Revenue Impact (-15% to -18%, broken into same-store sales decline with traffic and basket drivers, and store count changes), Gross Margin Pressure (-12% to -15%, including product cost inflation, promotional investment, shrink, and private label mix), Operating Expense Inflation (+5% to +7%, covering labor, occupancy, marketing, shrink costs), and Operational Efficiency Losses (-2% to -3%). Each driver is decomposed to specific, measurable metrics with concrete data points to pull: e.g., competitor store counts and price tracking for market share, commodity prices and carrier rates for cost inflation, foot traffic sensors and POS data for transaction trends, shrink rates by category, promotional lift analysis, FTE productivity, inventory turns, etc. The tree shows exhaustive coverage of all material margin pressure factors and is organized hierarchically from profit down to operational metrics. Expectation: provides a complete root-cause framework for investigating a 30% profit decline in grocery retail with all revenue, margin, cost, and operational drivers identified with specific data requirements for each. True?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Result: I have built a comprehensive root-cause tree for the grocery retail division's 30% profit decline. The tree decomposes the problem into four main pillars: Revenue Impact (-15% to -18%, broken into same-store sales decline with traffic and basket drivers, and store count changes), Gross Margin Pressure (-12% to -15%, including product cost inflation, promotional investment, shrink, and private label mix), Operating Expense Inflation (+5% to +7%, covering labor, occupancy, marketing, shrink costs), and Operational Efficiency Losses (-2% to -3%). Each driver is decomposed to specific, measurable metrics with concrete data points to pull: e.g., competitor store counts and price tracking for market share, commodity prices and carrier rates for cost inflation, foot traffic sensors and POS data for transaction trends, shrink rates by category, promotional lift analysis, FTE productivity, inventory turns, etc. The tree shows exhaustive coverage of all material margin pressure factors and is organized hierarchically from profit down to operational metrics. Expectation: provides a complete root-cause framework for investigating a 30% profit decline in grocery retail with all revenue, margin, cost, and operational drivers identified with specific data requirements for each. True?",
           "role": "user"
         }
       ],
@@ -1570,15 +1530,7 @@
       "agent": "grocery",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Have you completed the root-cause tree for the grocery retail division's 30% profit decline?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Have you completed the root-cause tree for the grocery retail division's 30% profit decline?",
           "role": "user"
         }
       ],
@@ -1668,15 +1620,7 @@
       "agent": "streaming",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Have you completed the root-cause tree for the streaming media division's 30% profit decline?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Have you completed the root-cause tree for the streaming media division's 30% profit decline?",
           "role": "user"
         }
       ],
@@ -1706,15 +1650,7 @@
       "agent": "logistics",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Have you completed the root-cause tree for the industrial logistics division's 30% profit decline?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Have you completed the root-cause tree for the industrial logistics division's 30% profit decline?",
           "role": "user"
         }
       ],
@@ -1732,15 +1668,7 @@
       "agent": "judge",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Result: Comprehensive root-cause tree with explicit data fields for 30% profit decline covering: (1) Revenue branch: volume drivers (shipment count, tonnage, lane utilization, customer churn, market share), pricing drivers (rate decline, service mix, contract renegotiation, service credits), damage/loss. (2) COGS branch: fuel costs (price, consumption/mpg, route efficiency, surcharge lag), labor costs (wages, overtime, turnover, productivity, benefits, dock labor, training), asset utilization (cube %, weight %, downtime %, maintenance frequency, fleet age, excess leases), intermodal/3PL costs (partner rates, air freight, transload). (3) OpEx branch: vehicle costs (tires, maintenance, tolls, insurance, licensing), facility costs (rent, utilities, maintenance, security), technology (tracking, TMS/WMS, ELDs, IT support), regulatory (FMCSA, environmental, insurance claims, legal), admin overhead. (4) SG&A branch: sales/marketing, customer service, bad debt. (5) Operational metrics: network efficiency, customer quality, safety/compliance. Each leaf node specifies exact data fields to pull (e.g., \"shipments_count_curr_period\", \"avg_mpg_rating\", \"driver_turnover_rate_%\", \"cube_utilization_%\"). Expectation: exhaustive tree with all revenue factors, fuel drivers (price, consumption, route efficiency), labor drivers (wages, turnover, productivity, benefits), asset utilization (cube, weight, downtime, maintenance), with checkable concrete metrics for each. True?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Result: Comprehensive root-cause tree with explicit data fields for 30% profit decline covering: (1) Revenue branch: volume drivers (shipment count, tonnage, lane utilization, customer churn, market share), pricing drivers (rate decline, service mix, contract renegotiation, service credits), damage/loss. (2) COGS branch: fuel costs (price, consumption/mpg, route efficiency, surcharge lag), labor costs (wages, overtime, turnover, productivity, benefits, dock labor, training), asset utilization (cube %, weight %, downtime %, maintenance frequency, fleet age, excess leases), intermodal/3PL costs (partner rates, air freight, transload). (3) OpEx branch: vehicle costs (tires, maintenance, tolls, insurance, licensing), facility costs (rent, utilities, maintenance, security), technology (tracking, TMS/WMS, ELDs, IT support), regulatory (FMCSA, environmental, insurance claims, legal), admin overhead. (4) SG&A branch: sales/marketing, customer service, bad debt. (5) Operational metrics: network efficiency, customer quality, safety/compliance. Each leaf node specifies exact data fields to pull (e.g., \"shipments_count_curr_period\", \"avg_mpg_rating\", \"driver_turnover_rate_%\", \"cube_utilization_%\"). Expectation: exhaustive tree with all revenue factors, fuel drivers (price, consumption, route efficiency), labor drivers (wages, turnover, productivity, benefits), asset utilization (cube, weight, downtime, maintenance), with checkable concrete metrics for each. True?",
           "role": "user"
         }
       ],
@@ -2102,15 +2030,7 @@
       "agent": "judge",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Result: Comprehensive root cause analysis framework covering: (1) Revenue drivers with POS, loyalty, channel, and product mix data sources; (2) Cost pressures analyzing COGS, labor, occupancy, and shrinkage; (3) Inventory issues including excess stock, stockouts, accuracy, and carrying costs; (4) Operational inefficiencies spanning labor productivity, store profitability, supply chain, merchandising/pricing, and SG&A; plus diagnostic decision tree and recommended deep dives. Expectation: Provides complete analysis of 40% profit decline with specific metrics, data sources, and investigation priorities for retail chain. True?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Result: Comprehensive root cause analysis framework covering: (1) Revenue drivers with POS, loyalty, channel, and product mix data sources; (2) Cost pressures analyzing COGS, labor, occupancy, and shrinkage; (3) Inventory issues including excess stock, stockouts, accuracy, and carrying costs; (4) Operational inefficiencies spanning labor productivity, store profitability, supply chain, merchandising/pricing, and SG&A; plus diagnostic decision tree and recommended deep dives. Expectation: Provides complete analysis of 40% profit decline with specific metrics, data sources, and investigation priorities for retail chain. True?",
           "role": "user"
         }
       ],
@@ -2200,15 +2120,7 @@
       "agent": "judge",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Result: Enhanced root cause analysis with quantified calculations, specific red flag thresholds, waterfall methodology, and actionable metrics dashboard covering: (1) Revenue drivers with elasticity math and margin impact examples; (2) Cost pressures with COGS, labor, occupancy, and shrinkage quantifications; (3) Inventory analysis with aged stock calculations and DIO metrics; (4) Operational inefficiencies with productivity benchmarks, store-level P&L variance, supply chain costs, promotional math, and overhead rigidity; (5) Diagnostic workflow including revenue waterfall, priority matrix, and data ownership. Expectation: Complete framework enables retail chain to identify which drivers caused 40% profit decline with specific numbers, thresholds, and investigation priorities. True?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Result: Enhanced root cause analysis with quantified calculations, specific red flag thresholds, waterfall methodology, and actionable metrics dashboard covering: (1) Revenue drivers with elasticity math and margin impact examples; (2) Cost pressures with COGS, labor, occupancy, and shrinkage quantifications; (3) Inventory analysis with aged stock calculations and DIO metrics; (4) Operational inefficiencies with productivity benchmarks, store-level P&L variance, supply chain costs, promotional math, and overhead rigidity; (5) Diagnostic workflow including revenue waterfall, priority matrix, and data ownership. Expectation: Complete framework enables retail chain to identify which drivers caused 40% profit decline with specific numbers, thresholds, and investigation priorities. True?",
           "role": "user"
         }
       ],
@@ -2521,15 +2433,7 @@
       "agent": "grocery",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "[from napo] Problem: Grocery retail division profit declined 30% this year. Build a complete root-cause decomposition tree breaking down EVERY driver to concrete, checkable causes. For each leaf node, specify the exact data you would pull to validate or refute it. Structure: Profit = Revenue - COGS - Operating Expenses. Decompose each component and sub-component exhaustively. Include: sales volume drivers (units sold, price realization, mix), COGS drivers (commodity costs, shrinkage, vendor terms), and OpEx drivers (labor, occupancy, distribution, supply chain). When done tell napo.",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "[from napo] Problem: Grocery retail division profit declined 30% this year. Build a complete root-cause decomposition tree breaking down EVERY driver to concrete, checkable causes. For each leaf node, specify the exact data you would pull to validate or refute it. Structure: Profit = Revenue - COGS - Operating Expenses. Decompose each component and sub-component exhaustively. Include: sales volume drivers (units sold, price realization, mix), COGS drivers (commodity costs, shrinkage, vendor terms), and OpEx drivers (labor, occupancy, distribution, supply chain). When done tell napo.",
           "role": "user"
         }
       ],
@@ -2558,15 +2462,7 @@
       "agent": "logistics",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "[from napo] Problem: Industrial logistics division profit declined 30% this year. Build a complete root-cause decomposition tree breaking down EVERY driver to concrete, checkable causes. For each leaf node, specify the exact data you would pull to validate or refute it. Structure: Profit = Revenue - Direct Costs - Operating Expenses. Decompose: revenue drivers (tonnage, rates, customer mix), direct costs (fuel, vehicle maintenance, driver labor, subcontractor), operational efficiency (utilization, asset turns), pricing power. When done tell napo.",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "[from napo] Problem: Industrial logistics division profit declined 30% this year. Build a complete root-cause decomposition tree breaking down EVERY driver to concrete, checkable causes. For each leaf node, specify the exact data you would pull to validate or refute it. Structure: Profit = Revenue - Direct Costs - Operating Expenses. Decompose: revenue drivers (tonnage, rates, customer mix), direct costs (fuel, vehicle maintenance, driver labor, subcontractor), operational efficiency (utilization, asset turns), pricing power. When done tell napo.",
           "role": "user"
         }
       ],
@@ -3024,15 +2920,7 @@
       "agent": "judge",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Result: Complete root-cause decomposition tree with 60+ leaf nodes covering:\n1. REVENUE: Subscription (subs count via churn/acquisition/mix, pricing/ARPU, geographic mix) and Advertising (impressions, CPM, fill rate)\n2. CONTENT COSTS: Licensed (price/hour, renewals, depreciation), Original (volume, budget/title, utilization/binge, talent escalation), Mix shift\n3. TECH/OPS: Infrastructure (bandwidth, compute, efficiency), Development (headcount, features, tech debt), Support/Compliance\n4. MARKETING: CAC deterioration (channel saturation, CPC/CTR/conversion decline, organic decay), Channel mix shift, LTV:CAC ratio\nEach leaf specifies exact data to pull (YoY metrics, rates, volumes, costs, conversion funnels, cohort analysis).\n\nExpectation: Solves the problem of building a complete, checkable root-cause decomposition tree for a 30% profit decline that breaks down EVERY profit driver to concrete, measurable leaf nodes with validation data specified. True?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Result: Complete root-cause decomposition tree with 60+ leaf nodes covering:\n1. REVENUE: Subscription (subs count via churn/acquisition/mix, pricing/ARPU, geographic mix) and Advertising (impressions, CPM, fill rate)\n2. CONTENT COSTS: Licensed (price/hour, renewals, depreciation), Original (volume, budget/title, utilization/binge, talent escalation), Mix shift\n3. TECH/OPS: Infrastructure (bandwidth, compute, efficiency), Development (headcount, features, tech debt), Support/Compliance\n4. MARKETING: CAC deterioration (channel saturation, CPC/CTR/conversion decline, organic decay), Channel mix shift, LTV:CAC ratio\nEach leaf specifies exact data to pull (YoY metrics, rates, volumes, costs, conversion funnels, cohort analysis).\n\nExpectation: Solves the problem of building a complete, checkable root-cause decomposition tree for a 30% profit decline that breaks down EVERY profit driver to concrete, measurable leaf nodes with validation data specified. True?",
           "role": "user"
         }
       ],
@@ -3153,15 +3041,7 @@
       "agent": "judge",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Result: I have built a comprehensive root-cause decomposition tree for the 30% industrial logistics profit decline. The tree structures Profit = Revenue - Direct Costs - Operating Expenses and decomposes: (1) Revenue drivers into tonnage volume decline, rate decline, and customer mix degradation with 15 leaf causes; (2) Direct costs into fuel (+5 causes), vehicle maintenance (+4), driver labor (+5), subcontractor costs (+4); (3) Operating expenses into asset utilization, pricing power, fixed cost absorption, and operational inefficiency with 12+ leaf causes; plus synergistic effects. For each leaf node, I specified exact data to pull: customer revenue by account, avg rate per ton-mile, fleet MPG, maintenance cost per vehicle, driver wages vs. benchmarks, fuel surcharge pass-through rate, contract lock-in duration, on-time delivery %, load utilization %, subcontracting volume, and 20+ other concrete, measurable metrics from CRM, TMS, telematics, HR, accounting systems. Expectation: provides a complete, checkable root-cause framework that breaks down every profit driver to concrete causes with specific validation data. True?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Result: I have built a comprehensive root-cause decomposition tree for the 30% industrial logistics profit decline. The tree structures Profit = Revenue - Direct Costs - Operating Expenses and decomposes: (1) Revenue drivers into tonnage volume decline, rate decline, and customer mix degradation with 15 leaf causes; (2) Direct costs into fuel (+5 causes), vehicle maintenance (+4), driver labor (+5), subcontractor costs (+4); (3) Operating expenses into asset utilization, pricing power, fixed cost absorption, and operational inefficiency with 12+ leaf causes; plus synergistic effects. For each leaf node, I specified exact data to pull: customer revenue by account, avg rate per ton-mile, fleet MPG, maintenance cost per vehicle, driver wages vs. benchmarks, fuel surcharge pass-through rate, contract lock-in duration, on-time delivery %, load utilization %, subcontracting volume, and 20+ other concrete, measurable metrics from CRM, TMS, telematics, HR, accounting systems. Expectation: provides a complete, checkable root-cause framework that breaks down every profit driver to concrete causes with specific validation data. True?",
           "role": "user"
         }
       ],
@@ -3359,15 +3239,7 @@
       "agent": "judge",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Result: A comprehensive 4-driver framework for analyzing 25% profit margin compression with 10% revenue growth, including:\n1. Revenue Quality Decline (ATV, CAC/LTV, discounts, channel mix)\n2. Cost Structure Inflation (COGS %, labor costs, commodity inputs, facility costs)\n3. Mix Shifts (product line margins, cohort analysis, geographic mix, price realization)\n4. Operational Inefficiencies (manufacturing variances, OpEx ratio, working capital, capacity, quality)\n\nEach driver includes specific metrics, data sources (CRM, accounting systems, procurement DB, HR systems, production scheduling), and quantitative examples showing impact.\n\nExpectation: Identifies all drivers of margin compression with concrete metrics and actionable data sources. True?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Result: A comprehensive 4-driver framework for analyzing 25% profit margin compression with 10% revenue growth, including:\n1. Revenue Quality Decline (ATV, CAC/LTV, discounts, channel mix)\n2. Cost Structure Inflation (COGS %, labor costs, commodity inputs, facility costs)\n3. Mix Shifts (product line margins, cohort analysis, geographic mix, price realization)\n4. Operational Inefficiencies (manufacturing variances, OpEx ratio, working capital, capacity, quality)\n\nEach driver includes specific metrics, data sources (CRM, accounting systems, procurement DB, HR systems, production scheduling), and quantitative examples showing impact.\n\nExpectation: Identifies all drivers of margin compression with concrete metrics and actionable data sources. True?",
           "role": "user"
         }
       ],
@@ -3518,15 +3390,7 @@
       "agent": "judge",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Result: Comprehensive 4-driver margin compression analysis with concrete metrics (ASP/discount analysis, COGS inflation tracking, product/geographic/channel mix breakdown, OpEx efficiency ratios), specific data sources (GL, CRM, HR systems, segment reporting), quantification framework, and investigation roadmap. Expectation: solves identifying all drivers of profit margin compression with metrics and data sources. True?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Result: Comprehensive 4-driver margin compression analysis with concrete metrics (ASP/discount analysis, COGS inflation tracking, product/geographic/channel mix breakdown, OpEx efficiency ratios), specific data sources (GL, CRM, HR systems, segment reporting), quantification framework, and investigation roadmap. Expectation: solves identifying all drivers of profit margin compression with metrics and data sources. True?",
           "role": "user"
         }
       ],
@@ -4278,15 +4142,7 @@
       "agent": "napo",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Our conglomerate's profit declined 30% this year across three very different divisions: grocery retail, streaming media, and industrial logistics. Build the complete root-cause tree for EACH division — every driver decomposed to concrete checkable causes with the specific data you would pull for each. All three divisions fully worked out; a summary or a single generic tree is not acceptable.",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Our conglomerate's profit declined 30% this year across three very different divisions: grocery retail, streaming media, and industrial logistics. Build the complete root-cause tree for EACH division — every driver decomposed to concrete checkable causes with the specific data you would pull for each. All three divisions fully worked out; a summary or a single generic tree is not acceptable.",
           "role": "user"
         }
       ],
@@ -4539,15 +4395,7 @@
       "agent": "judge",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Result: Complete profit margin compression analysis covering ALL drivers: (Primary) Revenue quality decline with ASP/discount/product mix metrics; Cost structure inflation with COGS component breakdown and labor/supply chain tracking; Mix shifts across product/geographic/channel/contract dimensions; Operational inefficiencies in S&M, R&D, G&A, and capacity; (Secondary) Accounting reclassifications, revenue recognition changes, stock-based compensation, FX impacts, financing/amortization; PLUS comprehensive data source mapping, frequency, and 3-phase investigation roadmap. Expectation: comprehensively solves identifying all drivers of profit margin compression despite revenue growth with concrete metrics and data sources. True?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Result: Complete profit margin compression analysis covering ALL drivers: (Primary) Revenue quality decline with ASP/discount/product mix metrics; Cost structure inflation with COGS component breakdown and labor/supply chain tracking; Mix shifts across product/geographic/channel/contract dimensions; Operational inefficiencies in S&M, R&D, G&A, and capacity; (Secondary) Accounting reclassifications, revenue recognition changes, stock-based compensation, FX impacts, financing/amortization; PLUS comprehensive data source mapping, frequency, and 3-phase investigation roadmap. Expectation: comprehensively solves identifying all drivers of profit margin compression despite revenue growth with concrete metrics and data sources. True?",
           "role": "user"
         }
       ],
@@ -5145,15 +4993,7 @@
       "agent": "judge",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Result: I've created a comprehensive root-cause decomposition tree for the 30% profit decline, organized into 6 major branches: Revenue Decline (volume, pricing, churn, mix), Cost Structure Deterioration (fuel, labor, fleet, operations, technology), Service Quality Deterioration (on-time delivery, service levels, complaints), Mix & Portfolio Shift, and Non-Operational Items. Each cause includes specific data points to pull (e.g., YoY shipment volumes, ARPU, fuel costs per gallon, labor productivity metrics, on-time delivery %, margin by service type). The tree provides hierarchical decomposition from top-level profit decline to concrete, checkable metrics at the leaf nodes. Expectation: This addresses building a complete root-cause tree decomposing all drivers to concrete checkable causes with specific data points for each cause. True?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Result: I've created a comprehensive root-cause decomposition tree for the 30% profit decline, organized into 6 major branches: Revenue Decline (volume, pricing, churn, mix), Cost Structure Deterioration (fuel, labor, fleet, operations, technology), Service Quality Deterioration (on-time delivery, service levels, complaints), Mix & Portfolio Shift, and Non-Operational Items. Each cause includes specific data points to pull (e.g., YoY shipment volumes, ARPU, fuel costs per gallon, labor productivity metrics, on-time delivery %, margin by service type). The tree provides hierarchical decomposition from top-level profit decline to concrete, checkable metrics at the leaf nodes. Expectation: This addresses building a complete root-cause tree decomposing all drivers to concrete checkable causes with specific data points for each cause. True?",
           "role": "user"
         }
       ],
@@ -5171,15 +5011,7 @@
       "agent": "judge",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Result: I've created a comprehensive root-cause tree decomposing the 30% grocery retail profit decline into three primary drivers (Revenue Decline, COGS Increase, Operating Expense Increase), each broken down to 3-4 levels into concrete checkable causes. Each leaf node includes specific data points to pull (customer count, SKU costs, shrinkage %, wage rates, shrinkage %, supplier pricing, footfall metrics, etc.). The tree maps profit mechanics (Profit = Revenue - COGS - OpEx) and includes data collection frequency recommendations. Expectation: provides actionable root-cause decomposition tree with specific metrics to investigate for each causal pathway. True?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Result: I've created a comprehensive root-cause tree decomposing the 30% grocery retail profit decline into three primary drivers (Revenue Decline, COGS Increase, Operating Expense Increase), each broken down to 3-4 levels into concrete checkable causes. Each leaf node includes specific data points to pull (customer count, SKU costs, shrinkage %, wage rates, shrinkage %, supplier pricing, footfall metrics, etc.). The tree maps profit mechanics (Profit = Revenue - COGS - OpEx) and includes data collection frequency recommendations. Expectation: provides actionable root-cause decomposition tree with specific metrics to investigate for each causal pathway. True?",
           "role": "user"
         }
       ],
@@ -5233,15 +5065,7 @@
       "agent": "judge",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Result: I have decomposed the 30% streaming media profit decline into a complete root-cause tree with three primary branches: (1) Revenue Decline - covering subscriber churn, new acquisition slowdown, ARPU decline, and advertising revenue; (2) Cost Increases - covering content acquisition, technology infrastructure, marketing, personnel, and payment processing; (3) Operational Inefficiency - covering content optimization and promotional effectiveness. Each node includes specific, checkable data points to pull for concrete diagnosis. Does this comprehensive tree structure appropriately solve the requirement to deliver a complete root-cause decomposition with specific data points for each cause?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Result: I have decomposed the 30% streaming media profit decline into a complete root-cause tree with three primary branches: (1) Revenue Decline - covering subscriber churn, new acquisition slowdown, ARPU decline, and advertising revenue; (2) Cost Increases - covering content acquisition, technology infrastructure, marketing, personnel, and payment processing; (3) Operational Inefficiency - covering content optimization and promotional effectiveness. Each node includes specific, checkable data points to pull for concrete diagnosis. Does this comprehensive tree structure appropriately solve the requirement to deliver a complete root-cause decomposition with specific data points for each cause?",
           "role": "user"
         }
       ],
@@ -5650,15 +5474,7 @@
       "agent": "judge",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Result: Comprehensive analysis identifying four drivers of 25% margin compression with 10% revenue growth: (1) Revenue Quality Decline - measured via ASP, price/mix variance, CAC/LTV, discount analysis from revenue systems and CRM; (2) Cost Structure Inflation - tracked via COGS margin, cost per unit, material/labor/freight inflation from GL and supply chain systems; (3) Mix Shifts - analyzed via product category margins, volume shifts, weighted average margin from P&L segmentation; (4) Operational Inefficiencies - monitored via OpEx ratio, EBITDA margin, overhead absorption, revenue per FTE from GL and HR systems. Each driver includes specific metrics and data sources. Expectation: identifies all four drivers of margin compression with concrete metrics and actionable data sources. True?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Result: Comprehensive analysis identifying four drivers of 25% margin compression with 10% revenue growth: (1) Revenue Quality Decline - measured via ASP, price/mix variance, CAC/LTV, discount analysis from revenue systems and CRM; (2) Cost Structure Inflation - tracked via COGS margin, cost per unit, material/labor/freight inflation from GL and supply chain systems; (3) Mix Shifts - analyzed via product category margins, volume shifts, weighted average margin from P&L segmentation; (4) Operational Inefficiencies - monitored via OpEx ratio, EBITDA margin, overhead absorption, revenue per FTE from GL and HR systems. Each driver includes specific metrics and data sources. Expectation: identifies all four drivers of margin compression with concrete metrics and actionable data sources. True?",
           "role": "user"
         }
       ],
@@ -5868,15 +5684,7 @@
       "agent": "judge",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Result: Comprehensive profitability driver analysis framework addressing all four categories (revenue quality decline, cost structure inflation, mix shifts, operational inefficiencies) with specific metrics, data sources, and concrete investigation steps for a tech company experiencing 25% margin compression with 10% revenue growth. Expectation: Provides actionable framework identifying all material drivers with measurable KPIs and source-of-data guidance. True?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Result: Comprehensive profitability driver analysis framework addressing all four categories (revenue quality decline, cost structure inflation, mix shifts, operational inefficiencies) with specific metrics, data sources, and concrete investigation steps for a tech company experiencing 25% margin compression with 10% revenue growth. Expectation: Provides actionable framework identifying all material drivers with measurable KPIs and source-of-data guidance. True?",
           "role": "user"
         }
       ],
@@ -6098,15 +5906,7 @@
       "agent": "judge",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Result: Complete root cause analysis framework for 40% retail profit decline covering: (1) Revenue Drivers with 4 analytical categories (sales volume, product mix, customer retention, metrics/sources), (2) Cost Pressures with 3 categories (COGS inflation, labor escalation, fixed cost deleverage, KPIs), (3) Inventory Issues with 3 categories (excess inventory, supply chain mismatch, carrying costs with specific metrics), (4) Operational Inefficiencies with 4 categories (store execution, distribution/logistics, SG&A overhead, pricing/promotion) - each with specific data sources and measurable KPIs. Expectation: Provides comprehensive, actionable root cause analysis framework for 40% profit decline in retail with specific data sources and metrics for each driver. True?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Result: Complete root cause analysis framework for 40% retail profit decline covering: (1) Revenue Drivers with 4 analytical categories (sales volume, product mix, customer retention, metrics/sources), (2) Cost Pressures with 3 categories (COGS inflation, labor escalation, fixed cost deleverage, KPIs), (3) Inventory Issues with 3 categories (excess inventory, supply chain mismatch, carrying costs with specific metrics), (4) Operational Inefficiencies with 4 categories (store execution, distribution/logistics, SG&A overhead, pricing/promotion) - each with specific data sources and measurable KPIs. Expectation: Provides comprehensive, actionable root cause analysis framework for 40% profit decline in retail with specific data sources and metrics for each driver. True?",
           "role": "user"
         }
       ],
@@ -6316,15 +6116,7 @@
       "agent": "judge",
       "messages": [
         {
-          "content": [
-            {
-              "type": "text",
-              "text": "Result: COMPLETE ROOT-CAUSE ANALYSIS FOR 35% PROFIT DECLINE\n\n**PROFIT DECLINE EQUATION:**\nProfit = Revenue - Cost of Goods Sold - Operating Expenses - Other Expenses + Other Income\n\n**1. REVENUE DRIVERS (Top-Level Split)**\n\n**1A. Total Revenue Decline**\n- Data to pull: YoY revenue comparison (current year vs. prior year, by month)\n- Metric: Revenue $'s and %\n- Checkable cause: Overall top-line contraction\n\n  **1A1. Volume Decline**\n  - Unit sales by product/service line (YoY)\n  - Customer count (new, retained, lost) YoY\n  - Average transaction frequency per customer\n  - Market share data vs. competitors\n  - Specific data: Sales volume by SKU, customer cohort retention rates\n  \n  **1A2. Price/Mix Decline**\n  - Average selling price by product (YoY)\n  - Product mix shift (% revenue from high vs. low margin)\n  - Discount/promotional intensity increase\n  - Specific data: ASP by product, promotion frequency %, margin by product mix\n  \n  **1A3. Customer Acquisition Failure**\n  - New customer count (YoY)\n  - CAC (cost per acquisition) trend\n  - Marketing spend vs. prior year\n  - Conversion rate by channel\n  - Specific data: New customers by source, conversion rates, marketing ROI by channel\n\n  **1A4. Churn/Retention Crisis**\n  - Customer retention rate by cohort\n  - Churn rate (YoY)\n  - NPS/satisfaction scores (current vs. prior year)\n  - Customer complaint/support ticket spike\n  - Specific data: Cohort retention %, churn reasons (survey), NPS trend\n\n---\n\n**2. COGS DRIVERS (Cost of Goods Sold Expansion)**\n\n**2A. Input Cost Inflation**\n- Material costs (specific commodity/supplier prices YoY)\n- Labor rates (wage increases by role)\n- Freight/logistics costs (per unit or per shipment)\n- Specific data: Supplier price quotes, payroll averages, freight rate cards\n\n**2B. Manufacturing/Production Inefficiency**\n- Yield/waste rates (units lost in production)\n- Scrap % (YoY)\n- Rework/defect rates\n- Capacity utilization (%) — fixed costs spread over fewer units\n- Specific data: Yield reports, scrap logs, production efficiency metrics\n\n**2C. Inventory Shrinkage**\n- Theft/loss rates (units vs. $)\n- Obsolescence write-downs\n- Markdown due to excess inventory\n- Specific data: Physical inventory count variance, obsolescence reserve entries\n\n**2D. Supply Chain Disruption**\n- Expedited shipping costs\n- Supplier substitution at premium cost\n- Production downtime (machine breakdowns)\n- Specific data: Emergency freight logs, substitution transactions, downtime hours\n\n---\n\n**3. OPERATING EXPENSE DRIVERS (SG&A Expansion)**\n\n**3A. Headcount/Compensation**\n- Total headcount (YoY increase/decrease)\n- Average salary/wage by department\n- Bonus payouts (% of payroll)\n- Turnover forcing ramp costs\n- Specific data: Headcount reports by department, payroll run files, bonus accrual %\n\n**3B. Sales & Marketing Spend**\n- Marketing budget spend vs. plan\n- Sales team headcount increase\n- Campaign spend effectiveness (CPM, CPC, conversion)\n- Advertising cost-per-acquisition trend\n- Specific data: Marketing spend by channel, ad spend reports, CAC by campaign\n\n**3C. G&A Overhead**\n- Rent/facility costs (new locations, lease renegotiations?)\n- Technology/software subscriptions\n- Professional services (legal, audit, consulting)\n- Insurance premiums\n- Specific data: Lease agreements, subscription logs, invoice analysis by vendor\n\n**3D. Depreciation & Amortization**\n- Capital asset additions (new PP&E)\n- Intangible asset amortization (acquisitions?)\n- Asset impairments/write-downs\n- Specific data: Fixed asset schedule, acquisition agreements, impairment tests\n\n---\n\n**4. OTHER EXPENSES & INCOME DRIVERS**\n\n**4A. Interest Expense**\n- Debt balance increase\n- Interest rate changes\n- Debt covenant violations\n- Specific data: Debt schedule, interest rate agreements, banking covenants\n\n**4B. Foreign Exchange Loss**\n- Currency exposure (if multi-currency)\n- Hedging effectiveness\n- Specific data: FX transaction logs, translation adjustments\n\n**4C. One-Time Charges**\n- Restructuring costs\n- Lawsuit settlements\n- Asset write-downs\n- Specific data: Legal matters tracking, impairment analyses, severance agreements\n\n**4D. Gains/Loss on Asset Sales**\n- Sale of subsidiary/asset (was a gain, now gone?)\n- Loss on discontinued operations\n- Specific data: M&A/asset sale activity, discontinued ops reconciliation\n\n---\n\n**5. ANALYTICAL SEQUENCE (Work through in this order):**\n\n**Step 1: P&L Bridge Analysis**\n- Build waterfall showing Profit Year-Prior → Profit Current Year\n- Isolate: Revenue decline impact, COGS increase impact, OpEx increase impact\n- Identify: Which is biggest driver of the 35% decline?\n\n**Step 2: Root Cause by Driver Magnitude**\n- If Revenue down 15% → Investigate Volume/Price/Churn (1A1-1A4)\n- If COGS up 8% → Investigate Cost/Yield/Supply Chain (2A-2D)\n- If OpEx up 20% → Investigate Headcount/Marketing/G&A (3A-3C)\n\n**Step 3: Drill into Top 3 Drivers**\n- For each, pull the granular data above\n- Build hypothesis then validate with data\n- Identify the specific concrete cause (e.g., \"Supplier X raised prices 22%\", \"Competitor Y took 5% share\", \"Churn to Product Z competitor spiked 40%\")\n\n**Step 4: Validate Root Causes**\n- Tie each back to Profit equation\n- Calculate impact: (Change in driver $ magnitude) / (Profit base) = % of 35% decline\n- Confirm drivers sum to ~35% decline\n\n---\n\nExpectation: This framework systematically decomposes a 35% profit decline into every material driver (revenue, COGS, OpEx, other), with concrete checkable causes and the specific data files/metrics needed to validate each cause. True?",
-              "cache_control": {
-                "type": "ephemeral"
-              }
-            }
-          ],
+          "content": "Result: COMPLETE ROOT-CAUSE ANALYSIS FOR 35% PROFIT DECLINE\n\n**PROFIT DECLINE EQUATION:**\nProfit = Revenue - Cost of Goods Sold - Operating Expenses - Other Expenses + Other Income\n\n**1. REVENUE DRIVERS (Top-Level Split)**\n\n**1A. Total Revenue Decline**\n- Data to pull: YoY revenue comparison (current year vs. prior year, by month)\n- Metric: Revenue $'s and %\n- Checkable cause: Overall top-line contraction\n\n  **1A1. Volume Decline**\n  - Unit sales by product/service line (YoY)\n  - Customer count (new, retained, lost) YoY\n  - Average transaction frequency per customer\n  - Market share data vs. competitors\n  - Specific data: Sales volume by SKU, customer cohort retention rates\n  \n  **1A2. Price/Mix Decline**\n  - Average selling price by product (YoY)\n  - Product mix shift (% revenue from high vs. low margin)\n  - Discount/promotional intensity increase\n  - Specific data: ASP by product, promotion frequency %, margin by product mix\n  \n  **1A3. Customer Acquisition Failure**\n  - New customer count (YoY)\n  - CAC (cost per acquisition) trend\n  - Marketing spend vs. prior year\n  - Conversion rate by channel\n  - Specific data: New customers by source, conversion rates, marketing ROI by channel\n\n  **1A4. Churn/Retention Crisis**\n  - Customer retention rate by cohort\n  - Churn rate (YoY)\n  - NPS/satisfaction scores (current vs. prior year)\n  - Customer complaint/support ticket spike\n  - Specific data: Cohort retention %, churn reasons (survey), NPS trend\n\n---\n\n**2. COGS DRIVERS (Cost of Goods Sold Expansion)**\n\n**2A. Input Cost Inflation**\n- Material costs (specific commodity/supplier prices YoY)\n- Labor rates (wage increases by role)\n- Freight/logistics costs (per unit or per shipment)\n- Specific data: Supplier price quotes, payroll averages, freight rate cards\n\n**2B. Manufacturing/Production Inefficiency**\n- Yield/waste rates (units lost in production)\n- Scrap % (YoY)\n- Rework/defect rates\n- Capacity utilization (%) — fixed costs spread over fewer units\n- Specific data: Yield reports, scrap logs, production efficiency metrics\n\n**2C. Inventory Shrinkage**\n- Theft/loss rates (units vs. $)\n- Obsolescence write-downs\n- Markdown due to excess inventory\n- Specific data: Physical inventory count variance, obsolescence reserve entries\n\n**2D. Supply Chain Disruption**\n- Expedited shipping costs\n- Supplier substitution at premium cost\n- Production downtime (machine breakdowns)\n- Specific data: Emergency freight logs, substitution transactions, downtime hours\n\n---\n\n**3. OPERATING EXPENSE DRIVERS (SG&A Expansion)**\n\n**3A. Headcount/Compensation**\n- Total headcount (YoY increase/decrease)\n- Average salary/wage by department\n- Bonus payouts (% of payroll)\n- Turnover forcing ramp costs\n- Specific data: Headcount reports by department, payroll run files, bonus accrual %\n\n**3B. Sales & Marketing Spend**\n- Marketing budget spend vs. plan\n- Sales team headcount increase\n- Campaign spend effectiveness (CPM, CPC, conversion)\n- Advertising cost-per-acquisition trend\n- Specific data: Marketing spend by channel, ad spend reports, CAC by campaign\n\n**3C. G&A Overhead**\n- Rent/facility costs (new locations, lease renegotiations?)\n- Technology/software subscriptions\n- Professional services (legal, audit, consulting)\n- Insurance premiums\n- Specific data: Lease agreements, subscription logs, invoice analysis by vendor\n\n**3D. Depreciation & Amortization**\n- Capital asset additions (new PP&E)\n- Intangible asset amortization (acquisitions?)\n- Asset impairments/write-downs\n- Specific data: Fixed asset schedule, acquisition agreements, impairment tests\n\n---\n\n**4. OTHER EXPENSES & INCOME DRIVERS**\n\n**4A. Interest Expense**\n- Debt balance increase\n- Interest rate changes\n- Debt covenant violations\n- Specific data: Debt schedule, interest rate agreements, banking covenants\n\n**4B. Foreign Exchange Loss**\n- Currency exposure (if multi-currency)\n- Hedging effectiveness\n- Specific data: FX transaction logs, translation adjustments\n\n**4C. One-Time Charges**\n- Restructuring costs\n- Lawsuit settlements\n- Asset write-downs\n- Specific data: Legal matters tracking, impairment analyses, severance agreements\n\n**4D. Gains/Loss on Asset Sales**\n- Sale of subsidiary/asset (was a gain, now gone?)\n- Loss on discontinued operations\n- Specific data: M&A/asset sale activity, discontinued ops reconciliation\n\n---\n\n**5. ANALYTICAL SEQUENCE (Work through in this order):**\n\n**Step 1: P&L Bridge Analysis**\n- Build waterfall showing Profit Year-Prior → Profit Current Year\n- Isolate: Revenue decline impact, COGS increase impact, OpEx increase impact\n- Identify: Which is biggest driver of the 35% decline?\n\n**Step 2: Root Cause by Driver Magnitude**\n- If Revenue down 15% → Investigate Volume/Price/Churn (1A1-1A4)\n- If COGS up 8% → Investigate Cost/Yield/Supply Chain (2A-2D)\n- If OpEx up 20% → Investigate Headcount/Marketing/G&A (3A-3C)\n\n**Step 3: Drill into Top 3 Drivers**\n- For each, pull the granular data above\n- Build hypothesis then validate with data\n- Identify the specific concrete cause (e.g., \"Supplier X raised prices 22%\", \"Competitor Y took 5% share\", \"Churn to Product Z competitor spiked 40%\")\n\n**Step 4: Validate Root Causes**\n- Tie each back to Profit equation\n- Calculate impact: (Change in driver $ magnitude) / (Profit base) = % of 35% decline\n- Confirm drivers sum to ~35% decline\n\n---\n\nExpectation: This framework systematically decomposes a 35% profit decline into every material driver (revenue, COGS, OpEx, other), with concrete checkable causes and the specific data files/metrics needed to validate each cause. True?",
           "role": "user"
         }
       ],
