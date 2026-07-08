@@ -12,18 +12,15 @@ defmodule El.Answer do
   end
 
   def await(ref, timeout) do
-    recv(ref, timeout)
+    get(ref, timeout)
   end
 
-  defp recv(ref, timeout) do
+  defp get(ref, timeout) do
     receive do
       {^ref, answer} -> answer
-    after timeout -> fallback()
+    after
+      timeout -> collect(0)
     end
-  end
-
-  defp fallback do
-    collect(0)
   end
 
   defp receive_answer(acc, timer) do
@@ -35,14 +32,14 @@ defmodule El.Answer do
 
   defp process_output(acc, timer, data) do
     combined = acc <> data
-    combined |> done?(acc) |> finish_or_continue(combined, timer)
+    combined |> done?(acc) |> settle(combined, timer)
   end
 
-  defp finish_or_continue(true, combined, _timer) do
+  defp settle(true, combined, _timer) do
     strip_ansi(combined)
   end
 
-  defp finish_or_continue(false, combined, timer) do
+  defp settle(false, combined, timer) do
     receive_answer(combined, timer)
   end
 
