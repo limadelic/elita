@@ -6,7 +6,8 @@ defmodule El.Commands.Ls do
   import IO, only: [puts: 1]
   import Keyword, only: [get: 2]
   import Registry, only: [lookup: 2, select: 2]
-  import Resolver, only: [normalize: 2, glob: 2]
+  import Glob, only: [hits?: 2]
+  import Resolver, only: [normalize: 2]
   import String, only: [downcase: 1]
 
   def execute(opts \\ []) do
@@ -40,7 +41,7 @@ defmodule El.Commands.Ls do
   end
 
   defp match_path?(%{path: p}, t) when p == t, do: true
-  defp match_path?(%{path: p}, t), do: glob(p, t)
+  defp match_path?(%{path: p}, t), do: hits?(p, t)
   defp match_path?(_, _), do: false
 
   defp format_output([]) do

@@ -8,11 +8,11 @@ defmodule Tools.Sys.Set do
   end
 
   defp spec(name) do
-    %{
-      name: name,
-      description: "Store data with a key",
-      parameters: parameters()
-    }
+    %{name: name, description: description(), parameters: parameters()}
+  end
+
+  defp description do
+    "Store data with a key"
   end
 
   def exec(_tool, %{"value" => value, "key" => key}, state) do

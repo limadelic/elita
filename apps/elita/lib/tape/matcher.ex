@@ -1,4 +1,9 @@
 defmodule Tape.Matcher do
+  import Enum, only: [all?: 2, any?: 2]
+  import String, only: [contains?: 2, ends_with?: 2, slice: 3]
+  import Map, only: [fetch: 2]
+  import Regex, only: [compile!: 1]
+
   def contains(a, b) do
     dispatch_contains(a, b)
   end
@@ -20,7 +25,7 @@ defmodule Tape.Matcher do
   end
 
   defp dispatch_map_contains(a, b, true) do
-    Enum.all?(a, &check_map_entry(&1, b))
+    all?(a, &check_map_entry(&1, b))
   end
 
   defp dispatch_map_contains(_a, _b, false) do
@@ -28,7 +33,7 @@ defmodule Tape.Matcher do
   end
 
   defp dispatch_list_contains(a, b, true) do
-    Enum.all?(a, &check_list_item(&1, b))
+    all?(a, &check_list_item(&1, b))
   end
 
   defp dispatch_list_contains(_a, _b, false) do
@@ -52,7 +57,7 @@ defmodule Tape.Matcher do
   end
 
   defp check_binary_contains(a, b, true, true) do
-    String.contains?(b, a)
+    contains?(b, a)
   end
 
   defp check_binary_contains(a, b, false, false) do
@@ -69,26 +74,26 @@ defmodule Tape.Matcher do
   end
 
   defp get_map_value(b, k) do
-    get_by_atom_or_string(Map.fetch(b, k), b, k)
+    get_by_atom_or_string(fetch(b, k), b, k)
   end
 
   defp get_by_atom_or_string({:ok, val}, _b, _k), do: val
   defp get_by_atom_or_string(:error, b, k), do: b[to_string(k)]
 
   defp check_list_item(x, b) do
-    Enum.any?(b, &contains(x, &1))
+    any?(b, &contains(x, &1))
   end
 
   defp check_regex_or_string(rest, b) do
-    is_regex = String.ends_with?(rest, "/")
+    is_regex = ends_with?(rest, "/")
     handle_regex_check(is_regex, rest, b)
   end
 
   defp handle_regex_check(true, rest, b), do: regex_match(rest, b)
-  defp handle_regex_check(false, rest, b), do: String.contains?(b, "/" <> rest)
+  defp handle_regex_check(false, rest, b), do: contains?(b, "/" <> rest)
 
   defp regex_match(rest, b) do
-    pattern = String.slice(rest, 0, String.length(rest) - 1)
-    Regex.match?(Regex.compile!(pattern), b)
+    pattern = slice(rest, 0, String.length(rest) - 1)
+    Regex.match?(compile!(pattern), b)
   end
 end

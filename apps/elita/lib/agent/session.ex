@@ -4,14 +4,23 @@ defmodule Agent.Session do
   import Agent.Spawn, only: [run: 2]
   import GenServer, only: [start_link: 3, call: 3]
   import Keyword, only: [fetch!: 2, get: 3]
+  import Map, only: [put: 3]
   import String, only: [downcase: 1]
 
   def start_link(opts) do
-    folder = Keyword.fetch!(opts, :folder)
-    normalized = Keyword.fetch!(opts, :name) |> to_string() |> downcase()
+    folder = fetch!(opts, :folder)
+    normalized = normalize(opts)
+    via = via(normalized, folder)
+    start_link(__MODULE__, opts, name: via)
+  end
+
+  defp normalize(opts) do
+    fetch!(opts, :name) |> to_string() |> downcase()
+  end
+
+  defp via(normalized, folder) do
     metadata = %{kind: :headless, folder: folder}
-    via_name = {:via, Registry, {ElitaRegistry, normalized, metadata}}
-    start_link(__MODULE__, opts, name: via_name)
+    {:via, Registry, {ElitaRegistry, normalized, metadata}}
   end
 
   def ask(pid, message), do: call(pid, {:ask, message}, :infinity)
@@ -19,11 +28,13 @@ defmodule Agent.Session do
   def fetch(pid), do: call(pid, :fetch, :infinity)
   @impl true
   def init(opts) do
-    name = fetch!(opts, :name)
-    folder = fetch!(opts, :folder)
-    self = get(opts, :self, nil)
-    runner = get(opts, :runner, &run/2)
-    {:ok, %{name: name, folder: folder, self: self, runner: runner}}
+    {:ok, state(opts)}
+  end
+
+  defp state(opts) do
+    %{name: fetch!(opts, :name), folder: fetch!(opts, :folder)}
+    |> put(:self, get(opts, :self, nil))
+    |> put(:runner, get(opts, :runner, &run/2))
   end
 
   @impl true

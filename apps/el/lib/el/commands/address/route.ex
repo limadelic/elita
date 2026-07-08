@@ -46,10 +46,18 @@ defmodule El.Commands.Address.Route do
   def rpc_call(rpc), do: rpc
 
   def exec(entry, msg, :ask, tool),
-    do: (up(entry); local(entry.name, msg, tool, []))
+    do:
+      (
+        up(entry)
+        local(entry.name, msg, tool, [])
+      )
 
   def exec(entry, msg, :tell, tool),
-    do: (up(entry); tell(entry.name, msg, tool))
+    do:
+      (
+        up(entry)
+        tell(entry.name, msg, tool)
+      )
 
   def route(recipient, msg, mode, tool) do
     result = resolve(recipient, world_factory().(), cwd())

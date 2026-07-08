@@ -1,12 +1,12 @@
 defmodule Agent.Manager do
   import Agent.Config, only: [load: 0]
   import Agent.Session, only: [start_link: 1]
-
-  require Logger
+  import Enum, only: [each: 2]
+  import Logger, only: [info: 1, error: 1]
 
   def start_agents do
     load()
-    |> Enum.each(&boot_agent/1)
+    |> each(&boot_agent/1)
   end
 
   defp boot_agent({name, folder}) do
@@ -15,10 +15,10 @@ defmodule Agent.Manager do
   end
 
   defp handle_boot_result({:ok, _pid}, name, folder) do
-    Logger.info("Agent booted: #{name} at #{folder}")
+    info("Agent booted: #{name} at #{folder}")
   end
 
   defp handle_boot_result({:error, reason}, name, _folder) do
-    Logger.error("Failed to boot #{name}: #{inspect(reason)}")
+    error("Failed to boot #{name}: #{inspect(reason)}")
   end
 end

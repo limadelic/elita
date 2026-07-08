@@ -49,11 +49,14 @@ defmodule El.Pty do
     ]
   end
 
-  defp wait_exit(pid) do
-    ref = monitor(pid)
+  defp hang(ref, pid) do
     receive do
       {:DOWN, ^ref, :process, ^pid, _} -> :ok
     end
+  end
+
+  defp wait_exit(pid) do
+    hang(monitor(pid), pid)
   end
 
   @impl true
