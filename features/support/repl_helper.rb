@@ -47,7 +47,8 @@ module ReplHelper
 
   def wait_for_prompt(prompt_word)
     output = ""
-    timeout = Time.now + 30
+    duration = ENV["TAPE"] == "rec" ? 300 : 30
+    timeout = Time.now + duration
     pattern = "#{prompt_word}>"
 
     begin
