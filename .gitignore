@@ -14,4 +14,7 @@ status.json
 .claude/worktrees/
 /reports/
 node_modules/
+coverdata*.ets
+test_*.exs
+test_*.ets
 

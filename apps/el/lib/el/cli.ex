@@ -21,7 +21,32 @@ defmodule El.CLI do
 
   def main(argv) do
     ensure_all_started(:elita)
-    dispatch(argv)
+    if System.get_env("COVER") == "1" do
+      with_cover(argv)
+    else
+      dispatch(argv)
+    end
+  end
+
+  defp with_cover(argv) do
+    El.Cover.start()
+    result = dispatch(argv)
+    file = coverage_filename()
+    File.write(file <> ".marker", "exported")
+    El.Cover.export_unique(file)
+    File.write(file <> ".done", "success")
+    result
+  end
+
+
+  defp coverage_filename do
+    pid = :os.getpid() |> to_string()
+    ts = :erlang.system_time(:millisecond)
+    filename = "coverdata.#{pid}.#{ts}.ets"
+    case System.get_env("COVER_DIR") do
+      nil -> filename
+      dir -> dir <> "/" <> filename
+    end
   end
 
   defp dispatch(argv) do
