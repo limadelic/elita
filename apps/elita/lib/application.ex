@@ -19,10 +19,10 @@ defmodule Elita.Application do
   end
 
   defp start_supervisor do
-    start_link(
-      [child_spec(keys: :unique, name: ElitaRegistry)],
-      strategy: :one_for_one,
-      name: Elita.Supervisor
-    )
+    start_link([child_spec(keys: :unique, name: ElitaRegistry)], opts())
+  end
+
+  defp opts do
+    [strategy: :one_for_one, name: Elita.Supervisor]
   end
 end
