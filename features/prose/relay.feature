@@ -6,15 +6,11 @@ Feature: Masked relay
     * el> get me a relay agent
     * el> ask relay - price is expensive at $99 a month, friction is smooth onboarding, desire is strong customer demand
     * verify
-      | 🚀 scout_price | scout |
-      | 🤔 relay → scout_price | price is $99 a month |
+      | 🤔 el → relay | price is expensive |
       | ✨ scout_price | price concerns high |
-      | 🤔 relay → scout_friction | onboarding is smooth |
       | ✨ scout_friction | friction acceptable |
-      | 🤔 relay → scout_desire | customer demand |
       | ✨ scout_desire | desire strong |
-      | 🚀 auditor | auditor |
-      | 🤔 relay → auditor | synthesize verdicts |
-      | ✨ auditor | price-high friction-acceptable desire-strong |
+      | 🤔 relay → auditor | Synthesize these three |
+      | ✨ auditor | consensus |
       | ✨ relay | consensus |
       | ✨ el | Consensus |
