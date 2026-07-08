@@ -6,7 +6,6 @@ Feature: Speck mother
     * speck> exec mother
     * verify
       | 📢 speck → mother_v1 | time to give birth |
-      | 🚀 mother_v1 | baby |
       | ✨ mother_v1 | Welcome to the world |
       | 🤔 speck → baby_v1 | What are you doing |
       | ✨ baby_v1 | WAAAAAHHHHH |
