@@ -1,1 +1,1 @@
-default: --require features/step_definitions --require features/support --publish-quiet --format progress
+default: --require features/step_definitions --require features/support --publish-quiet --format progress --format html --out reports/cucumber.html
