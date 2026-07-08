@@ -37,19 +37,19 @@ defmodule Tools.Sys.Spawn do
   defp props do
     %{
       name: %{type: "string", description: "Name for the new agent"},
-      configs: configs_prop()
+      configs: configs()
     }
   end
 
-  defp configs_prop do
-    %{type: "array", items: items(), description: description_configs()}
+  defp configs do
+    %{type: "array", items: items(), description: blurb()}
   end
 
   defp items do
     %{type: "string"}
   end
 
-  defp description_configs do
+  defp blurb do
     "Configs for the agent, defaults to [name]"
   end
 
