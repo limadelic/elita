@@ -46,9 +46,6 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
       - uses: actions/checkout@v4
@@ -94,10 +91,6 @@ jobs:
           name: cucumber-report
           path: reports/
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-        if: always()
-
       - name: Compute badge counts
         run: |
           mkdir -p site
@@ -125,16 +118,148 @@ jobs:
         run: |
           mkdir -p site
           cp reports/cucumber.html site/index.html
-          cp -r reports/coverage site/ || true
         if: always()
+
+      - name: Upload test report artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-site
+          path: site/
+
+  coverage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    continue-on-error: true
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: erlef/setup-beam@v1
+        with:
+          elixir-version: '1.18'
+          otp-version: '28'
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+
+      - name: Build el escript
+        run: |
+          cd apps/el
+          mix deps.get
+          mix escript.build
+
+      - name: Prepare elita
+        run: |
+          cd apps/elita
+          mix deps.get
+          mix compile
+
+      - name: Run Cucumber with coverage
+        run: |
+          COVER=1 TAPE=replay bundle exec cucumber --publish-quiet 2>&1 | tee coverage.log
+        env:
+          MIX_ENV: test
+        continue-on-error: true
+
+      - name: Analyze coverage
+        run: |
+          mkdir -p cover
+          elixir bin/analyze_coverage.exs
+        continue-on-error: true
+
+      - name: Generate coverage badge
+        run: |
+          mkdir -p site
+          ruby << 'RUBY'
+            begin
+              require 'json'
+              total_pct = 0.0
+
+              if File.exist?('cover/index.html')
+                content = File.read('cover/index.html')
+                if content =~ /<p><strong>Total: ([\d.]+)%<\/strong><\/p>/
+                  total_pct = $1.to_f
+                end
+              end
+
+              color = case total_pct
+                      when 0..24 then 'e05d44'
+                      when 25..59 then 'fe7d37'
+                      else '23D96C'
+                      end
+
+              badge = {
+                schemaVersion: 1,
+                label: 'coverage',
+                message: "#{total_pct}%",
+                color: color
+              }
+
+              File.write('site/coverage.json', JSON.generate(badge))
+              puts "Coverage badge: #{total_pct}% (#{color})"
+            rescue => e
+              puts "Warning: Could not generate coverage badge: #{e.message}"
+            end
+          RUBY
+        continue-on-error: true
+
+      - name: Prepare coverage site
+        run: |
+          mkdir -p site/coverage
+          cp -r cover/* site/coverage/ 2>/dev/null || true
+          if [ -f site/coverage.json ]; then
+            cp site/coverage.json site/
+          fi
+        continue-on-error: true
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-site
+          path: site/
+        continue-on-error: true
+
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    needs: [test]
+    if: always()
+
+    steps:
+      - name: Download test report
+        uses: actions/download-artifact@v4
+        with:
+          name: test-site
+          path: site
+
+      - name: Download coverage report
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-site
+          path: site
+        continue-on-error: true
+
+      - name: Add coverage link to report
+        run: |
+          if [ -f site/index.html ] && [ -d site/coverage ]; then
+            sed -i 's|</body>|<hr><p><a href="coverage/">Coverage Report</a> | <a href="coverage.json">Badge</a></p></body>|' site/index.html
+          fi
+        continue-on-error: true
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
 
       - name: Upload to Pages
         uses: actions/upload-pages-artifact@v3
-        if: always()
         with:
           path: site
 
       - name: Deploy to Pages
         id: deployment
         uses: actions/deploy-pages@v4
-        if: always()

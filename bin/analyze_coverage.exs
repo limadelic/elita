@@ -1,16 +1,24 @@
 #!/usr/bin/env elixir
 
 System.put_env("MIX_ENV", "test")
-File.cd!("/Users/mike/dev/self/elita-qa/apps/el")
 
 :cover.start()
 
-base_dir = "/Users/mike/dev/self/elita-qa"
+base_dir = File.cwd!()
+File.cd!(Path.join(base_dir, "apps/el"))
+
 ["el", "elita"] |> Enum.each(fn app ->
   beam_dir = Path.join(base_dir, "_build/test/lib/#{app}/ebin")
-  File.ls!(beam_dir) |> Enum.filter(&String.ends_with?(&1, ".beam")) |> Enum.each(fn beam ->
-    :cover.compile_beam(Path.join(beam_dir, beam) |> to_charlist())
-  end)
+  case File.ls(beam_dir) do
+    {:ok, files} ->
+      files
+      |> Enum.filter(&String.ends_with?(&1, ".beam"))
+      |> Enum.each(fn beam ->
+        :cover.compile_beam(Path.join(beam_dir, beam) |> to_charlist())
+      end)
+    {:error, _} ->
+      IO.puts("Warning: ebin directory not found: #{beam_dir}")
+  end
 end)
 
 File.cd!(base_dir)
