@@ -6,7 +6,7 @@ module ReplHelper
       "CASSETTE" => @cassette,
       "MIX_ENV" => "test"
     }
-    cmd = "./apps/el/el #{args}".strip
+    cmd = "cd apps/elita/agents/elita && ../../../../apps/el/el #{args}".strip
     @reader, @writer, @pid = PTY.spawn(env, "/bin/sh", "-c", cmd)
     wait_for_prompt(args.split.first || "el")
   end
@@ -14,7 +14,7 @@ module ReplHelper
   def one_shot(args)
     @cassette = @cassette || "greet"
     tape = ENV["TAPE"] || "replay"
-    full_cmd = "TAPE=#{tape} CASSETTE=#{@cassette} MIX_ENV=test ./apps/el/el #{args}"
+    full_cmd = "cd apps/elita/agents/elita && TAPE=#{tape} CASSETTE=#{@cassette} MIX_ENV=test ../../../../apps/el/el #{args}"
     output = ""
     timeout = Time.now + 30
 

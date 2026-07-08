@@ -12,7 +12,7 @@ defmodule Tools.Sys.Spawn do
   end
 
   defp description(state) do
-    "Spawn a new agent.#{help(state)}"
+    "Wake an agent from the directory. Only listed agents exist. For any other role, spawn name=<role> with configs=[\"actor\"] and tell it the role.#{help(state)}"
   end
 
   def exec(_, %{"name" => %{"name" => name} = inner}, state) do
