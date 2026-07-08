@@ -6,8 +6,6 @@ defmodule Tester do
   import Log, only: [log: 5]
   import String, only: [contains?: 2, downcase: 1]
 
-  require Logger
-
   defmacro __using__(_opts) do
     quote do
       use ExUnit.Case
