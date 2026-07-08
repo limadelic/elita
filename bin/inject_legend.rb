@@ -57,24 +57,40 @@ CSS
 LEGEND_HTML = <<~HTML
   <div class="legend-container">
     <div class="legend-intro">
-      <code>* > el &lt;agent&gt;</code> enters the elita REPL (like iex/pry) addressed at an agent; the prompt becomes <code>&lt;agent&gt;></code>. Lines are a terminal transcript. <code>&amp;</code> fires commands without waiting.
+      <code>> el &lt;agent&gt;</code> enters elita's REPL (like iex/pry) addressed at an agent; the prompt becomes <code>&lt;agent&gt;></code>. Lines read as a terminal transcript. <code>&amp;</code> fires commands without waiting.
     </div>
     <div class="legend-items">
       <div class="legend-item">
         <span class="legend-label">🤔</span>
-        <span class="legend-meaning">Ask: a question sent to an agent</span>
+        <span class="legend-meaning">Ask: question to agent</span>
       </div>
       <div class="legend-item">
         <span class="legend-label">📢</span>
-        <span class="legend-meaning">Tell: agent-to-agent delegation</span>
+        <span class="legend-meaning">Tell: delegation</span>
       </div>
       <div class="legend-item">
         <span class="legend-label">✨</span>
-        <span class="legend-meaning">Agent's reply</span>
+        <span class="legend-meaning">Agent reply</span>
       </div>
       <div class="legend-item">
         <span class="legend-label">👀</span>
-        <span class="legend-meaning">Observed output/logs</span>
+        <span class="legend-meaning">Get: retrieve data</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-label">✏️</span>
+        <span class="legend-meaning">Set: store data</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-label">🚀</span>
+        <span class="legend-meaning">Spawn: create agent</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-label">🧪</span>
+        <span class="legend-meaning">Spec: read config</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-label">🎭</span>
+        <span class="legend-meaning">Become: switch role</span>
       </div>
     </div>
   </div>
