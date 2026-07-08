@@ -17,7 +17,7 @@ When(/^(\w+)> ([^:]+):$/) do |prompt, input, table|
       break  # Success
     rescue => e
       if attempt < max_attempts - 1
-        sleep 0.1 if ENV["TAPE"] == "rec"  # Backoff only during live recording
+        sleep 1 if ENV["TAPE"] == "rec"  # Backoff only during live recording
       else
         raise e  # Final attempt failed
       end

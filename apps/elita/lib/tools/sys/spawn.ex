@@ -12,7 +12,7 @@ defmodule Tools.Sys.Spawn do
   end
 
   defp description(state) do
-    "Wake an agent from the directory. Only listed agents exist. For any other role, spawn name=<role> with configs=[\"actor\"] and tell it the role.#{help(state)}"
+    "Spawn an agent with the person's name and one or more configs. Configs must be existing agent files (boss, worker, actor, etc).#{help(state)}"
   end
 
   def exec(_, %{"name" => %{"name" => name} = inner}, state) do
@@ -39,7 +39,7 @@ defmodule Tools.Sys.Spawn do
 
   defp props do
     %{
-      name: %{type: "string", description: "Name for the new agent", enum: agents()},
+      name: %{type: "string", description: "Person's name, e.g. michael, dwight, pam, jim"},
       configs: configs()
     }
   end
@@ -49,7 +49,7 @@ defmodule Tools.Sys.Spawn do
   end
 
   defp items do
-    %{type: "string"}
+    %{type: "string", enum: agents()}
   end
 
   defp blurb do
