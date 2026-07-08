@@ -9,8 +9,7 @@ Feature: Birth
     * verify
       | 📢 el → mother | ready to give birth |
       | 📢 el → mother | It's time |
+      | ✨ mother | my beautiful baby has arrived |
       | 📢 el → baby | just born |
       | 🤔 el → baby | How does it feel |
       | ✨ baby | WAAHHHHH |
-      | ✨ mother | my baby |
-      | ✨ mother | I will love you forever |
