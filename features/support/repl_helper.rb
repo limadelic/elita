@@ -22,7 +22,7 @@ module ReplHelper
     @cassette = @cassette || "greet"
     tape = ENV["TAPE"] || "replay"
     escript_path = "../../../../apps/el/el"
-    base_cmd = "cd apps/elita/agents/elita && TAPE=#{tape} CASSETTE=#{@cassette} MIX_ENV=test #{escript_path} #{args}"
+    base_cmd = "cd apps/elita/agents/elita && TAPE=#{tape} CASSETTE=#{@cassette} CASSETTE_DIR=#{cassette_dir} MIX_ENV=test #{escript_path} #{args}"
     full_cmd = ENV["COVER"] == "1" ? cover_cmd(args, tape) : base_cmd
     output = ""
     duration = ENV["COVER"] == "1" ? 180 : 30
