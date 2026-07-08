@@ -63,7 +63,10 @@ defmodule El.Cover do
     Path.join(base, "_build/#{env}/lib/#{app}/ebin")
   end
 
-  defp env_name, do: get_env("MIX_ENV") || "test"
+  defp env_name, do: or_default(get_env("MIX_ENV"), "test")
+
+  defp or_default(nil, default), do: default
+  defp or_default(value, _), do: value
 
   defp load_dir(dir) do
     full = abs_path(dir)
