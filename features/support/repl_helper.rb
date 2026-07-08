@@ -96,7 +96,7 @@ module ReplHelper
   end
 
   def cover_cmd_boot(args)
-    "cd /Users/mike/dev/self/elita-qa && TAPE=#{ENV['TAPE'] || 'replay'} CASSETTE=#{@cassette} CASSETTE_DIR=#{cassette_dir} MIX_ENV=test mix cover #{args}"
+    "cd /Users/mike/dev/self/elita-qa/apps/el && TAPE=#{ENV['TAPE'] || 'replay'} CASSETTE=#{@cassette} CASSETTE_DIR=#{cassette_dir} MIX_ENV=test mix run -e \"El.CLI.main([\\\"#{args}\\\"])\""
   end
 
   def cover_cmd(args, tape)
