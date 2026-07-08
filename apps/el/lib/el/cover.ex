@@ -60,11 +60,14 @@ defmodule El.Cover do
   defp load_from(_path, false), do: :ok
   defp load_from(path, true), do: :cover.import(path |> to_charlist())
 
-
   defp beam_dirs do
     base = File.cwd!() |> Path.dirname() |> Path.dirname()
     env = env_name()
-    [Path.join(base, "_build/#{env}/lib/el/ebin"), Path.join(base, "_build/#{env}/lib/elita/ebin")]
+
+    [
+      Path.join(base, "_build/#{env}/lib/el/ebin"),
+      Path.join(base, "_build/#{env}/lib/elita/ebin")
+    ]
   end
 
   defp env_name, do: pick_env(get_env("MIX_ENV"))
