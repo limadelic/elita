@@ -25,16 +25,14 @@ Feature: Boss
     * el> have dwight the boss manage pam the receptionist and jim the salesman
 
     * el> tell michael we need 50 copies of the quarterly sales report
-
-    * el> what happened
       | 📢 el → michael     | 50 copies of the quarterly sales report |
       | 📢 michael → Dwight | get it done                             |
-      | 📢 dwight → Pam     | 50 copies of the quarterly sales report |
-      | ✨ pam               | I'll get these done right away          |
 
     * el> ask pam do you have a task
-      | 🤔 el → pam | do you have a task |
-      | ✨ pam       | not at the moment  |
+      | 📢 dwight → Pam | 50 copies of the quarterly sales report |
+      | ✨ pam           | I'll get these done right away          |
+      | 🤔 el → pam     | do you have a task                      |
+      | ✨ pam           | not at the moment                       |
 
     * el> ask jim do you have a task
       | 🤔 el → jim | do you have a task      |
