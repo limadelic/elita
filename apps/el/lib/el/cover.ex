@@ -58,6 +58,7 @@ defmodule El.Cover do
 
   defp save_coverage do
     path = expand(@datafile) |> Kernel.to_charlist()
+
     case :cover.export(path) do
       :ok -> :ok
       {:ok, data} -> data
