@@ -2,18 +2,13 @@ defmodule Tools.User.Load.Schema do
   import Tools.User.Cfg, only: [parse: 1]
   import Tools.User.Def, only: [spec: 2]
   import Tools.User.Validate, only: [check: 1]
+  import Path, only: [expand: 2, join: 2]
+  import File, only: [exists?: 1]
 
-  alias File
-  alias Path
-
-  @app_root Path.expand("../../..", __DIR__)
+  @app_root expand("../../..", __DIR__)
 
   def get(name, state) do
-    name
-    |> path()
-    |> load()
-    |> check()
-    |> spec(state)
+    name |> path() |> load() |> check() |> spec(state)
   end
 
   def tool(name) do
@@ -21,11 +16,11 @@ defmodule Tools.User.Load.Schema do
   end
 
   defp path(name) do
-    Path.join(@app_root, "agents/tools/#{name}.md")
+    join(@app_root, "agents/tools/#{name}.md")
   end
 
   defp load(file_path) do
-    exists_and_parse(File.exists?(file_path), file_path)
+    exists_and_parse(exists?(file_path), file_path)
   end
 
   defp exists_and_parse(true, file_path), do: parse(file_path)

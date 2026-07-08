@@ -1,6 +1,7 @@
 defmodule Tools.User.Def.Schema do
   import Enum, only: [map: 2]
-  import String, only: [split: 2, trim: 1]
+  import String, only: [split: 2, trim: 1, to_atom: 1]
+  import Map, only: [put: 3, new: 2]
 
   def get(tool, _state) when tool != nil do
     spec = %{name: tool.name, description: tool.body}
@@ -14,19 +15,15 @@ defmodule Tools.User.Def.Schema do
 
   defp armed(spec, params) do
     names = split(params, ",") |> map(&trim/1)
-    Map.put(spec, :parameters, schema(names))
+    put(spec, :parameters, schema(names))
   end
 
   defp schema(names) do
-    %{
-      type: "object",
-      properties: fields(names),
-      required: names
-    }
+    %{type: "object", properties: fields(names), required: names}
   end
 
   defp fields(names) do
-    Map.new(names, fn name -> {String.to_atom(name), %{type: "string"}} end)
+    new(names, fn name -> {to_atom(name), %{type: "string"}} end)
   end
 end
 
