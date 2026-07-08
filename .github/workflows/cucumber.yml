@@ -73,6 +73,11 @@ jobs:
         env:
           MIX_ENV: test
 
+      - name: Inject legend into report
+        run: |
+          ruby bin/inject_legend.rb reports/cucumber.html
+        if: always()
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         if: always()
