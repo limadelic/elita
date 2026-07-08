@@ -4,7 +4,7 @@ defmodule El.Distribution do
   import El.Host, only: [host: 0]
   import El.Peers, only: [load: 0]
   import Process, only: [sleep: 1]
-  import Node, only: [connect: 1, set_cookie: 1, start: 2]
+  import Node, only: [connect: 1, set_cookie: 1]
   import Enum, only: [each: 2]
   import IO, only: [write: 2]
   import String, only: [contains?: 2]

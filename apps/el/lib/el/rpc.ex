@@ -5,7 +5,6 @@ defmodule El.RPC do
   import File, only: [cwd!: 0]
   import El.Commands.Ask, only: [execute: 2]
   import El.Commands.Ls, only: [remote: 1]
-  import Node, only: [self: 0]
 
   def dispatch(command, cwd \\ cwd!()) do
     ensure_all_started(:elita)

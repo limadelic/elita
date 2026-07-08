@@ -3,8 +3,6 @@ defmodule TapeHandler do
 
   alias Tape.Play
   alias Tape.Record
-  import Record
-  import Play
 
   def handle(body, name, fun) do
     route(body, name, fun, get_env("TAPE"), get_env("LIVE"))

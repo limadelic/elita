@@ -1,7 +1,6 @@
 defmodule Tools.User.Ast do
   import Enum, only: [reduce: 3]
   import Macro, only: [prewalk: 3]
-  import Atom
 
   def bound(ast) do
     {_ast, bound} = prewalk(ast, [], &bind/2)
