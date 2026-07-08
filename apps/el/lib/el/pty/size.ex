@@ -18,14 +18,14 @@ defmodule El.Pty.Size do
   defp parse(_), do: {24, 80}
 
   defp extract([rows, cols]) do
-    size_or_default(to_int(rows), to_int(cols))
+    size_or_default(num(rows), num(cols))
   rescue
     _ -> {24, 80}
   end
 
   defp extract(_), do: {24, 80}
 
-  defp to_int(str), do: to_integer(str)
+  defp num(str), do: to_integer(str)
 
   defp size_or_default(row, col) when row > 0, do: check_col(col, row)
   defp size_or_default(_, _), do: {24, 80}
