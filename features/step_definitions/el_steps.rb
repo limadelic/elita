@@ -1,7 +1,11 @@
 require "pty"
 
-When(/^> el\s*([^:]+)?$/) do |args|
+When(/^> el(?!\s+tell\s)(\s[^:]+)?$/) do |args|
   boot((args || "").strip)
+end
+
+When(/^> el (tell .+)$/) do |args|
+  one_shot(args)
 end
 
 When(/^(\w+)> ([^:]+):$/) do |prompt, input, table|

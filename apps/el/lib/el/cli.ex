@@ -46,6 +46,7 @@ defmodule El.CLI do
   defp parse(["ls", path]), do: {:ls, path}
   defp parse(["cd", path]), do: {:cd, path}
   defp parse(["daemon"]), do: :daemon
+  defp parse([]), do: {:repl, "el"}
   defp parse([agent]), do: {:repl, agent}
   defp parse(_), do: :usage
 

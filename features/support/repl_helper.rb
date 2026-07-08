@@ -8,7 +8,32 @@ module ReplHelper
     }
     cmd = "./apps/el/el #{args}".strip
     @reader, @writer, @pid = PTY.spawn(env, "/bin/sh", "-c", cmd)
-    wait_for_prompt(args.split.first || "greet")
+    wait_for_prompt(args.split.first || "el")
+  end
+
+  def one_shot(args)
+    @cassette = @cassette || "greet"
+    tape = ENV["TAPE"] || "replay"
+    full_cmd = "TAPE=#{tape} CASSETTE=#{@cassette} MIX_ENV=test ./apps/el/el #{args}"
+    output = ""
+    timeout = Time.now + 30
+
+    begin
+      reader, writer, pid = PTY.spawn("/bin/sh", "-c", full_cmd)
+      while Time.now < timeout
+        ready = IO.select([reader], nil, nil, 0.1)
+        if ready
+          chunk = reader.readpartial(4096)
+          output << chunk
+        end
+      end
+    rescue EOFError
+    ensure
+      Process.wait(pid) if pid
+      writer.close if writer && !writer.closed?
+    end
+
+    output
   end
 
   def send(input, prompt)
