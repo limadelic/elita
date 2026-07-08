@@ -2,8 +2,9 @@ defmodule El.Commands.Ask.Remote do
   @moduledoc false
   import :binary, only: [at: 2]
   import String, only: [contains?: 2]
-
-  alias El.Answer
+  import IO, only: [puts: 1]
+  import GenServer, only: [call: 2, cast: 2]
+  import El.Answer, only: [await: 2]
 
   def ask(msg, target, proc, tool) do
     wrap = fn -> print(msg, target, proc) end
@@ -12,22 +13,26 @@ defmodule El.Commands.Ask.Remote do
 
   defp print(msg, target, proc) do
     result = answer(msg, target, proc)
-    IO.puts(result)
+    puts(result)
   end
 
   defp tap(target, proc, fun, _tool) do
-    :ok = GenServer.call({proc, target}, {:tap, self()})
+    :ok = call({proc, target}, {:tap, self()})
     result = fun.()
-    :ok = GenServer.call({proc, target}, {:untap, self()})
+    :ok = call({proc, target}, {:untap, self()})
     result
   end
 
   defp answer(msg, target, proc) do
+    {ref, text} = prepare(msg)
+    cast({proc, target}, {:inject, text, reply: {ref, self()}})
+    await(ref, 30_000)
+  end
+
+  defp prepare(msg) do
     text = format(msg)
     ref = make_ref()
-    reply = {ref, self()}
-    GenServer.cast({proc, target}, {:inject, text, reply: reply})
-    Answer.await(ref, 30_000)
+    {ref, text}
   end
 
   defp format(msg), do: formatted(contains?(msg, "\n"), msg)
