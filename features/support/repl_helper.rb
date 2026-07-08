@@ -2,7 +2,7 @@ module ReplHelper
   def boot(args)
     @cassette = @cassette || "greet"
     env = {
-      "TAPE" => "replay",
+      "TAPE" => ENV["TAPE"] || "replay",
       "CASSETTE" => @cassette,
       "MIX_ENV" => "test"
     }
@@ -22,7 +22,7 @@ module ReplHelper
 
   def wait_for_prompt(prompt_word)
     output = ""
-    timeout = Time.now + 5
+    timeout = Time.now + 30
     pattern = "#{prompt_word}>"
 
     begin

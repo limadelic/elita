@@ -1,9 +1,10 @@
 require 'timeout'
 
 Around do |scenario, block|
-  Timeout.timeout(40) { block.call }
+  timeout_secs = ENV["TAPE"] == "rec" ? 300 : 40
+  Timeout.timeout(timeout_secs) { block.call }
 rescue Timeout::Error
-  raise "Scenario '#{scenario.name}' timed out after 40s"
+  raise "Scenario '#{scenario.name}' timed out after #{timeout_secs}s"
 end
 
 Before do |scenario|
