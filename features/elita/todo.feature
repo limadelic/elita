@@ -4,10 +4,12 @@ Feature: Todo
     * > el todo
 
     * todo> Add call dentist to my list
-      | ✨ todo | added |
+      | 👀 todo | (empty) |
+      | ✨ todo  | added   |
 
     * todo> Mark call dentist as done
-      | ✨ todo | marked |
+      | 👀 todo | call dentist |
+      | ✨ todo  | marked       |
 
     * todo> What do I need to do?
       | ✨ todo | no tasks |
