@@ -12,4 +12,5 @@ elita-*.tar
 CLAUDE.local.md
 status.json
 .claude/worktrees/
+/reports/
 

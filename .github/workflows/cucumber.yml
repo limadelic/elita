@@ -1,0 +1,79 @@
+name: Cucumber Tests
+
+on:
+  push:
+    branches:
+      - qa
+      - wip
+  workflow_dispatch:
+
+permissions:
+  pages: write
+  id-token: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: erlef/setup-beam@v1
+        with:
+          elixir-version: '1.18'
+          otp-version: '26'
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+
+      - name: Build el escript
+        run: |
+          cd apps/el
+          mix deps.get
+          mix escript.build
+
+      - name: Prepare elita
+        run: |
+          cd apps/elita
+          mix deps.get
+          mix compile
+
+      - name: Run Cucumber tests
+        run: |
+          mkdir -p reports
+          TAPE=replay bundle exec cucumber --format html:reports/cucumber.html --publish-quiet
+        env:
+          MIX_ENV: test
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cucumber-report
+          path: reports/
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+        if: always()
+
+      - name: Create site directory
+        run: |
+          mkdir -p site
+          cp reports/cucumber.html site/index.html
+        if: always()
+
+      - name: Upload to Pages
+        uses: actions/upload-pages-artifact@v3
+        if: always()
+        with:
+          path: site
+
+      - name: Deploy to Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        if: always()
