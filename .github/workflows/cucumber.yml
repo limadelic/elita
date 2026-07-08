@@ -12,6 +12,29 @@ permissions:
   id-token: write
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: erlef/setup-beam@v1
+        with:
+          elixir-version: '1.18'
+          otp-version: '28'
+
+      - name: Lint el
+        run: |
+          cd apps/el
+          mix deps.get
+          mix credo --strict
+
+      - name: Lint elita
+        run: |
+          cd apps/elita
+          mix deps.get
+          mix credo --strict
+
   test:
     runs-on: ubuntu-latest
     environment:
