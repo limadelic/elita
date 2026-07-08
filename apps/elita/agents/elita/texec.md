@@ -19,4 +19,6 @@ Be systematic about the way you execute each scenario
   - Update status to "passed" or "failed" with results
 - Use set tool to save updated scenarios with results
 
-Provide final summary with overall Passed or Failed result.
+## Reporting
+
+When reporting results, state each verified behavior in the spec's own example words, one per line, then the verdict.
