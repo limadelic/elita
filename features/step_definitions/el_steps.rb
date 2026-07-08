@@ -1,8 +1,8 @@
 require "pty"
 
-When(/^> el (tell .+)$/) do |args, *rest|
+When(/^> el(?!\s+tell\s)(\s[^:]+)?$/) do |args, *rest|
   table = rest.first
-  one_shot(args)
+  boot((args || "").strip)
   if table && is_verify_table?(table)
     verify_lines(table.raw)
   elsif table
@@ -10,9 +10,9 @@ When(/^> el (tell .+)$/) do |args, *rest|
   end
 end
 
-When(/^> el(?!\s+tell\s)(\s[^:]+)?$/) do |args, *rest|
+When(/^> el (tell .+)$/) do |args, *rest|
   table = rest.first
-  boot((args || "").strip)
+  one_shot(args)
   if table && is_verify_table?(table)
     verify_lines(table.raw)
   elsif table
