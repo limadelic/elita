@@ -7,7 +7,10 @@ Feature: Actor
       | 🤖 actor          | Versatile actor who plays any role      |
       | 🎭 speck as tplan | pending                                 |
       | ✏️ scenario_1     | Role Adoption                           |
+      | 🎭 speck as texec |                                         |
+      | 🚀 actor_v1       | as actor                                |
       | ✨ actor_v1        | Welcome to Ashworth House               |
+      | 🚀 actor_v3       | as actor                                |
       | ✨ actor_v3        | I'm Claude, an AI assistant             |
       | 👀 scenario_1     | status: passed                          |
       | 👀 scenario_3     | status: failed                          |

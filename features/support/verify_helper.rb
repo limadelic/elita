@@ -109,7 +109,7 @@ module VerifyHelper
     elsif equals_idx
       [line[0...equals_idx], line[equals_idx + 3..-1]]
     else
-      [nil, nil]
+      [line, line]
     end
   end
 
