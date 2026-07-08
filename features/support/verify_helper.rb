@@ -5,19 +5,21 @@ module VerifyHelper
 
   def verify_lines(rows)
     tx = transcript
-    lines = tx.split("\n").map(&:strip).reject(&:empty?)
+    tx = tx.force_encoding("UTF-8") if tx.respond_to?(:force_encoding)
+    lines = tx.split("\n").map { |l| l.strip.force_encoding("UTF-8") rescue l.strip }.reject(&:empty?)
+    folded = fold_continuation_lines(lines)
     cursor = 0
 
     rows.each do |row|
-      want_prefix = row[0].strip
-      want_text = row[1].strip.downcase
+      want_prefix = row[0].strip.force_encoding("UTF-8") rescue row[0].strip
+      want_text = row[1].strip.downcase.force_encoding("UTF-8") rescue row[1].strip.downcase
       found = false
 
-      (cursor...lines.size).each do |idx|
-        line = lines[idx]
+      (cursor...folded.size).each do |idx|
+        full_line = folded[idx]
 
-        if line.include?(": ")
-          line_prefix, line_text = line.split(": ", 2)
+        if full_line.include?(": ")
+          line_prefix, line_text = full_line.split(": ", 2)
           prefix_match = line_prefix == want_prefix
           text_match = want_text.empty? || line_text.downcase.include?(want_text)
 
@@ -36,6 +38,26 @@ module VerifyHelper
   end
 
   private
+
+  def fold_continuation_lines(lines)
+    result = []
+    current = nil
+
+    lines.each do |line|
+      if log_line?(line)
+        result << line
+        current = result.size - 1
+      elsif current && current >= 0
+        result[current] << " " << line
+      end
+    end
+
+    result
+  end
+
+  def log_line?(line)
+    line.match?(/^[\p{So}🀀-🿿]/) rescue false
+  end
 
   def cells(table)
     table.raw.flatten.map(&:strip).reject(&:empty?)
