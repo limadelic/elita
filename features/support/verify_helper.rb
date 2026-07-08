@@ -30,6 +30,7 @@ module VerifyHelper
 
         (@scenario_cursor...@folded_lines.size).each do |idx|
           full_line = @folded_lines[idx]
+          full_line = full_line.sub(/\A(?:\s*\w+>\s*)+/, "")
           line_prefix, line_text = split_line(full_line)
 
           if line_prefix && line_text
