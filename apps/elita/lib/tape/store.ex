@@ -45,7 +45,5 @@ defmodule Tape.Store do
     join(dir, "#{get_env("CASSETTE")}.json")
   end
 
-  defp cassette_dir do
-    get_env("CASSETTE_DIR") || join(@app_root, "test/cassettes")
-  end
+  defp cassette_dir, do: get_env("CASSETTE_DIR") || join(@app_root, "test/cassettes")
 end
