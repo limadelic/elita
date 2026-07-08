@@ -24,7 +24,8 @@ Feature: Boss
     * verify
       | 📢 el → michael | 50 copies of the quarterly sales report |
       | 📢 michael → Dwight | get it done |
-      | 📢 dwight → Pam | on his desk within the hour |
+      | 📢 dwight → Pam | 50 copies of the quarterly sales report |
+      | ✨ pam | I'll get these done right away |
       | 🤔 el → pam | do you have a task |
       | ✨ pam | not at the moment |
       | 🤔 el → jim | do you have a task |
