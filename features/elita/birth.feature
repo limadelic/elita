@@ -8,6 +8,6 @@ Feature: Birth
     * el> ask the baby how does it feel to be born
     * verify
       | 📢 el → mother | it's time |
-      | 🤔 el → baby | how does it feel to be born |
       | ✨ mother | welcome to the world, my precious child |
+      | 🤔 el → baby | how does it feel to be born |
       | ✨ baby | i'm baby! i cry |

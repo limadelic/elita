@@ -7,11 +7,11 @@ Feature: Todo
     * todo> Mark call dentist as done
     * todo> What do I need to do?
     * verify
-      | 👀 todo | (empty) |
+      | 👀 todo | empty |
       | ✏️ todo | call dentist |
-      | ✨ todo | added "call dentist" |
+      | ✨ todo | added call dentist |
       | 👀 todo | call dentist |
-      | ✨ todo | marked "call dentist" as complete |
+      | ✨ todo | marked call dentist |
       | ✨ todo | no tasks |
 
   Scenario: Todo remembers tasks

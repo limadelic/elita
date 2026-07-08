@@ -1,5 +1,3 @@
-require "set"
-
 module VerifyHelper
   def verify_table(table, output)
     cells(table).each { |cell| verify_cell(cell, output) }
@@ -10,16 +8,15 @@ module VerifyHelper
     tx = tx.force_encoding("UTF-8") if tx.respond_to?(:force_encoding)
     lines = tx.split("\n").map { |l| l.strip.force_encoding("UTF-8") rescue l.strip }.reject(&:empty?)
     folded = fold_continuation_lines(lines)
-    matched_indices = Set.new
+    cursor = 0
 
     rows.each do |row|
       want_prefix = row[0].strip.force_encoding("UTF-8") rescue row[0].strip
       want_text = row[1].strip.downcase.force_encoding("UTF-8") rescue row[1].strip.downcase
       found = false
 
-      folded.each_with_index do |full_line, idx|
-        next if matched_indices.include?(idx)
-
+      (cursor...folded.size).each do |idx|
+        full_line = folded[idx]
         line_prefix, line_text = split_line(full_line)
 
         if line_prefix && line_text
@@ -27,7 +24,7 @@ module VerifyHelper
           text_match = want_text.empty? || line_text.downcase.include?(want_text) || line_text.downcase.gsub(/\s+/, "").include?(want_text.gsub(/\s+/, ""))
 
           if prefix_match && text_match
-            matched_indices << idx
+            cursor = idx + 1
             found = true
             break
           end

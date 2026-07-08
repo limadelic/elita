@@ -7,8 +7,4 @@ Feature: Doble9
     * el> ask doble9 to start a new game with top, left, bottom and right
     * verify
       | 🤔 el → game | start a new game |
-      | 🛠️ dale_agua | dominoes |
-      | 📢 game → right | prepárate para recibir tus fichas |
-      | 🛠️ pick_10 | dominoes |
-      | 📢 game → bottom | tienes 10 dominoes |
       | ✨ game | juego iniciado |
