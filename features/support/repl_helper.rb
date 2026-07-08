@@ -104,7 +104,7 @@ module ReplHelper
   end
 
   def strip_ansi(text)
-    text.gsub(/\e\[[0-9;]*m/, "")
+    text.force_encoding("UTF-8").scrub("").gsub(/\e\[[0-9;]*m/, "")
   end
 
   def wait_for_prompt(prompt_word)
