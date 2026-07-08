@@ -15,9 +15,7 @@ defmodule El.Trace.Format do
   end
 
   defp hex_data(data) do
-    data
-    |> bin_to_list()
-    |> map_join("", &hex_byte/1)
+    bytes(data) |> map_join("", &hex_byte/1)
   end
 
   defp hex_byte(byte) do
@@ -26,8 +24,12 @@ defmodule El.Trace.Format do
     |> pad_leading(2, "0")
   end
 
+  defp bytes(data) do
+    bin_to_list(data)
+  end
+
   defp ascii_data(data) do
-    bin_to_list(data) |> map_join("", &safe_char/1)
+    bytes(data) |> map_join("", &safe_char/1)
   end
 
   defp safe_char(byte) when byte in 32..126, do: <<byte>>
