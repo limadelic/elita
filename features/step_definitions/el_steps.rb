@@ -29,3 +29,7 @@ When(/^(\w+)> (.+)$/) do |prompt, input, *rest|
     send(input, prompt)
   end
 end
+
+Then(/^verify$/) do |table|
+  verify_lines(table.raw)
+end

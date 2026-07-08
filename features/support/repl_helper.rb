@@ -1,6 +1,8 @@
 module ReplHelper
   def boot(args)
     @cassette = @cassette || "greet"
+    @transcript = ""
+    @transcript_stripped = ""
     env = {
       "TAPE" => ENV["TAPE"] || "replay",
       "CASSETTE" => @cassette,
@@ -43,7 +45,15 @@ module ReplHelper
     wait_for_prompt(prompt)
   end
 
+  def transcript
+    @transcript_stripped || ""
+  end
+
   private
+
+  def strip_ansi(text)
+    text.gsub(/\e\[[0-9;]*m/, "")
+  end
 
   def wait_for_prompt(prompt_word)
     output = ""
@@ -57,6 +67,9 @@ module ReplHelper
         if ready
           chunk = @reader.readpartial(4096)
           output << chunk
+          @transcript << chunk if @transcript
+          stripped_chunk = strip_ansi(chunk)
+          @transcript_stripped << stripped_chunk if @transcript_stripped
           return output if output.include?(pattern)
         end
       end

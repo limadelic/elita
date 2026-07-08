@@ -3,6 +3,38 @@ module VerifyHelper
     cells(table).each { |cell| verify_cell(cell, output) }
   end
 
+  def verify_lines(rows)
+    tx = transcript
+    lines = tx.split("\n").map(&:strip).reject(&:empty?)
+    cursor = 0
+
+    rows.each do |row|
+      want_prefix = row[0].strip
+      want_text = row[1].strip.downcase
+      found = false
+
+      (cursor...lines.size).each do |idx|
+        line = lines[idx]
+
+        if line.include?(": ")
+          line_prefix, line_text = line.split(": ", 2)
+          prefix_match = line_prefix == want_prefix
+          text_match = want_text.empty? || line_text.downcase.include?(want_text)
+
+          if prefix_match && text_match
+            cursor = idx + 1
+            found = true
+            break
+          end
+        end
+      end
+
+      unless found
+        raise "No match for prefix='#{want_prefix}' text='#{want_text}'\n\nTranscript:\n#{tx}"
+      end
+    end
+  end
+
   private
 
   def cells(table)
