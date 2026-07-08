@@ -23,6 +23,10 @@ jobs:
           elixir-version: '1.18'
           otp-version: '28'
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+
       - name: Lint el
         run: |
           cd apps/el
@@ -34,6 +38,11 @@ jobs:
           cd apps/elita
           mix deps.get
           mix lint
+
+      - name: Check Gherkin formatting
+        run: |
+          npm install
+          npm run fmt:check
 
   test:
     runs-on: ubuntu-latest

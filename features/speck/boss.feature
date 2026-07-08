@@ -4,7 +4,6 @@ Feature: Boss
   Scenario: Boss delegates tasks to workers
     * > el speck
     * speck> exec boss
-    * verify
       | 📢 speck → boss_v1                    | assign them the task    |
       | 📢 boss_v1 → worker_v1                | quarterly report        |
       | ✨ worker_v1                           | yes, i have a task      |

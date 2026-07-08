@@ -3,7 +3,6 @@ Feature: Mother
   Scenario: Mother gives birth to babies
     * > el speck
     * speck> exec mother
-    * verify
       | 📢 speck → mother_v1 | time to give birth   |
       | ✨ mother_v1          | Welcome to the world |
       | 🤔 speck → baby_v1   | What are you doing   |

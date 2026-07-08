@@ -4,7 +4,6 @@ Feature: Greet
   Scenario: Greet greets a user
     * > el speck
     * speck> exec greet
-    * verify
       | 🤔 speck → greet_v2 | hello, how are you          |
       | ✨ greet_v2          | who am i talking to         |
       | 🤔 speck → greet_v2 | my name is mike             |

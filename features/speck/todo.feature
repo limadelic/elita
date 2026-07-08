@@ -4,7 +4,6 @@ Feature: Todo
   Scenario: Todo manages task lists
     * > el speck
     * speck> exec todo
-    * verify
       | 👀 scenarios       | pending    |
       | 🤔 speck → todo_v1 | groceries  |
       | 👀 todo            | (empty)    |

@@ -7,6 +7,7 @@
     "prettier-plugin-gherkin": "^4.0.0"
   },
   "scripts": {
-    "fmt": "prettier --write 'features/**/*.feature'"
+    "fmt": "prettier --write 'features/**/*.feature'",
+    "fmt:check": "prettier --check 'features/**/*.feature'"
   }
 }
