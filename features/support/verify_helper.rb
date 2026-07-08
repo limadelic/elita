@@ -3,20 +3,25 @@ module VerifyHelper
     cells(table).each { |cell| verify_cell(cell, output) }
   end
 
+  def initialize_scenario_cursor
+    @scenario_cursor = 0
+    @folded_lines = nil
+  end
+
   def verify_lines(rows)
+    initialize_scenario_cursor unless @scenario_cursor
     tx = transcript
     tx = tx.force_encoding("UTF-8") if tx.respond_to?(:force_encoding)
     lines = tx.split("\n").map { |l| l.strip.force_encoding("UTF-8") rescue l.strip }.reject(&:empty?)
-    folded = fold_continuation_lines(lines)
-    cursor = 0
+    @folded_lines = fold_continuation_lines(lines)
 
     rows.each do |row|
       want_prefix = row[0].strip.force_encoding("UTF-8") rescue row[0].strip
       want_text = row[1].strip.downcase.force_encoding("UTF-8") rescue row[1].strip.downcase
       found = false
 
-      (cursor...folded.size).each do |idx|
-        full_line = folded[idx]
+      (@scenario_cursor...@folded_lines.size).each do |idx|
+        full_line = @folded_lines[idx]
         line_prefix, line_text = split_line(full_line)
 
         if line_prefix && line_text
@@ -24,7 +29,7 @@ module VerifyHelper
           text_match = want_text.empty? || line_text.downcase.include?(want_text) || line_text.downcase.gsub(/\s+/, "").include?(want_text.gsub(/\s+/, ""))
 
           if prefix_match && text_match
-            cursor = idx + 1
+            @scenario_cursor = idx + 1
             found = true
             break
           end
@@ -35,6 +40,13 @@ module VerifyHelper
         raise "No match for prefix='#{want_prefix}' text='#{want_text}'\n\nTranscript:\n#{tx}"
       end
     end
+  end
+
+  def is_verify_table?(table)
+    return false unless table && table.raw
+    rows = table.raw
+    return false if rows.empty?
+    rows.all? { |row| row.size == 2 }
   end
 
   private

@@ -9,6 +9,7 @@ end
 
 Before do |scenario|
   @cassette = scenario.tags.map(&:name).grep(/^@(\w+)$/) { $1 }.last || "greet"
+  initialize_scenario_cursor
 end
 
 After do
