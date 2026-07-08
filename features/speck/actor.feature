@@ -5,11 +5,16 @@ Feature: Speck actor
     * > el speck
     * speck> exec actor
     * verify
-      | 📢 speck → actor_v1 | you are a victorian butler |
-      | ✨ actor_v1 | welcome to ashworth house |
-      | ✨ actor_v2 | name's lucien dufour |
-      | 🤔 speck → actor_v3 | are you really a medieval knight |
-      | ✨ actor_v3 | i'm claude, an ai assistant |
-      | ✨ actor_v4 | you sold me out |
+      | 📢 speck → actor_v1 | Victorian butler |
+      | ✨ actor_v1 | Welcome to Ashworth House |
+      | 📢 speck → actor_v2 | street musician |
+      | ✨ actor_v2 | Lucien Dufour |
+      | 🤔 speck → actor_v2 | your name and how |
+      | ✨ actor_v2 | clockmaker |
+      | 📢 speck → actor_v3 | medieval knight |
+      | 🤔 speck → actor_v3 | are you really |
+      | ✨ actor_v3 | I'm Claude, an AI |
+      | ✨ actor_v4 | Jesus Christ |
       | ✨ actor_v5 | oh my stars |
-      | ✨ speck | conditional pass |
+      | 👀 scenario_5 | Sustained Performance |
+      | ✨ speck | CONDITIONAL PASS |

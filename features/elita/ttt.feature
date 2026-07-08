@@ -8,9 +8,11 @@ Feature: Ttt
     * el> tell alice start a game with bob, you are X, play first
     * el> ask alice did the game finish and was it a win or a tie
     * verify
-      | 📢 alice → el | opening |
+      | 📢 el → alice | character |
+      | 📢 alice → el | board |
       | ✨ bob | ready |
-      | 📢 el → bob | alice is gonna |
-      | 📢 el → alice | start |
+      | 📢 el → bob | alice |
+      | 📢 bob → Alice | Your move |
+      | 📢 alice → bob | Your turn |
       | 🤔 el → alice | finish |
-      | ✨ alice | win |
+      | ✨ alice | WIN |

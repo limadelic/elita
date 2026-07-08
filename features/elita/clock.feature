@@ -5,5 +5,7 @@ Feature: Clock
     * > el
     * el> ask the clock what time it is
     * verify
+      | 🚀 clock | timekeeper |
       | 🤔 el → clock | what time is it |
-      | ✨ clock | 1:28 and 42 seconds in the morning |
+      | ✨ clock | CLOCK ONLINE |
+      | ✨ clock | 1:28 and 42 seconds |

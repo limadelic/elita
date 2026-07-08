@@ -6,10 +6,12 @@ Feature: Doctor
     * el> have an actor play a patient with appendicitis
     * el> ask a doctor to diagnose them
     * verify
-      | 📢 el → patient | you are a patient with appendicitis |
+      | 📢 el → patient | patient with appendicitis |
+      | 🚀 doctor | doctor |
       | 🤔 el → doctor | diagnose the patient |
       | 🤔 doctor → patient | main complaint |
-      | ✨ patient | pain in my lower right side |
+      | ✨ patient | lower right side |
       | 🤔 doctor → patient | fever or chills |
       | ✨ patient | around 101 |
-      | ✨ doctor | acute appendicitis |
+      | ✨ doctor | ACUTE APPENDICITIS |
+      | ✨ doctor | You will need surgery |
