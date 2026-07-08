@@ -7,11 +7,11 @@ Feature: Doctor
     * el> ask a doctor to diagnose them
     * verify
       | 📢 el → patient | patient with appendicitis |
-      | 🚀 doctor | doctor |
       | 🤔 el → doctor | diagnose the patient |
       | 🤔 doctor → patient | main complaint |
       | ✨ patient | lower right side |
       | 🤔 doctor → patient | fever or chills |
       | ✨ patient | around 101 |
+      | 🤔 doctor → patient | bowel movements |
       | ✨ doctor | ACUTE APPENDICITIS |
-      | ✨ doctor | You will need surgery |
+      | ✨ el | You will need surgery |
