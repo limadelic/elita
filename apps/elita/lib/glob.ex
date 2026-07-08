@@ -2,7 +2,7 @@ defmodule Glob do
   import String, only: [contains?: 2]
   import Path, only: [split: 1]
 
-  def match?(entry_path, pattern) do
+  def hits?(entry_path, pattern) do
     match(split(entry_path), split(pattern))
   end
 

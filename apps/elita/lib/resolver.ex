@@ -9,7 +9,7 @@ defmodule Resolver do
   import Enum, only: [filter: 2, group_by: 2, flat_map: 2]
   import Path, only: [join: 2, expand: 1]
   import String, only: [split: 3]
-  import Glob, only: [wild?: 1]
+  import Glob, only: [wild?: 1, hits?: 2]
 
   def resolve(address, world, cwd) do
     world
@@ -48,7 +48,7 @@ defmodule Resolver do
   defp path_match(p, p), do: true
   defp path_match(p, s), do: glob_or_fail(wild?(s), p, s)
 
-  defp glob_or_fail(true, p, s), do: Glob.match?(p, s)
+  defp glob_or_fail(true, p, s), do: hits?(p, s)
   defp glob_or_fail(false, _p, _s), do: false
 
   defp named(entries, nil, _fanout), do: entries
