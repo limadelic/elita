@@ -24,7 +24,8 @@ defmodule Elita.Umbrella do
     [
       test: [&run_test/1],
       lint: [&run_lint/1],
-      build: [&run_build/1]
+      build: [&run_build/1],
+      ship: "cmd bin/release"
     ]
   end
 
