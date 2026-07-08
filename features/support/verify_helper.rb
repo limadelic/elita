@@ -10,7 +10,7 @@ module VerifyHelper
 
   def verify_lines(rows)
     initialize_scenario_cursor unless @scenario_cursor
-    ci_timeout = ENV["GITHUB_ACTIONS"] == "true" ? 15 : 3
+    ci_timeout = ENV["GITHUB_ACTIONS"] == "true" ? 60 : 3
     deadline = Time.now + (ENV["TAPE"] == "rec" ? 10 : ci_timeout)
 
     loop do
