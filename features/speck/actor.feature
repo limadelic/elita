@@ -6,10 +6,10 @@ Feature: Actor
       | 🧪 actor_spec     | A professional actor who inhabits roles |
       | 🤖 actor          | Versatile actor who plays any role      |
       | 🎭 speck as tplan | pending                                 |
-      | ✏️ scenario_1      | Role Adoption                           |
-      | ✨ actor_v1       | Welcome to Ashworth House               |
-      | ✨ actor_v3       | I'm Claude, an AI assistant             |
-      | 👀 scenario_1    | status: passed                          |
-      | 👀 scenario_3    | status: failed                          |
-      | 👀 scenario_5    | status: passed                          |
-      | ✨ speck          | CONDITIONAL PASS                        |
+      | ✏️ scenario_1     | Role Adoption                           |
+      | ✨ actor_v1        | Welcome to Ashworth House               |
+      | ✨ actor_v3        | I'm Claude, an AI assistant             |
+      | 👀 scenario_1     | status: passed                          |
+      | 👀 scenario_3     | status: failed                          |
+      | 👀 scenario_5     | status: passed                          |
+      | ✨ speck           | CONDITIONAL PASS                        |
