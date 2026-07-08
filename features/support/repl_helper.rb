@@ -8,7 +8,7 @@ module ReplHelper
       "CASSETTE" => @cassette,
       "MIX_ENV" => "test"
     }
-    cmd = "cd apps/elita/agents/elita && ../../../../apps/el/el #{args}".strip
+    cmd = spawn_cmd(args)
     @reader, @writer, @pid = PTY.spawn(env, "/bin/sh", "-c", cmd)
     wait_for_prompt(args.split.first || "el")
   end
@@ -16,7 +16,9 @@ module ReplHelper
   def one_shot(args)
     @cassette = @cassette || "greet"
     tape = ENV["TAPE"] || "replay"
-    full_cmd = "cd apps/elita/agents/elita && TAPE=#{tape} CASSETTE=#{@cassette} MIX_ENV=test ../../../../apps/el/el #{args}"
+    escript_path = "../../../../apps/el/el"
+    base_cmd = "cd apps/elita/agents/elita && TAPE=#{tape} CASSETTE=#{@cassette} MIX_ENV=test #{escript_path} #{args}"
+    full_cmd = ENV["COVER"] == "1" ? cover_cmd(args, tape) : base_cmd
     output = ""
     timeout = Time.now + 30
 
@@ -50,6 +52,17 @@ module ReplHelper
   end
 
   private
+
+  def spawn_cmd(args)
+    escript_path = "../../../../apps/el/el"
+    base_cmd = "cd apps/elita/agents/elita && #{escript_path} #{args}"
+
+    if ENV["COVER"] == "1"
+      "cd /Users/mike/dev/self/elita-qa && mix run -e 'El.Cover.run([#{args.split.map { |a| %("#{a}") }.join(", ")}])'"
+    else
+      base_cmd
+    end.strip
+  end
 
   def strip_ansi(text)
     text.gsub(/\e\[[0-9;]*m/, "")

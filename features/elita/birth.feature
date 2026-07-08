@@ -7,7 +7,7 @@ Feature: Birth
     * el> tell the mother it's time
     * el> ask the baby how does it feel to be born
     * verify
-      | 📢 el → mother | it's time |
-      | ✨ mother | welcome to the world, my precious child |
-      | 🤔 el → baby | how does it feel to be born |
-      | ✨ baby | i'm baby! i cry |
+      | 📢 el → mother | time |
+      | 🤔 el → baby | feel |
+      | ✨ baby | waaahhhhh |
+      | ✨ mother | gasps |
