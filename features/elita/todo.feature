@@ -7,8 +7,8 @@ Feature: Todo
     * todo> Mark call dentist as done
     * todo> What do I need to do?
     * verify
-      | ✨ todo | added |
-      | ✨ todo | marked |
+      | ✨ todo | added    |
+      | ✨ todo | marked   |
       | ✨ todo | no tasks |
 
   Scenario: Todo remembers tasks
@@ -26,5 +26,4 @@ Feature: Todo
       | added |
     * todo> What do I need to do?
       | milk |
-      | dog |
-
+      | dog  |

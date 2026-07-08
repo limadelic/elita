@@ -6,9 +6,9 @@ Feature: Doble9
     * el> get me a doble9 game and four greed players named top, left, bottom and right
     * el> ask doble9 to start a new game with top, left, bottom and right
     * verify
-      | 🤔 el → game | start a new game |
-      | ✨ game | Bienvenido |
-      | 📢 game → top | FICHAS REPARTIDAS |
+      | 🤔 el → game     | start a new game  |
+      | ✨ game           | Bienvenido        |
+      | 📢 game → top    | FICHAS REPARTIDAS |
       | 📢 game → bottom | FICHAS REPARTIDAS |
-      | ✨ game | JUEGO INICIADO |
-      | ✨ el | Fichas en mano |
+      | ✨ game           | JUEGO INICIADO    |
+      | ✨ el             | Fichas en mano    |

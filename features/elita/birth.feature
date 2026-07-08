@@ -7,9 +7,9 @@ Feature: Birth
     * el> tell the mother it's time
     * el> ask the baby how does it feel to be born
     * verify
-      | 📢 el → mother | ready to give birth |
-      | 📢 el → mother | It's time |
-      | ✨ mother | my beautiful baby has arrived |
-      | 📢 el → baby | just born |
-      | 🤔 el → baby | How does it feel |
-      | ✨ baby | WAAHHHHH |
+      | 📢 el → mother | ready to give birth           |
+      | 📢 el → mother | It's time                     |
+      | ✨ mother       | my beautiful baby has arrived |
+      | 📢 el → baby   | just born                     |
+      | 🤔 el → baby   | How does it feel              |
+      | ✨ baby         | WAAHHHHH                      |

@@ -6,6 +6,6 @@ Feature: Clockwatcher
     * el> get me a clockwatcher
     * el> ask the clockwatcher to file a report
     * verify
-      | 🤔 el → clockwatcher | file a report |
-      | ✨ clockwatcher | i don't start until 9 am |
-      | ✨ el | 1:29 in the morning |
+      | 🤔 el → clockwatcher | file a report            |
+      | ✨ clockwatcher       | i don't start until 9 am |
+      | ✨ el                 | 1:29 in the morning      |

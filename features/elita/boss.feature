@@ -8,10 +8,10 @@ Feature: Boss
     * el> ask the dev do you have a task from boss
     * el> ask the qa do you have a task from boss
     * verify
-      | 📢 el → boss | we need more tests |
-      | 📢 boss → qa | we need more tests |
-      | ✨ dev | no, i don't have a task from boss |
-      | ✨ qa | yes. i have a task from boss |
+      | 📢 el → boss | we need more tests                |
+      | 📢 boss → qa | we need more tests                |
+      | ✨ dev        | no, i don't have a task from boss |
+      | ✨ qa         | yes. i have a task from boss      |
 
   @cascade
   Scenario: Boss delegates down the chain
@@ -22,11 +22,11 @@ Feature: Boss
     * el> ask pam do you have a task
     * el> ask jim do you have a task
     * verify
-      | 📢 el → michael | 50 copies of the quarterly sales report |
-      | 📢 michael → Dwight | get it done |
-      | 📢 dwight → Pam | 50 copies of the quarterly sales report |
-      | ✨ pam | I'll get these done right away |
-      | 🤔 el → pam | do you have a task |
-      | ✨ pam | not at the moment |
-      | 🤔 el → jim | do you have a task |
-      | ✨ jim | no, i don't have a task |
+      | 📢 el → michael     | 50 copies of the quarterly sales report |
+      | 📢 michael → Dwight | get it done                             |
+      | 📢 dwight → Pam     | 50 copies of the quarterly sales report |
+      | ✨ pam               | I'll get these done right away          |
+      | 🤔 el → pam         | do you have a task                      |
+      | ✨ pam               | not at the moment                       |
+      | 🤔 el → jim         | do you have a task                      |
+      | ✨ jim               | no, i don't have a task                 |
