@@ -1,4 +1,3 @@
-@doctor
 Feature: Doctor
 
   Scenario: Doctor diagnoses a patient

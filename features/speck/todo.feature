@@ -1,4 +1,4 @@
-@specktodo
+@tape:specktodo
 Feature: Speck todo
 
   Scenario: Speck verifies todo meets its spec

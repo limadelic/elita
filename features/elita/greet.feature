@@ -1,4 +1,3 @@
-@greet
 Feature: Greet
 
   Scenario: Greeeet learns your name

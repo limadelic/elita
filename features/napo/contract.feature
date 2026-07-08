@@ -1,4 +1,3 @@
-@napocontract
 Feature: Napo contract
 
   Scenario: Napo reviews a contract across facets

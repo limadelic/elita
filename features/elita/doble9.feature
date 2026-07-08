@@ -1,4 +1,3 @@
-@dominoes
 Feature: Doble9
 
   Scenario: A fresh game deals ten dominoes to each player

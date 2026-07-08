@@ -1,4 +1,4 @@
-@speckgreet
+@tape:speckgreet
 Feature: Speck greet
 
   Scenario: Speck verifies greet meets its spec

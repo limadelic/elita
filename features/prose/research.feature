@@ -1,4 +1,3 @@
-@research
 Feature: Research tree
 
   Scenario: Research synthesizes multiple researchers

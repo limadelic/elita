@@ -1,4 +1,3 @@
-@delegate
 Feature: Boss
 
   Scenario: Boss delegates to the right worker
@@ -16,7 +15,7 @@ Feature: Boss
     * el> ask the qa do you have a task from boss
       | ✨ qa | yes. i have a task from boss |
 
-  @cascade
+  @tape:cascade
   Scenario: Boss delegates down the chain
     * > el
 

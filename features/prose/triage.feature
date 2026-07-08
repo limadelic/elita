@@ -1,4 +1,3 @@
-@triage
 Feature: Inbox triage
 
   Scenario: Triage sorts the inbox

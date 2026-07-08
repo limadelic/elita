@@ -1,4 +1,3 @@
-@masked
 Feature: Masked relay
 
   Scenario: Relay scouts each aspect blind and builds consensus

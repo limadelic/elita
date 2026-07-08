@@ -1,4 +1,3 @@
-@speckmother
 Feature: Speck mother
 
   Scenario: Speck verifies mother meets its spec

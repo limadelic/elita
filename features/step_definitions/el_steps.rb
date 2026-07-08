@@ -1,18 +1,26 @@
 require "pty"
 
-When(/^> el(?!\s+tell\s)(\s[^:]+)?$/) do |args, *rest|
+When(/^> el (tell .+)$/) do |args, *rest|
   table = rest.first
-  boot((args || "").strip)
+  output = one_shot(args)
+
+  # Accumulate output into transcript for verify_lines retry-drain
+  @transcript ||= ""
+  @transcript_stripped ||= ""
+  @transcript << output
+  stripped = output.gsub(/\e\[[0-9;]*m/, "")
+  @transcript_stripped << stripped
+
   if table && is_verify_table?(table)
     verify_lines(table.raw)
   elsif table
-    verify_table(table, transcript)
+    verify_table(table, output)
   end
 end
 
-When(/^> el (tell .+)$/) do |args, *rest|
+When(/^> el(?!\s+tell\s)(\s[^:]+)?$/) do |args, *rest|
   table = rest.first
-  one_shot(args)
+  boot((args || "").strip)
   if table && is_verify_table?(table)
     verify_lines(table.raw)
   elsif table

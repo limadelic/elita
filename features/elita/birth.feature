@@ -1,4 +1,3 @@
-@born
 Feature: Birth
 
   Scenario: Mother gives birth to a baby

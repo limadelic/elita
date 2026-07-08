@@ -8,7 +8,8 @@ rescue Timeout::Error
 end
 
 Before do |scenario|
-  @cassette = scenario.tags.map(&:name).grep(/^@(\w+)$/) { $1 }.last || "greet"
+  tape_tag = scenario.tags.map(&:name).find { |t| t.start_with?("@tape:") }
+  @cassette = tape_tag ? tape_tag.sub("@tape:", "") : File.basename(scenario.location.file, ".feature")
   initialize_scenario_cursor
 end
 
@@ -20,5 +21,6 @@ After do
     rescue Errno::ESRCH
     end
   end
+  @reader.close if @reader && !@reader.closed?
   @writer.close if @writer && !@writer.closed?
 end

@@ -1,4 +1,4 @@
-@speckboss
+@tape:speckboss
 Feature: Speck boss
 
   Scenario: Speck verifies boss meets its spec

@@ -1,4 +1,3 @@
-@tictactoe
 Feature: Ttt
 
   Scenario: Two players play to the end
@@ -14,4 +13,3 @@ Feature: Ttt
       | 📢 el → bob    | Alice says   |
       | 📢 bob → Alice | Nice opening |
       | 📢 alice → bob | Good move    |
-

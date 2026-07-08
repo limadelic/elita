@@ -1,4 +1,3 @@
-@watch
 Feature: Clockwatcher
 
   Scenario: Watcher only works business hours

@@ -77,7 +77,7 @@ module ReplHelper
 
   def spawn_cmd(args)
     escript_path = "../../../../apps/el/el"
-    base_cmd = "cd apps/elita/agents/elita && #{escript_path} #{args}"
+    base_cmd = "cd apps/elita/agents/elita && TAPE=#{ENV['TAPE'] || 'replay'} CASSETTE=#{@cassette} MIX_ENV=test #{escript_path} #{args}"
 
     if ENV["COVER"] == "1"
       cover_cmd_boot(args)

@@ -1,4 +1,3 @@
-@renewal
 Feature: Renewal risk
 
   Scenario: Coordinator flags at-risk renewals across accounts
