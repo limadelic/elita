@@ -1,8 +1,10 @@
 defmodule El.CLI do
   import Application, only: [ensure_all_started: 1]
   import IO, only: [puts: 1]
+  import System, only: [get_env: 1]
   import El.Command
   alias El.REPL
+  alias El.Cover
 
   @usage """
   Usage:
@@ -21,33 +23,29 @@ defmodule El.CLI do
 
   def main(argv) do
     ensure_all_started(:elita)
-    if System.get_env("COVER") == "1" do
-      with_cover(argv)
-    else
-      dispatch(argv)
-    end
+    maybe_cover(get_env("COVER"), argv)
   end
 
-  defp with_cover(argv) do
-    El.Cover.start()
+  defp maybe_cover("1", argv) do
+    Cover.start()
     result = dispatch(argv)
-    file = coverage_filename()
-    File.write(file <> ".marker", "exported")
-    El.Cover.export_unique(file)
-    File.write(file <> ".done", "success")
+    Cover.export_unique(cover_file())
     result
   end
 
-
-  defp coverage_filename do
-    pid = :os.getpid() |> to_string()
-    ts = :erlang.system_time(:millisecond)
-    filename = "coverdata.#{pid}.#{ts}.ets"
-    case System.get_env("COVER_DIR") do
-      nil -> filename
-      dir -> dir <> "/" <> filename
-    end
+  defp maybe_cover(_other, argv) do
+    dispatch(argv)
   end
+
+  defp cover_file do
+    pid = System.pid() |> to_string()
+    ts = :erlang.system_time(:millisecond) |> to_string()
+    name = "coverdata.#{pid}.#{ts}.ets"
+    prepend_dir(get_env("COVER_DIR"), name)
+  end
+
+  defp prepend_dir(nil, name), do: name
+  defp prepend_dir(dir, name), do: dir <> name
 
   defp dispatch(argv) do
     argv |> parse() |> run()
