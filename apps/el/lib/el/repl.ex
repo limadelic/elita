@@ -37,26 +37,23 @@ defmodule El.REPL do
     loop(agent)
   end
 
-  defp export_if_covering do
-    case get_env("COVER") do
-      "1" -> do_export()
-      _ -> :ok
-    end
+  defp export_if_covering, do: maybe_export(get_env("COVER"))
+
+  defp maybe_export("1") do
+    :cover.export(String.to_charlist(cover_file()))
+  rescue
+    _ -> :ok
   end
 
-  defp do_export do
-    try do
-      :cover.export(String.to_charlist(cover_file()))
-    rescue
-      _ -> :ok
-    end
-  end
+  defp maybe_export(_), do: :ok
 
   defp cover_file do
-    dir = get_env("COVER_DIR") || ""
-    pid = pid() |> to_string()
-    dir <> "coverdata.#{pid}.ets"
+    dir = pick_dir(get_env("COVER_DIR"))
+    "#{dir}coverdata.#{pid() |> to_string()}.ets"
   end
+
+  defp pick_dir(nil), do: ""
+  defp pick_dir(dir), do: dir
 
   defp handle(_agent, ""), do: :ok
 

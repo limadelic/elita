@@ -47,7 +47,10 @@ defmodule El.Cover do
     ["_build/#{env_name()}/lib/el/ebin", "_build/#{env_name()}/lib/elita/ebin"]
   end
 
-  defp env_name, do: get_env("MIX_ENV") || "test"
+  defp env_name, do: pick_env(get_env("MIX_ENV"))
+
+  defp pick_env(nil), do: "test"
+  defp pick_env(env), do: env
 
   defp load_dir(dir) do
     full = expand(dir)
