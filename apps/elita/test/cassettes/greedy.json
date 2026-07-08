@@ -1,0 +1,191 @@
+[
+  {
+    "a": [
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01C1xJcgJkAfcUY7P6XvCMTk",
+        "input": {
+          "configs": [
+            "greed",
+            "player"
+          ],
+          "name": "greed"
+        },
+        "name": "spawn",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "content": "get me a greed player",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Done.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "content": [
+            {
+              "content": "spawned",
+              "tool_use_id": "toolu_01C1xJcgJkAfcUY7P6XvCMTk",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "n": 3
+    }
+  },
+  {
+    "a": [
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_0153jomjTyHwurYP3iBzoSX1",
+        "input": {
+          "question": "table [3,5], dominoes [9,9] [2,3] [9,6] [4,5], your move",
+          "recipient": "greed"
+        },
+        "name": "ask",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "content": "ask greed - table [3,5], dominoes [9,9] [2,3] [9,6] [4,5], your move",
+          "role": "user"
+        }
+      ],
+      "n": 5
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Play [2,3] on 3",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "greed",
+      "messages": [
+        {
+          "content": "table [3,5], dominoes [9,9] [2,3] [9,6] [4,5], your move",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Play [2,3] on 3",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "content": [
+            {
+              "content": "Play [2,3] on 3",
+              "tool_use_id": "toolu_0153jomjTyHwurYP3iBzoSX1",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "n": 7
+    }
+  },
+  {
+    "a": [
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01D7KRC7v8q6Lg3fTkHR65fM",
+        "input": {
+          "question": "table [1,3], dominoes [2,4] [5,6] [0,0], your move",
+          "recipient": "greed"
+        },
+        "name": "ask",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "content": "ask greed - table [1,3], dominoes [2,4] [5,6] [0,0], your move",
+          "role": "user"
+        }
+      ],
+      "n": 9
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "knock knock",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "greed",
+      "messages": [
+        {
+          "content": "table [1,3], dominoes [2,4] [5,6] [0,0], your move",
+          "role": "user"
+        }
+      ],
+      "n": 3
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "knock knock",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "tool_result",
+              "content": "knock knock",
+              "tool_use_id": "toolu_01D7KRC7v8q6Lg3fTkHR65fM"
+            }
+          ]
+        }
+      ],
+      "n": 11
+    }
+  }
+]
