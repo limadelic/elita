@@ -2,6 +2,7 @@ defmodule Utils.File do
   import Enum, only: [map: 2, find_value: 2]
   import File, only: [read: 1]
   import Path, only: [expand: 2, wildcard: 1]
+  import System, only: [get_env: 1]
 
   @app_root expand("../..", __DIR__)
 
@@ -19,11 +20,23 @@ defmodule Utils.File do
 
   defp paths(name) do
     map(@paths, fn path -> join(Path.join(@app_root, path), name) end) ++
-      nested(name)
+      nested(name) ++
+      home(name)
   end
 
   defp nested(name) do
     wildcard(Path.join(@app_root, "agents/**/#{name}"))
+  end
+
+  defp home(name) do
+    get_env("ELITA_HOME") |> home_paths(name)
+  end
+
+  defp home_paths(nil, _name), do: []
+
+  defp home_paths(home, name) do
+    map(@paths, fn path -> join(Path.join(home, path), name) end) ++
+      wildcard(Path.join(home, "agents/**/#{name}"))
   end
 
   defp handle_missing(nil, name), do: "file not found: #{name}"
