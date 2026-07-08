@@ -62,7 +62,7 @@
           {Credo.Check.Readability.ModuleNames, []},
           {Credo.Check.Readability.VariableNames, []},
           {Credo.Check.Refactor.FunctionArity, [max_arity: 5]},
-          {Credo.Check.Refactor.CyclomaticComplexity, [max_complexity: 2]},
+          {Credo.Check.Refactor.CyclomaticComplexity, [max_complexity: 1]},
           {Credo.Check.Design.DuplicatedCode, mass_threshold: 40},
           {Elita.Credo.MaxFunctionLines, [max_lines: 5]},
           {Elita.Credo.MaxModuleLines, [max_lines: 100]},
