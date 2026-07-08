@@ -11,6 +11,7 @@ defmodule El.Commands.Address.Route do
   import Node, only: [self: 0]
   import Kernel, except: [self: 0]
   import Resolver, only: [resolve: 3]
+  import El.Commands.Address, only: [route: 4]
 
   def handle({:error, :unknown}, recipient, _msg, _mode, _tool),
     do: puts("unknown: #{recipient}")

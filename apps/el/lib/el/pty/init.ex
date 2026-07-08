@@ -4,6 +4,7 @@ defmodule El.Pty.Init do
   import El.Trace
   import Map
   import Process, except: [alias: 1]
+  import Port, only: [info: 2]
 
   def call(cfg) do
     size = cfg[:get_size].()

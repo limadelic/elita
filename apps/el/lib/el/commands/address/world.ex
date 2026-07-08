@@ -5,7 +5,8 @@ defmodule El.Commands.Address.World do
   import File, only: [exists?: 1, ls!: 1]
   import Path, only: [expand: 1, join: 2]
   import String, only: [ends_with?: 2, trim_trailing: 2]
-  import Node, only: [list: 0]
+  import Node, only: [list: 0, self: 0]
+  import Atom, only: [to_string: 1]
 
   def build(nodes \\ &peers/0) do
     folders = load() |> map(&entry/1)

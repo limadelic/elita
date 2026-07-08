@@ -4,6 +4,7 @@ defmodule Agent.Harness do
   import Agent.Session, only: [ask: 2, cast: 2]
   import Elita, only: [call: 2]
   import String, only: [to_atom: 1, downcase: 1]
+  import Registry
 
   def dispatch(recipient, message, :ask) do
     recipient

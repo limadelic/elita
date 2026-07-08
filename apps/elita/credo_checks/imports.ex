@@ -18,15 +18,22 @@ defmodule Elita.Credo.Imports do
   def run(%SourceFile{} = source_file, params) do
     allowlist = Keyword.get(params, :allowlist, [:ets, :erlang, :rand])
     filename = source_file.filename
+    Process.put(:elita_imports, [])
     Code.prewalk(source_file, &check_call(&1, &2, allowlist, filename))
   end
 
+  defp check_call({:import, _meta, [{:__aliases__, _ma, parts} | _rest]} = ast, issues, _allowlist, _filename) do
+    imports = Process.get(:elita_imports) || []
+    Process.put(:elita_imports, [parts | imports])
+    {ast, issues}
+  end
+
   defp check_call({{:., meta, [module, _func]}, _call_meta, _args} = ast, issues, allowlist, filename) do
-    # Skip compiler-generated calls (interpolation, bracket access, etc.)
     if Keyword.get(meta, :generated, false) do
       {ast, issues}
     else
-      {ast, maybe_add_issue(module, meta, issues, allowlist, filename)}
+      imports = Process.get(:elita_imports) || []
+      {ast, maybe_add_issue(module, meta, issues, allowlist, imports, filename)}
     end
   end
 
@@ -34,44 +41,52 @@ defmodule Elita.Credo.Imports do
     {ast, issues}
   end
 
-  defp maybe_add_issue({:__MODULE__, _meta1}, _meta2, issues, _allowlist, _filename) do
+  defp maybe_add_issue({:__MODULE__, _meta1}, _meta2, issues, _allowlist, _imports, _filename) do
     issues
   end
 
-  defp maybe_add_issue(:__MODULE__, _meta, issues, _allowlist, _filename) do
+  defp maybe_add_issue(:__MODULE__, _meta, issues, _allowlist, _imports, _filename) do
     issues
   end
 
-  defp maybe_add_issue({:__aliases__, _meta_alias, [module]}, meta, issues, allowlist, filename) when is_atom(module) do
-    if should_report?(module, allowlist) do
-      [create_issue(module, meta, filename) | issues]
-    else
+  defp maybe_add_issue({:__aliases__, _meta_alias, [module]}, meta, issues, allowlist, imports, filename) when is_atom(module) do
+    if is_imported?([module], imports) or not should_report?(module, allowlist) do
       issues
+    else
+      [create_issue(module, meta, filename) | issues]
     end
   end
 
-  defp maybe_add_issue({:__aliases__, _meta, parts}, meta, issues, allowlist, filename)
+  defp maybe_add_issue({:__aliases__, _meta, parts}, meta, issues, allowlist, imports, filename)
        when is_list(parts) and length(parts) > 1 do
     module_name = Enum.join(Enum.map(parts, &to_string/1), ".")
-    if should_report_nested(module_name, allowlist) do
-      [create_issue(module_name, meta, filename) | issues]
-    else
+    if is_imported_nested?(parts, imports) or not should_report_nested(module_name, allowlist) do
       issues
+    else
+      [create_issue(module_name, meta, filename) | issues]
     end
   end
 
-  defp maybe_add_issue(module, _meta, issues, _allowlist, _filename)
+  defp maybe_add_issue(module, _meta, issues, _allowlist, _imports, _filename)
        when not is_atom(module) do
     issues
   end
 
-  defp maybe_add_issue(module, meta, issues, allowlist, filename)
+  defp maybe_add_issue(module, meta, issues, allowlist, imports, filename)
        when is_atom(module) do
-    if should_report?(module, allowlist) do
-      [create_issue(module, meta, filename) | issues]
-    else
+    if is_imported?([module], imports) or not should_report?(module, allowlist) do
       issues
+    else
+      [create_issue(module, meta, filename) | issues]
     end
+  end
+
+  defp is_imported?(parts, imports) do
+    Enum.any?(imports, &(&1 == parts))
+  end
+
+  defp is_imported_nested?(parts, imports) do
+    Enum.any?(imports, &(&1 == parts))
   end
 
   defp should_report?(module, allowlist) do

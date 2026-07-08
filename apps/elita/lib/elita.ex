@@ -10,6 +10,7 @@ defmodule Elita do
   import String, only: [downcase: 1, trim: 1]
   import System, only: [get_env: 1]
   import Tools
+  import GenServer
 
   def start_link(name, configs) do
     GenServer.start_link(__MODULE__, {name, configs}, name: via(name))
