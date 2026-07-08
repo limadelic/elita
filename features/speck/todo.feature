@@ -1,7 +1,7 @@
 @tape:specktodo
 Feature: Todo
 
-  Scenario: Todo tracks tasks - add task, confirm addition, list shows task
+  Scenario: Todo manages task lists
     * > el speck
     * speck> exec todo
       | 👀 scenarios       | pending    |
