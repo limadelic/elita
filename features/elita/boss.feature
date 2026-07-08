@@ -1,6 +1,6 @@
 Feature: Boss
 
-  Scenario: Boss delegates to the right worker
+  Scenario: Dev manager delegates to the right worker
     * > el
 
     * el> have a boss manage a dev and a qa
@@ -15,8 +15,8 @@ Feature: Boss
     * el> ask the qa do you have a task from boss
       | ✨ qa | yes. i have a task from boss |
 
-  @tape:cascade
-  Scenario: Boss delegates down the chain
+  @tape:office
+  Scenario: Office manager delegates down the chain
     * > el
 
     * el> have michael the boss manage dwight the assistant regional manager
@@ -26,12 +26,12 @@ Feature: Boss
     * el> tell michael we need 50 copies of the quarterly sales report
       | 📢 el → michael     | 50 copies of the quarterly sales report |
       | 📢 michael → Dwight | get it done                             |
+      | 📢 dwight → Pam     | 50 copies of the quarterly sales report |
+      | ✨ pam               | get these done right away               |
 
     * el> ask pam do you have a task
-      | 📢 dwight → Pam | 50 copies of the quarterly sales report |
-      | ✨ pam           | I'll get these done right away          |
-      | 🤔 el → pam     | do you have a task                      |
-      | ✨ pam           | not at the moment                       |
+      | 🤔 el → pam | do you have a task |
+      | ✨ pam       | not at the moment  |
 
     * el> ask jim do you have a task
       | 🤔 el → jim | do you have a task      |

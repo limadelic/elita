@@ -1,9 +1,8 @@
 Feature: Clock
 
   Scenario: Clock tells the time
-    * > el
+    * > el clock
 
-    * el> ask the clock what time it is
+    * clock> what time is it
       | 🤔 el → clock | what time is it     |
-      | ✨ clock       | CLOCK ONLINE        |
       | ✨ clock       | 1:28 and 42 seconds |
