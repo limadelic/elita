@@ -13,12 +13,10 @@ defmodule El.Cover do
 
   @datafile "coverdata.ets"
 
-  defp datafile_path do
-    case get_env("COVER_DIR") do
-      nil -> Path.expand(@datafile)
-      dir -> Path.join(dir, @datafile)
-    end
-  end
+  defp datafile_path, do: file_in_dir(get_env("COVER_DIR"), @datafile)
+
+  defp file_in_dir(nil, file), do: Path.expand(file)
+  defp file_in_dir(dir, file), do: Path.join(dir, file)
 
   def run(argv) do
     setup()
@@ -65,17 +63,18 @@ defmodule El.Cover do
     Path.join(base, "_build/#{env}/lib/#{app}/ebin")
   end
 
-  defp env_name do
-    case get_env("MIX_ENV") do
-      nil -> "test"
-      env -> env
-    end
-  end
+  defp env_name, do: get_env("MIX_ENV") || "test"
 
   defp load_dir(dir) do
-    full = if String.starts_with?(dir, "/"), do: dir, else: expand(dir)
-    if dir?(full), do: load_beams(full)
+    full = abs_path(dir)
+    maybe_load_beams(full, dir?(full))
   end
+
+  defp maybe_load_beams(_full, false), do: :ok
+  defp maybe_load_beams(full, true), do: load_beams(full)
+
+  defp abs_path("/" <> _ = path), do: path
+  defp abs_path(path), do: expand(path)
 
   defp load_beams(dir) do
     beams(dir) |> each(&load_beam(dir, &1))
