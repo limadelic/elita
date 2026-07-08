@@ -20,10 +20,15 @@ defmodule El.Cover do
     export()
   end
 
-  defp start do
+  def start do
     :cover.start()
     load()
     compile()
+  end
+
+  def export_unique(name) do
+    path = expand(name) |> to_charlist()
+    report_export(:cover.export(path))
   end
 
   defp load do
