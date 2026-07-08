@@ -5,20 +5,20 @@ defmodule Mlm do
   import System, only: [get_env: 2]
   import Tools, only: [tools: 2]
 
-  alias Adapt
-  alias Shape
+  import Adapt, only: [resp: 1, text: 1, parts: 1]
+  import Shape, only: [messages: 2, add_tools: 2]
 
   @url "http://#{get_env("MLM_HOST", "localhost")}:11434/api/chat"
 
   def llm(text) when is_binary(text) do
-    body(text) |> req() |> Adapt.resp() |> Adapt.text()
+    body(text) |> req() |> resp() |> text()
   end
 
   def llm(%{config: config, history: history} = state) do
     {build_body(compose(config), history, state)
      |> req()
-     |> Adapt.resp()
-     |> Adapt.parts(), state}
+     |> resp()
+     |> parts(), state}
   end
 
   defp body(text) do
@@ -27,8 +27,8 @@ defmodule Mlm do
   end
 
   defp build_body(composed, history, state) do
-    base_body(model(), Shape.messages(composed.content, history))
-    |> Shape.add_tools(tools(composed, state))
+    base_body(model(), messages(composed.content, history))
+    |> add_tools(tools(composed, state))
   end
 
   defp base_body(m, msgs) do
