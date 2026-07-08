@@ -9,5 +9,5 @@ Feature: Birth
     * verify
       | 📢 el → mother | it's time |
       | 🤔 el → baby | how does it feel to be born |
-      | ✨ baby | i'm baby! i cry |
       | ✨ mother | welcome to the world, my precious child |
+      | ✨ baby | i'm baby! i cry |

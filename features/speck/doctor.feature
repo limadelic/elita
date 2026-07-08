@@ -9,4 +9,4 @@ Feature: Speck doctor
       | 🤔 doctor_v1 → patient_v1 | what is your main complaint |
       | ✨ patient_v1 | wah! wah! |
       | ✨ doctor_v1 | infantile colic |
-      | ✨ speck | spec |
+      | ✨ speck | validated |

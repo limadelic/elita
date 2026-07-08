@@ -1,3 +1,5 @@
+require "set"
+
 module VerifyHelper
   def verify_table(table, output)
     cells(table).each { |cell| verify_cell(cell, output) }
@@ -8,15 +10,16 @@ module VerifyHelper
     tx = tx.force_encoding("UTF-8") if tx.respond_to?(:force_encoding)
     lines = tx.split("\n").map { |l| l.strip.force_encoding("UTF-8") rescue l.strip }.reject(&:empty?)
     folded = fold_continuation_lines(lines)
-    cursor = 0
+    matched_indices = Set.new
 
     rows.each do |row|
       want_prefix = row[0].strip.force_encoding("UTF-8") rescue row[0].strip
       want_text = row[1].strip.downcase.force_encoding("UTF-8") rescue row[1].strip.downcase
       found = false
 
-      (cursor...folded.size).each do |idx|
-        full_line = folded[idx]
+      folded.each_with_index do |full_line, idx|
+        next if matched_indices.include?(idx)
+
         line_prefix, line_text = split_line(full_line)
 
         if line_prefix && line_text
@@ -24,7 +27,7 @@ module VerifyHelper
           text_match = want_text.empty? || line_text.downcase.include?(want_text) || line_text.downcase.gsub(/\s+/, "").include?(want_text.gsub(/\s+/, ""))
 
           if prefix_match && text_match
-            cursor = idx + 1
+            matched_indices << idx
             found = true
             break
           end
@@ -75,7 +78,9 @@ module VerifyHelper
   end
 
   def log_line?(line)
-    line.match?(/^[\p{So}🀀-🿿]/) rescue false
+    # Match log lines: emoji followed by space and letters/emoji (agent/system markers)
+    # Exclude lines starting with emoji but followed by decorative chars like * ✅
+    line.match?(/^[\p{So}🀀-🿿][\s]*[a-zA-Z🀀-🿿]/) rescue false
   end
 
   def cells(table)
