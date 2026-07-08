@@ -1,24 +1,28 @@
 defmodule El.Standpoint do
+  import Agent
+  import File
+  import Path
+
   def set(path) do
-    expanded = Path.expand(path)
+    expanded = expand(path)
     ensure()
-    Agent.update(:standpoint, fn _old -> expanded end)
+    update(:standpoint, fn _old -> expanded end)
     :ok
   end
 
   def get do
     ensure()
-    Agent.get(:standpoint, & &1)
+    get(:standpoint, & &1)
   rescue
     _ -> birth()
   end
 
   def birth do
-    File.cwd!() |> trim()
+    cwd!() |> trim()
   end
 
   defp ensure do
-    Agent.start_link(fn -> birth() end, name: :standpoint)
+    start_link(fn -> birth() end, name: :standpoint)
   rescue
     _ -> :ok
   end
