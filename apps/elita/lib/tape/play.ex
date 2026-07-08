@@ -1,11 +1,11 @@
 defmodule Tape.Play do
   import Tape.Matcher, only: [contains: 2]
   import Tape.Store, only: [load_entries: 0]
-  import Tape.Writer, only: [claim_agent: 4, claim: 3]
+  import Tape.Writer, only: [claim: 3]
+  import Tape.Play.Pick, only: [agent: 1]
   import System, only: [get_env: 1]
-  import Enum, except: [drop: 2, take: 2]
-  import Map, only: [drop: 2, get: 2, get: 3, take: 2]
-  import List, only: [last: 1]
+  import Enum, only: [at: 2]
+  import Map, only: [get: 2, take: 2]
   import Jason, only: [decode!: 1, encode!: 1]
 
   def handle(body, name, fun) do
@@ -25,48 +25,11 @@ defmodule Tape.Play do
   defp validate_cassette(cassette), do: raise("no cassette: #{cassette}")
 
   defp answer(ctx) do
-    agent_answer(ctx) |> handle_answer(ctx)
+    agent(ctx) |> handle_answer(ctx)
   end
 
   defp handle_answer(nil, ctx), do: untagged(ctx, 0)
   defp handle_answer(answer, _ctx), do: answer
-
-  defp agent_answer(ctx) do
-    ctx.entries
-    |> filter(&agent_entry?(&1, ctx.name))
-    |> filter(&content_match?(&1, ctx.normalized))
-    |> pick_answer(ctx)
-  end
-
-  defp agent_entry?(e, name), do: get(e["q"], "agent") == name
-
-  defp content_match?(entry, normalized) do
-    contains(drop(entry["q"], ["agent", "n"]), normalized)
-  end
-
-  defp pick_answer([], _ctx), do: nil
-
-  defp pick_answer(matches, ctx) do
-    count = length(get(ctx.body, :messages, []))
-    sorted = sort_matches(matches, count)
-    indexed = map(sorted, fn m -> {m, find_idx(ctx.entries, m)} end)
-    extract_answer(find(indexed, &claim_slot?(ctx, &1)), sorted)
-  end
-
-  defp sort_matches(matches, count) do
-    {t, o} = split_with(matches, &(get(&1["q"], "n") == count))
-    t ++ o
-  end
-
-  defp find_idx(entries, target), do: find_index(entries, &(&1 == target))
-
-  defp extract_answer({e, _}, _), do: e["a"]
-  defp extract_answer(nil, []), do: nil
-  defp extract_answer(nil, matches), do: last(matches)["a"]
-
-  defp claim_slot?(ctx, {e, idx}) do
-    claim_agent(cassette_key(), ctx.name, idx, get_times(e))
-  end
 
   defp untagged(%{entries: entries} = ctx, idx) when idx >= length(entries) do
     raise "tape miss: #{ctx.name} #{inspect(ctx.normalized)}"
