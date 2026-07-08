@@ -60,8 +60,10 @@ module ReplHelper
         ready = IO.select([@reader], nil, nil, 0.1)
         if ready
           chunk = @reader.readpartial(4096)
+          chunk = chunk.force_encoding("UTF-8") rescue chunk.to_s
           @transcript << chunk if @transcript
           stripped_chunk = strip_ansi(chunk)
+          stripped_chunk = stripped_chunk.force_encoding("UTF-8") rescue stripped_chunk.to_s
           @transcript_stripped << stripped_chunk if @transcript_stripped
         else
           break
@@ -113,9 +115,11 @@ module ReplHelper
         ready = IO.select([@reader], nil, nil, 0.1)
         if ready
           chunk = @reader.readpartial(4096)
+          chunk = chunk.force_encoding("UTF-8") rescue chunk.to_s
           output << chunk
           @transcript << chunk if @transcript
           stripped_chunk = strip_ansi(chunk)
+          stripped_chunk = stripped_chunk.force_encoding("UTF-8") rescue stripped_chunk.to_s
           @transcript_stripped << stripped_chunk if @transcript_stripped
           return output if output.include?(pattern)
         end
