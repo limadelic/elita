@@ -39,7 +39,7 @@ create_release() {
 
 compute_sha() {
   local version=$1
-  echo "Computing sha256..."
+  echo "Computing sha256..." >&2
   curl -sL "https://github.com/limadelic/elita/archive/refs/tags/v$version.tar.gz" | shasum -a 256 | awk '{print $1}'
 }
 
@@ -50,7 +50,7 @@ update_tap() {
   temp_dir=$(mktemp -d)
 
   cd "$temp_dir"
-  git clone https://github.com/limadelic/homebrew-tap
+  git clone git@github.com:limadelic/homebrew-tap.git
   cd homebrew-tap
 
   sed -i '' "s|url.*github.com/limadelic/elita/archive.*|url \"https://github.com/limadelic/elita/archive/refs/tags/v${version}.tar.gz\"|" Formula/elita.rb
