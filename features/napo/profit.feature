@@ -10,7 +10,7 @@ Feature: Napo profit
       | 🤔 napo → judge     | complete root-cause tree                             |
       | ✨ judge             | No                                                   |
       | 📢 napo → grocery   | demand compression, margin erosion, operational drag |
-      | 📢 napo → stream    | subscriber churn, revenue headwinds, cost overruns  |
+      | 📢 napo → stream    | subscriber churn, revenue headwinds, cost overruns   |
       | 📢 napo → logistics | volume decline, asset utilization, operational cost  |
       | ✨ napo              | children spawned and told. awaiting completion       |
       | ✨ el                | collecting their root-cause analyses                 |
