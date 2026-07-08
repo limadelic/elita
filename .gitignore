@@ -15,6 +15,7 @@ status.json
 /reports/
 node_modules/
 coverdata*.ets
+featurescoverdata*.ets
 test_*.exs
 test_*.ets
 
