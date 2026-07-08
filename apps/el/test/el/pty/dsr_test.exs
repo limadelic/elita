@@ -1,5 +1,6 @@
 defmodule El.Pty.DsrTest do
   use ExUnit.Case
+
   alias El.Pty.Dsr
 
   describe "scan" do

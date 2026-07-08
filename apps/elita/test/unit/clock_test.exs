@@ -1,5 +1,6 @@
 defmodule ClockUnitTest do
   use Tester
+
   @moduletag :main
   @moduletag :spec
 

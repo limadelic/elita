@@ -2,27 +2,21 @@ defmodule Elita.Credo.LineCheck do
   @default_threshold 50
   @base_issue %Credo.Issue{category: :refactor, exit_status: 2}
 
-  def find_body_lines(meta) do
-    meta |> extract_end_line() |> to_result(meta)
+  def find_body_lines(meta, source) do
+    meta |> extract_end_line(source) |> to_result(meta)
   end
 
   defp to_result(nil, _meta), do: :error
-  defp to_result(end_line, meta), do: {:ok, count_lines(end_line, meta)}
-
-  defp count_lines(end_line, meta) do
-    end_line - Keyword.get(meta, :line, 0) - 1
+  defp to_result(end_line, meta) when is_integer(end_line) do
+    {:ok, end_line - Keyword.get(meta, :line, 0)}
   end
+  defp to_result(_end_line, _meta), do: :error
 
-  defp extract_end_line(meta) do
-    meta |> Keyword.get(:end_line) |> extract_end_line_impl(meta)
-  end
-
-  defp extract_end_line_impl(nil, meta), do: extract_from_expression(meta)
-  defp extract_end_line_impl(end_line, _meta), do: end_line
-
-  defp extract_from_expression(meta) do
-    expr = Keyword.get(meta, :end_of_expression, [])
-    Keyword.get(expr, :line)
+  defp extract_end_line(meta, _source) do
+    case Keyword.get(meta, :end) do
+      end_meta when is_list(end_meta) -> Keyword.get(end_meta, :line)
+      _ -> nil
+    end
   end
 
   def issue_for(check, name, lines, max, {meta, filename}) do

@@ -1,7 +1,10 @@
 defmodule El.Host do
   @moduledoc false
+  import Keyword, only: [get: 3]
+  import String, only: [contains?: 2]
+
   def host(opts \\ []) do
-    env_module = Keyword.get(opts, :env_module, El.Infra.Env)
+    env_module = get(opts, :env_module, El.Infra.Env)
     env_module.get("EL_HOST") |> default_host()
   end
 
@@ -9,7 +12,7 @@ defmodule El.Host do
   defp default_host(h), do: h
 
   def naming_mode(h) do
-    pick_naming_mode(String.contains?(h, "."))
+    pick_naming_mode(contains?(h, "."))
   end
 
   defp pick_naming_mode(true), do: :longnames

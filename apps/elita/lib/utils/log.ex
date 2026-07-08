@@ -1,7 +1,7 @@
 defmodule Log do
-  import Utils.Yaml, only: [yaml: 1]
-  import String, only: [contains?: 2]
   import IO, only: [puts: 1]
+  import String, only: [contains?: 2]
+  import Utils.Yaml, only: [yaml: 1]
 
   @colors %{
     green: 82,

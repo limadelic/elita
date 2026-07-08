@@ -1,5 +1,6 @@
 defmodule BossUnitTest do
   use Tester
+
   @moduletag :main
   @moduletag :spec
 
@@ -48,7 +49,11 @@ defmodule BossUnitTest do
       tell(:michael, "you manage dwight the assistant regional manager")
       tell(:dwight, "you manage pam the receptionist and jim the salesman")
 
-      verify(:michael, "done", "we need 50 copies of the quarterly sales report")
+      verify(
+        :michael,
+        "done",
+        "we need 50 copies of the quarterly sales report"
+      )
 
       wait_until(:pam, "receive a task to make 50 copies")
 

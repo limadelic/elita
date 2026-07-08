@@ -1,12 +1,13 @@
 defmodule NapoContractTest do
   use Tester
+
   @moduletag timeout: 180_000
 
   setup do
     System.put_env("LIVE", "1")
     System.put_env("CASSETTE", "sample")
 
-    unless System.get_env("TAPE") do
+    if !System.get_env("TAPE") do
       System.put_env("TAPE", "replay")
     end
 
@@ -257,7 +258,8 @@ defmodule NapoContractTest do
     tree_operational = read_mem("tree_operational")
     tree_combo = read_mem("tree_combo")
 
-    if present?(tree_financial) && present?(tree_liability) && present?(tree_operational) &&
+    if present?(tree_financial) && present?(tree_liability) &&
+         present?(tree_operational) &&
          present?(tree_combo) do
       assert is_binary(tree_financial), "tree_financial should be binary"
       assert is_binary(tree_liability), "tree_liability should be binary"
@@ -286,7 +288,8 @@ defmodule NapoContractTest do
     tree_o2 = read_mem("tree_o2")
     tree_combo2 = read_mem("tree_combo2")
 
-    if present?(tree_f2) && present?(tree_l2) && present?(tree_o2) && present?(tree_combo2) do
+    if present?(tree_f2) && present?(tree_l2) && present?(tree_o2) &&
+         present?(tree_combo2) do
       assert is_binary(tree_f2), "tree_f2 should be binary"
       assert is_binary(tree_l2), "tree_l2 should be binary"
       assert is_binary(tree_o2), "tree_o2 should be binary"
@@ -314,7 +317,8 @@ defmodule NapoContractTest do
     tree_o3 = read_mem("tree_o3")
     tree_combo3 = read_mem("tree_combo3")
 
-    if present?(tree_f3) && present?(tree_l3) && present?(tree_o3) && present?(tree_combo3) do
+    if present?(tree_f3) && present?(tree_l3) && present?(tree_o3) &&
+         present?(tree_combo3) do
       assert is_binary(tree_f3), "tree_f3 should be binary"
       assert is_binary(tree_l3), "tree_l3 should be binary"
       assert is_binary(tree_o3), "tree_o3 should be binary"
@@ -364,19 +368,34 @@ defmodule NapoContractTest do
     count = 0
 
     count =
-      if String.contains?(combo_text, ["financial", "salary", "compensation", "overtime"]),
-        do: count + 1,
-        else: count
+      if String.contains?(combo_text, [
+           "financial",
+           "salary",
+           "compensation",
+           "overtime"
+         ]),
+         do: count + 1,
+         else: count
 
     count =
-      if String.contains?(combo_text, ["liability", "dispute", "arbitration", "non-compete"]),
-        do: count + 1,
-        else: count
+      if String.contains?(combo_text, [
+           "liability",
+           "dispute",
+           "arbitration",
+           "non-compete"
+         ]),
+         do: count + 1,
+         else: count
 
     count =
-      if String.contains?(combo_text, ["operational", "hours", "remote", "probation"]),
-        do: count + 1,
-        else: count
+      if String.contains?(combo_text, [
+           "operational",
+           "hours",
+           "remote",
+           "probation"
+         ]),
+         do: count + 1,
+         else: count
 
     count
   end
@@ -385,19 +404,34 @@ defmodule NapoContractTest do
     count = 0
 
     count =
-      if String.contains?(combo_text, ["pricing", "upfront", "payment", "refundable"]),
-        do: count + 1,
-        else: count
-
-    count =
-      if String.contains?(combo_text, ["indemnity", "indemnification", "liability", "negligence"]),
+      if String.contains?(combo_text, [
+           "pricing",
+           "upfront",
+           "payment",
+           "refundable"
+         ]),
          do: count + 1,
          else: count
 
     count =
-      if String.contains?(combo_text, ["auto-renewal", "uptime", "sla", "service level"]),
-        do: count + 1,
-        else: count
+      if String.contains?(combo_text, [
+           "indemnity",
+           "indemnification",
+           "liability",
+           "negligence"
+         ]),
+         do: count + 1,
+         else: count
+
+    count =
+      if String.contains?(combo_text, [
+           "auto-renewal",
+           "uptime",
+           "sla",
+           "service level"
+         ]),
+         do: count + 1,
+         else: count
 
     count
   end
@@ -406,19 +440,34 @@ defmodule NapoContractTest do
     count = 0
 
     count =
-      if String.contains?(combo_text, ["triple-net", "cam", "taxes", "insurance"]),
-        do: count + 1,
-        else: count
-
-    count =
-      if String.contains?(combo_text, ["personal guarantee", "indemnity", "eviction", "liability"]),
+      if String.contains?(combo_text, [
+           "triple-net",
+           "cam",
+           "taxes",
+           "insurance"
+         ]),
          do: count + 1,
          else: count
 
     count =
-      if String.contains?(combo_text, ["sublease", "renewal", "termination", "maintenance"]),
-        do: count + 1,
-        else: count
+      if String.contains?(combo_text, [
+           "personal guarantee",
+           "indemnity",
+           "eviction",
+           "liability"
+         ]),
+         do: count + 1,
+         else: count
+
+    count =
+      if String.contains?(combo_text, [
+           "sublease",
+           "renewal",
+           "termination",
+           "maintenance"
+         ]),
+         do: count + 1,
+         else: count
 
     count
   end

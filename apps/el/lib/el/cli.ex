@@ -1,67 +1,68 @@
 defmodule El.CLI do
   import Application, only: [ensure_all_started: 1]
   import IO, only: [puts: 1]
+  import El.Command
 
-  alias El.Commands.Ask
-  alias El.Commands.Tell
-  alias El.Commands.Claude
-  alias El.Commands.Ls
-  alias El.Distribution
+  @usage """
+  Usage:
+    el ask <agent> <message>
+    el tell <agent> <message>
+    el spawn <name> <agent>
+    el [tool] ask <agent> <message>
+    el [tool] tell <agent> <message>
+    el claude [name]
+    el ls
+    el cd <path>
+    el daemon
+  """
+
+  @known_tools ["claude", "codex"]
 
   def main(argv) do
     ensure_all_started(:elita)
-
-    argv
-    |> parse()
-    |> execute()
+    dispatch(argv)
   end
 
-  defp parse(["ask", agent, msg]) do
-    {:ask, agent, msg}
+  defp dispatch(argv) do
+    argv |> parse() |> run()
   end
 
-  defp parse(["tell", agent, msg]) do
-    {:tell, agent, msg}
+  defp parse(["ask", agent, msg]), do: {:ask, nil, agent, msg}
+  defp parse(["tell", agent, msg]), do: {:tell, nil, agent, msg}
+  defp parse(["spawn", name, agent]), do: {:spawn, name, agent}
+
+  defp parse([tool, "ask", agent, msg]) do
+    check(tool, {:ask, tool, agent, msg})
   end
 
-  defp parse(["claude"]) do
-    {:claude, :default}
+  defp parse([tool, "tell", agent, msg]) do
+    check(tool, {:tell, tool, agent, msg})
   end
 
-  defp parse(["claude", name]) do
-    {:claude, name}
+  defp parse(["claude"]), do: {:claude, :default}
+  defp parse(["claude", name]), do: {:claude, name}
+  defp parse(["ls"]), do: {:ls, nil}
+  defp parse(["ls", path]), do: {:ls, path}
+  defp parse(["cd", path]), do: {:cd, path}
+  defp parse(["daemon"]), do: :daemon
+  defp parse(_), do: :usage
+
+  defp check(tool, cmd) when tool in @known_tools, do: cmd
+  defp check(tool, _cmd), do: {:unknown_tool, tool}
+
+  defp run(:usage) do
+    @usage |> puts()
   end
 
-  defp parse(["ls"]) do
-    :ls
+  defp run({:unknown_tool, tool}) do
+    puts("unknown tool: #{tool}")
   end
 
-  defp parse(_) do
-    :usage
-  end
-
-  defp execute(:usage) do
-    puts("Usage:")
-    puts("  el ask <agent> <message>")
-    puts("  el tell <agent> <message>")
-    puts("  el claude [name]")
-    puts("  el ls")
-  end
-
-  defp execute({:ask, agent, msg}) do
-    Ask.execute(agent, msg)
-  end
-
-  defp execute({:tell, agent, msg}) do
-    Tell.execute(agent, msg)
-  end
-
-  defp execute({:claude, name}) do
-    Claude.execute(name)
-  end
-
-  defp execute(:ls) do
-    Distribution.start()
-    Ls.execute()
-  end
+  defp run({:ask, tool, agent, msg}), do: ask(agent, msg, tool)
+  defp run({:tell, tool, agent, msg}), do: tell(agent, msg, tool)
+  defp run({:spawn, name, agent}), do: spawn(name, agent)
+  defp run({:claude, name}), do: claude(name)
+  defp run({:ls, path}), do: ls(path)
+  defp run({:cd, path}), do: cd(path)
+  defp run(:daemon), do: daemon()
 end

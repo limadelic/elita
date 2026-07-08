@@ -1,5 +1,6 @@
 defmodule TttUnitTest do
   use Tester
+
   @moduletag :main
 
   setup do
@@ -19,7 +20,8 @@ defmodule TttUnitTest do
     tell(:bob, "alice is gonna be your opponent, wait for her move")
     tell(:alice, "start a game with bob, you are X, play first")
 
-    result = ask(:alice, "tell me: did the game finish and was it a win or tie?")
+    result =
+      ask(:alice, "tell me: did the game finish and was it a win or tie?")
 
     judge(result, "the game finished with a winner or a tie")
   end

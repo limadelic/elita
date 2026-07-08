@@ -1,10 +1,11 @@
 defmodule Cfgs do
   import Enum, only: [map: 2, reject: 2, flat_map: 2, uniq: 1]
+  import List, only: [flatten: 1]
   import Map, only: [get: 3]
 
   def config(names) when is_list(names) do
     names
-    |> expand
+    |> expand()
     |> map(&Cfg.config/1)
   end
 
@@ -24,7 +25,7 @@ defmodule Cfgs do
   defp gather_deps(list) do
     list
     |> map(&deps/1)
-    |> List.flatten()
+    |> flatten()
     |> reject(&(&1 in list))
   end
 

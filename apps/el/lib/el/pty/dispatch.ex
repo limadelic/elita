@@ -1,0 +1,71 @@
+defmodule El.Pty.Dispatch do
+  @moduledoc false
+  import El.Trace
+  import El.Pty.Handler
+  import El.Pty.Cleanup
+  import List
+  import Enum
+
+  def info({pty, {:data, data}}, state) do
+    process(pty, data, state)
+    {:noreply, state}
+  end
+
+  def info({:stdin, data}, %{pty: pty, port: port, input: input} = state) do
+    log_chunk(data)
+    process_input(port, pty, input.(data))
+    {:noreply, state}
+  end
+
+  def info({pty, {:exit_status, _}}, %{pty: pty} = state) do
+    finish(state)
+    {:stop, :normal, state}
+  end
+
+  def info({:EXIT, _pid, :normal}, state) do
+    {:noreply, state}
+  end
+
+  def info({:EXIT, _pid, reason}, %{os_pid: os_pid} = state) do
+    kill_group(os_pid)
+    {:stop, reason, state}
+  end
+
+  def info({pty, :closed}, %{pty: pty, os_pid: os_pid} = state) do
+    kill_group(os_pid)
+    {:stop, :normal, state}
+  end
+
+  def call({:tap, pid}, %{taps: taps} = state) do
+    {:reply, :ok, %{state | taps: [pid | taps]}}
+  end
+
+  def call({:untap, pid}, %{taps: taps} = state) do
+    {:reply, :ok, %{state | taps: delete(taps, pid)}}
+  end
+
+  def cast({:inject, msg}, %{pty: pty, port: port} = state) do
+    log_chunk(msg)
+    port.command(pty, msg)
+    {:noreply, state}
+  end
+
+  defp broadcast(taps, data) do
+    each(taps, fn pid -> send(pid, {:output, data}) end)
+  end
+
+  defp cleanup(os_pid, file, out) do
+    kill_group(os_pid)
+    file.close(out)
+  end
+
+  defp process(pty, data, %{port: port, file: file, out: out, taps: taps} = state) do
+    file.write(out, data)
+    broadcast(taps, data)
+    handle_dsr_response(port, pty, data, state)
+  end
+
+  defp finish(%{os_pid: os_pid, file: file, out: out}) do
+    cleanup(os_pid, file, out)
+  end
+end

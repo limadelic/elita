@@ -6,7 +6,7 @@ defmodule Llm do
 
   defp llm_impl(arg) do
     get_env("LLM", "lite")
-    |> select_backend
+    |> select_backend()
     |> apply(:llm, [arg])
   end
 

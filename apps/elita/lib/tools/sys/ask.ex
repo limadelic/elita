@@ -1,14 +1,18 @@
 defmodule Tools.Sys.Ask.Schema do
   def get(name, _state) do
-    %{
-      name: name,
-      description: "Ask question to another agent and get response",
-      parameters: params()
-    }
+    %{name: name, description: description(), parameters: params()}
+  end
+
+  defp description do
+    "Ask question to another agent and get response"
   end
 
   defp params do
-    %{type: "object", properties: properties(), required: ["recipient", "question"]}
+    %{type: "object", properties: properties(), required: required()}
+  end
+
+  defp required do
+    ["recipient", "question"]
   end
 
   defp properties do
@@ -20,42 +24,17 @@ defmodule Tools.Sys.Ask.Schema do
 end
 
 defmodule Tools.Sys.Ask do
+  import Agent.Harness, only: [dispatch: 3]
   import Log, only: [log: 5]
-  import Agent.Registry, only: [lookup: 1]
-  import Agent.Session, only: [ask: 2]
-  import Tools.Sys.Safe, only: [call: 2]
 
   defdelegate spec(name, state), to: Tools.Sys.Ask.Schema, as: :get
 
   def exec(_, %{"recipient" => recipient, "question" => question}, %{name: sender} = state) do
     log("🤔", "#{sender} → #{recipient}", ": ", question, :green)
-    response = route(recipient, question)
-    {response, state}
+    {dispatch(recipient, question, :ask), state}
   end
 
   def exec(_, _args, state) do
     {"ask needs recipient and question", state}
-  end
-
-  defp route(recipient, question) do
-    lookup(String.to_atom(recipient))
-    |> handle(recipient, question)
-  end
-
-  defp handle({:ok, {_pid, nil}}, recipient, question) do
-    Elita.call(String.to_atom(recipient), question)
-  end
-
-  defp handle({:ok, {pid, _folder}}, _recipient, question) do
-    {:ok, response} = ask(pid, question)
-    response
-  end
-
-  defp handle({:error, :not_found}, recipient, question) do
-    guard(recipient, question)
-  end
-
-  defp guard(recipient, question) do
-    call(fn -> Elita.call(String.to_atom(recipient), question) end, "agent not found")
   end
 end

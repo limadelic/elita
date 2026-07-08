@@ -5,6 +5,13 @@
 - gates met + progress = commit push wip
 - NO worktrees, one tree, one change at a time
 
+# Testing
+
+- NO unit tests, NO test-per-module PERIOD
+- tests express business behavior in business language
+- ONE acceptance flow per feature slice, extend existing flows, never a new file zoo
+- $0 tape replay always; one live confirm at the very end only
+
 # Code Styles
 
 - use single words ALWAYS (no compound words)

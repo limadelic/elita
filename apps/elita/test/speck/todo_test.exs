@@ -1,5 +1,6 @@
 defmodule SpecTodoTest do
   use Tester
+
   @moduletag :live
   @moduletag :spec
   @moduletag timeout: 1_200_000
@@ -8,7 +9,7 @@ defmodule SpecTodoTest do
     System.put_env("LIVE", "1")
     System.put_env("CASSETTE", "todo_speck")
 
-    unless System.get_env("TAPE") do
+    if !System.get_env("TAPE") do
       System.put_env("TAPE", "replay")
     end
 

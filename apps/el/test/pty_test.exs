@@ -82,91 +82,109 @@ defmodule PtyTest do
   end
 
   test "init opens port with script wrapper", %{agent: agent} do
-    {:ok, pid} = El.Pty.start_link(
-      :test_pty,
-      "mycmd",
-      file: FakeFile,
-      port: FakePort
-    )
+    {:ok, pid} =
+      El.Pty.start_link(
+        :test_pty,
+        "mycmd",
+        file: FakeFile,
+        port: FakePort
+      )
 
     Process.sleep(50)
 
     calls = get_calls(agent)
+
     assert Enum.any?(calls, fn
-      {:port_open, {{:spawn_executable, "/usr/bin/script"}, opts}} ->
-        Enum.any?(opts, fn
-          {:args, ["-q", "/dev/null", "sh", "-c", _]} -> true
-          _ -> false
-        end)
-      _ -> false
-    end)
+             {:port_open, {{:spawn_executable, "/usr/bin/script"}, opts}} ->
+               Enum.any?(opts, fn
+                 {:args, ["-q", "/dev/null", "sh", "-c", _]} -> true
+                 _ -> false
+               end)
+
+             _ ->
+               false
+           end)
 
     GenServer.stop(pid)
   end
 
   test "init applies terminal size via stty", %{agent: agent} do
-    {:ok, pid} = El.Pty.start_link(
-      :test_pty,
-      "mycmd",
-      file: FakeFile,
-      port: FakePort,
-      get_size: fn -> {42, 100} end
-    )
+    {:ok, pid} =
+      El.Pty.start_link(
+        :test_pty,
+        "mycmd",
+        file: FakeFile,
+        port: FakePort,
+        get_size: fn -> {42, 100} end
+      )
 
     Process.sleep(50)
 
     calls = get_calls(agent)
+
     assert Enum.any?(calls, fn
-      {:port_open, {{:spawn_executable, "/usr/bin/script"}, opts}} ->
-        Enum.any?(opts, fn
-          {:args, ["-q", "/dev/null", "sh", "-c", cmd]} ->
-            String.contains?(cmd, "stty rows 42 cols 100") and String.contains?(cmd, "exec mycmd")
-          _ -> false
-        end)
-      _ -> false
-    end)
+             {:port_open, {{:spawn_executable, "/usr/bin/script"}, opts}} ->
+               Enum.any?(opts, fn
+                 {:args, ["-q", "/dev/null", "sh", "-c", cmd]} ->
+                   String.contains?(cmd, "stty rows 42 cols 100") and
+                     String.contains?(cmd, "exec mycmd")
+
+                 _ ->
+                   false
+               end)
+
+             _ ->
+               false
+           end)
 
     GenServer.stop(pid)
   end
 
   test "init opens tty for write", %{agent: agent} do
-    {:ok, pid} = El.Pty.start_link(
-      :test_pty,
-      "mycmd",
-      file: FakeFile,
-      port: FakePort
-    )
+    {:ok, pid} =
+      El.Pty.start_link(
+        :test_pty,
+        "mycmd",
+        file: FakeFile,
+        port: FakePort
+      )
 
     Process.sleep(50)
 
     calls = get_calls(agent)
+
     assert Enum.any?(calls, fn
-      {:file_open, {"/dev/tty", [:write, :binary, :raw]}} -> true
-      _ -> false
-    end)
+             {:file_open, {"/dev/tty", [:write, :binary, :raw]}} -> true
+             _ -> false
+           end)
 
     GenServer.stop(pid)
   end
 
   test "init spawns read loop that opens tty for read", %{agent: agent} do
-    {:ok, pid} = El.Pty.start_link(
-      :test_pty,
-      "mycmd",
-      file: FakeFile,
-      port: FakePort
-    )
+    {:ok, pid} =
+      El.Pty.start_link(
+        :test_pty,
+        "mycmd",
+        file: FakeFile,
+        port: FakePort
+      )
 
     Process.sleep(50)
 
     calls = get_calls(agent)
-    write_opens = Enum.filter(calls, fn
-      {:file_open, {"/dev/tty", [:write, :binary, :raw]}} -> true
-      _ -> false
-    end)
-    read_opens = Enum.filter(calls, fn
-      {:file_open, {"/dev/tty", [:read, :binary, :raw]}} -> true
-      _ -> false
-    end)
+
+    write_opens =
+      Enum.filter(calls, fn
+        {:file_open, {"/dev/tty", [:write, :binary, :raw]}} -> true
+        _ -> false
+      end)
+
+    read_opens =
+      Enum.filter(calls, fn
+        {:file_open, {"/dev/tty", [:read, :binary, :raw]}} -> true
+        _ -> false
+      end)
 
     assert write_opens != []
     assert read_opens != []
@@ -175,12 +193,13 @@ defmodule PtyTest do
   end
 
   test "port data message writes to tty", %{agent: agent} do
-    {:ok, pid} = El.Pty.start_link(
-      :test_pty,
-      "mycmd",
-      file: FakeFile,
-      port: FakePort
-    )
+    {:ok, pid} =
+      El.Pty.start_link(
+        :test_pty,
+        "mycmd",
+        file: FakeFile,
+        port: FakePort
+      )
 
     Process.sleep(50)
     clear_calls(agent)
@@ -190,21 +209,23 @@ defmodule PtyTest do
     Process.sleep(50)
 
     calls = get_calls(agent)
+
     assert Enum.any?(calls, fn
-      {:file_write, {{:fake_file, "/dev/tty"}, "hello"}} -> true
-      _ -> false
-    end)
+             {:file_write, {{:fake_file, "/dev/tty"}, "hello"}} -> true
+             _ -> false
+           end)
 
     GenServer.stop(pid)
   end
 
   test "stdin message sends to port", %{agent: agent} do
-    {:ok, pid} = El.Pty.start_link(
-      :test_pty,
-      "mycmd",
-      file: FakeFile,
-      port: FakePort
-    )
+    {:ok, pid} =
+      El.Pty.start_link(
+        :test_pty,
+        "mycmd",
+        file: FakeFile,
+        port: FakePort
+      )
 
     Process.sleep(50)
     clear_calls(agent)
@@ -214,21 +235,23 @@ defmodule PtyTest do
     Process.sleep(50)
 
     calls = get_calls(agent)
+
     assert Enum.any?(calls, fn
-      {:port_command, {:fake_port, "data"}} -> true
-      _ -> false
-    end)
+             {:port_command, {:fake_port, "data"}} -> true
+             _ -> false
+           end)
 
     GenServer.stop(pid)
   end
 
   test "inject sends to port", %{agent: agent} do
-    {:ok, pid} = El.Pty.start_link(
-      :test_pty,
-      "mycmd",
-      file: FakeFile,
-      port: FakePort
-    )
+    {:ok, pid} =
+      El.Pty.start_link(
+        :test_pty,
+        "mycmd",
+        file: FakeFile,
+        port: FakePort
+      )
 
     Process.sleep(50)
     clear_calls(agent)
@@ -238,21 +261,23 @@ defmodule PtyTest do
     Process.sleep(50)
 
     calls = get_calls(agent)
+
     assert Enum.any?(calls, fn
-      {:port_command, {:fake_port, "injected"}} -> true
-      _ -> false
-    end)
+             {:port_command, {:fake_port, "injected"}} -> true
+             _ -> false
+           end)
 
     GenServer.stop(pid)
   end
 
   test "exit_status stops normally and closes tty", %{agent: agent} do
-    {:ok, pid} = El.Pty.start_link(
-      :test_pty,
-      "mycmd",
-      file: FakeFile,
-      port: FakePort
-    )
+    {:ok, pid} =
+      El.Pty.start_link(
+        :test_pty,
+        "mycmd",
+        file: FakeFile,
+        port: FakePort
+      )
 
     Process.sleep(50)
 
@@ -263,21 +288,23 @@ defmodule PtyTest do
     Process.sleep(50)
 
     calls = get_calls(agent)
+
     assert Enum.any?(calls, fn
-      {:file_close, {:fake_file, "/dev/tty"}} -> true
-      _ -> false
-    end)
+             {:file_close, {:fake_file, "/dev/tty"}} -> true
+             _ -> false
+           end)
 
     assert_receive {:DOWN, ^ref, :process, ^pid, :normal}, 1000
   end
 
   test "exit_status captures and kills process group", %{agent: agent} do
-    {:ok, pid} = El.Pty.start_link(
-      :test_pty,
-      "mycmd",
-      file: FakeFile,
-      port: FakePort
-    )
+    {:ok, pid} =
+      El.Pty.start_link(
+        :test_pty,
+        "mycmd",
+        file: FakeFile,
+        port: FakePort
+      )
 
     Process.sleep(50)
 
@@ -288,10 +315,11 @@ defmodule PtyTest do
     Process.sleep(50)
 
     calls = get_calls(agent)
+
     assert Enum.any?(calls, fn
-      {:port_info, {:fake_port, :os_pid}} -> true
-      _ -> false
-    end)
+             {:port_info, {:fake_port, :os_pid}} -> true
+             _ -> false
+           end)
 
     assert_receive {:DOWN, ^ref, :process, ^pid, :normal}, 1000
   end
@@ -299,13 +327,14 @@ defmodule PtyTest do
   test "input hook transforms stdin bytes before port.command", %{agent: agent} do
     upcase = fn bytes -> String.upcase(bytes) end
 
-    {:ok, pid} = El.Pty.start_link(
-      :test_pty,
-      "mycmd",
-      file: FakeFile,
-      port: FakePort,
-      input: upcase
-    )
+    {:ok, pid} =
+      El.Pty.start_link(
+        :test_pty,
+        "mycmd",
+        file: FakeFile,
+        port: FakePort,
+        input: upcase
+      )
 
     Process.sleep(50)
     clear_calls(agent)
@@ -315,10 +344,11 @@ defmodule PtyTest do
     Process.sleep(50)
 
     calls = get_calls(agent)
+
     assert Enum.any?(calls, fn
-      {:port_command, {:fake_port, "HELLO"}} -> true
-      _ -> false
-    end)
+             {:port_command, {:fake_port, "HELLO"}} -> true
+             _ -> false
+           end)
 
     GenServer.stop(pid)
   end
@@ -326,13 +356,14 @@ defmodule PtyTest do
   test "input :drop suppresses stdin bytes", %{agent: agent} do
     drop_all = fn _bytes -> :drop end
 
-    {:ok, pid} = El.Pty.start_link(
-      :test_pty,
-      "mycmd",
-      file: FakeFile,
-      port: FakePort,
-      input: drop_all
-    )
+    {:ok, pid} =
+      El.Pty.start_link(
+        :test_pty,
+        "mycmd",
+        file: FakeFile,
+        port: FakePort,
+        input: drop_all
+      )
 
     Process.sleep(50)
     clear_calls(agent)
@@ -342,21 +373,23 @@ defmodule PtyTest do
     Process.sleep(50)
 
     calls = get_calls(agent)
-    assert !Enum.any?(calls, fn
-      {:port_command, {:fake_port, _}} -> true
-      _ -> false
-    end)
+
+    refute Enum.any?(calls, fn
+             {:port_command, {:fake_port, _}} -> true
+             _ -> false
+           end)
 
     GenServer.stop(pid)
   end
 
   test "default input is identity", %{agent: agent} do
-    {:ok, pid} = El.Pty.start_link(
-      :test_pty,
-      "mycmd",
-      file: FakeFile,
-      port: FakePort
-    )
+    {:ok, pid} =
+      El.Pty.start_link(
+        :test_pty,
+        "mycmd",
+        file: FakeFile,
+        port: FakePort
+      )
 
     Process.sleep(50)
     clear_calls(agent)
@@ -366,10 +399,11 @@ defmodule PtyTest do
     Process.sleep(50)
 
     calls = get_calls(agent)
+
     assert Enum.any?(calls, fn
-      {:port_command, {:fake_port, "untouched"}} -> true
-      _ -> false
-    end)
+             {:port_command, {:fake_port, "untouched"}} -> true
+             _ -> false
+           end)
 
     GenServer.stop(pid)
   end
@@ -377,13 +411,14 @@ defmodule PtyTest do
   test "taps receive output chunks", %{agent: _agent} do
     caller = self()
 
-    {:ok, pid} = El.Pty.start_link(
-      :test_pty,
-      "mycmd",
-      file: FakeFile,
-      port: FakePort,
-      taps: [caller]
-    )
+    {:ok, pid} =
+      El.Pty.start_link(
+        :test_pty,
+        "mycmd",
+        file: FakeFile,
+        port: FakePort,
+        taps: [caller]
+      )
 
     Process.sleep(50)
 
@@ -399,13 +434,14 @@ defmodule PtyTest do
   test "inject bypasses input hook", %{agent: agent} do
     upcase = fn bytes -> String.upcase(bytes) end
 
-    {:ok, pid} = El.Pty.start_link(
-      :test_pty,
-      "mycmd",
-      file: FakeFile,
-      port: FakePort,
-      input: upcase
-    )
+    {:ok, pid} =
+      El.Pty.start_link(
+        :test_pty,
+        "mycmd",
+        file: FakeFile,
+        port: FakePort,
+        input: upcase
+      )
 
     Process.sleep(50)
     clear_calls(agent)
@@ -415,10 +451,11 @@ defmodule PtyTest do
     Process.sleep(50)
 
     calls = get_calls(agent)
+
     assert Enum.any?(calls, fn
-      {:port_command, {:fake_port, "injected"}} -> true
-      _ -> false
-    end)
+             {:port_command, {:fake_port, "injected"}} -> true
+             _ -> false
+           end)
 
     GenServer.stop(pid)
   end
@@ -426,13 +463,14 @@ defmodule PtyTest do
   test "dsr responses unaffected by taps", %{agent: agent} do
     caller = self()
 
-    {:ok, pid} = El.Pty.start_link(
-      :test_pty,
-      "mycmd",
-      file: FakeFile,
-      port: FakePort,
-      taps: [caller]
-    )
+    {:ok, pid} =
+      El.Pty.start_link(
+        :test_pty,
+        "mycmd",
+        file: FakeFile,
+        port: FakePort,
+        taps: [caller]
+      )
 
     Process.sleep(50)
     clear_calls(agent)
@@ -442,10 +480,12 @@ defmodule PtyTest do
     Process.sleep(50)
 
     calls = get_calls(agent)
-    dsr_responses = Enum.filter(calls, fn
-      {:port_command, {:fake_port, _}} -> true
-      _ -> false
-    end)
+
+    dsr_responses =
+      Enum.filter(calls, fn
+        {:port_command, {:fake_port, _}} -> true
+        _ -> false
+      end)
 
     assert dsr_responses != []
 
@@ -453,15 +493,18 @@ defmodule PtyTest do
   end
 
   test "traces stdin data when EL_TRACE set" do
-    trace_file = Path.join(System.tmp_dir!(), "pty_trace_#{System.unique_integer()}.log")
+    trace_file =
+      Path.join(System.tmp_dir!(), "pty_trace_#{System.unique_integer()}.log")
+
     System.put_env("EL_TRACE", trace_file)
 
-    {:ok, pid} = El.Pty.start_link(
-      :test_pty,
-      "mycmd",
-      file: FakeFile,
-      port: FakePort
-    )
+    {:ok, pid} =
+      El.Pty.start_link(
+        :test_pty,
+        "mycmd",
+        file: FakeFile,
+        port: FakePort
+      )
 
     Process.sleep(50)
 
@@ -479,15 +522,21 @@ defmodule PtyTest do
   end
 
   test "traces inject data when EL_TRACE set" do
-    trace_file = Path.join(System.tmp_dir!(), "pty_inject_trace_#{System.unique_integer()}.log")
+    trace_file =
+      Path.join(
+        System.tmp_dir!(),
+        "pty_inject_trace_#{System.unique_integer()}.log"
+      )
+
     System.put_env("EL_TRACE", trace_file)
 
-    {:ok, pid} = El.Pty.start_link(
-      :test_pty,
-      "mycmd",
-      file: FakeFile,
-      port: FakePort
-    )
+    {:ok, pid} =
+      El.Pty.start_link(
+        :test_pty,
+        "mycmd",
+        file: FakeFile,
+        port: FakePort
+      )
 
     Process.sleep(50)
 
@@ -503,5 +552,4 @@ defmodule PtyTest do
     System.delete_env("EL_TRACE")
     File.rm(trace_file)
   end
-
 end

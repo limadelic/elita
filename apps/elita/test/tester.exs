@@ -1,17 +1,28 @@
 defmodule Tester do
-  require Logger
-  import ExUnit.Assertions
   import Elita, only: [start_link: 2, cast: 2, call: 2]
-  import String, only: [contains?: 2, downcase: 1]
   import Enum, only: [map: 2]
+  import ExUnit.Assertions
   import GenServer, only: [stop: 1]
   import Log, only: [log: 5]
+  import String, only: [contains?: 2, downcase: 1]
+
+  require Logger
 
   defmacro __using__(_opts) do
     quote do
       use ExUnit.Case
+
       import Kernel, except: [spawn: 1, spawn: 2]
       import Tester
+
+      setup context do
+        if context[:live] do
+          System.put_env("LIVE", "1")
+          on_exit(fn -> System.delete_env("LIVE") end)
+        end
+
+        :ok
+      end
     end
   end
 
@@ -35,18 +46,15 @@ defmodule Tester do
   end
 
   defp via(name) do
-    {:via, Registry, {ElitaRegistry, name}}
+    normalized = name |> downcase()
+    {:via, Registry, {ElitaRegistry, normalized, %{kind: :native, folder: nil}}}
   end
 
   defp setup do
-    el_entry = :ets.lookup(:agent_registry, :el)
-    :ets.delete_all_objects(:agent_registry)
-
-    if el_entry != [] do
-      :ets.insert(:agent_registry, el_entry)
+    case Registry.start_link(keys: :unique, name: ElitaRegistry) do
+      {:ok, _pid} -> :ok
+      {:error, {:already_started, _pid}} -> :ok
     end
-
-    :ok
   end
 
   defp name(n), do: to_string(n)
@@ -74,7 +82,8 @@ defmodule Tester do
     prompt = "Result: #{result}\n\nExpectation: #{expectation}"
     verdict = ask(:judge, prompt)
 
-    assert is_binary(verdict), "Expected binary verdict, got: #{inspect(verdict)}"
+    assert is_binary(verdict),
+           "Expected binary verdict, got: #{inspect(verdict)}"
 
     assert downcase(verdict) == "yes",
            "Judge said: #{verdict}. Expectation failed: #{expectation}"

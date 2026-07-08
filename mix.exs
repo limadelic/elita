@@ -29,22 +29,24 @@ defmodule Elita.Umbrella do
   end
 
   defp run_test(_) do
-    cmd1 = "cd apps/elita && mix test"
-    cmd2 = "cd apps/el && mix test"
-    Mix.shell().cmd(cmd1)
-    Mix.shell().cmd(cmd2)
+    check("cd apps/elita && mix test")
+    check("cd apps/el && mix test")
   end
 
   defp run_lint(_) do
-    cmd1 = "cd apps/elita && mix lint"
-    cmd2 = "cd apps/el && mix lint"
-    Mix.shell().cmd(cmd1)
-    Mix.shell().cmd(cmd2)
+    check("cd apps/elita && mix lint")
+    check("cd apps/el && mix lint")
   end
 
   defp run_build(_) do
-    cmd = "cd apps/el && mix escript.build"
-    Mix.shell().cmd(cmd)
+    check("cd apps/el && mix escript.build")
+  end
+
+  defp check(cmd) do
+    case Mix.shell().cmd(cmd) do
+      0 -> :ok
+      _ -> raise Mix.Error, "command failed: #{cmd}"
+    end
   end
 
   defp deps do

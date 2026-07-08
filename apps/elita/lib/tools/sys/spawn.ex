@@ -1,18 +1,17 @@
 defmodule Tools.Sys.Spawn do
   import Elita, only: [start_link: 2]
-  import Agent.Registry, only: [register: 3]
+  import Enum, only: [join: 2]
   import Log, only: [log: 5]
   import Map, only: [get: 2, get: 3]
-  import Enum, only: [join: 2]
-  import String, only: [to_atom: 1]
+
   alias Access
 
   def spec(name, state) do
-    %{
-      name: name,
-      description: "Spawn a new agent.#{help(state)}",
-      parameters: parameters()
-    }
+    %{name: name, description: description(state), parameters: parameters()}
+  end
+
+  defp description(state) do
+    "Spawn a new agent.#{help(state)}"
   end
 
   def exec(_, %{"name" => %{"name" => name} = inner}, state) do
@@ -38,16 +37,20 @@ defmodule Tools.Sys.Spawn do
   defp props do
     %{
       name: %{type: "string", description: "Name for the new agent"},
-      configs: configs_prop()
+      configs: configs()
     }
   end
 
-  defp configs_prop do
-    %{
-      type: "array",
-      items: %{type: "string"},
-      description: "Configs for the agent, defaults to [name]"
-    }
+  defp configs do
+    %{type: "array", items: items(), description: blurb()}
+  end
+
+  defp items do
+    %{type: "string"}
+  end
+
+  defp blurb do
+    "Configs for the agent, defaults to [name]"
   end
 
   defp fetch_configs([_ | _] = list, _name) do
@@ -64,10 +67,10 @@ defmodule Tools.Sys.Spawn do
     {"spawned", state}
   end
 
-  defp started({:ok, pid}, name), do: register(to_atom(name), nil, pid)
+  defp started({:ok, _pid}, _name), do: :ok
 
-  defp started({:error, {:already_started, pid}}, name) do
-    register(to_atom(name), nil, pid)
+  defp started({:error, {:already_started, _pid}}, _name) do
+    :ok
   end
 
   defp log(name, [name]) do

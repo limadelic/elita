@@ -1,8 +1,9 @@
 defmodule Tools.User.Exec do
-  import String, only: [split: 2, trim: 1]
-  import Enum, only: [map: 2, join: 2, at: 2]
   import Code, only: [eval_string: 2]
+  import Enum, only: [map: 2, join: 2, at: 2]
   import Log, only: [log: 5]
+  import String, only: [split: 2, trim: 1, to_atom: 1]
+  import Map, only: [to_list: 1]
 
   def exec(tool, args) when tool != nil do
     log("🛠️", tool.name, ": ", args, :red)
@@ -16,11 +17,7 @@ defmodule Tools.User.Exec do
   defp first([], _, _), do: "No code found"
 
   defp first([code | _], tool, args) do
-    tool.imports
-    |> modules
-    |> imports
-    |> plus(code)
-    |> eval(args, tool.name)
+    tool.imports |> modules() |> imports() |> plus(code) |> eval(args, tool.name)
   end
 
   defp modules(nil), do: []
@@ -34,11 +31,7 @@ defmodule Tools.User.Exec do
   defp imports(module), do: "import #{module}"
 
   defp plus(imports, code) do
-    """
-    #{join(imports, "\n")}
-
-    #{code}
-    """
+    "\n#{join(imports, "\n")}\n\n#{code}\n"
   end
 
   defp eval(text, args, name) do
@@ -56,11 +49,11 @@ defmodule Tools.User.Exec do
   defp result({:error, error, stack}, name), do: failed(error, stack, name)
 
   defp run(text, args) do
-    bindings = args |> Map.to_list() |> map(&atomize_key/1)
+    bindings = to_list(args) |> map(&atomize_key/1)
     result(eval_string(text, bindings))
   end
 
-  defp atomize_key({k, v}) when is_binary(k), do: {String.to_atom(k), v}
+  defp atomize_key({k, v}) when is_binary(k), do: {to_atom(k), v}
   defp atomize_key({k, v}), do: {k, v}
 
   defp result({res, _}), do: res

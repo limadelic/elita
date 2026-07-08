@@ -14,7 +14,9 @@ defmodule El.MixProject do
       build_path: "../../_build",
       config_path: "../../config/config.exs",
       deps_path: "../../deps",
-      lockfile: "../../mix.lock"
+      lockfile: "../../mix.lock",
+      compilers: [:yecc, :leex, :erlang, :elixir, :app],
+      elixirc_options: [warnings_as_errors: true]
     ]
   end
 
@@ -23,7 +25,7 @@ defmodule El.MixProject do
 
   defp aliases do
     [
-      lint: ["credo --strict"]
+      lint: ["format --check-formatted", "credo --strict"]
     ]
   end
 

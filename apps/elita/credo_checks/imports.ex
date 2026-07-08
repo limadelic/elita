@@ -18,15 +18,58 @@ defmodule Elita.Credo.Imports do
   def run(%SourceFile{} = source_file, params) do
     allowlist = Keyword.get(params, :allowlist, [:ets, :erlang, :rand])
     filename = source_file.filename
+    Process.put(:elita_imports, [])
+    Process.put(:elita_aliases, [])
+    Process.put(:elita_local_defs, [])
+    Process.put(:elita_import_names, [])
     Code.prewalk(source_file, &check_call(&1, &2, allowlist, filename))
   end
 
-  defp check_call({{:., meta, [module, _func]}, _call_meta, _args} = ast, issues, allowlist, filename) do
-    # Skip compiler-generated calls (interpolation, bracket access, etc.)
+  defp check_call({:import, _meta, [{:__aliases__, _ma, parts} | rest]} = ast, issues, _allowlist, _filename) do
+    imports = Process.get(:elita_imports) || []
+    Process.put(:elita_imports, [parts | imports])
+    collect_import_only_names(rest)
+    {ast, issues}
+  end
+
+  defp check_call({:alias, _meta, [{:__aliases__, _ma, parts} | rest]} = ast, issues, _allowlist, _filename) do
+    alias_name = extract_alias_name(parts, rest)
+    aliases = Process.get(:elita_aliases) || []
+    Process.put(:elita_aliases, [alias_name | aliases])
+    {ast, issues}
+  end
+
+  defp check_call({:alias, _meta, [{{:., _dm, [{:__aliases__, _ma, _parts}, :{}]}, _call_meta, children}]} = ast, issues, _allowlist, _filename) do
+    aliases = Process.get(:elita_aliases) || []
+    new_aliases = Enum.reduce(children, aliases, fn child, acc ->
+      case child do
+        {:__aliases__, _cm, child_parts} -> [List.last(child_parts) | acc]
+        _ -> acc
+      end
+    end)
+    Process.put(:elita_aliases, new_aliases)
+    {ast, issues}
+  end
+
+  defp check_call({type, _meta, [head | _tail]} = ast, issues, _allowlist, _filename)
+       when type in [:def, :defp, :defmacro] do
+    func_name = extract_function_name(head)
+    if func_name do
+      local_defs = Process.get(:elita_local_defs) || []
+      Process.put(:elita_local_defs, [func_name | local_defs])
+    end
+    {ast, issues}
+  end
+
+  defp check_call({{:., meta, [module, func]}, _call_meta, _args} = ast, issues, allowlist, filename) do
     if Keyword.get(meta, :generated, false) do
       {ast, issues}
     else
-      {ast, maybe_add_issue(module, meta, issues, allowlist, filename)}
+      imports = Process.get(:elita_imports) || []
+      aliases = Process.get(:elita_aliases) || []
+      local_defs = Process.get(:elita_local_defs) || []
+      import_names = Process.get(:elita_import_names) || []
+      {ast, maybe_add_issue(module, func, meta, issues, allowlist, imports, aliases, local_defs, import_names, filename)}
     end
   end
 
@@ -34,40 +77,71 @@ defmodule Elita.Credo.Imports do
     {ast, issues}
   end
 
-  defp maybe_add_issue({:__MODULE__, _meta1}, _meta2, issues, _allowlist, _filename) do
+  defp maybe_add_issue({:__MODULE__, _meta1}, _func, _meta2, issues, _allowlist, _imports, _aliases, _local_defs, _import_names, _filename) do
     issues
   end
 
-  defp maybe_add_issue(:__MODULE__, _meta, issues, _allowlist, _filename) do
+  defp maybe_add_issue(:__MODULE__, _func, _meta, issues, _allowlist, _imports, _aliases, _local_defs, _import_names, _filename) do
     issues
   end
 
-  defp maybe_add_issue({:__aliases__, _meta1, [_module]}, _meta2, issues, _allowlist, _filename) do
-    # Single-segment aliases (e.g., Record.handle via alias Tape.Record) are OK
-    issues
-  end
-
-  defp maybe_add_issue({:__aliases__, _meta, parts}, meta, issues, allowlist, filename)
-       when is_list(parts) and length(parts) > 1 do
-    module_name = Enum.join(Enum.map(parts, &to_string/1), ".")
-    if should_report_nested(module_name, allowlist) do
-      [create_issue(module_name, meta, filename) | issues]
-    else
+  defp maybe_add_issue({:__aliases__, _meta_alias, [module]}, func, meta, issues, allowlist, imports, aliases, local_defs, import_names, filename) when is_atom(module) do
+    if has_collision?(func, local_defs, import_names) or
+       is_imported?([module], imports) or is_aliased?(module, aliases) or not should_report?(module, allowlist) do
       issues
+    else
+      [create_issue(module, meta, filename) | issues]
     end
   end
 
-  defp maybe_add_issue(module, _meta, issues, _allowlist, _filename)
+  defp maybe_add_issue({:__aliases__, _meta, parts}, func, meta, issues, allowlist, imports, aliases, local_defs, import_names, filename)
+       when is_list(parts) and length(parts) > 1 do
+    module_name = Enum.join(Enum.map(parts, &to_string/1), ".")
+    if has_collision?(func, local_defs, import_names) or
+       is_imported_nested?(parts, imports) or is_aliased_nested?(parts, aliases) or not should_report_nested(module_name, allowlist) do
+      issues
+    else
+      [create_issue(module_name, meta, filename) | issues]
+    end
+  end
+
+  defp maybe_add_issue(module, _func, _meta, issues, _allowlist, _imports, _aliases, _local_defs, _import_names, _filename)
        when not is_atom(module) do
     issues
   end
 
-  defp maybe_add_issue(module, meta, issues, allowlist, filename)
+  defp maybe_add_issue(module, func, meta, issues, allowlist, imports, aliases, local_defs, import_names, filename)
        when is_atom(module) do
-    if should_report?(module, allowlist) do
-      [create_issue(module, meta, filename) | issues]
-    else
+    if has_collision?(func, local_defs, import_names) or
+       is_imported?([module], imports) or is_aliased?(module, aliases) or not should_report?(module, allowlist) do
       issues
+    else
+      [create_issue(module, meta, filename) | issues]
+    end
+  end
+
+  defp is_imported?(parts, imports) do
+    Enum.any?(imports, &(&1 == parts))
+  end
+
+  defp is_imported_nested?(parts, imports) do
+    Enum.any?(imports, &(&1 == parts))
+  end
+
+  defp is_aliased?(module, aliases) when is_atom(module) do
+    Enum.any?(aliases, &(&1 == module))
+  end
+
+  defp is_aliased_nested?(parts, aliases) do
+    last_part = List.last(parts)
+    Enum.any?(aliases, &(&1 == last_part))
+  end
+
+  defp extract_alias_name(parts, rest) do
+    case rest do
+      [[as: {:__aliases__, _meta, as_parts}]] -> List.last(as_parts)
+      [[as: as_atom]] when is_atom(as_atom) -> as_atom
+      _ -> List.last(parts)
     end
   end
 
@@ -119,4 +193,47 @@ defmodule Elita.Credo.Imports do
       filename: filename
     }
   end
+
+  defp extract_function_name({:when, _meta, [func_def | _rest]}), do: extract_function_name(func_def)
+  defp extract_function_name({name, _meta, _args}) when is_atom(name), do: name
+  defp extract_function_name(_), do: nil
+
+  defp collect_import_only_names(rest) do
+    case rest do
+      [[only: names]] when is_list(names) ->
+        import_names = Process.get(:elita_import_names) || []
+        collected = Enum.reduce(names, import_names, fn item, acc ->
+          case item do
+            {name, _arity} when is_atom(name) -> [name | acc]
+            name when is_atom(name) -> [name | acc]
+            _ -> acc
+          end
+        end)
+        Process.put(:elita_import_names, collected)
+      _ ->
+        :ok
+    end
+  end
+
+  defp has_collision?(func, local_defs, import_names) when is_atom(func) do
+    has_local_def?(func, local_defs) or has_import_name?(func, import_names) or is_kernel_builtin?(func)
+  end
+
+  defp has_collision?(_func, _local_defs, _import_names), do: false
+
+  defp has_local_def?(func, local_defs) do
+    Enum.any?(local_defs, &(&1 == func))
+  end
+
+  defp has_import_name?(func, import_names) do
+    Enum.any?(import_names, &(&1 == func))
+  end
+
+  defp is_kernel_builtin?(name) when is_atom(name) do
+    funcs = Kernel.__info__(:functions) |> Enum.map(&elem(&1, 0))
+    macros = Kernel.__info__(:macros) |> Enum.map(&elem(&1, 0))
+    Enum.member?(funcs, name) or Enum.member?(macros, name)
+  end
+
+  defp is_kernel_builtin?(_), do: false
 end

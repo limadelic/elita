@@ -4,7 +4,7 @@ defmodule Compose do
 
   def compose([main | rest]) do
     active = [main | reject(rest, &(&1[:active] == false))]
-    active |> headers |> content(active)
+    active |> headers() |> content(active)
   end
 
   defp headers(configs) do
@@ -19,7 +19,7 @@ defmodule Compose do
   end
 
   defp merge_tools(acc, config) do
-    (tools(acc) ++ tools(config)) |> uniq
+    (tools(acc) ++ tools(config)) |> uniq()
   end
 
   defp tools(config) do

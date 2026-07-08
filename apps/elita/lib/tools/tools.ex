@@ -1,15 +1,15 @@
 defmodule Tools do
-  import String, only: [capitalize: 1]
+  import Code, only: [ensure_loaded: 1]
   import Enum, only: [map: 2, reject: 2, map_reduce: 3]
   import Map, only: [put: 3]
   import Module, only: [concat: 1]
-  import Code, only: [ensure_loaded: 1]
+  import String, only: [capitalize: 1]
 
   def tools(%{tools: names}, state) when is_list(names) do
     names
     |> map(&prompt(&1, state))
     |> reject(&is_nil/1)
-    |> wrap
+    |> wrap()
   end
 
   def tools(_, _), do: []

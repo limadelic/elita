@@ -1,80 +1,96 @@
 defmodule El.Commands.Ls do
+  @moduledoc "Lists agents in the current folder with their registration status."
+
+  import El.Commands.Address.World, only: [build: 0, cwd: 0]
+  import Enum, only: [map: 2, sort_by: 2, filter: 2, join: 2, any?: 2]
   import IO, only: [puts: 1]
-  import El.Host, only: [host: 0]
+  import Keyword, only: [get: 2]
+  import Registry, only: [lookup: 2, select: 2]
+  import Glob, only: [hits?: 2]
+  import Resolver, only: [normalize: 2]
+  import String, only: [downcase: 1]
 
   def execute(opts \\ []) do
-    {Keyword.get(opts, :net_adm, :net_adm), Keyword.get(opts, :host, nil),
-     Keyword.get(opts, :filter, &default_filter/1), Keyword.get(opts, :ping, &default_ping/2),
-     Keyword.get(opts, :extract, &default_extract/1)}
-    |> call_build()
+    path = get(opts, :path)
+    render(path) |> puts()
   end
 
-  defp call_build({net_adm, host, filter, ping, extract}) do
-    names = safe_get_names(net_adm, host)
-    display(build_sessions(names, host, filter, ping, extract))
+  def remote(opts \\ []) do
+    path = get(opts, :path)
+    render(path)
   end
 
-  defp build_sessions(names, host, filter, ping, extract) do
-    names
-    |> Enum.filter(fn entry -> alive?(entry, filter, host, ping) end)
-    |> Enum.map(extract)
+  defp render("//") do
+    build()
+    |> filter(&(&1.kind == :node))
+    |> sort_by(& &1.name)
+    |> format_output()
   end
 
-  defp alive?(entry, filter, host, ping) do
-    Enum.all?([filter.(entry), ping.(elem(entry, 0), host) == :pong])
+  defp render(path) do
+    target = normalize(path, cwd())
+    world = build() |> filter(&(&1.kind != :node))
+    visible = entries(world, target)
+    (visible ++ harvest(visible)) |> sort_by(& &1.name) |> format_output()
   end
 
-  defp display([]), do: puts("no sessions")
-  defp display(sessions), do: Enum.each(sessions, &puts/1)
+  defp entries(world, nil), do: world
 
-  defp safe_get_names(net_adm, host) do
-    call_names(net_adm, host) |> handle_names()
-  rescue
-    _ -> []
+  defp entries(world, target) do
+    world |> filter(&match_path?(&1, target))
   end
 
-  defp handle_names({:ok, names}), do: names
-  defp handle_names(names) when is_list(names), do: names
-  defp handle_names(_), do: []
+  defp match_path?(%{path: p}, t) when p == t, do: true
+  defp match_path?(%{path: p}, t), do: hits?(p, t)
+  defp match_path?(_, _), do: false
 
-  defp call_names(net_adm, nil), do: net_adm.names()
-  defp call_names(net_adm, host), do: net_adm.names(host)
-
-  defp default_filter({name, _port}) do
-    name_string(name)
-    |> String.starts_with?("claude_")
+  defp format_output([]) do
+    "no agents"
   end
 
-  defp default_extract({name, _port}) do
-    name_string(name)
-    |> String.replace_prefix("claude_", "")
+  defp format_output(entries) do
+    entries |> map(&format/1) |> join("\n")
   end
 
-  defp name_string(name) when is_atom(name) do
-    Atom.to_string(name)
+  defp format(%{kind: :node} = entry) do
+    "#{entry.name} #{kind_label(entry.kind)}"
   end
 
-  defp name_string(name) when is_list(name) do
-    List.to_string(name)
+  defp format(entry) do
+    "#{entry.name} #{kind_label(entry.kind)} #{status(entry.name)}"
   end
 
-  defp name_string(name) when is_binary(name) do
-    name
+  defp status(name) do
+    normalized = downcase(to_string(name))
+    lookup(ElitaRegistry, normalized) |> map_status()
   end
 
-  defp default_ping(name, host) do
-    node_atom = node_to_atom(name, host)
-    Node.set_cookie(:elita)
-    Node.ping(node_atom)
+  defp map_status([_ | _]), do: "active"
+  defp map_status([]), do: "asleep"
+
+  defp harvest(visible) do
+    names = map(visible, & &1.name)
+    headless(names) |> map(&entry/1)
   end
 
-  defp node_to_atom(name, nil) do
-    name_str = name_string(name)
-    String.to_atom("#{name_str}@#{host()}")
+  defp headless(names) do
+    ElitaRegistry
+    |> select([{{:"$1", :_, %{kind: :headless}}, [], [:"$1"]}])
+    |> filter(&not_in?(names, &1))
   end
 
-  defp node_to_atom(name, host) do
-    name_str = name_string(name)
-    String.to_atom("#{name_str}@#{host}")
+  defp not_in?(list, name) do
+    !any?(list, fn n ->
+      downcase(to_string(n)) == downcase(to_string(name))
+    end)
   end
+
+  defp entry(name) do
+    %{name: to_string(name), path: nil, kind: :session}
+  end
+
+  defp kind_label(:file), do: "file"
+  defp kind_label(:folder), do: "folder"
+  defp kind_label(:session), do: "session"
+  defp kind_label(:node), do: "node"
 end

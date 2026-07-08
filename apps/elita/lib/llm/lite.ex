@@ -5,6 +5,7 @@ defmodule Lite do
   import Enum, only: [map: 2, find_value: 2]
   import System, only: [get_env: 1, get_env: 2]
   import Map, only: [put: 3, delete: 2]
+  import List, only: [pop_at: 2]
   import Req, only: [post: 2]
   import Application, only: [get_env: 3]
   @cache_key %{type: "ephemeral"}
@@ -40,8 +41,11 @@ defmodule Lite do
 
   defp base(composed, history, %{name: agent_name}) do
     text = snip(composed.content, composed[:import]) <> " Your name is #{agent_name}."
+    decorate(%{model: model(), max_tokens: 4096}, text, history)
+  end
 
-    %{model: model(), max_tokens: 4096}
+  defp decorate(base, text, history) do
+    base
     |> put(:system, [%{type: "text", text: text, cache_control: @cache_key}])
     |> put(:messages, history)
   end
@@ -54,7 +58,7 @@ defmodule Lite do
   defp add_tools(base, _), do: base
 
   defp cache(tools) do
-    {last, init} = List.pop_at(tools, -1)
+    {last, init} = pop_at(tools, -1)
     apply_cache(last, init, tools)
   end
 

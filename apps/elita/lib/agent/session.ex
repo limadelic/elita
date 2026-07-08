@@ -1,23 +1,40 @@
 defmodule Agent.Session do
   use GenServer
-  require Logger
-  import GenServer, only: [start_link: 3, call: 3]
-  import String, only: [trim: 1]
-  import Port, only: [open: 2, close: 1]
-  import System, only: [find_executable: 1]
-  import Logger, only: [error: 1, warning: 1]
-  import Keyword, only: [fetch!: 2, get: 3]
 
-  def start_link(opts), do: start_link(__MODULE__, opts, [])
+  import Agent.Spawn, only: [run: 2]
+  import GenServer, only: [start_link: 3, call: 3]
+  import Keyword, only: [fetch!: 2, get: 3]
+  import Map, only: [put: 3]
+  import String, only: [downcase: 1]
+
+  def start_link(opts) do
+    folder = fetch!(opts, :folder)
+    normalized = normalize(opts)
+    via = via(normalized, folder)
+    start_link(__MODULE__, opts, name: via)
+  end
+
+  defp normalize(opts) do
+    fetch!(opts, :name) |> to_string() |> downcase()
+  end
+
+  defp via(normalized, folder) do
+    metadata = %{kind: :headless, folder: folder}
+    {:via, Registry, {ElitaRegistry, normalized, metadata}}
+  end
+
   def ask(pid, message), do: call(pid, {:ask, message}, :infinity)
   def cast(pid, message), do: GenServer.cast(pid, {:cast, message})
-
+  def fetch(pid), do: call(pid, :fetch, :infinity)
   @impl true
   def init(opts) do
-    name = fetch!(opts, :name)
-    folder = fetch!(opts, :folder)
-    runner = get(opts, :runner, &default_runner/2)
-    {:ok, %{name: name, folder: folder, runner: runner}}
+    {:ok, state(opts)}
+  end
+
+  defp state(opts) do
+    %{name: fetch!(opts, :name), folder: fetch!(opts, :folder)}
+    |> put(:self, get(opts, :self, nil))
+    |> put(:runner, get(opts, :runner, &run/2))
   end
 
   @impl true
@@ -26,65 +43,18 @@ defmodule Agent.Session do
     {:reply, {:ok, response}, state}
   end
 
+  def handle_call({:act, message}, _from, state) do
+    response = state.runner.(message, state.folder)
+    {:reply, response, state}
+  end
+
+  def handle_call(:fetch, _from, state) do
+    {:reply, state, state}
+  end
+
   @impl true
   def handle_cast({:cast, message}, state) do
     state.runner.(message, state.folder)
     {:noreply, state}
-  end
-
-  defp default_runner(message, folder) do
-    {:spawn_executable, path()}
-    |> open(port_opts(message, folder))
-    |> handle_port()
-  end
-
-  defp path, do: found(find_executable("claude"))
-  defp found(nil), do: raise("claude executable not found")
-  defp found(path), do: path
-
-  defp handle_port({:error, reason}) do
-    error("Failed to open Claude port: #{inspect(reason)}")
-    "ERROR: Could not start Claude"
-  end
-
-  defp handle_port(port) do
-    read_response(port, "")
-  after
-    close_safe(port)
-  end
-
-  defp port_opts(message, folder) do
-    [{:args, ["-p", message, "--allowedTools", ""]}, {:cd, String.to_charlist(folder)}] ++
-      [:binary, :exit_status, :use_stdio]
-  end
-
-  defp read_response(port, acc) do
-    receive do
-      {^port, msg} -> handle_port_msg(msg, port, acc)
-    after
-      30000 -> on_timeout(port, acc)
-    end
-  end
-
-  defp handle_port_msg({:data, data}, port, acc), do: read_response(port, acc <> data)
-  defp handle_port_msg({:exit_status, _}, _port, acc), do: trim(acc)
-
-  defp on_timeout(port, acc) do
-    kill_port_process(port)
-    warning("Claude port timeout")
-    acc
-  end
-
-  defp kill_port_process(port) do
-    {:os_pid, pid} = :erlang.port_info(port, :os_pid)
-    System.cmd("kill", [to_string(pid)])
-  rescue
-    _ -> :ok
-  end
-
-  defp close_safe(port) do
-    close(port)
-  rescue
-    _ -> :ok
   end
 end

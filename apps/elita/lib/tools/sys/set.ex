@@ -1,18 +1,18 @@
 defmodule Tools.Sys.Set do
   import Log, only: [log: 5]
-  import Mem, only: [depth_table: 0, table: 0]
   import Map, only: [put: 3]
+  import Mem, only: [depth_table: 0, table: 0]
 
   def spec(name, _state) do
     spec(name)
   end
 
   defp spec(name) do
-    %{
-      name: name,
-      description: "Store data with a key",
-      parameters: parameters()
-    }
+    %{name: name, description: description(), parameters: parameters()}
+  end
+
+  defp description do
+    "Store data with a key"
   end
 
   def exec(_tool, %{"value" => value, "key" => key}, state) do

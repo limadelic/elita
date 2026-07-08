@@ -2,14 +2,14 @@ defmodule Elita do
   use GenServer
 
   import Cfgs, only: [config: 1]
-  import Llm, only: [llm: 1]
-  import Mem, only: [create: 0]
-  import Tools
   import History, only: [record: 1]
-  import Msg, only: [user: 1]
+  import Llm, only: [llm: 1]
   import Log, only: [log: 5]
+  import Mem, only: [create: 0]
+  import Msg, only: [user: 1]
   import String, only: [downcase: 1, trim: 1]
   import System, only: [get_env: 1]
+  import Tools
 
   def start_link(name, configs) do
     GenServer.start_link(__MODULE__, {name, configs}, name: via(name))
@@ -24,8 +24,8 @@ defmodule Elita do
   end
 
   defp via(name) do
-    normalized = name |> to_string |> downcase
-    {:via, Registry, {ElitaRegistry, normalized}}
+    normalized = name |> to_string() |> downcase()
+    {:via, Registry, {ElitaRegistry, normalized, %{kind: :native, folder: nil}}}
   end
 
   def init({name, configs}) do
@@ -36,7 +36,7 @@ defmodule Elita do
 
   defp tape_seed do
     get_env("TAPE")
-    |> maybe_seed
+    |> maybe_seed()
   end
 
   defp maybe_seed(nil), do: :ok
@@ -69,11 +69,7 @@ defmodule Elita do
   end
 
   defp act(state) do
-    state
-    |> llm
-    |> exec
-    |> record
-    |> done
+    state |> llm() |> exec() |> record() |> done()
   end
 
   defp done({:act, state}) do

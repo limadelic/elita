@@ -1,13 +1,16 @@
 defmodule El.Commands.Size do
   @moduledoc false
 
+  import System
+  import String
+
   def read_terminal_size, do: fallback([read_env(), read_stty(), {24, 80}])
 
   defp fallback([nil | rest]), do: fallback(rest)
   defp fallback([size | _]), do: size
 
   defp read_env do
-    {safe_int(System.get_env("EL_ROWS")), safe_int(System.get_env("EL_COLS"))}
+    {safe_int(get_env("EL_ROWS")), safe_int(get_env("EL_COLS"))}
     |> check_valid()
   end
 
@@ -19,7 +22,7 @@ defmodule El.Commands.Size do
   defp pick_valid({_, _, _, _}), do: nil
 
   defp safe_int(str) when is_binary(str) do
-    String.to_integer(str)
+    to_integer(str)
   rescue
     _ -> 0
   end
@@ -27,14 +30,14 @@ defmodule El.Commands.Size do
   defp safe_int(_), do: 0
 
   defp read_stty do
-    System.cmd("sh", ["-c", "stty size < /dev/tty"], stderr_to_stdout: true)
+    cmd("sh", ["-c", "stty size < /dev/tty"], stderr_to_stdout: true)
     |> parse_stty()
   rescue
     _ -> nil
   end
 
   defp parse_stty({output, 0}) do
-    extract_pair(String.trim(output) |> String.split())
+    trim(output) |> split() |> extract_pair()
   end
 
   defp parse_stty(_), do: nil

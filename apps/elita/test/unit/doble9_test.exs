@@ -1,5 +1,6 @@
 defmodule Doble9UnitTest do
   use Tester
+
   @moduletag :main
   @moduletag :spec
 
@@ -23,7 +24,11 @@ defmodule Doble9UnitTest do
       spawn(:bottom, [:player, :greed])
       spawn(:right, [:player, :greed])
 
-      verify(:doble9, "Perfect", "start a new game with players: top, left, bottom, right")
+      verify(
+        :doble9,
+        "Perfect",
+        "start a new game with players: top, left, bottom, right"
+      )
     end
   end
 end

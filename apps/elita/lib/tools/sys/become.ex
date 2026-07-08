@@ -26,9 +26,9 @@ defmodule Tools.Sys.Become.Schema do
 end
 
 defmodule Tools.Sys.Become do
+  import Enum, only: [map: 2]
   import Log, only: [log: 5]
   import Map, only: [put: 3]
-  import Enum, only: [map: 2]
 
   defdelegate spec(name, state), to: Tools.Sys.Become.Schema, as: :get
 

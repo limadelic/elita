@@ -1,6 +1,6 @@
 defmodule History do
-  import Msg, only: [tool_result: 2]
   import Enum, only: [any?: 2, find_value: 3, filter: 2, map: 2]
+  import Msg, only: [tool_result: 2]
 
   def record({parts, state}) do
     record(parts, state)
@@ -63,7 +63,9 @@ defmodule History do
     %{type: "text", text: text}
   end
 
-  defp to_content(%{"tool_use" => %{"id" => id, "name" => name, "input" => input}}) do
+  defp to_content(%{
+         "tool_use" => %{"id" => id, "name" => name, "input" => input}
+       }) do
     %{type: "tool_use", id: id, name: name, input: input}
   end
 
