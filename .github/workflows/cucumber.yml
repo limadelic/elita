@@ -66,10 +66,16 @@ jobs:
           mix deps.get
           mix compile
 
-      - name: Run Cucumber tests
+      - name: Run Cucumber tests with coverage
         run: |
           mkdir -p reports
-          TAPE=replay bundle exec cucumber --format html --out reports/cucumber.html --publish-quiet
+          TAPE=replay COVER=1 bundle exec cucumber --format html --out reports/cucumber.html --publish-quiet
+        env:
+          MIX_ENV: test
+
+      - name: Generate coverage report
+        run: |
+          mix cover.report
         env:
           MIX_ENV: test
 
@@ -88,6 +94,7 @@ jobs:
         run: |
           mkdir -p site
           cp reports/cucumber.html site/index.html
+          cp -r reports/coverage site/
         if: always()
 
       - name: Upload to Pages

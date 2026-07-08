@@ -4,6 +4,7 @@ Agentic platform using OTP patterns for reliable agent behavior
 
 [![cukes](https://github.com/limadelic/elita/actions/workflows/cucumber.yml/badge.svg?branch=qa)](https://github.com/limadelic/elita/actions/workflows/cucumber.yml)
 [![report](https://img.shields.io/badge/cuke-report-brightgreen)](https://limadelic.github.io/elita/)
+[![coverage](https://img.shields.io/endpoint?url=https://limadelic.github.io/elita/coverage/badge.json)](https://limadelic.github.io/elita/coverage/)
 
 ## Installation
 
