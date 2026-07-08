@@ -8,7 +8,7 @@ Feature: Ttt
       | 📢 el → bob   | character |
 
     * el> tell alice start a game with bob, you are X, play first
-      | 📢 alice → bob | X and I'll start |
+      | 📢 alice → bob | I'm X |
       | 📢 bob → Alice | I'll take the center |
 
     * el> ask alice about the game progress
