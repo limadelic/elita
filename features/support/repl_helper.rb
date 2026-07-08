@@ -25,7 +25,7 @@ module ReplHelper
     base_cmd = "cd apps/elita/agents/elita && TAPE=#{tape} CASSETTE=#{@cassette} CASSETTE_DIR=#{cassette_dir} MIX_ENV=test #{escript_path} #{args}"
     full_cmd = ENV["COVER"] == "1" ? cover_cmd(args, tape) : base_cmd
     output = ""
-    duration = ENV["COVER"] == "1" ? 180 : 30
+    duration = ENV["COVER"] == "1" ? 600 : 30
     timeout = Time.now + duration
 
     begin
@@ -106,7 +106,7 @@ module ReplHelper
   def wait_for_prompt(prompt_word)
     output = ""
     duration = if ENV["COVER"] == "1"
-      180
+      600
     elsif ENV["TAPE"] == "rec"
       300
     else

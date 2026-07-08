@@ -1,7 +1,7 @@
 @tape:speckboss
-Feature: Speck boss
+Feature: Boss
 
-  Scenario: Speck verifies boss meets its spec
+  Scenario: Boss delegates tasks to workers
     * > el speck
     * speck> exec boss
     * verify
