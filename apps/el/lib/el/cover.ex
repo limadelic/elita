@@ -6,7 +6,7 @@ defmodule El.Cover do
   import Enum, only: [filter: 2, each: 2]
   import String, only: [ends_with?: 2]
   import IO, only: [puts: 1]
-  import Mix, only: [env: 0]
+  import System, only: [get_env: 1]
   import El.CLI, only: [main: 1]
 
   @moduledoc false
@@ -44,8 +44,10 @@ defmodule El.Cover do
   end
 
   defp beam_dirs do
-    ["_build/#{env()}/lib/el/ebin", "_build/#{env()}/lib/elita/ebin"]
+    ["_build/#{env_name()}/lib/el/ebin", "_build/#{env_name()}/lib/elita/ebin"]
   end
+
+  defp env_name, do: get_env("MIX_ENV") || "test"
 
   defp load_dir(dir) do
     full = expand(dir)

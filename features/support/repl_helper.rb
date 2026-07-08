@@ -13,6 +13,10 @@ module ReplHelper
       "CASSETTE_DIR" => cassette_dir,
       "MIX_ENV" => "test"
     }
+    if ENV["COVER"] == "1"
+      env["COVER"] = "1"
+      env["COVER_DIR"] = File.expand_path("../..", __dir__)
+    end
     cmd = spawn_cmd(args)
     @reader, @writer, @pid = PTY.spawn(env, "/bin/sh", "-c", cmd)
     wait_for_prompt(args.split.first || "el")

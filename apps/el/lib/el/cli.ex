@@ -28,24 +28,12 @@ defmodule El.CLI do
 
   defp maybe_cover("1", argv) do
     Cover.start()
-    result = dispatch(argv)
-    Cover.export_unique(cover_file())
-    result
+    dispatch(argv)
   end
 
   defp maybe_cover(_other, argv) do
     dispatch(argv)
   end
-
-  defp cover_file do
-    pid = System.pid() |> to_string()
-    ts = :erlang.system_time(:millisecond) |> to_string()
-    name = "coverdata.#{pid}.#{ts}.ets"
-    prepend_dir(get_env("COVER_DIR"), name)
-  end
-
-  defp prepend_dir(nil, name), do: name
-  defp prepend_dir(dir, name), do: dir <> name
 
   defp dispatch(argv) do
     argv |> parse() |> run()
