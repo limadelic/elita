@@ -6,7 +6,6 @@ defmodule El.Cover do
   import Enum, only: [filter: 2, each: 2]
   import String, except: [to_charlist: 1]
   import Mix, only: [env: 0]
-  import El.CLI, only: [main: 1]
 
   @moduledoc false
 
@@ -15,7 +14,7 @@ defmodule El.Cover do
   def run(argv) do
     ensure_all_started(:elita)
     start_coverage()
-    main(argv)
+    El.CLI.main(argv)
     save_coverage()
   end
 
@@ -58,7 +57,11 @@ defmodule El.Cover do
   end
 
   defp save_coverage do
-    {:ok, data} = :cover.export(expand(@datafile) |> Kernel.to_charlist())
-    data
+    path = expand(@datafile) |> Kernel.to_charlist()
+    case :cover.export(path) do
+      :ok -> :ok
+      {:ok, data} -> data
+      error -> IO.puts("Warning: cover export returned #{inspect(error)}")
+    end
   end
 end
