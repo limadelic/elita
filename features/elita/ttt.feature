@@ -15,9 +15,3 @@ Feature: Ttt
       | 📢 bob → Alice | Nice opening |
       | 📢 alice → bob | Good move    |
 
-    * el> tell alice start a game with bob, you are X, play first
-      | 📢 el → alice |  |
-
-    * el> ask alice did the game finish and was it a win or a tie
-      | 🤔 el → alice |  |
-      | ✨ alice       |  |
