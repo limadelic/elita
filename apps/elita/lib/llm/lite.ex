@@ -6,7 +6,7 @@ defmodule Lite do
   import System, only: [get_env: 1, get_env: 2]
   import Map, only: [put: 3, delete: 2]
   import Req, only: [post: 2]
-  import Application, only: [get_env: 3]
+  import TapeHandler, only: [handle: 3]
   @cache_key %{type: "ephemeral"}
   def llm(%{config: config, history: history, name: agent_name} = state) do
     composed = compose(config)
@@ -22,9 +22,7 @@ defmodule Lite do
   end
 
   defp tape(body, agent_name, fun),
-    do: get_env(:elita, :tape_handler, &thru/3).(body, agent_name, fun)
-
-  defp thru(_body, _agent_name, fun), do: fun.()
+    do: handle(body, agent_name, fun)
 
   defp text([%{"type" => "text", "text" => t} | _]), do: t
   defp text(other), do: other

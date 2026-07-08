@@ -26,8 +26,17 @@ def boot_el(args)
   el_bin = File.expand_path("./apps/el/el", Dir.pwd)
   cmd = "#{el_bin} #{args}".strip
 
-  @el_pty, @el_reader = PTY.open
-  @el_pid = spawn(env, cmd, out: @el_reader, err: @el_reader, in: @el_pty)
+  # Save environment and set test vars
+  old_env = ENV.to_h
+  begin
+    env.each { |k, v| ENV[k] = v }
+
+    # Use PTY.spawn which properly sets up the PTY connection
+    # PTY.spawn returns reader, writer, pid
+    @el_reader, @el_pty, @el_pid = PTY.spawn(cmd)
+  ensure
+    ENV.replace(old_env)
+  end
 
   # Wait for prompt to appear (e.g., "greet>"), with detailed error reporting
   output = ""
@@ -53,7 +62,7 @@ def boot_el(args)
   end
 
   # If we get here, prompt never appeared
-  Process.kill("TERM", @el_pid) rescue nil
+  Process.kill("TERM", @el_pid) if @el_pid
   @el_pty.close if @el_pty
 
   raise "Boot failed: expected prompt after 'el #{args}' but got:\n#{output}\n\n" +
