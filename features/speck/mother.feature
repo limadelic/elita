@@ -1,6 +1,7 @@
-Feature: Speck mother
+@tape:mother
+Feature: Mother
 
-  Scenario: Speck verifies mother meets its spec
+  Scenario: Mother gives birth to babies
     * > el speck
     * speck> exec mother
     * verify

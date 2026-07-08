@@ -1,6 +1,7 @@
-Feature: Speck actor
+@tape:actor
+Feature: Actor
 
-  Scenario: Speck verifies actor meets its spec
+  Scenario: Actor plays different characters
     * > el speck
     * speck> exec actor
     * verify

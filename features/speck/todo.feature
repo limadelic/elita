@@ -1,7 +1,7 @@
 @tape:specktodo
-Feature: Speck todo
+Feature: Todo
 
-  Scenario: Speck verifies todo meets its spec
+  Scenario: Todo manages task lists
     * > el speck
     * speck> exec todo
     * verify

@@ -1,7 +1,7 @@
 @tape:speckdoctor
-Feature: Speck doctor
+Feature: Doctor
 
-  Scenario: Speck verifies doctor meets its spec
+  Scenario: Doctor diagnoses a patient
     * > el speck
     * speck> exec doctor
     * verify
