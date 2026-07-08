@@ -23,10 +23,10 @@ defmodule Shape do
   end
 
   defp func_spec(d) do
-    %{
-      name: d[:name],
-      description: d[:description],
-      parameters: get(d, :parameters, %{type: "object"})
-    }
+    %{name: d[:name], description: d[:description], parameters: params(d)}
+  end
+
+  defp params(d) do
+    get(d, :parameters, %{type: "object"})
   end
 end
