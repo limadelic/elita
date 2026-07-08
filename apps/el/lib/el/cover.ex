@@ -6,7 +6,7 @@ defmodule El.Cover do
   import Enum, only: [filter: 2, each: 2]
   import String, only: [ends_with?: 2]
   import IO, only: [puts: 1]
-  import System, only: [get_env: 1]
+  import System, only: [get_env: 1, delete_env: 1]
   import El.CLI, only: [main: 1]
 
   @moduledoc false
@@ -14,10 +14,18 @@ defmodule El.Cover do
   @datafile "coverdata.ets"
 
   def run(argv) do
+    setup()
+    execute(argv)
+  end
+
+  defp setup do
     ensure_all_started(:elita)
     start()
-    clear_env()
-    call_cli(argv)
+    delete_env("COVER")
+  end
+
+  defp execute(argv) do
+    main(argv)
     export()
   end
 
@@ -30,10 +38,6 @@ defmodule El.Cover do
   def export_unique(name) do
     path = expand(name) |> to_charlist()
     report_export(:cover.export(path))
-  end
-
-  defp clear_env do
-    System.delete_env("COVER")
   end
 
   defp load do
@@ -79,10 +83,6 @@ defmodule El.Cover do
 
   defp load_beam(dir, file) do
     dir |> join(file) |> to_charlist() |> :cover.compile_beam()
-  end
-
-  defp call_cli(argv) do
-    main(argv)
   end
 
   defp export do
