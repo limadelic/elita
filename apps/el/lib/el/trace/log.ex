@@ -4,11 +4,32 @@ defmodule El.Trace.Log do
   import File
   import El.Trace.Format
 
-  def chunk(data), do: write_maybe(get_env("EL_TRACE"), trace(data))
-  def header({rows, cols}, tty_source), do: write_maybe(get_env("EL_TRACE"), "#{monotonic_time(:millisecond)} start rows=#{rows} cols=#{cols} tty_source=#{tty_source}\n")
-  def event(msg), do: write_maybe(get_env("EL_TRACE"), "#{monotonic_time(:millisecond)} #{msg}\n")
-  def event(msg, reason), do: write_maybe(get_env("EL_TRACE"), "#{monotonic_time(:millisecond)} #{msg} reason=#{reason}\n")
+  def chunk(data), do: jot(get_env("EL_TRACE"), trace(data))
 
-  defp write_maybe(nil, _), do: :ok
-  defp write_maybe(path, line), do: write(path, line, [:append])
+  def header({rows, cols}, tty_source) do
+    jot(get_env("EL_TRACE"), caption(rows, cols, tty_source))
+  end
+
+  def event(msg) do
+    jot(get_env("EL_TRACE"), stamp(msg))
+  end
+
+  def event(msg, reason) do
+    jot(get_env("EL_TRACE"), remark(msg, reason))
+  end
+
+  defp caption(rows, cols, source) do
+    "#{monotonic_time(:millisecond)} start rows=#{rows} cols=#{cols} tty_source=#{source}\n"
+  end
+
+  defp stamp(msg) do
+    "#{monotonic_time(:millisecond)} #{msg}\n"
+  end
+
+  defp remark(msg, reason) do
+    "#{monotonic_time(:millisecond)} #{msg} reason=#{reason}\n"
+  end
+
+  defp jot(nil, _), do: :ok
+  defp jot(path, line), do: write(path, line, [:append])
 end
