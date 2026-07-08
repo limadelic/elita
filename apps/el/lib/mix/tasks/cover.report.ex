@@ -95,6 +95,6 @@ defmodule Mix.Tasks.Cover.Report do
     ~s(<tr><td>#{module}</td><td>#{coverage}%</td></tr>)
   end
 
-  defp average(coverages) when empty?(coverages), do: 0
+  defp average([]), do: 0
   defp average(coverages), do: trunc(sum(coverages) / length(coverages))
 end
