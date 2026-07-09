@@ -18,7 +18,7 @@ module VerifyHelper
       tx = transcript
       tx = tx.force_encoding("UTF-8") if tx.respond_to?(:force_encoding)
       lines = tx.split("\n").map { |l| l.strip.force_encoding("UTF-8") rescue l.strip }.reject(&:empty?)
-      @folded_lines = fold_continuation_lines(lines)
+      @folded_lines = fold(lines)
 
       all_found = true
       found_indices = []
@@ -135,7 +135,7 @@ module VerifyHelper
     end
   end
 
-  def fold_continuation_lines(lines)
+  def fold(lines)
     result = []
     current = nil
 
