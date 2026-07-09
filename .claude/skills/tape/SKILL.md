@@ -55,6 +55,7 @@ Record once live, replay free forever. The tape IS the spec — edit the cassett
 
 Agents are nondeterministic: fresh recordings phrase/name things differently, sometimes skip steps.
 
+- **Record first, assert after**: Never record with placeholder/guessed assertion rows — fragment mismatch fails mid-run and truncates cassette. Strip assertion rows (keep prompt steps), record complete tape, then write fragments verbatim from it
 - **Preserve structure**: Same scenario shape, same rows, same story beats — never rewrite to match a tape
 - **Adjust text**: After retaping, update fragment text to new tape VERBATIM (case-insensitive match is key)
 - **Golden master**: Feature file = spec + regression net; new tape ≈ new golden master for approval
