@@ -164,17 +164,14 @@ module VerifyHelper
 
   def fold(lines)
     result = []
-    current = nil
+    idx = nil
 
     lines.each do |line|
-      if log?(line)
+      if log?(line) || board?(line)
         result << line
-        current = result.size - 1
-      elsif board?(line)
-        result << line
-        current = result.size - 1
-      elsif current && current >= 0
-        result[current] << " " << line
+        idx = result.size - 1
+      elsif idx && idx >= 0
+        result[idx] << " " << line
       end
     end
 
