@@ -10,7 +10,7 @@ When(/^> el tell (.+)$/) do |args, *rest|
   @transcript_stripped << output.gsub(/\e\[[0-9;]*m/, "")
 
   if table && valid?(table)
-    verify_lines(table.raw)
+    lines(table.raw)
   elsif table
     verify_table(table, output)
   end
@@ -20,7 +20,7 @@ When(/^> el$/) do |*rest|
   table = rest.first
   boot("")
   if table && valid?(table)
-    verify_lines(table.raw)
+    lines(table.raw)
   elsif table
     verify_table(table, transcript)
   end
@@ -31,7 +31,7 @@ When(/^> el (\w+)$/) do |agent, *rest|
   boot(agent)
   if table && valid?(table)
     drain
-    verify_lines(table.raw)
+    lines(table.raw)
   elsif table
     verify_table(table, transcript)
   end
@@ -49,14 +49,14 @@ When(/^(\w+)> (.+)$/) do |prompt, input, *rest|
   output = attempt(5) { send(input, prompt) }
 
   if valid
-    verify_lines(table.raw)
+    lines(table.raw)
   elsif table
     attempt(5) { verify_table(table, output) }
   end
 end
 
 Then(/^verify$/) do |table|
-  verify_lines(table.raw)
+  lines(table.raw)
 end
 
 Then(/^print transcript$/) do

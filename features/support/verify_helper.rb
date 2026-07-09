@@ -8,7 +8,7 @@ module VerifyHelper
     @folded_lines = nil
   end
 
-  def verify_lines(rows)
+  def lines(rows)
     reset unless @scenario_cursor
     deadline = timeout_deadline
     last_nudge = Time.now - 2
