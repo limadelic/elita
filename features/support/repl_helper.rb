@@ -162,14 +162,17 @@ module ReplHelper
 
   def wait_loop(output, pattern, timeout)
     begin
-      while Time.now < timeout
-        chunk = fetch(@reader)
-        next if chunk.empty?
-
-        record_chunk(chunk, output)
-        return output if output.include?(pattern)
-      end
+      loop_until_match(output, pattern, timeout)
     rescue EOFError
+    end
+  end
+
+  def loop_until_match(output, pattern, timeout)
+    while Time.now < timeout
+      chunk = fetch(@reader)
+      next if chunk.empty?
+      record_chunk(chunk, output)
+      return output if output.include?(pattern)
     end
   end
 
