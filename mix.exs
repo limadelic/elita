@@ -34,6 +34,7 @@ defmodule Elita.Umbrella do
   end
 
   defp run_lint(_) do
+    check("mix format --check-formatted")
     check("mix credo --strict")
   end
 
