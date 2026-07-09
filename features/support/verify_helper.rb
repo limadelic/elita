@@ -12,12 +12,14 @@ module VerifyHelper
     initialize_scenario_cursor unless @scenario_cursor
     ci_timeout = ENV["GITHUB_ACTIONS"] == "true" ? 60 : 3
     deadline = Time.now + (ENV["TAPE"] == "rec" ? 10 : ci_timeout)
-    last_newline_sent = Time.now - 2  # Allow immediate first send
+    last_newline_sent = Time.now - 2 # Allow immediate first send
 
     loop do
       tx = transcript
       tx = tx.force_encoding("UTF-8") if tx.respond_to?(:force_encoding)
-      lines = tx.split("\n").map { |l| l.strip.force_encoding("UTF-8") rescue l.strip }.reject(&:empty?)
+      lines = tx.split("\n").map { |l|
+        l.strip.force_encoding("UTF-8") rescue l.strip
+      }.reject(&:empty?)
       @folded_lines = fold_continuation_lines(lines)
 
       all_found = true
@@ -35,7 +37,9 @@ module VerifyHelper
 
           if line_prefix && line_text
             prefix_match = line_prefix.include?(want_prefix)
-            text_match = want_text.empty? || line_text.downcase.include?(want_text) || line_text.downcase.gsub(/\s+/, "").include?(want_text.gsub(/\s+/, ""))
+            text_match = want_text.empty? || line_text.downcase.include?(want_text) || line_text.downcase.gsub(
+              /\s+/, ""
+            ).include?(want_text.gsub(/\s+/, ""))
 
             if prefix_match && text_match
               found_indices << idx + 1
@@ -79,6 +83,7 @@ module VerifyHelper
 
   def nudge_pty
     return unless @writer
+
     @writer.write("\n")
     @writer.flush
   rescue IOError
@@ -87,8 +92,10 @@ module VerifyHelper
 
   def is_verify_table?(table)
     return false unless table && table.raw
+
     rows = table.raw
     return false if rows.empty?
+
     rows.all? { |row| row.size == 2 }
   end
 
@@ -163,7 +170,9 @@ module VerifyHelper
   end
 
   def assert_includes(expected, output)
-    expected.split.each { |w| raise "Expected '#{w}' in:\n#{output}" unless output.downcase.include?(w.downcase) }
+    expected.split.each { |w|
+      raise "Expected '#{w}' in:\n#{output}" unless output.downcase.include?(w.downcase)
+    }
   end
 
   def refute_includes(unexpected, output)
