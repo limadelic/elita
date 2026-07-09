@@ -7,7 +7,7 @@ defmodule El.CLI do
   import El.Commands.Claude, only: [claude: 1]
   import El.Commands.Cd, only: [cd: 1]
   import El.Distribution, only: [daemon: 0]
-  import El.REPL, only: [run: 1]
+  import El.Command.Ls, only: [run: 1]
 
   @usage """
   Usage:
@@ -62,12 +62,12 @@ defmodule El.CLI do
     puts("unknown tool: #{tool}")
   end
 
-  defp exec({:repl, agent}), do: run(agent)
+  defp exec({:repl, agent}), do: El.REPL.run(agent)
   defp exec({:ask, tool, agent, msg}), do: ask(agent, msg, tool)
   defp exec({:tell, tool, agent, msg}), do: tell(agent, msg, tool)
   defp exec({:spawn, name, agent}), do: spawn(name, agent)
   defp exec({:claude, name}), do: claude(name)
-  defp exec({:ls, path}), do: El.Command.Ls.run(path)
+  defp exec({:ls, path}), do: run(path)
   defp exec({:cd, path}), do: cd(path)
   defp exec(:daemon), do: daemon()
   defp exec(_), do: :usage
