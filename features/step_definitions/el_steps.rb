@@ -69,7 +69,7 @@ def attempt(max_tries = 5)
     begin
       result = yield
       break
-    rescue => e
+    rescue
       raise if try >= max_tries - 1
       sleep 1 if ENV["TAPE"] == "rec"
     end
