@@ -48,7 +48,7 @@ defmodule Tools.User.Ast do
   defp mark({false, _meta, nil}, refs), do: {false, refs}
 
   defp mark({name, _meta, nil}, refs) when is_atom(name) do
-    {nil, [to_string(name) | refs]}
+    {nil, [Atom.to_string(name) | refs]}
   end
 
   defp mark(node, refs), do: {node, refs}
