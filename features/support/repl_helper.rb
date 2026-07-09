@@ -1,5 +1,5 @@
 module ReplHelper
-  def cassette_dir
+  def cassettes
     File.expand_path("../cassettes", __dir__)
   end
 
@@ -18,10 +18,10 @@ module ReplHelper
     ensure_cassette
     tape = ::ENV["TAPE"] || "replay"
     clock_part = @clock ? "CLOCK=#{@clock} " : ""
-    cmd = "cd apps/elita/agents/elita && TAPE=#{tape} CASSETTE=#{@cassette} CASSETTE_DIR=#{cassette_dir} MIX_ENV=test #{clock_part}../../../../apps/el/el #{args}"
+    cmd = "cd apps/elita/agents/elita && TAPE=#{tape} CASSETTE=#{@cassette} CASSETTE_DIR=#{cassettes} MIX_ENV=test #{clock_part}../../../../apps/el/el #{args}"
     output = ""
     timeout = Time.now + 30
-    env_hash = { "TAPE" => tape, "CASSETTE" => @cassette, "CASSETTE_DIR" => cassette_dir, "MIX_ENV" => "test" }
+    env_hash = { "TAPE" => tape, "CASSETTE" => @cassette, "CASSETTE_DIR" => cassettes, "MIX_ENV" => "test" }
     env_hash["CLOCK"] = @clock if @clock
     env = ::ENV.to_h.merge(env_hash)
 
@@ -80,7 +80,7 @@ module ReplHelper
     env = {
       "TAPE" => ::ENV["TAPE"] || "replay",
       "CASSETTE" => @cassette,
-      "CASSETTE_DIR" => cassette_dir,
+      "CASSETTE_DIR" => cassettes,
       "MIX_ENV" => "test"
     }
     env["CLOCK"] = @clock if @clock
