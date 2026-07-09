@@ -17,3 +17,11 @@ Feature: Greet
     * > el greet
     * greet> hello
       | ✨ greet | hello from tape |
+
+  @tape:tape_miss_live @tape_on_miss:live
+  Scenario: Tape falls through to live on miss
+    * > el greet
+    * greet> hello
+      | ✨ greet | hello from tape |
+    * greet> goodbye
+      | ✨ greet | response from stubbed server |
