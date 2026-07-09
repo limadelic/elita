@@ -26,7 +26,7 @@ defmodule Tools.User.Ast do
   defp names({false, _, nil}, acc), do: acc
 
   defp names({name, _, nil}, acc) when is_atom(name) do
-    [Atom.to_string(name) | acc]
+    [to_string(name) | acc]
   end
 
   defp names({_name, _, args}, acc) when is_list(args) do
@@ -48,7 +48,7 @@ defmodule Tools.User.Ast do
   defp mark({false, _meta, nil}, refs), do: {false, refs}
 
   defp mark({name, _meta, nil}, refs) when is_atom(name) do
-    {nil, [Atom.to_string(name) | refs]}
+    {nil, [to_string(name) | refs]}
   end
 
   defp mark(node, refs), do: {node, refs}
