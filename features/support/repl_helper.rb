@@ -30,11 +30,14 @@ module ReplHelper
     return unless @reader
 
     chunk = absorb(@reader)
+    record_transcript(chunk, strip(chunk))
+  end
+
+  def record_transcript(chunk, stripped)
     chunk = encode(chunk)
     @transcript << chunk if @transcript
-    stripped_chunk = strip(chunk)
-    stripped_chunk = encode(stripped_chunk)
-    @transcript_stripped << stripped_chunk if @transcript_stripped
+    stripped = encode(stripped)
+    @transcript_stripped << stripped if @transcript_stripped
   end
 
   private
@@ -50,6 +53,7 @@ module ReplHelper
       loop do
         ready = IO.select([pty], nil, nil, 0.1)
         break unless ready
+
         output << pty.readpartial(4096)
       end
     rescue EOFError
@@ -161,6 +165,7 @@ module ReplHelper
       while Time.now < timeout
         chunk = fetch(@reader)
         next if chunk.empty?
+
         record_chunk(chunk, output)
         return output if output.include?(pattern)
       end
