@@ -1,5 +1,6 @@
 Feature: Napo contract
 
+  @tape:contract
   Scenario: Napo analyzes employment contract
     * > el
     * el> get me a napo agent
@@ -7,17 +8,10 @@ Feature: Napo contract
       | Done Napo is ready |
 
     * el> ask napo to review an employment contract that pays no overtime, has a 2 year non-compete, claims all personal projects as company property and forces arbitration at the employee's expense
-      | 🚀 contract_lead as napo           |
-      | 📢 contract_lead → overtime        |
-      | 📢 contract_lead → noncompete      |
-      | 📢 contract_lead → ipassign        |
-      | 📢 contract_lead → arbitration     |
-      | Orchestration Structure            |
-      | Now let me wait                    |
-      | Violates FLSA if you're non-exempt |
-      | Enforceability varies by state     |
-      | Likely unenforceable if created    |
-      | Often unenforceable under          |
+      | ✨ el | Violates FLSA if you're non-exempt                   |
+      | ✨ el | Enforceability varies by state                       |
+      | ✨ el | Likely unenforceable if created outside work hours   |
+      | ✨ el | Often unenforceable under unconscionability doctrine |
 
   @wip
   Scenario Outline: Napo analyzes contracts with specialists
