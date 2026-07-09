@@ -22,7 +22,7 @@ module VerifyHelper
     end
   end
 
-  def nudge_pty
+  def nudge
     return unless @writer
     @writer.write("\n")
     @writer.flush
@@ -133,7 +133,7 @@ module VerifyHelper
     drain
 
     if ENV["TAPE"] != "rec" && Time.now - last_nudge >= 1.0
-      nudge_pty
+      nudge
       last_nudge = Time.now
     end
 
