@@ -11,7 +11,7 @@ When(/^> el tell (.+)$/) do |args, *rest|
   stripped = output.gsub(/\e\[[0-9;]*m/, "")
   @transcript_stripped << stripped
 
-  if table && is_verify_table?(table)
+  if table && valid?(table)
     verify_lines(table.raw)
   elsif table
     verify_table(table, output)
@@ -21,7 +21,7 @@ end
 When(/^> el$/) do |*rest|
   table = rest.first
   boot("")
-  if table && is_verify_table?(table)
+  if table && valid?(table)
     verify_lines(table.raw)
   elsif table
     verify_table(table, transcript)
@@ -31,7 +31,7 @@ end
 When(/^> el (\w+)$/) do |agent, *rest|
   table = rest.first
   boot(agent)
-  if table && is_verify_table?(table)
+  if table && valid?(table)
     drain_pty
     verify_lines(table.raw)
   elsif table
@@ -44,7 +44,7 @@ When(/^(\w+)> (.+)$/) do |prompt, input, *rest|
 
   # For addressed prompts with verify_lines tables, we need to add the request log
   # to transcript before sending so it's properly captured
-  if table && is_verify_table?(table)
+  if table && valid?(table)
     @transcript_stripped ||= ""
     @transcript_stripped << "\n🤔 el → #{prompt}: #{input}\n"
   end
@@ -66,7 +66,7 @@ When(/^(\w+)> (.+)$/) do |prompt, input, *rest|
   end
 
   # Check table if present
-  if table && is_verify_table?(table)
+  if table && valid?(table)
     verify_lines(table.raw)
   elsif table
     # Retry table verification for transient failures
