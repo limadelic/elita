@@ -34,7 +34,7 @@ module VerifyHelper
           if next_continuation_idx < @folded_lines.size
             full_line = @folded_lines[next_continuation_idx]
             full_line = full_line.sub(/\A(?:\s*\w+>\s*)+/, "")
-            line_prefix, line_text = split_line(full_line)
+            line_prefix, line_text = split(full_line)
 
             if line_text
               text_match = want_text.empty? || line_text.downcase.include?(want_text) || line_text.downcase.gsub(/\s+/, "").include?(want_text.gsub(/\s+/, ""))
@@ -51,7 +51,7 @@ module VerifyHelper
           (@scenario_cursor...@folded_lines.size).each do |idx|
             full_line = @folded_lines[idx]
             full_line = full_line.sub(/\A(?:\s*\w+>\s*)+/, "")
-            line_prefix, line_text = split_line(full_line)
+            line_prefix, line_text = split(full_line)
 
             if line_prefix && line_text
               prefix_match = line_prefix.include?(want_prefix)
@@ -116,22 +116,20 @@ module VerifyHelper
 
   private
 
-  def split_line(line)
+  def split(line)
     colon_idx = line.index(": ")
     equals_idx = line.index(" = ")
 
-    if colon_idx && equals_idx
-      if colon_idx < equals_idx
-        [line[0...colon_idx], line[colon_idx + 2..-1]]
-      else
-        [line[0...equals_idx], line[equals_idx + 3..-1]]
-      end
-    elsif colon_idx
+    return [line, line] unless colon_idx || equals_idx
+
+    if colon_idx && !equals_idx
       [line[0...colon_idx], line[colon_idx + 2..-1]]
-    elsif equals_idx
+    elsif equals_idx && !colon_idx
       [line[0...equals_idx], line[equals_idx + 3..-1]]
+    elsif colon_idx < equals_idx
+      [line[0...colon_idx], line[colon_idx + 2..-1]]
     else
-      [line, line]
+      [line[0...equals_idx], line[equals_idx + 3..-1]]
     end
   end
 
