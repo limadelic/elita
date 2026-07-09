@@ -200,5 +200,3 @@ module ReplHelper
     raise "Timeout waiting for '#{pattern}' in:\n#{output}"
   end
 end
-
-World(ReplHelper)
