@@ -196,7 +196,7 @@ module VerifyHelper
 
   def check(cell, output)
     if negated?(cell)
-      refute_includes(extract(cell), output)
+      refute(extract(cell), output)
     else
       assert(extract(cell), output)
     end
@@ -215,7 +215,7 @@ module VerifyHelper
     expected.split.each { |w| raise "Expected '#{w}' in:\n#{output}" unless output.downcase.include?(w.downcase) }
   end
 
-  def refute_includes(unexpected, output)
+  def refute(unexpected, output)
     raise "Expected '#{unexpected}' NOT in:\n#{output}" if output.downcase.include?(unexpected.downcase)
   end
 end
