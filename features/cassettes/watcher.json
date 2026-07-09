@@ -130,6 +130,78 @@
       "agent": "clockwatcher",
       "messages": [
         {
+          "content": "file a report",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "I'm checking the current time: **2026-07-09 01:11:59** (1:11 AM on Thursday)\n\n**No, I don't start until 9 AM.** \n\nPlease come back during work hours (9 AM to 5 PM, Monday through Friday) and I'll be happy to file that report for you.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "clockwatcher",
+      "messages": [
+        {
+          "content": "file a report",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "I need to check the current time before responding to your task request.\n\nThe current time is **2026-07-09 01:12:15** (1:12 AM on Thursday, July 9th, 2026).\n\n**No, I don't start until 9 AM.**\n\nWork hours begin at 9 AM. Please come back during business hours (9 AM to 5 PM, Monday through Friday) to file your report.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "clockwatcher",
+      "messages": [
+        {
+          "content": "file a report",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "I'm checking the clock now...\n\nThe current time is **2026-07-09 01:12:31** (1:12 AM on Thursday).\n\n**No, I don't start until 9 AM.**\n\nCome back during work hours (9 AM to 5 PM, Monday through Friday) and I'll be happy to file that report for you.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "clockwatcher",
+      "messages": [
+        {
+          "content": "file a report",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "I appreciate the request, but I need to check the current time first.\n\n**Current time: 2026-07-09 01:12:47 (1:12 AM, Thursday)**\n\nSince it's currently 1:12 AM, which is well before my 9 AM start time, I must decline.\n\n**No, I don't start until 9 AM.**\n\nPlease come back during my work hours (9 AM to 5 PM, Monday through Friday) and I'll be happy to help you file that report.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "clockwatcher",
+      "messages": [
+        {
           "role": "user",
           "content": "file a report"
         }
