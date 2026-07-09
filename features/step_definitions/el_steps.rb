@@ -19,9 +19,9 @@ end
 
 When(/^(\w+)> (.+)$/) do |prompt, input, *rest|
   table = rest.first
-  track_request(prompt, input) if table && valid?(table)
+  note(prompt, input) if table && valid?(table)
   output = retrying(5) { send(input, prompt) }
-  handle_result(table, output)
+  settle(table, output)
 end
 
 Then(/^verify$/) do |table|
@@ -40,7 +40,7 @@ def handle(table, output)
   valid?(table) ? verify(table.raw) : table(table, output)
 end
 
-def handle_result(table, output)
+def settle(table, output)
   return unless table
 
   valid?(table) ? retrying(5) { verify(table.raw) } : retrying(5) {
@@ -55,7 +55,7 @@ def track(chunk, stripped)
   @transcript_stripped << stripped
 end
 
-def track_request(prompt, input)
+def note(prompt, input)
   @transcript_stripped ||= ""
   @transcript_stripped << "\n🤔 el → #{prompt}: #{input}\n"
 end
