@@ -140,8 +140,8 @@ module VerifyHelper
     current = nil
 
     lines.each_with_index do |line, input_idx|
-      is_log = log_line?(line)
-      is_board = board_line?(line)
+      is_log = log?(line)
+      is_board = board?(line)
       if is_log
         result << line
         current = result.size - 1
@@ -157,23 +157,16 @@ module VerifyHelper
     result
   end
 
-  def board_line?(line)
-    # Match lines that look like tic-tac-toe boards: exactly 3 cells with X, O, or spaces/underscores
-    # Pattern: pipe-separated cells like "X | _ | _"
+  def board?(line)
     line.match?(/^[XO_\s]*\|[XO_\s]*\|[XO_\s]*$/) rescue false
   end
 
-  def log_line?(line)
-    # Match log lines: emoji followed by space and letters/emoji (agent/system markers)
-    # OR match prompt lines: word characters followed by > (with or without emoji after)
-    # OR match standalone prompts: word characters followed by >
-    # OR match scenario save rows: ✏️ emoji followed by name and "="
-    # Exclude lines starting with emoji but followed by decorative chars like * ✅
-    is_emoji_line = line.match?(/^[\p{So}🀀-🿿][\s]*[a-zA-Z🀀-🿿]/) rescue false
-    is_scenario_save = line.match?(/^✏️\s+\w+.*=/) rescue false
-    is_prompt_with_emoji = line.match?(/^\w+>\s+[\p{So}🀀-🿿]/) rescue false
-    is_standalone_prompt = line.match?(/^\w+>$/) rescue false
-    is_emoji_line || is_scenario_save || is_prompt_with_emoji || is_standalone_prompt
+  def log?(line)
+    emoji = line.match?(/^[\p{So}🀀-🿿][\s]*[a-zA-Z🀀-🿿]/) rescue false
+    save = line.match?(/^✏️\s+\w+.*=/) rescue false
+    prompt_emoji = line.match?(/^\w+>\s+[\p{So}🀀-🿿]/) rescue false
+    prompt = line.match?(/^\w+>$/) rescue false
+    emoji || save || prompt_emoji || prompt
   end
 
   def cells(table)
