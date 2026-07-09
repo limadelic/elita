@@ -1,14 +1,25 @@
 Feature: Clockwatcher
 
-  Scenario Outline: Watcher responds by time of day
+  @tape:dawn
+  Scenario: Watcher declines before hours
     * > el clockwatcher
 
     * clockwatcher> file a report
-      | 🤔 el → clockwatcher | file a report         |
-      | ✨ clockwatcher       | I don't start until 9 |
+      | 🤔 el → clockwatcher | file a report   |
+      | ✨ clockwatcher       | I don't start   |
 
-    Examples:
-      | cassette | clock |
-      | dawn     | 06:00 |
-      | noon     | 12:00 |
-      | night    | 20:00 |
+  @tape:noon
+  Scenario: Watcher takes lunch break
+    * > el clockwatcher
+
+    * clockwatcher> file a report
+      | 🤔 el → clockwatcher | file a report    |
+      | ✨ clockwatcher       | it's lunch time  |
+
+  @tape:night
+  Scenario: Watcher clocks out after hours
+    * > el clockwatcher
+
+    * clockwatcher> file a report
+      | 🤔 el → clockwatcher | file a report      |
+      | ✨ clockwatcher       | I'm done for the day |

@@ -2,61 +2,7 @@
   {
     "a": [
       {
-        "text": "no, I don't start until 9\n\nIt's currently 1:44 AM on Thursday, July 9th, 2026 - well before my 9 AM start time. I'll be available to help with reports once I clock in at 9 AM on a weekday.",
-        "type": "text"
-      }
-    ],
-    "q": {
-      "agent": "clockwatcher",
-      "messages": [
-        {
-          "content": "file a report",
-          "role": "user"
-        }
-      ],
-      "n": 1
-    }
-  },
-  {
-    "a": [
-      {
-        "text": "# No, I don't start until 9 AM\n\nIt's currently **1:44 AM** on Thursday, July 9th, 2026. I'm not available yet.\n\nPlease come back during my work hours: **9 AM to 5 PM, Monday through Friday**.",
-        "type": "text"
-      }
-    ],
-    "q": {
-      "agent": "clockwatcher",
-      "messages": [
-        {
-          "content": "file a report",
-          "role": "user"
-        }
-      ],
-      "n": 1
-    }
-  },
-  {
-    "a": [
-      {
-        "text": "I appreciate the request, but I need to check the current time first.\n\n**Current time: 2026-07-09 01:45:22 (1:45 AM on Thursday)**\n\nNo, I can't help with that right now. It's 1:45 AM - I don't start until 9 AM. \n\nPlease come back during work hours (9 AM to 5 PM, Monday to Friday) and I'll be happy to file that report for you.",
-        "type": "text"
-      }
-    ],
-    "q": {
-      "agent": "clockwatcher",
-      "messages": [
-        {
-          "content": "file a report",
-          "role": "user"
-        }
-      ],
-      "n": 1
-    }
-  },
-  {
-    "a": [
-      {
-        "text": "I'm sorry, but I can't help with that right now.\n\nThe current time is **1:45 AM on Thursday, July 9th, 2026**.\n\nI don't start work until 9 AM on weekdays. Please come back during my work hours (9 AM to 5 PM, Monday through Friday) and I'll be happy to help you file that report.",
+        "text": "I'm sorry, I can't help with that right now - **it's lunch time** (12:00 PM).\n\nI'm taking my lunch break from 12 PM to 1 PM. Please come back after 1 PM and I'll be happy to help you file that report!",
         "type": "text"
       }
     ],
