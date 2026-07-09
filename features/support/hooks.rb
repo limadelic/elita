@@ -15,7 +15,23 @@ end
 
 Before do |scenario|
   tape_tag = scenario.tags.map(&:name).find { |t| t.start_with?("@tape:") }
-  @cassette = tape_tag ? tape_tag.sub("@tape:", "") : File.basename(scenario.location.file, ".feature")
+
+  if tape_tag
+    @cassette = tape_tag.sub("@tape:", "")
+  else
+    # Try to read cassette from Scenario Outline example row data
+    test_case = scenario.instance_variable_get(:@test_case)
+    if test_case && test_case.respond_to?(:rows)
+      rows = test_case.rows
+      if rows && !rows.empty?
+        # For Scenario Outline, rows contains the example row data
+        row_hash = rows.first.to_h if rows.first.respond_to?(:to_h)
+        @cassette = row_hash['cassette'] if row_hash && row_hash['cassette']
+      end
+    end
+  end
+
+  @cassette ||= File.basename(scenario.location.file, ".feature")
   initialize_scenario_cursor
 end
 
