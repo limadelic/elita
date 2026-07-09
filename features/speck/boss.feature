@@ -7,10 +7,10 @@ Feature: Boss
       | 🧪 boss_spec | delegates   |
       | 🤖 boss      | never ask   |
       | 🤖 worker    | takes tasks |
-    * speck generates scenarios
+    * verify
       | 🎭 speck as tplan |                                  |
       | ✏️ boss_scenarios | Direct task assignment to single |
-    * speck runs the test suite
+    * verify
       | 🎭 speck as texec          |                         |
       | 🚀 boss_v1                 | as boss                 |
       | 🚀 worker_v1               | as worker               |
