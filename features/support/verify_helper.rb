@@ -49,7 +49,7 @@ module VerifyHelper
         end
 
         unless found
-          if Time.now < deadline
+          if pending?(deadline)
             all_found = false
             break
           else
@@ -64,7 +64,7 @@ module VerifyHelper
         return
       end
 
-      if Time.now >= deadline
+      if !pending?(deadline)
         raise "Timeout waiting for all rows to match.\n\nTranscript:\n#{transcript}"
       end
 
@@ -99,6 +99,10 @@ module VerifyHelper
   end
 
   private
+
+  def pending?(deadline)
+    Time.now < deadline
+  end
 
   def split(line)
     colon_idx = line.index(": ")
