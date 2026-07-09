@@ -29,10 +29,9 @@ module ReplHelper
       reader, writer, pid = PTY.spawn(env, "/bin/sh", "-c", cmd)
       while Time.now < timeout
         ready = IO.select([reader], nil, nil, 0.1)
-        if ready
-          chunk = reader.readpartial(4096)
-          output << chunk
-        end
+        next unless ready
+        chunk = reader.readpartial(4096)
+        output << chunk
       end
     rescue EOFError
     ensure
