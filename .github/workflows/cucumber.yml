@@ -127,7 +127,7 @@ jobs:
           name: test-site
           path: site/
 
-deploy:
+  deploy:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
