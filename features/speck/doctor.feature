@@ -8,6 +8,8 @@ Feature: Doctor
       | 🤖 doctor                 | ask tool                           |
       | 🎭 speck as tplan         |                                    |
       | ✏️ scenario_1             | Doctor asks one question and waits |
+      | ✏️ scenario_2             | Doctor makes diagnosis             |
+      | ✏️ scenario_3             | Synchronous communication          |
       | 🎭 speck as texec         |                                    |
       | 🚀 doctor_v1              | as doctor                          |
       | 🚀 patient_v1             | as baby                            |
