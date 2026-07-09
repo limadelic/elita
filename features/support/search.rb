@@ -15,6 +15,7 @@ module Search
     loop do
       tx = transcript
       return if search(rows, normalize(tx), deadline, tx)
+
       drain; (nudge; last_sent = Time.now) if timing?(last_sent)
       sleep 0.05
     end
