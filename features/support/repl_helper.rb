@@ -61,9 +61,9 @@ module ReplHelper
         ready = IO.select([@reader], nil, nil, 0.1)
         break unless ready
         chunk = @reader.readpartial(4096)
-        chunk = safe_encode(chunk)
+        chunk = encode(chunk)
         @transcript << chunk if @transcript
-        stripped_chunk = safe_encode(strip_ansi(chunk))
+        stripped_chunk = encode(strip_ansi(chunk))
         @transcript_stripped << stripped_chunk if @transcript_stripped
       end
     rescue EOFError
@@ -87,7 +87,7 @@ module ReplHelper
     hash
   end
 
-  def safe_encode(text)
+  def encode(text)
     text.force_encoding("UTF-8") rescue text.to_s
   end
 
@@ -112,10 +112,10 @@ module ReplHelper
         ready = IO.select([@reader], nil, nil, 0.1)
         next unless ready
         chunk = @reader.readpartial(4096)
-        chunk = safe_encode(chunk)
+        chunk = encode(chunk)
         output << chunk
         @transcript << chunk if @transcript
-        stripped_chunk = safe_encode(strip_ansi(chunk))
+        stripped_chunk = encode(strip_ansi(chunk))
         @transcript_stripped << stripped_chunk if @transcript_stripped
         return output if output.include?(pattern)
       end
