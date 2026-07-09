@@ -49,14 +49,20 @@ module ReplHelper
   end
 
   def absorb_loop(pty, output)
-    begin
-      loop do
-        ready = IO.select([pty], nil, nil, 0.1)
-        break unless ready
+    absorb_safe { read_loop(pty, output) }
+  end
 
-        output << pty.readpartial(4096)
-      end
-    rescue EOFError
+  def absorb_safe
+    yield
+  rescue EOFError
+  end
+
+  def read_loop(pty, output)
+    loop do
+      ready = IO.select([pty], nil, nil, 0.1)
+      break unless ready
+
+      output << pty.readpartial(4096)
     end
   end
 
@@ -171,6 +177,7 @@ module ReplHelper
     while Time.now < timeout
       chunk = fetch(@reader)
       next if chunk.empty?
+
       record_chunk(chunk, output)
       return output if output.include?(pattern)
     end
