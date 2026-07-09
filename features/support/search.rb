@@ -19,29 +19,33 @@ module Search
 
   def cycle(rows, deadline)
     last_sent = Time.now - 2
-    loop do
-      tx = transcript
-      return if search(rows, normalize(tx), deadline, tx)
-
-      elapsed = Time.now - last_sent
-      if ENV["TAPE"] != "rec" && elapsed >= 1.0
-        drain
-        nudge
-        last_sent = Time.now
-      end
+    while !search(rows, normalize(transcript), deadline, transcript)
+      last_sent = tick(last_sent)
       sleep 0.05
     end
   end
 
+  def tick(last_sent)
+    return last_sent if ENV["TAPE"] == "rec" || Time.now - last_sent < 1.0
+
+    drain; nudge; Time.now
+  end
+
   def search(rows, folded_lines, deadline, tx)
-    found_indices = rows.each_with_object([]) do |row, acc|
+    found_indices = hit(rows, folded_lines, deadline, tx)
+    return nil unless found_indices
+
+    @scenario_cursor = found_indices.max if found_indices.any?
+    found_indices
+  end
+
+  def hit(rows, folded_lines, deadline, tx)
+    rows.each_with_object([]) do |row, acc|
       idx = find(row, folded_lines, deadline, tx)
       return nil unless idx
 
       acc << idx
     end
-    @scenario_cursor = found_indices.max if found_indices.any?
-    found_indices
   end
 
   def find(row, folded_lines, deadline, tx)
@@ -97,17 +101,15 @@ module Search
     lines = tx.split("\n").map { |l|
       l.strip.force_encoding("UTF-8") rescue l.strip
     }.reject(&:empty?)
-    lines.each_with_object([]) { |line, result|
-      if is_log?(line)
-        result << line
-      elsif result.any?
-        result[-1] << " " << line
-      end
-    }
+    fold(lines)
   end
 
-  def is_log?(line)
-    PATTERNS.any? { |p| (line.match?(p) rescue false) }
+  def fold(lines)
+    lines.each_with_object([]) { |line, result|
+      is_log = PATTERNS.any? { |p| (line.match?(p) rescue false) }
+      result << line if is_log
+      result[-1] << " " << line if !is_log && result.any?
+    }
   end
 
   def nudge
