@@ -30,12 +30,10 @@ module VerifyHelper
   end
 
   def search(rows, folded_lines, deadline, tx)
-    found_indices = []
-    rows.each do |row|
+    found_indices = rows.each_with_object([]) do |row, acc|
       idx = find_match(row, folded_lines, deadline, tx)
       return nil unless idx
-
-      found_indices << idx
+      acc << idx
     end
     @scenario_cursor = found_indices.max if found_indices.any?
     found_indices
