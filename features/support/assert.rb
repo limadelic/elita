@@ -20,7 +20,8 @@ module Assert
 
   def assert(expected, output)
     expected.split.each { |w|
-      (output.downcase.include?(w.downcase) or raise("Expected '#{w}' in:\n#{output}"))
+      msg = "Expected '#{w}' in:\n#{output}"
+      (output.downcase.include?(w.downcase) or raise(msg))
     }
   end
 

@@ -22,10 +22,17 @@ module Search
     loop do
       tx = transcript
       return if search(rows, normalize(tx), deadline, tx)
-      (drain; nudge; last_sent = Time.now) if ENV["TAPE"] != "rec" && Time.now - last_sent >= 1.0
+
+      elapsed = Time.now - last_sent
+      if ENV["TAPE"] != "rec" && elapsed >= 1.0
+        drain
+        nudge
+        last_sent = Time.now
+      end
       sleep 0.05
     end
   end
+
   def search(rows, folded_lines, deadline, tx)
     found_indices = rows.each_with_object([]) do |row, acc|
       idx = find(row, folded_lines, deadline, tx)
@@ -39,7 +46,8 @@ module Search
 
   def find(row, folded_lines, deadline, tx)
     prefix = row[0].strip.force_encoding("UTF-8") rescue row[0].strip
-    text = (row[1].strip.downcase).force_encoding("UTF-8") rescue row[1].strip.downcase
+    downtext = row[1].strip.downcase
+    text = downtext.force_encoding("UTF-8") rescue downtext
     scan(folded_lines, prefix, text) || fail(prefix, text, deadline, tx)
   end
 
@@ -52,23 +60,29 @@ module Search
 
   def fail(prefix, text, deadline, tx)
     return nil if Time.now < deadline
+
     msg = "No match for prefix='#{prefix}' text='#{text}'"
     raise msg << "\n\nTranscript:\n#{tx}"
   end
 
   def split(line)
     c, e = line.index(": "), line.index(" = ")
-    c && (!e || c < e) ? [line[0...c], line[c + 2..-1]] : e ? [line[0...e], line[e + 3..-1]] : [line, line]
+    c && (!e || c < e) ? [
+      line[0...c],
+      line[c + 2..-1]
+    ] : e ? [line[0...e], line[e + 3..-1]] : [line, line]
   end
 
   def match?(folded_line, want_prefix, want_text)
     line = folded_line.sub(/\A(?:\s*\w+>\s*)+/, "")
     prefix, text = split(line)
     return false unless prefix && text
-    [prefix.include?(want_prefix),
+
+    [
+      prefix.include?(want_prefix),
       want_text.empty? ||
-      text.downcase.include?(want_text) ||
-      text.downcase.gsub(/\s+/, "").include?(want_text.gsub(/\s+/, ""))
+        text.downcase.include?(want_text) ||
+        text.downcase.gsub(/\s+/, "").include?(want_text.gsub(/\s+/, ""))
     ].all?
   end
 
@@ -80,8 +94,16 @@ module Search
 
   def normalize(transcript)
     tx = (transcript.dup.force_encoding("UTF-8") rescue transcript)
-    lines = tx.split("\n").map { |l| l.strip.force_encoding("UTF-8") rescue l.strip }.reject(&:empty?)
-    lines.each_with_object([]) { |line, result| is_log?(line) ? result << line : result.any? && (result[-1] << " " << line) }
+    lines = tx.split("\n").map { |l|
+      l.strip.force_encoding("UTF-8") rescue l.strip
+    }.reject(&:empty?)
+    lines.each_with_object([]) { |line, result|
+      if is_log?(line)
+        result << line
+      elsif result.any?
+        result[-1] << " " << line
+      end
+    }
   end
 
   def is_log?(line)
