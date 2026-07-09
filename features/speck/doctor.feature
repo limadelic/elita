@@ -4,10 +4,14 @@ Feature: Doctor
   Scenario: speck reads, writes, and runs doctor scenarios
     * > el speck
     * speck> exec doctor
-      | 🧪 doctor_spec            | ask tool        |
-      | 🤖 doctor                 | ask tool        |
-      | 🎭 speck as tplan         |                 |
-      | ✏️ scenario_1             |                 |
+      | 🧪 doctor_spec | ask tool |
+      | 🤖 doctor      | ask tool |
+    * speck generates scenarios
+      | 🎭 speck as tplan |                                    |
+      | ✏️ scenario_1     | Doctor asks one question and waits |
+      | ✏️ scenario_2     | Doctor makes diagnosis             |
+      | ✏️ scenario_3     | Synchronous communication          |
+    * speck runs the test suite
       | 🎭 speck as texec         |                 |
       | 🚀 doctor_v1              | as doctor       |
       | 🚀 patient_v1             | as baby         |

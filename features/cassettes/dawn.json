@@ -1,0 +1,20 @@
+[
+  {
+    "a": [
+      {
+        "text": "I appreciate the request, but I can't help right now.\n\n**Current time: 2025-07-07 06:00:00 (6:00 AM)**\n\nI don't start until 9 AM. Please come back at 9 AM or later on a weekday, and I'll be happy to help you file that report.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "clockwatcher",
+      "messages": [
+        {
+          "role": "user",
+          "content": "file a report"
+        }
+      ],
+      "n": 1
+    }
+  }
+]

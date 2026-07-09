@@ -1,5 +1,5 @@
 module ReplHelper
-  def cassette_dir
+  def dir
     File.expand_path("../cassettes", __dir__)
   end
 
@@ -10,20 +10,27 @@ module ReplHelper
     env = {
       "TAPE" => ENV["TAPE"] || "replay",
       "CASSETTE" => @cassette,
-      "CASSETTE_DIR" => cassette_dir,
+      "CASSETTE_DIR" => dir,
       "MIX_ENV" => "test"
     }
-    env["TAPE_ON_MISS"] = @tape_on_miss if @tape_on_miss
-    cmd = spawn_cmd(args)
+    cmd = spawn(args)
     @reader, @writer, @pid = PTY.spawn(env, "/bin/sh", "-c", cmd)
-    wait_for_prompt(args.split.first || "el")
+    wait(args.split.first || "el")
   end
 
-  def one_shot(args)
+  def one(args)
     @cassette = @cassette || "greet"
     tape = ENV["TAPE"] || "replay"
     escript_path = "../../../../apps/el/el"
-    cmd = "cd apps/elita/agents/elita && TAPE=#{tape} CASSETTE=#{@cassette} CASSETTE_DIR=#{cassette_dir} MIX_ENV=test #{escript_path} #{args}"
+    cmd = (
+      "cd apps/elita/agents/elita && " +
+      "TAPE=#{tape} " +
+      "CASSETTE=#{@cassette} " +
+      "CASSETTE_DIR=#{dir} " +
+      "MIX_ENV=test " +
+      "#{escript_path} " +
+      "#{args}"
+    ).strip
     output = ""
     timeout = Time.now + 30
 
@@ -47,49 +54,78 @@ module ReplHelper
 
   def send(input, prompt)
     raise "PTY not initialized" unless @writer
+
     @writer.write("#{input}\n")
     @writer.flush
-    wait_for_prompt(prompt)
+    wait(prompt)
   end
 
   def transcript
     @transcript_stripped || ""
   end
 
-  def drain_pty
+  def drain
     return unless @reader
 
+    chunk = absorb(@reader)
+    chunk = encode(chunk)
+    @transcript << chunk if @transcript
+    stripped_chunk = strip(chunk)
+    stripped_chunk = encode(stripped_chunk)
+    @transcript_stripped << stripped_chunk if @transcript_stripped
+  end
+
+  private
+
+  def absorb(pty)
+    output = ""
     begin
       while true
-        ready = IO.select([@reader], nil, nil, 0.1)
+        ready = IO.select([pty], nil, nil, 0.1)
         if ready
-          chunk = @reader.readpartial(4096)
-          chunk = chunk.force_encoding("UTF-8") rescue chunk.to_s
-          @transcript << chunk if @transcript
-          stripped_chunk = strip_ansi(chunk)
-          stripped_chunk = stripped_chunk.force_encoding("UTF-8") rescue stripped_chunk.to_s
-          @transcript_stripped << stripped_chunk if @transcript_stripped
+          chunk = pty.readpartial(4096)
+          output << chunk
         else
           break
         end
       end
     rescue EOFError
     end
+    output
   end
 
-  private
+  def fetch(pty)
+    ready = IO.select([pty], nil, nil, 0.1)
+    return "" unless ready
 
-  def spawn_cmd(args)
+    chunk = pty.readpartial(4096)
+    encode(chunk)
+  rescue EOFError
+    ""
+  end
+
+  def encode(value)
+    value.force_encoding("UTF-8") rescue value.to_s
+  end
+
+  def spawn(args)
     escript_path = "../../../../apps/el/el"
-    tape_on_miss = @tape_on_miss ? "TAPE_ON_MISS=#{@tape_on_miss} " : ""
-    "cd apps/elita/agents/elita && TAPE=#{ENV['TAPE'] || 'replay'} CASSETTE=#{@cassette} CASSETTE_DIR=#{cassette_dir} #{tape_on_miss}MIX_ENV=test #{escript_path} #{args}".strip
+    (
+      "cd apps/elita/agents/elita && " +
+      "TAPE=#{ENV['TAPE'] || 'replay'} " +
+      "CASSETTE=#{@cassette} " +
+      "CASSETTE_DIR=#{dir} " +
+      "MIX_ENV=test " +
+      "#{escript_path} " +
+      "#{args}"
+    ).strip
   end
 
-  def strip_ansi(text)
+  def strip(text)
     text.force_encoding("UTF-8").scrub("").gsub(/\e\[[0-9;]*m/, "")
   end
 
-  def wait_for_prompt(prompt_word)
+  def wait(prompt_word)
     output = ""
     duration = ENV["TAPE"] == "rec" ? 300 : 30
     timeout = Time.now + duration
@@ -97,17 +133,15 @@ module ReplHelper
 
     begin
       while Time.now < timeout
-        ready = IO.select([@reader], nil, nil, 0.1)
-        if ready
-          chunk = @reader.readpartial(4096)
-          chunk = chunk.force_encoding("UTF-8") rescue chunk.to_s
-          output << chunk
-          @transcript << chunk if @transcript
-          stripped_chunk = strip_ansi(chunk)
-          stripped_chunk = stripped_chunk.force_encoding("UTF-8") rescue stripped_chunk.to_s
-          @transcript_stripped << stripped_chunk if @transcript_stripped
-          return output if output.include?(pattern)
-        end
+        chunk = fetch(@reader)
+        next if chunk.empty?
+
+        output << chunk
+        @transcript << chunk if @transcript
+        stripped_chunk = strip(chunk)
+        stripped_chunk = encode(stripped_chunk)
+        @transcript_stripped << stripped_chunk if @transcript_stripped
+        return output if output.include?(pattern)
       end
     rescue EOFError
     end

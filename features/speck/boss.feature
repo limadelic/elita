@@ -4,11 +4,13 @@ Feature: Boss
   Scenario: speck reads, writes, and runs boss scenarios
     * > el speck
     * speck> exec boss
-      | 🧪 boss_spec               | delegates               |
-      | 🤖 boss                    | never ask               |
-      | 🤖 worker                  | takes tasks             |
-      | 🎭 speck as tplan          |                         |
-      | ✏️ boss_scenarios          |                         |
+      | 🧪 boss_spec | delegates   |
+      | 🤖 boss      | never ask   |
+      | 🤖 worker    | takes tasks |
+    * speck generates scenarios
+      | 🎭 speck as tplan |                                  |
+      | ✏️ boss_scenarios | Direct task assignment to single |
+    * speck runs the test suite
       | 🎭 speck as texec          |                         |
       | 🚀 boss_v1                 | as boss                 |
       | 🚀 worker_v1               | as worker               |

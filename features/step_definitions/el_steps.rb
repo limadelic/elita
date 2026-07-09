@@ -2,7 +2,7 @@ require "pty"
 
 When(/^> el tell (.+)$/) do |args, *rest|
   table = rest.first
-  output = one_shot("tell #{args}")
+  output = one("tell #{args}")
 
   # Accumulate output into transcript for verify_lines retry-drain
   @transcript ||= ""
@@ -11,40 +11,40 @@ When(/^> el tell (.+)$/) do |args, *rest|
   stripped = output.gsub(/\e\[[0-9;]*m/, "")
   @transcript_stripped << stripped
 
-  if table && is_verify_table?(table)
-    verify_lines(table.raw)
+  if table && valid?(table)
+    verify(table.raw)
   elsif table
-    verify_table(table, output)
+    table(table, output)
   end
 end
 
 When(/^> el$/) do |*rest|
   table = rest.first
   boot("")
-  if table && is_verify_table?(table)
-    verify_lines(table.raw)
+  if table && valid?(table)
+    verify(table.raw)
   elsif table
-    verify_table(table, transcript)
+    table(table, transcript)
   end
 end
 
 When(/^> el (\w+)$/) do |agent, *rest|
   table = rest.first
   boot(agent)
-  if table && is_verify_table?(table)
-    drain_pty
-    verify_lines(table.raw)
+  if table && valid?(table)
+    drain
+    verify(table.raw)
   elsif table
-    verify_table(table, transcript)
+    table(table, transcript)
   end
 end
 
 When(/^(\w+)> (.+)$/) do |prompt, input, *rest|
   table = rest.first
 
-  # For addressed prompts with verify_lines tables, we need to add the request log
-  # to transcript before sending so it's properly captured
-  if table && is_verify_table?(table)
+  # Add request log to transcript for verify_lines tables
+  # before sending so it's properly captured
+  if table && valid?(table)
     @transcript_stripped ||= ""
     @transcript_stripped << "\n🤔 el → #{prompt}: #{input}\n"
   end
@@ -66,14 +66,14 @@ When(/^(\w+)> (.+)$/) do |prompt, input, *rest|
   end
 
   # Check table if present
-  if table && is_verify_table?(table)
-    verify_lines(table.raw)
+  if table && valid?(table)
+    verify(table.raw)
   elsif table
     # Retry table verification for transient failures
     max_table_attempts = 5
     max_table_attempts.times do |attempt|
       begin
-        verify_table(table, output)
+        table(table, output)
         break
       rescue => e
         if attempt < max_table_attempts - 1
@@ -87,7 +87,15 @@ When(/^(\w+)> (.+)$/) do |prompt, input, *rest|
 end
 
 Then(/^verify$/) do |table|
-  verify_lines(table.raw)
+  verify(table.raw)
+end
+
+Then(/^speck generates scenarios$/) do |table|
+  verify(table.raw)
+end
+
+Then(/^speck runs the test suite$/) do |table|
+  verify(table.raw)
 end
 
 Then(/^print transcript$/) do

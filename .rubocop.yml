@@ -1,0 +1,119 @@
+AllCops:
+  TargetRubyVersion: 3.0
+  NewCops: disable
+  SuggestExtensions: false
+  Exclude:
+    - 'vendor/**/*'
+    - 'node_modules/**/*'
+    - 'deps/**/*'
+    - '_build/**/*'
+
+# The ones we care about
+Metrics/MethodLength:
+  Max: 5
+  CountAsOne:
+    - array
+    - hash
+    - heredoc
+    - method_call
+
+Metrics/ClassLength:
+  Max: 100
+
+Metrics/ModuleLength:
+  Max: 100
+
+Metrics/BlockLength:
+  Enabled: false
+
+Metrics/ParameterLists:
+  Enabled: false
+
+# Disable everything else
+Layout:
+  Enabled: true
+
+Layout/LineLength:
+  Max: 80
+
+Layout/MultilineMethodCallIndentation:
+  EnforcedStyle: indented
+
+Layout/MultilineOperationIndentation:
+  EnforcedStyle: indented
+
+Layout/ArgumentAlignment:
+  EnforcedStyle: with_fixed_indentation
+
+Layout/ParameterAlignment:
+  EnforcedStyle: with_fixed_indentation
+
+Layout/ArrayAlignment:
+  EnforcedStyle: with_fixed_indentation
+
+Layout/HashAlignment:
+  EnforcedHashRocketStyle: key
+  EnforcedColonStyle: key
+
+Layout/FirstArgumentIndentation:
+  EnforcedStyle: consistent
+
+Layout/FirstParameterIndentation:
+  EnforcedStyle: consistent
+
+Layout/FirstHashElementIndentation:
+  EnforcedStyle: consistent
+
+Layout/FirstArrayElementIndentation:
+  EnforcedStyle: consistent
+
+Layout/MultilineHashBraceLayout:
+  EnforcedStyle: new_line
+
+Layout/MultilineArrayBraceLayout:
+  EnforcedStyle: new_line
+
+Layout/MultilineMethodCallBraceLayout:
+  EnforcedStyle: new_line
+
+Layout/FirstHashElementLineBreak:
+  Enabled: true
+
+Layout/FirstArrayElementLineBreak:
+  Enabled: true
+
+Layout/FirstMethodArgumentLineBreak:
+  Enabled: true
+
+Lint:
+  Enabled: false
+
+Naming:
+  Enabled: false
+
+Naming/FileName:
+  Enabled: true
+  ExpectMatchingDefinition: true
+  CheckDefinitionPathHierarchy: true
+  CheckDefinitionPathHierarchyRoots:
+    - lib
+  Exclude:
+    - 'spec/**/*'
+    - 'bin/**/*'
+    - 'features/step_definitions/**/*'
+
+Style:
+  Enabled: false
+
+Style/ClassAndModuleChildren:
+  Enabled: true
+  EnforcedStyle: nested
+
+Bundler:
+  Enabled: false
+
+Gemspec:
+  Enabled: false
+
+Security:
+  Enabled: false
