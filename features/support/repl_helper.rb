@@ -11,7 +11,7 @@ module ReplHelper
     merged = ::ENV.to_h.merge(merged)
     cmd = spawn_cmd(args)
     @reader, @writer, @pid = PTY.spawn(merged, "/bin/sh", "-c", cmd)
-    wait_for_prompt(args.split.first || "el")
+    await(args.split.first || "el")
   end
 
   def one_shot(args)
@@ -46,7 +46,7 @@ module ReplHelper
     raise "PTY not initialized" unless @writer
     @writer.write("#{input}\n")
     @writer.flush
-    wait_for_prompt(prompt)
+    await(prompt)
   end
 
   def transcript
@@ -101,7 +101,7 @@ module ReplHelper
     text.force_encoding("UTF-8").scrub("").gsub(/\e\[[0-9;]*m/, "")
   end
 
-  def wait_for_prompt(prompt_word)
+  def await(prompt_word)
     output = ""
     duration = ::ENV["TAPE"] == "rec" ? 300 : 30
     timeout = Time.now + duration
