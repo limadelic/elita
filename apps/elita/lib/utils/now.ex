@@ -1,5 +1,5 @@
 defmodule Now do
-  import System, only: [get_env: 1]
+  import System, only: [get_env: 2]
   import String, only: [split: 2, to_integer: 1]
   import NaiveDateTime, only: [from_erl!: 1]
 
@@ -12,14 +12,13 @@ defmodule Now do
   end
 
   defp read_clock do
-    Application.get_env(:elita, :clock) || (&clock_from_env/0)
+    Application.get_env(:elita, :clock, &clock_from_env/0)
   end
 
   defp clock_from_env do
-    case get_env("CLOCK") do
-      nil -> {{2025, 7, 7}, {10, 0, 0}}
-      str -> parse(str)
-    end
+    "CLOCK"
+    |> get_env("10:00:00")
+    |> parse()
   end
 
   defp parse(str) do
