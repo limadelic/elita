@@ -196,13 +196,15 @@ module VerifyHelper
 
   def verify_cell(cell, output)
     if negated?(cell)
-      content = cell[1..-2].strip
-      content = content[1..-1].strip if content.start_with?(">")
-      refute_includes(content, output)
+      refute_includes(extract(cell), output)
     else
-      content = cell.start_with?(">") ? cell[1..-1].strip : cell
-      assert_includes(content, output)
+      assert_includes(extract(cell), output)
     end
+  end
+
+  def extract(cell)
+    content = negated?(cell) ? cell[1..-2].strip : cell
+    content.start_with?(">") ? content[1..-1].strip : content
   end
 
   def negated?(cell)
