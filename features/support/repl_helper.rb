@@ -14,36 +14,8 @@ module ReplHelper
 
   def one(args)
     @cassette = @cassette || "greet"
-    tape = ENV["TAPE"] || "replay"
-    escript_path = "../../../../apps/el/el"
-    cmd = (
-      "cd apps/elita/agents/elita && " +
-      "TAPE=#{tape} " +
-      "CASSETTE=#{@cassette} " +
-      "CASSETTE_DIR=#{dir} " +
-      "MIX_ENV=test " +
-      "#{escript_path} " +
-      "#{args}"
-    ).strip
-    output = ""
-    timeout = Time.now + 30
-
-    begin
-      reader, writer, pid = PTY.spawn("/bin/sh", "-c", cmd)
-      while Time.now < timeout
-        ready = IO.select([reader], nil, nil, 0.1)
-        if ready
-          chunk = reader.readpartial(4096)
-          output << chunk
-        end
-      end
-    rescue EOFError
-    ensure
-      Process.wait(pid) if pid
-      writer.close if writer && !writer.closed?
-    end
-
-    output
+    cmd = command(args)
+    run_one(cmd)
   end
 
   def send(input, prompt)
@@ -154,6 +126,44 @@ module ReplHelper
     }
     @reader, @writer, @pid = PTY.spawn(env, "/bin/sh", "-c", cmd)
     wait(prompt)
+  end
+
+  def command(args)
+    tape = ENV["TAPE"] || "replay"
+    escript_path = "../../../../apps/el/el"
+    (
+      "cd apps/elita/agents/elita && " +
+      "TAPE=#{tape} " +
+      "CASSETTE=#{@cassette} " +
+      "CASSETTE_DIR=#{dir} " +
+      "MIX_ENV=test " +
+      "#{escript_path} " +
+      "#{args}"
+    ).strip
+  end
+
+  def run_one(cmd)
+    output = ""
+    timeout = Time.now + 30
+    reader, writer, pid = PTY.spawn("/bin/sh", "-c", cmd)
+    drain_output(reader, timeout, output)
+    cleanup_pty(writer, pid)
+    output
+  end
+
+  def drain_output(reader, timeout, output)
+    begin
+      while Time.now < timeout
+        ready = IO.select([reader], nil, nil, 0.1)
+        output << reader.readpartial(4096) if ready
+      end
+    rescue EOFError
+    end
+  end
+
+  def cleanup_pty(writer, pid)
+    Process.wait(pid) if pid
+    writer.close if writer && !writer.closed?
   end
 end
 
