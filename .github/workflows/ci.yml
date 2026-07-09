@@ -35,16 +35,13 @@ jobs:
       - name: Get dependencies
         run: mix deps.get
 
-      - name: Format check
-        run: mix format --check-formatted
-
-      - name: Lint with credo
-        id: credo
-        run: mix credo --strict
+      - name: Lint
+        id: lint
+        run: mix lint
         continue-on-error: true
 
       - name: Credo failure detail
-        if: steps.credo.outcome == 'failure'
+        if: steps.lint.outcome == 'failure'
         run: |
           # Get detailed JSON output
           mix credo list --format json > /tmp/credo.json
@@ -74,7 +71,7 @@ jobs:
           fi
 
       - name: Fail if credo had issues
-        if: steps.credo.outcome == 'failure'
+        if: steps.lint.outcome == 'failure'
         run: exit 1
 
       - name: Generate lint badge
