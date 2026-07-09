@@ -79,6 +79,16 @@ module ReplHelper
 
   private
 
+  def fetch(pty)
+    ready = IO.select([pty], nil, nil, 0.1)
+    return "" unless ready
+
+    chunk = pty.readpartial(4096)
+    encode(chunk)
+  rescue EOFError
+    ""
+  end
+
   def encode(value)
     value.force_encoding("UTF-8") rescue value.to_s
   end
@@ -108,17 +118,15 @@ module ReplHelper
 
     begin
       while Time.now < timeout
-        ready = IO.select([@reader], nil, nil, 0.1)
-        if ready
-          chunk = @reader.readpartial(4096)
-          chunk = encode(chunk)
-          output << chunk
-          @transcript << chunk if @transcript
-          stripped_chunk = strip_ansi(chunk)
-          stripped_chunk = encode(stripped_chunk)
-          @transcript_stripped << stripped_chunk if @transcript_stripped
-          return output if output.include?(pattern)
-        end
+        chunk = fetch(@reader)
+        next if chunk.empty?
+
+        output << chunk
+        @transcript << chunk if @transcript
+        stripped_chunk = strip_ansi(chunk)
+        stripped_chunk = encode(stripped_chunk)
+        @transcript_stripped << stripped_chunk if @transcript_stripped
+        return output if output.include?(pattern)
       end
     rescue EOFError
     end
