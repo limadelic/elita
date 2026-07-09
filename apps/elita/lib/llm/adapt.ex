@@ -2,6 +2,7 @@ defmodule Adapt do
   import Enum, only: [map: 2, reduce: 3]
   import Map, only: [put: 3, merge: 2, new: 2]
   import String, only: [replace: 3, trim: 1]
+  import Jason, only: [decode: 1]
 
   def resp({:ok, %{status: 200, body: %{"message" => %{"tool_calls" => calls}}}}) do
     map(calls, &build_tool_use/1)
@@ -40,16 +41,16 @@ defmodule Adapt do
   end
 
   defp build_tool_use(%{"function" => %{"name" => name, "arguments" => args}}) do
-    %{"tool_use" => %{"id" => name, "name" => name, "input" => decode(args)}}
+    %{"tool_use" => %{"id" => name, "name" => name, "input" => decode_args(args)}}
   end
 
-  defp decode(args) when is_map(args) do
+  defp decode_args(args) when is_map(args) do
     args
     |> new(fn {k, v} -> {k, decode_val(v)} end)
     |> flatten_nested()
   end
 
-  defp decode(args) do
+  defp decode_args(args) do
     args
   end
 
@@ -73,7 +74,7 @@ defmodule Adapt do
   end
 
   defp decode_val(v) when is_binary(v) do
-    v |> replace("'", "\"") |> Jason.decode() |> decode_result(v)
+    v |> replace("'", "\"") |> decode() |> decode_result(v)
   end
 
   defp decode_val(v) do
