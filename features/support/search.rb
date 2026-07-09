@@ -92,7 +92,7 @@ module Search
 
   def deadline
     timeout = ENV["GITHUB_ACTIONS"] == "true" ? 60 : 3
-    timeout = 10 if ENV["TAPE"] == "rec"
+    timeout = 300 if ENV["TAPE"] == "rec"
     Time.now + timeout
   end
 
