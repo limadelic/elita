@@ -21,5 +21,7 @@ defmodule El.RPC do
   defp handle(["ask", agent, msg], _cwd), do: ask(agent, msg)
   defp handle(_, _cwd), do: ""
 
-  defp marker, do: "node: #{Node.self()}"
+  defp marker, do: "node: #{here()}"
+
+  defp here, do: :erlang.node()
 end
