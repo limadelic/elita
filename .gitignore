@@ -1,5 +1,6 @@
 .idea/
 /_build/
+/cover/
 /deps/
 /doc/
 erl_crash.dump
@@ -11,8 +12,3 @@ elita-*.tar
 CLAUDE.local.md
 status.json
 .claude/worktrees/
-/reports/
-node_modules/
-test_*.exs
-test_*.ets
-

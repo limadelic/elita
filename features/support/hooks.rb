@@ -8,8 +8,6 @@ end
 Around do |scenario, block|
   timeout_secs = if ENV["TAPE"] == "rec"
                    300
-                 elsif ENV["COVER"] == "1"
-                   600
                  else
                    70
                  end
