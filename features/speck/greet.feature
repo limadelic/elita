@@ -7,7 +7,7 @@ Feature: Greet
       | 🧪 greet_spec       | Who am I talking |
       | 🤖 greet            | friendly greeter |
       | 🎭 speck as tplan   |                  |
-      | ✏️ greet_scenario_1 | Initial Greeting                       |
+      | ✏️ greet_scenario_1 | Initial Greeting |
       | 🎭 speck as texec   |                  |
       | 🚀 greet_v          | as greet         |
       | ✨ greet_v           | who am i talking |
