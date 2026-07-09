@@ -6,7 +6,7 @@ defmodule El.Commands.Ask.Remote do
   import GenServer, only: [call: 2, cast: 2]
   import El.Answer, only: [await: 2]
 
-  def ask(msg, target, proc, tool) do
+  def relay(msg, target, proc, tool) do
     wrap = fn -> print(msg, target, proc) end
     tap(target, proc, wrap, tool)
   end
