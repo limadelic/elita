@@ -8,7 +8,7 @@ module ReplHelper
     @transcript = ""
     @transcript_stripped = ""
     env = build_env
-    env = Hash[::ENV.map { |k, v| [k, v] }].merge(env)
+    env = ::ENV.to_h.merge(env)
     cmd = spawn_cmd(args)
     @reader, @writer, @pid = PTY.spawn(env, "/bin/sh", "-c", cmd)
     wait_for_prompt(args.split.first || "el")
