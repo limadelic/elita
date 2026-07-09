@@ -2,78 +2,94 @@ require "pty"
 
 When(/^> el tell (.+)$/) do |args, *rest|
   table = rest.first
-  output = shot("tell #{args}")
+  output = one_shot("tell #{args}")
 
+  # Accumulate output into transcript for verify_lines retry-drain
   @transcript ||= ""
   @transcript_stripped ||= ""
   @transcript << output
-  @transcript_stripped << output.gsub(/\e\[[0-9;]*m/, "")
+  stripped = output.gsub(/\e\[[0-9;]*m/, "")
+  @transcript_stripped << stripped
 
-  if table && valid?(table)
-    lines(table.raw)
+  if table && is_verify_table?(table)
+    verify_lines(table.raw)
   elsif table
-    validate(table, output)
+    verify_table(table, output)
   end
 end
 
 When(/^> el$/) do |*rest|
   table = rest.first
   boot("")
-  if table && valid?(table)
-    lines(table.raw)
+  if table && is_verify_table?(table)
+    verify_lines(table.raw)
   elsif table
-    validate(table, transcript)
+    verify_table(table, transcript)
   end
 end
 
 When(/^> el (\w+)$/) do |agent, *rest|
   table = rest.first
   boot(agent)
-  if table && valid?(table)
-    drain
-    lines(table.raw)
+  if table && is_verify_table?(table)
+    drain_pty
+    verify_lines(table.raw)
   elsif table
-    validate(table, transcript)
+    verify_table(table, transcript)
   end
 end
 
 When(/^(\w+)> (.+)$/) do |prompt, input, *rest|
   table = rest.first
-  valid = table && valid?(table)
 
-  if valid
+  # For addressed prompts with verify_lines tables, we need to add the request log
+  # to transcript before sending so it's properly captured
+  if table && is_verify_table?(table)
     @transcript_stripped ||= ""
     @transcript_stripped << "\n🤔 el → #{prompt}: #{input}\n"
   end
 
-  output = attempt(5) { send(input, prompt) }
+  # Retry the send() for network issues
+  max_send_attempts = 5
+  output = nil
+  max_send_attempts.times do |attempt|
+    begin
+      output = send(input, prompt)
+      break
+    rescue => e
+      if attempt < max_send_attempts - 1
+        sleep 1 if ENV["TAPE"] == "rec"
+      else
+        raise e
+      end
+    end
+  end
 
-  if valid
-    lines(table.raw)
+  # Check table if present
+  if table && is_verify_table?(table)
+    verify_lines(table.raw)
   elsif table
-    attempt(5) { validate(table, output) }
+    # Retry table verification for transient failures
+    max_table_attempts = 5
+    max_table_attempts.times do |attempt|
+      begin
+        verify_table(table, output)
+        break
+      rescue => e
+        if attempt < max_table_attempts - 1
+          sleep 1 if ENV["TAPE"] == "rec"
+        else
+          raise e
+        end
+      end
+    end
   end
 end
 
 Then(/^verify$/) do |table|
-  lines(table.raw)
+  verify_lines(table.raw)
 end
 
 Then(/^print transcript$/) do
   puts "\n=== TRANSCRIPT ===\n#{transcript}\n=== END ===\n"
-end
-
-def attempt(max_tries = 5)
-  result = nil
-  max_tries.times do |try|
-    begin
-      result = yield
-      break
-    rescue
-      raise if try >= max_tries - 1
-
-      sleep 1 if ENV["TAPE"] == "rec"
-    end
-  end
-  result
 end

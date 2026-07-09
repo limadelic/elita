@@ -1,242 +1,173 @@
 module VerifyHelper
-  def validate(table, output)
-    cells(table).each { |cell| check(cell, output) }
+  def verify_table(table, output)
+    cells(table).each { |cell| verify_cell(cell, output) }
   end
 
-  def reset
+  def initialize_scenario_cursor
     @scenario_cursor = 0
     @folded_lines = nil
   end
 
-  def lines(rows)
-    reset unless @scenario_cursor
-    deadline = self.deadline
-    last_nudge = Time.now - 2
+  def verify_lines(rows)
+    initialize_scenario_cursor unless @scenario_cursor
+    ci_timeout = ENV["GITHUB_ACTIONS"] == "true" ? 60 : 3
+    deadline = Time.now + (ENV["TAPE"] == "rec" ? 10 : ci_timeout)
+    last_newline_sent = Time.now - 2  # Allow immediate first send
 
     loop do
-      @folded_lines = squeeze
-      matches = search(rows, deadline)
-      return advance(matches) if matches
+      tx = transcript
+      tx = tx.force_encoding("UTF-8") if tx.respond_to?(:force_encoding)
+      lines = tx.split("\n").map { |l| l.strip.force_encoding("UTF-8") rescue l.strip }.reject(&:empty?)
+      @folded_lines = fold_continuation_lines(lines)
 
-      last_nudge = persist(deadline, last_nudge)
+      all_found = true
+      found_indices = []
+
+      rows.each do |row|
+        want_prefix = row[0].strip.force_encoding("UTF-8") rescue row[0].strip
+        want_text = row[1].strip.downcase.force_encoding("UTF-8") rescue row[1].strip.downcase
+        found = false
+
+        (@scenario_cursor...@folded_lines.size).each do |idx|
+          full_line = @folded_lines[idx]
+          full_line = full_line.sub(/\A(?:\s*\w+>\s*)+/, "")
+          line_prefix, line_text = split_line(full_line)
+
+          if line_prefix && line_text
+            prefix_match = line_prefix.include?(want_prefix)
+            text_match = want_text.empty? || line_text.downcase.include?(want_text) || line_text.downcase.gsub(/\s+/, "").include?(want_text.gsub(/\s+/, ""))
+
+            if prefix_match && text_match
+              found_indices << idx + 1
+              found = true
+              break
+            end
+          end
+        end
+
+        unless found
+          if Time.now < deadline
+            all_found = false
+            break
+          else
+            raise "No match for prefix='#{want_prefix}' text='#{want_text}'\n\nTranscript:\n#{tx}"
+          end
+        end
+      end
+
+      if all_found
+        # Only update cursor if all rows were found
+        @scenario_cursor = found_indices.max if found_indices.any?
+        return
+      end
+
+      if Time.now >= deadline
+        raise "Timeout waiting for all rows to match.\n\nTranscript:\n#{transcript}"
+      end
+
+      drain_pty
+
+      # After ~1s without a match, nudge PTY with newline to flush cascade output (replay only)
+      if ENV["TAPE"] != "rec" && Time.now - last_newline_sent >= 1.0
+        nudge_pty
+        last_newline_sent = Time.now
+      end
+
+      sleep 0.05
     end
   end
 
-  def nudge
+  def nudge_pty
     return unless @writer
-
     @writer.write("\n")
     @writer.flush
   rescue IOError
+    # PTY might be closed, ignore
   end
 
-  def valid?(table)
+  def is_verify_table?(table)
     return false unless table && table.raw
-
     rows = table.raw
     return false if rows.empty?
-
     rows.all? { |row| row.size == 2 }
   end
 
   private
 
-  def deadline
-    secs = ENV["TAPE"] == "rec" ? 10 : (ENV["GITHUB_ACTIONS"] == "true" ? 60 : 3)
-    Time.now + secs
-  end
+  def split_line(line)
+    colon_idx = line.index(": ")
+    equals_idx = line.index(" = ")
 
-  def squeeze
-    tx = transcript
-    tx = tx.force_encoding("UTF-8") if tx.respond_to?(:force_encoding)
-    lines = tx.split("\n").map { |l|
-      l.strip.force_encoding("UTF-8") rescue l.strip
-    }.reject(&:empty?)
-    fold(lines)
-  end
-
-  def search(rows, deadline)
-    all_found = true
-    found_indices = []
-    cursor = @scenario_cursor
-
-    rows.each do |row|
-      prefix = safe(row[0].strip)
-      text = safe(row[1].strip.downcase)
-
-      if row(prefix, text, cursor, found_indices)
-        cursor = found_indices.last
-      elsif Time.now >= deadline
-        raise error(prefix, text)
+    if colon_idx && equals_idx
+      if colon_idx < equals_idx
+        [line[0...colon_idx], line[colon_idx + 2..-1]]
       else
-        all_found = false
-        break
+        [line[0...equals_idx], line[equals_idx + 3..-1]]
+      end
+    elsif colon_idx
+      [line[0...colon_idx], line[colon_idx + 2..-1]]
+    elsif equals_idx
+      [line[0...equals_idx], line[equals_idx + 3..-1]]
+    else
+      [line, line]
+    end
+  end
+
+  def fold_continuation_lines(lines)
+    result = []
+    current = nil
+
+    lines.each_with_index do |line, input_idx|
+      is_log = log_line?(line)
+      if is_log
+        result << line
+        current = result.size - 1
+      elsif current && current >= 0
+        result[current] << " " << line
       end
     end
 
-    all_found ? found_indices : nil
-  end
-
-  def row(prefix, text, cursor, matches)
-    if prefix.empty?
-      scan(text, cursor, matches)
-    else
-      anchor(prefix, text, cursor, matches)
-    end
-  end
-
-  def scan(text, cursor, matches)
-    return false if cursor >= @folded_lines.size
-
-    line = scrub(@folded_lines[cursor])
-    _prefix, line_text = split(line)
-
-    return false unless line_text
-    return false unless match?(text, line_text)
-
-    matches << cursor + 1
-    true
-  end
-
-  def anchor(prefix, text, cursor, matches)
-    (@scenario_cursor...@folded_lines.size).each do |idx|
-      line = scrub(@folded_lines[idx])
-      line_prefix, line_text = split(line)
-
-      next unless line_prefix && line_text
-      next unless line_prefix.include?(prefix)
-      next unless match?(text, line_text)
-
-      matches << idx + 1
-      return true
-    end
-
-    false
-  end
-
-  def scrub(line)
-    line.sub(/\A(?:\s*\w+>\s*)+/, "")
-  end
-
-  def normalize(text)
-    text.downcase.gsub(/\s+/, "")
-  end
-
-  def safe(text)
-    text.force_encoding("UTF-8")
-  rescue
-    text
-  end
-
-  def match?(want, have)
-    want.empty? ||
-      have.downcase.include?(want) ||
-      normalize(have).include?(normalize(want))
-  end
-
-  def error(prefix, text)
-    msg = "No match for prefix='#{prefix}' text='#{text}'"
-    "#{msg}\n\nTranscript:\n#{transcript}"
-  end
-
-  def persist(deadline, last_nudge)
-    if Time.now >= deadline
-      msg = "Timeout waiting for all rows to match."
-      raise "#{msg}\n\nTranscript:\n#{transcript}"
-    end
-
-    drain
-
-    if ENV["TAPE"] != "rec" && Time.now - last_nudge >= 1.0
-      nudge
-      last_nudge = Time.now
-    end
-
-    sleep 0.05
-    last_nudge
-  end
-
-  def advance(matches)
-    @scenario_cursor = matches.max if matches.any?
-  end
-
-  def split(line)
-    colon_idx = line.index(": ")
-    equals_idx = line.index(" = ")
-    return [line, line] unless colon_idx || equals_idx
-
-    choose(line, colon_idx, equals_idx)
-  end
-
-  def choose(line, c_idx, e_idx)
-    pick_idx = c_idx && !e_idx ? c_idx : (e_idx && !c_idx ? e_idx : (c_idx < e_idx ? c_idx : e_idx))
-    offset = (pick_idx == c_idx) ? 2 : 3
-    [line[0...pick_idx], line[pick_idx + offset..-1]]
-  end
-
-  def fold(lines)
-    result = []
-    idx = nil
-    lines.each { |line| idx = mark(result, line, idx) }
     result
   end
 
-  def mark(result, line, idx)
-    if log?(line) || board?(line)
-      result << line
-      return result.size - 1
-    end
-    result[idx] << " " << line if idx && idx >= 0
-    idx
-  end
-
-  def board?(line)
-    line.match?(/^[XO_\s]*\|[XO_\s]*\|[XO_\s]*$/) rescue false
-  end
-
-  def log?(line)
-    emoji = line.match?(/^[\p{So}🀀-🿿][\s]*[a-zA-Z🀀-🿿]/) rescue false
-    save = line.match?(/^✏️\s+\w+.*=/) rescue false
-    prompt_emoji = line.match?(/^\w+>\s+[\p{So}🀀-🿿]/) rescue false
-    prompt = line.match?(/^\w+>$/) rescue false
-    emoji || save || prompt_emoji || prompt
+  def log_line?(line)
+    # Match log lines: emoji followed by space and letters/emoji (agent/system markers)
+    # OR match prompt lines: word characters followed by > (with or without emoji after)
+    # OR match standalone prompts: word characters followed by >
+    # OR match scenario save rows: ✏️ emoji followed by name and "="
+    # Exclude lines starting with emoji but followed by decorative chars like * ✅
+    is_emoji_line = line.match?(/^[\p{So}🀀-🿿][\s]*[a-zA-Z🀀-🿿]/) rescue false
+    is_scenario_save = line.match?(/^✏️\s+\w+.*=/) rescue false
+    is_prompt_with_emoji = line.match?(/^\w+>\s+[\p{So}🀀-🿿]/) rescue false
+    is_standalone_prompt = line.match?(/^\w+>$/) rescue false
+    is_emoji_line || is_scenario_save || is_prompt_with_emoji || is_standalone_prompt
   end
 
   def cells(table)
     table.raw.flatten.map(&:strip).reject(&:empty?)
   end
 
-  def check(cell, output)
+  def verify_cell(cell, output)
     if negated?(cell)
-      refute(extract(cell), output)
+      content = cell[1..-2].strip
+      content = content[1..-1].strip if content.start_with?(">")
+      refute_includes(content, output)
     else
-      assert(extract(cell), output)
+      content = cell.start_with?(">") ? cell[1..-1].strip : cell
+      assert_includes(content, output)
     end
-  end
-
-  def extract(cell)
-    content = negated?(cell) ? cell[1..-2].strip : cell
-    content.start_with?(">") ? content[1..-1].strip : content
   end
 
   def negated?(cell)
     cell.start_with?("(") && cell.end_with?(")")
   end
 
-  def assert(expected, output)
-    expected.split.each do |w|
-      next if output.downcase.include?(w.downcase)
-
-      msg = "Expected '#{w}' in:\n#{output}"
-      raise msg
-    end
+  def assert_includes(expected, output)
+    expected.split.each { |w| raise "Expected '#{w}' in:\n#{output}" unless output.downcase.include?(w.downcase) }
   end
 
-  def refute(unexpected, output)
-    return unless output.downcase.include?(unexpected.downcase)
-
-    msg = "Expected '#{unexpected}' NOT in:\n#{output}"
-    raise msg
+  def refute_includes(unexpected, output)
+    raise "Expected '#{unexpected}' NOT in:\n#{output}" if output.downcase.include?(unexpected.downcase)
   end
 end
 

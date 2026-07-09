@@ -88,15 +88,17 @@ end
 
 def inject(path)
   html = File.read(path)
-
-  unless html.include?('<body>')
-    puts "ERROR: Could not find <body> tag in #{path}"
-    exit 1
-  end
-
+  check(path, html)
   html.sub!('<body>', "<body>#{LEGEND_CSS}#{LEGEND_HTML}")
   File.write(path, html)
   puts "Legend injected successfully into #{path}"
+end
+
+def check(path, html)
+  return if html.include?('<body>')
+
+  puts "ERROR: Could not find <body> tag in #{path}"
+  exit 1
 end
 
 path = ARGV[0] || 'reports/cucumber.html'
