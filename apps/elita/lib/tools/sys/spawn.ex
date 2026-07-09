@@ -5,8 +5,6 @@ defmodule Tools.Sys.Spawn do
   import Map, only: [get: 2, get: 3]
   import Utils.World, only: [agents: 0]
 
-  alias Access
-
   def spec(name, state) do
     %{name: name, description: description(state), parameters: parameters()}
   end
