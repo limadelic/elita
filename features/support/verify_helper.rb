@@ -62,7 +62,7 @@ module VerifyHelper
       if row(prefix, text, cursor, found_indices)
         cursor = found_indices.last
       elsif Time.now >= deadline
-        raise match_error(prefix, text)
+        raise error(prefix, text)
       else
         all_found = false
         break
@@ -121,7 +121,7 @@ module VerifyHelper
     want.empty? || have.downcase.include?(want) || normalize(have).include?(normalize(want))
   end
 
-  def match_error(prefix, text)
+  def error(prefix, text)
     "No match for prefix='#{prefix}' text='#{text}'\n\nTranscript:\n#{transcript}"
   end
 
