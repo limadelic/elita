@@ -7,7 +7,7 @@ defmodule Lite do
   import Map, only: [put: 3, delete: 2]
   import List, only: [pop_at: 2]
   import Req, only: [post: 2]
-  import TapeHandler, only: [handle: 3]
+  import TapeHandler, only: [handle: 4]
   @cache_key %{type: "ephemeral"}
   def llm(%{config: config, history: history, name: agent_name} = state) do
     composed = compose(config)
@@ -20,17 +20,17 @@ defmodule Lite do
     tape(request(text), "direct") |> text
   end
 
-  defp tape(body, name), do: handle(body, name, fn -> req(body) |> resp end)
+  defp tape(body, name) do
+    handle(body, name, fn -> req(body) |> resp end, miss_opts(get_env("TAPE_ON_MISS")))
+  end
+
+  defp miss_opts("live"), do: [on_miss: :live]
+  defp miss_opts(_), do: []
 
   defp text([%{"type" => "text", "text" => t} | _]), do: t
   defp text(other), do: other
 
-  defp req(body), do: req(body, get_env("TAPE_ON_MISS"))
-
-  defp req(_body, "live"),
-    do: {:ok, %{status: 200, body: %{"content" => [%{"type" => "text", "text" => "stubbed"}]}}}
-
-  defp req(body, _), do: post(url(), opts(body))
+  defp req(body), do: post(url(), opts(body))
 
   defp opts(body), do: [json: body] ++ req_opts()
   defp req_opts, do: [headers: headers(), connect_options: connect(), receive_timeout: 120_000]
