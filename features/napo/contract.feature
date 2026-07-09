@@ -1,17 +1,5 @@
 Feature: Napo contract
 
-  @tape:vendor
-  Scenario: Napo analyzes vendor agreement
-    * > el
-    * el> get me a napo agent
-    * el> ask napo to review a vendor agreement with unilateral pricing increases, auto-renewal trap, one-sided liability, and vendor-favorable indemnification terms
-
-  @tape:lease
-  Scenario: Napo analyzes office lease
-    * > el
-    * el> get me a napo agent
-    * el> ask napo to review an office lease with triple-net costs, personal guarantee, landlord early termination rights, and no renewal options
-
   Scenario Outline: Napo analyzes contracts, split across specialist agents
     * > el
 
@@ -33,3 +21,11 @@ Feature: Napo contract
     Examples: Employment contract
       | cassette | type       | problem                                                                                                                                                                   | a1       | aspect_1               | a2         | aspect_2                  | a3       | aspect_3                                         | a4          | aspect_4                                 | finding_1                          | finding_2                      | finding_3                                    | finding_4                                   |
       | contract | employment | an employment contract that pays no overtime, has a 2 year non-compete, claims all personal projects as company property and forces arbitration at the employee's expense | overtime | No overtime pay clause | noncompete | 2-year non-compete clause | ipassign | Claims all personal projects as company property | arbitration | Forced arbitration at employee's expense | Violates FLSA if you're non-exempt | Enforceability varies by state | Likely unenforceable if created outside work | Often unenforceable under unconscionability |
+
+    Examples: Vendor agreement
+      | cassette | type   | problem                                                                                                                                  | a1      | aspect_1                     | a2      | aspect_2                        | a3        | aspect_3                                | a4    | aspect_4                         | finding_1                               | finding_2                        | finding_3                       | finding_4                         |
+      | vendor   | vendor | a vendor agreement with unilateral pricing increases, auto-renewal trap, one-sided liability, and vendor-favorable indemnification terms | pricing | Unilateral pricing increases | renewal | Auto-renewal with 60-day notice | liability | One-sided liability cap favoring vendor | indem | Vendor-favorable indemnification | Vendor can increase prices without caps | Auto-renewal defaults to renewal | Liability caps are asymmetrical | You indemnify vendor unilaterally |
+
+    Examples: Office lease
+      | cassette | type         | problem                                                                                                              | a1         | aspect_1               | a2        | aspect_2                  | a3         | aspect_3                     | a4      | aspect_4           | finding_1                        | finding_2                      | finding_3                           | finding_4                           |
+      | lease    | office lease | an office lease with triple-net costs, personal guarantee, landlord early termination rights, and no renewal options | triple_net | Triple-net costs (NNN) | guarantee | Personal guarantee clause | early_term | Landlord can terminate early | renewal | No renewal options | CAM escalation hides $300K-$600K | Personal guarantee $1.75M risk | Landlord can terminate unilaterally | No renewal option forces relocation |
