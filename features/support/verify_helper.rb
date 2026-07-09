@@ -1,6 +1,6 @@
 module VerifyHelper
   def validate(table, output)
-    cells(table).each { |cell| verify_cell(cell, output) }
+    cells(table).each { |cell| check(cell, output) }
   end
 
   def reset
@@ -194,7 +194,7 @@ module VerifyHelper
     table.raw.flatten.map(&:strip).reject(&:empty?)
   end
 
-  def verify_cell(cell, output)
+  def check(cell, output)
     if negated?(cell)
       refute_includes(extract(cell), output)
     else
