@@ -30,7 +30,7 @@ When(/^> el (\w+)$/) do |agent, *rest|
   table = rest.first
   boot(agent)
   if table && valid?(table)
-    drain_pty
+    drain
     verify_lines(table.raw)
   elsif table
     verify_table(table, transcript)

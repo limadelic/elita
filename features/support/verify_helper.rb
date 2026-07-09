@@ -130,7 +130,7 @@ module VerifyHelper
       raise "Timeout waiting for all rows to match.\n\nTranscript:\n#{transcript}"
     end
 
-    drain_pty
+    drain
 
     if ENV["TAPE"] != "rec" && Time.now - last_nudge >= 1.0
       nudge_pty

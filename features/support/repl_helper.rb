@@ -53,7 +53,7 @@ module ReplHelper
     @transcript_stripped || ""
   end
 
-  def drain_pty
+  def drain
     return unless @reader
 
     begin
