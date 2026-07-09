@@ -4,11 +4,12 @@ defmodule TapeHandler do
   alias Tape.Play
   alias Tape.Record
 
-  def handle(body, name, fun) do
-    route(body, name, fun, get_env("TAPE"), get_env("LIVE"))
+  def handle(body, name, fun, opts \\ []) do
+    on_miss = Keyword.get(opts, :on_miss, :raise)
+    route(body, name, fun, on_miss, get_env("TAPE"), get_env("LIVE"))
   end
 
-  defp route(body, name, fun, "rec", _live), do: Record.handle(body, name, fun)
-  defp route(_body, _name, fun, _tape, "1"), do: fun.()
-  defp route(body, name, fun, _tape, _live), do: Play.handle(body, name, fun)
+  defp route(body, name, fun, _on_miss, "rec", _live), do: Record.handle(body, name, fun)
+  defp route(_body, _name, fun, _on_miss, _tape, "1"), do: fun.()
+  defp route(body, name, fun, on_miss, _tape, _live), do: Play.handle(body, name, fun, on_miss)
 end

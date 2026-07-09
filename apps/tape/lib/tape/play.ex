@@ -8,10 +8,10 @@ defmodule Tape.Play do
   import Map, only: [get: 2, take: 2]
   import Jason, only: [decode!: 1, encode!: 1]
 
-  def handle(body, name, fun) do
+  def handle(body, name, fun, on_miss \\ :raise) do
     ensure_entries(load())
 
-    %{entries: load(), normalized: norm(body), body: body, name: name, fun: fun}
+    %{entries: load(), normalized: norm(body), body: body, name: name, fun: fun, on_miss: on_miss}
     |> answer()
   end
 
@@ -31,7 +31,7 @@ defmodule Tape.Play do
   defp handle_answer(nil, ctx), do: untagged(ctx, 0)
   defp handle_answer(answer, _ctx), do: answer
 
-  defp untagged(%{entries: entries} = ctx, idx) when idx >= length(entries) do
+  defp untagged(%{entries: entries, on_miss: :raise} = ctx, idx) when idx >= length(entries) do
     raise "tape miss: #{ctx.name} #{inspect(ctx.normalized)}"
   end
 
