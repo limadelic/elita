@@ -118,6 +118,7 @@ jobs:
         run: |
           mkdir -p site
           cp reports/cucumber.html site/index.html
+          cp reports/cucumber.html site/cukes.html
         if: always()
 
       - name: Upload test report artifact
@@ -145,6 +146,7 @@ jobs:
       - name: Preserve lint badge
         run: |
           curl -sf https://limadelic.github.io/elita/lint.json -o site/lint.json || true
+          curl -sf https://limadelic.github.io/elita/credo.html -o site/credo.html || true
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
