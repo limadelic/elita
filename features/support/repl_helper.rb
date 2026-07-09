@@ -4,25 +4,19 @@ module ReplHelper
   end
 
   def boot(args)
-    @cassette = @cassette || "greet"
+    ensure_cassette
     @transcript = ""
     @transcript_stripped = ""
-    env = {
-      "TAPE" => ENV["TAPE"] || "replay",
-      "CASSETTE" => @cassette,
-      "CASSETTE_DIR" => cassette_dir,
-      "MIX_ENV" => "test"
-    }
+    env = build_env
     cmd = spawn_cmd(args)
     @reader, @writer, @pid = PTY.spawn(env, "/bin/sh", "-c", cmd)
     wait_for_prompt(args.split.first || "el")
   end
 
   def one_shot(args)
-    @cassette = @cassette || "greet"
+    ensure_cassette
     tape = ENV["TAPE"] || "replay"
-    escript_path = "../../../../apps/el/el"
-    cmd = "cd apps/elita/agents/elita && TAPE=#{tape} CASSETTE=#{@cassette} CASSETTE_DIR=#{cassette_dir} MIX_ENV=test #{escript_path} #{args}"
+    cmd = "cd apps/elita/agents/elita && TAPE=#{tape} CASSETTE=#{@cassette} CASSETTE_DIR=#{cassette_dir} MIX_ENV=test ../../../../apps/el/el #{args}"
     output = ""
     timeout = Time.now + 30
 
@@ -63,10 +57,9 @@ module ReplHelper
         ready = IO.select([@reader], nil, nil, 0.1)
         if ready
           chunk = @reader.readpartial(4096)
-          chunk = chunk.force_encoding("UTF-8") rescue chunk.to_s
+          chunk = safe_encode(chunk)
           @transcript << chunk if @transcript
-          stripped_chunk = strip_ansi(chunk)
-          stripped_chunk = stripped_chunk.force_encoding("UTF-8") rescue stripped_chunk.to_s
+          stripped_chunk = safe_encode(strip_ansi(chunk))
           @transcript_stripped << stripped_chunk if @transcript_stripped
         else
           break
@@ -78,9 +71,27 @@ module ReplHelper
 
   private
 
+  def ensure_cassette
+    @cassette ||= "greet"
+  end
+
+  def build_env
+    {
+      "TAPE" => ENV["TAPE"] || "replay",
+      "CASSETTE" => @cassette,
+      "CASSETTE_DIR" => cassette_dir,
+      "MIX_ENV" => "test"
+    }
+  end
+
+  def safe_encode(text)
+    text.force_encoding("UTF-8") rescue text.to_s
+  end
+
   def spawn_cmd(args)
-    escript_path = "../../../../apps/el/el"
-    "cd apps/elita/agents/elita && TAPE=#{ENV['TAPE'] || 'replay'} CASSETTE=#{@cassette} CASSETTE_DIR=#{cassette_dir} MIX_ENV=test #{escript_path} #{args}".strip
+    env = build_env
+    vars = env.map { |k, v| "#{k}=#{v}" }.join(" ")
+    "cd apps/elita/agents/elita && #{vars} ../../../../apps/el/el #{args}".strip
   end
 
   def strip_ansi(text)
@@ -98,11 +109,10 @@ module ReplHelper
         ready = IO.select([@reader], nil, nil, 0.1)
         if ready
           chunk = @reader.readpartial(4096)
-          chunk = chunk.force_encoding("UTF-8") rescue chunk.to_s
+          chunk = safe_encode(chunk)
           output << chunk
           @transcript << chunk if @transcript
-          stripped_chunk = strip_ansi(chunk)
-          stripped_chunk = stripped_chunk.force_encoding("UTF-8") rescue stripped_chunk.to_s
+          stripped_chunk = safe_encode(strip_ansi(chunk))
           @transcript_stripped << stripped_chunk if @transcript_stripped
           return output if output.include?(pattern)
         end
