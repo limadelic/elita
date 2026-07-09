@@ -7,10 +7,10 @@ module ReplHelper
     default
     @transcript = ""
     @transcript_stripped = ""
-    env = build_env
-    env = ::ENV.to_h.merge(env)
+    merged = env
+    merged = ::ENV.to_h.merge(merged)
     cmd = spawn_cmd(args)
-    @reader, @writer, @pid = PTY.spawn(env, "/bin/sh", "-c", cmd)
+    @reader, @writer, @pid = PTY.spawn(merged, "/bin/sh", "-c", cmd)
     wait_for_prompt(args.split.first || "el")
   end
 
@@ -76,15 +76,15 @@ module ReplHelper
     @cassette ||= "greet"
   end
 
-  def build_env
-    env = {
+  def env
+    hash = {
       "TAPE" => ::ENV["TAPE"] || "replay",
       "CASSETTE" => @cassette,
       "CASSETTE_DIR" => cassettes,
       "MIX_ENV" => "test"
     }
-    env["CLOCK"] = @clock if @clock
-    env
+    hash["CLOCK"] = @clock if @clock
+    hash
   end
 
   def safe_encode(text)
@@ -92,8 +92,8 @@ module ReplHelper
   end
 
   def spawn_cmd(args)
-    env = build_env
-    vars = env.map { |k, v| "#{k}=#{v}" }.join(" ")
+    hash = env
+    vars = hash.map { |k, v| "#{k}=#{v}" }.join(" ")
     "cd apps/elita/agents/elita && #{vars} ../../../../apps/el/el #{args}".strip
   end
 
