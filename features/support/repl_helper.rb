@@ -5,11 +5,7 @@ module ReplHelper
 
   def boot(args)
     @cassette = @cassette || "greet"
-    @transcript = ""
-    @transcript_stripped = ""
-    cmd = spawn(args)
-    prompt = args.split.first || "el"
-    start_pty(cmd, prompt)
+    reset_state(args)
   end
 
   def one(args)
@@ -93,28 +89,9 @@ module ReplHelper
 
   def wait(prompt_word)
     output = ""
-    duration = ENV["TAPE"] == "rec" ? 300 : 30
-    timeout = Time.now + duration
     pattern = "#{prompt_word}>"
-
-    begin
-      while Time.now < timeout
-        chunk = fetch(@reader)
-        next if chunk.empty?
-
-        output << chunk
-        @transcript << chunk if @transcript
-        stripped_chunk = strip(chunk)
-        stripped_chunk = encode(stripped_chunk)
-        @transcript_stripped << stripped_chunk if @transcript_stripped
-        return output if output.include?(pattern)
-      end
-    rescue EOFError
-    end
-
-    Process.kill("TERM", @pid) if @pid
-    @writer.close if @writer && !@writer.closed?
-    raise "Timeout waiting for '#{pattern}' in:\n#{output}"
+    timeout = calc_timeout
+    wait_loop(output, pattern, timeout) || fail_wait(pattern, output)
   end
 
   def start_pty(cmd, prompt)
@@ -164,6 +141,45 @@ module ReplHelper
   def cleanup_pty(writer, pid)
     Process.wait(pid) if pid
     writer.close if writer && !writer.closed?
+  end
+
+  def reset_state(args)
+    @transcript = ""
+    @transcript_stripped = ""
+    cmd = spawn(args)
+    prompt = args.split.first || "el"
+    start_pty(cmd, prompt)
+  end
+
+  def calc_timeout
+    duration = ENV["TAPE"] == "rec" ? 300 : 30
+    Time.now + duration
+  end
+
+  def wait_loop(output, pattern, timeout)
+    begin
+      while Time.now < timeout
+        chunk = fetch(@reader)
+        next if chunk.empty?
+        record_chunk(chunk, output)
+        return output if output.include?(pattern)
+      end
+    rescue EOFError
+    end
+  end
+
+  def record_chunk(chunk, output)
+    output << chunk
+    @transcript << chunk if @transcript
+    stripped = strip(chunk)
+    stripped = encode(stripped)
+    @transcript_stripped << stripped if @transcript_stripped
+  end
+
+  def fail_wait(pattern, output)
+    Process.kill("TERM", @pid) if @pid
+    @writer.close if @writer && !@writer.closed?
+    raise "Timeout waiting for '#{pattern}' in:\n#{output}"
   end
 end
 
