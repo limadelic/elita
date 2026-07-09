@@ -191,12 +191,8 @@ module VerifyHelper
   end
 
   def refute(unexpected, output)
-    output_lower = output.downcase
-    unexpected_lower = unexpected.downcase
-    if output_lower.include?(unexpected_lower)
-      msg = "Expected '#{unexpected}' NOT in:\n#{output}"
-      raise msg
-    end
+    return unless output.downcase.include?(unexpected.downcase)
+    raise "Expected '#{unexpected}' NOT in:\n#{output}"
   end
 end
 
