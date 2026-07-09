@@ -11,7 +11,7 @@ defmodule El.Commands.Spawn do
   import Code, only: [ensure_loaded?: 1]
   import Keyword, only: [put: 3]
 
-  def execute(session, agent) do
+  def spawn(session, agent) do
     start()
     handle(resolve(agent, build(), cwd()), session, agent)
   end
