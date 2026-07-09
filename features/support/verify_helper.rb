@@ -83,7 +83,7 @@ module VerifyHelper
   def scan(text, cursor, matches)
     return false if cursor >= @folded_lines.size
 
-    line = clean_line(@folded_lines[cursor])
+    line = scrub(@folded_lines[cursor])
     _prefix, line_text = split(line)
 
     return false unless line_text
@@ -95,7 +95,7 @@ module VerifyHelper
 
   def anchor(prefix, text, cursor, matches)
     (@scenario_cursor...@folded_lines.size).each do |idx|
-      line = clean_line(@folded_lines[idx])
+      line = scrub(@folded_lines[idx])
       line_prefix, line_text = split(line)
 
       next unless line_prefix && line_text
@@ -109,7 +109,7 @@ module VerifyHelper
     false
   end
 
-  def clean_line(line)
+  def scrub(line)
     line.sub(/\A(?:\s*\w+>\s*)+/, "")
   end
 
