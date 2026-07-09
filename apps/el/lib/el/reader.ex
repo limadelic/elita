@@ -1,4 +1,4 @@
-defmodule El.PtyReader do
+defmodule El.Reader do
   @moduledoc false
   import El.Trace
 

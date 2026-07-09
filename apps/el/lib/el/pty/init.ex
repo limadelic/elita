@@ -1,6 +1,6 @@
 defmodule El.Pty.Init do
   @moduledoc false
-  import El.PtyReader
+  import El.Reader
   import El.Trace
   import Map
   import Process, except: [alias: 1, info: 1]
