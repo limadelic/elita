@@ -7,7 +7,72 @@ on:
       - main
 
 jobs:
-  ci:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: erlef/setup-beam@v1
+        with:
+          elixir-version: '1.18'
+          otp-version: '28'
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            deps
+            _build
+          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-
+
+      - name: Get dependencies
+        run: mix deps.get
+
+      - name: Format check
+        run: mix format --check-formatted
+
+      - name: Lint with credo
+        id: credo
+        run: mix credo --strict
+        continue-on-error: true
+
+      - name: Credo failure detail
+        if: steps.credo.outcome == 'failure'
+        run: |
+          # Get detailed JSON output
+          mix credo list --format json > /tmp/credo.json
+
+          # Parse and create summary
+          echo "## Lint Violations" >> $GITHUB_STEP_SUMMARY
+          ISSUE_COUNT=$(jq '.issues | length' /tmp/credo.json)
+          echo "Found $ISSUE_COUNT issues" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$ISSUE_COUNT" -gt 0 ]; then
+            echo "| File | Line | Check | Message |" >> $GITHUB_STEP_SUMMARY
+            echo "|------|------|-------|---------|" >> $GITHUB_STEP_SUMMARY
+
+            jq -r '.issues[] | [.filename, .line_no, .check, .message] | @csv' /tmp/credo.json | while IFS=',' read -r file line check message; do
+              file=$(echo "$file" | tr -d '"')
+              check=$(echo "$check" | tr -d '"')
+              message=$(echo "$message" | tr -d '"')
+
+              # Emit GitHub annotation
+              echo "::error file=$file,line=$line,title=$check::$message"
+
+              # Add to summary table
+              file_short=$(basename "$file")
+              echo "| $file_short | $line | $check | $message |" >> $GITHUB_STEP_SUMMARY
+            done
+          fi
+
+      - name: Fail if credo had issues
+        if: steps.credo.outcome == 'failure'
+        run: exit 1
+
+  test:
     runs-on: ubuntu-latest
 
     steps:
@@ -37,9 +102,6 @@ jobs:
 
       - name: Compile with warnings as errors
         run: mix compile --warnings-as-errors
-
-      - name: Lint
-        run: mix lint
 
       - name: Test
         run: mix test
