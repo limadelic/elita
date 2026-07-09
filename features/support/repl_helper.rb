@@ -130,9 +130,8 @@ module ReplHelper
 
   def run_one(cmd)
     output = ""
-    timeout = Time.now + 30
     reader, writer, pid = PTY.spawn("/bin/sh", "-c", cmd)
-    drain_output(reader, timeout, output)
+    drain_output(reader, Time.now + 30, output)
     cleanup_pty(writer, pid)
     output
   end
