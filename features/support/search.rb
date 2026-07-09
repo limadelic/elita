@@ -15,12 +15,10 @@ module Search
     loop do
       tx = transcript
       return if search(rows, normalize(tx), deadline, tx)
-
-      drain; (nudge; last_sent = Time.now) if timing?(last_sent)
+      (drain; nudge; last_sent = Time.now) if ENV["TAPE"] != "rec" && Time.now - last_sent >= 1.0
       sleep 0.05
     end
   end
-
   def search(rows, folded_lines, deadline, tx)
     found_indices = rows.each_with_object([]) do |row, acc|
       idx = find(row, folded_lines, deadline, tx)
@@ -33,18 +31,9 @@ module Search
   end
 
   def find(row, folded_lines, deadline, tx)
-    prefix, text = parse(row)
-    scan(
-      folded_lines, prefix,
-      text
-    ) || fail(prefix, text, deadline, tx)
-  end
-
-  def parse(row)
     prefix = row[0].strip.force_encoding("UTF-8") rescue row[0].strip
-    text = row[1].strip.downcase
-    text = text.force_encoding("UTF-8") rescue text
-    [prefix, text]
+    text = (row[1].strip.downcase).force_encoding("UTF-8") rescue row[1].strip.downcase
+    scan(folded_lines, prefix, text) || fail(prefix, text, deadline, tx)
   end
 
   def scan(folded_lines, prefix, text)
@@ -55,19 +44,9 @@ module Search
   end
 
   def fail(prefix, text, deadline, tx)
-    return nil if pending?(deadline)
-
+    return nil if Time.now < deadline
     msg = "No match for prefix='#{prefix}' text='#{text}'"
-    msg << "\n\nTranscript:\n#{tx}"
-    raise msg
-  end
-
-  def pending?(deadline)
-    Time.now < deadline
-  end
-
-  def timing?(last_sent)
-    ENV["TAPE"] != "rec" && Time.now - last_sent >= 1.0
+    raise msg << "\n\nTranscript:\n#{tx}"
   end
 
   def split(line)
@@ -85,12 +64,11 @@ module Search
     line = folded_line.sub(/\A(?:\s*\w+>\s*)+/, "")
     prefix, text = split(line)
     return false unless prefix && text
-
-    prefix_matches = prefix.include?(want_prefix)
-    text_matches = want_text.empty? ||
+    [prefix.include?(want_prefix),
+      want_text.empty? ||
       text.downcase.include?(want_text) ||
       text.downcase.gsub(/\s+/, "").include?(want_text.gsub(/\s+/, ""))
-    prefix_matches && text_matches
+    ].all?
   end
 
   def deadline
@@ -105,27 +83,11 @@ module Search
     lines = tx.split("\n").map { |l|
       l.strip.force_encoding("UTF-8") rescue l.strip
     }.reject(&:empty?)
-    fold(lines)
-  end
-
-  def fold(lines)
+    patterns = [/^[\p{So}🀀-🿿][\s]*[a-zA-Z🀀-🿿]/, /^✏️\s+\w+.*=/, /^\w+>\s+[\p{So}🀀-🿿]/, /^\w+>$/]
     lines.each_with_object([]) do |line, result|
-      if log?(line)
-        result << line
-      elsif result.any?
-        result[-1] << " " << line
-      end
+      is_log = patterns.any? { |p| (line.match?(p) rescue false) }
+      is_log ? (result << line) : (result.any? && (result[-1] << " " << line))
     end
-  end
-
-  def log?(line)
-    patterns = [
-      /^[\p{So}🀀-🿿][\s]*[a-zA-Z🀀-🿿]/,
-      /^✏️\s+\w+.*=/,
-      /^\w+>\s+[\p{So}🀀-🿿]/,
-      /^\w+>$/
-    ]
-    patterns.any? { |p| (line.match?(p) rescue false) }
   end
 
   def nudge
