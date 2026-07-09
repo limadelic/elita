@@ -7,15 +7,9 @@ module ReplHelper
     @cassette = @cassette || "greet"
     @transcript = ""
     @transcript_stripped = ""
-    env = {
-      "TAPE" => ENV["TAPE"] || "replay",
-      "CASSETTE" => @cassette,
-      "CASSETTE_DIR" => dir,
-      "MIX_ENV" => "test"
-    }
     cmd = spawn(args)
-    @reader, @writer, @pid = PTY.spawn(env, "/bin/sh", "-c", cmd)
-    wait(args.split.first || "el")
+    prompt = args.split.first || "el"
+    start_pty(cmd, prompt)
   end
 
   def one(args)
@@ -149,6 +143,17 @@ module ReplHelper
     Process.kill("TERM", @pid) if @pid
     @writer.close if @writer && !@writer.closed?
     raise "Timeout waiting for '#{pattern}' in:\n#{output}"
+  end
+
+  def start_pty(cmd, prompt)
+    env = {
+      "TAPE" => ENV["TAPE"] || "replay",
+      "CASSETTE" => @cassette,
+      "CASSETTE_DIR" => dir,
+      "MIX_ENV" => "test"
+    }
+    @reader, @writer, @pid = PTY.spawn(env, "/bin/sh", "-c", cmd)
+    wait(prompt)
   end
 end
 
