@@ -58,7 +58,7 @@ module ReplHelper
     return unless @reader
 
     begin
-      while true
+      loop do
         ready = IO.select([@reader], nil, nil, 0.1)
         if ready
           chunk = @reader.readpartial(4096)
