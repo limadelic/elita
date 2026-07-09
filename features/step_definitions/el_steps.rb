@@ -1,89 +1,27 @@
 require "pty"
 
 When(/^> el tell (.+)$/) do |args, *rest|
-  table = rest.first
   output = one("tell #{args}")
-
-  # Accumulate output into transcript for verify_lines retry-drain
-  @transcript ||= ""
-  @transcript_stripped ||= ""
-  @transcript << output
-  stripped = output.gsub(/\e\[[0-9;]*m/, "")
-  @transcript_stripped << stripped
-
-  if table && valid?(table)
-    verify(table.raw)
-  elsif table
-    table(table, output)
-  end
+  track(output, output.gsub(/\e\[[0-9;]*m/, ""))
+  handle(rest.first, output)
 end
 
 When(/^> el$/) do |*rest|
-  table = rest.first
   boot("")
-  if table && valid?(table)
-    verify(table.raw)
-  elsif table
-    table(table, transcript)
-  end
+  handle(rest.first, transcript)
 end
 
 When(/^> el (\w+)$/) do |agent, *rest|
-  table = rest.first
   boot(agent)
-  if table && valid?(table)
-    drain
-    verify(table.raw)
-  elsif table
-    table(table, transcript)
-  end
+  drain
+  handle(rest.first, transcript)
 end
 
 When(/^(\w+)> (.+)$/) do |prompt, input, *rest|
   table = rest.first
-
-  # Add request log to transcript for verify_lines tables
-  # before sending so it's properly captured
-  if table && valid?(table)
-    @transcript_stripped ||= ""
-    @transcript_stripped << "\n🤔 el → #{prompt}: #{input}\n"
-  end
-
-  # Retry the send() for network issues
-  max_send_attempts = 5
-  output = nil
-  max_send_attempts.times do |attempt|
-    begin
-      output = send(input, prompt)
-      break
-    rescue => e
-      if attempt < max_send_attempts - 1
-        sleep 1 if ENV["TAPE"] == "rec"
-      else
-        raise e
-      end
-    end
-  end
-
-  # Check table if present
-  if table && valid?(table)
-    verify(table.raw)
-  elsif table
-    # Retry table verification for transient failures
-    max_table_attempts = 5
-    max_table_attempts.times do |attempt|
-      begin
-        table(table, output)
-        break
-      rescue => e
-        if attempt < max_table_attempts - 1
-          sleep 1 if ENV["TAPE"] == "rec"
-        else
-          raise e
-        end
-      end
-    end
-  end
+  track_request(prompt, input) if table && valid?(table)
+  output = retrying(5) { send(input, prompt) }
+  handle_result(table, output)
 end
 
 Then(/^verify$/) do |table|
@@ -92,4 +30,38 @@ end
 
 Then(/^print transcript$/) do
   puts "\n=== TRANSCRIPT ===\n#{transcript}\n=== END ===\n"
+end
+
+private
+
+def handle(table, output)
+  return unless table
+
+  valid?(table) ? verify(table.raw) : table(table, output)
+end
+
+def handle_result(table, output)
+  return unless table
+
+  valid?(table) ? retrying(5) { verify(table.raw) } : retrying(5) {
+    table(table, output)
+  }
+end
+
+def track(chunk, stripped)
+  @transcript ||= ""
+  @transcript_stripped ||= ""
+  @transcript << chunk
+  @transcript_stripped << stripped
+end
+
+def track_request(prompt, input)
+  @transcript_stripped ||= ""
+  @transcript_stripped << "\n🤔 el → #{prompt}: #{input}\n"
+end
+
+def retrying(times)
+  yield
+rescue => e
+  (times -= 1).zero? ? (raise e) : (sleep 1 if ENV["TAPE"] == "rec"; retry)
 end
