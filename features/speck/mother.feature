@@ -1,14 +1,15 @@
+@tape:mother
 Feature: Mother
 
-  Scenario: Mother spawns baby agents - each baby cries and identifies itself
+  Scenario: speck reads, writes, and runs mother scenarios
     * > el speck
     * speck> exec mother
-      | 📢 speck → mother_v1 | time to give birth   |
-      | ✨ mother_v1          | Welcome to the world |
-      | 🤔 speck → baby_v1   | What are you doing   |
-      | ✨ baby_v1            | WAAAAAHHHHH          |
-      | 🤔 speck → baby_v2   | Are you baby_v2      |
-      | ✨ baby_v2            | Me baby_v2! Me cry   |
-      | 🤔 speck → baby_v3   | Are you baby_v3      |
-      | ✨ baby_v3            | I am baby_v3         |
-      | ✨ speck              | PASSED               |
+      | 🧪 mother_spec    | spawn       |
+      | 🤖 mother         | spawn       |
+      | 🎭 speck as tplan |             |
+      | 🎭 speck as texec |             |
+      | 🚀 mother_v1      | as mother   |
+      | 🚀 baby_v1        | as baby     |
+      | ✨ baby_v1         | WAAAAAHHHHH |
+      | 🚀 baby_v2        | as baby     |
+      | ✨ speck           | PASSED      |
