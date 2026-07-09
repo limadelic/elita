@@ -41,19 +41,19 @@ module ReplHelper
 
   def absorb(pty)
     output = ""
+    absorb_loop(pty, output)
+    output
+  end
+
+  def absorb_loop(pty, output)
     begin
-      while true
+      loop do
         ready = IO.select([pty], nil, nil, 0.1)
-        if ready
-          chunk = pty.readpartial(4096)
-          output << chunk
-        else
-          break
-        end
+        break unless ready
+        output << pty.readpartial(4096)
       end
     rescue EOFError
     end
-    output
   end
 
   def fetch(pty)
