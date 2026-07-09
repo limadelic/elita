@@ -16,7 +16,7 @@ module VerifyHelper
     loop do
       @folded_lines = squeeze
       matches = search(rows, deadline)
-      return update_cursor(matches) if matches
+      return advance(matches) if matches
 
       last_nudge = persist(deadline, last_nudge)
     end
@@ -141,7 +141,7 @@ module VerifyHelper
     last_nudge
   end
 
-  def update_cursor(matches)
+  def advance(matches)
     @scenario_cursor = matches.max if matches.any?
   end
 
