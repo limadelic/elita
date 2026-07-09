@@ -156,6 +156,11 @@ jobs:
           name: lint-badge
           path: site
 
+      - name: Preserve cucumber files
+        run: |
+          curl -sf https://limadelic.github.io/elita/cukes.json -o site/cukes.json || true
+          curl -sf https://limadelic.github.io/elita/index.html -o site/index.html || true
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
 

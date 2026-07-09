@@ -142,6 +142,10 @@ jobs:
           name: test-site
           path: site
 
+      - name: Preserve lint badge
+        run: |
+          curl -sf https://limadelic.github.io/elita/lint.json -o site/lint.json || true
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
