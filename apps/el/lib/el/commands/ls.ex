@@ -10,7 +10,7 @@ defmodule El.Commands.Ls do
   import Resolver, only: [normalize: 2]
   import String, only: [downcase: 1]
 
-  def execute(opts \\ []) do
+  def ls(opts \\ []) do
     path = get(opts, :path)
     render(path) |> puts()
   end

@@ -7,7 +7,7 @@ defmodule El.Command.Ls do
   import El.Distribution, only: [start: 0]
   import El.Command.Ls.Query, only: [fetch: 1]
   import El.Command.Ls.Boot, only: [spawn: 0]
-  import El.Commands.Ls, only: [execute: 1]
+  import El.Commands.Ls, only: [ls: 1]
 
   def run(path \\ nil) do
     start()
@@ -26,10 +26,10 @@ defmodule El.Command.Ls do
     wait(0, path)
   end
 
-  defp gate(_, path), do: execute(path: path)
+  defp gate(_, path), do: ls(path: path)
 
   defp wait(n, path) when n >= 10 do
-    execute(path: path)
+    ls(path: path)
   end
 
   defp wait(n, path) do
