@@ -11,13 +11,13 @@ defmodule El.Commands.Claude do
   import File, only: [write!: 2, cwd!: 0]
   import Path, only: [basename: 1]
 
-  def execute(name \\ :default) do
-    execute(name, deps())
+  def claude(name \\ :default) do
+    claude(name, deps())
   end
 
   defp deps, do: [distribution_start: &start/1, cmd: &cmd/1, run: &run/2]
 
-  def execute(name, deps) when is_list(deps) do
+  def claude(name, deps) when is_list(deps) do
     run_with_cleanup(resolve_session_name(name), deps)
   after
     restore()

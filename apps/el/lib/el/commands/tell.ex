@@ -9,7 +9,7 @@ defmodule El.Commands.Tell do
   import Node, only: [connect: 1]
   import String, only: [contains?: 2, to_atom: 1]
 
-  def execute(agent, msg, tool \\ nil, opts \\ []) do
+  def tell(agent, msg, tool \\ nil, opts \\ []) do
     start()
     {t, o, env} = args(tool, opts)
     ctx = %{agent: agent, msg: msg, tool: t, env: env, opts: o}

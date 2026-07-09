@@ -1,17 +1,12 @@
 defmodule El.Command.Delegator do
   @moduledoc false
 
-  alias El.Commands.Ask
-  alias El.Commands.Cd
-  alias El.Commands.Claude
-  alias El.Commands.Tell
-  alias El.Distribution
   import El.Commands.Spawn, only: [execute: 2]
 
-  def ask(agent, msg, tool \\ nil), do: Ask.execute(agent, msg, tool)
-  def tell(agent, msg, tool \\ nil), do: Tell.execute(agent, msg, tool)
+  def ask(agent, msg, tool \\ nil), do: El.Commands.Ask.ask(agent, msg, tool)
+  def tell(agent, msg, tool \\ nil), do: El.Commands.Tell.tell(agent, msg, tool)
   def spawn(name, agent), do: execute(name, agent)
-  def claude(name), do: Claude.execute(name)
-  def cd(path), do: Cd.execute(path)
-  def daemon, do: Distribution.daemon()
+  def claude(name), do: El.Commands.Claude.claude(name)
+  def cd(path), do: El.Commands.Cd.cd(path)
+  def daemon, do: El.Distribution.daemon()
 end

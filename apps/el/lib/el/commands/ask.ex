@@ -1,7 +1,6 @@
 defmodule El.Commands.Ask do
   @moduledoc false
   import El.Commands.Address, only: [route: 4]
-  import El.Commands.Ask.Remote, only: [ask: 4]
   import El.Commands.Lookup, only: [local: 4]
   import String, only: [contains?: 2, to_atom: 1]
   import Keyword, only: [get: 3]
@@ -9,7 +8,7 @@ defmodule El.Commands.Ask do
   import El.Commands.Tell, only: [remote_target: 2, remote_unreachable: 2]
   import Node, only: [connect: 1]
 
-  def execute(agent, msg, tool \\ nil, opts \\ []) do
+  def ask(agent, msg, tool \\ nil, opts \\ []) do
     start()
     {t, o, env} = args(tool, opts)
     ctx = %{agent: agent, msg: msg, tool: t, env: env, opts: o}
@@ -57,7 +56,7 @@ defmodule El.Commands.Ask do
          true,
          {msg, target, proc, _agent, _env, tool}
        ) do
-    ask(msg, target, proc, tool)
+    El.Commands.Ask.Remote.ask(msg, target, proc, tool)
   end
 
   defp forward(
