@@ -35,6 +35,10 @@ defmodule Tape.Play do
     raise "tape miss: #{ctx.name} #{inspect(ctx.normalized)}"
   end
 
+  defp untagged(%{entries: entries, on_miss: :live, fun: fun}, idx) when idx >= length(entries) do
+    fun.()
+  end
+
   defp untagged(ctx, idx) do
     entry = at(ctx.entries, idx)
     check_untagged(entry, ctx, idx, get(entry["q"], "agent"))

@@ -5,8 +5,15 @@ defmodule TapeHandler do
   alias Tape.Record
 
   def handle(body, name, fun, opts \\ []) do
-    on_miss = Keyword.get(opts, :on_miss, :raise)
+    on_miss = Keyword.get(opts, :on_miss, default_miss())
     route(body, name, fun, on_miss, get_env("TAPE"), get_env("LIVE"))
+  end
+
+  defp default_miss do
+    case get_env("TAPE_ON_MISS") do
+      nil -> :raise
+      m -> String.to_atom(m)
+    end
   end
 
   defp route(body, name, fun, _on_miss, "rec", _live), do: Record.handle(body, name, fun)

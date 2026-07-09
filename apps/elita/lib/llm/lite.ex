@@ -12,23 +12,25 @@ defmodule Lite do
   def llm(%{config: config, history: history, name: agent_name} = state) do
     composed = compose(config)
     body = build(composed, history, state)
-    result = tape(body, agent_name, fn -> req(body) |> resp end)
+    result = tape(body, agent_name)
     {parts(result), state}
   end
 
   def llm(text) when is_binary(text) do
-    body = request(text)
-    result = tape(body, "direct", fn -> req(body) |> resp end)
-    result |> text
+    tape(request(text), "direct") |> text
   end
 
-  defp tape(body, agent_name, fun),
-    do: handle(body, agent_name, fun)
+  defp tape(body, name), do: handle(body, name, fn -> req(body) |> resp end)
 
   defp text([%{"type" => "text", "text" => t} | _]), do: t
   defp text(other), do: other
 
-  defp req(body), do: post(url(), opts(body))
+  defp req(body), do: req(body, get_env("TAPE_ON_MISS"))
+
+  defp req(_body, "live"),
+    do: {:ok, %{status: 200, body: %{"content" => [%{"type" => "text", "text" => "stubbed"}]}}}
+
+  defp req(body, _), do: post(url(), opts(body))
 
   defp opts(body), do: [json: body] ++ req_opts()
   defp req_opts, do: [headers: headers(), connect_options: connect(), receive_timeout: 120_000]

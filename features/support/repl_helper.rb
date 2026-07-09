@@ -13,6 +13,7 @@ module ReplHelper
       "CASSETTE_DIR" => cassette_dir,
       "MIX_ENV" => "test"
     }
+    env["TAPE_ON_MISS"] = @tape_on_miss if @tape_on_miss
     cmd = spawn_cmd(args)
     @reader, @writer, @pid = PTY.spawn(env, "/bin/sh", "-c", cmd)
     wait_for_prompt(args.split.first || "el")
