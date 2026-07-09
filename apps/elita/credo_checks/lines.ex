@@ -1,4 +1,4 @@
-defmodule Elita.Credo.LineCheck do
+defmodule Elita.Credo.Lines do
   @default_threshold 50
   @base_issue %Credo.Issue{category: :refactor, exit_status: 2}
 
@@ -12,12 +12,10 @@ defmodule Elita.Credo.LineCheck do
   end
   defp to_result(_end_line, _meta), do: :error
 
-  defp extract_end_line(meta, _source) do
-    case Keyword.get(meta, :end) do
-      end_meta when is_list(end_meta) -> Keyword.get(end_meta, :line)
-      _ -> nil
-    end
-  end
+  defp extract_end_line(meta, _source), do: get_end_line(Keyword.get(meta, :end))
+
+  defp get_end_line(end_meta) when is_list(end_meta), do: Keyword.get(end_meta, :line)
+  defp get_end_line(_), do: nil
 
   def issue_for(check, name, lines, max, {meta, filename}) do
     msg = "#{name} is too long (#{lines} lines, max is #{max})."

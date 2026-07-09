@@ -85,15 +85,14 @@ defmodule Tape.Matcher do
   end
 
   defp check_regex_or_string(rest, b) do
-    is_regex = ends_with?(rest, "/")
-    handle_regex_check(is_regex, rest, b)
+    check_regex_match(rest, b, ends_with?(rest, "/"))
   end
 
-  defp handle_regex_check(true, rest, b), do: regex_match(rest, b)
-  defp handle_regex_check(false, rest, b), do: contains?(b, "/" <> rest)
+  defp check_regex_match(rest, b, true), do: regex_match(rest, b)
+  defp check_regex_match(rest, b, false), do: contains?(b, "/" <> rest)
 
   defp regex_match(rest, b) do
-    pattern = slice(rest, 0, length(rest) - 1)
-    Regex.match?(compile!(pattern), b)
+    pattern = slice(rest, 0, byte_size(rest) - 1)
+    b =~ compile!(pattern)
   end
 end
