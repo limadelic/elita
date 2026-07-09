@@ -126,20 +126,13 @@ module VerifyHelper
   end
 
   def fold(lines)
-    result = []
-    current = nil
-
-    lines.each_with_index do |line, input_idx|
-      is_log = log?(line)
-      if is_log
+    lines.each_with_object([]) do |line, result|
+      if log?(line)
         result << line
-        current = result.size - 1
-      elsif current && current >= 0
-        result[current] << " " << line
+      elsif result.any?
+        result[-1] << " " << line
       end
     end
-
-    result
   end
 
   def log?(line)
