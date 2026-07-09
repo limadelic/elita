@@ -27,9 +27,13 @@ defmodule Elita.Credo.Imports do
   end
 
   defp check_call({:import, _meta, [{:__aliases__, _ma, parts} | rest]} = ast, issues, _allowlist, _filename) do
-    imports = Process.get(:elita_imports) || []
-    Process.put(:elita_imports, [parts | imports])
-    collect_import_only_names(rest)
+    case rest do
+      [[only: names]] when is_list(names) ->
+        collect_import_only_names(parts, rest)
+      _ ->
+        imports = Process.get(:elita_imports) || []
+        Process.put(:elita_imports, [parts | imports])
+    end
     {ast, issues}
   end
 
@@ -86,8 +90,11 @@ defmodule Elita.Credo.Imports do
     issues
   end
 
-  defp maybe_add_issue({:__aliases__, _meta_alias, [module]}, _func, meta, issues, allowlist, imports, aliases, _local_defs, _import_names, filename) when is_atom(module) do
-    if is_imported?([module], imports) or is_aliased?(module, aliases) or not should_report?(module, allowlist) do
+  defp maybe_add_issue({:__aliases__, _meta_alias, [module]}, func, meta, issues, allowlist, imports, aliases, _local_defs, import_names, filename) when is_atom(module) do
+    if is_fully_imported?([module], imports) or
+       is_function_imported?(module, func, import_names) or
+       is_aliased?(module, aliases) or
+       not should_report?(module, allowlist) do
       issues
     else
       [create_issue(module, meta, filename) | issues]
@@ -109,17 +116,24 @@ defmodule Elita.Credo.Imports do
     issues
   end
 
-  defp maybe_add_issue(module, _func, meta, issues, allowlist, imports, aliases, _local_defs, _import_names, filename)
+  defp maybe_add_issue(module, func, meta, issues, allowlist, imports, aliases, _local_defs, import_names, filename)
        when is_atom(module) do
-    if is_imported?([module], imports) or is_aliased?(module, aliases) or not should_report?(module, allowlist) do
+    if is_fully_imported?([module], imports) or
+       is_function_imported?(module, func, import_names) or
+       is_aliased?(module, aliases) or
+       not should_report?(module, allowlist) do
       issues
     else
       [create_issue(module, meta, filename) | issues]
     end
   end
 
-  defp is_imported?(parts, imports) do
+  defp is_fully_imported?(parts, imports) do
     Enum.any?(imports, &(&1 == parts))
+  end
+
+  defp is_function_imported?(module, func, import_names) when is_atom(module) and is_atom(func) do
+    Enum.any?(import_names, &(&1 == {module, func}))
   end
 
   defp is_imported_nested?(parts, imports) do
@@ -196,16 +210,18 @@ defmodule Elita.Credo.Imports do
   defp extract_function_name({name, _meta, _args}) when is_atom(name), do: name
   defp extract_function_name(_), do: nil
 
-  defp collect_import_only_names(rest) do
+  defp collect_import_only_names(module_parts, rest) do
     case rest do
       [[only: names]] when is_list(names) ->
         import_names = Process.get(:elita_import_names) || []
+        module = List.first(module_parts)
         collected = Enum.reduce(names, import_names, fn item, acc ->
-          case item do
-            {name, _arity} when is_atom(name) -> [name | acc]
-            name when is_atom(name) -> [name | acc]
-            _ -> acc
+          func = case item do
+            {name, _arity} when is_atom(name) -> name
+            name when is_atom(name) -> name
+            _ -> nil
           end
+          if func, do: [{module, func} | acc], else: acc
         end)
         Process.put(:elita_import_names, collected)
       _ ->

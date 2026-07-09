@@ -93,7 +93,7 @@ defmodule Tape.Matcher do
   defp handle_regex_check(false, rest, b), do: contains?(b, "/" <> rest)
 
   defp regex_match(rest, b) do
-    pattern = slice(rest, 0, String.length(rest) - 1)
+    pattern = slice(rest, 0, length(rest) - 1)
     Regex.match?(compile!(pattern), b)
   end
 end
