@@ -13,7 +13,7 @@ Before do |scenario|
 end
 
 After do
-  kill_process if @pid
+  kill if @pid
   @reader&.close unless @reader&.closed?
   @writer&.close unless @writer&.closed?
 end
@@ -51,7 +51,7 @@ def clock(scenario)
   rows.first.to_h&.dig('clock') || ENV['CLOCK']
 end
 
-def kill_process
+def kill
   Process.kill("TERM", @pid)
   Process.wait(@pid, Process::WNOHANG)
 rescue Errno::ESRCH
