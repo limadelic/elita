@@ -12,7 +12,10 @@ CLAUDE.local.md
 status.json
 .claude/worktrees/
 /reports/
+/reports/coverage/
 node_modules/
 test_*.exs
 test_*.ets
+coverdata.*
+.coverage*
 
