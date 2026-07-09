@@ -8,14 +8,10 @@ module Assert
   end
 
   def cell(cell, output)
-    if negated?(cell)
-      content = cell[1..-2].strip
-      content = content[1..-1].strip if content.start_with?(">")
-      refute(content, output)
-    else
-      content = cell.start_with?(">") ? cell[1..-1].strip : cell
-      assert(content, output)
-    end
+    n = negated?(cell)
+    c = (n ? cell[1..-2] : cell).strip
+    c = c[1..-1].strip if c.start_with?(">")
+    (n ? refute : method(:assert)).call(c, output)
   end
 
   def negated?(cell)
@@ -24,12 +20,7 @@ module Assert
 
   def assert(expected, output)
     expected.split.each { |w|
-      output_lower = output.downcase
-      w_lower = w.downcase
-      unless output_lower.include?(w_lower)
-        msg = "Expected '#{w}' in:\n#{output}"
-        raise msg
-      end
+      (output.downcase.include?(w.downcase) or raise("Expected '#{w}' in:\n#{output}"))
     }
   end
 
