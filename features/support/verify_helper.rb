@@ -198,7 +198,7 @@ module VerifyHelper
     if negated?(cell)
       refute_includes(extract(cell), output)
     else
-      assert_includes(extract(cell), output)
+      assert(extract(cell), output)
     end
   end
 
@@ -211,7 +211,7 @@ module VerifyHelper
     cell.start_with?("(") && cell.end_with?(")")
   end
 
-  def assert_includes(expected, output)
+  def assert(expected, output)
     expected.split.each { |w| raise "Expected '#{w}' in:\n#{output}" unless output.downcase.include?(w.downcase) }
   end
 
