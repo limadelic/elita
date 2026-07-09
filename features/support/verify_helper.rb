@@ -136,16 +136,13 @@ module VerifyHelper
   end
 
   def log?(line)
-    # Match log lines: emoji followed by space and letters/emoji (agent/system markers)
-    # OR match prompt lines: word characters followed by > (with or without emoji after)
-    # OR match standalone prompts: word characters followed by >
-    # OR match scenario save rows: ✏️ emoji followed by name and "="
-    # Exclude lines starting with emoji but followed by decorative chars like * ✅
-    is_emoji_line = line.match?(/^[\p{So}🀀-🿿][\s]*[a-zA-Z🀀-🿿]/) rescue false
-    is_scenario_save = line.match?(/^✏️\s+\w+.*=/) rescue false
-    is_prompt_with_emoji = line.match?(/^\w+>\s+[\p{So}🀀-🿿]/) rescue false
-    is_standalone_prompt = line.match?(/^\w+>$/) rescue false
-    is_emoji_line || is_scenario_save || is_prompt_with_emoji || is_standalone_prompt
+    patterns = [
+      /^[\p{So}🀀-🿿][\s]*[a-zA-Z🀀-🿿]/, # emoji + space + letter
+      /^✏️\s+\w+.*=/, # pencil + word + =
+      /^\w+>\s+[\p{So}🀀-🿿]/, # prompt + emoji
+      /^\w+>$/ # just prompt
+    ]
+    patterns.any? { |p| (line.match?(p) rescue false) }
   end
 
   def cells(table)
