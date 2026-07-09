@@ -79,8 +79,7 @@ module Search
   end
 
   def normalize(transcript)
-    tx = transcript.dup
-    tx = tx.force_encoding("UTF-8") if tx.respond_to?(:force_encoding)
+    tx = (transcript.dup.force_encoding("UTF-8") rescue transcript)
     lines = tx.split("\n").map { |l| l.strip.force_encoding("UTF-8") rescue l.strip }.reject(&:empty?)
     lines.each_with_object([]) { |line, result| is_log?(line) ? result << line : result.any? && (result[-1] << " " << line) }
   end
