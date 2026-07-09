@@ -1,7 +1,7 @@
 defmodule TapeHandler do
   import System, only: [get_env: 1]
   import Keyword, only: [get: 3]
-  import Map, only: [put: 3]
+  import Map, only: [merge: 2]
 
   alias Tape.Play
   alias Tape.Record
@@ -10,10 +10,14 @@ defmodule TapeHandler do
     ctx(%{body: body, name: name, fun: fun}, opts) |> route()
   end
 
-  defp ctx(basic, opts) do
-    put(basic, :on_miss, get(opts, :on_miss, :raise))
-    |> put(:tape, get_env("TAPE"))
-    |> put(:live, get_env("LIVE"))
+  defp ctx(basic, opts), do: merge(basic, ctx_updates(opts))
+
+  defp ctx_updates(opts) do
+    %{
+      on_miss: get(opts, :on_miss, :raise),
+      tape: get_env("TAPE"),
+      live: get_env("LIVE")
+    }
   end
 
   defp route(%{tape: "rec"} = ctx), do: Record.handle(ctx.body, ctx.name, ctx.fun)

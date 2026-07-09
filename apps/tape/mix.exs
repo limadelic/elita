@@ -30,7 +30,8 @@ defmodule Tape.MixProject do
 
   defp deps do
     [
-      {:jason, "~> 1.4"}
+      {:jason, "~> 1.4"},
+      {:credo, "~> 1.7", runtime: false}
     ]
   end
 end
