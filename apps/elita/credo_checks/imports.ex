@@ -5,7 +5,7 @@ defmodule Elita.Credo.Imports do
   alias Credo.Code
 
   def param_defaults do
-    [allowlist: [:ets, :erlang, :rand]]
+    [allowlist: [:ets, :erlang, :rand, :cover]]
   end
 
   @check_desc "Functions must be imported, not called with Module.func syntax. Aliases (single-segment qualified calls) are OK."
@@ -16,7 +16,8 @@ defmodule Elita.Credo.Imports do
   end
 
   def run(%SourceFile{} = source_file, params) do
-    allowlist = Keyword.get(params, :allowlist, [:ets, :erlang, :rand])
+    defaults = param_defaults()
+    allowlist = Keyword.get(params, :allowlist, Keyword.get(defaults, :allowlist))
     filename = source_file.filename
     Process.put(:elita_imports, [])
     Process.put(:elita_aliases, [])

@@ -29,10 +29,10 @@ defmodule Mix.Tasks.Cover.Report do
   end
 
   defp coverages do
-    modules() |> map(&module_coverage/1)
+    covered_modules() |> map(&module_coverage/1)
   end
 
-  defp modules do
+  defp covered_modules do
     safe_modules(:cover.modules())
   end
 

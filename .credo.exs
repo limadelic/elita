@@ -21,7 +21,7 @@
         # You can give explicit globs or simply directories.
         # In the latter case `**/*.{ex,exs}` will be used.
         #
-        included: ["lib/"],
+        included: ["apps/*/lib/"],
         excluded: [~r"/_build/", ~r"/deps/", ~r"/node_modules/"]
       },
       #
@@ -32,12 +32,12 @@
       # If you create your own checks, you must specify the source files for
       # them here, so they can be loaded by Credo before running the analysis.
       #
-      requires: ["credo_checks/line_check.ex", "credo_checks/max_function_lines.ex", "credo_checks/max_module_lines.ex", "credo_checks/imports.ex"],
+      requires: ["apps/elita/credo_checks/line_check.ex", "apps/elita/credo_checks/max_function_lines.ex", "apps/elita/credo_checks/max_module_lines.ex", "apps/elita/credo_checks/imports.ex"],
       #
       # If you want to enforce a style guide and need a more traditional linting
       # experience, you can change `strict` to `true` below:
       #
-      strict: false,
+      strict: true,
       #
       # To modify the timeout for parsing files, change this value:
       #
