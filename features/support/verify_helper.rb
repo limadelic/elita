@@ -74,13 +74,13 @@ module VerifyHelper
 
   def row(prefix, text, cursor, matches)
     if prefix.empty?
-      match_continuation(text, cursor, matches)
+      scan(text, cursor, matches)
     else
       match_anchor(prefix, text, cursor, matches)
     end
   end
 
-  def match_continuation(text, cursor, matches)
+  def scan(text, cursor, matches)
     return false if cursor >= @folded_lines.size
 
     line = clean_line(@folded_lines[cursor])
