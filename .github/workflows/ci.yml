@@ -6,6 +6,10 @@ on:
     branches:
       - main
 
+permissions:
+  pages: write
+  id-token: write
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -72,6 +76,37 @@ jobs:
         if: steps.credo.outcome == 'failure'
         run: exit 1
 
+      - name: Generate lint badge
+        run: |
+          mkdir -p site
+          ruby << 'RUBY'
+            require 'json'
+            if File.exist?('/tmp/credo.json')
+              credo = JSON.parse(File.read('/tmp/credo.json'))
+              issue_count = credo['issues'].length
+            else
+              issue_count = 0
+            end
+            color = issue_count == 0 ? '23D96C' : 'e05d44'
+            message = issue_count == 0 ? 'clean' : "#{issue_count} issues"
+            badge = {
+              schemaVersion: 1,
+              label: 'credo',
+              message: message,
+              color: color,
+              labelColor: '173647'
+            }
+            File.write('site/lint.json', JSON.generate(badge))
+          RUBY
+        if: always()
+
+      - name: Upload lint badge artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lint-badge
+          path: site/
+
   test:
     runs-on: ubuntu-latest
 
@@ -105,3 +140,30 @@ jobs:
 
       - name: Test
         run: mix test
+
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    needs: [lint]
+    if: always()
+
+    steps:
+      - name: Download lint badge
+        uses: actions/download-artifact@v4
+        with:
+          name: lint-badge
+          path: site
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload to Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy to Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
