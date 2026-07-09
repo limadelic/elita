@@ -170,17 +170,23 @@ module VerifyHelper
   def fold(lines)
     result = []
     idx = nil
-
-    lines.each do |line|
-      if log?(line) || board?(line)
-        result << line
-        idx = result.size - 1
-      elsif idx && idx >= 0
-        result[idx] << " " << line
-      end
-    end
-
+    lines.each { |line| idx = mark(result, line, idx) }
     result
+  end
+
+  def mark(result, line, idx)
+    return append(result, line) if log?(line) || board?(line)
+    merge(result, line, idx) if idx && idx >= 0
+    idx
+  end
+
+  def append(result, line)
+    result << line
+    result.size - 1
+  end
+
+  def merge(result, line, idx)
+    result[idx] << " " << line
   end
 
   def board?(line)
