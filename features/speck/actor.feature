@@ -7,7 +7,7 @@ Feature: Actor
       | 🧪 actor_spec | A professional actor who inhabits roles |
       | 🤖 actor      | Versatile actor who plays any role      |
 
-    * speck generates scenarios
+    * verify
       | 🎭 speck as tplan  |                                            |
       | ✏️ actor_scenarios | Role Adoption - Victorian Butler           |
       | ✏️ actor_scenarios | Period-Accurate Speech                     |
@@ -18,7 +18,7 @@ Feature: Actor
       | ✏️ actor_scenarios | Realistic Mannerisms                       |
       | ✏️ actor_scenarios | Situational Improvisation                  |
 
-    * speck runs the test suite
+    * verify
       | 🎭 speck as texec  |                      |
       | 🚀 actor_v1        | as actor             |
       | ✨ actor_v1         | Edmund Hartwell      |
