@@ -1,11 +1,6 @@
 require 'timeout'
 
 Around do |scenario, block|
-  timeout_secs = case ENV["TAPE"]
-  when "rec" then 300
-  when nil then ENV["COVER"] == "1" ? 600 : 70
-  else 70
-  end
   Timeout.timeout(timeout_secs) { block.call }
 rescue Timeout::Error
   raise "Scenario '#{scenario.name}' timed out after #{timeout_secs}s"
@@ -24,6 +19,17 @@ end
 
 private
 
+def timeout_secs
+  case ENV["TAPE"]
+  when "rec"
+    300
+  when nil
+    ENV["COVER"] == "1" ? 600 : 70
+  else
+    70
+  end
+end
+
 def extract_cassette(scenario)
   tag = scenario.tags.map(&:name).find { |t| t.start_with?("@tape:") }
   return tag.sub("@tape:", "") if tag
@@ -34,8 +40,7 @@ def extract_cassette(scenario)
   rows = test_case.rows
   return unless rows&.any?
 
-  row = rows.first.to_h if rows.first.respond_to?(:to_h)
-  row&.dig('cassette')
+  rows.first.to_h&.dig('cassette') if rows.first.respond_to?(:to_h)
 end
 
 def kill_process
