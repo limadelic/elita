@@ -9,7 +9,7 @@ defmodule El.Command.Ls do
   import El.Command.Ls.Boot, only: [spawn: 0]
   import El.Commands.Ls, only: [ls: 1]
 
-  def run(path \\ nil) do
+  def list(path \\ nil) do
     start()
     fetch(path) |> reach(path)
   end
