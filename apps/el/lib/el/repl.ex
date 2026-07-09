@@ -3,6 +3,7 @@ defmodule El.REPL do
   import Elita, only: [start_link: 2, call: 2]
   import IO, only: [read: 2, puts: 1, write: 1]
   import String, only: [trim: 1]
+  import El.ShippedTape, only: [setup: 0]
 
   def run(agent) do
     ensure_all_started(:elita)
@@ -11,6 +12,7 @@ defmodule El.REPL do
   end
 
   defp setup_all(agent) do
+    setup()
     Registry.start_link(keys: :unique, name: ElitaRegistry) |> settle()
     Tape.Writer.start_link(nil) |> settle()
     start_link(agent, [agent]) |> settle()
