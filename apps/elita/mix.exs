@@ -37,7 +37,8 @@ defmodule Elita.MixProject do
       {:jason, "~> 1.4"},
       {:yaml_elixir, "~> 2.9"},
       {:ymlr, "~> 2.0"},
-      {:credo, "~> 1.7", runtime: false}
+      {:credo, "~> 1.7", runtime: false},
+      {:tape, in_umbrella: true}
     ]
   end
 
