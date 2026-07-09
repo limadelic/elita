@@ -46,37 +46,12 @@ When(/^(\w+)> (.+)$/) do |prompt, input, *rest|
     @transcript_stripped << "\n🤔 el → #{prompt}: #{input}\n"
   end
 
-  max_send_attempts = 5
-  output = nil
-  max_send_attempts.times do |attempt|
-    begin
-      output = send(input, prompt)
-      break
-    rescue => e
-      if attempt < max_send_attempts - 1
-        sleep 1 if ENV["TAPE"] == "rec"
-      else
-        raise e
-      end
-    end
-  end
+  output = attempt(5) { send(input, prompt) }
 
   if table && valid?(table)
     verify_lines(table.raw)
   elsif table
-    max_table_attempts = 5
-    max_table_attempts.times do |attempt|
-      begin
-        verify_table(table, output)
-        break
-      rescue => e
-        if attempt < max_table_attempts - 1
-          sleep 1 if ENV["TAPE"] == "rec"
-        else
-          raise e
-        end
-      end
-    end
+    attempt(5) { verify_table(table, output) }
   end
 end
 
@@ -86,4 +61,21 @@ end
 
 Then(/^print transcript$/) do
   puts "\n=== TRANSCRIPT ===\n#{transcript}\n=== END ===\n"
+end
+
+def attempt(max_tries = 5)
+  result = nil
+  max_tries.times do |try|
+    begin
+      result = yield
+      break
+    rescue => e
+      if try < max_tries - 1
+        sleep 1 if ENV["TAPE"] == "rec"
+      else
+        raise e
+      end
+    end
+  end
+  result
 end
