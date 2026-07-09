@@ -85,7 +85,15 @@ module ReplHelper
 
   def spawn_cmd(args)
     escript_path = "../../../../apps/el/el"
-    "cd apps/elita/agents/elita && TAPE=#{ENV['TAPE'] || 'replay'} CASSETTE=#{@cassette} CASSETTE_DIR=#{cassette_dir} MIX_ENV=test #{escript_path} #{args}".strip
+    (
+      "cd apps/elita/agents/elita && " +
+      "TAPE=#{ENV['TAPE'] || 'replay'} " +
+      "CASSETTE=#{@cassette} " +
+      "CASSETTE_DIR=#{cassette_dir} " +
+      "MIX_ENV=test " +
+      "#{escript_path} " +
+      "#{args}"
+    ).strip
   end
 
   def strip_ansi(text)
