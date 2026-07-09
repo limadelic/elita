@@ -22,25 +22,47 @@ module VerifyHelper
 
       all_found = true
       found_indices = []
+      next_continuation_idx = @scenario_cursor
 
       rows.each do |row|
         want_prefix = row[0].strip.force_encoding("UTF-8") rescue row[0].strip
         want_text = row[1].strip.downcase.force_encoding("UTF-8") rescue row[1].strip.downcase
         found = false
 
-        (@scenario_cursor...@folded_lines.size).each do |idx|
-          full_line = @folded_lines[idx]
-          full_line = full_line.sub(/\A(?:\s*\w+>\s*)+/, "")
-          line_prefix, line_text = split_line(full_line)
+        if want_prefix.empty?
+          # Continuation row: match col-2 against next line at next_continuation_idx position
+          if next_continuation_idx < @folded_lines.size
+            full_line = @folded_lines[next_continuation_idx]
+            full_line = full_line.sub(/\A(?:\s*\w+>\s*)+/, "")
+            line_prefix, line_text = split_line(full_line)
 
-          if line_prefix && line_text
-            prefix_match = line_prefix.include?(want_prefix)
-            text_match = want_text.empty? || line_text.downcase.include?(want_text) || line_text.downcase.gsub(/\s+/, "").include?(want_text.gsub(/\s+/, ""))
+            if line_text
+              text_match = want_text.empty? || line_text.downcase.include?(want_text) || line_text.downcase.gsub(/\s+/, "").include?(want_text.gsub(/\s+/, ""))
+              if text_match
+                found_indices << next_continuation_idx + 1
+                next_continuation_idx += 1
+                found = true
+              end
+            end
+          end
+        else
+          # Regular row: search from scenario_cursor onwards (original behavior)
+          # But track next_continuation_idx for following continuation rows
+          (@scenario_cursor...@folded_lines.size).each do |idx|
+            full_line = @folded_lines[idx]
+            full_line = full_line.sub(/\A(?:\s*\w+>\s*)+/, "")
+            line_prefix, line_text = split_line(full_line)
 
-            if prefix_match && text_match
-              found_indices << idx + 1
-              found = true
-              break
+            if line_prefix && line_text
+              prefix_match = line_prefix.include?(want_prefix)
+              text_match = want_text.empty? || line_text.downcase.include?(want_text) || line_text.downcase.gsub(/\s+/, "").include?(want_text.gsub(/\s+/, ""))
+
+              if prefix_match && text_match
+                found_indices << idx + 1
+                next_continuation_idx = idx + 1
+                found = true
+                break
+              end
             end
           end
         end
@@ -119,7 +141,12 @@ module VerifyHelper
 
     lines.each_with_index do |line, input_idx|
       is_log = log_line?(line)
+      is_board = board_line?(line)
       if is_log
+        result << line
+        current = result.size - 1
+      elsif is_board
+        # Keep board lines separate
         result << line
         current = result.size - 1
       elsif current && current >= 0
@@ -128,6 +155,12 @@ module VerifyHelper
     end
 
     result
+  end
+
+  def board_line?(line)
+    # Match lines that look like tic-tac-toe boards: exactly 3 cells with X, O, or spaces/underscores
+    # Pattern: pipe-separated cells like "X | _ | _"
+    line.match?(/^[XO_\s]*\|[XO_\s]*\|[XO_\s]*$/) rescue false
   end
 
   def log_line?(line)
