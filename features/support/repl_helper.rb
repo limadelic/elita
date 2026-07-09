@@ -23,7 +23,7 @@ module ReplHelper
     timeout = Time.now + 30
     env_hash = { "TAPE" => tape, "CASSETTE" => @cassette, "CASSETTE_DIR" => cassette_dir, "MIX_ENV" => "test" }
     env_hash["CLOCK"] = @clock if @clock
-    env = Hash[::ENV.map { |k, v| [k, v] }].merge(env_hash)
+    env = ::ENV.to_h.merge(env_hash)
 
     begin
       reader, writer, pid = PTY.spawn(env, "/bin/sh", "-c", cmd)
