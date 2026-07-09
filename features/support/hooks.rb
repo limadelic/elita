@@ -21,14 +21,9 @@ end
 private
 
 def timeout
-  case ENV["TAPE"]
-  when "rec"
-    300
-  when nil
-    ENV["COVER"] == "1" ? 600 : 70
-  else
-    70
-  end
+  return 300 if ENV["TAPE"] == "rec"
+  return 600 if ENV["TAPE"].nil? && ENV["COVER"] == "1"
+  70
 end
 
 def cassette(scenario)
