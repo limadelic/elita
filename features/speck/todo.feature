@@ -6,10 +6,10 @@ Feature: Todo
     * speck> exec todo
       | 🧪 todo_spec | mem tools    |
       | 🤖 todo      | task manager |
-    * speck generates scenarios
+    * verify
       | 🎭 speck as tplan |                   |
       | ✏️ scenarios      | Store single task |
-    * speck runs the test suite
+    * verify
       | 🎭 speck as texec  |            |
       | 🚀 todo_v1         | as todo    |
       | 🤔 speck → todo_v1 | groceries  |
