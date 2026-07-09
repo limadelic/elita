@@ -1,12 +1,10 @@
 require 'timeout'
 
 Around do |scenario, block|
-  timeout_secs = if ENV["TAPE"] == "rec"
-    300
-  elsif ENV["COVER"] == "1"
-    600
-  else
-    70
+  timeout_secs = case ENV["TAPE"]
+  when "rec" then 300
+  when nil then ENV["COVER"] == "1" ? 600 : 70
+  else 70
   end
   Timeout.timeout(timeout_secs) { block.call }
 rescue Timeout::Error
@@ -14,35 +12,34 @@ rescue Timeout::Error
 end
 
 Before do |scenario|
-  tape_tag = scenario.tags.map(&:name).find { |t| t.start_with?("@tape:") }
-
-  if tape_tag
-    @cassette = tape_tag.sub("@tape:", "")
-  else
-    # Try to read cassette from Scenario Outline example row data
-    test_case = scenario.instance_variable_get(:@test_case)
-    if test_case && test_case.respond_to?(:rows)
-      rows = test_case.rows
-      if rows && !rows.empty?
-        # For Scenario Outline, rows contains the example row data
-        row_hash = rows.first.to_h if rows.first.respond_to?(:to_h)
-        @cassette = row_hash['cassette'] if row_hash && row_hash['cassette']
-      end
-    end
-  end
-
-  @cassette ||= File.basename(scenario.location.file, ".feature")
+  @cassette = extract_cassette(scenario) || File.basename(scenario.location.file, ".feature")
   initialize_scenario_cursor
 end
 
 After do
-  if @pid
-    begin
-      Process.kill("TERM", @pid)
-      Process.wait(@pid, Process::WNOHANG)
-    rescue Errno::ESRCH
-    end
-  end
-  @reader.close if @reader && !@reader.closed?
-  @writer.close if @writer && !@writer.closed?
+  kill_process if @pid
+  @reader&.close unless @reader&.closed?
+  @writer&.close unless @writer&.closed?
+end
+
+private
+
+def extract_cassette(scenario)
+  tag = scenario.tags.map(&:name).find { |t| t.start_with?("@tape:") }
+  return tag.sub("@tape:", "") if tag
+
+  test_case = scenario.instance_variable_get(:@test_case)
+  return unless test_case&.respond_to?(:rows)
+
+  rows = test_case.rows
+  return unless rows&.any?
+
+  row = rows.first.to_h if rows.first.respond_to?(:to_h)
+  row&.dig('cassette')
+end
+
+def kill_process
+  Process.kill("TERM", @pid)
+  Process.wait(@pid, Process::WNOHANG)
+rescue Errno::ESRCH
 end
