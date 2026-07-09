@@ -7,7 +7,7 @@ Feature: Todo
       | 🧪 todo_spec       | mem tools     |
       | 🤖 todo            | task manager  |
       | 🎭 speck as tplan  |               |
-      | ✏️ scenarios       |               |
+      | ✏️ scenarios       | Store single task                      |
       | 🎭 speck as texec  |               |
       | 🚀 todo_v1         | as todo       |
       | 🤔 speck → todo_v1 | groceries     |
