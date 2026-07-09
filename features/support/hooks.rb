@@ -1,4 +1,7 @@
 require 'timeout'
+require 'webrick'
+require 'json'
+require 'thread'
 
 module Hooks
 end
@@ -22,10 +25,14 @@ Before do |scenario|
     "@tape:",
     ""
   ) : File.basename(scenario.location.file, ".feature")
+  @tape_on_miss = scenario.tags.map(&:name).find { |t| t.start_with?("@tape_on_miss:") }
+  @tape_on_miss = @tape_on_miss ? @tape_on_miss.sub("@tape_on_miss:", "") : nil
   init
+  start_stub_server if @tape_on_miss == "live"
 end
 
 After do
+  stop_stub_server
   if @pid
     begin
       Process.kill("TERM", @pid)
@@ -35,4 +42,34 @@ After do
   end
   @reader.close if @reader && !@reader.closed?
   @writer.close if @writer && !@writer.closed?
+end
+
+def start_stub_server
+  @stub_port = 19999
+  @stub_server = WEBrick::HTTPServer.new(
+    Port: @stub_port,
+    AccessLog: [],
+    Logger: WEBrick::Log.new("/dev/null")
+  )
+
+  @stub_server.mount_proc("/v1/messages") do |req, res|
+    if req.request_method == "POST"
+      res["Content-Type"] = "application/json"
+      res.body = JSON.generate({
+        content: [{ type: "text", text: "response from stubbed server" }]
+      })
+    end
+  end
+
+  @stub_thread = Thread.new { @stub_server.start }
+  sleep 0.1
+  ENV["ANTHROPIC_BASE_URL"] = "http://localhost:#{@stub_port}"
+end
+
+def stop_stub_server
+  if @stub_server
+    @stub_server.shutdown
+    @stub_thread&.join(1)
+    ENV.delete("ANTHROPIC_BASE_URL")
+  end
 end
