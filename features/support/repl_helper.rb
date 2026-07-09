@@ -63,10 +63,10 @@ module ReplHelper
         ready = IO.select([@reader], nil, nil, 0.1)
         if ready
           chunk = @reader.readpartial(4096)
-          chunk = chunk.force_encoding("UTF-8") rescue chunk.to_s
+          chunk = encode(chunk)
           @transcript << chunk if @transcript
           stripped_chunk = strip_ansi(chunk)
-          stripped_chunk = stripped_chunk.force_encoding("UTF-8") rescue stripped_chunk.to_s
+          stripped_chunk = encode(stripped_chunk)
           @transcript_stripped << stripped_chunk if @transcript_stripped
         else
           break
@@ -77,6 +77,10 @@ module ReplHelper
   end
 
   private
+
+  def encode(value)
+    value.force_encoding("UTF-8") rescue value.to_s
+  end
 
   def spawn_cmd(args)
     escript_path = "../../../../apps/el/el"
@@ -98,11 +102,11 @@ module ReplHelper
         ready = IO.select([@reader], nil, nil, 0.1)
         if ready
           chunk = @reader.readpartial(4096)
-          chunk = chunk.force_encoding("UTF-8") rescue chunk.to_s
+          chunk = encode(chunk)
           output << chunk
           @transcript << chunk if @transcript
           stripped_chunk = strip_ansi(chunk)
-          stripped_chunk = stripped_chunk.force_encoding("UTF-8") rescue stripped_chunk.to_s
+          stripped_chunk = encode(stripped_chunk)
           @transcript_stripped << stripped_chunk if @transcript_stripped
           return output if output.include?(pattern)
         end
