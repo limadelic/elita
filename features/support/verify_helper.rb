@@ -88,19 +88,11 @@ module VerifyHelper
   end
 
   def split(line)
-    colon_idx = line.index(": ")
-    equals_idx = line.index(" = ")
-
-    if colon_idx && equals_idx
-      if colon_idx < equals_idx
-        [line[0...colon_idx], line[colon_idx + 2..-1]]
-      else
-        [line[0...equals_idx], line[equals_idx + 3..-1]]
-      end
-    elsif colon_idx
-      [line[0...colon_idx], line[colon_idx + 2..-1]]
-    elsif equals_idx
-      [line[0...equals_idx], line[equals_idx + 3..-1]]
+    case [line.index(": "), line.index(" = ")]
+    in [c, e] if c && (!e || c < e)
+      [line[0...c], line[c + 2..-1]]
+    in [_, e] if e
+      [line[0...e], line[e + 3..-1]]
     else
       [line, line]
     end
