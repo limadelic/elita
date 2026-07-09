@@ -180,6 +180,7 @@ module ReplHelper
   def loop_until_match(output, pattern, timeout)
     while Time.now < timeout
       next if (chunk = fetch(@reader)).empty?
+
       record_chunk(chunk, output)
       return output if output.include?(pattern)
     end
