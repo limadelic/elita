@@ -36,6 +36,7 @@ defmodule Elita.Umbrella do
   defp run_lint(_) do
     check("cd apps/elita && mix lint")
     check("cd apps/el && mix lint")
+    check("cd apps/tape && mix lint")
   end
 
   defp run_build(_) do

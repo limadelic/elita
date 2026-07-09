@@ -5,14 +5,17 @@ defmodule Tape.Play do
   import Tape.Play.Pick, only: [agent: 1]
   import System, only: [get_env: 1]
   import Enum, only: [at: 2]
-  import Map, only: [get: 2, take: 2]
+  import Map, only: [get: 2, take: 2, merge: 2]
   import Jason, only: [decode!: 1, encode!: 1]
 
   def handle(body, name, fun, on_miss \\ :raise) do
     ensure_entries(load())
+    context(load(), body, name, fun, on_miss) |> answer()
+  end
 
-    %{entries: load(), normalized: norm(body), body: body, name: name, fun: fun, on_miss: on_miss}
-    |> answer()
+  defp context(entries, body, name, fun, on_miss) do
+    %{entries: entries, normalized: norm(body), body: body}
+    |> merge(%{name: name, fun: fun, on_miss: on_miss})
   end
 
   defp load, do: load_entries()
