@@ -18,6 +18,7 @@ module VerifyHelper
     last_newline_sent = Time.now - 2
     loop do
       return if search(rows, normalize(transcript), deadline, transcript)
+
       drain
       nudge_if_needed(last_newline_sent)
       last_newline_sent = Time.now if timing?(last_newline_sent)
@@ -27,6 +28,7 @@ module VerifyHelper
 
   def nudge_if_needed(last_sent)
     return unless timing?(last_sent)
+
     nudge
   end
 
@@ -35,6 +37,7 @@ module VerifyHelper
     rows.each do |row|
       idx = find_match(row, folded_lines, deadline, tx)
       return nil unless idx
+
       found_indices << idx
     end
     @scenario_cursor = found_indices.max if found_indices.any?
@@ -43,7 +46,10 @@ module VerifyHelper
 
   def find_match(row, folded_lines, deadline, tx)
     prefix, text = parse_row(row)
-    search_lines(folded_lines, prefix, text) || handle_notfound(prefix, text, deadline, tx)
+    search_lines(
+      folded_lines, prefix,
+      text
+    ) || handle_notfound(prefix, text, deadline, tx)
   end
 
   def parse_row(row)
@@ -62,6 +68,7 @@ module VerifyHelper
 
   def handle_notfound(prefix, text, deadline, tx)
     return nil if pending?(deadline)
+
     msg = "No match for prefix='#{prefix}' text='#{text}'"
     msg << "\n\nTranscript:\n#{tx}"
     raise msg
