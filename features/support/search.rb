@@ -2,7 +2,7 @@ module Search
   def verify(rows)
     init unless @scenario_cursor
     deadline = deadline()
-    verify_loop(rows, deadline)
+    attempt(rows, deadline)
   end
 
   def init
@@ -10,7 +10,7 @@ module Search
     @folded_lines = nil
   end
 
-  def verify_loop(rows, deadline)
+  def attempt(rows, deadline)
     last_sent = Time.now - 2
     loop do
       tx = transcript
@@ -23,7 +23,7 @@ module Search
 
   def search(rows, folded_lines, deadline, tx)
     found_indices = rows.each_with_object([]) do |row, acc|
-      idx = find_match(row, folded_lines, deadline, tx)
+      idx = find(row, folded_lines, deadline, tx)
       return nil unless idx
 
       acc << idx
@@ -32,29 +32,29 @@ module Search
     found_indices
   end
 
-  def find_match(row, folded_lines, deadline, tx)
-    prefix, text = parse_row(row)
-    search_lines(
+  def find(row, folded_lines, deadline, tx)
+    prefix, text = parse(row)
+    scan(
       folded_lines, prefix,
       text
-    ) || handle_notfound(prefix, text, deadline, tx)
+    ) || fail(prefix, text, deadline, tx)
   end
 
-  def parse_row(row)
+  def parse(row)
     prefix = row[0].strip.force_encoding("UTF-8") rescue row[0].strip
     text = row[1].strip.downcase
     text = text.force_encoding("UTF-8") rescue text
     [prefix, text]
   end
 
-  def search_lines(folded_lines, prefix, text)
+  def scan(folded_lines, prefix, text)
     (@scenario_cursor...folded_lines.size).each do |idx|
       return idx + 1 if match?(folded_lines[idx], prefix, text)
     end
     nil
   end
 
-  def handle_notfound(prefix, text, deadline, tx)
+  def fail(prefix, text, deadline, tx)
     return nil if pending?(deadline)
 
     msg = "No match for prefix='#{prefix}' text='#{text}'"
