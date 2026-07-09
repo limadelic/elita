@@ -32,7 +32,7 @@
       # If you create your own checks, you must specify the source files for
       # them here, so they can be loaded by Credo before running the analysis.
       #
-      requires: Enum.map(["line_check.ex", "max_function_lines.ex", "max_module_lines.ex", "imports.ex"], &Path.expand("apps/elita/credo_checks/#{&1}", __DIR__)),
+      requires: Enum.map(["line_check.ex", "max_function_lines.ex", "max_module_lines.ex", "imports.ex", "compound_names.ex", "alias_usage.ex"], &Path.expand("apps/elita/credo_checks/#{&1}", __DIR__)),
       #
       # If you want to enforce a style guide and need a more traditional linting
       # experience, you can change `strict` to `true` below:
@@ -67,6 +67,8 @@
           {Elita.Credo.MaxFunctionLines, [max_lines: 5]},
           {Elita.Credo.MaxModuleLines, [max_lines: 100]},
           {Elita.Credo.Imports, []},
+          {Elita.Credo.CompoundNames, []},
+          {Elita.Credo.AliasUsage, []},
           {Credo.Check.Warning.Dbg, []},
           {Credo.Check.Warning.IoInspect, []},
           {Credo.Check.Warning.IExPry, []},
