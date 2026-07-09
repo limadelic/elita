@@ -87,13 +87,10 @@ module VerifyHelper
     _prefix, line_text = split(line)
 
     return false unless line_text
+    return false unless matches_text?(text, line_text)
 
-    if text.empty? || line_text.downcase.include?(text) || normalize(line_text).include?(normalize(text))
-      matches << cursor + 1
-      true
-    else
-      false
-    end
+    matches << cursor + 1
+    true
   end
 
   def match_anchor(prefix, text, cursor, matches)
@@ -103,11 +100,10 @@ module VerifyHelper
 
       next unless line_prefix && line_text
       next unless line_prefix.include?(prefix)
+      next unless matches_text?(text, line_text)
 
-      if text.empty? || line_text.downcase.include?(text) || normalize(line_text).include?(normalize(text))
-        matches << idx + 1
-        return true
-      end
+      matches << idx + 1
+      return true
     end
 
     false
@@ -119,6 +115,10 @@ module VerifyHelper
 
   def normalize(text)
     text.downcase.gsub(/\s+/, "")
+  end
+
+  def matches_text?(want, have)
+    want.empty? || have.downcase.include?(want) || normalize(have).include?(normalize(want))
   end
 
   def match_error(prefix, text)
