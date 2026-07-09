@@ -8,14 +8,11 @@ tape_handler =
   end
 
 clock_fn =
-  case {System.get_env("TAPE"), System.get_env("LIVE")} do
-    {"rec", _} ->
+  case System.get_env("LIVE") do
+    "1" ->
       nil
 
-    {_, "1"} ->
-      nil
-
-    {_, _} ->
+    _ ->
       fn ->
         case System.get_env("CLOCK") do
           nil ->
