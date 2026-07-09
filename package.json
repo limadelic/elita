@@ -1,0 +1,13 @@
+{
+  "name": "elita-qa",
+  "version": "1.0.0",
+  "description": "QA testing suite for elita",
+  "devDependencies": {
+    "prettier": "^3.0.0",
+    "prettier-plugin-gherkin": "^4.0.0"
+  },
+  "scripts": {
+    "fmt": "prettier --write 'features/**/*.feature'",
+    "fmt:check": "prettier --check 'features/**/*.feature'"
+  }
+}

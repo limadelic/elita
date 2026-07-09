@@ -2,6 +2,7 @@ defmodule El.CLI do
   import Application, only: [ensure_all_started: 1]
   import IO, only: [puts: 1]
   import El.Command
+  alias El.REPL
 
   @usage """
   Usage:
@@ -20,10 +21,6 @@ defmodule El.CLI do
 
   def main(argv) do
     ensure_all_started(:elita)
-    dispatch(argv)
-  end
-
-  defp dispatch(argv) do
     argv |> parse() |> run()
   end
 
@@ -45,6 +42,8 @@ defmodule El.CLI do
   defp parse(["ls", path]), do: {:ls, path}
   defp parse(["cd", path]), do: {:cd, path}
   defp parse(["daemon"]), do: :daemon
+  defp parse([]), do: {:repl, "el"}
+  defp parse([agent]), do: {:repl, agent}
   defp parse(_), do: :usage
 
   defp check(tool, cmd) when tool in @known_tools, do: cmd
@@ -58,6 +57,7 @@ defmodule El.CLI do
     puts("unknown tool: #{tool}")
   end
 
+  defp run({:repl, agent}), do: REPL.run(agent)
   defp run({:ask, tool, agent, msg}), do: ask(agent, msg, tool)
   defp run({:tell, tool, agent, msg}), do: tell(agent, msg, tool)
   defp run({:spawn, name, agent}), do: spawn(name, agent)
@@ -65,4 +65,5 @@ defmodule El.CLI do
   defp run({:ls, path}), do: ls(path)
   defp run({:cd, path}), do: cd(path)
   defp run(:daemon), do: daemon()
+  defp run(_), do: :usage
 end

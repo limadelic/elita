@@ -1,0 +1,155 @@
+name: Cucumber Tests
+
+on:
+  push:
+    branches:
+      - qa
+      - wip
+  workflow_dispatch:
+
+permissions:
+  pages: write
+  id-token: write
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: erlef/setup-beam@v1
+        with:
+          elixir-version: '1.18'
+          otp-version: '28'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+
+      - name: Lint el
+        run: |
+          cd apps/el
+          mix deps.get
+          mix lint
+
+      - name: Lint elita
+        run: |
+          cd apps/elita
+          mix deps.get
+          mix lint
+
+      - name: Check Gherkin formatting
+        run: |
+          npm install
+          npm run fmt:check
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: erlef/setup-beam@v1
+        with:
+          elixir-version: '1.18'
+          otp-version: '28'
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+
+      - name: Build el escript
+        run: |
+          cd apps/el
+          mix deps.get
+          mix escript.build
+
+      - name: Prepare elita
+        run: |
+          cd apps/elita
+          mix deps.get
+          mix compile
+
+      - name: Run Cucumber tests
+        run: |
+          mkdir -p reports
+          TAPE=replay bundle exec cucumber --format html --out reports/cucumber.html --format json --out reports/cucumber.json --publish-quiet
+        env:
+          MIX_ENV: test
+
+      - name: Inject legend into report
+        run: |
+          ruby bin/inject_legend.rb reports/cucumber.html
+        if: always()
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cucumber-report
+          path: reports/
+
+      - name: Compute badge counts
+        run: |
+          mkdir -p site
+          ruby << 'RUBY'
+            require 'json'
+            data = JSON.parse(File.read('reports/cucumber.json'))
+            scenarios = data.flat_map { |f| f['elements'] || [] }
+            passed = scenarios.count { |sc| (sc['steps'] || []).all? { |s| s.dig('result','status') == 'passed' } }
+            total = scenarios.length
+            color = passed == total ? '23D96C' : 'e05d44'
+            badge = {
+              schemaVersion: 1,
+              label: 'cukes',
+              message: "#{passed}/#{total}",
+              color: color,
+              namedLogo: 'cucumber',
+              logoColor: 'white',
+              labelColor: '173647'
+            }
+            File.write('site/cukes.json', JSON.generate(badge))
+          RUBY
+        if: always()
+
+      - name: Create site directory
+        run: |
+          mkdir -p site
+          cp reports/cucumber.html site/index.html
+        if: always()
+
+      - name: Upload test report artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-site
+          path: site/
+
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    needs: [test]
+    if: always()
+
+    steps:
+      - name: Download test report
+        uses: actions/download-artifact@v4
+        with:
+          name: test-site
+          path: site
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload to Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy to Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

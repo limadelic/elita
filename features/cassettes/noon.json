@@ -1,0 +1,20 @@
+[
+  {
+    "a": [
+      {
+        "text": "I'm sorry, I can't help with that right now - **it's lunch time** (12:00 PM).\n\nI'm taking my lunch break from 12 PM to 1 PM. Please come back after 1 PM and I'll be happy to help you file that report!",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "clockwatcher",
+      "messages": [
+        {
+          "role": "user",
+          "content": "file a report"
+        }
+      ],
+      "n": 1
+    }
+  }
+]
