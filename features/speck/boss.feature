@@ -4,17 +4,18 @@ Feature: Boss
   Scenario: speck reads, writes, and runs boss scenarios
     * > el speck
     * speck> exec boss
-      | 🧪 boss_spec               | Tell Tool                       |
-      | 🤖 boss                    | Delegating                      |
-      | 🎭 speck as tplan          |                                 |
-      | ✏️ scenario_1              | Boss delegates to single worker |
-      | 🎭 speck as texec          |                                 |
-      | 🚀 boss_v1                 | as boss                         |
-      | 🚀 worker_v1               | as worker                       |
-      | 📢 boss_v1 → worker_v1     | Implement login feature         |
-      | ✨ boss_v1                  | done                            |
-      | ✨ worker_v1                | my role as a team member        |
-      | 🚀 boss_v2                 | as boss                         |
-      | 📢 boss_v2 → dev_worker_v2 | Develop REST API                |
-      | ✨ qa_worker_v2             | adopted the role                |
-      | ✨ speck                    | VERIFIED AND PASSING            |
+      | 🧪 boss_spec               | delegates                        |
+      | 🤖 boss                    | never ask                        |
+      | 🤖 worker                  | takes tasks                      |
+      | 🎭 speck as tplan          |                                  |
+      | ✏️ boss_scenarios          | Direct task assignment to single |
+      | 🎭 speck as texec          |                                  |
+      | 🚀 boss_v1                 | as boss                          |
+      | 🚀 worker_v1               | as worker                        |
+      | 📢 boss_v1 → worker_v1     | quarterly report                 |
+      | ✨ boss_v1                  | done                             |
+      | ✨ worker_v1                | I have a task                    |
+      | 🚀 boss_v2                 | as boss                          |
+      | 📢 boss_v2 → dev_worker_v2 | authentication                   |
+      | ✨ qa_worker_v2             | No, I don't have a task          |
+      | ✨ speck                    | PASSED                           |
