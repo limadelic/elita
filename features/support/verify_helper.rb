@@ -71,7 +71,7 @@ module VerifyHelper
       drain
 
       # After ~1s without a match, nudge PTY with newline to flush cascade output (replay only)
-      if ENV["TAPE"] != "rec" && Time.now - last_newline_sent >= 1.0
+      if timing?(last_newline_sent)
         nudge
         last_newline_sent = Time.now
       end
@@ -102,6 +102,10 @@ module VerifyHelper
 
   def pending?(deadline)
     Time.now < deadline
+  end
+
+  def timing?(last_sent)
+    ENV["TAPE"] != "rec" && Time.now - last_sent >= 1.0
   end
 
   def split(line)
