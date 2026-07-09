@@ -139,12 +139,18 @@ module ReplHelper
   end
 
   def drain_output(reader, timeout, output)
-    begin
-      while Time.now < timeout
-        ready = IO.select([reader], nil, nil, 0.1)
-        output << reader.readpartial(4096) if ready
-      end
-    rescue EOFError
+    drain_safe { read_until(reader, timeout, output) }
+  end
+
+  def drain_safe
+    yield
+  rescue EOFError
+  end
+
+  def read_until(reader, timeout, output)
+    while Time.now < timeout
+      ready = IO.select([reader], nil, nil, 0.1)
+      output << reader.readpartial(4096) if ready
     end
   end
 
