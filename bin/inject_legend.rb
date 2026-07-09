@@ -1,7 +1,5 @@
 #!/usr/bin/env ruby
 
-require 'rexml/document'
-
 LEGEND_CSS = <<~CSS
   <style>
     .legend-container {
