@@ -5,13 +5,13 @@ module ReplHelper
 
   def boot(args)
     @cassette = @cassette || "greet"
-    reset_state(args)
+    reset(args)
   end
 
   def one(args)
     @cassette = @cassette || "greet"
     cmd = command(args)
-    run_one(cmd)
+    run(cmd)
   end
 
   def send(input, prompt)
@@ -30,10 +30,10 @@ module ReplHelper
     return unless @reader
 
     chunk = absorb(@reader)
-    record_transcript(chunk, strip(chunk))
+    append(chunk, strip(chunk))
   end
 
-  def record_transcript(chunk, stripped)
+  def append(chunk, stripped)
     chunk = encode(chunk)
     @transcript << chunk if @transcript
     stripped = encode(stripped)
@@ -44,20 +44,16 @@ module ReplHelper
 
   def absorb(pty)
     output = ""
-    absorb_loop(pty, output)
+    safe { read(pty, output) }
     output
   end
 
-  def absorb_loop(pty, output)
-    absorb_safe { read_loop(pty, output) }
-  end
-
-  def absorb_safe
+  def safe
     yield
   rescue EOFError
   end
 
-  def read_loop(pty, output)
+  def read(pty, output)
     loop do
       ready = IO.select([pty], nil, nil, 0.1)
       break unless ready
@@ -99,11 +95,11 @@ module ReplHelper
   def wait(prompt_word)
     output = ""
     pattern = "#{prompt_word}>"
-    timeout = calc_timeout
-    wait_loop(output, pattern, timeout) || fail_wait(pattern, output)
+    timeout = deadline
+    attempt(output, pattern, timeout) || timeout_error(pattern, output)
   end
 
-  def start_pty(cmd, prompt)
+  def launch(cmd, prompt)
     env = {
       "TAPE" => ENV["TAPE"] || "replay",
       "CASSETTE" => @cassette,
@@ -128,65 +124,60 @@ module ReplHelper
     ).strip
   end
 
-  def run_one(cmd)
+  def run(cmd)
     output = ""
     reader, writer, pid = PTY.spawn("/bin/sh", "-c", cmd)
-    drain_output(reader, Time.now + 30, output)
-    cleanup_pty(writer, pid)
+    extract(reader, Time.now + 30, output)
+    kill(writer, pid)
     output
   end
 
-  def drain_output(reader, timeout, output)
-    drain_safe { read_until(reader, timeout, output) }
+  def extract(reader, timeout, output)
+    safe { await(reader, timeout, output) }
   end
 
-  def drain_safe
-    yield
-  rescue EOFError
-  end
-
-  def read_until(reader, timeout, output)
+  def await(reader, timeout, output)
     while Time.now < timeout
       ready = IO.select([reader], nil, nil, 0.1)
       output << reader.readpartial(4096) if ready
     end
   end
 
-  def cleanup_pty(writer, pid)
+  def kill(writer, pid)
     Process.wait(pid) if pid
     writer.close if writer && !writer.closed?
   end
 
-  def reset_state(args)
+  def reset(args)
     @transcript = ""
     @transcript_stripped = ""
     cmd = spawn(args)
     prompt = args.split.first || "el"
-    start_pty(cmd, prompt)
+    launch(cmd, prompt)
   end
 
-  def calc_timeout
+  def deadline
     duration = ENV["TAPE"] == "rec" ? 300 : 30
     Time.now + duration
   end
 
-  def wait_loop(output, pattern, timeout)
+  def attempt(output, pattern, timeout)
     begin
-      loop_until_match(output, pattern, timeout)
+      poll(output, pattern, timeout)
     rescue EOFError
     end
   end
 
-  def loop_until_match(output, pattern, timeout)
+  def poll(output, pattern, timeout)
     while Time.now < timeout
       next if (chunk = fetch(@reader)).empty?
 
-      record_chunk(chunk, output)
+      log(chunk, output)
       return output if output.include?(pattern)
     end
   end
 
-  def record_chunk(chunk, output)
+  def log(chunk, output)
     output << chunk
     @transcript << chunk if @transcript
     stripped = strip(chunk)
@@ -194,7 +185,7 @@ module ReplHelper
     @transcript_stripped << stripped if @transcript_stripped
   end
 
-  def fail_wait(pattern, output)
+  def timeout_error(pattern, output)
     Process.kill("TERM", @pid) if @pid
     @writer.close if @writer && !@writer.closed?
     raise "Timeout waiting for '#{pattern}' in:\n#{output}"

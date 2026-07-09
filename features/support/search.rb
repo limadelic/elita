@@ -2,7 +2,7 @@ module Search
   def verify(rows)
     init unless @scenario_cursor
     deadline = deadline()
-    attempt(rows, deadline)
+    cycle(rows, deadline)
   end
 
   def init
@@ -10,7 +10,7 @@ module Search
     @folded_lines = nil
   end
 
-  def attempt(rows, deadline)
+  def cycle(rows, deadline)
     last_sent = Time.now - 2
     loop do
       tx = transcript
