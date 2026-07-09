@@ -9,7 +9,7 @@ end
 Before do |scenario|
   @cassette = extract_cassette(scenario) || File.basename(scenario.location.file, ".feature")
   @clock = extract_clock(scenario)
-  initialize_scenario_cursor
+  reset
 end
 
 After do
