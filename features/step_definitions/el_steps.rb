@@ -42,8 +42,8 @@ end
 When(/^(\w+)> (.+)$/) do |prompt, input, *rest|
   table = rest.first
 
-  # For addressed prompts with verify_lines tables, we need to add the request log
-  # to transcript before sending so it's properly captured
+  # Add request log to transcript for verify_lines tables
+  # before sending so it's properly captured
   if table && is_verify_table?(table)
     @transcript_stripped ||= ""
     @transcript_stripped << "\n🤔 el → #{prompt}: #{input}\n"
