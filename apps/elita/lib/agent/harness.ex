@@ -2,7 +2,7 @@ defmodule Agent.Harness do
   @moduledoc "Routes ask/tell messages to agents based on registration kind."
 
   import Agent.Session, only: [ask: 2, cast: 2]
-  import Elita, only: [call: 2]
+  import Elita, only: [request: 2]
   import String, only: [to_atom: 1, downcase: 1]
 
   def dispatch(recipient, message, :ask) do
@@ -23,7 +23,7 @@ defmodule Agent.Harness do
   end
 
   defp handle_ask([{_pid, %{kind: :native}}], recipient, message) do
-    call(to_atom(recipient), message)
+    request(to_atom(recipient), message)
   end
 
   defp handle_ask([{pid, %{kind: :headless}}], _recipient, message) do
@@ -41,7 +41,7 @@ defmodule Agent.Harness do
   end
 
   defp handle_tell([{_pid, %{kind: :native}}], recipient, message) do
-    Elita.cast(to_atom(recipient), message)
+    Elita.dispatch(to_atom(recipient), message)
   end
 
   defp handle_tell([{pid, %{kind: :headless}}], _recipient, message) do

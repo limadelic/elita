@@ -2,6 +2,7 @@ defmodule Elita do
   use GenServer
 
   import Cfgs, only: [load: 1]
+  import GenServer, only: [call: 3, cast: 2, start_link: 3]
   import History, only: [record: 1]
   import Llm, only: [llm: 1]
   import Log, only: [log: 5]
@@ -11,16 +12,16 @@ defmodule Elita do
   import System, only: [get_env: 1]
   import Tools
 
-  def start_link(name, configs) do
-    GenServer.start_link(__MODULE__, {name, configs}, name: via(name))
+  def spawn(name, configs) do
+    start_link(__MODULE__, {name, configs}, name: via(name))
   end
 
-  def cast(name, msg) do
-    GenServer.cast(via(name), {:act, msg})
+  def dispatch(name, msg) do
+    cast(via(name), {:act, msg})
   end
 
-  def call(name, msg) do
-    GenServer.call(via(name), {:act, msg}, :infinity)
+  def request(name, msg) do
+    call(via(name), {:act, msg}, :infinity)
   end
 
   defp via(name) do

@@ -1,5 +1,5 @@
 defmodule Chat do
-  import Elita, only: [start_link: 2, call: 2]
+  import Elita, only: [spawn: 2, request: 2]
   import IO, only: [gets: 1, puts: 1]
   import Node, only: [start: 1]
   import String, only: [trim: 1, to_atom: 1]
@@ -14,7 +14,7 @@ defmodule Chat do
 
   defp chat(agent, name) do
     start(:"#{name}@127.0.0.1")
-    {:ok, _pid} = start_link(agent, name)
+    {:ok, _pid} = spawn(agent, name)
     repl(name)
   end
 
@@ -27,7 +27,7 @@ defmodule Chat do
   end
 
   defp handle_input(input, agent) do
-    puts(call(agent, trim(input)))
+    puts(request(agent, trim(input)))
     repl(agent)
   end
 end

@@ -14,7 +14,7 @@ defmodule Elita.Application do
   defp boot do
     {:ok, _} = start_supervisor()
     start_agents()
-    {:ok, _} = Elita.start_link("el", ["el"])
+    {:ok, _} = Elita.spawn("el", ["el"])
     {:ok, self()}
   end
 
