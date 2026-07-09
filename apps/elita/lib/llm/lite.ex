@@ -7,7 +7,7 @@ defmodule Lite do
   import Map, only: [put: 3, delete: 2]
   import List, only: [pop_at: 2]
   import Req, only: [post: 2]
-  import TapeHandler, only: [handle: 4]
+  import Tape, only: [handle: 4]
   import Miss, only: [opts: 1]
   @cache_key %{type: "ephemeral"}
   def llm(%{config: config, history: history, name: agent_name} = state) do

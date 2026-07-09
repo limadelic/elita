@@ -8,7 +8,7 @@ defmodule Tape.Play do
   import Map, only: [get: 2, take: 2]
   import Jason, only: [decode!: 1, encode!: 1]
 
-  def handle(body, name, fun, on_miss \\ :raise) do
+  def play(body, name, fun, on_miss \\ :raise) do
     ensure_entries(load())
     context(load(), body, name, fun, on_miss) |> answer()
   end

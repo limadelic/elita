@@ -3,7 +3,7 @@ defmodule Tape.Record do
   import Map, only: [get: 3]
   import List, only: [last: 1]
 
-  def handle(body, name, fun) do
+  def record(body, name, fun) do
     response = fun.()
     append_live(sparse(body, name), response)
     response
