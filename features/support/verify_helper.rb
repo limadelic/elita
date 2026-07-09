@@ -14,7 +14,7 @@ module VerifyHelper
     last_nudge = Time.now - 2
 
     loop do
-      @folded_lines = prepare_lines
+      @folded_lines = squeeze
       matches = find_matches(rows, deadline)
       return update_cursor(matches) if matches
 
@@ -43,7 +43,7 @@ module VerifyHelper
     Time.now + timeout_secs
   end
 
-  def prepare_lines
+  def squeeze
     tx = transcript
     tx = tx.force_encoding("UTF-8") if tx.respond_to?(:force_encoding)
     lines = tx.split("\n").map { |l| l.strip.force_encoding("UTF-8") rescue l.strip }.reject(&:empty?)
