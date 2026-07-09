@@ -2,7 +2,6 @@
 
 require 'rexml/document'
 
-# Legend definition
 LEGEND_CSS = <<~CSS
   <style>
     .legend-container {
@@ -82,27 +81,26 @@ LEGEND_HTML = <<~HTML
   </div>
 HTML
 
-def inject_legend(html_path)
-  content = File.read(html_path)
-
-  # Find the opening <body> tag and inject after it
-  if content.include?('<body>')
-    # Insert legend right after <body>
-    content.sub!('<body>', "<body>#{LEGEND_CSS}#{LEGEND_HTML}")
-    File.write(html_path, content)
-    puts "Legend injected successfully into #{html_path}"
-  else
-    puts "ERROR: Could not find <body> tag in #{html_path}"
+def validate(path)
+  unless File.exist?(path)
+    puts "ERROR: File not found: #{path}"
     exit 1
   end
 end
 
-# Main
-html_file = ARGV[0] || 'reports/cucumber.html'
+def inject(path)
+  html = File.read(path)
 
-unless File.exist?(html_file)
-  puts "ERROR: File not found: #{html_file}"
-  exit 1
+  unless html.include?('<body>')
+    puts "ERROR: Could not find <body> tag in #{path}"
+    exit 1
+  end
+
+  html.sub!('<body>', "<body>#{LEGEND_CSS}#{LEGEND_HTML}")
+  File.write(path, html)
+  puts "Legend injected successfully into #{path}"
 end
 
-inject_legend(html_file)
+path = ARGV[0] || 'reports/cucumber.html'
+validate(path)
+inject(path)
