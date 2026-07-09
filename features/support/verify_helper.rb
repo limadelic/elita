@@ -59,7 +59,7 @@ module VerifyHelper
       prefix = row[0].strip.force_encoding("UTF-8") rescue row[0].strip
       text = row[1].strip.downcase.force_encoding("UTF-8") rescue row[1].strip.downcase
 
-      if match_row(prefix, text, cursor, found_indices)
+      if row(prefix, text, cursor, found_indices)
         cursor = found_indices.last
       elsif Time.now >= deadline
         raise match_error(prefix, text)
@@ -72,7 +72,7 @@ module VerifyHelper
     all_found ? found_indices : nil
   end
 
-  def match_row(prefix, text, cursor, matches)
+  def row(prefix, text, cursor, matches)
     if prefix.empty?
       match_continuation(text, cursor, matches)
     else
