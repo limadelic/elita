@@ -5,7 +5,7 @@ defmodule Elita.Credo.Imports do
   alias Credo.Code
 
   def param_defaults do
-    [allowlist: [:ets, :erlang, :rand, :cover]]
+    [allowlist: [:ets, :erlang, :rand, :cover, :node]]
   end
 
   @check_desc "Functions must be imported, not called with Module.func syntax. Aliases (single-segment qualified calls) are OK."
