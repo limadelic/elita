@@ -1,4 +1,4 @@
-defmodule El.ShippedTape do
+defmodule El.Shipped do
   import System, only: [get_env: 1, put_env: 2]
   import Path, only: [join: 2, dirname: 1]
 
