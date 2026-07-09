@@ -18,7 +18,7 @@ module VerifyHelper
       matches = search(rows, deadline)
       return update_cursor(matches) if matches
 
-      last_nudge = break_or_retry(deadline, last_nudge)
+      last_nudge = persist(deadline, last_nudge)
     end
   end
 
@@ -125,7 +125,7 @@ module VerifyHelper
     "No match for prefix='#{prefix}' text='#{text}'\n\nTranscript:\n#{transcript}"
   end
 
-  def break_or_retry(deadline, last_nudge)
+  def persist(deadline, last_nudge)
     if Time.now >= deadline
       raise "Timeout waiting for all rows to match.\n\nTranscript:\n#{transcript}"
     end
