@@ -59,25 +59,32 @@ module ReplHelper
   def drain
     return unless @reader
 
+    chunk = absorb(@reader)
+    chunk = encode(chunk)
+    @transcript << chunk if @transcript
+    stripped_chunk = strip(chunk)
+    stripped_chunk = encode(stripped_chunk)
+    @transcript_stripped << stripped_chunk if @transcript_stripped
+  end
+
+  private
+
+  def absorb(pty)
+    output = ""
     begin
       while true
-        ready = IO.select([@reader], nil, nil, 0.1)
+        ready = IO.select([pty], nil, nil, 0.1)
         if ready
-          chunk = @reader.readpartial(4096)
-          chunk = encode(chunk)
-          @transcript << chunk if @transcript
-          stripped_chunk = strip(chunk)
-          stripped_chunk = encode(stripped_chunk)
-          @transcript_stripped << stripped_chunk if @transcript_stripped
+          chunk = pty.readpartial(4096)
+          output << chunk
         else
           break
         end
       end
     rescue EOFError
     end
+    output
   end
-
-  private
 
   def fetch(pty)
     ready = IO.select([pty], nil, nil, 0.1)
