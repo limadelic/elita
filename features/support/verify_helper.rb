@@ -11,51 +11,16 @@ module VerifyHelper
   def verify(rows)
     init unless @scenario_cursor
     deadline = deadline()
-    last_newline_sent = Time.now - 2 # Allow immediately first send
+    last_newline_sent = Time.now - 2
 
     loop do
       tx = transcript
       @folded_lines = normalize(tx)
 
-      all_found = true
-      found_indices = []
-
-      rows.each do |row|
-        want_prefix = row[0].strip.force_encoding("UTF-8") rescue row[0].strip
-        want_text = row[1].strip.downcase.force_encoding("UTF-8") rescue row[1].strip.downcase
-        found = false
-
-        (@scenario_cursor...@folded_lines.size).each do |idx|
-          if match?(@folded_lines[idx], want_prefix, want_text)
-            found_indices << idx + 1
-            found = true
-            break
-          end
-        end
-
-        unless found
-          if pending?(deadline)
-            all_found = false
-            break
-          else
-            raise "No match for prefix='#{want_prefix}' text='#{want_text}'\n\nTranscript:\n#{tx}"
-          end
-        end
-      end
-
-      if all_found
-        # Only update cursor if all rows were found
-        @scenario_cursor = found_indices.max if found_indices.any?
-        return
-      end
-
-      if !pending?(deadline)
-        raise "Timeout waiting for all rows to match.\n\nTranscript:\n#{transcript}"
-      end
+      found_indices = search(rows, @folded_lines, deadline, tx)
+      return if found_indices
 
       drain
-
-      # After ~1s without a match, nudge PTY with newline to flush cascade output (replay only)
       if timing?(last_newline_sent)
         nudge
         last_newline_sent = Time.now
@@ -63,6 +28,35 @@ module VerifyHelper
 
       sleep 0.05
     end
+  end
+
+  def search(rows, folded_lines, deadline, tx)
+    found_indices = []
+
+    rows.each do |row|
+      want_prefix = row[0].strip.force_encoding("UTF-8") rescue row[0].strip
+      want_text = row[1].strip.downcase.force_encoding("UTF-8") rescue row[1].strip.downcase
+      found = false
+
+      (@scenario_cursor...folded_lines.size).each do |idx|
+        if match?(folded_lines[idx], want_prefix, want_text)
+          found_indices << idx + 1
+          found = true
+          break
+        end
+      end
+
+      unless found
+        if pending?(deadline)
+          return nil
+        else
+          raise "No match for prefix='#{want_prefix}' text='#{want_text}'\n\nTranscript:\n#{tx}"
+        end
+      end
+    end
+
+    @scenario_cursor = found_indices.max if found_indices.any?
+    found_indices
   end
 
   def nudge
