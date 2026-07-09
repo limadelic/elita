@@ -7,8 +7,8 @@ rescue Timeout::Error
 end
 
 Before do |scenario|
-  @cassette = extract_cassette(scenario) || File.basename(scenario.location.file, ".feature")
-  @clock = extract_clock(scenario)
+  @cassette = cassette(scenario) || File.basename(scenario.location.file, ".feature")
+  @clock = clock(scenario)
   reset
 end
 
@@ -31,7 +31,7 @@ def timeout
   end
 end
 
-def extract_cassette(scenario)
+def cassette(scenario)
   tag = scenario.tags.map(&:name).find { |t| t.start_with?("@tape:") }
   return tag.sub("@tape:", "") if tag
 
@@ -44,7 +44,7 @@ def extract_cassette(scenario)
   (rows.first.to_h&.dig('cassette') if rows.first.respond_to?(:to_h)) || ENV['CASSETTE']
 end
 
-def extract_clock(scenario)
+def clock(scenario)
   test_case = scenario.instance_variable_get(:@test_case)
   return ENV['CLOCK'] unless test_case&.respond_to?(:rows)
 
