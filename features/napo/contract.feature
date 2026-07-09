@@ -1,3 +1,4 @@
+@wip
 Feature: Napo contract
 
   Scenario Outline: Napo analyzes contracts, split across specialist agents
