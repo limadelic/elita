@@ -26,21 +26,10 @@ module VerifyHelper
         found = false
 
         (@scenario_cursor...@folded_lines.size).each do |idx|
-          full_line = @folded_lines[idx]
-          full_line = full_line.sub(/\A(?:\s*\w+>\s*)+/, "")
-          line_prefix, line_text = split(full_line)
-
-          if line_prefix && line_text
-            prefix_match = line_prefix.include?(want_prefix)
-            text_match = want_text.empty? || line_text.downcase.include?(want_text) || line_text.downcase.gsub(
-              /\s+/, ""
-            ).include?(want_text.gsub(/\s+/, ""))
-
-            if prefix_match && text_match
-              found_indices << idx + 1
-              found = true
-              break
-            end
+          if match?(@folded_lines[idx], want_prefix, want_text)
+            found_indices << idx + 1
+            found = true
+            break
           end
         end
 
@@ -121,6 +110,18 @@ module VerifyHelper
     else
       [line, line]
     end
+  end
+
+  def match?(folded_line, want_prefix, want_text)
+    line = folded_line.sub(/\A(?:\s*\w+>\s*)+/, "")
+    prefix, text = split(line)
+    return false unless prefix && text
+
+    prefix_matches = prefix.include?(want_prefix)
+    text_matches = want_text.empty? ||
+      text.downcase.include?(want_text) ||
+      text.downcase.gsub(/\s+/, "").include?(want_text.gsub(/\s+/, ""))
+    prefix_matches && text_matches
   end
 
   def deadline
