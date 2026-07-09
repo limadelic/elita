@@ -18,7 +18,7 @@ module VerifyHelper
       matches = find_matches(rows, deadline)
       return update_cursor(matches) if matches
 
-      break_or_retry(deadline, last_nudge)
+      last_nudge = break_or_retry(deadline, last_nudge)
     end
   end
 
@@ -138,6 +138,7 @@ module VerifyHelper
     end
 
     sleep 0.05
+    last_nudge
   end
 
   def update_cursor(matches)
