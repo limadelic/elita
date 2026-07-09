@@ -1,4 +1,11 @@
 module Search
+  PATTERNS = [
+    /^[\p{So}🀀-🿿][\s]*[a-zA-Z🀀-🿿]/,
+    /^✏️\s+\w+.*=/,
+    /^\w+>\s+[\p{So}🀀-🿿]/,
+    /^\w+>$/
+  ].freeze
+
   def verify(rows)
     init unless @scenario_cursor
     deadline = deadline()
@@ -78,16 +85,14 @@ module Search
   end
 
   def normalize(transcript)
-    tx = transcript
+    tx = transcript.dup
     tx = tx.force_encoding("UTF-8") if tx.respond_to?(:force_encoding)
-    lines = tx.split("\n").map { |l|
-      l.strip.force_encoding("UTF-8") rescue l.strip
-    }.reject(&:empty?)
-    patterns = [/^[\p{So}🀀-🿿][\s]*[a-zA-Z🀀-🿿]/, /^✏️\s+\w+.*=/, /^\w+>\s+[\p{So}🀀-🿿]/, /^\w+>$/]
-    lines.each_with_object([]) do |line, result|
-      is_log = patterns.any? { |p| (line.match?(p) rescue false) }
-      is_log ? (result << line) : (result.any? && (result[-1] << " " << line))
-    end
+    lines = tx.split("\n").map { |l| l.strip.force_encoding("UTF-8") rescue l.strip }.reject(&:empty?)
+    lines.each_with_object([]) { |line, result| is_log?(line) ? result << line : result.any? && (result[-1] << " " << line) }
+  end
+
+  def is_log?(line)
+    PATTERNS.any? { |p| (line.match?(p) rescue false) }
   end
 
   def nudge
