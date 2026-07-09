@@ -15,7 +15,7 @@ module VerifyHelper
 
     loop do
       @folded_lines = squeeze
-      matches = find_matches(rows, deadline)
+      matches = search(rows, deadline)
       return update_cursor(matches) if matches
 
       last_nudge = break_or_retry(deadline, last_nudge)
@@ -50,7 +50,7 @@ module VerifyHelper
     fold(lines)
   end
 
-  def find_matches(rows, deadline)
+  def search(rows, deadline)
     all_found = true
     found_indices = []
     cursor = @scenario_cursor
