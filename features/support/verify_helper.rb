@@ -35,7 +35,8 @@ module VerifyHelper
 
     rows.each do |row|
       want_prefix = row[0].strip.force_encoding("UTF-8") rescue row[0].strip
-      want_text = row[1].strip.downcase.force_encoding("UTF-8") rescue row[1].strip.downcase
+      want_text = row[1].strip.downcase
+      want_text = want_text.force_encoding("UTF-8") rescue want_text
       found = false
 
       (@scenario_cursor...folded_lines.size).each do |idx|
@@ -50,7 +51,9 @@ module VerifyHelper
         if pending?(deadline)
           return nil
         else
-          raise "No match for prefix='#{want_prefix}' text='#{want_text}'\n\nTranscript:\n#{tx}"
+          msg = "No match for prefix='#{want_prefix}' text='#{want_text}'"
+          msg << "\n\nTranscript:\n#{tx}"
+          raise msg
         end
       end
     end
@@ -166,12 +169,22 @@ module VerifyHelper
 
   def assert(expected, output)
     expected.split.each { |w|
-      raise "Expected '#{w}' in:\n#{output}" unless output.downcase.include?(w.downcase)
+      output_lower = output.downcase
+      w_lower = w.downcase
+      unless output_lower.include?(w_lower)
+        msg = "Expected '#{w}' in:\n#{output}"
+        raise msg
+      end
     }
   end
 
   def refute(unexpected, output)
-    raise "Expected '#{unexpected}' NOT in:\n#{output}" if output.downcase.include?(unexpected.downcase)
+    output_lower = output.downcase
+    unexpected_lower = unexpected.downcase
+    if output_lower.include?(unexpected_lower)
+      msg = "Expected '#{unexpected}' NOT in:\n#{output}"
+      raise msg
+    end
   end
 end
 
