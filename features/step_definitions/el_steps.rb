@@ -4,7 +4,6 @@ When(/^> el tell (.+)$/) do |args, *rest|
   table = rest.first
   output = one_shot("tell #{args}")
 
-  # Accumulate output into transcript for verify_lines retry-drain
   @transcript ||= ""
   @transcript_stripped ||= ""
   @transcript << output
@@ -42,14 +41,11 @@ end
 When(/^(\w+)> (.+)$/) do |prompt, input, *rest|
   table = rest.first
 
-  # For addressed prompts with verify_lines tables, we need to add the request log
-  # to transcript before sending so it's properly captured
   if table && valid?(table)
     @transcript_stripped ||= ""
     @transcript_stripped << "\n🤔 el → #{prompt}: #{input}\n"
   end
 
-  # Retry the send() for network issues
   max_send_attempts = 5
   output = nil
   max_send_attempts.times do |attempt|
@@ -65,11 +61,9 @@ When(/^(\w+)> (.+)$/) do |prompt, input, *rest|
     end
   end
 
-  # Check table if present
   if table && valid?(table)
     verify_lines(table.raw)
   elsif table
-    # Retry table verification for transient failures
     max_table_attempts = 5
     max_table_attempts.times do |attempt|
       begin
