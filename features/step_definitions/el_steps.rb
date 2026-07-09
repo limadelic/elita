@@ -2,7 +2,7 @@ require "pty"
 
 When(/^> el tell (.+)$/) do |args, *rest|
   table = rest.first
-  output = one_shot("tell #{args}")
+  output = shot("tell #{args}")
 
   @transcript ||= ""
   @transcript_stripped ||= ""

@@ -14,7 +14,7 @@ module ReplHelper
     await(args.split.first || "el")
   end
 
-  def one_shot(args)
+  def shot(args)
     default
     tape = ::ENV["TAPE"] || "replay"
     clock_part = @clock ? "CLOCK=#{@clock} " : ""
