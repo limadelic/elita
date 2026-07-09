@@ -5,7 +5,7 @@ Feature: Clockwatcher
     * > el clockwatcher
 
     * clockwatcher> file a report
-      | 🤔 el → clockwatcher | file a report       |
+      | 🤔 el → clockwatcher | file a report         |
       | ✨ clockwatcher       | I don't start until 9 |
 
   @tape:noon
@@ -13,7 +13,7 @@ Feature: Clockwatcher
     * > el clockwatcher
 
     * clockwatcher> file a report
-      | 🤔 el → clockwatcher | file a report       |
+      | 🤔 el → clockwatcher | file a report         |
       | ✨ clockwatcher       | I don't start until 9 |
 
   @tape:night
@@ -21,5 +21,5 @@ Feature: Clockwatcher
     * > el clockwatcher
 
     * clockwatcher> file a report
-      | 🤔 el → clockwatcher | file a report       |
+      | 🤔 el → clockwatcher | file a report         |
       | ✨ clockwatcher       | I don't start until 9 |
