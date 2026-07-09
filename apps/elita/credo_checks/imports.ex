@@ -235,6 +235,4 @@ defmodule Elita.Credo.Imports do
     macros = Kernel.__info__(:macros) |> Enum.map(&elem(&1, 0))
     Enum.member?(funcs, name) or Enum.member?(macros, name)
   end
-
-  defp is_kernel_builtin?(_), do: false
 end
