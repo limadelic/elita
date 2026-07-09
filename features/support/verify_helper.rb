@@ -3,13 +3,13 @@ module VerifyHelper
     cells(table).each { |cell| verify_cell(cell, output) }
   end
 
-  def initialize_scenario_cursor
+  def reset
     @scenario_cursor = 0
     @folded_lines = nil
   end
 
   def verify_lines(rows)
-    initialize_scenario_cursor unless @scenario_cursor
+    reset unless @scenario_cursor
     ci_timeout = ENV["GITHUB_ACTIONS"] == "true" ? 60 : 3
     deadline = Time.now + (ENV["TAPE"] == "rec" ? 10 : ci_timeout)
     last_newline_sent = Time.now - 2  # Allow immediate first send
