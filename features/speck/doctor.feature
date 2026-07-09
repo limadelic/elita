@@ -1,14 +1,16 @@
 @tape:speckdoctor
 Feature: Doctor
 
-  Scenario: Doctor diagnoses a patient
+  Scenario: speck reads, writes, and runs doctor scenarios
     * > el speck
     * speck> exec doctor
-      | 📢 speck → doctor_v1      | diagnose patient_v1 |
-      | 🤔 doctor_v1 → patient_v1 | main complaint      |
-      | ✨ patient_v1              | WAH! WAH!           |
-      | 🤔 doctor_v1 → patient_v1 | how long            |
-      | ✨ doctor_v1               | Infantile Colic     |
-      | 🤔 speck → doctor_v1      | ask tool            |
-      | ✨ doctor_v1               | did block           |
-      | ✨ speck                   | PASSED              |
+      | 🧪 doctor_spec            | ask tool        |
+      | 🤖 doctor                 | ask tool        |
+      | 🎭 speck as tplan         |                 |
+      | 🎭 speck as texec         |                 |
+      | 🚀 doctor_v1              | as doctor       |
+      | 🚀 patient_v1             | as baby         |
+      | 🤔 doctor_v1 → patient_v1 | main complaint  |
+      | ✨ patient_v1              | WAH WAH         |
+      | ✨ doctor_v1               | Infantile Colic |
+      | ✨ speck                   | PASSED          |
