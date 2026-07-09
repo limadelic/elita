@@ -5,7 +5,7 @@ Feature: Boss
     * > el speck
     * speck> exec boss
       | 🧪 boss_spec               | Tell Tool                       |
-      | 🤖 boss                    | Gets things done like a boss    |
+      | 🤖 boss                    | Delegating                      |
       | 🎭 speck as tplan          |                                 |
       | ✏️ scenario_1              | Boss delegates to single worker |
       | 🎭 speck as texec          |                                 |
