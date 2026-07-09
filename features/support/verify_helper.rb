@@ -42,17 +42,8 @@ module VerifyHelper
   private
 
   def deadline
-    Time.now + timeout
-  end
-
-  def timeout
-    if ENV["TAPE"] == "rec"
-      10
-    elsif ENV["GITHUB_ACTIONS"] == "true"
-      60
-    else
-      3
-    end
+    secs = ENV["TAPE"] == "rec" ? 10 : (ENV["GITHUB_ACTIONS"] == "true" ? 60 : 3)
+    Time.now + secs
   end
 
   def squeeze
@@ -178,15 +169,9 @@ module VerifyHelper
   end
 
   def choose(line, c_idx, e_idx)
-    return split_at(line, c_idx, 2) if c_idx && !e_idx
-
-    return split_at(line, e_idx, 3) if e_idx && !c_idx
-
-    c_idx < e_idx ? split_at(line, c_idx, 2) : split_at(line, e_idx, 3)
-  end
-
-  def split_at(line, idx, offset)
-    [line[0...idx], line[idx + offset..-1]]
+    pick_idx = c_idx && !e_idx ? c_idx : (e_idx && !c_idx ? e_idx : (c_idx < e_idx ? c_idx : e_idx))
+    offset = (pick_idx == c_idx) ? 2 : 3
+    [line[0...pick_idx], line[pick_idx + offset..-1]]
   end
 
   def fold(lines)
@@ -197,19 +182,12 @@ module VerifyHelper
   end
 
   def mark(result, line, idx)
-    return append(result, line) if log?(line) || board?(line)
-
-    merge(result, line, idx) if idx && idx >= 0
+    if log?(line) || board?(line)
+      result << line
+      return result.size - 1
+    end
+    result[idx] << " " << line if idx && idx >= 0
     idx
-  end
-
-  def append(result, line)
-    result << line
-    result.size - 1
-  end
-
-  def merge(result, line, idx)
-    result[idx] << " " << line
   end
 
   def board?(line)
