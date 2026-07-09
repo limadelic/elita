@@ -107,7 +107,7 @@ module VerifyHelper
     # PTY might be closed, ignore
   end
 
-  def is_verify_table?(table)
+  def valid?(table)
     return false unless table && table.raw
     rows = table.raw
     return false if rows.empty?
