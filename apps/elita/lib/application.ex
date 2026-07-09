@@ -2,6 +2,7 @@ defmodule Elita.Application do
   use Application
 
   import Agent.Manager, only: [start_agents: 0]
+  import Elita, only: [spawn: 2]
   import Mem, only: [init_global: 0]
   import Registry, only: [child_spec: 1]
   import Supervisor, only: [start_link: 2]
@@ -14,7 +15,7 @@ defmodule Elita.Application do
   defp boot do
     {:ok, _} = start_supervisor()
     start_agents()
-    {:ok, _} = Elita.spawn("el", ["el"])
+    {:ok, _} = spawn("el", ["el"])
     {:ok, self()}
   end
 

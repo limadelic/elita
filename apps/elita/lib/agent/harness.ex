@@ -3,23 +3,24 @@ defmodule Agent.Harness do
 
   import Agent.Session, only: [ask: 2, cast: 2]
   import Elita, only: [request: 2]
+  import Registry, only: [lookup: 2]
   import String, only: [to_atom: 1, downcase: 1]
 
   def dispatch(recipient, message, :ask) do
     recipient
-    |> lookup()
+    |> find_entry()
     |> handle_ask(recipient, message)
   end
 
   def dispatch(recipient, message, :tell) do
     recipient
-    |> lookup()
+    |> find_entry()
     |> handle_tell(recipient, message)
   end
 
-  defp lookup(recipient) do
+  defp find_entry(recipient) do
     normalized = recipient |> to_atom() |> Kernel.to_string() |> downcase()
-    Registry.lookup(ElitaRegistry, normalized)
+    lookup(ElitaRegistry, normalized)
   end
 
   defp handle_ask([{_pid, %{kind: :native}}], recipient, message) do
