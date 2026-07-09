@@ -15,21 +15,14 @@ module VerifyHelper
   end
 
   def verify_loop(rows, deadline)
-    last_newline_sent = Time.now - 2
+    last_sent = Time.now - 2
     loop do
       return if search(rows, normalize(transcript), deadline, transcript)
-
       drain
-      nudge_if_needed(last_newline_sent)
-      last_newline_sent = Time.now if timing?(last_newline_sent)
+      nudge if timing?(last_sent)
+      last_sent = Time.now if timing?(last_sent)
       sleep 0.05
     end
-  end
-
-  def nudge_if_needed(last_sent)
-    return unless timing?(last_sent)
-
-    nudge
   end
 
   def search(rows, folded_lines, deadline, tx)
