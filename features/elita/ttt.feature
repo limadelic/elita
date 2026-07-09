@@ -1,6 +1,6 @@
 Feature: Ttt
 
-  Scenario: Two players play to a tie
+  Scenario: Two players play to the end
     * > el
 
     * el> get me two ttt players named alice and bob
@@ -8,49 +8,32 @@ Feature: Ttt
       | 📢 el → bob   | You are Bob, a ttt player   |
 
     * el> tell alice start a game with bob, you are X, play first
-      | 📢 alice → bob | I'll take square 5       |
-      |                | _ \| _ \| _            |
-      |                | _ \| X \| _            |
-      |                | _ \| _ \| _            |
-
-      | 📢 bob → Alice | I'll take square 1       |
-      |                | O \| _ \| _            |
-      |                | _ \| X \| _            |
-      |                | _ \| _ \| _            |
-
-      | 📢 alice → bob | I'll take square 9       |
-      |                | O \| _ \| _            |
-      |                | _ \| X \| _            |
-      |                | _ \| _ \| X            |
-
-      | 📢 bob → Alice | I'll take square 3       |
-      |                | O \| _ \| O            |
-      |                | _ \| X \| _            |
-      |                | _ \| _ \| X            |
-
-      | 📢 alice → bob | I'll take square 7       |
-      |                | O \| _ \| O            |
-      |                | _ \| X \| _            |
-      |                | X \| _ \| X            |
-
-      | 📢 bob → Alice | I'll take square 8       |
-      |                | O \| _ \| O            |
-      |                | _ \| X \| _            |
-      |                | X \| O \| X            |
-
-      | 📢 alice → bob | I'll take square 4       |
-      |                | O \| _ \| O            |
-      |                | X \| X \| _            |
-      |                | X \| O \| X            |
-
-      | 📢 bob → Alice | I'll take square 6       |
-      |                | O \| _ \| O            |
-      |                | X \| X \| O            |
-      |                | X \| O \| X            |
-
-      | 📢 alice → bob | I'll take square 2       |
-      |                | O \| X \| O            |
-      |                | X \| X \| O            |
-      |                | X \| O \| X            |
-
-      | ✨ alice        | Game Over - Tie          |
+      | 📢 el → bob    | Alice says: Let's play! I'll be X.       |
+      |                | X \| _ \| _                              |
+      |                | _ \| _ \| _                              |
+      |                | _ \| _ \| _                              |
+      | 📢 bob → Alice | Nice opening! I'll take the center:      |
+      |                | X \| _ \| _                              |
+      |                | _ \| O \| _                              |
+      |                | _ \| _ \| _                              |
+      | 📢 alice → bob | Good move! I'll take the bottom-right    |
+      |                | X \| _ \| _                              |
+      |                | _ \| O \| _                              |
+      |                | _ \| _ \| X                              |
+      | 📢 bob → Alice | Alright! I'll block your diagonal threat |
+      |                | X \| _ \| _                              |
+      |                | _ \| O \| _                              |
+      |                | O \| _ \| X                              |
+      | 📢 alice → bob | Good block! I'll take the top-right      |
+      |                | X \| _ \| X                              |
+      |                | _ \| O \| _                              |
+      |                | X \| _ \| O                              |
+      | 📢 bob → Alice | I've got to block your top row!          |
+      |                | X \| O \| X                              |
+      |                | _ \| O \| _                              |
+      |                | X \| _ \| O                              |
+      | 📢 alice → bob | I'll take the top-middle and win!        |
+      |                | X \| X \| X                              |
+      |                | _ \| O \| _                              |
+      |                | O \| _ \| X                              |
+      | ✨ alice        | Game Over - Alice Wins                   |
