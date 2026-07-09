@@ -7,7 +7,7 @@ Feature: Mother
       | 🧪 mother_spec    | spawn       |
       | 🤖 mother         | spawn       |
       | 🎭 speck as tplan |             |
-      | ✏️ scenario_1     |             |
+      | ✏️ scenario_1     | Mother Spawns Baby Successfully       |
       | 🎭 speck as texec |             |
       | 🚀 mother_v1      | as mother   |
       | 🚀 baby_v1        | as baby     |

@@ -7,7 +7,7 @@ Feature: Doctor
       | 🧪 doctor_spec            | ask tool        |
       | 🤖 doctor                 | ask tool        |
       | 🎭 speck as tplan         |                 |
-      | ✏️ scenario_1             |                 |
+      | ✏️ scenario_1             | Doctor asks one question and waits     |
       | 🎭 speck as texec         |                 |
       | 🚀 doctor_v1              | as doctor       |
       | 🚀 patient_v1             | as baby         |

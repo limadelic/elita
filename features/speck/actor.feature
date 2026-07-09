@@ -6,7 +6,7 @@ Feature: Actor
       | 🧪 actor_spec     | A professional actor who inhabits roles |
       | 🤖 actor          | Versatile actor who plays any role      |
       | 🎭 speck as tplan |                                         |
-      | ✏️ scenario_1     |                                         |
+      | ✏️ scenario_1     | Role Adoption - Victorian Butler       |
       | 🎭 speck as texec |                                         |
       | 🚀 actor_v1       | as actor                                |
       | ✨ actor_v1        | Welcome to Ashworth House               |

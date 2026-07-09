@@ -8,7 +8,7 @@ Feature: Boss
       | 🤖 boss                    | never ask               |
       | 🤖 worker                  | takes tasks             |
       | 🎭 speck as tplan          |                         |
-      | ✏️ boss_scenarios          |                         |
+      | ✏️ boss_scenarios          | Direct task assignment to single      |
       | 🎭 speck as texec          |                         |
       | 🚀 boss_v1                 | as boss                 |
       | 🚀 worker_v1               | as worker               |

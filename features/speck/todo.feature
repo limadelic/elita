@@ -14,5 +14,5 @@ Feature: Todo
       | ✨ todo_v1          | added         |
       | 🚀 todo_v2         | as todo       |
       | 🤔 speck → todo_v2 | What tasks    |
-      | ✨ todo_v2          | buy groceries |
+      | ✨ todo_v2          | empty         |
       | ✨ speck            | PASSED        |
