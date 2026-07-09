@@ -4,8 +4,6 @@ defmodule El.Command.Ls.Query do
   import Node, only: [connect: 1]
   import File, only: [cwd!: 0]
 
-  alias El.RPC
-
   def fetch(path) do
     connect(:"elita@127.0.0.1") |> dial(path)
   rescue
@@ -15,7 +13,7 @@ defmodule El.Command.Ls.Query do
   defp dial(true, path) do
     cwd = cwd!()
     cmd = route(path)
-    output = call(:"elita@127.0.0.1", RPC, :dispatch, [cmd, cwd])
+    output = call(:"elita@127.0.0.1", El.RPC, :dispatch, [cmd, cwd])
     {:ok, output}
   end
 
