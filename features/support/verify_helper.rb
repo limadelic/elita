@@ -153,18 +153,18 @@ module VerifyHelper
   def split(line)
     colon_idx = line.index(": ")
     equals_idx = line.index(" = ")
-
     return [line, line] unless colon_idx || equals_idx
+    choose(line, colon_idx, equals_idx)
+  end
 
-    if colon_idx && !equals_idx
-      [line[0...colon_idx], line[colon_idx + 2..-1]]
-    elsif equals_idx && !colon_idx
-      [line[0...equals_idx], line[equals_idx + 3..-1]]
-    elsif colon_idx < equals_idx
-      [line[0...colon_idx], line[colon_idx + 2..-1]]
-    else
-      [line[0...equals_idx], line[equals_idx + 3..-1]]
-    end
+  def choose(line, c_idx, e_idx)
+    return split_at(line, c_idx, 2) if c_idx && !e_idx
+    return split_at(line, e_idx, 3) if e_idx && !c_idx
+    c_idx < e_idx ? split_at(line, c_idx, 2) : split_at(line, e_idx, 3)
+  end
+
+  def split_at(line, idx, offset)
+    [line[0...idx], line[idx + offset..-1]]
   end
 
   def fold(lines)
