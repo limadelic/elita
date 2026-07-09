@@ -46,6 +46,7 @@ module ReplHelper
 
   def send(input, prompt)
     raise "PTY not initialized" unless @writer
+
     @writer.write("#{input}\n")
     @writer.flush
     wait_for_prompt(prompt)
