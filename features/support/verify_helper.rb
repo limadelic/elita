@@ -15,11 +15,7 @@ module VerifyHelper
 
     loop do
       tx = transcript
-      tx = tx.force_encoding("UTF-8") if tx.respond_to?(:force_encoding)
-      lines = tx.split("\n").map { |l|
-        l.strip.force_encoding("UTF-8") rescue l.strip
-      }.reject(&:empty?)
-      @folded_lines = fold(lines)
+      @folded_lines = normalize(tx)
 
       all_found = true
       found_indices = []
@@ -131,6 +127,14 @@ module VerifyHelper
     timeout = ENV["GITHUB_ACTIONS"] == "true" ? 60 : 3
     timeout = 10 if ENV["TAPE"] == "rec"
     Time.now + timeout
+  end
+
+  def normalize(transcript)
+    tx = transcript.force_encoding("UTF-8") if transcript.respond_to?(:force_encoding)
+    lines = tx.split("\n").map { |l|
+      l.strip.force_encoding("UTF-8") rescue l.strip
+    }.reject(&:empty?)
+    fold(lines)
   end
 
   def fold(lines)
