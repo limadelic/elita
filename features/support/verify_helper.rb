@@ -87,7 +87,7 @@ module VerifyHelper
     _prefix, line_text = split(line)
 
     return false unless line_text
-    return false unless matches_text?(text, line_text)
+    return false unless match?(text, line_text)
 
     matches << cursor + 1
     true
@@ -100,7 +100,7 @@ module VerifyHelper
 
       next unless line_prefix && line_text
       next unless line_prefix.include?(prefix)
-      next unless matches_text?(text, line_text)
+      next unless match?(text, line_text)
 
       matches << idx + 1
       return true
@@ -117,7 +117,7 @@ module VerifyHelper
     text.downcase.gsub(/\s+/, "")
   end
 
-  def matches_text?(want, have)
+  def match?(want, have)
     want.empty? || have.downcase.include?(want) || normalize(have).include?(normalize(want))
   end
 
