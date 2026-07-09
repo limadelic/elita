@@ -1,7 +1,7 @@
 defmodule Elita do
   use GenServer
 
-  import Cfgs, only: [config: 1]
+  import Cfgs, only: [load: 1]
   import History, only: [record: 1]
   import Llm, only: [llm: 1]
   import Log, only: [log: 5]
@@ -31,7 +31,7 @@ defmodule Elita do
   def init({name, configs}) do
     create()
     tape_seed()
-    {:ok, %{name: name, config: config(configs), history: [], configs: configs}}
+    {:ok, %{name: name, config: load(configs), history: [], configs: configs}}
   end
 
   defp tape_seed do

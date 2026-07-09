@@ -2,14 +2,15 @@ defmodule Cfgs do
   import Enum, only: [map: 2, reject: 2, flat_map: 2, uniq: 1]
   import List, only: [flatten: 1]
   import Map, only: [get: 3]
+  import Cfg, only: [config: 1]
 
-  def config(names) when is_list(names) do
+  def load(names) when is_list(names) do
     names
     |> expand()
-    |> map(&Cfg.config/1)
+    |> map(&config/1)
   end
 
-  def config(name), do: Cfg.config(name)
+  def load(name), do: config(name)
 
   def value(key, configs) do
     configs
@@ -33,7 +34,7 @@ defmodule Cfgs do
   defp expand(list, deps), do: expand(list ++ deps)
 
   defp deps(name) do
-    Cfg.config(name) |> includes()
+    config(name) |> includes()
   end
 
   defp includes(config) do
