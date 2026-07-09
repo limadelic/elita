@@ -69,7 +69,7 @@ module VerifyHelper
         raise "Timeout waiting for all rows to match.\n\nTranscript:\n#{transcript}"
       end
 
-      drain_pty
+      drain
 
       # After ~1s without a match, nudge PTY with newline to flush cascade output (replay only)
       if ENV["TAPE"] != "rec" && Time.now - last_newline_sent >= 1.0

@@ -1,5 +1,5 @@
 module ReplHelper
-  def cassette_dir
+  def dir
     File.expand_path("../cassettes", __dir__)
   end
 
@@ -10,19 +10,19 @@ module ReplHelper
     env = {
       "TAPE" => ENV["TAPE"] || "replay",
       "CASSETTE" => @cassette,
-      "CASSETTE_DIR" => cassette_dir,
+      "CASSETTE_DIR" => dir,
       "MIX_ENV" => "test"
     }
-    cmd = spawn_cmd(args)
+    cmd = spawn(args)
     @reader, @writer, @pid = PTY.spawn(env, "/bin/sh", "-c", cmd)
-    wait_for_prompt(args.split.first || "el")
+    wait(args.split.first || "el")
   end
 
-  def one_shot(args)
+  def one(args)
     @cassette = @cassette || "greet"
     tape = ENV["TAPE"] || "replay"
     escript_path = "../../../../apps/el/el"
-    cmd = "cd apps/elita/agents/elita && TAPE=#{tape} CASSETTE=#{@cassette} CASSETTE_DIR=#{cassette_dir} MIX_ENV=test #{escript_path} #{args}"
+    cmd = "cd apps/elita/agents/elita && TAPE=#{tape} CASSETTE=#{@cassette} CASSETTE_DIR=#{dir} MIX_ENV=test #{escript_path} #{args}"
     output = ""
     timeout = Time.now + 30
 
@@ -49,14 +49,14 @@ module ReplHelper
 
     @writer.write("#{input}\n")
     @writer.flush
-    wait_for_prompt(prompt)
+    wait(prompt)
   end
 
   def transcript
     @transcript_stripped || ""
   end
 
-  def drain_pty
+  def drain
     return unless @reader
 
     begin
@@ -66,7 +66,7 @@ module ReplHelper
           chunk = @reader.readpartial(4096)
           chunk = encode(chunk)
           @transcript << chunk if @transcript
-          stripped_chunk = strip_ansi(chunk)
+          stripped_chunk = strip(chunk)
           stripped_chunk = encode(stripped_chunk)
           @transcript_stripped << stripped_chunk if @transcript_stripped
         else
@@ -93,24 +93,24 @@ module ReplHelper
     value.force_encoding("UTF-8") rescue value.to_s
   end
 
-  def spawn_cmd(args)
+  def spawn(args)
     escript_path = "../../../../apps/el/el"
     (
       "cd apps/elita/agents/elita && " +
       "TAPE=#{ENV['TAPE'] || 'replay'} " +
       "CASSETTE=#{@cassette} " +
-      "CASSETTE_DIR=#{cassette_dir} " +
+      "CASSETTE_DIR=#{dir} " +
       "MIX_ENV=test " +
       "#{escript_path} " +
       "#{args}"
     ).strip
   end
 
-  def strip_ansi(text)
+  def strip(text)
     text.force_encoding("UTF-8").scrub("").gsub(/\e\[[0-9;]*m/, "")
   end
 
-  def wait_for_prompt(prompt_word)
+  def wait(prompt_word)
     output = ""
     duration = ENV["TAPE"] == "rec" ? 300 : 30
     timeout = Time.now + duration
@@ -123,7 +123,7 @@ module ReplHelper
 
         output << chunk
         @transcript << chunk if @transcript
-        stripped_chunk = strip_ansi(chunk)
+        stripped_chunk = strip(chunk)
         stripped_chunk = encode(stripped_chunk)
         @transcript_stripped << stripped_chunk if @transcript_stripped
         return output if output.include?(pattern)

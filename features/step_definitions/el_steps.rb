@@ -2,7 +2,7 @@ require "pty"
 
 When(/^> el tell (.+)$/) do |args, *rest|
   table = rest.first
-  output = one_shot("tell #{args}")
+  output = one("tell #{args}")
 
   # Accumulate output into transcript for verify_lines retry-drain
   @transcript ||= ""
@@ -32,7 +32,7 @@ When(/^> el (\w+)$/) do |agent, *rest|
   table = rest.first
   boot(agent)
   if table && valid?(table)
-    drain_pty
+    drain
     verify(table.raw)
   elsif table
     table(table, transcript)
