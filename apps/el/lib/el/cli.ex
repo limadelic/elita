@@ -1,7 +1,12 @@
 defmodule El.CLI do
   import Application, only: [ensure_all_started: 1]
   import IO, only: [puts: 1]
-  import El.Command
+  import El.Commands.Ask, only: [ask: 3]
+  import El.Commands.Tell, only: [tell: 3]
+  import El.Commands.Spawn, only: [spawn: 2]
+  import El.Commands.Claude, only: [claude: 1]
+  import El.Commands.Cd, only: [cd: 1]
+  import El.Distribution, only: [daemon: 0]
   import El.REPL, only: [run: 1]
 
   @usage """
@@ -62,7 +67,7 @@ defmodule El.CLI do
   defp exec({:tell, tool, agent, msg}), do: tell(agent, msg, tool)
   defp exec({:spawn, name, agent}), do: spawn(name, agent)
   defp exec({:claude, name}), do: claude(name)
-  defp exec({:ls, path}), do: ls(path)
+  defp exec({:ls, path}), do: El.Command.Ls.run(path)
   defp exec({:cd, path}), do: cd(path)
   defp exec(:daemon), do: daemon()
   defp exec(_), do: :usage
