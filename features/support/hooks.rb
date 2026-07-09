@@ -40,8 +40,9 @@ def cassette(scenario)
 
   rows = test_case.rows
   return ENV['CASSETTE'] unless rows&.any?
+  return ENV['CASSETTE'] unless rows.first&.respond_to?(:to_h)
 
-  (rows.first.to_h&.dig('cassette') if rows.first.respond_to?(:to_h)) || ENV['CASSETTE']
+  rows.first.to_h&.dig('cassette') || ENV['CASSETTE']
 end
 
 def clock(scenario)
@@ -50,8 +51,9 @@ def clock(scenario)
 
   rows = test_case.rows
   return ENV['CLOCK'] unless rows&.any?
+  return ENV['CLOCK'] unless rows.first&.respond_to?(:to_h)
 
-  (rows.first.to_h&.dig('clock') if rows.first.respond_to?(:to_h)) || ENV['CLOCK']
+  rows.first.to_h&.dig('clock') || ENV['CLOCK']
 end
 
 def kill_process
