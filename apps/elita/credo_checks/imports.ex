@@ -86,20 +86,18 @@ defmodule Elita.Credo.Imports do
     issues
   end
 
-  defp maybe_add_issue({:__aliases__, _meta_alias, [module]}, func, meta, issues, allowlist, imports, aliases, local_defs, import_names, filename) when is_atom(module) do
-    if has_collision?(func, local_defs, import_names) or
-       is_imported?([module], imports) or is_aliased?(module, aliases) or not should_report?(module, allowlist) do
+  defp maybe_add_issue({:__aliases__, _meta_alias, [module]}, _func, meta, issues, allowlist, imports, aliases, _local_defs, _import_names, filename) when is_atom(module) do
+    if is_imported?([module], imports) or is_aliased?(module, aliases) or not should_report?(module, allowlist) do
       issues
     else
       [create_issue(module, meta, filename) | issues]
     end
   end
 
-  defp maybe_add_issue({:__aliases__, _meta, parts}, func, meta, issues, allowlist, imports, aliases, local_defs, import_names, filename)
+  defp maybe_add_issue({:__aliases__, _meta, parts}, _func, meta, issues, allowlist, imports, aliases, _local_defs, _import_names, filename)
        when is_list(parts) and length(parts) > 1 do
     module_name = Enum.join(Enum.map(parts, &to_string/1), ".")
-    if has_collision?(func, local_defs, import_names) or
-       is_imported_nested?(parts, imports) or is_aliased_nested?(parts, aliases) or not should_report_nested(module_name, allowlist) do
+    if is_imported_nested?(parts, imports) or is_aliased_nested?(parts, aliases) or not should_report_nested(module_name, allowlist) do
       issues
     else
       [create_issue(module_name, meta, filename) | issues]
@@ -111,10 +109,9 @@ defmodule Elita.Credo.Imports do
     issues
   end
 
-  defp maybe_add_issue(module, func, meta, issues, allowlist, imports, aliases, local_defs, import_names, filename)
+  defp maybe_add_issue(module, _func, meta, issues, allowlist, imports, aliases, _local_defs, _import_names, filename)
        when is_atom(module) do
-    if has_collision?(func, local_defs, import_names) or
-       is_imported?([module], imports) or is_aliased?(module, aliases) or not should_report?(module, allowlist) do
+    if is_imported?([module], imports) or is_aliased?(module, aliases) or not should_report?(module, allowlist) do
       issues
     else
       [create_issue(module, meta, filename) | issues]
@@ -216,23 +213,4 @@ defmodule Elita.Credo.Imports do
     end
   end
 
-  defp has_collision?(func, local_defs, import_names) when is_atom(func) do
-    has_local_def?(func, local_defs) or has_import_name?(func, import_names) or is_kernel_builtin?(func)
-  end
-
-  defp has_collision?(_func, _local_defs, _import_names), do: false
-
-  defp has_local_def?(func, local_defs) do
-    Enum.any?(local_defs, &(&1 == func))
-  end
-
-  defp has_import_name?(func, import_names) do
-    Enum.any?(import_names, &(&1 == func))
-  end
-
-  defp is_kernel_builtin?(name) when is_atom(name) do
-    funcs = Kernel.__info__(:functions) |> Enum.map(&elem(&1, 0))
-    macros = Kernel.__info__(:macros) |> Enum.map(&elem(&1, 0))
-    Enum.member?(funcs, name) or Enum.member?(macros, name)
-  end
 end
