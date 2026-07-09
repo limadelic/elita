@@ -90,14 +90,6 @@ Then(/^verify$/) do |table|
   verify(table.raw)
 end
 
-Then(/^speck generates scenarios$/) do |table|
-  verify(table.raw)
-end
-
-Then(/^speck runs the test suite$/) do |table|
-  verify(table.raw)
-end
-
 Then(/^print transcript$/) do
   puts "\n=== TRANSCRIPT ===\n#{transcript}\n=== END ===\n"
 end
