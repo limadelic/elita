@@ -8,7 +8,7 @@ defmodule Lite do
   import List, only: [pop_at: 2]
   import Req, only: [post: 2]
   import TapeHandler, only: [handle: 4]
-  import String, only: [to_atom: 1]
+  import TapeOptions, only: [miss_opts: 1]
   @cache_key %{type: "ephemeral"}
   def llm(%{config: config, history: history, name: agent_name} = state) do
     composed = compose(config)
@@ -24,9 +24,6 @@ defmodule Lite do
   defp tape(body, name) do
     handle(body, name, fn -> req(body) |> resp end, miss_opts(get_env("TAPE_ON_MISS")))
   end
-
-  defp miss_opts(m) when m in ["live", "swallow"], do: [on_miss: to_atom(m)]
-  defp miss_opts(_), do: []
 
   defp text([%{"type" => "text", "text" => t} | _]), do: t
   defp text(other), do: other
