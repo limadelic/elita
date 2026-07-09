@@ -1,7 +1,6 @@
 require 'timeout'
 require 'webrick'
 require 'json'
-require 'thread'
 
 module Hooks
 end
@@ -32,7 +31,7 @@ Before do |scenario|
 end
 
 After do
-  stop_stub_server
+  ensure_stub_server_stopped
   if @pid
     begin
       Process.kill("TERM", @pid)
@@ -66,10 +65,12 @@ def start_stub_server
   ENV["ANTHROPIC_BASE_URL"] = "http://localhost:#{@stub_port}"
 end
 
-def stop_stub_server
+def ensure_stub_server_stopped
   if @stub_server
     @stub_server.shutdown
-    @stub_thread&.join(1)
+    @stub_thread&.join(1) if @stub_thread
     ENV.delete("ANTHROPIC_BASE_URL")
   end
+rescue => e
+  # Ignore errors during shutdown
 end
