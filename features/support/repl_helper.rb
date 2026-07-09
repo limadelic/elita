@@ -200,3 +200,8 @@ module ReplHelper
     raise "Timeout waiting for '#{pattern}' in:\n#{output}"
   end
 end
+
+require_relative "search"
+require_relative "assert"
+
+World(ReplHelper, Search, Assert)
