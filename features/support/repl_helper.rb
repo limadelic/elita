@@ -5,7 +5,18 @@ module ReplHelper
 
   def boot(args)
     @cassette = @cassette || "greet"
-    reset(args)
+    @transcript = ""
+    @transcript_stripped = ""
+    env = {
+      "TAPE" => ENV["TAPE"] || "replay",
+      "CASSETTE" => @cassette,
+      "CASSETTE_DIR" => dir,
+      "MIX_ENV" => "test"
+    }
+    env["TAPE_ON_MISS"] = @tape_on_miss if @tape_on_miss
+    cmd = spawn(args)
+    @reader, @writer, @pid = PTY.spawn(env, "/bin/sh", "-c", cmd)
+    wait(args.split.first || "el")
   end
 
   def one(args)
