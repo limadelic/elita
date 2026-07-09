@@ -7,8 +7,7 @@ When(/^> el tell (.+)$/) do |args, *rest|
   @transcript ||= ""
   @transcript_stripped ||= ""
   @transcript << output
-  stripped = output.gsub(/\e\[[0-9;]*m/, "")
-  @transcript_stripped << stripped
+  @transcript_stripped << output.gsub(/\e\[[0-9;]*m/, "")
 
   if table && valid?(table)
     verify_lines(table.raw)
