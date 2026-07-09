@@ -11,23 +11,23 @@ module VerifyHelper
   def verify(rows)
     init unless @scenario_cursor
     deadline = deadline()
+    verify_loop(rows, deadline)
+  end
+
+  def verify_loop(rows, deadline)
     last_newline_sent = Time.now - 2
-
     loop do
-      tx = transcript
-      @folded_lines = normalize(tx)
-
-      found_indices = search(rows, @folded_lines, deadline, tx)
-      return if found_indices
-
+      return if search(rows, normalize(transcript), deadline, transcript)
       drain
-      if timing?(last_newline_sent)
-        nudge
-        last_newline_sent = Time.now
-      end
-
+      nudge_if_needed(last_newline_sent)
+      last_newline_sent = Time.now if timing?(last_newline_sent)
       sleep 0.05
     end
+  end
+
+  def nudge_if_needed(last_sent)
+    return unless timing?(last_sent)
+    nudge
   end
 
   def search(rows, folded_lines, deadline, tx)
