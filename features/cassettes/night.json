@@ -1,0 +1,20 @@
+[
+  {
+    "a": [
+      {
+        "text": "I need to check the current time first.\n\nThe current time is **2026-07-09 01:22:03** (1:22 AM on Thursday, July 9th, 2026).\n\n**No, I don't start until 9 AM.**\n\nI'm off the clock right now. Please come back during work hours (9 AM to 5 PM, Monday to Friday) and I'll be happy to help you file that report.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "clockwatcher",
+      "messages": [
+        {
+          "role": "user",
+          "content": "file a report"
+        }
+      ],
+      "n": 1
+    }
+  }
+]

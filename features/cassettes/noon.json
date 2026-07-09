@@ -1,0 +1,20 @@
+[
+  {
+    "a": [
+      {
+        "text": "No, I don't start until 9 AM.\n\nThe current time is 2026-07-09 01:21:57 (1:21 AM on Thursday morning). I'm not available until 9 AM on a weekday.\n\nPlease come back during work hours: 9 AM to 5 PM, Monday through Friday.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "clockwatcher",
+      "messages": [
+        {
+          "role": "user",
+          "content": "file a report"
+        }
+      ],
+      "n": 1
+    }
+  }
+]

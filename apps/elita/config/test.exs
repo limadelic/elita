@@ -9,9 +9,24 @@ tape_handler =
 
 clock_fn =
   case {System.get_env("TAPE"), System.get_env("LIVE")} do
-    {"rec", _} -> nil
-    {_, "1"} -> nil
-    {_, _} -> &Clock.now/0
+    {"rec", _} ->
+      nil
+
+    {_, "1"} ->
+      nil
+
+    {_, _} ->
+      fn ->
+        case System.get_env("CLOCK") do
+          nil ->
+            {{2025, 7, 7}, {10, 0, 0}}
+
+          str ->
+            [h, m | rest] = String.split(str, ":")
+            s = if rest == [], do: "0", else: hd(rest)
+            {{2025, 7, 7}, {String.to_integer(h), String.to_integer(m), String.to_integer(s)}}
+        end
+      end
   end
 
 config :elita, :tape_handler, tape_handler
