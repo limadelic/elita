@@ -76,7 +76,7 @@ module VerifyHelper
     if prefix.empty?
       scan(text, cursor, matches)
     else
-      match_anchor(prefix, text, cursor, matches)
+      anchor(prefix, text, cursor, matches)
     end
   end
 
@@ -93,7 +93,7 @@ module VerifyHelper
     true
   end
 
-  def match_anchor(prefix, text, cursor, matches)
+  def anchor(prefix, text, cursor, matches)
     (@scenario_cursor...@folded_lines.size).each do |idx|
       line = clean_line(@folded_lines[idx])
       line_prefix, line_text = split(line)
