@@ -8,6 +8,7 @@ end
 
 Before do |scenario|
   @cassette = extract_cassette(scenario) || File.basename(scenario.location.file, ".feature")
+  @clock = extract_clock(scenario)
   initialize_scenario_cursor
 end
 
@@ -41,6 +42,16 @@ def extract_cassette(scenario)
   return unless rows&.any?
 
   rows.first.to_h&.dig('cassette') if rows.first.respond_to?(:to_h)
+end
+
+def extract_clock(scenario)
+  test_case = scenario.instance_variable_get(:@test_case)
+  return unless test_case&.respond_to?(:rows)
+
+  rows = test_case.rows
+  return unless rows&.any?
+
+  rows.first.to_h&.dig('clock') if rows.first.respond_to?(:to_h)
 end
 
 def kill_process

@@ -80,6 +80,7 @@ module ReplHelper
       "TAPE" => ENV["TAPE"] || "replay",
       "CASSETTE" => @cassette,
       "CASSETTE_DIR" => cassette_dir,
+      "CLOCK" => @clock,
       "MIX_ENV" => "test"
     }
   end
