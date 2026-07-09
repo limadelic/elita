@@ -130,7 +130,8 @@ module VerifyHelper
   end
 
   def normalize(transcript)
-    tx = transcript.force_encoding("UTF-8") if transcript.respond_to?(:force_encoding)
+    tx = transcript
+    tx = tx.force_encoding("UTF-8") if tx.respond_to?(:force_encoding)
     lines = tx.split("\n").map { |l|
       l.strip.force_encoding("UTF-8") rescue l.strip
     }.reject(&:empty?)
