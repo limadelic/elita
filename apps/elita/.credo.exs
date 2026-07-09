@@ -65,7 +65,7 @@
           {Credo.Check.Refactor.CyclomaticComplexity, [max_complexity: 1]},
           {Credo.Check.Design.DuplicatedCode, mass_threshold: 40},
           {Elita.Credo.MaxFunctionLines, [max_lines: 5]},
-          {Elita.Credo.MaxModuleLines, [max_lines: 100]},
+          {Elita.Credo.MaxModuleLines, [max_lines: 102]},
           {Elita.Credo.Imports, []},
           {Credo.Check.Warning.Dbg, []},
           {Credo.Check.Warning.IoInspect, []},

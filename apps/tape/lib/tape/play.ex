@@ -39,6 +39,10 @@ defmodule Tape.Play do
     fun.()
   end
 
+  defp untagged(%{entries: entries, on_miss: :swallow}, idx) when idx >= length(entries) do
+    []
+  end
+
   defp untagged(ctx, idx) do
     entry = at(ctx.entries, idx)
     check_untagged(entry, ctx, idx, get(entry["q"], "agent"))

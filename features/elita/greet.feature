@@ -25,3 +25,11 @@ Feature: Greet
       | ✨ greet | hello from tape |
     * greet> goodbye
       | ✨ greet | response from stubbed server |
+
+  @tape:tape_miss_swallow @tape_on_miss:swallow
+  Scenario: Tape swallows miss and returns empty reply
+    * > el greet
+    * greet> hello
+      | ✨ greet | hello from tape |
+    * greet> unknown
+      | greet> |
