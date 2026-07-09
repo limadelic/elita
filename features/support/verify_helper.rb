@@ -10,7 +10,7 @@ module VerifyHelper
 
   def lines(rows)
     reset unless @scenario_cursor
-    deadline = timeout_deadline
+    deadline = self.deadline
     last_nudge = Time.now - 2
 
     loop do
@@ -38,7 +38,7 @@ module VerifyHelper
 
   private
 
-  def timeout_deadline
+  def deadline
     timeout_secs = ENV["TAPE"] == "rec" ? 10 : (ENV["GITHUB_ACTIONS"] == "true" ? 60 : 3)
     Time.now + timeout_secs
   end
