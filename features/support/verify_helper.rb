@@ -18,6 +18,7 @@ module VerifyHelper
     last_sent = Time.now - 2
     loop do
       return if search(rows, normalize(transcript), deadline, transcript)
+
       drain
       nudge if timing?(last_sent)
       last_sent = Time.now if timing?(last_sent)
@@ -185,6 +186,7 @@ module VerifyHelper
 
   def refute(unexpected, output)
     return unless output.downcase.include?(unexpected.downcase)
+
     raise "Expected '#{unexpected}' NOT in:\n#{output}"
   end
 end
