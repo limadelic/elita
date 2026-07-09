@@ -22,7 +22,15 @@ module ReplHelper
     @cassette = @cassette || "greet"
     tape = ENV["TAPE"] || "replay"
     escript_path = "../../../../apps/el/el"
-    cmd = "cd apps/elita/agents/elita && TAPE=#{tape} CASSETTE=#{@cassette} CASSETTE_DIR=#{dir} MIX_ENV=test #{escript_path} #{args}"
+    cmd = (
+      "cd apps/elita/agents/elita && " +
+      "TAPE=#{tape} " +
+      "CASSETTE=#{@cassette} " +
+      "CASSETTE_DIR=#{dir} " +
+      "MIX_ENV=test " +
+      "#{escript_path} " +
+      "#{args}"
+    ).strip
     output = ""
     timeout = Time.now + 30
 
