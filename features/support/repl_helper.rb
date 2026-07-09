@@ -69,6 +69,7 @@ module ReplHelper
   def fetch(pty)
     ready = IO.select([pty], nil, nil, 0.1)
     return "" unless ready
+
     encode(pty.readpartial(4096))
   rescue EOFError
     ""
