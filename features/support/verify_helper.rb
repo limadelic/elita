@@ -10,9 +10,8 @@ module VerifyHelper
 
   def verify(rows)
     init unless @scenario_cursor
-    ci_timeout = ENV["GITHUB_ACTIONS"] == "true" ? 60 : 3
-    deadline = Time.now + (ENV["TAPE"] == "rec" ? 10 : ci_timeout)
-    last_newline_sent = Time.now - 2 # Allow immediate first send
+    deadline = deadline()
+    last_newline_sent = Time.now - 2 # Allow immediately first send
 
     loop do
       tx = transcript
@@ -118,6 +117,11 @@ module VerifyHelper
     else
       [line, line]
     end
+  end
+
+  def deadline
+    timeout = ENV["TAPE"] == "rec" ? 10 : ENV["GITHUB_ACTIONS"] == "true" ? 60 : 3
+    Time.now + timeout
   end
 
   def fold(lines)
