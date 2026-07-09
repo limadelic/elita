@@ -22,7 +22,7 @@ Before do |scenario|
     "@tape:",
     ""
   ) : File.basename(scenario.location.file, ".feature")
-  initialize_scenario_cursor
+  init
 end
 
 After do

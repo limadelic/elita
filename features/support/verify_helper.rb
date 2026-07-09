@@ -1,19 +1,15 @@
 module VerifyHelper
-  def verify(rows)
-    verify_lines(rows)
+  def table(tbl, output)
+    cells(tbl).each { |c| cell(c, output) }
   end
 
-  def verify_table(table, output)
-    cells(table).each { |cell| verify_cell(cell, output) }
-  end
-
-  def initialize_scenario_cursor
+  def init
     @scenario_cursor = 0
     @folded_lines = nil
   end
 
-  def verify_lines(rows)
-    initialize_scenario_cursor unless @scenario_cursor
+  def verify(rows)
+    init unless @scenario_cursor
     ci_timeout = ENV["GITHUB_ACTIONS"] == "true" ? 60 : 3
     deadline = Time.now + (ENV["TAPE"] == "rec" ? 10 : ci_timeout)
     last_newline_sent = Time.now - 2 # Allow immediate first send
@@ -24,7 +20,7 @@ module VerifyHelper
       lines = tx.split("\n").map { |l|
         l.strip.force_encoding("UTF-8") rescue l.strip
       }.reject(&:empty?)
-      @folded_lines = fold_continuation_lines(lines)
+      @folded_lines = fold(lines)
 
       all_found = true
       found_indices = []
@@ -37,7 +33,7 @@ module VerifyHelper
         (@scenario_cursor...@folded_lines.size).each do |idx|
           full_line = @folded_lines[idx]
           full_line = full_line.sub(/\A(?:\s*\w+>\s*)+/, "")
-          line_prefix, line_text = split_line(full_line)
+          line_prefix, line_text = split(full_line)
 
           if line_prefix && line_text
             prefix_match = line_prefix.include?(want_prefix)
@@ -77,7 +73,7 @@ module VerifyHelper
 
       # After ~1s without a match, nudge PTY with newline to flush cascade output (replay only)
       if ENV["TAPE"] != "rec" && Time.now - last_newline_sent >= 1.0
-        nudge_pty
+        nudge
         last_newline_sent = Time.now
       end
 
@@ -85,7 +81,7 @@ module VerifyHelper
     end
   end
 
-  def nudge_pty
+  def nudge
     return unless @writer
 
     @writer.write("\n")
@@ -94,7 +90,7 @@ module VerifyHelper
     # PTY might be closed, ignore
   end
 
-  def is_verify_table?(table)
+  def valid?(table)
     return false unless table && table.raw
 
     rows = table.raw
@@ -105,7 +101,7 @@ module VerifyHelper
 
   private
 
-  def split_line(line)
+  def split(line)
     colon_idx = line.index(": ")
     equals_idx = line.index(" = ")
 
@@ -124,12 +120,12 @@ module VerifyHelper
     end
   end
 
-  def fold_continuation_lines(lines)
+  def fold(lines)
     result = []
     current = nil
 
     lines.each_with_index do |line, input_idx|
-      is_log = log_line?(line)
+      is_log = log?(line)
       if is_log
         result << line
         current = result.size - 1
@@ -141,7 +137,7 @@ module VerifyHelper
     result
   end
 
-  def log_line?(line)
+  def log?(line)
     # Match log lines: emoji followed by space and letters/emoji (agent/system markers)
     # OR match prompt lines: word characters followed by > (with or without emoji after)
     # OR match standalone prompts: word characters followed by >
@@ -158,14 +154,14 @@ module VerifyHelper
     table.raw.flatten.map(&:strip).reject(&:empty?)
   end
 
-  def verify_cell(cell, output)
+  def cell(cell, output)
     if negated?(cell)
       content = cell[1..-2].strip
       content = content[1..-1].strip if content.start_with?(">")
-      refute_includes(content, output)
+      refute(content, output)
     else
       content = cell.start_with?(">") ? cell[1..-1].strip : cell
-      assert_includes(content, output)
+      assert(content, output)
     end
   end
 
@@ -173,13 +169,13 @@ module VerifyHelper
     cell.start_with?("(") && cell.end_with?(")")
   end
 
-  def assert_includes(expected, output)
+  def assert(expected, output)
     expected.split.each { |w|
       raise "Expected '#{w}' in:\n#{output}" unless output.downcase.include?(w.downcase)
     }
   end
 
-  def refute_includes(unexpected, output)
+  def refute(unexpected, output)
     raise "Expected '#{unexpected}' NOT in:\n#{output}" if output.downcase.include?(unexpected.downcase)
   end
 end
