@@ -10,92 +10,15 @@ module VerifyHelper
 
   def verify_lines(rows)
     reset unless @scenario_cursor
-    ci_timeout = ENV["GITHUB_ACTIONS"] == "true" ? 60 : 3
-    deadline = Time.now + (ENV["TAPE"] == "rec" ? 10 : ci_timeout)
-    last_newline_sent = Time.now - 2  # Allow immediate first send
+    deadline = timeout_deadline
+    last_nudge = Time.now - 2
 
     loop do
-      tx = transcript
-      tx = tx.force_encoding("UTF-8") if tx.respond_to?(:force_encoding)
-      lines = tx.split("\n").map { |l| l.strip.force_encoding("UTF-8") rescue l.strip }.reject(&:empty?)
-      @folded_lines = fold(lines)
+      @folded_lines = prepare_lines
+      matches = find_matches(rows, deadline)
+      return update_cursor(matches) if matches
 
-      all_found = true
-      found_indices = []
-      next_continuation_idx = @scenario_cursor
-
-      rows.each do |row|
-        want_prefix = row[0].strip.force_encoding("UTF-8") rescue row[0].strip
-        want_text = row[1].strip.downcase.force_encoding("UTF-8") rescue row[1].strip.downcase
-        found = false
-
-        if want_prefix.empty?
-          # Continuation row: match col-2 against next line at next_continuation_idx position
-          if next_continuation_idx < @folded_lines.size
-            full_line = @folded_lines[next_continuation_idx]
-            full_line = full_line.sub(/\A(?:\s*\w+>\s*)+/, "")
-            line_prefix, line_text = split(full_line)
-
-            if line_text
-              text_match = want_text.empty? || line_text.downcase.include?(want_text) || line_text.downcase.gsub(/\s+/, "").include?(want_text.gsub(/\s+/, ""))
-              if text_match
-                found_indices << next_continuation_idx + 1
-                next_continuation_idx += 1
-                found = true
-              end
-            end
-          end
-        else
-          # Regular row: search from scenario_cursor onwards (original behavior)
-          # But track next_continuation_idx for following continuation rows
-          (@scenario_cursor...@folded_lines.size).each do |idx|
-            full_line = @folded_lines[idx]
-            full_line = full_line.sub(/\A(?:\s*\w+>\s*)+/, "")
-            line_prefix, line_text = split(full_line)
-
-            if line_prefix && line_text
-              prefix_match = line_prefix.include?(want_prefix)
-              text_match = want_text.empty? || line_text.downcase.include?(want_text) || line_text.downcase.gsub(/\s+/, "").include?(want_text.gsub(/\s+/, ""))
-
-              if prefix_match && text_match
-                found_indices << idx + 1
-                next_continuation_idx = idx + 1
-                found = true
-                break
-              end
-            end
-          end
-        end
-
-        unless found
-          if Time.now < deadline
-            all_found = false
-            break
-          else
-            raise "No match for prefix='#{want_prefix}' text='#{want_text}'\n\nTranscript:\n#{tx}"
-          end
-        end
-      end
-
-      if all_found
-        # Only update cursor if all rows were found
-        @scenario_cursor = found_indices.max if found_indices.any?
-        return
-      end
-
-      if Time.now >= deadline
-        raise "Timeout waiting for all rows to match.\n\nTranscript:\n#{transcript}"
-      end
-
-      drain_pty
-
-      # After ~1s without a match, nudge PTY with newline to flush cascade output (replay only)
-      if ENV["TAPE"] != "rec" && Time.now - last_newline_sent >= 1.0
-        nudge_pty
-        last_newline_sent = Time.now
-      end
-
-      sleep 0.05
+      break_or_retry(deadline, last_nudge)
     end
   end
 
@@ -104,7 +27,6 @@ module VerifyHelper
     @writer.write("\n")
     @writer.flush
   rescue IOError
-    # PTY might be closed, ignore
   end
 
   def valid?(table)
@@ -115,6 +37,112 @@ module VerifyHelper
   end
 
   private
+
+  def timeout_deadline
+    timeout_secs = ENV["TAPE"] == "rec" ? 10 : (ENV["GITHUB_ACTIONS"] == "true" ? 60 : 3)
+    Time.now + timeout_secs
+  end
+
+  def prepare_lines
+    tx = transcript
+    tx = tx.force_encoding("UTF-8") if tx.respond_to?(:force_encoding)
+    lines = tx.split("\n").map { |l| l.strip.force_encoding("UTF-8") rescue l.strip }.reject(&:empty?)
+    fold(lines)
+  end
+
+  def find_matches(rows, deadline)
+    all_found = true
+    found_indices = []
+    cursor = @scenario_cursor
+
+    rows.each do |row|
+      prefix = row[0].strip.force_encoding("UTF-8") rescue row[0].strip
+      text = row[1].strip.downcase.force_encoding("UTF-8") rescue row[1].strip.downcase
+
+      if match_row(prefix, text, cursor, found_indices)
+        cursor = found_indices.last
+      elsif Time.now >= deadline
+        raise match_error(prefix, text)
+      else
+        all_found = false
+        break
+      end
+    end
+
+    all_found ? found_indices : nil
+  end
+
+  def match_row(prefix, text, cursor, matches)
+    if prefix.empty?
+      match_continuation(text, cursor, matches)
+    else
+      match_anchor(prefix, text, cursor, matches)
+    end
+  end
+
+  def match_continuation(text, cursor, matches)
+    return false if cursor >= @folded_lines.size
+
+    line = clean_line(@folded_lines[cursor])
+    _prefix, line_text = split(line)
+
+    return false unless line_text
+
+    if text.empty? || line_text.downcase.include?(text) || normalize(line_text).include?(normalize(text))
+      matches << cursor + 1
+      true
+    else
+      false
+    end
+  end
+
+  def match_anchor(prefix, text, cursor, matches)
+    (@scenario_cursor...@folded_lines.size).each do |idx|
+      line = clean_line(@folded_lines[idx])
+      line_prefix, line_text = split(line)
+
+      next unless line_prefix && line_text
+      next unless line_prefix.include?(prefix)
+
+      if text.empty? || line_text.downcase.include?(text) || normalize(line_text).include?(normalize(text))
+        matches << idx + 1
+        return true
+      end
+    end
+
+    false
+  end
+
+  def clean_line(line)
+    line.sub(/\A(?:\s*\w+>\s*)+/, "")
+  end
+
+  def normalize(text)
+    text.downcase.gsub(/\s+/, "")
+  end
+
+  def match_error(prefix, text)
+    "No match for prefix='#{prefix}' text='#{text}'\n\nTranscript:\n#{transcript}"
+  end
+
+  def break_or_retry(deadline, last_nudge)
+    if Time.now >= deadline
+      raise "Timeout waiting for all rows to match.\n\nTranscript:\n#{transcript}"
+    end
+
+    drain_pty
+
+    if ENV["TAPE"] != "rec" && Time.now - last_nudge >= 1.0
+      nudge_pty
+      last_nudge = Time.now
+    end
+
+    sleep 0.05
+  end
+
+  def update_cursor(matches)
+    @scenario_cursor = matches.max if matches.any?
+  end
 
   def split(line)
     colon_idx = line.index(": ")
@@ -137,14 +165,11 @@ module VerifyHelper
     result = []
     current = nil
 
-    lines.each_with_index do |line, input_idx|
-      is_log = log?(line)
-      is_board = board?(line)
-      if is_log
+    lines.each do |line|
+      if log?(line)
         result << line
         current = result.size - 1
-      elsif is_board
-        # Keep board lines separate
+      elsif board?(line)
         result << line
         current = result.size - 1
       elsif current && current >= 0
