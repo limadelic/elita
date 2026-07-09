@@ -145,10 +145,9 @@ module ReplHelper
         return output if output.include?(pattern)
       end
     rescue EOFError
+      return output
     end
 
-    Process.kill("TERM", @pid) if @pid
-    @writer.close if @writer && !@writer.closed?
     raise "Timeout waiting for '#{pattern}' in:\n#{output}"
   end
 end
