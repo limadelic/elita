@@ -1,7 +1,7 @@
 defmodule Mix.Tasks.Cover do
-  @compile {:no_warn_undefined, El.Cover}
+  import El.Cover
 
   def run(argv) do
-    El.Cover.run(argv)
+    execute(argv)
   end
 end
