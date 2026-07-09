@@ -63,7 +63,7 @@ module ReplHelper
         chunk = @reader.readpartial(4096)
         chunk = encode(chunk)
         @transcript << chunk if @transcript
-        stripped_chunk = encode(strip_ansi(chunk))
+        stripped_chunk = encode(strip(chunk))
         @transcript_stripped << stripped_chunk if @transcript_stripped
       end
     rescue EOFError
@@ -97,7 +97,7 @@ module ReplHelper
     "cd apps/elita/agents/elita && #{vars} ../../../../apps/el/el #{args}".strip
   end
 
-  def strip_ansi(text)
+  def strip(text)
     text.force_encoding("UTF-8").scrub("").gsub(/\e\[[0-9;]*m/, "")
   end
 
@@ -115,7 +115,7 @@ module ReplHelper
         chunk = encode(chunk)
         output << chunk
         @transcript << chunk if @transcript
-        stripped_chunk = encode(strip_ansi(chunk))
+        stripped_chunk = encode(strip(chunk))
         @transcript_stripped << stripped_chunk if @transcript_stripped
         return output if output.include?(pattern)
       end
