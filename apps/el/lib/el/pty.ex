@@ -5,24 +5,25 @@ defmodule El.Pty do
   import Keyword, except: [size: 1]
   import Process, except: [alias: 1, info: 2]
 
-  import GenServer, only: [start_link: 3, cast: 2, call: 2]
+  import GenServer, only: [start_link: 3]
   import El.Pty.Init, only: [call: 1]
   import El.Pty.Size, only: [get_default: 0]
+  import El.Pty.Dispatch, only: [info: 2, call: 2, cast: 2]
 
   def boot(name, cmd, opts \\ []) do
     start_link(__MODULE__, {cmd, opts}, name: name)
   end
 
   def inject(name, message) do
-    cast(name, {:inject, message})
+    GenServer.cast(name, {:inject, message})
   end
 
   def tap(name, pid) do
-    call(name, {:tap, pid})
+    GenServer.call(name, {:tap, pid})
   end
 
   def untap(name, pid) do
-    call(name, {:untap, pid})
+    GenServer.call(name, {:untap, pid})
   end
 
   def run(name, opts \\ []) do
@@ -76,16 +77,16 @@ defmodule El.Pty do
 
   @impl true
   def handle_info(msg, state) do
-    El.Pty.Dispatch.info(msg, state)
+    info(msg, state)
   end
 
   @impl true
   def handle_call(msg, _from, state) do
-    El.Pty.Dispatch.call(msg, state)
+    call(msg, state)
   end
 
   @impl true
   def handle_cast(msg, state) do
-    El.Pty.Dispatch.cast(msg, state)
+    cast(msg, state)
   end
 end

@@ -1,8 +1,10 @@
 defmodule El.Commands.Address.World do
   import Agent.Config, only: [load: 0]
+  import Atom, only: [to_string: 1]
   import El.Standpoint, only: [get: 0]
   import Enum, only: [map: 2, flat_map: 2, uniq_by: 2, filter: 2]
   import File, only: [exists?: 1, ls!: 1]
+  import Kernel, except: [to_string: 1]
   import Path, only: [expand: 1, join: 2]
   import String, only: [ends_with?: 2, trim_trailing: 2]
   import Node, only: [list: 0]
@@ -25,7 +27,7 @@ defmodule El.Commands.Address.World do
   defp entry({name, folder}) do
     folder = expand(folder)
     self = check(folder)
-    %{name: Atom.to_string(name), path: folder, kind: :folder, file_path: self}
+    %{name: to_string(name), path: folder, kind: :folder, file_path: self}
   end
 
   defp check(folder) do
@@ -53,6 +55,6 @@ defmodule El.Commands.Address.World do
   end
 
   defp remote(node) do
-    %{name: Atom.to_string(node), path: nil, kind: :node, file_path: nil}
+    %{name: to_string(node), path: nil, kind: :node, file_path: nil}
   end
 end

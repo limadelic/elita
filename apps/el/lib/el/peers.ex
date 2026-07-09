@@ -1,6 +1,8 @@
 defmodule El.Peers do
+  import Atom, only: [to_string: 1]
   import Enum, only: [join: 2, map: 2, reject: 2, uniq: 1]
   import File, only: [mkdir_p!: 1, read: 1, write!: 2]
+  import Kernel, except: [to_string: 1]
   import Path, only: [dirname: 1]
   import String, only: [split: 2, to_atom: 1, trim: 1]
   import System, only: [get_env: 2]
@@ -25,7 +27,7 @@ defmodule El.Peers do
 
   defp store(file, lines) do
     mkdir_p!(dirname(file))
-    write!(file, lines |> map(&Atom.to_string/1) |> join("\n"))
+    write!(file, lines |> map(&to_string/1) |> join("\n"))
   end
 
   defp parse({:ok, content}) do

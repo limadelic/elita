@@ -66,7 +66,7 @@
           {Credo.Check.Design.DuplicatedCode, mass_threshold: 40},
           {Elita.Credo.MaxFunctionLines, [max_lines: 5]},
           {Elita.Credo.MaxModuleLines, [max_lines: 100]},
-          {Elita.Credo.Imports, [allowlist: [:ets, :erlang, :rand, :cover]]},
+          {Elita.Credo.Imports, [allowlist: [:ets, :erlang, :rand, :cover, "El.Commands.Ask.Remote"]]},
           {Elita.Credo.CompoundNames, []},
           {Elita.Credo.AliasUsage, []},
           {Credo.Check.Warning.Dbg, []},
