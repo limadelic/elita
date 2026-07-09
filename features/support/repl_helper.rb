@@ -21,7 +21,10 @@ module ReplHelper
     cmd = "cd apps/elita/agents/elita && TAPE=#{tape} CASSETTE=#{@cassette} CASSETTE_DIR=#{cassettes} MIX_ENV=test #{clock_part}../../../../apps/el/el #{args}"
     output = ""
     timeout = Time.now + 30
-    env_hash = { "TAPE" => tape, "CASSETTE" => @cassette, "CASSETTE_DIR" => cassettes, "MIX_ENV" => "test" }
+    env_hash = {
+      "TAPE" => tape, "CASSETTE" => @cassette,
+      "CASSETTE_DIR" => cassettes, "MIX_ENV" => "test"
+    }
     env_hash["CLOCK"] = @clock if @clock
     env = ::ENV.to_h.merge(env_hash)
 
@@ -30,6 +33,7 @@ module ReplHelper
       while Time.now < timeout
         ready = IO.select([reader], nil, nil, 0.1)
         next unless ready
+
         chunk = reader.readpartial(4096)
         output << chunk
       end
@@ -44,6 +48,7 @@ module ReplHelper
 
   def send(input, prompt)
     raise "PTY not initialized" unless @writer
+
     @writer.write("#{input}\n")
     @writer.flush
     await(prompt)
@@ -60,6 +65,7 @@ module ReplHelper
       loop do
         ready = IO.select([@reader], nil, nil, 0.1)
         break unless ready
+
         chunk = @reader.readpartial(4096)
         chunk = encode(chunk)
         @transcript << chunk if @transcript
@@ -111,6 +117,7 @@ module ReplHelper
       while Time.now < timeout
         ready = IO.select([@reader], nil, nil, 0.1)
         next unless ready
+
         chunk = @reader.readpartial(4096)
         chunk = encode(chunk)
         output << chunk

@@ -7,7 +7,10 @@ rescue Timeout::Error
 end
 
 Before do |scenario|
-  @cassette = cassette(scenario) || File.basename(scenario.location.file, ".feature")
+  @cassette = cassette(scenario) || File.basename(
+    scenario.location.file,
+    ".feature"
+  )
   @clock = clock(scenario)
   reset
 end
@@ -23,6 +26,7 @@ private
 def timeout
   return 300 if ENV["TAPE"] == "rec"
   return 600 if ENV["TAPE"].nil? && ENV["COVER"] == "1"
+
   70
 end
 

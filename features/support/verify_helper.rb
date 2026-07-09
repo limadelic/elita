@@ -24,6 +24,7 @@ module VerifyHelper
 
   def nudge
     return unless @writer
+
     @writer.write("\n")
     @writer.flush
   rescue IOError
@@ -31,8 +32,10 @@ module VerifyHelper
 
   def valid?(table)
     return false unless table && table.raw
+
     rows = table.raw
     return false if rows.empty?
+
     rows.all? { |row| row.size == 2 }
   end
 
@@ -46,7 +49,9 @@ module VerifyHelper
   def squeeze
     tx = transcript
     tx = tx.force_encoding("UTF-8") if tx.respond_to?(:force_encoding)
-    lines = tx.split("\n").map { |l| l.strip.force_encoding("UTF-8") rescue l.strip }.reject(&:empty?)
+    lines = tx.split("\n").map { |l|
+      l.strip.force_encoding("UTF-8") rescue l.strip
+    }.reject(&:empty?)
     fold(lines)
   end
 
@@ -212,7 +217,9 @@ module VerifyHelper
   end
 
   def assert(expected, output)
-    expected.split.each { |w| raise "Expected '#{w}' in:\n#{output}" unless output.downcase.include?(w.downcase) }
+    expected.split.each { |w|
+      raise "Expected '#{w}' in:\n#{output}" unless output.downcase.include?(w.downcase)
+    }
   end
 
   def refute(unexpected, output)
