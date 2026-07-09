@@ -91,11 +91,11 @@ Then(/^verify$/) do |table|
 end
 
 Then(/^speck generates scenarios$/) do |table|
-  verify_lines(table.raw)
+  verify(table.raw)
 end
 
 Then(/^speck runs the test suite$/) do |table|
-  verify_lines(table.raw)
+  verify(table.raw)
 end
 
 Then(/^print transcript$/) do

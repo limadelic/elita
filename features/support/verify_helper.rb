@@ -1,4 +1,8 @@
 module VerifyHelper
+  def verify(rows)
+    verify_lines(rows)
+  end
+
   def verify_table(table, output)
     cells(table).each { |cell| verify_cell(cell, output) }
   end
