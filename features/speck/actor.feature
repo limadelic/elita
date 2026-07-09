@@ -11,17 +11,9 @@ Feature: Actor
       | 🎭 speck as tplan |                                    |
       | ✏️ scenario_1     | Role Adoption - Victorian Butler   |
       | ✏️ scenario_2     | Improvised Backstory               |
-      | ✏️ scenario_3     | Character Integrity Under Pressure |
-      | ✏️ scenario_4     | Emotional Consistency              |
-      | ✏️ scenario_5     | Sustained Performance              |
+      | ✏️ scenario_3     | Character Integrity Under Challenge |
+      | ✏️ scenario_4     | Situational Improvisation          |
+      | ✏️ scenario_5     | Character Consistency              |
 
     * speck runs the test suite
-      | 🎭 speck as texec |                             |
-      | 🚀 actor_v1       | as actor                    |
-      | ✨ actor_v1        | Welcome to Ashworth House   |
-      | 🚀 actor_v3       | as actor                    |
-      | ✨ actor_v3        | I'm Claude, an AI assistant |
-      | 👀 scenario_1     | status: passed              |
-      | 👀 scenario_3     | status: failed              |
-      | 👀 scenario_5     | status: passed              |
-      | ✨ speck           | CONDITIONAL PASS            |
+      |  |  |
