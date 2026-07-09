@@ -15,6 +15,7 @@ module Search
     loop do
       tx = transcript
       return if search(rows, normalize(tx), deadline, tx)
+
       drain
       (nudge; last_sent = Time.now) if timing?(last_sent)
       sleep 0.05
@@ -25,6 +26,7 @@ module Search
     found_indices = rows.each_with_object([]) do |row, acc|
       idx = find_match(row, folded_lines, deadline, tx)
       return nil unless idx
+
       acc << idx
     end
     @scenario_cursor = found_indices.max if found_indices.any?
@@ -33,7 +35,10 @@ module Search
 
   def find_match(row, folded_lines, deadline, tx)
     prefix, text = parse_row(row)
-    search_lines(folded_lines, prefix, text) || handle_notfound(prefix, text, deadline, tx)
+    search_lines(
+      folded_lines, prefix,
+      text
+    ) || handle_notfound(prefix, text, deadline, tx)
   end
 
   def parse_row(row)
@@ -52,6 +57,7 @@ module Search
 
   def handle_notfound(prefix, text, deadline, tx)
     return nil if pending?(deadline)
+
     msg = "No match for prefix='#{prefix}' text='#{text}'"
     msg << "\n\nTranscript:\n#{tx}"
     raise msg
@@ -80,6 +86,7 @@ module Search
     line = folded_line.sub(/\A(?:\s*\w+>\s*)+/, "")
     prefix, text = split(line)
     return false unless prefix && text
+
     prefix_matches = prefix.include?(want_prefix)
     text_matches = want_text.empty? ||
       text.downcase.include?(want_text) ||
@@ -124,6 +131,7 @@ module Search
 
   def nudge
     return unless @writer
+
     @writer.write("\n")
     @writer.flush
   rescue IOError

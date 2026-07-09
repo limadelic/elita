@@ -35,13 +35,16 @@ module Assert
 
   def refute(unexpected, output)
     return unless output.downcase.include?(unexpected.downcase)
+
     raise "Expected '#{unexpected}' NOT in:\n#{output}"
   end
 
   def valid?(table)
     return false unless table && table.raw
+
     rows = table.raw
     return false if rows.empty?
+
     rows.all? { |row| row.size == 2 }
   end
 end
