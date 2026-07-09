@@ -36,12 +36,12 @@ def extract_cassette(scenario)
   return tag.sub("@tape:", "") if tag
 
   test_case = scenario.instance_variable_get(:@test_case)
-  return unless test_case&.respond_to?(:rows)
+  return ENV['CASSETTE'] unless test_case&.respond_to?(:rows)
 
   rows = test_case.rows
-  return unless rows&.any?
+  return ENV['CASSETTE'] unless rows&.any?
 
-  rows.first.to_h&.dig('cassette') if rows.first.respond_to?(:to_h)
+  (rows.first.to_h&.dig('cassette') if rows.first.respond_to?(:to_h)) || ENV['CASSETTE']
 end
 
 def extract_clock(scenario)

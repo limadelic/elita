@@ -64,6 +64,24 @@
       "agent": "clockwatcher",
       "messages": [
         {
+          "content": "file a report",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "No, I don't start until 9 AM.\n\nIt's currently 2:06 AM on Thursday, July 9th, 2026 - well before my 9 AM start time. Please come back during work hours (9 AM to 5 PM, Monday through Friday) and I'll be happy to help you file that report.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "clockwatcher",
+      "messages": [
+        {
           "role": "user",
           "content": "file a report"
         }

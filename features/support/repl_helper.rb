@@ -8,6 +8,7 @@ module ReplHelper
     @transcript = ""
     @transcript_stripped = ""
     env = build_env
+    env = Hash[::ENV.map { |k, v| [k, v] }].merge(env)
     cmd = spawn_cmd(args)
     @reader, @writer, @pid = PTY.spawn(env, "/bin/sh", "-c", cmd)
     wait_for_prompt(args.split.first || "el")
@@ -15,13 +16,17 @@ module ReplHelper
 
   def one_shot(args)
     ensure_cassette
-    tape = ENV["TAPE"] || "replay"
-    cmd = "cd apps/elita/agents/elita && TAPE=#{tape} CASSETTE=#{@cassette} CASSETTE_DIR=#{cassette_dir} MIX_ENV=test ../../../../apps/el/el #{args}"
+    tape = ::ENV["TAPE"] || "replay"
+    clock_part = @clock ? "CLOCK=#{@clock} " : ""
+    cmd = "cd apps/elita/agents/elita && TAPE=#{tape} CASSETTE=#{@cassette} CASSETTE_DIR=#{cassette_dir} MIX_ENV=test #{clock_part}../../../../apps/el/el #{args}"
     output = ""
     timeout = Time.now + 30
+    env_hash = { "TAPE" => tape, "CASSETTE" => @cassette, "CASSETTE_DIR" => cassette_dir, "MIX_ENV" => "test" }
+    env_hash["CLOCK"] = @clock if @clock
+    env = Hash[::ENV.map { |k, v| [k, v] }].merge(env_hash)
 
     begin
-      reader, writer, pid = PTY.spawn("/bin/sh", "-c", cmd)
+      reader, writer, pid = PTY.spawn(env, "/bin/sh", "-c", cmd)
       while Time.now < timeout
         ready = IO.select([reader], nil, nil, 0.1)
         if ready
@@ -76,13 +81,14 @@ module ReplHelper
   end
 
   def build_env
-    {
-      "TAPE" => ENV["TAPE"] || "replay",
+    env = {
+      "TAPE" => ::ENV["TAPE"] || "replay",
       "CASSETTE" => @cassette,
       "CASSETTE_DIR" => cassette_dir,
-      "CLOCK" => @clock,
       "MIX_ENV" => "test"
     }
+    env["CLOCK"] = @clock if @clock
+    env
   end
 
   def safe_encode(text)
@@ -101,7 +107,7 @@ module ReplHelper
 
   def wait_for_prompt(prompt_word)
     output = ""
-    duration = ENV["TAPE"] == "rec" ? 300 : 30
+    duration = ::ENV["TAPE"] == "rec" ? 300 : 30
     timeout = Time.now + duration
     pattern = "#{prompt_word}>"
 
