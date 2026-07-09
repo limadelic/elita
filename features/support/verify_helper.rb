@@ -120,7 +120,8 @@ module VerifyHelper
   end
 
   def deadline
-    timeout = ENV["TAPE"] == "rec" ? 10 : ENV["GITHUB_ACTIONS"] == "true" ? 60 : 3
+    timeout = ENV["GITHUB_ACTIONS"] == "true" ? 60 : 3
+    timeout = 10 if ENV["TAPE"] == "rec"
     Time.now + timeout
   end
 
