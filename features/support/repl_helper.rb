@@ -4,7 +4,7 @@ module ReplHelper
   end
 
   def boot(args)
-    ensure_cassette
+    default
     @transcript = ""
     @transcript_stripped = ""
     env = build_env
@@ -15,7 +15,7 @@ module ReplHelper
   end
 
   def one_shot(args)
-    ensure_cassette
+    default
     tape = ::ENV["TAPE"] || "replay"
     clock_part = @clock ? "CLOCK=#{@clock} " : ""
     cmd = "cd apps/elita/agents/elita && TAPE=#{tape} CASSETTE=#{@cassette} CASSETTE_DIR=#{cassettes} MIX_ENV=test #{clock_part}../../../../apps/el/el #{args}"
@@ -72,7 +72,7 @@ module ReplHelper
 
   private
 
-  def ensure_cassette
+  def default
     @cassette ||= "greet"
   end
 
