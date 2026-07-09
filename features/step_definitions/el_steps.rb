@@ -39,15 +39,16 @@ end
 
 When(/^(\w+)> (.+)$/) do |prompt, input, *rest|
   table = rest.first
+  valid = table && valid?(table)
 
-  if table && valid?(table)
+  if valid
     @transcript_stripped ||= ""
     @transcript_stripped << "\n🤔 el → #{prompt}: #{input}\n"
   end
 
   output = attempt(5) { send(input, prompt) }
 
-  if table && valid?(table)
+  if valid
     verify_lines(table.raw)
   elsif table
     attempt(5) { verify_table(table, output) }
