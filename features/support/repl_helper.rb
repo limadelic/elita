@@ -9,7 +9,7 @@ module ReplHelper
     @transcript_stripped = ""
     merged = env
     merged = ::ENV.to_h.merge(merged)
-    cmd = spawn_cmd(args)
+    cmd = cmd(args)
     @reader, @writer, @pid = PTY.spawn(merged, "/bin/sh", "-c", cmd)
     await(args.split.first || "el")
   end
@@ -91,7 +91,7 @@ module ReplHelper
     text.force_encoding("UTF-8") rescue text.to_s
   end
 
-  def spawn_cmd(args)
+  def cmd(args)
     hash = env
     vars = hash.map { |k, v| "#{k}=#{v}" }.join(" ")
     "cd apps/elita/agents/elita && #{vars} ../../../../apps/el/el #{args}".strip
