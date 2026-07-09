@@ -2,9 +2,10 @@ Feature: Napo contract
 
   Scenario Outline: Napo analyzes contracts, split across specialist agents
     * > el
+
     * el> get me a napo agent
+
     * el> ask napo to review <problem>
-    * verify
       | 🤔 el → napo            | review <problem>                         |
       | 🤔 napo → contract_lead | Evaluate this <type> contract            |
       | 📢 contract_lead → <a1> | <aspect_1>                               |
