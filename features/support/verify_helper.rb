@@ -1,5 +1,5 @@
 module VerifyHelper
-  def verify_table(table, output)
+  def validate(table, output)
     cells(table).each { |cell| verify_cell(cell, output) }
   end
 

@@ -12,7 +12,7 @@ When(/^> el tell (.+)$/) do |args, *rest|
   if table && valid?(table)
     lines(table.raw)
   elsif table
-    verify_table(table, output)
+    validate(table, output)
   end
 end
 
@@ -22,7 +22,7 @@ When(/^> el$/) do |*rest|
   if table && valid?(table)
     lines(table.raw)
   elsif table
-    verify_table(table, transcript)
+    validate(table, transcript)
   end
 end
 
@@ -33,7 +33,7 @@ When(/^> el (\w+)$/) do |agent, *rest|
     drain
     lines(table.raw)
   elsif table
-    verify_table(table, transcript)
+    validate(table, transcript)
   end
 end
 
@@ -51,7 +51,7 @@ When(/^(\w+)> (.+)$/) do |prompt, input, *rest|
   if valid
     lines(table.raw)
   elsif table
-    attempt(5) { verify_table(table, output) }
+    attempt(5) { validate(table, output) }
   end
 end
 
