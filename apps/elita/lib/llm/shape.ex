@@ -1,7 +1,7 @@
 defmodule Shape do
   import Enum, only: [map: 2]
   import Map, only: [put: 3, get: 3]
-  import MsgAdapter, only: [to_ollama: 1]
+  import Forge, only: [to_ollama: 1]
 
   def messages(system, history) do
     [
