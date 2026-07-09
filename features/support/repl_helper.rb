@@ -60,15 +60,12 @@ module ReplHelper
     begin
       loop do
         ready = IO.select([@reader], nil, nil, 0.1)
-        if ready
-          chunk = @reader.readpartial(4096)
-          chunk = safe_encode(chunk)
-          @transcript << chunk if @transcript
-          stripped_chunk = safe_encode(strip_ansi(chunk))
-          @transcript_stripped << stripped_chunk if @transcript_stripped
-        else
-          break
-        end
+        break unless ready
+        chunk = @reader.readpartial(4096)
+        chunk = safe_encode(chunk)
+        @transcript << chunk if @transcript
+        stripped_chunk = safe_encode(strip_ansi(chunk))
+        @transcript_stripped << stripped_chunk if @transcript_stripped
       end
     rescue EOFError
     end
