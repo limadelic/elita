@@ -1,13 +1,17 @@
 @tape:specktodo
 Feature: Todo
 
-  Scenario: Todo manages task lists
+  Scenario: speck reads, writes, and runs todo scenarios
     * > el speck
     * speck> exec todo
-      | 👀 scenarios       | pending                         |
-      | 🤔 speck → todo_v1 | groceries                       |
-      | 👀 todo            | (empty)                         |
-      | ✨ todo_v1          | added                           |
-      | 👀 todo            | buy groceries buy milk walk dog |
-      | 🤔 speck → todo_v2 | What tasks                      |
-      | ✨ speck            | PASSED                          |
+      | 🧪 todo_spec       | mem tools     |
+      | 🤖 todo            | task manager  |
+      | 🎭 speck as tplan  |               |
+      | 🎭 speck as texec  |               |
+      | 🚀 todo_v1         | as todo       |
+      | 🤔 speck → todo_v1 | groceries     |
+      | ✨ todo_v1          | added         |
+      | 🚀 todo_v2         | as todo       |
+      | 🤔 speck → todo_v2 | What tasks    |
+      | ✨ todo_v2          | buy groceries |
+      | ✨ speck            | PASSED        |
