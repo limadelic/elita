@@ -5,30 +5,30 @@ defmodule El.Pty do
   import Keyword, except: [size: 1]
   import Process, except: [alias: 1, info: 2]
 
-  import El.Pty.Dispatch, only: [info: 2, call: 2, cast: 2]
+  import GenServer, only: [start_link: 3, cast: 2, call: 2]
   import El.Pty.Init, only: [call: 1]
   import El.Pty.Size, only: [get_default: 0]
 
-  def start_link(name, cmd, opts \\ []) do
-    GenServer.start_link(__MODULE__, {cmd, opts}, name: name)
+  def boot(name, cmd, opts \\ []) do
+    start_link(__MODULE__, {cmd, opts}, name: name)
   end
 
   def inject(name, message) do
-    GenServer.cast(name, {:inject, message})
+    cast(name, {:inject, message})
   end
 
   def tap(name, pid) do
-    GenServer.call(name, {:tap, pid})
+    call(name, {:tap, pid})
   end
 
   def untap(name, pid) do
-    GenServer.call(name, {:untap, pid})
+    call(name, {:untap, pid})
   end
 
   def run(name, opts \\ []) do
     cmd = get(opts, :cmd, "claude --dangerously-skip-permissions")
     full_opts = build_options(opts, cmd)
-    {:ok, pid} = start_link(name, cmd, full_opts)
+    {:ok, pid} = boot(name, cmd, full_opts)
     wait_exit(pid)
   end
 
@@ -76,16 +76,16 @@ defmodule El.Pty do
 
   @impl true
   def handle_info(msg, state) do
-    info(msg, state)
+    El.Pty.Dispatch.info(msg, state)
   end
 
   @impl true
   def handle_call(msg, _from, state) do
-    call(msg, state)
+    El.Pty.Dispatch.call(msg, state)
   end
 
   @impl true
   def handle_cast(msg, state) do
-    cast(msg, state)
+    El.Pty.Dispatch.cast(msg, state)
   end
 end
