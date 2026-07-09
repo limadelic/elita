@@ -3,6 +3,7 @@ defmodule El.REPL do
   import Elita, only: [spawn: 2, request: 2]
   import IO, only: [read: 2, puts: 1, write: 1]
   import String, only: [trim: 1]
+  import Registry, only: [start_link: 1]
 
   def run(agent) do
     ensure_all_started(:elita)
@@ -11,9 +12,13 @@ defmodule El.REPL do
   end
 
   defp setup_all(agent) do
-    Registry.start_link(keys: :unique, name: ElitaRegistry) |> settle()
-    Tape.Writer.start_link(nil) |> settle()
+    start_link(keys: :unique, name: ElitaRegistry) |> settle()
+    tape_start() |> settle()
     spawn(agent, [agent]) |> settle()
+  end
+
+  defp tape_start do
+    Tape.Writer.start_link(nil)
   end
 
   defp settle({:ok, _pid}), do: :ok
