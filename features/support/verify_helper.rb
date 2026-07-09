@@ -42,8 +42,17 @@ module VerifyHelper
   private
 
   def deadline
-    timeout_secs = ENV["TAPE"] == "rec" ? 10 : (ENV["GITHUB_ACTIONS"] == "true" ? 60 : 3)
-    Time.now + timeout_secs
+    Time.now + timeout
+  end
+
+  def timeout
+    if ENV["TAPE"] == "rec"
+      10
+    elsif ENV["GITHUB_ACTIONS"] == "true"
+      60
+    else
+      3
+    end
   end
 
   def squeeze
@@ -61,8 +70,8 @@ module VerifyHelper
     cursor = @scenario_cursor
 
     rows.each do |row|
-      prefix = row[0].strip.force_encoding("UTF-8") rescue row[0].strip
-      text = row[1].strip.downcase.force_encoding("UTF-8") rescue row[1].strip.downcase
+      prefix = safe(row[0].strip)
+      text = safe(row[1].strip.downcase)
 
       if row(prefix, text, cursor, found_indices)
         cursor = found_indices.last
@@ -122,17 +131,27 @@ module VerifyHelper
     text.downcase.gsub(/\s+/, "")
   end
 
+  def safe(text)
+    text.force_encoding("UTF-8")
+  rescue
+    text
+  end
+
   def match?(want, have)
-    want.empty? || have.downcase.include?(want) || normalize(have).include?(normalize(want))
+    want.empty? ||
+      have.downcase.include?(want) ||
+      normalize(have).include?(normalize(want))
   end
 
   def error(prefix, text)
-    "No match for prefix='#{prefix}' text='#{text}'\n\nTranscript:\n#{transcript}"
+    msg = "No match for prefix='#{prefix}' text='#{text}'"
+    "#{msg}\n\nTranscript:\n#{transcript}"
   end
 
   def persist(deadline, last_nudge)
     if Time.now >= deadline
-      raise "Timeout waiting for all rows to match.\n\nTranscript:\n#{transcript}"
+      msg = "Timeout waiting for all rows to match."
+      raise "#{msg}\n\nTranscript:\n#{transcript}"
     end
 
     drain
@@ -154,12 +173,15 @@ module VerifyHelper
     colon_idx = line.index(": ")
     equals_idx = line.index(" = ")
     return [line, line] unless colon_idx || equals_idx
+
     choose(line, colon_idx, equals_idx)
   end
 
   def choose(line, c_idx, e_idx)
     return split_at(line, c_idx, 2) if c_idx && !e_idx
+
     return split_at(line, e_idx, 3) if e_idx && !c_idx
+
     c_idx < e_idx ? split_at(line, c_idx, 2) : split_at(line, e_idx, 3)
   end
 
@@ -176,6 +198,7 @@ module VerifyHelper
 
   def mark(result, line, idx)
     return append(result, line) if log?(line) || board?(line)
+
     merge(result, line, idx) if idx && idx >= 0
     idx
   end
@@ -223,13 +246,19 @@ module VerifyHelper
   end
 
   def assert(expected, output)
-    expected.split.each { |w|
-      raise "Expected '#{w}' in:\n#{output}" unless output.downcase.include?(w.downcase)
-    }
+    expected.split.each do |w|
+      next if output.downcase.include?(w.downcase)
+
+      msg = "Expected '#{w}' in:\n#{output}"
+      raise msg
+    end
   end
 
   def refute(unexpected, output)
-    raise "Expected '#{unexpected}' NOT in:\n#{output}" if output.downcase.include?(unexpected.downcase)
+    return unless output.downcase.include?(unexpected.downcase)
+
+    msg = "Expected '#{unexpected}' NOT in:\n#{output}"
+    raise msg
   end
 end
 
