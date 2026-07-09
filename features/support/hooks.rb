@@ -1,13 +1,16 @@
 require 'timeout'
 
+module Hooks
+end
+
 Around do |scenario, block|
   timeout_secs = if ENV["TAPE"] == "rec"
-    300
-  elsif ENV["COVER"] == "1"
-    600
-  else
-    70
-  end
+                   300
+                 elsif ENV["COVER"] == "1"
+                   600
+                 else
+                   70
+                 end
   Timeout.timeout(timeout_secs) { block.call }
 rescue Timeout::Error
   raise "Scenario '#{scenario.name}' timed out after #{timeout_secs}s"
@@ -15,7 +18,10 @@ end
 
 Before do |scenario|
   tape_tag = scenario.tags.map(&:name).find { |t| t.start_with?("@tape:") }
-  @cassette = tape_tag ? tape_tag.sub("@tape:", "") : File.basename(scenario.location.file, ".feature")
+  @cassette = tape_tag ? tape_tag.sub(
+    "@tape:",
+    ""
+  ) : File.basename(scenario.location.file, ".feature")
   initialize_scenario_cursor
 end
 
