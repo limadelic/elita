@@ -8,7 +8,7 @@ defmodule Lite do
   import List, only: [pop_at: 2]
   import Req, only: [post: 2]
   import TapeHandler, only: [handle: 4]
-  import TapeOptions, only: [miss_opts: 1]
+  import Miss, only: [opts: 1]
   @cache_key %{type: "ephemeral"}
   def llm(%{config: config, history: history, name: agent_name} = state) do
     composed = compose(config)
@@ -22,15 +22,15 @@ defmodule Lite do
   end
 
   defp tape(body, name) do
-    handle(body, name, fn -> req(body) |> resp end, miss_opts(get_env("TAPE_ON_MISS")))
+    handle(body, name, fn -> req(body) |> resp end, opts(get_env("TAPE_ON_MISS")))
   end
 
   defp text([%{"type" => "text", "text" => t} | _]), do: t
   defp text(other), do: other
 
-  defp req(body), do: post(url(), opts(body))
+  defp req(body), do: post(url(), payload(body))
 
-  defp opts(body), do: [json: body] ++ req_opts()
+  defp payload(body), do: [json: body] ++ req_opts()
   defp req_opts, do: [headers: headers(), connect_options: connect(), receive_timeout: 120_000]
 
   defp build(composed, history, state) do
