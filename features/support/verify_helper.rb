@@ -32,34 +32,39 @@ module VerifyHelper
 
   def search(rows, folded_lines, deadline, tx)
     found_indices = []
-
     rows.each do |row|
-      want_prefix = row[0].strip.force_encoding("UTF-8") rescue row[0].strip
-      want_text = row[1].strip.downcase
-      want_text = want_text.force_encoding("UTF-8") rescue want_text
-      found = false
-
-      (@scenario_cursor...folded_lines.size).each do |idx|
-        if match?(folded_lines[idx], want_prefix, want_text)
-          found_indices << idx + 1
-          found = true
-          break
-        end
-      end
-
-      unless found
-        if pending?(deadline)
-          return nil
-        else
-          msg = "No match for prefix='#{want_prefix}' text='#{want_text}'"
-          msg << "\n\nTranscript:\n#{tx}"
-          raise msg
-        end
-      end
+      idx = find_match(row, folded_lines, deadline, tx)
+      return nil unless idx
+      found_indices << idx
     end
-
     @scenario_cursor = found_indices.max if found_indices.any?
     found_indices
+  end
+
+  def find_match(row, folded_lines, deadline, tx)
+    prefix, text = parse_row(row)
+    search_lines(folded_lines, prefix, text) || handle_notfound(prefix, text, deadline, tx)
+  end
+
+  def parse_row(row)
+    prefix = row[0].strip.force_encoding("UTF-8") rescue row[0].strip
+    text = row[1].strip.downcase
+    text = text.force_encoding("UTF-8") rescue text
+    [prefix, text]
+  end
+
+  def search_lines(folded_lines, prefix, text)
+    (@scenario_cursor...folded_lines.size).each do |idx|
+      return idx + 1 if match?(folded_lines[idx], prefix, text)
+    end
+    nil
+  end
+
+  def handle_notfound(prefix, text, deadline, tx)
+    return nil if pending?(deadline)
+    msg = "No match for prefix='#{prefix}' text='#{text}'"
+    msg << "\n\nTranscript:\n#{tx}"
+    raise msg
   end
 
   def nudge
