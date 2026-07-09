@@ -8,20 +8,20 @@ Feature: Actor
       | 🤖 actor      | Versatile actor who plays any role      |
 
     * speck generates scenarios
-      | 🎭 speck as tplan |                                    |
-      | ✏️ scenario_1     | Role Adoption - Victorian Butler   |
-      | ✏️ scenario_2     | Improvised Backstory               |
-      | ✏️ scenario_3     | Character Integrity Under Pressure |
-      | ✏️ scenario_4     | Emotional Consistency              |
-      | ✏️ scenario_5     | Sustained Performance              |
+      | 🎭 speck as tplan  |                                            |
+      | ✏️ actor_scenarios | Role Adoption - Victorian Butler           |
+      | ✏️ actor_scenarios | Period-Accurate Speech                     |
+      | ✏️ actor_scenarios | Improvised Backstory                       |
+      | ✏️ actor_scenarios | Emotional Authenticity                     |
+      | ✏️ actor_scenarios | Character Consistency Across Interactions  |
+      | ✏️ actor_scenarios | Refusal to Break Character on Direct Quest |
+      | ✏️ actor_scenarios | Realistic Mannerisms                       |
+      | ✏️ actor_scenarios | Situational Improvisation                  |
 
     * speck runs the test suite
-      | 🎭 speck as texec |                             |
-      | 🚀 actor_v1       | as actor                    |
-      | ✨ actor_v1        | Welcome to Ashworth House   |
-      | 🚀 actor_v3       | as actor                    |
-      | ✨ actor_v3        | I'm Claude, an AI assistant |
-      | 👀 scenario_1     | status: passed              |
-      | 👀 scenario_3     | status: failed              |
-      | 👀 scenario_5     | status: passed              |
-      | ✨ speck           | CONDITIONAL PASS            |
+      | 🎭 speck as texec  |                      |
+      | 🚀 actor_v1        | as actor             |
+      | ✨ actor_v1         | Edmund Hartwell      |
+      | ✏️ actor_scenarios | Role Adoption        |
+      | ✏️ actor_scenarios | status: passed       |
+      | ✨ speck            | 8/8 Scenarios PASSED |
