@@ -17,11 +17,14 @@ module VerifyHelper
   def verify_loop(rows, deadline)
     last_sent = Time.now - 2
     loop do
-      return if search(rows, normalize(transcript), deadline, transcript)
-
+      return if search(
+        rows,
+        normalize(transcript),
+        deadline,
+        transcript
+      )
       drain
-      nudge if timing?(last_sent)
-      last_sent = Time.now if timing?(last_sent)
+      (nudge; last_sent = Time.now) if timing?(last_sent)
       sleep 0.05
     end
   end
