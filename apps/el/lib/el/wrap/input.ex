@@ -47,9 +47,13 @@ defmodule El.Wrap.Input do
   defp backspace(line), do: drop(line, -1)
 
   defp eol(line, rest, parent, agent_name, eol) do
-    check(line, parent, agent_name)
+    result = check(line, parent, agent_name)
     {data, new_line} = feed(rest, [], parent, agent_name)
-    {eol <> data, new_line}
+    if handled?(result) do
+      {"", new_line}
+    else
+      {eol <> data, new_line}
+    end
   end
 
   defp check(line, parent, agent_name) do
@@ -59,12 +63,17 @@ defmodule El.Wrap.Input do
     |> dispatch(parent, agent_name)
   end
 
+  defp handled?(result) do
+    result == {:handled}
+  end
+
   def dispatch("/exit", parent, _agent_name) do
     send(parent, :exit_wrap)
+    :forward
   end
 
   def dispatch("", _parent, _agent_name) do
-    :ok
+    :forward
   end
 
   def dispatch(input, parent, agent_name) when is_atom(agent_name) do
@@ -72,12 +81,12 @@ defmodule El.Wrap.Input do
   end
 
   def dispatch(_input, _parent, _agent_name) do
-    :ok
+    :forward
   end
 
   defp route(input, parent, agent_name) do
     case String.split(input, " ", parts: 2) do
-      [_] -> :ok
+      [_] -> :forward
       [word, rest] -> send_to_puppet(word, rest, parent, agent_name)
     end
   end
@@ -85,7 +94,7 @@ defmodule El.Wrap.Input do
   defp send_to_puppet(name, message, _parent, _agent_name) do
     atom_name = to_atom(name)
     case target(atom_name) do
-      nil -> :ok
+      nil -> :forward
       puppet_pid ->
         Task.start(fn ->
           try do
@@ -94,7 +103,7 @@ defmodule El.Wrap.Input do
             _ -> :ok
           end
         end)
-        :ok
+        {:handled}
     end
   end
 end
