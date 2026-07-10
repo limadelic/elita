@@ -17,6 +17,15 @@ defmodule El.Distribution do
     boot(node_name, naming(opts))
   end
 
+  def target(name) do
+    case {name, :puppet} |> :global.whereis_name() do
+      :undefined -> nil
+      pid -> pid
+    end
+  rescue
+    _ -> nil
+  end
+
   def daemon do
     boot(:"elita@127.0.0.1", :longnames)
     ensure_all_started(:elita)
