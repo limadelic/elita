@@ -53,7 +53,7 @@ defmodule Elita.Credo.Imports do
        when is_atom(module), do: issues
 
   defp check_module({:__aliases__, _meta, [_,_|_] = parts}, _arity, meta, issues, ctx) do
-    name = Enum.join(Enum.map(parts, &to_string/1), ".")
+    name = Enum.map_join(parts, ".", &to_string/1)
     flag_nested(builtin?(name), name, meta, issues, ctx)
   end
 
