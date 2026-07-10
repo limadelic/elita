@@ -10,7 +10,7 @@ defmodule El.Commands.Claude do
   import File, only: [write!: 2, cwd!: 0]
   import Path, only: [basename: 1]
   import El.Wrap.Resize, only: [watch: 1]
-  import El.Wrap.Input, only: [open: 1, encode: 2]
+  import El.Wrap.Input, only: [open: 2, encode: 2]
   import GenServer, only: [start_link: 3]
 
   def claude(name \\ :default) do
@@ -51,7 +51,7 @@ defmodule El.Commands.Claude do
 
   defp boot(process_name, deps) do
     setup(deps)
-    buf = open(self())
+    buf = open(self(), process_name)
     execute(process_name, deps, buf)
   end
 
