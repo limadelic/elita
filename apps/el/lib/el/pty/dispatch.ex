@@ -3,7 +3,7 @@ defmodule El.Pty.Dispatch do
   import El.Trace
   import El.Pty.Handler
   import El.Pty.Cleanup
-  import List, except: [to_charlist: 1]
+  import List
   import Enum
   import :os, only: [cmd: 1]
 
@@ -87,6 +87,7 @@ defmodule El.Pty.Dispatch do
     _ -> :ok
   end
 
+  # credo:disable-for-lines:1
   defp chars(s), do: String.to_charlist(s)
 
   defp format(rows, cols) do
