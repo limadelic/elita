@@ -39,33 +39,51 @@ end
 
 After do |scenario|
   ensure_stub_server_stopped
-  reap_puppet_processes
+  reap_all_sessions
 end
 
 After('@malko') do
   FileUtils.rm_rf(@scratch) if @scratch && File.exist?(@scratch)
 end
 
-def reap_puppet_processes
-  if @pid
-    begin
-      pgid = Process.getpgid(@pid)
-      Process.kill("TERM", -pgid)
-      sleep 0.1
-      Process.kill("KILL", -pgid)
-    rescue Errno::ESRCH
-    rescue Errno::EPERM
-    end
+def reap_all_sessions
+  @sessions ||= {}
+  killed_any = false
 
-    begin
-      Process.wait(@pid, Process::WNOHANG)
-    rescue Errno::ESRCH
-    end
+  @sessions.each do |name, session|
+    next unless session && session[:pid]
+    kill_process(session[:pid])
+    killed_any = true
+    session[:reader]&.close
+    session[:writer]&.close
+  end
 
+  if killed_any
+    kill_orphaned_scripts
+  elsif @pid
+    kill_process(@pid)
     kill_orphaned_scripts
   end
-  @reader.close if @reader && !@reader.closed?
-  @writer.close if @writer && !@writer.closed?
+
+  @reader&.close if @reader && !@reader.closed?
+  @writer&.close if @writer && !@writer.closed?
+end
+
+def kill_process(pid)
+  return unless pid
+  begin
+    pgid = Process.getpgid(pid)
+    Process.kill("TERM", -pgid)
+    sleep 0.1
+    Process.kill("KILL", -pgid)
+  rescue Errno::ESRCH
+  rescue Errno::EPERM
+  end
+
+  begin
+    Process.wait(pid, Process::WNOHANG)
+  rescue Errno::ESRCH
+  end
 end
 
 def kill_orphaned_scripts

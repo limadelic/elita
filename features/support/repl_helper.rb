@@ -5,7 +5,22 @@ module ReplHelper
 
   def boot(args)
     @cassette = @cassette || "greet"
+    @sessions ||= {}
     reset(args)
+    store_session(args)
+  end
+
+  def store_session(args)
+    name = session_name(args)
+    @sessions[name] = {
+      reader: @reader,
+      writer: @writer,
+      pid: @pid,
+      screen: @screen,
+      transcript: @transcript,
+      transcript_stripped: @transcript_stripped
+    }
+    @current = name
   end
 
   def one(args)
@@ -15,6 +30,10 @@ module ReplHelper
   end
 
   def send(input, prompt)
+    @sessions ||= {}
+    if @sessions.key?(prompt)
+      activate(prompt)
+    end
     raise "PTY not initialized" unless @writer
 
     @writer.write("#{input}\n")
@@ -24,6 +43,17 @@ module ReplHelper
     else
       wait(prompt)
     end
+  end
+
+  def activate(name)
+    session = @sessions[name]
+    return unless session
+    @reader = session[:reader]
+    @writer = session[:writer]
+    @pid = session[:pid]
+    @screen = session[:screen]
+    @transcript = session[:transcript]
+    @transcript_stripped = session[:transcript_stripped]
   end
 
   def transcript
