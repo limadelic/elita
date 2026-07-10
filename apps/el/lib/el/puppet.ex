@@ -65,7 +65,7 @@ defmodule El.Puppet do
         safe_unwatch(pty_pid)
         buffer
     after
-      1000 ->
+      200 ->
         safe_unwatch(pty_pid)
         demonitor(monitor_ref)
         buffer
