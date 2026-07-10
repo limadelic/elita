@@ -14,9 +14,7 @@ defmodule El.Distribution do
 
   def start(name \\ :default, opts \\ []) do
     node_name = node(name, opts)
-    host_value = addr(opts)
-    mode = mode(host_value)
-    boot(node_name, mode)
+    boot(node_name, naming(opts))
   end
 
   def daemon do
@@ -33,13 +31,32 @@ defmodule El.Distribution do
   end
 
   defp node(name, opts) do
-    session_name = session(name)
-    host_value = addr(opts)
-    :"claude_#{session_name}@#{host_value}"
+    :"claude_#{session(name)}@#{get(opts, :host, host())}"
   end
 
   defp boot(node_name, mode) do
-    Node.start(node_name, mode) |> act(node_name, mode)
+    retry(fn -> Node.start(node_name, mode) end, 5) |> act(node_name, mode)
+  end
+
+  defp retry(fun, tries) do
+    attempt(fun.(), fun, tries)
+  end
+
+  defp attempt({:ok, pid}, _fun, _tries) do
+    {:ok, pid}
+  end
+
+  defp attempt({:error, {:already_started, pid}}, _fun, _tries) do
+    {:error, {:already_started, pid}}
+  end
+
+  defp attempt({:error, _reason}, fun, tries) when tries > 1 do
+    sleep(200)
+    retry(fun, tries - 1)
+  end
+
+  defp attempt({:error, _reason}, _fun, _tries) do
+    {:error, :max_retries_exceeded}
   end
 
   defp act({:ok, _pid}, _node_name, _mode) do
@@ -53,20 +70,16 @@ defmodule El.Distribution do
   end
 
   defp act({:error, reason}, _node_name, _mode) do
-    warn(reason)
+    write(:stderr, "Error: Failed to start distribution: #{inspect(reason)}\n")
     :ok
   end
 
-  defp warn(reason) do
-    write(:stderr, "Warning: Failed to start distribution: #{inspect(reason)}\n")
-  end
-
   defp mode(h) do
-    {contains?(h, "."), h} |> format()
+    format(contains?(h, "."))
   end
 
-  defp format({true, _}), do: :longnames
-  defp format({false, _}), do: :shortnames
+  defp format(true), do: :longnames
+  defp format(false), do: :shortnames
 
   def naming(opts) do
     host_value = get(opts, :host, "127.0.0.1")
@@ -77,13 +90,8 @@ defmodule El.Distribution do
     get(opts, :host, host())
   end
 
-  defp addr(opts) do
-    get(opts, :host, host())
-  end
-
   defp session(:default) do
-    cwd!()
-    |> basename()
+    cwd!() |> basename()
   end
 
   defp session(name) when is_binary(name) do

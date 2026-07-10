@@ -19,8 +19,16 @@ defmodule El.Puppet do
   defp register(name, pty) do
     via = {:via, Registry, {ElitaRegistry, name, %{kind: :puppet}}}
     {:ok, pid} = start_link(__MODULE__, pty, name: via)
-    :global.register_name({name, :puppet}, pid)
+    global_register(name, pid)
     {:ok, pid}
+  end
+
+  defp global_register(name, pid) do
+    if Node.alive?() do
+      :global.register_name({name, :puppet}, pid)
+    else
+      :ok
+    end
   end
 
   def init(pty_pid) do

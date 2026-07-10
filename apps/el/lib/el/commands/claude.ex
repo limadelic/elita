@@ -78,7 +78,7 @@ defmodule El.Commands.Claude do
   end
 
   defp install(name) do
-    {:ok, _} = start_link(El.Puppet, [name: name, pty_pid: name], [])
+    start_link(El.Puppet, [name: name, pty_pid: name], [])
   end
 
   defp restore do

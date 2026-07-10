@@ -1,4 +1,4 @@
-@malko @wip
+@malko
 Feature: Malkovich Malkovich
 
   Scenario: Malkovich Malkovich
