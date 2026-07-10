@@ -86,11 +86,7 @@ defmodule El.Wrap.Input do
   end
 
   defp converse(puppet_pid, message, agent_name) do
-    try do
-      ask(puppet_pid, message) |> puts()
-      puts("#{agent_name}> ")
-    rescue
-      _ -> :ok
-    end
+    ask(puppet_pid, message) |> puts()
+    puts("#{agent_name}> ")
   end
 end
