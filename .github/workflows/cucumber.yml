@@ -5,6 +5,7 @@ on:
     branches:
       - qa
       - wip
+      - malko
   workflow_dispatch:
 
 permissions:
