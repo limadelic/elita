@@ -19,17 +19,9 @@ defmodule El.Wrap.Input do
     end)
   end
 
-  defp feed(<<>>, line, _parent, _agent_name) do
-    {"", line}
-  end
-
-  defp feed(<<13, rest::binary>>, line, parent, agent_name) do
-    eol(line, rest, parent, agent_name, "\r")
-  end
-
-  defp feed(<<10, rest::binary>>, line, parent, agent_name) do
-    eol(line, rest, parent, agent_name, "\n")
-  end
+  defp feed(<<>>, line, _parent, _agent_name), do: {"", line}
+  defp feed(<<13, rest::binary>>, line, parent, agent_name), do: eol(line, rest, parent, agent_name, "\r")
+  defp feed(<<10, rest::binary>>, line, parent, agent_name), do: eol(line, rest, parent, agent_name, "\n")
 
   defp feed(<<byte, rest::binary>>, line, parent, agent_name) when byte in [8, 127] do
     chars = backspace(line)
@@ -50,21 +42,14 @@ defmodule El.Wrap.Input do
   defp eol(line, rest, parent, agent_name, eol) do
     result = check(line, parent, agent_name)
     {data, new_line} = feed(rest, [], parent, agent_name)
-    finalize(handled?(result), eol, data, new_line)
+    finalize(result == {:handled}, eol, data, new_line)
   end
 
   defp finalize(true, _eol, _data, new_line), do: {"", new_line}
   defp finalize(false, eol, data, new_line), do: {eol <> data, new_line}
 
   defp check(line, parent, agent_name) do
-    line
-    |> join("")
-    |> trim()
-    |> dispatch(parent, agent_name)
-  end
-
-  defp handled?(result) do
-    result == {:handled}
+    line |> join("") |> trim() |> dispatch(parent, agent_name)
   end
 
   def dispatch("/exit", parent, _agent_name) do
@@ -96,16 +81,14 @@ defmodule El.Wrap.Input do
 
   defp execute(nil, _message, _agent_name), do: :forward
   defp execute(puppet_pid, message, agent_name) do
-    Task.start(fn -> prompt(puppet_pid, message, agent_name) end)
+    Task.start(fn ->
+      try do
+        ask(puppet_pid, message) |> puts()
+        puts("#{agent_name}> ")
+      rescue
+        _ -> :ok
+      end
+    end)
     {:handled}
-  end
-
-  defp prompt(pid, message, agent_name) do
-    try do
-      ask(pid, message) |> puts()
-      puts("#{agent_name}> ")
-    rescue
-      _ -> :ok
-    end
   end
 end
