@@ -9,15 +9,9 @@ module Stub
     File.write(claude_stub, stub_script(splash))
     File.chmod(0755, claude_stub)
 
-    # Write puppet stub (for malko or other names)
-    puppet_stub = File.join(bin_dir, 'puppet_stub.rb')
-    File.write(puppet_stub, stub_script(splash))
-    File.chmod(0755, puppet_stub)
-
     el_escript = File.expand_path('../../apps/el/el', __dir__)
-    el_wrapper = File.join(bin_dir, 'el')
-    File.write(el_wrapper, el_wrapper_script(el_escript, puppet_stub))
-    File.chmod(0755, el_wrapper)
+    el_link = File.join(bin_dir, 'el')
+    File.symlink(el_escript, el_link) unless File.exist?(el_link)
   end
 
   private
@@ -69,21 +63,6 @@ module Stub
     SCRIPT
   end
 
-  def el_wrapper_script(el_escript, puppet_stub_path)
-    <<~SCRIPT
-      #!/bin/bash
-
-      # Check if first arg is a puppet name (malko)
-      if [ "$1" = "malko" ]; then
-        # Run stub as puppet
-        export PUPPET_NAME="$1"
-        exec ruby #{puppet_stub_path}
-      else
-        # Run real el
-        exec #{el_escript} "$@"
-      fi
-    SCRIPT
-  end
 end
 
 World(Stub)

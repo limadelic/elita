@@ -1,7 +1,7 @@
 defmodule El.REPL do
   import Application, only: [ensure_all_started: 1]
   import Elita, only: [spawn: 2]
-  import El.Distribution, only: [start: 0]
+  import El.Distribution, only: [start: 1]
   import El.Puppet, only: [ask: 2]
   import Agent.Harness, only: [dispatch: 3]
   import IO, only: [read: 2, puts: 1, write: 1]
@@ -15,7 +15,7 @@ defmodule El.REPL do
 
   defp init(agent) do
     setup()
-    boot()
+    boot(agent)
     find(agent)
   end
 
@@ -25,8 +25,8 @@ defmodule El.REPL do
     tape() |> settle()
   end
 
-  defp boot do
-    start()
+  defp boot(agent) do
+    start(agent)
   rescue
     _ -> :ok
   end
