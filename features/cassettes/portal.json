@@ -1,11 +1,26 @@
 [
   {
-    "screen": "0;✳ Claude Code\n ▐▛███▜▌Claude Codev2.1.198\n▝▜█████▛▘Sonnet 5 with low effort · Claude Max\n  ▘▘ ▝▝  ~/dev/self/elita/malko"
+    "a": [
+      {
+        "text": "1 + 1 = 2",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "malko",
+      "messages": [
+        {
+          "content": "1+1",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
   },
   {
     "a": [
       {
-        "text": "1 + 1 = 2",
+        "text": "1 + 1 = **2**",
         "type": "text"
       }
     ],
