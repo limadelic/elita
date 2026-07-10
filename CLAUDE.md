@@ -5,6 +5,10 @@
 - gates met + progress = commit push wip
 - NO worktrees, one tree, one change at a time
 
+# Plans
+
+Plans live in `.claude/plans/` (versioned with codebase).
+
 # Testing
 
 - NO unit tests, NO test-per-module PERIOD

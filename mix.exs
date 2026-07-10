@@ -4,7 +4,7 @@ defmodule Elita.Umbrella do
   def project do
     [
       app: :elita_umbrella,
-      version: "0.1.0",
+      version: "0.0.2",
       elixir: "~> 1.18",
       apps_path: "apps",
       config_path: "config/config.exs",
@@ -24,7 +24,8 @@ defmodule Elita.Umbrella do
     [
       test: [&run_test/1],
       lint: [&run_lint/1],
-      build: [&run_build/1]
+      build: [&run_build/1],
+      ship: "cmd bin/release"
     ]
   end
 
