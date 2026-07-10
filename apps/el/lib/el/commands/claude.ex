@@ -12,6 +12,7 @@ defmodule El.Commands.Claude do
   import El.Wrap.Resize, only: [watch: 1]
   import El.Wrap.Input, only: [open: 2, encode: 2]
   import GenServer, only: [start_link: 3]
+  import El.Log, only: [write: 1]
 
   def claude(name \\ :default) do
     claude(name, deps())
@@ -20,8 +21,10 @@ defmodule El.Commands.Claude do
   defp deps, do: [distribution_start: &start/1, cmd: &cmd/1, run: &run/2]
 
   def claude(name, deps) when is_list(deps) do
+    write("boot: #{name}\n")
     go(resolve(name), deps)
   after
+    write("shutdown\n")
     restore()
     stty()
   end
