@@ -54,19 +54,19 @@ defmodule El.Wrap.Input do
   defp backspace(line), do: drop(line, -1)
 
   defp eol(line, rest, parent, agent_name, eol) do
-    input_str = line |> join("")
+    input_str = line |> to_string()
     write("input line: #{inspect(input_str)}\n")
     result = check(line, parent, agent_name)
     write("dispatch result: #{inspect(result)}\n")
     {data, new_line} = feed(rest, [], parent, agent_name)
-    finalize(result == {:handled}, eol, data, new_line)
+    finalize(result == {:handled}, input_str, eol, data, new_line)
   end
 
-  defp finalize(true, _eol, _data, new_line), do: {"", new_line}
-  defp finalize(false, eol, data, new_line), do: {eol <> data, new_line}
+  defp finalize(true, _input_str, _eol, _data, new_line), do: {"", new_line}
+  defp finalize(false, input_str, eol, data, new_line), do: {input_str <> eol <> data, new_line}
 
   defp check(line, parent, agent_name) do
-    line |> join("") |> trim() |> dispatch(parent, agent_name)
+    line |> to_string() |> trim() |> dispatch(parent, agent_name)
   end
 
   def dispatch("/exit", parent, agent_name) do

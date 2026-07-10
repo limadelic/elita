@@ -83,6 +83,9 @@ defmodule El.Pty do
 
   @impl true
   def handle_info(msg, state) do
+    import El.Log, only: [write: 1]
+    tag = if is_tuple(msg), do: elem(msg, 0), else: msg
+    write("pty.handle_info: received message tag=#{inspect(tag)}\n")
     info(msg, state)
   end
 
