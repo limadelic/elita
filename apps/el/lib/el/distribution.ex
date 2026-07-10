@@ -23,15 +23,19 @@ defmodule El.Distribution do
   rescue
     _ -> find(name)
   end
+
   defp pick(:undefined, name), do: find(name)
   defp pick(pid, _), do: pid
+
   defp find(name) do
     lookup(ElitaRegistry, name) |> extract()
   rescue
     _ -> nil
   end
+
   defp extract([{pid, %{kind: :puppet}}]), do: pid
   defp extract(_), do: nil
+
   def daemon do
     boot(:"elita@127.0.0.1", :longnames)
     ensure_all_started(:elita)
@@ -39,7 +43,11 @@ defmodule El.Distribution do
     sleep(:infinity)
   end
 
-  defp dial, do: (try do load() |> each(&connect/1) rescue _ -> :ok end)
+  defp dial do
+    load() |> each(&connect/1)
+  rescue
+    _ -> :ok
+  end
   defp node(name, opts) do
     :"claude_#{session(name)}@#{get(opts, :host, host())}"
   end
@@ -50,22 +58,13 @@ defmodule El.Distribution do
     |> act(node_name, mode)
   end
 
-  defp attempt({:ok, pid}, _fun, _tries) do
-    {:ok, pid}
-  end
-
-  defp attempt({:error, {:already_started, pid}}, _fun, _tries) do
-    {:error, {:already_started, pid}}
-  end
-
+  defp attempt({:ok, pid}, _fun, _tries), do: {:ok, pid}
+  defp attempt({:error, {:already_started, pid}}, _fun, _tries), do: {:error, {:already_started, pid}}
   defp attempt({:error, _reason}, fun, tries) when tries > 1 do
     sleep(200)
     attempt(fun.(), fun, tries - 1)
   end
-
-  defp attempt({:error, _reason}, _fun, _tries) do
-    {:error, :max_retries_exceeded}
-  end
+  defp attempt({:error, _reason}, _fun, _tries), do: {:error, :max_retries_exceeded}
 
   defp act({:ok, _pid}, _node_name, _mode) do
     set_cookie(:elita)
