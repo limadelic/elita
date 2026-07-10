@@ -53,13 +53,8 @@ defmodule El.Wrap.Input do
     finalize(handled?(result), eol, data, new_line)
   end
 
-  defp finalize(true, _eol, _data, new_line) do
-    {"", new_line}
-  end
-
-  defp finalize(false, eol, data, new_line) do
-    {eol <> data, new_line}
-  end
+  defp finalize(true, _eol, _data, new_line), do: {"", new_line}
+  defp finalize(false, eol, data, new_line), do: {eol <> data, new_line}
 
   defp check(line, parent, agent_name) do
     line
@@ -77,17 +72,9 @@ defmodule El.Wrap.Input do
     :forward
   end
 
-  def dispatch("", _parent, _agent_name) do
-    :forward
-  end
-
-  def dispatch(input, parent, agent_name) when is_atom(agent_name) do
-    route(input, parent, agent_name)
-  end
-
-  def dispatch(_input, _parent, _agent_name) do
-    :forward
-  end
+  def dispatch("", _parent, _agent_name), do: :forward
+  def dispatch(input, parent, agent_name) when is_atom(agent_name), do: route(input, parent, agent_name)
+  def dispatch(_input, _parent, _agent_name), do: :forward
 
   defp route(input, parent, agent_name) do
     input
@@ -115,14 +102,10 @@ defmodule El.Wrap.Input do
 
   defp prompt(pid, message, agent_name) do
     try do
-      reply(pid, message, agent_name)
+      ask(pid, message) |> puts()
+      puts("#{agent_name}> ")
     rescue
       _ -> :ok
     end
-  end
-
-  defp reply(pid, message, agent_name) do
-    ask(pid, message) |> puts()
-    puts("#{agent_name}> ")
   end
 end
