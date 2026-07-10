@@ -30,9 +30,9 @@ defmodule Elita.Credo.Names do
     visit({ast, issues, meta, name, filename, allow})
   end
 
-  defp check({:defp, meta, [{name, _meta, _args} | _rest]} = ast, issues, filename, allow)
+  defp check({:defp, meta, [{name, _meta, _args} | _rest]} = ast, issues, filename, _allow)
        when is_atom(name) do
-    visit({ast, issues, meta, name, filename, allow})
+    visit({ast, issues, meta, name, filename, []})
   end
 
   defp check({:defmacro, meta, [{name, _meta, _args} | _rest]} = ast, issues, filename, allow)
