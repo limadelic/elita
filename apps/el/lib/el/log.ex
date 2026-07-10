@@ -60,7 +60,7 @@ defmodule El.Log do
   end
 
   defp inner(path) do
-    (@cfg ++ [file: String.to_charlist(path)]) |> new()
+    (@cfg ++ [file: to_charlist(path)]) |> new()
   end
 
   defp path(name) do

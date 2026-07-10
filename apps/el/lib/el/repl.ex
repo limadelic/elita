@@ -5,7 +5,7 @@ defmodule El.REPL do
   import El.Puppet, only: [ask: 2]
   import Agent.Harness, only: [dispatch: 3]
   import IO, only: [read: 2, puts: 1, write: 1]
-  import String, only: [trim: 1]
+  import String, only: [trim: 1, split: 3]
 
   def run(agent) do
     ensure_all_started(:elita)
@@ -83,7 +83,7 @@ defmodule El.REPL do
     dispatch(agent, input, :ask) |> puts()
   end
 
-  defp route(_a, p, i), do: i |> String.split(" ", parts: 2) |> via(p, i)
+  defp route(_a, p, i), do: i |> split(" ", parts: 2) |> via(p, i)
 
   defp via([_w], p, i), do: ask(p, i)
   defp via([w, _], p, i), do: ask(choose(target(w), p), i)

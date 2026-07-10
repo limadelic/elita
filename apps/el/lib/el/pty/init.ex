@@ -59,6 +59,10 @@ defmodule El.Pty.Init do
   defp setup(file, _pty, size) do
     {:ok, fd} = file.open("/dev/tty", [:read, :binary, :raw])
     mark(size, sink(fd, file))
+    pump(file)
+  end
+
+  defp pump(file) do
     flag(:trap_exit, true)
     parent = self()
     spawn_link(fn -> start(file, parent) end)

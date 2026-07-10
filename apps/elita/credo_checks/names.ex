@@ -23,7 +23,10 @@ defmodule Elita.Credo.Names do
     :start_link,
     :start,
     :stop,
-    :child_spec
+    :child_spec,
+    :format_status,
+    :moduledoc,
+    :doc
   ]
   def explanations do
     [check: @check]
@@ -43,19 +46,26 @@ defmodule Elita.Credo.Names do
        ),
        do: {ast, compose(parts, meta, filename, issues)}
 
-  defp check({:def, meta, [{name, _meta, _args} | _rest]} = ast, issues, filename, allow)
+  defp check({:def, meta, [{name, _meta, args} | _rest]} = ast, issues, filename, allow)
        when is_atom(name) do
-    visit({ast, issues, meta, name, filename, allow})
+    issues2 = check_params(args, issues, filename)
+    visit({ast, issues2, meta, name, filename, allow})
   end
 
-  defp check({:defp, meta, [{name, _meta, _args} | _rest]} = ast, issues, filename, _allow)
+  defp check({:defp, meta, [{name, _meta, args} | _rest]} = ast, issues, filename, _allow)
        when is_atom(name) do
-    visit({ast, issues, meta, name, filename, []})
+    issues2 = check_params(args, issues, filename)
+    visit({ast, issues2, meta, name, filename, []})
   end
 
-  defp check({:defmacro, meta, [{name, _meta, _args} | _rest]} = ast, issues, filename, allow)
+  defp check({:defmacro, meta, [{name, _meta, args} | _rest]} = ast, issues, filename, allow)
        when is_atom(name) do
-    visit({ast, issues, meta, name, filename, allow})
+    issues2 = check_params(args, issues, filename)
+    visit({ast, issues2, meta, name, filename, allow})
+  end
+
+  defp check({:=, meta, [lhs, _rhs]} = ast, issues, filename, _allow) do
+    {ast, check_assignment(lhs, issues, filename, meta)}
   end
 
   defp check(ast, issues, _filename, _allow), do: {ast, issues}
@@ -79,6 +89,36 @@ defmodule Elita.Credo.Names do
 
   defp result(false, {ast, _meta, _name, _filename, issues}), do: {ast, issues}
   defp snake?(s), do: s |> trim_trailing("?!") |> contains?("_")
+
+  defp check_params(args, issues, filename) when is_list(args) do
+    args
+    |> filter(&is_atom_with_underscore?/1)
+    |> map(&param_issue(&1, filename))
+    |> concat(issues)
+  end
+
+  defp check_params(_, issues, _filename), do: issues
+
+  defp is_atom_with_underscore?({name, _meta, nil}) when is_atom(name) do
+    name_str = "#{name}"
+    snake?(name_str) && !starts_with?(name_str, "_")
+  end
+
+  defp is_atom_with_underscore?(_), do: false
+
+  defp param_issue({name, meta, nil}, filename) do
+    issue("#{name}: Parameter is compound; use single words.", meta, filename)
+  end
+
+  defp check_assignment({name, _meta, nil}, issues, filename, meta) when is_atom(name) do
+    if snake?("#{name}") do
+      [issue("#{name}: Variable is compound; use single words.", meta, filename) | issues]
+    else
+      issues
+    end
+  end
+
+  defp check_assignment(_, issues, _filename, _meta), do: issues
 
   defp issue(msg, meta, filename),
     do:

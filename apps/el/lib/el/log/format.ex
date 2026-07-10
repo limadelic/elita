@@ -1,5 +1,5 @@
 defmodule El.Log.Format do
-  import DateTime, only: [from_unix!: 2]
+  import DateTime, only: [from_unix!: 2, to_iso8601: 1]
   import IO, only: [iodata_to_binary: 1]
 
   def format(event, _config) do
@@ -21,7 +21,7 @@ defmodule El.Log.Format do
   defp text(msg), do: inspect(msg)
 
   defp stamp(ts) do
-    ts |> from_unix!(:millisecond) |> DateTime.to_iso8601()
+    ts |> from_unix!(:millisecond) |> to_iso8601()
   end
 
   defp render(fmt, args) do

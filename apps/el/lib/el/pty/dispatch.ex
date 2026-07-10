@@ -3,8 +3,8 @@ defmodule El.Pty.Dispatch do
   import El.Trace
   import El.Pty.Handler
   import El.Pty.Cleanup
-  import List
-  import Enum
+  import List, only: [delete: 2]
+  import Enum, only: [each: 2]
   import :os, only: [cmd: 1]
 
   def info({pty, {:data, data}}, state) do
@@ -82,7 +82,7 @@ defmodule El.Pty.Dispatch do
   end
 
   defp resize({rows, cols}) do
-    "stty rows #{rows} cols #{cols} < /dev/tty" |> String.to_charlist() |> cmd()
+    "stty rows #{rows} cols #{cols} < /dev/tty" |> to_charlist() |> cmd()
   rescue
     _ -> :ok
   end
