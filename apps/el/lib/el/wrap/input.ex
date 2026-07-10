@@ -1,10 +1,9 @@
 defmodule El.Wrap.Input do
   @moduledoc false
   import Agent
-  import Enum, only: [drop: 2, join: 2]
-  import String, only: [split: 2, split: 3, trim: 1, to_atom: 1]
-  import El.Distribution, only: [target: 1]
-  import El.Puppet, only: [ask: 2]
+  import Enum, only: [drop: 2]
+  import String, only: [split: 3, trim: 1]
+  import El.Wrap.Remote, only: [deliver: 3]
   import IO, only: [write: 2]
 
   def open(parent, agent \\ nil) do
@@ -46,11 +45,16 @@ defmodule El.Wrap.Input do
     input = to_string(line)
     result = check(line, parent, agent)
     {data, line} = feed(rest, [], parent, agent)
-    finalize(result == {:handled}, input, eol, data, line)
+    finalize(result == {:handled}, input, line, agent, {eol, data})
   end
 
-  defp finalize(true, _input, _eol, _data, line), do: {"", line}
-  defp finalize(false, input, eol, data, line), do: {input <> eol <> data, line}
+  defp finalize(true, input, line, agent, {eol, _data}) do
+    {input <> eol <> "#{agent}> ", line}
+  end
+
+  defp finalize(false, input, line, _agent, {eol, data}) do
+    {input <> eol <> data, line}
+  end
 
   defp check(line, parent, agent),
     do: line |> to_string() |> trim() |> dispatch(parent, agent)
@@ -62,35 +66,31 @@ defmodule El.Wrap.Input do
 
   def dispatch("", _parent, _agent), do: :forward
 
-  def dispatch(input, parent, agent) when is_atom(agent) do
-    input |> split(" ", parts: 2) |> route(parent, agent)
+  def dispatch("@" <> rest, _parent, agent) when is_atom(agent) do
+    rest |> split(">", parts: 2) |> remote(agent)
+  end
+
+  def dispatch(input, _parent, agent) when is_atom(agent) do
+    input |> split(" ", parts: 2) |> implicit(agent)
   end
 
   def dispatch(_input, _parent, _agent), do: :forward
 
-  defp route([_], _parent, _agent), do: :forward
-
-  defp route([word, rest], _parent, agent) do
-    puppet(word, rest, agent)
+  defp remote([name, message], agent) do
+    deliver(name, message, agent) |> prompt(agent)
   end
 
-  defp route(_, _parent, _agent), do: :forward
+  defp remote(_, _agent), do: :forward
 
-  defp puppet(name, message, agent) do
-    name |> to_atom() |> target() |> dial(message, agent)
-  end
+  defp implicit([word, rest], agent),
+    do: deliver(word, rest, agent) |> prompt(agent)
 
-  defp dial(nil, _message, _agent), do: :forward
+  defp implicit(_, _agent), do: :forward
 
-  defp dial(puppet, message, agent) do
-    ask(puppet, message) |> show(agent)
-  catch
-    :exit, _ -> :forward
-  end
-
-  defp show(response, agent) do
-    content = response |> split("\n") |> drop(-1) |> join("\n")
-    write(:stdio, "#{content}\n#{agent}> ")
+  defp prompt({:handled}, agent) do
+    write(:stdio, "#{agent}> ")
     {:handled}
   end
+
+  defp prompt(:forward, _agent), do: :forward
 end
