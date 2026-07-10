@@ -25,7 +25,7 @@ defmodule El.Commands.Address.World do
   defp entry({name, folder}) do
     folder = expand(folder)
     self = check(folder)
-    %{name: Atom.to_string(name), path: folder, kind: :folder, file_path: self}
+    %{name: to_string(name), path: folder, kind: :folder, file_path: self}
   end
 
   defp check(folder) do
@@ -49,10 +49,10 @@ defmodule El.Commands.Address.World do
   end
 
   defp peers do
-    [Node.self() | list()]
+    [self() | list()]
   end
 
   defp remote(node) do
-    %{name: Atom.to_string(node), path: nil, kind: :node, file_path: nil}
+    %{name: to_string(node), path: nil, kind: :node, file_path: nil}
   end
 end

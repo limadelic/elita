@@ -12,8 +12,8 @@ defmodule El.Pty.Dispatch do
   end
 
   def info({:stdin, data}, %{pty: pty, port: port, input: input} = state) do
-    log_chunk(data)
-    process_input(port, pty, input.(data))
+    record(data)
+    write(port, pty, input.(data))
     {:noreply, state}
   end
 
@@ -27,12 +27,12 @@ defmodule El.Pty.Dispatch do
   end
 
   def info({:EXIT, _pid, reason}, %{os_pid: os_pid} = state) do
-    kill_group(os_pid)
+    slay(os_pid)
     {:stop, reason, state}
   end
 
   def info({pty, :closed}, %{pty: pty, os_pid: os_pid} = state) do
-    kill_group(os_pid)
+    slay(os_pid)
     {:stop, :normal, state}
   end
 
@@ -45,7 +45,7 @@ defmodule El.Pty.Dispatch do
   end
 
   def cast({:inject, msg}, %{pty: pty, port: port} = state) do
-    log_chunk(msg)
+    record(msg)
     port.command(pty, msg)
     {:noreply, state}
   end
@@ -55,14 +55,14 @@ defmodule El.Pty.Dispatch do
   end
 
   defp cleanup(os_pid, file, out) do
-    kill_group(os_pid)
+    slay(os_pid)
     file.close(out)
   end
 
   defp process(pty, data, %{port: port, file: file, out: out, taps: taps} = state) do
     file.write(out, data)
     broadcast(taps, data)
-    handle_dsr_response(port, pty, data, state)
+    respond(port, pty, data, state)
   end
 
   defp finish(%{os_pid: os_pid, file: file, out: out}) do

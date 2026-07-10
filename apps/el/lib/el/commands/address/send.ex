@@ -10,15 +10,15 @@ defmodule El.Commands.Address.Send do
 
   defp find(n, msg, tool) do
     lookup(ElitaRegistry, key(n, tool))
-    |> try_fallback(n)
+    |> fallback(n)
     |> dispatch(msg)
   end
 
   defp key(n, nil), do: n
   defp key(n, tool), do: "#{n}:#{tool}"
 
-  defp try_fallback([], n), do: lookup(ElitaRegistry, n)
-  defp try_fallback(r, _), do: r
+  defp fallback([], n), do: lookup(ElitaRegistry, n)
+  defp fallback(r, _), do: r
 
   defp dispatch([], _msg), do: :ok
 

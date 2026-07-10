@@ -1,13 +1,13 @@
 defmodule Mem do
-  def init_global do
-    create_depth_table(:ets.whereis(depth_table()))
+  def setup do
+    build(:ets.whereis(depth()))
   end
 
-  defp create_depth_table(:undefined) do
-    :ets.new(depth_table(), [:set, :public, :named_table])
+  defp build(:undefined) do
+    :ets.new(depth(), [:set, :public, :named_table])
   end
 
-  defp create_depth_table(_), do: :ok
+  defp build(_), do: :ok
 
   def create do
     :ets.new(table(), [:set, :public, :named_table])
@@ -17,7 +17,7 @@ defmodule Mem do
     :"mem_#{:erlang.pid_to_list(self())}"
   end
 
-  def depth_table do
+  def depth do
     :mem_depth_global
   end
 end

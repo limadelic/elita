@@ -6,7 +6,7 @@ defmodule El.Answer do
 
   def collect(timeout) do
     timer = send_after(self(), :timeout, timeout)
-    result = receive_answer("", timer)
+    result = gather("", timer)
     cancel_timer(timer)
     result
   end
@@ -23,38 +23,38 @@ defmodule El.Answer do
     end
   end
 
-  defp receive_answer(acc, timer) do
+  defp gather(acc, timer) do
     receive do
-      {:output, data} -> process_output(acc, timer, data)
-      :timeout -> strip_ansi(acc)
+      {:output, data} -> handle(acc, timer, data)
+      :timeout -> text(acc)
     end
   end
 
-  defp process_output(acc, timer, data) do
+  defp handle(acc, timer, data) do
     combined = acc <> data
     combined |> done?(acc) |> settle(combined, timer)
   end
 
   defp settle(true, combined, _timer) do
-    strip_ansi(combined)
+    text(combined)
   end
 
   defp settle(false, combined, timer) do
-    receive_answer(combined, timer)
+    gather(combined, timer)
   end
 
   defp done?(_combined, ""), do: false
   defp done?(combined, _acc), do: contains?(combined, "\e[?2004h")
 
-  defp strip_ansi(text) do
-    text |> strip_csi() |> strip_osc()
+  defp text(input) do
+    input |> codes() |> commands()
   end
 
-  defp strip_csi(text) do
+  defp codes(text) do
     replace(text, ~r/\e\[[^a-zA-Z]*[a-zA-Z]/, "")
   end
 
-  defp strip_osc(text) do
+  defp commands(text) do
     replace(text, ~r/\e\][^\e]*(?:\e\\|\x07)/, "")
   end
 end

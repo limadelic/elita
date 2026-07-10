@@ -30,20 +30,20 @@ defmodule El.Commands.Address.Route do
   def steer(entry, msg, mode, tool), do: exec(entry, msg, mode, tool)
 
   def node(target, path, msg, mode, tool),
-    do: route_or_remote(target == self(), {target, path, msg, mode, tool})
+    do: dispatch(target == self(), {target, path, msg, mode, tool})
 
-  def route_or_remote(true, {_target, path, msg, mode, tool}),
+  def dispatch(true, {_target, path, msg, mode, tool}),
     do: route(path, msg, mode, tool)
 
-  def route_or_remote(false, {target, path, msg, mode, tool}),
+  def dispatch(false, {target, path, msg, mode, tool}),
     do: remote(target, path, msg, mode, tool)
 
   def remote(node, path, msg, mode, tool),
-    do: rpc_call().(node, El.Commands.Address, :route, [path, msg, mode, tool])
+    do: rpc().(node, El.Commands.Address, :route, [path, msg, mode, tool])
 
-  def rpc_call, do: rpc_call(get_env(:el, :rpc))
-  def rpc_call(nil), do: &call/4
-  def rpc_call(rpc), do: rpc
+  def rpc, do: rpc(get_env(:el, :rpc))
+  def rpc(nil), do: &call/4
+  def rpc(rpc_impl), do: rpc_impl
 
   def exec(entry, msg, :ask, tool),
     do:
@@ -60,11 +60,11 @@ defmodule El.Commands.Address.Route do
       )
 
   def route(recipient, msg, mode, tool) do
-    result = resolve(recipient, world_factory().(), cwd())
+    result = resolve(recipient, factory().(), cwd())
     handle(result, recipient, msg, mode, tool)
   end
 
-  def world_factory, do: world_factory(get_env(:el, :world))
-  def world_factory(nil), do: &build/0
-  def world_factory(f), do: f
+  def factory, do: factory(get_env(:el, :world))
+  def factory(nil), do: &build/0
+  def factory(f), do: f
 end

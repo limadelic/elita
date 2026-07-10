@@ -8,16 +8,16 @@ defmodule El.Trace.Format do
 
   def trace(data) do
     timestamp = monotonic_time(:millisecond)
-    hex = hex_data(data)
-    ascii = ascii_data(data)
+    hex = hex(data)
+    ascii = ascii(data)
     "#{timestamp} #{hex} #{ascii}\n"
   end
 
-  defp hex_data(data) do
-    bytes(data) |> map_join("", &hex_byte/1)
+  defp hex(data) do
+    bytes(data) |> map_join("", &encode/1)
   end
 
-  defp hex_byte(byte) do
+  defp encode(byte) do
     byte
     |> to_string(16)
     |> pad_leading(2, "0")
@@ -26,10 +26,10 @@ defmodule El.Trace.Format do
   defp bytes(<<>>), do: []
   defp bytes(<<byte, rest::binary>>), do: [byte | bytes(rest)]
 
-  defp ascii_data(data) do
-    bytes(data) |> map_join("", &safe_char/1)
+  defp ascii(data) do
+    bytes(data) |> map_join("", &safe/1)
   end
 
-  defp safe_char(byte) when byte in 32..126, do: <<byte>>
-  defp safe_char(_), do: "."
+  defp safe(byte) when byte in 32..126, do: <<byte>>
+  defp safe(_), do: "."
 end

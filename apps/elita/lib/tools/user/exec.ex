@@ -49,12 +49,12 @@ defmodule Tools.User.Exec do
   defp result({:error, error, stack}, name), do: failed(error, stack, name)
 
   defp run(text, args) do
-    bindings = to_list(args) |> map(&atomize_key/1)
+    bindings = to_list(args) |> map(&atomize/1)
     result(eval_string(text, bindings))
   end
 
-  defp atomize_key({k, v}) when is_binary(k), do: {to_atom(k), v}
-  defp atomize_key({k, v}), do: {k, v}
+  defp atomize({k, v}) when is_binary(k), do: {to_atom(k), v}
+  defp atomize({k, v}), do: {k, v}
 
   defp result({res, _}), do: res
 

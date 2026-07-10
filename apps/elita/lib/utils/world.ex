@@ -7,17 +7,17 @@ defmodule Utils.World do
   def agents do
     "."
     |> ls()
-    |> filter_md()
+    |> markdown()
     |> sort()
   end
 
-  defp filter_md({:ok, files}) do
+  defp markdown({:ok, files}) do
     files
     |> filter(&ends_with?(&1, ".md"))
     |> map(&basename(&1, ".md"))
   end
 
-  defp filter_md({:error, _}) do
+  defp markdown({:error, _}) do
     []
   end
 end

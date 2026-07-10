@@ -6,7 +6,7 @@ defmodule Mlm do
   import Tools, only: [tools: 2]
 
   import Adapt, only: [resp: 1, text: 1, parts: 1]
-  import Shape, only: [messages: 2, add_tools: 2]
+  import Shape, only: [messages: 2, equip: 2]
 
   @url "http://#{get_env("MLM_HOST", "localhost")}:11434/api/chat"
 
@@ -15,7 +15,7 @@ defmodule Mlm do
   end
 
   def llm(%{config: config, history: history} = state) do
-    {build_body(compose(config), history, state)
+    {equipped(compose(config), history, state)
      |> req()
      |> resp()
      |> parts(), state}
@@ -26,12 +26,12 @@ defmodule Mlm do
     %{model: model(), messages: messages, stream: false}
   end
 
-  defp build_body(composed, history, state) do
-    base_body(model(), messages(composed.content, history))
-    |> add_tools(tools(composed, state))
+  defp equipped(composed, history, state) do
+    base(model(), messages(composed.content, history))
+    |> equip(tools(composed, state))
   end
 
-  defp base_body(m, msgs) do
+  defp base(m, msgs) do
     %{model: m, messages: msgs, stream: false}
   end
 

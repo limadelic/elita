@@ -7,34 +7,34 @@ defmodule Lite do
   import Map, only: [put: 3, delete: 2]
   import List, only: [pop_at: 2]
   import Req, only: [post: 2]
-  import TapeHandler, only: [handle: 3]
+  import Tape, only: [handle: 4]
+  import Miss, only: [opts: 1]
   @cache_key %{type: "ephemeral"}
   def llm(%{config: config, history: history, name: agent_name} = state) do
     composed = compose(config)
     body = build(composed, history, state)
-    result = tape(body, agent_name, fn -> req(body) |> resp end)
+    result = tape(body, agent_name)
     {parts(result), state}
   end
 
   def llm(text) when is_binary(text) do
-    body = request(text)
-    result = tape(body, "direct", fn -> req(body) |> resp end)
-    result |> text
+    tape(request(text), "direct") |> text
   end
 
-  defp tape(body, agent_name, fun),
-    do: handle(body, agent_name, fun)
+  defp tape(body, name) do
+    handle(body, name, fn -> req(body) |> resp end, opts(get_env("TAPE_ON_MISS")))
+  end
 
   defp text([%{"type" => "text", "text" => t} | _]), do: t
   defp text(other), do: other
 
-  defp req(body), do: post(url(), opts(body))
+  defp req(body), do: post(url(), payload(body))
 
-  defp opts(body), do: [json: body] ++ req_opts()
-  defp req_opts, do: [headers: headers(), connect_options: connect(), receive_timeout: 120_000]
+  defp payload(body), do: [json: body] ++ settings()
+  defp settings, do: [headers: headers(), connect_options: connect(), receive_timeout: 120_000]
 
   defp build(composed, history, state) do
-    base(composed, history, state) |> add_tools(tools(composed, state))
+    base(composed, history, state) |> equip(tools(composed, state))
   end
 
   defp base(composed, history, %{name: agent_name}) do
@@ -48,20 +48,20 @@ defmodule Lite do
     |> put(:messages, history)
   end
 
-  defp add_tools(base, [%{function_declarations: defs}]) do
+  defp equip(base, [%{function_declarations: defs}]) do
     tools = map(defs, &schema/1)
     put(base, :tools, cache(tools))
   end
 
-  defp add_tools(base, _), do: base
+  defp equip(base, _), do: base
 
   defp cache(tools) do
     {last, init} = pop_at(tools, -1)
-    apply_cache(last, init, tools)
+    mark(last, init, tools)
   end
 
-  defp apply_cache(nil, _init, tools), do: tools
-  defp apply_cache(last, init, _tools), do: init ++ [put(last, :cache_control, @cache_key)]
+  defp mark(nil, _init, tools), do: tools
+  defp mark(last, init, _tools), do: init ++ [put(last, :cache_control, @cache_key)]
 
   defp schema(%{parameters: params} = tool),
     do: tool |> delete(:parameters) |> put(:input_schema, params)

@@ -4,7 +4,7 @@ defmodule El.Commands.Cd do
   import Resolver, only: [normalize: 2]
   import File, only: [dir?: 1]
 
-  def execute(path) do
+  def cd(path) do
     here = cwd()
     absolute = resolve(path, here)
     :ok = verify(absolute)

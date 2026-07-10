@@ -44,10 +44,10 @@ defmodule Cfg do
   end
 
   defp join(["", header, body], _), do: parse(header, body)
-  defp join({:ok, header}, body), do: to_map(header, body)
+  defp join({:ok, header}, body), do: build(header, body)
   defp join(_, md), do: %{content: md}
 
-  defp to_map(header, body) do
+  defp build(header, body) do
     header
     |> map(&props/1)
     |> new()

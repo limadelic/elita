@@ -5,16 +5,16 @@ defmodule El.Host do
 
   def host(opts \\ []) do
     env_module = get(opts, :env_module, El.Infra.Env)
-    env_module.get("EL_HOST") |> default_host()
+    env_module.get("EL_HOST") |> fallback()
   end
 
-  defp default_host(nil), do: "127.0.0.1"
-  defp default_host(h), do: h
+  defp fallback(nil), do: "127.0.0.1"
+  defp fallback(h), do: h
 
-  def naming_mode(h) do
-    pick_naming_mode(contains?(h, "."))
+  def mode(h) do
+    scheme(contains?(h, "."))
   end
 
-  defp pick_naming_mode(true), do: :longnames
-  defp pick_naming_mode(false), do: :shortnames
+  defp scheme(true), do: :longnames
+  defp scheme(false), do: :shortnames
 end

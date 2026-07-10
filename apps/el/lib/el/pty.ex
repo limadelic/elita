@@ -2,42 +2,37 @@ defmodule El.Pty do
   @moduledoc false
   use GenServer
 
-  import GenServer, except: [start_link: 3]
   import Keyword, except: [size: 1]
   import Process, except: [alias: 1, info: 2]
 
-  alias El.Pty.Dispatch
-  alias El.Pty.Init
-  alias El.Pty.Size
+  import El.Pty.Init, only: [call: 1]
+  import El.Pty.Size, only: [default: 0]
+  import El.Pty.Dispatch, only: [info: 2, call: 2, cast: 2]
 
-  import Dispatch, only: [info: 2]
-  import Init, only: [call: 1]
-  import Size, only: [get_default: 0]
-
-  def start_link(name, cmd, opts \\ []) do
+  def boot(name, cmd, opts \\ []) do
     GenServer.start_link(__MODULE__, {cmd, opts}, name: name)
   end
 
   def inject(name, message) do
-    cast(name, {:inject, message})
+    GenServer.cast(name, {:inject, message})
   end
 
   def tap(name, pid) do
-    call(name, {:tap, pid})
+    GenServer.call(name, {:tap, pid})
   end
 
   def untap(name, pid) do
-    call(name, {:untap, pid})
+    GenServer.call(name, {:untap, pid})
   end
 
   def run(name, opts \\ []) do
     cmd = get(opts, :cmd, "claude --dangerously-skip-permissions")
-    full_opts = build_options(opts, cmd)
-    {:ok, pid} = start_link(name, cmd, full_opts)
-    wait_exit(pid)
+    full_opts = finalize(opts, cmd)
+    {:ok, pid} = boot(name, cmd, full_opts)
+    await(pid)
   end
 
-  defp build_options(opts, _cmd) do
+  defp finalize(opts, _cmd) do
     clean = opts |> drop([:input, :taps, :cmd])
     clean ++ defaults(opts)
   end
@@ -55,7 +50,7 @@ defmodule El.Pty do
     end
   end
 
-  defp wait_exit(pid) do
+  defp await(pid) do
     hang(monitor(pid), pid)
   end
 
@@ -75,7 +70,7 @@ defmodule El.Pty do
 
   defp file(opts), do: get(opts, :file, :file)
   defp port(opts), do: get(opts, :port, Port)
-  defp size(opts), do: get(opts, :get_size, &get_default/0)
+  defp size(opts), do: get(opts, :get_size, &default/0)
   defp input(opts), do: get(opts, :input, fn x -> x end)
   defp taps(opts), do: get(opts, :taps, [])
 
@@ -86,11 +81,11 @@ defmodule El.Pty do
 
   @impl true
   def handle_call(msg, _from, state) do
-    Dispatch.call(msg, state)
+    call(msg, state)
   end
 
   @impl true
   def handle_cast(msg, state) do
-    Dispatch.cast(msg, state)
+    cast(msg, state)
   end
 end
