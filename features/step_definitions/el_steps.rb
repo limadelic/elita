@@ -32,6 +32,12 @@ Then(/^print transcript$/) do
   puts "\n=== TRANSCRIPT ===\n#{transcript}\n=== END ===\n"
 end
 
+Then(/^screen shows (.+)$/) do |text|
+  unless screen.include?(text)
+    raise "Screen does not contain '#{text}':\n#{screen}"
+  end
+end
+
 private
 
 def handle(table, output)
