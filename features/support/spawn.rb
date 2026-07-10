@@ -62,9 +62,19 @@ module Spawn
     @transcript_stripped = ""
     @screen = Screen.new
     cmd = spawn(args)
-    words = args.split
-    prompt = words.length > 1 ? words.last : (words.first || "el")
+    prompt = wait_prompt(args)
     launch(cmd, prompt)
+  end
+
+  def wait_prompt(args)
+    return "claude" if args.include?("claude")
+    words = args.split
+    words.empty? ? "el" : words.last
+  end
+
+  def session_name(args)
+    words = args.split
+    words.empty? ? "el" : words.last
   end
 
   def encode(value)
