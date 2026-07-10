@@ -1173,17 +1173,173 @@
       "agent": "mother",
       "messages": [
         {
-          "role": "user",
           "content": [
             {
-              "type": "tool_result",
               "content": "spawned",
-              "tool_use_id": "toolu_014jATmdDKuNp5YDZLUuU2KD"
+              "tool_use_id": "toolu_014jATmdDKuNp5YDZLUuU2KD",
+              "type": "tool_result"
             }
-          ]
+          ],
+          "role": "user"
         }
       ],
       "n": 5
+    }
+  },
+  {
+    "a": [
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01F7nwMQFKbMiJLCNfQGGuXw",
+        "input": {
+          "configs": [
+            "mother"
+          ],
+          "name": "mother"
+        },
+        "name": "spawn",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "content": "get me a mother ready to give birth",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Now telling her role:",
+        "type": "text"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01XbvAMRpRmS9FZ1CD3HmTvm",
+        "input": {
+          "message": "You are mother, ready to give birth. Stay in character.",
+          "recipient": "mother"
+        },
+        "name": "tell",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "content": [
+            {
+              "content": "spawned",
+              "tool_use_id": "toolu_01F7nwMQFKbMiJLCNfQGGuXw",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "n": 3
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Done.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "content": [
+            {
+              "content": "sent",
+              "tool_use_id": "toolu_01XbvAMRpRmS9FZ1CD3HmTvm",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "n": 5
+    }
+  },
+  {
+    "a": [
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01BWWztZHPpczB3H12jAkX97",
+        "input": {
+          "message": "It's time.",
+          "recipient": "mother"
+        },
+        "name": "tell",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "content": "tell the mother it's time",
+          "role": "user"
+        }
+      ],
+      "n": 7
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Done.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "content": [
+            {
+              "content": "sent",
+              "tool_use_id": "toolu_01BWWztZHPpczB3H12jAkX97",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "n": 9
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "*takes a deep breath and holds belly*\n\nOh, hello there... I'm so glad you're here. I can feel it - the time is coming soon. My body is telling me that my little one is ready to enter this world. \n\n*shifts carefully, breathing through a contraction*\n\nI've been waiting for this moment for so long. Nine months of anticipation, of preparing, of dreaming about who this precious baby will be. The excitement is mixed with a bit of nervousness, I'll admit - but I'm ready. My instincts are strong, and I trust that when the moment arrives, everything will unfold as it should.\n\n*rubs belly tenderly*\n\nEvery flutter, every kick... they've all been leading to this. I can feel the intensity building. The pains are becoming more regular now. My body knows what to do, even if my mind is racing with a thousand thoughts.\n\nI wonder who you'll look like, little one. Will you have your father's eyes? Grandmother's smile? What will your first cry sound like?\n\n*breathes deeply*\n\nSoon, my dear one. Very soon now, you'll be here in my arms instead of in my womb. The world is waiting to meet you.\n\n*grips the edge of whatever is nearby*\n\nThis is it... this is really happening...",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "mother",
+      "messages": [
+        {
+          "role": "user",
+          "content": "[from el] You are mother, ready to give birth. Stay in character."
+        }
+      ],
+      "n": 1
     }
   }
 ]

@@ -51,11 +51,22 @@ module Stub
 
       # Read stdin and respond
       while line = STDIN.gets
-        case line.strip
+        input = line.strip
+        case input
         when "/exit"
           break
         when "1+1"
           puts "2"
+        when "knock knock"
+          puts "who's there"
+        when "malko"
+          puts "malko who"
+        when "malkovich"
+          puts "MALKOVICH! MALKOVICH!"
+        when "malkovich knock knock"
+          puts "who's there"
+        when "malkovich malkovich"
+          puts "MALKOVICH! MALKOVICH!"
         end
         print prompt
         STDOUT.flush
