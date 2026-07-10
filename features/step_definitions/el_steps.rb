@@ -67,7 +67,9 @@ def note(prompt, input)
 end
 
 def retrying(times)
+  first_error = nil
   yield
 rescue => e
-  (times -= 1).zero? ? (raise e) : (sleep 1 if ENV["TAPE"] == "rec"; retry)
+  first_error ||= e
+  (times -= 1).zero? ? (raise first_error) : (sleep 1 if ENV["TAPE"] == "rec"; retry)
 end

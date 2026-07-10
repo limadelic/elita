@@ -125,8 +125,6 @@ module ReplHelper
   end
 
   def timeout_error(pattern, output)
-    Process.kill("TERM", @pid) if @pid
-    @writer.close if @writer && !@writer.closed?
     raise "Timeout waiting for '#{pattern}' in:\n#{output}"
   end
 end
