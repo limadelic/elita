@@ -134,7 +134,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     needs: [test]
-    if: always()
+    if: github.ref == 'refs/heads/qa'
 
     steps:
       - name: Download test report
