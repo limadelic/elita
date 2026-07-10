@@ -21,14 +21,16 @@ defmodule El.Distribution do
   def target(name) do
     import El.Log, only: [write: 1]
     write("target lookup: #{name}\n")
-    connect(:"claude_#{name}@127.0.0.1"); :global.sync()
+    connect(:"claude_#{name}@127.0.0.1")
+    :global.sync()
     result = :global.whereis_name({name, :puppet})
     write("global lookup #{name}: #{inspect(result)}\n")
     pick(result, name)
-  rescue e ->
-    import El.Log, only: [write: 1]
-    write("target lookup error: #{inspect(e)}\n")
-    find(name)
+  rescue
+    e ->
+      import El.Log, only: [write: 1]
+      write("target lookup error: #{inspect(e)}\n")
+      find(name)
   end
 
   defp pick(:undefined, name), do: find(name)
@@ -38,10 +40,11 @@ defmodule El.Distribution do
     import El.Log, only: [write: 1]
     write("registry lookup #{name}\n")
     lookup(ElitaRegistry, name) |> extract()
-  rescue e ->
-    import El.Log, only: [write: 1]
-    write("registry lookup error: #{inspect(e)}\n")
-    nil
+  rescue
+    e ->
+      import El.Log, only: [write: 1]
+      write("registry lookup error: #{inspect(e)}\n")
+      nil
   end
 
   defp extract([{pid, %{kind: :puppet}}]) do
@@ -79,6 +82,7 @@ defmodule El.Distribution do
     import El.Log, only: [write: 1]
     epmd = System.find_executable("epmd")
     write("boot: node_name=#{inspect(node_name)} mode=#{inspect(mode)} epmd=#{inspect(epmd)}\n")
+
     fn -> Node.start(node_name, mode) end
     |> then(&attempt(&1.(), &1, 5))
     |> act(node_name, mode)

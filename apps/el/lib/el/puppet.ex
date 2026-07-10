@@ -8,7 +8,10 @@ defmodule El.Puppet do
   import El.Log, only: [write: 1]
 
   def ask(pid, message) do
-    call(pid, {:ask, message}, :infinity)
+    write("ask entry pid=#{inspect(pid)} message=#{inspect(message)}\n")
+    result = call(pid, {:ask, message}, :infinity)
+    write("ask exit pid=#{inspect(pid)} result_len=#{byte_size(result)}\n")
+    result
   rescue
     e ->
       write("ask error: #{inspect(e)}\n")
@@ -38,7 +41,9 @@ defmodule El.Puppet do
   end
 
   defp alive?(true, name, pid) do
-    :global.register_name({name, :puppet}, pid)
+    result = :global.register_name({name, :puppet}, pid)
+    write("global.register_name result: #{inspect(result)}\n")
+    result
   end
 
   defp alive?(false, _name, _pid) do
@@ -50,7 +55,9 @@ defmodule El.Puppet do
   end
 
   def handle_call({:ask, message}, _from, %{pty_pid: pty_pid} = state) do
+    write("handle_call ask message=#{inspect(message)}\n")
     output = query(pty_pid, message)
+    write("handle_call ask done output_len=#{byte_size(output)}\n")
     {:reply, output, state}
   end
 
