@@ -8,31 +8,14 @@ defmodule El.Pty.Dispatch do
   import :os, only: [cmd: 1]
 
   def info({pty, {:data, data}}, state) do
-    import El.Log, only: [write: 1]
-
-    write(
-      "dispatch: received pty output, size=#{byte_size(data)}, first=#{inspect(String.slice(data, 0..30))}\n"
-    )
-
     process(pty, data, state)
     {:noreply, state}
   end
 
   def info({:stdin, data}, %{pty: pty, port: port, input: input} = state) do
-    import El.Log, only: [write: 1]
-    write("dispatch: received stdin, size=#{byte_size(data)}\n")
     record(data)
-    transformed = input.(data)
-    write("dispatch: input function returned #{inspect(transformed)}\n")
-    write("handler: about to write to pty\n")
-    write(port, pty, transformed)
-    write("handler: write completed\n")
+    write(port, pty, input.(data))
     {:noreply, state}
-  rescue
-    e ->
-      import El.Log, only: [write: 1]
-      write("dispatch: error in stdin handler: #{inspect(e)}\n")
-      raise e
   end
 
   def info(:exit_wrap, %{port: port, os_pid: os_pid} = state) do
@@ -65,12 +48,6 @@ defmodule El.Pty.Dispatch do
     {:stop, :normal, state}
   end
 
-  def info(msg, state) do
-    import El.Log, only: [write: 1]
-    tag = if is_tuple(msg), do: elem(msg, 0), else: msg
-    write("dispatch: unhandled message tag=#{inspect(tag)}\n")
-    {:noreply, state}
-  end
 
   def call({:tap, pid}, %{taps: taps} = state) do
     {:reply, :ok, %{state | taps: [pid | taps]}}

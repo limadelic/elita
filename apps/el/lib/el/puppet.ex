@@ -5,17 +5,9 @@ defmodule El.Puppet do
   import El.Pty, only: [watch: 2, unwatch: 2, inject: 2]
   import String, only: [ends_with?: 2]
   import Keyword, only: [fetch!: 2]
-  import El.Log, only: [write: 1]
 
   def ask(pid, message) do
-    write("ask entry pid=#{inspect(pid)} message=#{inspect(message)}\n")
-    result = call(pid, {:ask, message}, :infinity)
-    write("ask exit pid=#{inspect(pid)} result_len=#{byte_size(result)}\n")
-    result
-  rescue
-    e ->
-      write("ask error: #{inspect(e)}\n")
-      raise e
+    call(pid, {:ask, message}, :infinity)
   end
 
   def start_link(opts) do
@@ -28,12 +20,7 @@ defmodule El.Puppet do
     via = {:via, Registry, {ElitaRegistry, name, %{kind: :puppet}}}
     {:ok, pid} = start_link(__MODULE__, pty, name: via)
     notify(name, pid)
-    write("puppet #{name} registered\n")
     {:ok, pid}
-  rescue
-    e ->
-      write("puppet register error: #{inspect(e)}\n")
-      reraise e, __STACKTRACE__
   end
 
   defp notify(name, pid) do
@@ -41,9 +28,7 @@ defmodule El.Puppet do
   end
 
   defp alive?(true, name, pid) do
-    result = :global.register_name({name, :puppet}, pid)
-    write("global.register_name result: #{inspect(result)}\n")
-    result
+    :global.register_name({name, :puppet}, pid)
   end
 
   defp alive?(false, _name, _pid) do
@@ -55,9 +40,7 @@ defmodule El.Puppet do
   end
 
   def handle_call({:ask, message}, _from, %{pty_pid: pty_pid} = state) do
-    write("handle_call ask message=#{inspect(message)}\n")
     output = query(pty_pid, message)
-    write("handle_call ask done output_len=#{byte_size(output)}\n")
     {:reply, output, state}
   end
 
