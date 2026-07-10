@@ -9,6 +9,7 @@ defmodule El.CLI do
   import El.Distribution, only: [daemon: 0]
   import El.Command.Ls, only: [list: 1]
   import El.REPL, only: [run: 1]
+  import El.Log, only: [setup: 2]
 
   @usage """
   Usage:
@@ -31,14 +32,14 @@ defmodule El.CLI do
   end
 
   defp route(argv) do
-    name = session_name(argv)
-    El.Log.setup(name, argv)
+    name = name(argv)
+    setup(name, argv)
     argv |> parse()
   end
 
-  defp session_name(["claude", name | _]), do: name
-  defp session_name(["claude"]), do: "default"
-  defp session_name(_), do: "default"
+  defp name(["claude", name | _]), do: name
+  defp name(["claude"]), do: "default"
+  defp name(_), do: "default"
 
   defp parse(["ask", agent, msg]), do: {:ask, nil, agent, msg}
   defp parse(["tell", agent, msg]), do: {:tell, nil, agent, msg}

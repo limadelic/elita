@@ -46,13 +46,13 @@ defmodule El.Commands.Claude do
     _ -> :ok
   end
 
-  defp go(session_name, deps) do
-    validate(Keyword.get(deps, :distribution_start).(session_name), session_name)
-    boot(to_atom(session_name), deps)
+  defp go(name, deps) do
+    validate(Keyword.get(deps, :distribution_start).(name), name)
+    boot(to_atom(name), deps)
   end
 
-  defp validate(:taken, session_name) do
-    puts("session #{session_name} already live — el tell #{session_name} <msg>, or /exit it")
+  defp validate(:taken, name) do
+    puts("session #{name} already live — el tell #{name} <msg>, or /exit it")
     halt(1)
   end
 

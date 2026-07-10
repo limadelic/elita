@@ -15,7 +15,7 @@ defmodule El.Wrap.Input do
   rescue
     e ->
       write("input open error: #{inspect(e)}\n")
-      raise e
+      reraise e, __STACKTRACE__
   end
 
   def encode(buf, chunk) do
@@ -26,7 +26,7 @@ defmodule El.Wrap.Input do
   rescue
     e ->
       write("encode error: #{inspect(e)}\n")
-      raise e
+      reraise e, __STACKTRACE__
   end
 
   defp feed(<<>>, line, _parent, _agent_name), do: {"", line}
