@@ -48,9 +48,12 @@ defmodule El.Distribution do
   rescue
     _ -> :ok
   end
-  defp node(name, opts) do
-    :"claude_#{session(name)}@#{get(opts, :host, host())}"
-  end
+
+  defp node(:default, opts),
+    do: :"claude_#{cwd!() |> basename()}@#{get(opts, :host, host())}"
+
+  defp node(name, opts),
+    do: :"claude_#{name}@#{get(opts, :host, host())}"
 
   defp boot(node_name, mode) do
     fn -> Node.start(node_name, mode) end
@@ -59,11 +62,15 @@ defmodule El.Distribution do
   end
 
   defp attempt({:ok, pid}, _fun, _tries), do: {:ok, pid}
-  defp attempt({:error, {:already_started, pid}}, _fun, _tries), do: {:error, {:already_started, pid}}
+
+  defp attempt({:error, {:already_started, pid}}, _fun, _tries),
+    do: {:error, {:already_started, pid}}
+
   defp attempt({:error, _reason}, fun, tries) when tries > 1 do
     sleep(200)
     attempt(fun.(), fun, tries - 1)
   end
+
   defp attempt({:error, _reason}, _fun, _tries), do: {:error, :max_retries_exceeded}
 
   defp act({:ok, _pid}, _node_name, _mode) do
@@ -82,18 +89,12 @@ defmodule El.Distribution do
   end
 
   def naming(opts) do
-    opts |> get(:host, "127.0.0.1") |> dots?() |> mode()
+    %{true => :longnames, false => :shortnames}[
+      opts |> get(:host, "127.0.0.1") |> contains?(".")
+    ]
   end
-
-  defp dots?(h), do: contains?(h, ".")
-
-  defp mode(true), do: :longnames
-  defp mode(false), do: :shortnames
 
   def fetch(opts \\ []) do
     get(opts, :host, host())
   end
-
-  defp session(:default), do: cwd!() |> basename()
-  defp session(name), do: name
 end
