@@ -43,9 +43,7 @@ defmodule El.Distribution do
     sleep(:infinity)
   end
 
-  defp dial do
-    try do load() |> each(&connect/1) rescue _ -> :ok end
-  end
+  defp dial, do: (try do load() |> each(&connect/1) rescue _ -> :ok end)
   defp node(name, opts) do
     :"claude_#{session(name)}@#{get(opts, :host, host())}"
   end
