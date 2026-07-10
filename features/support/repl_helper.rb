@@ -7,11 +7,13 @@ module ReplHelper
     @cassette = @cassette || "greet"
     @transcript = ""
     @transcript_stripped = ""
+    @screen = Screen.new
     env = {
       "TAPE" => ENV["TAPE"] || "replay",
       "CASSETTE" => @cassette,
       "CASSETTE_DIR" => dir,
-      "MIX_ENV" => "test"
+      "MIX_ENV" => "test",
+      "PATH" => "#{@scratch}/bin:#{ENV['PATH']}"
     }
     env["TAPE_ON_MISS"] = @tape_on_miss if @tape_on_miss
     cmd = spawn(args)
