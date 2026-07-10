@@ -1,27 +1,27 @@
 module Spawn
   def spawn(args)
-    escript_path = File.expand_path("../../../apps/el/el", __FILE__)
+    el_symlink = File.join(@scratch, 'bin', 'el')
     (
       "cd #{@scratch} && " +
       "TAPE=#{ENV['TAPE'] || 'replay'} " +
       "CASSETTE=#{@cassette} " +
       "CASSETTE_DIR=#{dir} " +
       "MIX_ENV=test " +
-      "#{escript_path} " +
+      "#{el_symlink} " +
       "#{args}"
     ).strip
   end
 
   def command(args)
     tape = ENV["TAPE"] || "replay"
-    escript_path = File.expand_path("../../../apps/el/el", __FILE__)
+    el_symlink = File.join(@scratch, 'bin', 'el')
     (
       "cd #{@scratch} && " +
       "TAPE=#{tape} " +
       "CASSETTE=#{@cassette} " +
       "CASSETTE_DIR=#{dir} " +
       "MIX_ENV=test " +
-      "#{escript_path} " +
+      "#{el_symlink} " +
       "#{args}"
     ).strip
   end

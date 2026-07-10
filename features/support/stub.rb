@@ -9,6 +9,10 @@ module Stub
     claude_stub = File.join(bin_dir, 'claude')
     File.write(claude_stub, stub_script(splash))
     File.chmod(0755, claude_stub)
+
+    el_escript = File.expand_path('../../apps/el/el', __dir__)
+    el_link = File.join(bin_dir, 'el')
+    File.symlink(el_escript, el_link) unless File.exist?(el_link)
   end
 
   private

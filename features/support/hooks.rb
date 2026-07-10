@@ -6,6 +6,12 @@ require 'json'
 module Hooks
 end
 
+BeforeAll do
+  root = File.expand_path("../../..", __FILE__)
+  el_dir = File.join(root, "apps/el")
+  system("cd #{el_dir} && mix escript.build") || raise("Failed to build el escript")
+end
+
 Around do |scenario, block|
   timeout_secs = if ENV["TAPE"] == "rec"
                    300
