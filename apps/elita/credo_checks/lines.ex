@@ -1,4 +1,6 @@
 defmodule Elita.Credo.Lines do
+  import Map, only: [merge: 2]
+
   @default_threshold 50
   @base_issue %Credo.Issue{category: :refactor, exit_status: 2}
 
@@ -26,11 +28,13 @@ defmodule Elita.Credo.Lines do
   defp issue(check, msg, meta, pri, filename) do
     line = meta[:line]
     col = meta[:column]
-    @base_issue |> merge({check, msg, line, col, pri, filename})
+    @base_issue |> build({check, msg, line, col, pri, filename})
   end
 
-  defp merge(issue, {c, m, l, col, p, f}) do
-    issue |> Map.merge(%{check: c, message: m, line_no: l, column: col, priority: p, filename: f})
+  defp build(issue, {c, m, l, col, p, f}) do
+    issue |> merge(%{
+      check: c, message: m, line_no: l, column: col, priority: p, filename: f
+    })
   end
 
   defp priority(severity)

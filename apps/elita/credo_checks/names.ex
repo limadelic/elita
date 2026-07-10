@@ -2,28 +2,46 @@ defmodule Elita.Credo.Names do
   use Credo.Check, category: :refactor, base_priority: :normal
 
   import Credo.Code, only: [prewalk: 2]
+  import Keyword, only: [get: 3]
+  import Enum, only: [filter: 2, map: 2, reverse: 1, member?: 2, concat: 2]
+  import Elita.Credo.Check, only: [compound?: 1]
+  import String, only: [starts_with?: 2, contains?: 2, trim_trailing: 2]
+  import Map, only: [put: 3, merge: 2]
 
-  @check_desc "Module and function names should use single-word segments (e.g. Tape, Play, run, flag; not TapeHandler, check_call)."
+  @check "Module and function names should use single-word segments."
   @base %Credo.Issue{category: :refactor, exit_status: 2, priority: :normal}
+  @msg_mod "Module segment is compound; use single words."
+  @msg_fun "Function is compound; use single words."
   @allow [
-    :param_defaults, :explanations, :init, :terminate,
-    :handle_call, :handle_cast, :handle_info,
-    :start_link, :start, :stop, :child_spec
+    :param_defaults,
+    :explanations,
+    :init,
+    :terminate,
+    :handle_call,
+    :handle_cast,
+    :handle_info,
+    :start_link,
+    :start,
+    :stop,
+    :child_spec
   ]
-
   def explanations do
-    [check: @check_desc]
+    [check: @check]
   end
 
   def run(source_file, params) do
-    allow = Keyword.get(params, :allowlist, []) ++ @allow
+    allow = get(params, :allowlist, []) ++ @allow
     filename = source_file.filename
     prewalk(source_file, &check(&1, &2, filename, allow))
   end
 
-  defp check({:defmodule, meta, [{:__aliases__, _ma, parts} | _rest]} = ast, issues, filename, _allow) do
-    {ast, compose(parts, meta, filename, issues)}
-  end
+  defp check(
+         {:defmodule, meta, [{:__aliases__, _ma, parts} | _rest]} = ast,
+         issues,
+         filename,
+         _allow
+       ),
+       do: {ast, compose(parts, meta, filename, issues)}
 
   defp check({:def, meta, [{name, _meta, _args} | _rest]} = ast, issues, filename, allow)
        when is_atom(name) do
@@ -40,61 +58,36 @@ defmodule Elita.Credo.Names do
     visit({ast, issues, meta, name, filename, allow})
   end
 
-  defp check(ast, issues, _filename, _allow) do
-    {ast, issues}
-  end
+  defp check(ast, issues, _filename, _allow), do: {ast, issues}
 
   defp compose(parts, meta, filename, issues) do
-    parts |> Enum.filter(&compound?/1) |> mod(meta, filename) |> Enum.reverse() |> Enum.concat(issues)
+    format = &issue("#{&1}: #{@msg_mod}", meta, filename)
+    parts |> filter(&compound?/1) |> map(format) |> reverse() |> concat(issues)
   end
 
-  defp mod(parts, meta, filename) do
-    Enum.map(parts, &segment(&1, meta, filename))
-  end
-  defp segment(seg, meta, filename) do
-    msg = "Module segment '#{seg}' is compound. Use single words only (e.g. Tape, Play, not TapeHandler)."
-    issue(msg, meta, filename)
-  end
+  defp visit({ast, issues, meta, name, filename, allow}),
+    do: result(state(name, allow), {ast, meta, name, filename, issues})
 
-  defp visit({ast, issues, meta, name, filename, allow}) do
-    result(state(name, allow), {ast, meta, name, filename, issues})
-  end
-  defp state(name, allow) do
-    string = Atom.to_string(name)
-    flag(Enum.member?(allow, name), String.starts_with?(string, "_"), snake?(string))
-  end
+  defp state(name, allow),
+    do: flag(member?(allow, name), starts_with?("#{name}", "_"), snake?("#{name}"))
 
   defp flag(false, false, true), do: true
   defp flag(_, _, _), do: false
-  defp result(true, {ast, meta, name, filename, issues}) do
-    msg =
-      "Function '#{name}' is compound. Use single words only (e.g. run, flag, not check_call)."
 
-    {ast, [issue(msg, meta, filename) | issues]}
-  end
+  defp result(true, {ast, meta, name, filename, issues}),
+    do: {ast, [issue("#{name}: #{@msg_fun}", meta, filename) | issues]}
 
-  defp result(false, {ast, _meta, _name, _filename, issues}) do
-    {ast, issues}
-  end
-  defp snake?(s) do
-    name_without_suffix = String.trim_trailing(s, "?!")
-    String.contains?(name_without_suffix, "_")
-  end
+  defp result(false, {ast, _meta, _name, _filename, issues}), do: {ast, issues}
+  defp snake?(s), do: s |> trim_trailing("?!") |> contains?("_")
 
-  defp compound?(segment) do
-    segment |> str() |> word?()
-  end
-  defp str(atom) when is_atom(atom), do: Atom.to_string(atom)
-  defp str(s), do: s
-
-  defp word?(s) when not is_binary(s), do: false
-  defp word?(s) when byte_size(s) == 0, do: false
-  defp word?(s), do: pattern(Regex.match?(~r/^[A-Z][a-z]+[A-Z]/, s), s)
-  defp pattern(false, _s), do: false
-  defp pattern(true, s), do: String.upcase(s) != s
-
-  defp issue(msg, meta, filename) do
-    base = Map.put(@base, :check, __MODULE__)
-    Map.merge(base, %{message: msg, line_no: meta[:line], column: meta[:column], filename: filename})
-  end
+  defp issue(msg, meta, filename),
+    do:
+      @base
+      |> put(:check, __MODULE__)
+      |> merge(%{
+        message: msg,
+        line_no: meta[:line],
+        column: meta[:column],
+        filename: filename
+      })
 end

@@ -3,91 +3,79 @@ defmodule Elita.Credo.Imports do
 
   import Credo.Code, only: [prewalk: 2]
   import Elita.Credo.Check
+  import Keyword, only: [get: 2, get: 3]
+  import Enum, only: [map_join: 3]
+  import List, only: [first: 1]
+  import Map, only: [merge: 2]
 
-  def param_defaults, do: [allowlist: [:ets, :erlang, :rand, :cover]]
+  @msg "Please import instead of qualified calls"
+  @base %Credo.Issue{
+    category: :refactor,
+    exit_status: 2,
+    message: @msg,
+    priority: :normal
+  }
+  @allow [:ets, :erlang, :rand, :cover]
+  @mods [:GenServer, :Supervisor, :Application, :Task, :Node, :Process, :System]
 
-  @check_desc "Functions must be imported, not called with Module.func syntax. Aliases (single-segment qualified calls) are OK."
-  @param_desc "Erlang modules to allowlist for qualified calls."
+  def param_defaults, do: [allowlist: @allow, modules: @mods]
 
   def explanations do
-    [check: @check_desc, params: [allowlist: @param_desc]]
+    [
+      check: "Import functions instead of Module.func qualified calls.",
+      params: [allowlist: "Erlang modules allowlist for qualified calls."]
+    ]
   end
 
-  def run(source_file, params) do
-    defaults = param_defaults()
-    allowlist = Keyword.get(params, :allowlist, Keyword.get(defaults, :allowlist))
-    ctx = %{allowlist: allowlist, filename: source_file.filename}
-    prewalk(source_file, &visit(&1, &2, ctx))
+  def run(src, par) do
+    c = cfg(param_defaults(), par, src)
+    prewalk(src, &visit(&1, &2, c))
   end
 
-  defp visit({:import, _meta, [{:__aliases__, _ma, _parts} | _rest]} = ast, issues,
-                  _ctx), do: {ast, issues}
+  defp cfg(p, par, src), do: %{allowlist: get(par, :allowlist, get(p, :allowlist)), modules: get(par, :modules, get(p, :modules)), filename: src.filename}
 
-  defp visit({:alias, _meta, [{:__aliases__, _ma, _parts} | _rest]} = ast, issues,
-                  _ctx), do: {ast, issues}
-
-  defp visit({:alias, _meta, [{{:., _dm, [{:__aliases__, _ma, _parts}, :{}]},
-                                     _call_meta, _children}]} = ast,
-                  issues, _ctx),
-       do: {ast, issues}
-
-  defp visit({type, _meta, [_head | _tail]} = ast, issues, _ctx)
-       when type in [:def, :defp, :defmacro], do: {ast, issues}
-
-  defp visit({{:., meta, [module, _func]}, _call_meta, args} = ast, issues, ctx) do
-    cfg = %{generated: Keyword.get(meta, :generated, false), meta: meta, module: module, arity: length(args), ctx: ctx}
-    handle_call(ast, issues, cfg)
-  end
-
+  defp visit({:import, _, _} = ast, issues, _ctx), do: {ast, issues}
+  defp visit({:alias, _, _} = ast, issues, _ctx), do: {ast, issues}
+  defp visit({t, _, _} = ast, issues, _ctx) when t in [:def, :defp, :defmacro], do: {ast, issues}
+  defp visit({{:., _m, [_mod, f]}, _, _} = ast, issues, _ctx) when f in [:get, :fetch, :__access__], do: {ast, issues}
+  defp visit({{:., m, [{:__aliases__, _, _}, _]}, _, _} = ast, issues, ctx), do: {ast, scan(ast, m, issues, ctx)}
+  defp visit({{:., _, [_mod, _]}, _, _} = ast, issues, _ctx), do: {ast, issues}
   defp visit(ast, issues, _ctx), do: {ast, issues}
 
-  defp handle_call(ast, issues, %{generated: true}), do: {ast, issues}
-  defp handle_call(ast, issues, cfg) do
-    {ast, vet(cfg.module, cfg.arity, cfg.meta, issues, cfg.ctx)}
+  defp scan(ast, m, issues, ctx) do
+    skip(get(m, :generated, false), ast, m, issues, ctx)
   end
 
-  defp vet({:__MODULE__, _meta1}, _arity, _meta2, issues, _ctx), do: issues
-  defp vet(:__MODULE__, _arity, _meta, issues, _ctx), do: issues
-
-  defp vet({:__aliases__, _meta_alias, [module]}, _arity, _meta, issues, _ctx)
-       when is_atom(module), do: issues
-
-  defp vet({:__aliases__, _meta, [_,_|_] = parts}, _arity, meta, issues, ctx) do
-    name = Enum.map_join(parts, ".", &to_string/1)
-    nest(builtin?(name), name, meta, issues, ctx)
+  defp skip(true, _ast, _m, issues, _ctx), do: issues
+  defp skip(false, ast, m, issues, ctx) do
+    chk(first(elem(elem(ast, 0), 2)), m, issues, ctx)
   end
 
-  defp vet(module, _arity, _meta, issues, _ctx) when not is_atom(module),
-       do: issues
-
-  defp vet(module, _arity, meta, issues, ctx) when is_atom(module) do
-    atom(special?(module), module, meta, issues, ctx)
+  defp chk(:Access, _m, issues, _ctx), do: issues
+  defp chk(:Kernel, _m, issues, _ctx), do: issues
+  defp chk({:__MODULE__, _}, _m, issues, _ctx), do: issues
+  defp chk(:__MODULE__, _m, issues, _ctx), do: issues
+  defp chk({:__aliases__, _, [x]}, m, issues, ctx) when is_atom(x), do: single(x, m, issues, ctx)
+  defp chk({:__aliases__, _, [_, _ | _] = p}, m, issues, ctx) do
+    multi(map_join(p, ".", &to_string/1), m, issues, ctx)
   end
+  defp chk(x, _m, issues, _ctx) when not is_atom(x), do: issues
+  defp chk(x, m, issues, ctx) when is_atom(x), do: single(x, m, issues, ctx)
 
-  defp nest(true, _name, _meta, issues, _ctx), do: issues
-  defp nest(false, name, meta, issues, ctx) do
-    list(listed?(name, ctx.allowlist), name, meta, issues, ctx)
-  end
+  defp single(x, _m, issues, _ctx) when x in [:Kernel, :Access], do: issues
+  defp single(x, m, issues, ctx), do: ok(x in ctx.modules, m, issues, ctx)
 
-  defp list(true, _name, _meta, issues, _ctx), do: issues
-  defp list(false, name, meta, issues, ctx) do
-    [issue(name, meta, ctx.filename) | issues]
-  end
+  defp ok(true, _m, issues, _ctx), do: issues
+  defp ok(false, m, issues, ctx), do: [flag(m, ctx) | issues]
 
-  defp atom(true, _module, _meta, issues, _ctx), do: issues
-  defp atom(false, module, meta, issues, ctx) do
-    allow(module in ctx.allowlist, module, meta, issues, ctx)
-  end
+  defp multi(n, _m, issues, _ctx) when n in ["Kernel", "Access"], do: issues
+  defp multi(n, m, issues, ctx), do: buil(builtin?(n), n, m, issues, ctx)
 
-  defp allow(true, _module, _meta, issues, _ctx), do: issues
-  defp allow(false, module, meta, issues, ctx) do
-    [issue(module, meta, ctx.filename) | issues]
-  end
+  defp buil(true, _n, _m, issues, _ctx), do: issues
+  defp buil(false, n, m, issues, ctx), do: pend(listed?(n, ctx.allowlist), m, issues, ctx)
 
-  defp issue(module, meta, filename) do
-    %Credo.Issue{category: :refactor, exit_status: 2, check: __MODULE__,
-      message: "Use import #{module} instead of #{module}.function() calls.",
-      line_no: meta[:line], column: meta[:column], priority: :normal,
-      filename: filename}
-  end
+  defp pend(true, _m, issues, _ctx), do: issues
+  defp pend(false, m, issues, ctx), do: [flag(m, ctx) | issues]
+
+  defp flag(m, c), do: @base |> merge(%{check: __MODULE__, line_no: m[:line], column: m[:column], filename: c.filename})
 end
