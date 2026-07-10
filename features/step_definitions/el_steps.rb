@@ -38,6 +38,15 @@ Then(/^screen shows (.+)$/) do |text|
   end
 end
 
+When(/^(\w+):$/) do |name, *rest|
+  table = rest.first
+  activate(name)
+  return unless table
+  retrying(5) {
+    verify_lines(table.raw.map { |row| row[0].strip })
+  }
+end
+
 private
 
 def handle(table, output)
@@ -72,4 +81,16 @@ def retrying(times)
 rescue => e
   first_error ||= e
   (times -= 1).zero? ? (raise first_error) : (sleep 1 if ENV["TAPE"] == "rec"; retry)
+end
+
+def verify_lines(lines)
+  tx = transcript
+  cursor = 0
+  lines.each do |line|
+    idx = tx.index(line, cursor)
+    unless idx
+      raise "Expected '#{line}' in transcript after position #{cursor}:\n#{tx}"
+    end
+    cursor = idx + line.length
+  end
 end

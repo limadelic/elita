@@ -52,6 +52,7 @@ module Stub
       # Read stdin and respond
       while line = STDIN.gets("\r")
         input = line.strip
+        puts "🤔 \#{input}"
         case input
         when "/exit"
           break
