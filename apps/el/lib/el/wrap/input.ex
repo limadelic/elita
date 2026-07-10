@@ -97,27 +97,32 @@ defmodule El.Wrap.Input do
 
   defp process([_], _parent, _agent_name), do: :forward
   defp process([word, rest], parent, agent_name) do
-    send_to_puppet(word, rest, parent, agent_name)
+    invoke(word, rest, parent, agent_name)
   end
 
-  defp send_to_puppet(name, message, _parent, agent_name) do
-    atom_name = to_atom(name)
+  defp invoke(name, message, _parent, agent_name) do
+    name
+    |> to_atom()
+    |> target()
+    |> execute(message, agent_name)
+  end
 
-    case target(atom_name) do
-      nil ->
-        :forward
+  defp execute(nil, _message, _agent_name), do: :forward
+  defp execute(puppet_pid, message, agent_name) do
+    Task.start(fn -> prompt(puppet_pid, message, agent_name) end)
+    {:handled}
+  end
 
-      puppet_pid ->
-        Task.start(fn ->
-          try do
-            ask(puppet_pid, message) |> puts()
-            puts("#{agent_name}> ")
-          rescue
-            _ -> :ok
-          end
-        end)
-
-        {:handled}
+  defp prompt(pid, message, agent_name) do
+    try do
+      reply(pid, message, agent_name)
+    rescue
+      _ -> :ok
     end
+  end
+
+  defp reply(pid, message, agent_name) do
+    ask(pid, message) |> puts()
+    puts("#{agent_name}> ")
   end
 end
