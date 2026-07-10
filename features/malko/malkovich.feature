@@ -3,17 +3,17 @@ Feature: Malkovich Malkovich
 
   Scenario: Malkovich Malkovich
     * > el claude malkovich
-      | ✳                        |
-      | ▐▛███▜▌                  |
-      | ▝▜█████▛▘                |
-      | Claude Code              |
-      | Haiku                    |
+      | ✳ |
+      | ▐▛███▜▌ |
+      | ▝▜█████▛▘ |
+      | Claude Code |
+      | Haiku |
     * > el claude malko
-      | ✳                        |
-      | ▐▛███▜▌                  |
-      | ▝▜█████▛▘                |
-      | Claude Code              |
-      | Haiku                    |
+      | ✳ |
+      | ▐▛███▜▌ |
+      | ▝▜█████▛▘ |
+      | Claude Code |
+      | Haiku |
     * malko> malkovich knock knock
       | who's there |
     * malko> malko
