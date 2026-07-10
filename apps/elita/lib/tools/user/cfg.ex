@@ -19,15 +19,15 @@ defmodule Tools.User.Cfg do
   defp extract([_, header | rest]) do
     yaml(header)
     |> atomize()
-    |> with_blocks(rest)
-    |> with_body(rest)
+    |> enrich(rest)
+    |> finish(rest)
   end
 
-  defp with_blocks(cfg, rest) do
+  defp enrich(cfg, rest) do
     put(cfg, :code, blocks(join(rest, "---")))
   end
 
-  defp with_body(cfg, rest) do
+  defp finish(cfg, rest) do
     put(cfg, :body, body(join(rest, "---")))
   end
 

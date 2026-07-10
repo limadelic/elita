@@ -1,7 +1,7 @@
 defmodule Utils.File do
   import Enum, only: [map: 2, find_value: 2]
   import File, only: [read: 1]
-  import Path, only: [expand: 2, wildcard: 1]
+  import Path, only: [expand: 2, wildcard: 1, join: 2]
 
   @app_root expand("../..", __DIR__)
 
@@ -13,28 +13,28 @@ defmodule Utils.File do
 
   def file(name) do
     paths(name)
-    |> find_value(&safe_read/1)
-    |> handle_missing(name)
+    |> find_value(&fetch/1)
+    |> ensure(name)
   end
 
   defp paths(name) do
-    map(@paths, fn path -> join("#{@app_root}/#{path}", name) end) ++
+    map(@paths, fn path -> concat("#{@app_root}/#{path}", name) end) ++
       nested(name)
   end
 
   defp nested(name) do
-    wildcard(Path.join(@app_root, "agents/**/#{name}"))
+    wildcard(join(@app_root, "agents/**/#{name}"))
   end
 
-  defp handle_missing(nil, name), do: "file not found: #{name}"
-  defp handle_missing(content, _name), do: content
+  defp ensure(nil, name), do: "file not found: #{name}"
+  defp ensure(content, _name), do: content
 
-  defp join(path, name), do: "#{path}#{name}"
+  defp concat(path, name), do: "#{path}#{name}"
 
-  defp safe_read({:ok, content}), do: content
-  defp safe_read({:error, _}), do: nil
+  defp fetch({:ok, content}), do: content
+  defp fetch({:error, _}), do: nil
 
-  defp safe_read(path) do
-    read(path) |> safe_read()
+  defp fetch(path) do
+    read(path) |> fetch()
   end
 end

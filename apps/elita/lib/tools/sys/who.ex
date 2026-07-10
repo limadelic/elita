@@ -24,24 +24,24 @@ defmodule Tools.Sys.Who do
 
   def exec(_, _args, state) do
     log("👥", "who", "", "", :green)
-    {format_result(live_sessions(), agents()), state}
+    {result(sessions(), agents()), state}
   end
 
-  defp live_sessions do
-    select(ElitaRegistry, @pattern) |> map(&format_session/1)
+  defp sessions do
+    select(ElitaRegistry, @pattern) |> map(&session/1)
   end
 
-  defp format_session(%{name: name, kind: %{kind: k}}) do
+  defp session(%{name: name, kind: %{kind: k}}) do
     "#{name} (#{k})"
   end
 
-  defp format_session(%{name: name}), do: "#{name}"
+  defp session(%{name: name}), do: "#{name}"
 
-  defp format_result([], kinds) do
+  defp result([], kinds) do
     "live: none\navailable: #{join(kinds, ", ")}"
   end
 
-  defp format_result(live, kinds) do
+  defp result(live, kinds) do
     "live: #{join(live, ", ")}\navailable: #{join(kinds, ", ")}"
   end
 end

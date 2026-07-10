@@ -6,15 +6,15 @@ defmodule Utils.Yaml do
   import Ymlr, only: [document!: 1]
 
   def yaml(args) when is_map(args) do
-    encode_yaml(args)
+    express(args)
   end
 
   def yaml(args) when is_list(args) do
-    encode_yaml(args)
+    express(args)
   end
 
   def yaml(args) when is_binary(args) do
-    result = try_json(args)
+    result = probe(args)
     fallback(result, args)
   end
 
@@ -22,7 +22,7 @@ defmodule Utils.Yaml do
 
   def yaml(args), do: "#{inspect(args)}"
 
-  defp encode_yaml(args) do
+  defp express(args) do
     render(args)
   rescue
     _ -> inspect(args)
@@ -38,16 +38,16 @@ defmodule Utils.Yaml do
   defp fallback(nil, args), do: args
   defp fallback(result, _args), do: result
 
-  defp try_json(args) do
+  defp probe(args) do
     first = json(args)
-    handle_json(first, args)
+    process(first, args)
   end
 
-  defp handle_json(nil, args) do
+  defp process(nil, args) do
     yaml(json(replaced(args)))
   end
 
-  defp handle_json(parsed, _args) do
+  defp process(parsed, _args) do
     yaml(parsed)
   end
 
@@ -56,11 +56,11 @@ defmodule Utils.Yaml do
   end
 
   defp json(args) do
-    decode(args) |> parse_json()
+    decode(args) |> extract()
   end
 
-  defp parse_json({:ok, json}), do: json
-  defp parse_json(_), do: nil
+  defp extract({:ok, json}), do: json
+  defp extract(_), do: nil
 
   defp atomize(map) when is_map(map) do
     new(map, fn {k, v} -> {to_atom(k), atomize(v)} end)

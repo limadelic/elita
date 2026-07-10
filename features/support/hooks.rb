@@ -1,5 +1,7 @@
 require 'timeout'
 require 'fileutils'
+require 'webrick'
+require 'json'
 
 module Hooks
 end
@@ -23,10 +25,14 @@ Before do |scenario|
   ) : File.basename(scenario.location.file, ".feature")
   @scratch = Dir.mktmpdir
   write_stub_claude
+  @tape_on_miss = scenario.tags.map(&:name).find { |t| t.start_with?("@tape_on_miss:") }
+  @tape_on_miss = @tape_on_miss ? @tape_on_miss.sub("@tape_on_miss:", "") : nil
   init
+  start_stub_server if @tape_on_miss == "live"
 end
 
 After do
+  ensure_stub_server_stopped
   if @pid
     begin
       pgid = Process.getpgid(@pid)
@@ -69,4 +75,36 @@ def terminate_pids(pids, signal)
 
     Process.kill(signal, pid) rescue Errno::ESRCH
   end
+end
+
+def start_stub_server
+  @stub_port = 19999
+  @stub_server = WEBrick::HTTPServer.new(
+    Port: @stub_port,
+    AccessLog: [],
+    Logger: WEBrick::Log.new("/dev/null")
+  )
+
+  @stub_server.mount_proc("/v1/messages") do |req, res|
+    if req.request_method == "POST"
+      res["Content-Type"] = "application/json"
+      res.body = JSON.generate({
+        content: [{ type: "text", text: "response from stubbed server" }]
+      })
+    end
+  end
+
+  @stub_thread = Thread.new { @stub_server.start }
+  sleep 0.1
+  ENV["ANTHROPIC_BASE_URL"] = "http://localhost:#{@stub_port}"
+end
+
+def ensure_stub_server_stopped
+  if @stub_server
+    @stub_server.shutdown
+    @stub_thread&.join(1) if @stub_thread
+    ENV.delete("ANTHROPIC_BASE_URL")
+  end
+rescue => e
+  # Ignore errors during shutdown
 end

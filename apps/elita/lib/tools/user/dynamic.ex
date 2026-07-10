@@ -20,11 +20,11 @@ defmodule Tools.User.Load.Schema do
   end
 
   defp load(file_path) do
-    exists_and_parse(exists?(file_path), file_path)
+    gather(exists?(file_path), file_path)
   end
 
-  defp exists_and_parse(true, file_path), do: parse(file_path)
-  defp exists_and_parse(false, _file_path), do: nil
+  defp gather(true, file_path), do: parse(file_path)
+  defp gather(false, _file_path), do: nil
 end
 
 defmodule Tools.User do

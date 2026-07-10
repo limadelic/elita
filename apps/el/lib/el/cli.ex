@@ -1,9 +1,14 @@
 defmodule El.CLI do
   import Application, only: [ensure_all_started: 1]
   import IO, only: [puts: 1]
-  import System, only: [get_env: 1]
-  import El.Command
-  alias El.REPL
+  import El.Commands.Ask, only: [ask: 3]
+  import El.Commands.Tell, only: [tell: 3]
+  import El.Commands.Spawn, only: [spawn: 2]
+  import El.Commands.Claude, only: [claude: 1]
+  import El.Commands.Cd, only: [cd: 1]
+  import El.Distribution, only: [daemon: 0]
+  import El.Command.Ls, only: [list: 1]
+  import El.REPL, only: [run: 1]
 
   @usage """
   Usage:
@@ -22,65 +27,49 @@ defmodule El.CLI do
 
   def main(argv) do
     ensure_all_started(:elita)
-    argv |> read() |> run()
+    argv |> parse() |> exec()
   end
 
-  defp read(argv) do
-    route(argv, get_env("TAPE"), get_env("MIX_ENV"))
-  end
+  defp parse(["ask", agent, msg]), do: {:ask, nil, agent, msg}
+  defp parse(["tell", agent, msg]), do: {:tell, nil, agent, msg}
+  defp parse(["spawn", name, agent]), do: {:spawn, name, agent}
 
-  defp route(argv, tape, _mix_env) when tape != nil do
-    parse(argv, true)
-  end
-
-  defp route(argv, _tape, "test") do
-    parse(argv, true)
-  end
-
-  defp route(argv, _tape, _mix_env) do
-    parse(argv, false)
-  end
-
-  defp parse(["ask", agent, msg], _test?), do: {:ask, nil, agent, msg}
-  defp parse(["tell", agent, msg], _test?), do: {:tell, nil, agent, msg}
-  defp parse(["spawn", name, agent], _test?), do: {:spawn, name, agent}
-
-  defp parse([tool, "ask", agent, msg], _test?) do
+  defp parse([tool, "ask", agent, msg]) do
     check(tool, {:ask, tool, agent, msg})
   end
 
-  defp parse([tool, "tell", agent, msg], _test?) do
+  defp parse([tool, "tell", agent, msg]) do
     check(tool, {:tell, tool, agent, msg})
   end
 
-  defp parse(["claude"], _test?), do: {:claude, :default}
-  defp parse(["claude", name], _test?), do: {:claude, name}
-  defp parse(["ls"], _test?), do: {:ls, nil}
-  defp parse(["ls", path], _test?), do: {:ls, path}
-  defp parse(["cd", path], _test?), do: {:cd, path}
-  defp parse(["daemon"], _test?), do: :daemon
-  defp parse([], _test?), do: {:repl, "el"}
-  defp parse([agent], _test?), do: {:repl, agent}
-  defp parse(_, _test?), do: :usage
+  defp parse(["claude"]), do: {:claude, :default}
+  defp parse(["claude", name]), do: {:claude, name}
+  defp parse(["ls"]), do: {:ls, nil}
+  defp parse(["ls", path]), do: {:ls, path}
+  defp parse(["cd", path]), do: {:cd, path}
+  defp parse(["daemon"]), do: :daemon
+  defp parse([]), do: {:repl, "el"}
+  defp parse([agent]), do: {:repl, agent}
+  defp parse(_), do: :usage
 
   defp check(tool, cmd) when tool in @known_tools, do: cmd
   defp check(tool, _cmd), do: {:unknown_tool, tool}
 
-  defp run(:usage) do
+  defp exec(:usage) do
     @usage |> puts()
   end
 
-  defp run({:unknown_tool, tool}) do
+  defp exec({:unknown_tool, tool}) do
     puts("unknown tool: #{tool}")
   end
 
-  defp run({:repl, agent}), do: REPL.run(agent)
-  defp run({:ask, tool, agent, msg}), do: ask(agent, msg, tool)
-  defp run({:tell, tool, agent, msg}), do: tell(agent, msg, tool)
-  defp run({:spawn, name, agent}), do: spawn(name, agent)
-  defp run({:claude, name}), do: claude(name)
-  defp run({:ls, path}), do: ls(path)
-  defp run({:cd, path}), do: cd(path)
-  defp run(:daemon), do: daemon()
-  defp run(_), do: :usage
+  defp exec({:repl, agent}), do: run(agent)
+  defp exec({:ask, tool, agent, msg}), do: ask(agent, msg, tool)
+  defp exec({:tell, tool, agent, msg}), do: tell(agent, msg, tool)
+  defp exec({:spawn, name, agent}), do: spawn(name, agent)
+  defp exec({:claude, name}), do: claude(name)
+  defp exec({:ls, path}), do: list(path)
+  defp exec({:cd, path}), do: cd(path)
+  defp exec(:daemon), do: daemon()
+  defp exec(_), do: :usage
 end

@@ -4,15 +4,15 @@ defmodule El.Pty.Cleanup do
   import Process, only: [sleep: 1]
   import System, only: [cmd: 2]
 
-  def kill_group(nil), do: :ok
+  def slay(nil), do: :ok
 
-  def kill_group(pid) do
-    kill_sequence(pid)
+  def slay(pid) do
+    strike(pid)
   rescue
     _ -> :ok
   end
 
-  defp kill_sequence(pid) do
+  defp strike(pid) do
     signal(pid, "-TERM")
     sleep(100)
     signal(pid, "-9")

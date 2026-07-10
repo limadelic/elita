@@ -15,17 +15,17 @@ defmodule Resolver do
     world
     |> filter(&(&1.kind == :node))
     |> filter(&(&1.name == address))
-    |> maybe_node(address, world, cwd)
+    |> find(address, world, cwd)
   end
 
-  defp maybe_node([entry], _address, _world, _cwd), do: {:ok, entry}
+  defp find([entry], _address, _world, _cwd), do: {:ok, entry}
 
-  defp maybe_node([], address, world, cwd) do
+  defp find([], address, world, cwd) do
     {name, path, fanout} = unpack(address)
     world |> path(normalize(path, cwd)) |> named(name, fanout) |> rank()
   end
 
-  defp maybe_node(entries, _address, _world, _cwd), do: {:many, entries}
+  defp find(entries, _address, _world, _cwd), do: {:many, entries}
 
   defp unpack([name]), do: {name, nil, false}
   defp unpack(["", path]), do: {nil, path, true}
@@ -40,16 +40,16 @@ defmodule Resolver do
   def normalize(path, cwd), do: cwd |> join(path) |> expand()
 
   defp path(world, search_path),
-    do: filter(world, &matches_path?(&1, search_path))
+    do: filter(world, &fits?(&1, search_path))
 
-  defp matches_path?(_entry, nil), do: true
-  defp matches_path?(%{path: p}, s), do: path_match(p, s)
+  defp fits?(_entry, nil), do: true
+  defp fits?(%{path: p}, s), do: same?(p, s)
 
-  defp path_match(p, p), do: true
-  defp path_match(p, s), do: glob_or_fail(wild?(s), p, s)
+  defp same?(p, p), do: true
+  defp same?(p, s), do: glob(wild?(s), p, s)
 
-  defp glob_or_fail(true, p, s), do: hits?(p, s)
-  defp glob_or_fail(false, _p, _s), do: false
+  defp glob(true, p, s), do: hits?(p, s)
+  defp glob(false, _p, _s), do: false
 
   defp named(entries, nil, _fanout), do: entries
   defp named(entries, name, false), do: filter(entries, &(&1.name == name))
@@ -62,20 +62,20 @@ defmodule Resolver do
     entries
     |> group_by(&{&1.name, &1.path})
     |> flat_map(&prefer/1)
-    |> rank_result()
+    |> result()
   end
 
   defp prefer({_key, [single]}), do: [single]
-  defp prefer({_key, multiple}), do: prefer_files(multiple)
+  defp prefer({_key, multiple}), do: prefer(multiple)
 
-  defp prefer_files(entries) do
+  defp prefer(entries) do
     files = filter(entries, &(&1.kind == :file))
-    pick_files(files, entries)
+    pick(files, entries)
   end
 
-  defp pick_files([_ | _] = files, _entries), do: files
-  defp pick_files([], entries), do: entries
+  defp pick([_ | _] = files, _entries), do: files
+  defp pick([], entries), do: entries
 
-  defp rank_result([entry]), do: {:ok, entry}
-  defp rank_result(entries), do: {:many, entries}
+  defp result([entry]), do: {:ok, entry}
+  defp result(entries), do: {:many, entries}
 end

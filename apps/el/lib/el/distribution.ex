@@ -13,14 +13,14 @@ defmodule El.Distribution do
   import Path, only: [basename: 1]
 
   def start(name \\ :default, opts \\ []) do
-    node_name = build_node_name(name, opts)
-    host_value = build_host(opts)
-    mode = mode_from_host(host_value)
-    start_node(node_name, mode)
+    node_name = node(name, opts)
+    host_value = addr(opts)
+    mode = mode(host_value)
+    boot(node_name, mode)
   end
 
   def daemon do
-    start_node(:"elita@127.0.0.1", :longnames)
+    boot(:"elita@127.0.0.1", :longnames)
     ensure_all_started(:elita)
     redial()
     sleep(:infinity)
@@ -32,27 +32,27 @@ defmodule El.Distribution do
     _ -> :ok
   end
 
-  defp build_node_name(name, opts) do
+  defp node(name, opts) do
     session_name = session(name)
-    host_value = build_host(opts)
+    host_value = addr(opts)
     :"claude_#{session_name}@#{host_value}"
   end
 
-  defp start_node(node_name, mode) do
-    Node.start(node_name, mode) |> apply_start(node_name, mode)
+  defp boot(node_name, mode) do
+    Node.start(node_name, mode) |> act(node_name, mode)
   end
 
-  defp apply_start({:ok, _pid}, _node_name, _mode) do
+  defp act({:ok, _pid}, _node_name, _mode) do
     set_cookie(:elita)
     :ok
   end
 
-  defp apply_start({:error, {:already_started, _pid}}, _node_name, _mode) do
+  defp act({:error, {:already_started, _pid}}, _node_name, _mode) do
     set_cookie(:elita)
     :taken
   end
 
-  defp apply_start({:error, reason}, _node_name, _mode) do
+  defp act({:error, reason}, _node_name, _mode) do
     warn(reason)
     :ok
   end
@@ -61,23 +61,23 @@ defmodule El.Distribution do
     write(:stderr, "Warning: Failed to start distribution: #{inspect(reason)}\n")
   end
 
-  defp mode_from_host(h) do
-    {contains?(h, "."), h} |> format_mode()
+  defp mode(h) do
+    {contains?(h, "."), h} |> format()
   end
 
-  defp format_mode({true, _}), do: :longnames
-  defp format_mode({false, _}), do: :shortnames
+  defp format({true, _}), do: :longnames
+  defp format({false, _}), do: :shortnames
 
-  def naming_mode(opts) do
+  def naming(opts) do
     host_value = get(opts, :host, "127.0.0.1")
-    mode_from_host(host_value)
+    mode(host_value)
   end
 
-  def resolve_host(opts \\ []) do
+  def fetch(opts \\ []) do
     get(opts, :host, host())
   end
 
-  defp build_host(opts) do
+  defp addr(opts) do
     get(opts, :host, host())
   end
 

@@ -21,7 +21,7 @@
         # You can give explicit globs or simply directories.
         # In the latter case `**/*.{ex,exs}` will be used.
         #
-        included: ["lib/"],
+        included: ["apps/*/lib/", "apps/*/credo_checks/"],
         excluded: [~r"/_build/", ~r"/deps/", ~r"/node_modules/"]
       },
       #
@@ -32,7 +32,7 @@
       # If you create your own checks, you must specify the source files for
       # them here, so they can be loaded by Credo before running the analysis.
       #
-      requires: ["../elita/credo_checks/line_check.ex", "../elita/credo_checks/max_function_lines.ex", "../elita/credo_checks/max_module_lines.ex", "../elita/credo_checks/imports.ex"],
+      requires: Enum.map(["lines.ex", "check.ex", "funclines.ex", "modlines.ex", "imports.ex", "names.ex", "aliases.ex"], &Path.expand("apps/elita/credo_checks/#{&1}", __DIR__)),
       #
       # If you want to enforce a style guide and need a more traditional linting
       # experience, you can change `strict` to `true` below:
@@ -64,9 +64,11 @@
           {Credo.Check.Refactor.FunctionArity, [max_arity: 5]},
           {Credo.Check.Refactor.CyclomaticComplexity, [max_complexity: 1]},
           {Credo.Check.Design.DuplicatedCode, mass_threshold: 40},
-          {Elita.Credo.MaxFunctionLines, [max_lines: 5]},
-          {Elita.Credo.MaxModuleLines, [max_lines: 100]},
-          {Elita.Credo.Imports, []},
+          {Elita.Credo.Funclines, [max_lines: 5]},
+          {Elita.Credo.Modlines, [max_lines: 100]},
+          {Elita.Credo.Imports, [allowlist: [:ets, :erlang, :rand, :cover]]},
+          {Elita.Credo.Names, []},
+          {Elita.Credo.Aliases, []},
           {Credo.Check.Warning.Dbg, []},
           {Credo.Check.Warning.IoInspect, []},
           {Credo.Check.Warning.IExPry, []},
@@ -86,7 +88,8 @@
           {Credo.Check.Warning.UnsafeToAtom, false},
           {Credo.Check.Refactor.Nesting, []},
           {Credo.Check.Refactor.NegatedConditionsWithElse, []},
-          {Credo.Check.Refactor.CondStatements, []}
+          {Credo.Check.Refactor.CondStatements, []},
+          {Credo.Check.Readability.NestedFunctionCalls, []}
         ],
         disabled: [
           {Credo.Check.Consistency.ExceptionNames, []},
@@ -109,7 +112,6 @@
           {Credo.Check.Readability.ModuleAttributeNames, []},
           {Credo.Check.Readability.ModuleDoc, []},
           {Credo.Check.Readability.MultiAlias, []},
-          {Credo.Check.Readability.NestedFunctionCalls, []},
           {Credo.Check.Readability.OneArityFunctionInPipe, []},
           {Credo.Check.Readability.OnePipePerLine, []},
           {Credo.Check.Readability.ParenthesesInCondition, []},
