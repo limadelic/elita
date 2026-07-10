@@ -66,7 +66,7 @@
           {Credo.Check.Design.DuplicatedCode, mass_threshold: 40},
           {Elita.Credo.Funclines, [max_lines: 5]},
           {Elita.Credo.Modlines, [max_lines: 100]},
-          {Elita.Credo.Imports, [allowlist: [:ets, :erlang, :rand, :cover], modules: [:GenServer, :Supervisor, :Application, :Task, :Node, :Process, :System, :String]]},
+          {Elita.Credo.Imports, [allowlist: [:ets, :erlang, :rand, :cover], modules: [:GenServer, :Supervisor, :Application, :Task, :Node, :Process, :System, :String, :DateTime]]},
           {Elita.Credo.Names, []},
           {Elita.Credo.Aliases, []},
           {Credo.Check.Warning.Dbg, []},
