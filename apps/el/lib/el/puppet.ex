@@ -57,18 +57,24 @@ defmodule El.Puppet do
         ready(pty_pid, next, prompt?(next))
     after
       5000 ->
-        unwatch(pty_pid, self())
+        cleanup(pty_pid)
         buffer
     end
   end
 
   defp ready(pty_pid, buffer, true) do
-    unwatch(pty_pid, self())
+    cleanup(pty_pid)
     buffer
   end
 
   defp ready(pty_pid, buffer, false) do
     collect(pty_pid, buffer)
+  end
+
+  defp cleanup(pty_pid) do
+    unwatch(pty_pid, self())
+  rescue
+    _ -> :ok
   end
 
   defp prompt?(text) do

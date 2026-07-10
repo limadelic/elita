@@ -87,6 +87,8 @@ defmodule El.Wrap.Input do
     {:handled}
   rescue
     _ -> :forward
+  catch
+    :exit, _reason -> :forward
   end
 
   defp format(response, agent_name) do
