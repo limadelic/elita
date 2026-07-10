@@ -32,7 +32,7 @@ module Spawn
     ).strip
   end
 
-  def launch(cmd, prompt)
+  def launch(cmd, prompt, puppet_name = nil)
     env = {
       "TAPE" => ENV["TAPE"] || "replay",
       "CASSETTE" => @cassette,
@@ -40,6 +40,7 @@ module Spawn
       "MIX_ENV" => "test"
     }
     env["PATH"] = "#{@scratch}/bin:#{ENV['PATH']}" if @scratch
+    env["PUPPET_NAME"] = puppet_name if puppet_name
     @reader, @writer, @pid = PTY.spawn(env, "/bin/sh", "-c", cmd)
     wait(prompt)
   end
@@ -63,7 +64,8 @@ module Spawn
     @screen = Screen.new
     cmd = spawn(args)
     prompt = wait_prompt(args)
-    launch(cmd, prompt)
+    puppet_name = session_name(args)
+    launch(cmd, prompt, puppet_name)
   end
 
   def wait_prompt(args)

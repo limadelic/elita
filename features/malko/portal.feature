@@ -1,4 +1,4 @@
-@malko @wip
+@malko
 Feature: Portal
 
   Scenario: Through the tunnel into Malkovich
