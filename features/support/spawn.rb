@@ -1,8 +1,8 @@
 module Spawn
   def spawn(args)
-    escript_path = "../../../../apps/el/el"
+    escript_path = File.expand_path("../../../apps/el/el", __FILE__)
     (
-      "cd apps/elita/agents/elita && " +
+      "cd #{@scratch} && " +
       "TAPE=#{ENV['TAPE'] || 'replay'} " +
       "CASSETTE=#{@cassette} " +
       "CASSETTE_DIR=#{dir} " +
@@ -14,9 +14,9 @@ module Spawn
 
   def command(args)
     tape = ENV["TAPE"] || "replay"
-    escript_path = "../../../../apps/el/el"
+    escript_path = File.expand_path("../../../apps/el/el", __FILE__)
     (
-      "cd apps/elita/agents/elita && " +
+      "cd #{@scratch} && " +
       "TAPE=#{tape} " +
       "CASSETTE=#{@cassette} " +
       "CASSETTE_DIR=#{dir} " +
@@ -31,7 +31,8 @@ module Spawn
       "TAPE" => ENV["TAPE"] || "replay",
       "CASSETTE" => @cassette,
       "CASSETTE_DIR" => dir,
-      "MIX_ENV" => "test"
+      "MIX_ENV" => "test",
+      "PATH" => "#{@scratch}/bin:#{ENV['PATH']}"
     }
     @reader, @writer, @pid = PTY.spawn(env, "/bin/sh", "-c", cmd)
     wait(prompt)

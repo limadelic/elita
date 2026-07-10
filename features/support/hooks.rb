@@ -1,4 +1,5 @@
 require 'timeout'
+require 'fileutils'
 
 module Hooks
 end
@@ -20,6 +21,7 @@ Before do |scenario|
     "@tape:",
     ""
   ) : File.basename(scenario.location.file, ".feature")
+  @scratch = Dir.mktmpdir
   init
 end
 
@@ -33,4 +35,5 @@ After do
   end
   @reader.close if @reader && !@reader.closed?
   @writer.close if @writer && !@writer.closed?
+  FileUtils.rm_rf(@scratch) if @scratch && File.exist?(@scratch)
 end
