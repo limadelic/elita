@@ -1,6 +1,7 @@
 defmodule El.CLI do
   import Application, only: [ensure_all_started: 1]
   import IO, only: [puts: 1]
+  import System, only: [get_env: 1]
   import El.Command
   alias El.REPL
 
@@ -21,30 +22,48 @@ defmodule El.CLI do
 
   def main(argv) do
     ensure_all_started(:elita)
-    argv |> parse() |> run()
+    argv |> read() |> run()
   end
 
-  defp parse(["ask", agent, msg]), do: {:ask, nil, agent, msg}
-  defp parse(["tell", agent, msg]), do: {:tell, nil, agent, msg}
-  defp parse(["spawn", name, agent]), do: {:spawn, name, agent}
+  defp read(argv) do
+    route(argv, get_env("TAPE"), get_env("MIX_ENV"))
+  end
 
-  defp parse([tool, "ask", agent, msg]) do
+  defp route(argv, tape, _mix_env) when tape != nil do
+    parse(argv, true)
+  end
+
+  defp route(argv, _tape, "test") do
+    parse(argv, true)
+  end
+
+  defp route(argv, _tape, _mix_env) do
+    parse(argv, false)
+  end
+
+  defp parse(["ask", agent, msg], _test?), do: {:ask, nil, agent, msg}
+  defp parse(["tell", agent, msg], _test?), do: {:tell, nil, agent, msg}
+  defp parse(["spawn", name, agent], _test?), do: {:spawn, name, agent}
+
+  defp parse([tool, "ask", agent, msg], _test?) do
     check(tool, {:ask, tool, agent, msg})
   end
 
-  defp parse([tool, "tell", agent, msg]) do
+  defp parse([tool, "tell", agent, msg], _test?) do
     check(tool, {:tell, tool, agent, msg})
   end
 
-  defp parse(["claude"]), do: {:claude, :default}
-  defp parse(["claude", name]), do: {:claude, name}
-  defp parse(["ls"]), do: {:ls, nil}
-  defp parse(["ls", path]), do: {:ls, path}
-  defp parse(["cd", path]), do: {:cd, path}
-  defp parse(["daemon"]), do: :daemon
-  defp parse([]), do: {:repl, "el"}
-  defp parse([agent]), do: {:repl, agent}
-  defp parse(_), do: :usage
+  defp parse(["claude"], false), do: {:claude, :default}
+  defp parse(["claude", name], false), do: {:claude, name}
+  defp parse(["claude"], true), do: {:repl, "claude"}
+  defp parse(["claude", _name], true), do: {:repl, "claude"}
+  defp parse(["ls"], _test?), do: {:ls, nil}
+  defp parse(["ls", path], _test?), do: {:ls, path}
+  defp parse(["cd", path], _test?), do: {:cd, path}
+  defp parse(["daemon"], _test?), do: :daemon
+  defp parse([], _test?), do: {:repl, "el"}
+  defp parse([agent], _test?), do: {:repl, agent}
+  defp parse(_, _test?), do: :usage
 
   defp check(tool, cmd) when tool in @known_tools, do: cmd
   defp check(tool, _cmd), do: {:unknown_tool, tool}

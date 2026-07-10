@@ -6,11 +6,11 @@ defmodule El.REPL do
 
   def run(agent) do
     ensure_all_started(:elita)
-    setup_all(agent)
+    setup(agent)
     loop(agent)
   end
 
-  defp setup_all(agent) do
+  defp setup(agent) do
     Registry.start_link(keys: :unique, name: ElitaRegistry) |> settle()
     Tape.Writer.start_link(nil) |> settle()
     start_link(agent, [agent]) |> settle()
@@ -21,22 +21,27 @@ defmodule El.REPL do
   defp settle({:error, _}), do: :ok
 
   defp loop(agent) do
-    show_prompt(agent)
+    prompt(agent)
     read(:stdio, :line) |> process(agent)
   end
 
-  defp show_prompt(agent), do: write("#{agent}> ")
+  defp prompt(agent), do: write("#{agent}> ")
 
   defp process(:eof, _agent), do: :ok
 
   defp process(line, agent) do
-    handle(agent, trim(line))
-    loop(agent)
+    handle(agent, trim(line)) |> proceed(agent)
   end
+
+  defp proceed(:stop, _agent), do: :ok
+  defp proceed(:ok, agent), do: loop(agent)
 
   defp handle(_agent, ""), do: :ok
 
+  defp handle(_agent, "/exit"), do: :stop
+
   defp handle(agent, input) do
     call(agent, input) |> puts()
+    :ok
   end
 end

@@ -18,7 +18,7 @@ defmodule El.Commands.Claude do
   defp deps, do: [distribution_start: &start/1, cmd: &cmd/1, run: &run/2]
 
   def execute(name, deps) when is_list(deps) do
-    run_with_cleanup(resolve_session_name(name), deps)
+    run_with_cleanup(session(name), deps)
   after
     restore()
     cmd(~c"stty sane < /dev/tty")
@@ -72,6 +72,10 @@ defmodule El.Commands.Claude do
     replace(chunk, "\n", "\r")
   end
 
-  defp resolve_session_name(:default), do: cwd!() |> basename()
-  defp resolve_session_name(name) when is_binary(name), do: name
+  defp session(:default) do
+    cwd!()
+    |> basename()
+  end
+
+  defp session(name) when is_binary(name), do: name
 end

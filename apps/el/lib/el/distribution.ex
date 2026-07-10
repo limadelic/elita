@@ -33,7 +33,7 @@ defmodule El.Distribution do
   end
 
   defp build_node_name(name, opts) do
-    session_name = resolve_session_name(name)
+    session_name = session(name)
     host_value = build_host(opts)
     :"claude_#{session_name}@#{host_value}"
   end
@@ -81,12 +81,12 @@ defmodule El.Distribution do
     get(opts, :host, host())
   end
 
-  defp resolve_session_name(:default) do
+  defp session(:default) do
     cwd!()
     |> basename()
   end
 
-  defp resolve_session_name(name) when is_binary(name) do
+  defp session(name) when is_binary(name) do
     name
   end
 end
