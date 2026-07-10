@@ -87,12 +87,14 @@ defmodule El.Wrap.Input do
     case target(atom_name) do
       nil -> :ok
       puppet_pid ->
-        try do
-          ask(puppet_pid, message) |> puts()
-          :ok
-        rescue
-          _ -> :ok
-        end
+        Task.start(fn ->
+          try do
+            ask(puppet_pid, message) |> puts()
+          rescue
+            _ -> :ok
+          end
+        end)
+        :ok
     end
   end
 end
