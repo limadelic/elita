@@ -63,11 +63,13 @@ defmodule El.Commands.Claude do
   end
 
   defp execute(name, deps, buf) do
-    cmd = command()
-    input_fn = fn chunk -> encode(buf, chunk) end
-    opts = [cmd: cmd, get_size: &size/0, input: input_fn, resize: &watch/1]
-    Keyword.get(deps, :run).(name, opts)
+    Keyword.get(deps, :run).(name, opts(buf, command()))
     install(name)
+  end
+
+  defp opts(buf, cmd) do
+    input = fn chunk -> encode(buf, chunk) end
+    [cmd: cmd, get_size: &size/0, input: input, resize: &watch/1]
   end
 
   defp command do
