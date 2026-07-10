@@ -91,7 +91,11 @@ defmodule El.REPL do
   defp choose(nil, default), do: default
   defp choose(t, _), do: t
 
-  defp target(name) do
-    (try do :global.whereis_name({name, :puppet}) rescue _ -> nil end)
+  defp target(name), do: lookup(name)
+
+  defp lookup(name) do
+    :global.whereis_name({name, :puppet})
+  rescue
+    _ -> nil
   end
 end
