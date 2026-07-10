@@ -12,9 +12,15 @@ defmodule El.Puppet do
 
   def start_link(opts) do
     name = fetch!(opts, :name)
-    pty_pid = fetch!(opts, :pty_pid)
-    via_tuple = {:via, Registry, {ElitaRegistry, name, %{kind: :puppet}}}
-    start_link(__MODULE__, pty_pid, name: via_tuple)
+    pty = fetch!(opts, :pty_pid)
+    register(name, pty)
+  end
+
+  defp register(name, pty) do
+    via = {:via, Registry, {ElitaRegistry, name, %{kind: :puppet}}}
+    {:ok, pid} = start_link(__MODULE__, pty, name: via)
+    :global.register_name({name, :puppet}, pid)
+    {:ok, pid}
   end
 
   def init(pty_pid) do
