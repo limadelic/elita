@@ -19,9 +19,9 @@ defmodule El.Distribution do
   end
 
   def target(name) do
-    :global.whereis_name({name, :puppet}) |> pick(name)
-  rescue
-    _ -> find(name)
+    connect(:"claude_#{name}@127.0.0.1"); :global.sync()
+    pick(:global.whereis_name({name, :puppet}), name)
+  rescue _ -> find(name)
   end
 
   defp pick(:undefined, name), do: find(name)
