@@ -2,7 +2,6 @@ defmodule El.Pty do
   @moduledoc false
   use GenServer
 
-  import Keyword, except: [size: 1]
   import Process, except: [alias: 1, info: 2]
 
   import El.Pty.Init, only: [call: 1]
@@ -26,21 +25,30 @@ defmodule El.Pty do
   end
 
   def run(name, opts \\ []) do
-    cmd = get(opts, :cmd, "claude --dangerously-skip-permissions")
+    cmd = Keyword.get(opts, :cmd, "claude --dangerously-skip-permissions")
     full_opts = finalize(opts, cmd)
     {:ok, pid} = boot(name, cmd, full_opts)
+    startup(Keyword.get(opts, :resize), pid)
+  end
+
+  defp startup(resize_fn, pid) do
+    invoke(resize_fn, pid)
     await(pid)
   end
 
+  defp invoke(nil, _pid), do: :ok
+  defp invoke(resize_fn, pid), do: resize_fn.(pid)
+
   defp finalize(opts, _cmd) do
-    clean = opts |> drop([:input, :taps, :cmd])
-    clean ++ defaults(opts)
+    opts
+    |> Keyword.drop([:input, :taps, :cmd, :resize])
+    |> Kernel.++(defaults(opts))
   end
 
   defp defaults(opts) do
     [
-      input: get(opts, :input, fn x -> x end),
-      taps: get(opts, :taps, [])
+      input: Keyword.get(opts, :input, fn x -> x end),
+      taps: Keyword.get(opts, :taps, [])
     ]
   end
 
@@ -68,11 +76,11 @@ defmodule El.Pty do
       [get_size: size(opts), input: input(opts), taps: taps(opts)]
   end
 
-  defp file(opts), do: get(opts, :file, :file)
-  defp port(opts), do: get(opts, :port, Port)
-  defp size(opts), do: get(opts, :get_size, &default/0)
-  defp input(opts), do: get(opts, :input, fn x -> x end)
-  defp taps(opts), do: get(opts, :taps, [])
+  defp file(opts), do: Keyword.get(opts, :file, :file)
+  defp port(opts), do: Keyword.get(opts, :port, Port)
+  defp size(opts), do: Keyword.get(opts, :get_size, &default/0)
+  defp input(opts), do: Keyword.get(opts, :input, fn x -> x end)
+  defp taps(opts), do: Keyword.get(opts, :taps, [])
 
   @impl true
   def handle_info(msg, state) do

@@ -5,6 +5,7 @@ defmodule El.Pty.Dispatch do
   import El.Pty.Cleanup
   import List
   import Enum
+  import :os, only: [cmd: 1]
 
   def info({pty, {:data, data}}, state) do
     process(pty, data, state)
@@ -14,6 +15,17 @@ defmodule El.Pty.Dispatch do
   def info({:stdin, data}, %{pty: pty, port: port, input: input} = state) do
     record(data)
     write(port, pty, input.(data))
+    {:noreply, state}
+  end
+
+  def info(:exit_wrap, %{port: port, os_pid: os_pid} = state) do
+    port.close(port)
+    slay(os_pid)
+    {:stop, :normal, state}
+  end
+
+  def info({:resize, size}, %{port: _port} = state) do
+    resize(size)
     {:noreply, state}
   end
 
@@ -67,5 +79,15 @@ defmodule El.Pty.Dispatch do
 
   defp finish(%{os_pid: os_pid, file: file, out: out}) do
     cleanup(os_pid, file, out)
+  end
+
+  defp resize({rows, cols}) do
+    format(rows, cols) |> String.to_charlist() |> cmd()
+  rescue
+    _ -> :ok
+  end
+
+  defp format(rows, cols) do
+    "stty rows #{rows} cols #{cols} < /dev/tty"
   end
 end
