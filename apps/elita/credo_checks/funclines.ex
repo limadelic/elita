@@ -22,11 +22,7 @@ defmodule Elita.Credo.Funclines do
   end
 
   defp config(file, params) do
-    %{
-      max_lines: Keyword.get(params, :max_lines, 5),
-      filename: file.filename,
-      source: read!(file.filename)
-    }
+    %{max_lines: Keyword.get(params, :max_lines, 5), filename: file.filename, source: read!(file.filename)}
   end
 
   defp check({type, meta, [_head | _tail]} = ast, issues, cfg)

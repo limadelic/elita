@@ -6,8 +6,8 @@ defmodule El.Trace.Log do
 
   def chunk(data), do: jot(get_env("EL_TRACE"), trace(data))
 
-  def header({rows, cols}, tty_source) do
-    jot(get_env("EL_TRACE"), caption(rows, cols, tty_source))
+  def header({rows, cols}, source) do
+    jot(get_env("EL_TRACE"), caption(rows, cols, source))
   end
 
   def event(msg) do

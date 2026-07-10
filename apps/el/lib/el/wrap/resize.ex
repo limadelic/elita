@@ -8,8 +8,8 @@ defmodule El.Wrap.Resize do
 
   defp poll(pid) do
     Process.sleep(500)
-    new_size = size()
-    notify(pid, new_size)
+    size = size()
+    notify(pid, size)
     poll(pid)
   end
 

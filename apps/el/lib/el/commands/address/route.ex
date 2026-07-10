@@ -43,7 +43,7 @@ defmodule El.Commands.Address.Route do
 
   def rpc, do: rpc(get_env(:el, :rpc))
   def rpc(nil), do: &call/4
-  def rpc(rpc_impl), do: rpc_impl
+  def rpc(impl), do: impl
 
   def exec(entry, msg, :ask, tool),
     do:

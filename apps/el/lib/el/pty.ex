@@ -41,7 +41,7 @@ defmodule El.Pty do
   end
 
   defp invoke(nil, _pid), do: :ok
-  defp invoke(resize_fn, pid), do: resize_fn.(pid)
+  defp invoke(resizer, pid), do: resizer.(pid)
 
   defp finalize(opts, _cmd) do
     drop(opts, [:input, :taps, :cmd, :resize]) ++ defaults(opts)

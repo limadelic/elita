@@ -15,12 +15,13 @@ defmodule El.Distribution do
   import El.Log, only: [write: 1]
 
   def start(name \\ :default, opts \\ []) do
-    mode =
-      %{true => :longnames, false => :shortnames}[
-        opts |> get(:host, "127.0.0.1") |> contains?(".")
-      ]
+    boot(node(name, opts), mode(opts))
+  end
 
-    boot(node(name, opts), mode)
+  defp mode(opts) do
+    %{true => :longnames, false => :shortnames}[
+      opts |> get(:host, "127.0.0.1") |> contains?(".")
+    ]
   end
 
   def target(name) do
@@ -35,11 +36,9 @@ defmodule El.Distribution do
 
   defp locate(name) do
     :global.sync()
-    :global.whereis_name({name, :puppet}) |> pick(name)
+    result = :global.whereis_name({name, :puppet})
+    if result == :undefined, do: find(name), else: result
   end
-
-  defp pick(:undefined, name), do: find(name)
-  defp pick(pid, _), do: pid
 
   defp find(name) do
     lookup(ElitaRegistry, name) |> extract()
@@ -66,11 +65,8 @@ defmodule El.Distribution do
   defp node(:default, opts), do: :"claude_#{cwd!() |> basename()}@#{get(opts, :host, host())}"
   defp node(name, opts), do: :"claude_#{name}@#{get(opts, :host, host())}"
 
-  defp boot(node_name, mode) do
-    fn -> Node.start(node_name, mode) end
-    |> then(&attempt(&1.(), &1, 5))
-    |> act(node_name, mode)
-  end
+  defp boot(name, mode),
+    do: fn -> Node.start(name, mode) end |> then(&attempt(&1.(), &1, 5)) |> act(name, mode)
 
   defp attempt({:ok, pid}, _fun, _tries), do: {:ok, pid}
 
@@ -87,22 +83,18 @@ defmodule El.Distribution do
     {:error, :max_retries_exceeded}
   end
 
-  defp act({:ok, _}, _, _) do
-    set_cookie(:elita)
-    :ok
-  end
-
-  defp act({:error, {:already_started, _}}, _, _) do
-    set_cookie(:elita)
-    :taken
-  end
+  defp act({:ok, _}, _, _), do: cookie(:ok)
+  defp act({:error, {:already_started, _}}, _, _), do: cookie(:taken)
 
   defp act({:error, reason}, _, _) do
     write(:stderr, "Error: Failed to start distribution: #{inspect(reason)}\n")
     :ok
   end
 
-  def fetch(opts \\ []) do
-    get(opts, :host, host())
+  defp cookie(val) do
+    set_cookie(:elita)
+    val
   end
+
+  def fetch(opts \\ []), do: get(opts, :host, host())
 end

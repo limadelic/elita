@@ -55,14 +55,14 @@ defmodule El.Commands.Tell do
     route(agent, msg, :tell, tool)
   end
 
-  defp inject(msg, target, process_name, _tool) do
+  defp inject(msg, target, name, _tool) do
     text = format(msg)
-    cast({process_name, target}, {:inject, text})
+    cast({name, target}, {:inject, text})
   end
 
   def target(agent, opts \\ []) do
-    env_module = get(opts, :env_module, El.Infra.Env)
-    node(agent, env_module.get("EL_NODE"))
+    env = get(opts, :env_module, El.Infra.Env)
+    node(agent, env.get("EL_NODE"))
   end
 
   defp node(_agent, nil), do: nil

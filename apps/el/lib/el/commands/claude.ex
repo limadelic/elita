@@ -57,10 +57,10 @@ defmodule El.Commands.Claude do
 
   defp validate(_, _), do: :ok
 
-  defp boot(process_name, deps) do
+  defp boot(name, deps) do
     setup(deps)
-    buf = open(self(), process_name)
-    execute(process_name, deps, buf)
+    buf = open(self(), name)
+    execute(name, deps, buf)
   end
 
   defp setup(deps) do

@@ -28,8 +28,7 @@ defmodule El.Wrap.Input do
     do: eol(line, rest, parent, agent, "\n")
 
   defp feed(<<byte, rest::binary>>, line, parent, agent) when byte in [8, 127] do
-    chars = backspace(line)
-    feed(rest, chars, parent, agent)
+    feed(rest, backspace(line), parent, agent)
   end
 
   defp feed(<<char::utf8, rest::binary>>, line, parent, agent) do
@@ -84,20 +83,14 @@ defmodule El.Wrap.Input do
   defp dial(nil, _message, _agent), do: :forward
 
   defp dial(puppet, message, agent) do
-    ask(puppet, message) |> format(agent) |> output()
-  rescue
-    _ -> :forward
+    ask(puppet, message) |> show(agent)
   catch
     :exit, _ -> :forward
   end
 
-  defp output(d) do
-    write(:stdio, d)
-    {:handled}
-  end
-
-  defp format(response, agent) do
+  defp show(response, agent) do
     content = response |> split("\n") |> drop(-1) |> join("\n")
-    "#{content}\n#{agent}> "
+    write(:stdio, "#{content}\n#{agent}> ")
+    {:handled}
   end
 end

@@ -18,9 +18,9 @@ defmodule El.Pty.Dispatch do
     {:noreply, state}
   end
 
-  def info(:exit_wrap, %{port: port, os_pid: os_pid} = state) do
+  def info(:exit_wrap, %{port: port, child: child} = state) do
     port.close(port)
-    slay(os_pid)
+    slay(child)
     {:stop, :normal, state}
   end
 
@@ -38,13 +38,13 @@ defmodule El.Pty.Dispatch do
     {:noreply, state}
   end
 
-  def info({:EXIT, _pid, reason}, %{os_pid: os_pid} = state) do
-    slay(os_pid)
+  def info({:EXIT, _pid, reason}, %{child: child} = state) do
+    slay(child)
     {:stop, reason, state}
   end
 
-  def info({pty, :closed}, %{pty: pty, os_pid: os_pid} = state) do
-    slay(os_pid)
+  def info({pty, :closed}, %{pty: pty, child: child} = state) do
+    slay(child)
     {:stop, :normal, state}
   end
 
@@ -66,8 +66,8 @@ defmodule El.Pty.Dispatch do
     each(taps, fn pid -> send(pid, {:output, data}) end)
   end
 
-  defp cleanup(os_pid, file, out) do
-    slay(os_pid)
+  defp cleanup(child, file, out) do
+    slay(child)
     file.close(out)
   end
 
@@ -77,8 +77,8 @@ defmodule El.Pty.Dispatch do
     respond(port, pty, data, state)
   end
 
-  defp finish(%{os_pid: os_pid, file: file, out: out}) do
-    cleanup(os_pid, file, out)
+  defp finish(%{child: child, file: file, out: out}) do
+    cleanup(child, file, out)
   end
 
   defp resize({rows, cols}) do
