@@ -20,8 +20,12 @@ defmodule El.Wrap.Input do
   end
 
   defp feed(<<>>, line, _parent, _agent_name), do: {"", line}
-  defp feed(<<13, rest::binary>>, line, parent, agent_name), do: eol(line, rest, parent, agent_name, "\r")
-  defp feed(<<10, rest::binary>>, line, parent, agent_name), do: eol(line, rest, parent, agent_name, "\n")
+
+  defp feed(<<13, rest::binary>>, line, parent, agent_name),
+    do: eol(line, rest, parent, agent_name, "\r")
+
+  defp feed(<<10, rest::binary>>, line, parent, agent_name),
+    do: eol(line, rest, parent, agent_name, "\n")
 
   defp feed(<<byte, rest::binary>>, line, parent, agent_name) when byte in [8, 127] do
     chars = backspace(line)
@@ -58,7 +62,10 @@ defmodule El.Wrap.Input do
   end
 
   def dispatch("", _parent, _agent_name), do: :forward
-  def dispatch(input, parent, agent_name) when is_atom(agent_name), do: route(input, parent, agent_name)
+
+  def dispatch(input, parent, agent_name) when is_atom(agent_name),
+    do: route(input, parent, agent_name)
+
   def dispatch(_input, _parent, _agent_name), do: :forward
 
   defp route(input, parent, agent_name) do
@@ -68,6 +75,7 @@ defmodule El.Wrap.Input do
   end
 
   defp process([_], _parent, _agent_name), do: :forward
+
   defp process([word, rest], parent, agent_name) do
     invoke(word, rest, parent, agent_name)
   end
@@ -80,6 +88,7 @@ defmodule El.Wrap.Input do
   end
 
   defp execute(nil, _message, _agent_name), do: :forward
+
   defp execute(puppet_pid, message, agent_name) do
     Task.start(fn -> converse(puppet_pid, message, agent_name) end)
     {:handled}
