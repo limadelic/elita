@@ -85,25 +85,5 @@ defmodule El.REPL do
 
   defp route(a, p, i), do: route(a, p, i, String.split(i, " ", parts: 2))
   defp route(_, p, i, [_w]), do: ask(p, i)
-  defp route(a, p, _i, [w, r]) when a != w, do: dispatch(p, w, r, lookup(w))
-  defp route(_, p, _, [w, r]), do: ask(p, w <> " " <> r)
-
-  defp dispatch(_, _, r, pid) when is_pid(pid) do
-    ask_remote(pid, r)
-  end
-  defp dispatch(p, w, r, _), do: ask(p, w <> " " <> r)
-
-  defp ask_remote(pid, message) do
-    GenServer.call(pid, {:ask, message}, 1000)
-  rescue
-    _ -> ""
-  catch
-    :exit, _ -> ""
-  end
-
-  defp lookup(word) do
-    :global.whereis_name({word, :puppet})
-  rescue
-    _ -> nil
-  end
+  defp route(_a, p, _i, [_w, r]), do: ask(p, r)
 end
