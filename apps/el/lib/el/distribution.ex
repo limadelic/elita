@@ -14,6 +14,7 @@ defmodule El.Distribution do
   import El.Log, only: [write: 1]
 
   def start(name \\ :default, opts \\ []) do
+    :os.cmd(~c"epmd -daemon")
     boot(node(name, opts), mode(opts))
   end
 
@@ -24,8 +25,7 @@ defmodule El.Distribution do
   end
 
   def target(name) do
-    connect(:"claude_#{name}@127.0.0.1")
-    |> route(name)
+    connect(:"claude_#{name}@127.0.0.1") |> route(name)
   rescue
     _ -> find(name)
   end
