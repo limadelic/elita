@@ -80,6 +80,16 @@ jobs:
         env:
           MIX_ENV: test
 
+      - name: Upload session logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: session-logs
+          path: |
+            ~/.elita/sessions/
+            tmp/
+          if-no-files-found: warn
+
       - name: Inject legend into report
         run: |
           ruby bin/inject_legend.rb reports/cucumber.html
