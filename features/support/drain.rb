@@ -58,6 +58,7 @@ module Drain
   def log(chunk, output)
     output << chunk
     @transcript << chunk if @transcript
+    @screen.feed(chunk) if @screen
     stripped = strip(chunk)
     stripped = encode(stripped)
     @transcript_stripped << stripped if @transcript_stripped
