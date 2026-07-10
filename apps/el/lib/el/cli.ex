@@ -53,10 +53,8 @@ defmodule El.CLI do
     check(tool, {:tell, tool, agent, msg})
   end
 
-  defp parse(["claude"], false), do: {:claude, :default}
-  defp parse(["claude", name], false), do: {:claude, name}
-  defp parse(["claude"], true), do: {:repl, "claude"}
-  defp parse(["claude", _name], true), do: {:repl, "claude"}
+  defp parse(["claude"], _test?), do: {:claude, :default}
+  defp parse(["claude", name], _test?), do: {:claude, name}
   defp parse(["ls"], _test?), do: {:ls, nil}
   defp parse(["ls", path], _test?), do: {:ls, path}
   defp parse(["cd", path], _test?), do: {:cd, path}

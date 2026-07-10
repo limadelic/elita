@@ -21,7 +21,13 @@ defmodule El.Commands.Claude do
     run_with_cleanup(session(name), deps)
   after
     restore()
+    safe_stty()
+  end
+
+  defp safe_stty do
     cmd(~c"stty sane < /dev/tty")
+  rescue
+    _ -> :ok
   end
 
   defp run_with_cleanup(session_name, deps) do
@@ -50,6 +56,8 @@ defmodule El.Commands.Claude do
   defp raw_mode(deps) do
     cmd_fn = get(deps, :cmd)
     cmd_fn.(~c"stty raw -echo -isig < /dev/tty")
+  rescue
+    _ -> :ok
   end
 
   defp run_session(name, deps) do
