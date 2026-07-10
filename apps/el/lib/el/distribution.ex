@@ -89,10 +89,10 @@ defmodule El.Distribution do
   end
 
   def naming(opts) do
-    opts |> get(:host, "127.0.0.1") |> has_dot?() |> mode()
+    opts |> get(:host, "127.0.0.1") |> dots?() |> mode()
   end
 
-  defp has_dot?(h), do: contains?(h, ".")
+  defp dots?(h), do: contains?(h, ".")
 
   defp mode(true), do: :longnames
   defp mode(false), do: :shortnames
