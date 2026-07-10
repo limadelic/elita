@@ -67,29 +67,31 @@ defmodule El.Wrap.Input do
     :ok
   end
 
-  def dispatch(input, _parent, agent_name) when is_atom(agent_name) do
-    route(input, agent_name)
+  def dispatch(input, parent, agent_name) when is_atom(agent_name) do
+    route(input, parent, agent_name)
   end
 
   def dispatch(_input, _parent, _agent_name) do
     :ok
   end
 
-  defp route(input, _agent_name) do
+  defp route(input, parent, agent_name) do
     case String.split(input, " ", parts: 2) do
       [_] -> :ok
-      [word, rest] -> send_to_puppet(word, rest)
+      [word, rest] -> send_to_puppet(word, rest, parent, agent_name)
     end
   end
 
-  defp send_to_puppet(name, message) do
+  defp send_to_puppet(name, message, _parent, agent_name) do
     atom_name = to_atom(name)
     case target(atom_name) do
       nil -> :ok
       puppet_pid ->
         Task.start(fn ->
           try do
-            ask(puppet_pid, message) |> puts()
+            output = ask(puppet_pid, message)
+            puts(output)
+            puts("\n#{agent_name}> ")
           rescue
             _ -> :ok
           end
