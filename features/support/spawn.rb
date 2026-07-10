@@ -54,6 +54,7 @@ module Spawn
   def reset(args)
     @transcript = ""
     @transcript_stripped = ""
+    @screen = Screen.new
     cmd = spawn(args)
     prompt = args.split.first || "el"
     launch(cmd, prompt)
