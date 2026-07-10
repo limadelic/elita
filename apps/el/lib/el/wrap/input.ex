@@ -90,10 +90,14 @@ defmodule El.Wrap.Input do
   end
 
   defp route(input, parent, agent_name) do
-    case String.split(input, " ", parts: 2) do
-      [_] -> :forward
-      [word, rest] -> send_to_puppet(word, rest, parent, agent_name)
-    end
+    input
+    |> String.split(" ", parts: 2)
+    |> process(parent, agent_name)
+  end
+
+  defp process([_], _parent, _agent_name), do: :forward
+  defp process([word, rest], parent, agent_name) do
+    send_to_puppet(word, rest, parent, agent_name)
   end
 
   defp send_to_puppet(name, message, _parent, agent_name) do
