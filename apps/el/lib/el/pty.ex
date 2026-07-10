@@ -16,11 +16,11 @@ defmodule El.Pty do
     GenServer.cast(name, {:inject, message})
   end
 
-  def tap(name, pid) do
+  def watch(name, pid) do
     GenServer.call(name, {:tap, pid})
   end
 
-  def untap(name, pid) do
+  def unwatch(name, pid) do
     GenServer.call(name, {:untap, pid})
   end
 
@@ -40,9 +40,7 @@ defmodule El.Pty do
   defp invoke(resize_fn, pid), do: resize_fn.(pid)
 
   defp finalize(opts, _cmd) do
-    opts
-    |> Keyword.drop([:input, :taps, :cmd, :resize])
-    |> Kernel.++(defaults(opts))
+    Keyword.drop(opts, [:input, :taps, :cmd, :resize]) ++ defaults(opts)
   end
 
   defp defaults(opts) do

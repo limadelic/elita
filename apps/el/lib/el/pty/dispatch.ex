@@ -3,7 +3,7 @@ defmodule El.Pty.Dispatch do
   import El.Trace
   import El.Pty.Handler
   import El.Pty.Cleanup
-  import List
+  import List, except: [to_charlist: 1]
   import Enum
   import :os, only: [cmd: 1]
 
@@ -82,10 +82,12 @@ defmodule El.Pty.Dispatch do
   end
 
   defp resize({rows, cols}) do
-    format(rows, cols) |> String.to_charlist() |> cmd()
+    format(rows, cols) |> chars() |> cmd()
   rescue
     _ -> :ok
   end
+
+  defp chars(s), do: String.to_charlist(s)
 
   defp format(rows, cols) do
     "stty rows #{rows} cols #{cols} < /dev/tty"

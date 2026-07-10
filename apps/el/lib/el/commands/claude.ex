@@ -11,6 +11,7 @@ defmodule El.Commands.Claude do
   import Path, only: [basename: 1]
   import El.Wrap.Resize, only: [watch: 1]
   import El.Wrap.Input, only: [open: 1, encode: 2]
+  import GenServer, only: [start_link: 3]
 
   def claude(name \\ :default) do
     claude(name, deps())
@@ -62,10 +63,20 @@ defmodule El.Commands.Claude do
   end
 
   defp execute(name, deps, buf) do
-    model = get_env("CLAUDE_MODEL", "haiku")
-    cmd = "claude --dangerously-skip-permissions --model #{model}"
+    cmd = command()
     input_fn = fn chunk -> encode(buf, chunk) end
-    Keyword.get(deps, :run).(name, cmd: cmd, get_size: &size/0, input: input_fn, resize: &watch/1)
+    opts = [cmd: cmd, get_size: &size/0, input: input_fn, resize: &watch/1]
+    Keyword.get(deps, :run).(name, opts)
+    install(name)
+  end
+
+  defp command do
+    model = get_env("CLAUDE_MODEL", "haiku")
+    "claude --dangerously-skip-permissions --model #{model}"
+  end
+
+  defp install(name) do
+    {:ok, _} = start_link(El.Puppet, [name: name, pty_pid: name], [])
   end
 
   defp restore do

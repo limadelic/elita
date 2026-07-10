@@ -2,7 +2,7 @@ defmodule El.Puppet do
   use GenServer
 
   import GenServer, only: [start_link: 3, call: 3]
-  import El.Pty, only: [untap: 2, inject: 2]
+  import El.Pty, only: [watch: 2, unwatch: 2, inject: 2]
   import String, only: [ends_with?: 2]
   import Keyword, only: [fetch!: 2]
 
@@ -27,7 +27,7 @@ defmodule El.Puppet do
   end
 
   defp query(pty_pid, message) do
-    El.Pty.tap(pty_pid, self())
+    watch(pty_pid, self())
     inject(pty_pid, message <> "\r")
     collect(pty_pid, "")
   end
@@ -41,7 +41,7 @@ defmodule El.Puppet do
   end
 
   defp ready(pty_pid, buffer, true) do
-    untap(pty_pid, self())
+    unwatch(pty_pid, self())
     buffer
   end
 
