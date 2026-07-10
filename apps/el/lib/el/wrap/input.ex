@@ -68,45 +68,32 @@ defmodule El.Wrap.Input do
 
   def dispatch(_input, _parent, _agent_name), do: :forward
 
-  defp route(input, parent, agent_name) do
-    input
-    |> String.split(" ", parts: 2)
-    |> process(parent, agent_name)
+  defp route(input, _parent, agent_name) do
+    case String.split(input, " ", parts: 2) do
+      [_] -> :forward
+      [word, rest] -> puppet(word, rest, agent_name)
+    end
   end
 
-  defp process([_], _parent, _agent_name), do: :forward
-
-  defp process([word, rest], parent, agent_name) do
-    invoke(word, rest, parent, agent_name)
+  defp puppet(name, message, agent_name) do
+    name |> to_atom() |> target() |> dial(message, agent_name)
   end
 
-  defp invoke(name, message, _parent, agent_name) do
-    name
-    |> to_atom()
-    |> target()
-    |> execute(message, agent_name)
-  end
+  defp dial(nil, _message, _agent_name), do: :forward
 
-  defp execute(nil, _message, _agent_name), do: :forward
-
-  defp execute(puppet_pid, message, agent_name) do
-    converse(puppet_pid, message, agent_name)
+  defp dial(puppet_pid, message, agent_name) do
+    puppet_pid |> ask(message) |> format(agent_name) |> output()
     {:handled}
   rescue
     _ -> :forward
   end
 
-  defp converse(puppet_pid, message, agent_name) do
-    response = ask(puppet_pid, message)
-    lines = response |> String.split("\n")
-    content = lines |> drop(-1) |> join("\n")
-    output = "#{content}\n#{agent_name}> "
-    safe_output(output)
-  rescue
-    _ -> :ok
+  defp format(response, agent_name) do
+    content = response |> String.split("\n") |> drop(-1) |> join("\n")
+    "#{content}\n#{agent_name}> "
   end
 
-  defp safe_output(data) do
+  defp output(data) do
     write(:stdio, data)
   rescue
     _ -> :ok
