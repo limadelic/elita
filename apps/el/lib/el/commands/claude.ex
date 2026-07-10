@@ -21,10 +21,10 @@ defmodule El.Commands.Claude do
     go(resolve(name), deps)
   after
     restore()
-    safe_stty()
+    stty()
   end
 
-  defp safe_stty do
+  defp stty do
     cmd(~c"stty sane < /dev/tty")
   rescue
     _ -> :ok
