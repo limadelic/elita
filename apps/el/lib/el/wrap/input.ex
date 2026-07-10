@@ -1,6 +1,8 @@
 defmodule El.Wrap.Input do
   @moduledoc false
   import Agent
+  import Enum
+  import String
 
   def open(parent) do
     {:ok, pid} = start_link(fn -> {[], parent} end)
@@ -26,7 +28,7 @@ defmodule El.Wrap.Input do
   end
 
   defp feed(<<byte, rest::binary>>, line, parent) when byte in [8, 127] do
-    chars = drop(line)
+    chars = backspace(line)
     feed(rest, chars, parent)
   end
 
@@ -38,8 +40,8 @@ defmodule El.Wrap.Input do
     feed(rest, line, parent)
   end
 
-  defp drop([]), do: []
-  defp drop(line), do: Enum.drop(line, -1)
+  defp backspace([]), do: []
+  defp backspace(line), do: drop(line, -1)
 
   defp eol(line, rest, parent, eol) do
     check(line, parent)
@@ -49,8 +51,8 @@ defmodule El.Wrap.Input do
 
   defp check(line, parent) do
     line
-    |> Enum.join("")
-    |> String.trim()
+    |> join("")
+    |> trim()
     |> dispatch(parent)
   end
 
