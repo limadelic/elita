@@ -82,16 +82,14 @@ defmodule El.Wrap.Input do
     end
   end
 
-  defp send_to_puppet(name, message, _parent, agent_name) do
+  defp send_to_puppet(name, message, _parent, _agent_name) do
     atom_name = to_atom(name)
     case target(atom_name) do
       nil -> :ok
       puppet_pid ->
         Task.start(fn ->
           try do
-            output = ask(puppet_pid, message)
-            puts(output)
-            puts("\n#{agent_name}> ")
+            ask(puppet_pid, message) |> puts()
           rescue
             _ -> :ok
           end
