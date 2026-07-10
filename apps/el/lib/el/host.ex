@@ -4,8 +4,8 @@ defmodule El.Host do
   import String, only: [contains?: 2]
 
   def host(opts \\ []) do
-    env_module = get(opts, :env_module, El.Infra.Env)
-    env_module.get("EL_HOST") |> fallback()
+    env = get(opts, :env_module, El.Infra.Env)
+    env.get("EL_HOST") |> fallback()
   end
 
   defp fallback(nil), do: "127.0.0.1"

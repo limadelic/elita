@@ -39,8 +39,8 @@ defmodule Resolver do
   def normalize("/" <> _ = path, _cwd), do: path
   def normalize(path, cwd), do: cwd |> join(path) |> expand()
 
-  defp path(world, search_path),
-    do: filter(world, &fits?(&1, search_path))
+  defp path(world, search),
+    do: filter(world, &fits?(&1, search))
 
   defp fits?(_entry, nil), do: true
   defp fits?(%{path: p}, s), do: same?(p, s)

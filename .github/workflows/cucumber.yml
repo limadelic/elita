@@ -2,9 +2,6 @@ name: Cucumber Tests
 
 on:
   push:
-    branches:
-      - qa
-      - wip
   workflow_dispatch:
 
 permissions:
@@ -79,6 +76,16 @@ jobs:
         env:
           MIX_ENV: test
 
+      - name: Upload session logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: session-logs
+          path: |
+            ~/.elita/sessions/
+            tmp/
+          if-no-files-found: warn
+
       - name: Inject legend into report
         run: |
           ruby bin/inject_legend.rb reports/cucumber.html
@@ -134,7 +141,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     needs: [test]
-    if: github.ref == 'refs/heads/qa'
+    if: github.ref == 'refs/heads/main'
 
     steps:
       - name: Download test report

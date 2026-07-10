@@ -13,9 +13,9 @@ defmodule Tape.Play do
     context(load(), body, name, fun, on_miss) |> answer()
   end
 
-  defp context(entries, body, name, fun, on_miss) do
+  defp context(entries, body, name, fun, miss) do
     %{entries: entries, normalized: norm(body), body: body,
-      name: name, fun: fun, on_miss: on_miss}
+      name: name, fun: fun, on_miss: miss}
   end
 
   defp norm(body), do: normalize(request(body))

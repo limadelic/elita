@@ -5,18 +5,24 @@ module ReplHelper
 
   def boot(args)
     @cassette = @cassette || "greet"
-    @transcript = ""
-    @transcript_stripped = ""
-    env = {
-      "TAPE" => ENV["TAPE"] || "replay",
-      "CASSETTE" => @cassette,
-      "CASSETTE_DIR" => dir,
-      "MIX_ENV" => "test"
+    @sessions ||= {}
+    reset(args)
+    store_session(args)
+  end
+
+  def store_session(args)
+    name = session_name(args)
+    prompt = session_name(args)
+    @sessions[name] = {
+      reader: @reader,
+      writer: @writer,
+      pid: @pid,
+      screen: @screen,
+      transcript: @transcript,
+      transcript_stripped: @transcript_stripped,
+      prompt: prompt
     }
-    env["TAPE_ON_MISS"] = @tape_on_miss if @tape_on_miss
-    cmd = spawn(args)
-    @reader, @writer, @pid = PTY.spawn(env, "/bin/sh", "-c", cmd)
-    wait(args.split.first || "el")
+    @current = name
   end
 
   def one(args)
@@ -26,11 +32,31 @@ module ReplHelper
   end
 
   def send(input, prompt)
+    @sessions ||= {}
+    if @sessions.key?(prompt)
+      activate(prompt)
+    end
     raise "PTY not initialized" unless @writer
 
     @writer.write("#{input}\n")
     @writer.flush
-    wait(prompt)
+    if input == "/exit"
+      raise "Session still alive" unless closed?
+    else
+      actual_prompt = @sessions[prompt]&.dig(:prompt) || prompt
+      wait(actual_prompt)
+    end
+  end
+
+  def activate(name)
+    session = @sessions[name]
+    return unless session
+    @reader = session[:reader]
+    @writer = session[:writer]
+    @pid = session[:pid]
+    @screen = session[:screen]
+    @transcript = session[:transcript]
+    @transcript_stripped = session[:transcript_stripped]
   end
 
   def transcript
@@ -51,11 +77,44 @@ module ReplHelper
     @transcript_stripped << stripped if @transcript_stripped
   end
 
+  def closed?
+    timeout = Time.now + 2
+    loop do
+      break if reader_eof?
+      break if process_exited?
+      return false if Time.now > timeout
+
+      sleep 0.05
+    end
+    true
+  end
+
   private
+
+  def reader_eof?
+    return false unless @reader
+
+    ready = IO.select([@reader], nil, nil, 0.1)
+    return false unless ready
+
+    @reader.readpartial(1)
+    false
+  rescue EOFError
+    true
+  end
+
+  def process_exited?
+    return false unless @pid
+
+    Process.wait(@pid, Process::WNOHANG)
+    true
+  rescue Errno::ECHILD
+    true
+  end
 
   def wait(prompt_word)
     output = ""
-    pattern = "#{prompt_word}>"
+    pattern = prompt_word == "claude" ? "▐▛███▜▌" : "#{prompt_word}>"
     timeout = deadline
     attempt(output, pattern, timeout) || timeout_error(pattern, output)
   end
@@ -66,8 +125,6 @@ module ReplHelper
   end
 
   def timeout_error(pattern, output)
-    Process.kill("TERM", @pid) if @pid
-    @writer.close if @writer && !@writer.closed?
     raise "Timeout waiting for '#{pattern}' in:\n#{output}"
   end
 end

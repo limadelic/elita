@@ -2,7 +2,7 @@ defmodule Agent.Spawn do
   import Logger, only: [error: 1, warning: 1]
   import Port, only: [open: 2, close: 1]
   import String, only: [trim: 1]
-  import System, only: [cmd: 2, find_executable: 1]
+  import System, only: [cmd: 2, find_executable: 1, get_env: 2]
 
   def run(message, folder) do
     cmd = {:spawn_executable, exe()}
@@ -28,7 +28,9 @@ defmodule Agent.Spawn do
   end
 
   defp setup(message, folder) do
-    [{:args, ["-p", message, "--allowedTools", ""]}, {:cd, to_charlist(folder)}] ++
+    model = get_env("CLAUDE_MODEL", "haiku")
+
+    [{:args, ["-p", message, "--allowedTools", "", "--model", model]}, {:cd, to_charlist(folder)}] ++
       [:binary, :exit_status, :use_stdio]
   end
 

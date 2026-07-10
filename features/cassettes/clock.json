@@ -594,14 +594,14 @@
       "agent": "el",
       "messages": [
         {
-          "role": "user",
           "content": [
             {
-              "type": "tool_result",
               "content": "*tick* *tock*\n\nThe current time is 2026-07-08 01:29:09.\n\nAnother second has passed. Time waits for no one.",
-              "tool_use_id": "toolu_011QoBH1iqmrqWodgwm4pteQ"
+              "tool_use_id": "toolu_011QoBH1iqmrqWodgwm4pteQ",
+              "type": "tool_result"
             }
-          ]
+          ],
+          "role": "user"
         }
       ],
       "n": 8

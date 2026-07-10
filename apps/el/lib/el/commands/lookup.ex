@@ -21,7 +21,7 @@ defmodule El.Commands.Lookup do
 
   defp lookup(key), do: lookup(ElitaRegistry, key)
 
-  defp fallback([], fallback_key), do: lookup(fallback_key)
+  defp fallback([], key), do: lookup(key)
   defp fallback(result, _), do: result
 
   defp dispatch([], agent, _msg), do: puts("unknown: #{agent}")

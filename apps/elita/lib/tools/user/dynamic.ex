@@ -19,12 +19,12 @@ defmodule Tools.User.Load.Schema do
     join(@app_root, "agents/tools/#{name}.md")
   end
 
-  defp load(file_path) do
-    gather(exists?(file_path), file_path)
+  defp load(file) do
+    gather(exists?(file), file)
   end
 
-  defp gather(true, file_path), do: parse(file_path)
-  defp gather(false, _file_path), do: nil
+  defp gather(true, file), do: parse(file)
+  defp gather(false, _file), do: nil
 end
 
 defmodule Tools.User do

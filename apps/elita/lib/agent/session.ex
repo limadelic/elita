@@ -6,6 +6,7 @@ defmodule Agent.Session do
   import Keyword, only: [fetch!: 2, get: 3]
   import Map, only: [put: 3]
   import String, only: [downcase: 1]
+  import Tape, only: [handle: 3]
 
   def start_link(opts) do
     folder = fetch!(opts, :folder)
@@ -39,7 +40,8 @@ defmodule Agent.Session do
 
   @impl true
   def handle_call({:ask, message}, _from, state) do
-    response = state.runner.(message, state.folder)
+    body = %{messages: [%{content: message}]}
+    response = handle(body, state.name, fn -> state.runner.(message, state.folder) end)
     {:reply, {:ok, response}, state}
   end
 

@@ -9,9 +9,9 @@ defmodule El.Commands.Address.World do
 
   def build(nodes \\ &peers/0) do
     folders = load() |> map(&entry/1)
-    unique_files = gather(folders)
+    files = gather(folders)
     remote = nodes.() |> map(&remote/1)
-    folders ++ unique_files ++ remote
+    folders ++ files ++ remote
   end
 
   defp gather(folders) do
@@ -44,8 +44,8 @@ defmodule El.Commands.Address.World do
 
   defp file(folder, filename) do
     name = trim_trailing(filename, ".exs")
-    file_path = join(folder, filename)
-    %{name: name, path: folder, file_path: file_path, kind: :file}
+    path = join(folder, filename)
+    %{name: name, path: folder, file_path: path, kind: :file}
   end
 
   defp peers do

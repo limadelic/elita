@@ -2,8 +2,8 @@ defmodule El.Pty do
   @moduledoc false
   use GenServer
 
-  import Keyword, except: [size: 1]
-  import Process, except: [alias: 1, info: 2]
+  import Keyword, only: [drop: 2, get: 2, get: 3]
+  import Process, except: [alias: 1, info: 2, get: 2, get: 3]
 
   import El.Pty.Init, only: [call: 1]
   import El.Pty.Size, only: [default: 0]
@@ -17,24 +17,34 @@ defmodule El.Pty do
     GenServer.cast(name, {:inject, message})
   end
 
-  def tap(name, pid) do
+  def watch(name, pid) do
     GenServer.call(name, {:tap, pid})
   end
 
-  def untap(name, pid) do
+  def unwatch(name, pid) do
     GenServer.call(name, {:untap, pid})
   end
 
-  def run(name, opts \\ []) do
+  def launch(name, opts \\ []) do
     cmd = get(opts, :cmd, "claude --dangerously-skip-permissions")
-    full_opts = finalize(opts, cmd)
-    {:ok, pid} = boot(name, cmd, full_opts)
+    {:ok, pid} = boot(name, cmd, finalize(opts, cmd))
+    invoke(get(opts, :resize), pid)
+    pid
+  end
+
+  def wait(pid) do
     await(pid)
   end
 
+  def run(name, opts \\ []) do
+    launch(name, opts) |> wait()
+  end
+
+  defp invoke(nil, _pid), do: :ok
+  defp invoke(resizer, pid), do: resizer.(pid)
+
   defp finalize(opts, _cmd) do
-    clean = opts |> drop([:input, :taps, :cmd])
-    clean ++ defaults(opts)
+    drop(opts, [:input, :taps, :cmd, :resize]) ++ defaults(opts)
   end
 
   defp defaults(opts) do

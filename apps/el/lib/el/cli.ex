@@ -9,6 +9,7 @@ defmodule El.CLI do
   import El.Distribution, only: [daemon: 0]
   import El.Command.Ls, only: [list: 1]
   import El.REPL, only: [run: 1]
+  import El.Log, only: [setup: 2]
 
   @usage """
   Usage:
@@ -27,8 +28,18 @@ defmodule El.CLI do
 
   def main(argv) do
     ensure_all_started(:elita)
-    argv |> parse() |> exec()
+    argv |> route() |> exec()
   end
+
+  defp route(argv) do
+    name = name(argv)
+    setup(name, argv)
+    argv |> parse()
+  end
+
+  defp name(["claude", name | _]), do: name
+  defp name(["claude"]), do: "default"
+  defp name(_), do: "default"
 
   defp parse(["ask", agent, msg]), do: {:ask, nil, agent, msg}
   defp parse(["tell", agent, msg]), do: {:tell, nil, agent, msg}

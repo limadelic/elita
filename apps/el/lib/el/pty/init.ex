@@ -8,24 +8,24 @@ defmodule El.Pty.Init do
 
   def call(cfg) do
     size = cfg[:get_size].()
-    {pty, os_pid, out} = boot(cfg, size)
-    finish(cfg, pty, size, out, os_pid)
+    {pty, child, out} = boot(cfg, size)
+    finish(cfg, pty, size, out, child)
   end
 
   defp boot(cfg, size) do
-    {pty, os_pid} = pair(cfg[:port], cfg[:cmd], size)
-    {:ok, out} = cfg[:file].open("/dev/tty", [:write, :binary, :raw])
-    {pty, os_pid, out}
+    {pty, child} = pair(cfg[:port], cfg[:cmd], size)
+    {:ok, out} = cfg[:file].open("/dev/stdout", [:write, :binary])
+    {pty, child, out}
   end
 
-  defp finish(cfg, pty, size, out, os_pid) do
+  defp finish(cfg, pty, size, out, child) do
     setup(cfg[:file], pty, size)
     watch(pty)
-    core(pty, out, os_pid) |> attach(cfg)
+    core(pty, out, child) |> attach(cfg)
   end
 
-  defp core(pty, out, os_pid) do
-    %{pty: pty, out: out, os_pid: os_pid}
+  defp core(pty, out, child) do
+    %{pty: pty, out: out, child: child}
   end
 
   defp attach(state, cfg) do
@@ -38,8 +38,8 @@ defmodule El.Pty.Init do
 
   defp pair(port, cmd, size) do
     pty = launch(port, cmd, size)
-    os_pid = port.info(pty, :os_pid)
-    {pty, pid(os_pid)}
+    child = port.info(pty, :os_pid)
+    {pty, pid(child)}
   end
 
   defp pid({:os_pid, pid_val}), do: pid_val
@@ -53,14 +53,27 @@ defmodule El.Pty.Init do
 
   defp args({rows, cols}, cmd) do
     stty = "stty rows #{rows} cols #{cols}; stty raw -echo -isig;"
+    argv(:os.type(), stty, cmd)
+  end
+
+  defp argv({:unix, :darwin}, stty, cmd) do
     ["-q", "/dev/null", "sh", "-c", "#{stty} exec #{cmd}"]
+  end
+
+  defp argv({:unix, _}, stty, cmd) do
+    ["-q", "-c", "#{stty} exec #{cmd}", "/dev/null"]
   end
 
   defp setup(file, _pty, size) do
     {:ok, fd} = file.open("/dev/tty", [:read, :binary, :raw])
     mark(size, sink(fd, file))
+    pump(file)
+  end
+
+  defp pump(file) do
     flag(:trap_exit, true)
-    spawn_link(fn -> start(file, self()) end)
+    parent = self()
+    spawn_link(fn -> start(file, parent) end)
   end
 
   defp sink(fd, file) do
@@ -83,6 +96,6 @@ defmodule El.Pty.Init do
     react(info(pty), parent, pty)
   end
 
-  defp react(false, parent, pty), do: send(parent, {pty, :closed})
+  defp react(nil, parent, pty), do: send(parent, {pty, :closed})
   defp react(_, _, _), do: :ok
 end

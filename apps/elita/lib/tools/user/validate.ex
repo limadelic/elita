@@ -30,8 +30,8 @@ defmodule Tools.User.Validate do
   defp scan({:error, _}, _, _), do: :ok
 
   defp vet(ast, allowed, name) do
-    bad_var = find(refs(ast), &bad?(&1, allowed, bound(ast)))
-    resolve(bad_var, name)
+    bad = find(refs(ast), &bad?(&1, allowed, bound(ast)))
+    resolve(bad, name)
   end
 
   defp bad?(var, allowed, bound) do

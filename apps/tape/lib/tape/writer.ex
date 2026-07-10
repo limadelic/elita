@@ -12,13 +12,13 @@ defmodule Tape.Writer do
     end)
   end
 
-  def claim(cassette_key, idx, times) do
-    key = {cassette_key, idx}
+  def claim(cassette, idx, times) do
+    key = {cassette, idx}
     get_and_update(__MODULE__, &allow(&1, key, times))
   end
 
-  def bind(cassette_key, agent, idx, times) do
-    key = {cassette_key, agent, idx}
+  def bind(cassette, agent, idx, times) do
+    key = {cassette, agent, idx}
     get_and_update(__MODULE__, &allow(&1, key, times))
   end
 

@@ -11,8 +11,8 @@ When(/^> el$/) do |*rest|
   handle(rest.first, transcript)
 end
 
-When(/^> el (\w+)$/) do |agent, *rest|
-  boot(agent)
+When(/^> el (.+)$/) do |args, *rest|
+  boot(args)
   drain
   handle(rest.first, transcript)
 end
@@ -30,6 +30,12 @@ end
 
 Then(/^print transcript$/) do
   puts "\n=== TRANSCRIPT ===\n#{transcript}\n=== END ===\n"
+end
+
+Then(/^screen shows (.+)$/) do |text|
+  unless screen.include?(text)
+    raise "Screen does not contain '#{text}':\n#{screen}"
+  end
 end
 
 private
@@ -61,7 +67,9 @@ def note(prompt, input)
 end
 
 def retrying(times)
+  first_error = nil
   yield
 rescue => e
-  (times -= 1).zero? ? (raise e) : (sleep 1 if ENV["TAPE"] == "rec"; retry)
+  first_error ||= e
+  (times -= 1).zero? ? (raise first_error) : (sleep 1 if ENV["TAPE"] == "rec"; retry)
 end
