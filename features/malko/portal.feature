@@ -7,9 +7,7 @@ Feature: Portal
       | ▐▛███▜▌                  |
       | ▝▜█████▛▘                |
       | Claude Code              |
-      | Claude Codev2.1.198      |
-      | Sonnet 5 with low effort |
-      | ~/dev/self/elita/malko   |
+      | Haiku                    |
     * > el malko
     * malko> 1+1
       | 2 |

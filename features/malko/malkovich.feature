@@ -7,17 +7,13 @@ Feature: Malkovich Malkovich
       | ▐▛███▜▌                  |
       | ▝▜█████▛▘                |
       | Claude Code              |
-      | Claude Codev2.1.198      |
-      | Sonnet 5 with low effort |
-      | ~/dev/self/elita/malko   |
+      | Haiku                    |
     * > el claude malko
       | ✳                        |
       | ▐▛███▜▌                  |
       | ▝▜█████▛▘                |
       | Claude Code              |
-      | Claude Codev2.1.198      |
-      | Sonnet 5 with low effort |
-      | ~/dev/self/elita/malko   |
+      | Haiku                    |
     * malko> malkovich knock knock
       | who's there |
     * malko> malko
