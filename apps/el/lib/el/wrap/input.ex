@@ -50,12 +50,15 @@ defmodule El.Wrap.Input do
   defp eol(line, rest, parent, agent_name, eol) do
     result = check(line, parent, agent_name)
     {data, new_line} = feed(rest, [], parent, agent_name)
+    finalize(handled?(result), eol, data, new_line)
+  end
 
-    if handled?(result) do
-      {"", new_line}
-    else
-      {eol <> data, new_line}
-    end
+  defp finalize(true, _eol, _data, new_line) do
+    {"", new_line}
+  end
+
+  defp finalize(false, eol, data, new_line) do
+    {eol <> data, new_line}
   end
 
   defp check(line, parent, agent_name) do
