@@ -50,7 +50,7 @@ defmodule El.Wrap.Input do
     result = check(line, parent, agent_name)
     {data, new_line} = feed(rest, [], parent, agent_name)
     if handled?(result) do
-      {eol, new_line}
+      {"", new_line}
     else
       {eol <> data, new_line}
     end
