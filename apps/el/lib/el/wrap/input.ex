@@ -81,14 +81,16 @@ defmodule El.Wrap.Input do
 
   defp execute(nil, _message, _agent_name), do: :forward
   defp execute(puppet_pid, message, agent_name) do
-    Task.start(fn ->
-      try do
-        ask(puppet_pid, message) |> puts()
-        puts("#{agent_name}> ")
-      rescue
-        _ -> :ok
-      end
-    end)
+    Task.start(fn -> converse(puppet_pid, message, agent_name) end)
     {:handled}
+  end
+
+  defp converse(puppet_pid, message, agent_name) do
+    try do
+      ask(puppet_pid, message) |> puts()
+      puts("#{agent_name}> ")
+    rescue
+      _ -> :ok
+    end
   end
 end
