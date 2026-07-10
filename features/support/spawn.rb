@@ -39,7 +39,7 @@ module Spawn
       "CASSETTE_DIR" => dir,
       "MIX_ENV" => "test"
     }
-    env["PATH"] = "#{@scratch}/bin:#{ENV['PATH']}" if @scratch
+    env["PATH"] = [(@scratch ? "#{@scratch}/bin" : nil), ENV["PATH"]].compact.join(":")
     env["PUPPET_NAME"] = puppet_name if puppet_name
     @reader, @writer, @pid = PTY.spawn(env, "/bin/sh", "-c", cmd)
     wait(prompt)
