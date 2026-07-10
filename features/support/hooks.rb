@@ -25,20 +25,28 @@ end
 
 Before do |scenario|
   tape_tag = scenario.tags.map(&:name).find { |t| t.start_with?("@tape:") }
-  @cassette = tape_tag ? tape_tag.sub(
-    "@tape:",
-    ""
-  ) : File.basename(scenario.location.file, ".feature")
-  @scratch = Dir.mktmpdir
-  write_stub_claude
+  @cassette = tape_tag ? tape_tag.sub("@tape:", "") : File.basename(scenario.location.file, ".feature")
   @tape_on_miss = scenario.tags.map(&:name).find { |t| t.start_with?("@tape_on_miss:") }
   @tape_on_miss = @tape_on_miss ? @tape_on_miss.sub("@tape_on_miss:", "") : nil
   init
   start_stub_server if @tape_on_miss == "live"
 end
 
-After do
+Before('@malko') do
+  @scratch = Dir.mktmpdir
+  write_stub_claude
+end
+
+After do |scenario|
   ensure_stub_server_stopped
+  reap_puppet_processes
+end
+
+After('@malko') do
+  FileUtils.rm_rf(@scratch) if @scratch && File.exist?(@scratch)
+end
+
+def reap_puppet_processes
   if @pid
     begin
       pgid = Process.getpgid(@pid)
@@ -54,12 +62,10 @@ After do
     rescue Errno::ESRCH
     end
 
-    # Kill any orphaned script processes from this cassette
     kill_orphaned_scripts
   end
   @reader.close if @reader && !@reader.closed?
   @writer.close if @writer && !@writer.closed?
-  FileUtils.rm_rf(@scratch) if @scratch && File.exist?(@scratch)
 end
 
 def kill_orphaned_scripts

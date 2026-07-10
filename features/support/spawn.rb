@@ -1,27 +1,33 @@
 module Spawn
+  def work_dir
+    @scratch || "apps/elita/agents/elita"
+  end
+
+  def el_path
+    @scratch ? File.join(@scratch, 'bin', 'el') : "../../../../apps/el/el"
+  end
+
   def spawn(args)
-    el_symlink = File.join(@scratch, 'bin', 'el')
     (
-      "cd #{@scratch} && " +
+      "cd #{work_dir} && " +
       "TAPE=#{ENV['TAPE'] || 'replay'} " +
       "CASSETTE=#{@cassette} " +
       "CASSETTE_DIR=#{dir} " +
       "MIX_ENV=test " +
-      "#{el_symlink} " +
+      "#{el_path} " +
       "#{args}"
     ).strip
   end
 
   def command(args)
     tape = ENV["TAPE"] || "replay"
-    el_symlink = File.join(@scratch, 'bin', 'el')
     (
-      "cd #{@scratch} && " +
+      "cd #{work_dir} && " +
       "TAPE=#{tape} " +
       "CASSETTE=#{@cassette} " +
       "CASSETTE_DIR=#{dir} " +
       "MIX_ENV=test " +
-      "#{el_symlink} " +
+      "#{el_path} " +
       "#{args}"
     ).strip
   end
@@ -31,9 +37,9 @@ module Spawn
       "TAPE" => ENV["TAPE"] || "replay",
       "CASSETTE" => @cassette,
       "CASSETTE_DIR" => dir,
-      "MIX_ENV" => "test",
-      "PATH" => "#{@scratch}/bin:#{ENV['PATH']}"
+      "MIX_ENV" => "test"
     }
+    env["PATH"] = "#{@scratch}/bin:#{ENV['PATH']}" if @scratch
     @reader, @writer, @pid = PTY.spawn(env, "/bin/sh", "-c", cmd)
     wait(prompt)
   end
@@ -56,7 +62,8 @@ module Spawn
     @transcript_stripped = ""
     @screen = Screen.new
     cmd = spawn(args)
-    prompt = args.split.first || "el"
+    words = args.split
+    prompt = words.length > 1 ? words.last : (words.first || "el")
     launch(cmd, prompt)
   end
 
