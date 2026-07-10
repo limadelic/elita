@@ -5,7 +5,7 @@ defmodule El.Wrap.Input do
   import String
   import El.Distribution, only: [target: 1]
   import El.Puppet, only: [ask: 2]
-  import IO, only: [puts: 1]
+  import IO, only: [write: 2]
 
   def open(parent, agent_name \\ nil) do
     {:ok, pid} = start_link(fn -> {[], parent, agent_name} end)
@@ -90,12 +90,25 @@ defmodule El.Wrap.Input do
   defp execute(nil, _message, _agent_name), do: :forward
 
   defp execute(puppet_pid, message, agent_name) do
-    Task.start(fn -> converse(puppet_pid, message, agent_name) end)
+    converse(puppet_pid, message, agent_name)
     {:handled}
+  rescue
+    _ -> :forward
   end
 
   defp converse(puppet_pid, message, agent_name) do
-    ask(puppet_pid, message) |> puts()
-    puts("#{agent_name}> ")
+    response = ask(puppet_pid, message)
+    lines = response |> String.split("\n")
+    content = lines |> drop(-1) |> join("\n")
+    output = "#{content}\n#{agent_name}> "
+    safe_output(output)
+  rescue
+    _ -> :ok
+  end
+
+  defp safe_output(data) do
+    write(:stdio, data)
+  rescue
+    _ -> :ok
   end
 end
