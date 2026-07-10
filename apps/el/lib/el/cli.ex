@@ -32,18 +32,12 @@ defmodule El.CLI do
 
   defp route(argv) do
     name = session_name(argv)
-    El.Log.setup(name)
+    El.Log.setup(name, argv)
     argv |> parse()
   end
 
-  defp session_name(["claude" | t]) do
-    case t do
-      [] -> "default"
-      [name | _] -> name
-      _ -> "default"
-    end
-  end
-
+  defp session_name(["claude", name | _]), do: name
+  defp session_name(["claude"]), do: "default"
   defp session_name(_), do: "default"
 
   defp parse(["ask", agent, msg]), do: {:ask, nil, agent, msg}
