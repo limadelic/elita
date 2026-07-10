@@ -3,8 +3,7 @@ module Stub
     bin_dir = File.join(@scratch, 'bin')
     Dir.mkdir(bin_dir) unless Dir.exist?(bin_dir)
 
-    splash_path = File.expand_path('fixtures/splash.txt', __dir__)
-    splash = File.read(splash_path)
+    splash = cassette_screen || fixture_splash
 
     claude_stub = File.join(bin_dir, 'claude')
     File.write(claude_stub, stub_script(splash))
@@ -16,6 +15,27 @@ module Stub
   end
 
   private
+
+  def cassette_screen
+    cassette_path = File.join(
+      File.expand_path('../cassettes', __dir__),
+      "#{@cassette}.json"
+    )
+    return nil unless File.exist?(cassette_path)
+
+    begin
+      data = JSON.parse(File.read(cassette_path))
+      entry = data.find { |e| e.is_a?(Hash) && e.key?('screen') }
+      entry&.fetch('screen', nil)
+    rescue => e
+      nil
+    end
+  end
+
+  def fixture_splash
+    splash_path = File.expand_path('fixtures/splash.txt', __dir__)
+    File.read(splash_path)
+  end
 
   def stub_script(splash)
     <<~SCRIPT
