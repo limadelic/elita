@@ -3,8 +3,7 @@ defmodule El.Commands.Claude do
   import :os, only: [cmd: 1]
   import El.Pty, only: [launch: 2, wait: 1]
   import String, only: [to_atom: 1]
-  import IO, only: [puts: 1]
-  import System, only: [halt: 1, get_env: 2]
+  import System, only: [get_env: 2]
   import El.Commands.Size, only: [size: 0]
   import File, only: [write!: 2, cwd!: 0]
   import Path, only: [basename: 1]
@@ -46,16 +45,9 @@ defmodule El.Commands.Claude do
   end
 
   defp go(name, deps) do
-    validate(Keyword.get(deps, :distribution_start).(name), name)
     boot(to_atom(name), deps)
+    Task.start_link(fn -> Keyword.get(deps, :distribution_start).(name) end)
   end
-
-  defp validate(:taken, name) do
-    puts("session #{name} already live — el tell #{name} <msg>, or /exit it")
-    halt(1)
-  end
-
-  defp validate(_, _), do: :ok
 
   defp boot(name, deps) do
     setup(deps)
