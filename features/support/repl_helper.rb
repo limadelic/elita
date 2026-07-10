@@ -19,7 +19,11 @@ module ReplHelper
 
     @writer.write("#{input}\n")
     @writer.flush
-    wait(prompt) unless input == "/exit"
+    if input == "/exit"
+      raise "Session still alive" unless closed?
+    else
+      wait(prompt)
+    end
   end
 
   def transcript
