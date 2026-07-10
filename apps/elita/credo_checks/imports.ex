@@ -54,18 +54,14 @@ defmodule Elita.Credo.Imports do
 
   defp check_module({:__aliases__, _meta, [_,_|_] = parts}, _arity, meta, issues, ctx) do
     name = Enum.join(Enum.map(parts, &to_string/1), ".")
-    maybe_flag_nested(name, meta, issues, ctx)
+    flag_nested(builtin?(name), name, meta, issues, ctx)
   end
 
   defp check_module(module, _arity, _meta, issues, _ctx) when not is_atom(module),
        do: issues
 
   defp check_module(module, _arity, meta, issues, ctx) when is_atom(module) do
-    maybe_flag_atomic(module, meta, issues, ctx)
-  end
-
-  defp maybe_flag_nested(name, meta, issues, ctx) do
-    flag_nested(builtin?(name), name, meta, issues, ctx)
+    flag_atomic(special?(module), module, meta, issues, ctx)
   end
 
   defp flag_nested(true, _name, _meta, issues, _ctx), do: issues
@@ -76,10 +72,6 @@ defmodule Elita.Credo.Imports do
   defp flag_if_listed(true, _name, _meta, issues, _ctx), do: issues
   defp flag_if_listed(false, name, meta, issues, ctx) do
     [issue(name, meta, ctx.filename) | issues]
-  end
-
-  defp maybe_flag_atomic(module, meta, issues, ctx) do
-    flag_atomic(special?(module), module, meta, issues, ctx)
   end
 
   defp flag_atomic(true, _module, _meta, issues, _ctx), do: issues
