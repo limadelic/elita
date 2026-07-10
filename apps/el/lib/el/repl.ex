@@ -75,11 +75,24 @@ defmodule El.REPL do
 
   defp handle(_agent, _puppet, "/exit"), do: :stop
 
-  defp handle(_agent, puppet, input) when is_pid(puppet) do
-    ask(puppet, input) |> puts()
+  defp handle(agent, puppet, input) when is_pid(puppet) do
+    route(agent, puppet, input) |> puts()
   end
 
   defp handle(agent, nil, input) do
     dispatch(agent, input, :ask) |> puts()
+  end
+
+  defp route(a, p, i), do: route(a, p, i, String.split(i, " ", parts: 2))
+  defp route(_, p, i, [_w]), do: ask(p, i)
+  defp route(a, p, _i, [w, r]) when a != w, do: dispatch(p, w, r, lookup(w))
+  defp route(_, p, _, [w, r]), do: ask(p, w <> " " <> r)
+  defp dispatch(_, _, r, pid) when is_pid(pid), do: ask(pid, r)
+  defp dispatch(p, w, r, _), do: ask(p, w <> " " <> r)
+
+  defp lookup(word) do
+    :global.whereis_name({word, :puppet})
+  rescue
+    _ -> nil
   end
 end
