@@ -19,7 +19,7 @@ module ReplHelper
 
     @writer.write("#{input}\n")
     @writer.flush
-    wait(prompt)
+    wait(prompt) unless input == "/exit"
   end
 
   def transcript
@@ -40,7 +40,40 @@ module ReplHelper
     @transcript_stripped << stripped if @transcript_stripped
   end
 
+  def closed?
+    timeout = Time.now + 2
+    loop do
+      break if reader_eof?
+      break if process_exited?
+      return false if Time.now > timeout
+
+      sleep 0.05
+    end
+    true
+  end
+
   private
+
+  def reader_eof?
+    return false unless @reader
+
+    ready = IO.select([@reader], nil, nil, 0.1)
+    return false unless ready
+
+    @reader.readpartial(1)
+    false
+  rescue EOFError
+    true
+  end
+
+  def process_exited?
+    return false unless @pid
+
+    Process.wait(@pid, Process::WNOHANG)
+    true
+  rescue Errno::ECHILD
+    true
+  end
 
   def wait(prompt_word)
     output = ""

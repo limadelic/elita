@@ -32,6 +32,10 @@ Then(/^print transcript$/) do
   puts "\n=== TRANSCRIPT ===\n#{transcript}\n=== END ===\n"
 end
 
+Then(/^session closed$/) do
+  raise "Session still alive" unless closed?
+end
+
 private
 
 def handle(table, output)
