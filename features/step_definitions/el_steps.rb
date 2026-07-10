@@ -11,8 +11,8 @@ When(/^> el$/) do |*rest|
   handle(rest.first, transcript)
 end
 
-When(/^> el (\w+)$/) do |agent, *rest|
-  boot(agent)
+When(/^> el (.+)$/) do |args, *rest|
+  boot(args)
   drain
   handle(rest.first, transcript)
 end
