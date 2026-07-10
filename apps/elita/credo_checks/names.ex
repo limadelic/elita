@@ -12,8 +12,11 @@ defmodule Elita.Credo.Names do
   @base %Credo.Issue{category: :refactor, exit_status: 2, priority: :normal}
   @msg_mod "Module segment is compound; use single words."
   @msg_fun "Function is compound; use single words."
-  @allow [:param_defaults, :explanations, :init, :terminate, :handle_call, :handle_cast,
-          :handle_info, :start_link, :start, :stop, :child_spec, :format_status, :moduledoc, :doc]
+  @allow [
+    :param_defaults, :explanations, :init, :terminate, :handle_call,
+    :handle_cast, :handle_info, :start_link, :start, :stop,
+    :child_spec, :format_status, :moduledoc, :doc
+  ]
 
   def explanations, do: [check: @check]
   def run(file, params) do
@@ -38,7 +41,8 @@ defmodule Elita.Credo.Names do
     do: {ast, capture(lhs, issues, filename, meta)}
   defp check(ast, issues, _filename, _allow), do: {ast, issues}
   defp compose(parts, meta, filename, issues) do
-    parts |> filter(&compound?/1) |> map(&issue("#{&1}: #{@msg_mod}", meta, filename)) |> reverse() |> concat(issues)
+    m = &issue("#{&1}: #{@msg_mod}", meta, filename)
+    parts |> filter(&compound?/1) |> map(m) |> reverse() |> concat(issues)
   end
   defp visit({ast, issues, meta, name, filename, allow}),
     do: result(state(name, allow), {ast, meta, name, filename, issues})
@@ -72,5 +76,10 @@ defmodule Elita.Credo.Names do
   defp ok(false, _name, issues, _filename, _meta), do: issues
 
   defp issue(msg, meta, filename),
-    do: @base |> put(:check, __MODULE__) |> merge(%{message: msg, line_no: meta[:line], column: meta[:column], filename: filename})
+    do: @base |> put(:check, __MODULE__) |> merge(attrs(msg, meta, filename))
+
+  defp attrs(msg, meta, filename) do
+    %{message: msg, line_no: meta[:line],
+      column: meta[:column], filename: filename}
+  end
 end

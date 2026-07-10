@@ -1,5 +1,4 @@
 defmodule El.Distribution do
-  @moduledoc false
   import Application, only: [ensure_all_started: 1]
   import El.Host, only: [host: 0]
   import El.Peers, only: [load: 0]
@@ -36,9 +35,11 @@ defmodule El.Distribution do
 
   defp locate(name) do
     :global.sync()
-    result = :global.whereis_name({name, :puppet})
-    if result == :undefined, do: find(name), else: result
+    :global.whereis_name({name, :puppet}) |> reply(name)
   end
+
+  defp reply(:undefined, name), do: find(name)
+  defp reply(pid, _name), do: pid
 
   defp find(name) do
     lookup(ElitaRegistry, name) |> extract()
