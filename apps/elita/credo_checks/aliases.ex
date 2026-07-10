@@ -12,18 +12,18 @@ defmodule Elita.Credo.Aliases do
 
   def run(%Credo.SourceFile{} = source_file, _params) do
     filename = source_file.filename
-    prewalk(source_file, &check_alias(&1, &2, filename))
+    prewalk(source_file, &flag(&1, &2, filename))
   end
 
-  defp check_alias({:alias, meta, _args} = ast, issues, filename) do
-    {ast, [create_issue(meta, filename) | issues]}
+  defp flag({:alias, meta, _args} = ast, issues, filename) do
+    {ast, [issue(meta, filename) | issues]}
   end
 
-  defp check_alias(ast, issues, _filename) do
+  defp flag(ast, issues, _filename) do
     {ast, issues}
   end
 
-  defp create_issue(meta, filename) do
+  defp issue(meta, filename) do
     %Credo.Issue{category: :refactor, exit_status: 2, check: __MODULE__,
                  message: @msg, line_no: meta[:line], column: meta[:column],
                  priority: :normal, filename: filename}

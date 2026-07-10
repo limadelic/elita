@@ -1,11 +1,11 @@
 defmodule Tape.Record do
-  import Tape.Store, only: [append_live: 2]
+  import Tape.Store, only: [add: 2]
   import Map, only: [get: 3]
   import List, only: [last: 1]
 
   def record(body, name, fun) do
     response = fun.()
-    append_live(sparse(body, name), response)
+    add(sparse(body, name), response)
     response
   end
 
@@ -15,9 +15,9 @@ defmodule Tape.Record do
   end
 
   defp build(name, messages) do
-    %{"agent" => name, "messages" => last_only(messages), "n" => length(messages)}
+    %{"agent" => name, "messages" => recent(messages), "n" => length(messages)}
   end
 
-  defp last_only([]), do: []
-  defp last_only(messages), do: [last(messages)]
+  defp recent([]), do: []
+  defp recent(messages), do: [last(messages)]
 end

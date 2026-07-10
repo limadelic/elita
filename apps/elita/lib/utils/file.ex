@@ -13,8 +13,8 @@ defmodule Utils.File do
 
   def file(name) do
     paths(name)
-    |> find_value(&safe_read/1)
-    |> handle_missing(name)
+    |> find_value(&fetch/1)
+    |> ensure(name)
   end
 
   defp paths(name) do
@@ -26,15 +26,15 @@ defmodule Utils.File do
     wildcard(join(@app_root, "agents/**/#{name}"))
   end
 
-  defp handle_missing(nil, name), do: "file not found: #{name}"
-  defp handle_missing(content, _name), do: content
+  defp ensure(nil, name), do: "file not found: #{name}"
+  defp ensure(content, _name), do: content
 
   defp concat(path, name), do: "#{path}#{name}"
 
-  defp safe_read({:ok, content}), do: content
-  defp safe_read({:error, _}), do: nil
+  defp fetch({:ok, content}), do: content
+  defp fetch({:error, _}), do: nil
 
-  defp safe_read(path) do
-    read(path) |> safe_read()
+  defp fetch(path) do
+    read(path) |> fetch()
   end
 end

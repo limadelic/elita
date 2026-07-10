@@ -3,17 +3,17 @@ defmodule El.Pty.Handler do
   import El.Pty.Dsr
   import El.Pty.Size
 
-  def process_input(_port, _pty, :drop), do: :ok
-  def process_input(port, pty, transformed), do: port.command(pty, transformed)
+  def write(_port, _pty, :drop), do: :ok
+  def write(port, pty, transformed), do: port.command(pty, transformed)
 
-  def handle_dsr_response(port, pty, data, _state) do
-    {rows, cols} = get_default()
-    send_if_response(port, pty, scan(data, rows, cols, ""))
+  def respond(port, pty, data, _state) do
+    {rows, cols} = default()
+    send(port, pty, scan(data, rows, cols, ""))
   end
 
-  defp send_if_response(port, pty, {response, _}) when response != "" do
+  defp send(port, pty, {response, _}) when response != "" do
     port.command(pty, response)
   end
 
-  defp send_if_response(_, _, _), do: :ok
+  defp send(_, _, _), do: :ok
 end

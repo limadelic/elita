@@ -14,15 +14,15 @@ defmodule Tools.Sys.Spawn do
   end
 
   def exec(_, %{"name" => %{"name" => name} = inner}, state) do
-    do_spawn(name, fetch_configs(get(inner, "configs"), name), state)
+    run(name, configs(get(inner, "configs"), name), state)
   end
 
   def exec(_, %{"name" => name} = args, state) do
-    do_spawn(name, get(args, "configs", [name]), state)
+    run(name, get(args, "configs", [name]), state)
   end
 
   def exec(_, %{"configs" => [name | _] = configs}, state) do
-    do_spawn(name, configs, state)
+    run(name, configs, state)
   end
 
   defp help(_state) do
@@ -54,15 +54,15 @@ defmodule Tools.Sys.Spawn do
     "Configs for the agent, defaults to [name]"
   end
 
-  defp fetch_configs([_ | _] = list, _name) do
+  defp configs([_ | _] = list, _name) do
     list
   end
 
-  defp fetch_configs(_other, name) do
+  defp configs(_other, name) do
     [name]
   end
 
-  defp do_spawn(name, configs, state) do
+  defp run(name, configs, state) do
     log(name, configs)
     started(spawn(name, configs), name)
     {"spawned", state}

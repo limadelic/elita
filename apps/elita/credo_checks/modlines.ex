@@ -16,39 +16,39 @@ defmodule Elita.Credo.Modlines do
   end
 
   def run(source_file, params) do
-    cfg = make_config(source_file, params)
-    prewalk(source_file, &check_module(&1, &2, cfg))
+    cfg = config(source_file, params)
+    prewalk(source_file, &visit(&1, &2, cfg))
   end
 
-  defp make_config(source_file, params) do
+  defp config(source_file, params) do
     %{max_lines: Keyword.get(params, :max_lines, 100),
       filename: source_file.filename,
       source: File.read!(source_file.filename)}
   end
 
-  defp check_module({:defmodule, meta, [_ | _]} = ast, issues, cfg) do
-    {ast, check_size(meta, issues, cfg)}
+  defp visit({:defmodule, meta, [_ | _]} = ast, issues, cfg) do
+    {ast, measure(meta, issues, cfg)}
   end
 
-  defp check_module(ast, issues, _cfg) do
+  defp visit(ast, issues, _cfg) do
     {ast, issues}
   end
 
-  defp check_size(meta, issues, cfg) do
+  defp measure(meta, issues, cfg) do
     meta
-    |> find_body_lines(cfg.source)
-    |> add_issue(cfg.max_lines, meta, issues, cfg.filename)
+    |> lines(cfg.source)
+    |> append(cfg.max_lines, meta, issues, cfg.filename)
   end
 
-  defp add_issue({:ok, lines}, max, meta, issues, filename)
+  defp append({:ok, lines}, max, meta, issues, filename)
        when lines > max do
-    [create_issue(lines, max, meta, filename) | issues]
+    [item(lines, max, meta, filename) | issues]
   end
 
-  defp add_issue({:ok, _}, _, _, issues, _), do: issues
-  defp add_issue(:error, _, _, issues, _), do: issues
+  defp append({:ok, _}, _, _, issues, _), do: issues
+  defp append(:error, _, _, issues, _), do: issues
 
-  defp create_issue(body_lines, max_lines, meta, filename) do
-    issue_for(__MODULE__, "Module", body_lines, max_lines, {meta, filename})
+  defp item(body_lines, max_lines, meta, filename) do
+    flag(__MODULE__, "Module", body_lines, max_lines, {meta, filename})
   end
 end

@@ -16,48 +16,44 @@ defmodule Elita.Credo.Funclines do
   end
 
   def run(source_file, params) do
-    cfg = make_config(source_file, params)
-    prewalk(source_file, &check_function(&1, &2, cfg))
+    cfg = config(source_file, params)
+    prewalk(source_file, &check(&1, &2, cfg))
   end
 
-  defp make_config(source_file, params) do
+  defp config(source_file, params) do
     %{max_lines: Keyword.get(params, :max_lines, 5),
       filename: source_file.filename,
       source: File.read!(source_file.filename)}
   end
 
-  defp check_function({type, meta, [_head | _tail]} = ast, issues, cfg)
+  defp check({type, meta, [_head | _tail]} = ast, issues, cfg)
        when type in [:def, :defp, :defmacro] do
-    {ast, process_function(ast, issues, meta, cfg)}
+    {ast, process(ast, issues, meta, cfg)}
   end
 
-  defp check_function(ast, issues, _cfg) do
+  defp check(ast, issues, _cfg) do
     {ast, issues}
   end
 
-  defp process_function(ast, issues, meta, cfg) do
-    handle_body(is_receive_body?(ast), issues, meta, cfg)
+  defp process(ast, issues, meta, cfg) do
+    handle(receive?(ast), issues, meta, cfg)
   end
 
-  defp handle_body(true, issues, _meta, _cfg), do: issues
-  defp handle_body(false, issues, meta, cfg) do
+  defp handle(true, issues, _meta, _cfg), do: issues
+  defp handle(false, issues, meta, cfg) do
     meta
-    |> find_body_lines(cfg.source)
-    |> add_issue(cfg.max_lines, meta, issues, cfg.filename)
+    |> lines(cfg.source)
+    |> assess(cfg.max_lines, meta, issues, cfg.filename)
   end
 
-  defp is_receive_body?({_type, _meta, [_head | [[do: {:receive, _, _}]]]}), do: true
-  defp is_receive_body?(_), do: false
+  defp receive?({_type, _meta, [_head | [[do: {:receive, _, _}]]]}), do: true
+  defp receive?(_), do: false
 
-  defp add_issue({:ok, lines}, max, meta, issues, filename)
+  defp assess({:ok, lines}, max, meta, issues, filename)
        when lines > max do
-    [create_issue(lines, max, meta, filename) | issues]
+    [flag(__MODULE__, "Function", lines, max, {meta, filename}) | issues]
   end
 
-  defp add_issue({:ok, _}, _, _, issues, _), do: issues
-  defp add_issue(:error, _, _, issues, _), do: issues
-
-  defp create_issue(body_lines, max_lines, meta, filename) do
-    issue_for(__MODULE__, "Function", body_lines, max_lines, {meta, filename})
-  end
+  defp assess({:ok, _}, _, _, issues, _), do: issues
+  defp assess(:error, _, _, issues, _), do: issues
 end

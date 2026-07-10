@@ -6,7 +6,7 @@ defmodule El.Commands.Ask do
   import String, only: [contains?: 2, to_atom: 1]
   import Keyword, only: [get: 3]
   import El.Distribution, only: [start: 0]
-  import El.Commands.Tell, only: [remote_target: 2, remote_unreachable: 2]
+  import El.Commands.Tell, only: [target: 2, unreachable: 2]
   import Node, only: [connect: 1]
 
   def ask(agent, msg, tool \\ nil, opts \\ []) do
@@ -36,8 +36,8 @@ defmodule El.Commands.Ask do
   end
 
   defp relay(%{agent: agent, msg: msg, tool: tool, env: env, opts: opts}) do
-    target = remote_target(agent, env_module: env)
-    transmit(target, {agent, msg, tool, env, opts})
+    t = target(agent, env_module: env)
+    transmit(t, {agent, msg, tool, env, opts})
   end
 
   defp transmit(nil, {agent, msg, tool, _, opts}) do
@@ -69,7 +69,7 @@ defmodule El.Commands.Ask do
 
   defp fallback(agent, msg, env, tool) do
     host = env.get("EL_NODE")
-    remote_unreachable(agent, host)
+    unreachable(agent, host)
     local(agent, msg, tool, [])
   end
 end

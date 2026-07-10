@@ -19,11 +19,11 @@ defmodule Cfgs do
   end
 
   defp expand(list) do
-    deps = gather_deps(list)
+    deps = gather(list)
     expand(list, deps)
   end
 
-  defp gather_deps(list) do
+  defp gather(list) do
     list
     |> map(&deps/1)
     |> flatten()

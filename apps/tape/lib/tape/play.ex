@@ -1,6 +1,6 @@
 defmodule Tape.Play do
   import Tape.Matcher, only: [contains: 2]
-  import Tape.Store, only: [load_entries: 0]
+  import Tape.Store, only: [load: 0]
   import Tape.Writer, only: [claim: 3]
   import Tape.Play.Pick, only: [agent: 1]
   import System, only: [get_env: 1]
@@ -9,7 +9,7 @@ defmodule Tape.Play do
   import Jason, only: [decode!: 1, encode!: 1]
 
   def play(body, name, fun, on_miss \\ :raise) do
-    ensure_entries(load())
+    seed(load())
     context(load(), body, name, fun, on_miss) |> answer()
   end
 
@@ -18,21 +18,20 @@ defmodule Tape.Play do
       name: name, fun: fun, on_miss: on_miss}
   end
 
-  defp load, do: load_entries()
   defp norm(body), do: normalize(request(body))
 
-  defp ensure_entries([]), do: validate_cassette(get_env("CASSETTE"))
-  defp ensure_entries(_), do: :ok
+  defp seed([]), do: guard(get_env("CASSETTE"))
+  defp seed(_), do: :ok
 
-  defp validate_cassette(nil), do: :ok
-  defp validate_cassette(cassette), do: raise("no cassette: #{cassette}")
+  defp guard(nil), do: :ok
+  defp guard(cassette), do: raise("no cassette: #{cassette}")
 
   defp answer(ctx) do
-    agent(ctx) |> handle_answer(ctx)
+    agent(ctx) |> process(ctx)
   end
 
-  defp handle_answer(nil, ctx), do: untagged(ctx, 0)
-  defp handle_answer(answer, _ctx), do: answer
+  defp process(nil, ctx), do: untagged(ctx, 0)
+  defp process(answer, _ctx), do: answer
 
   defp untagged(%{entries: entries, on_miss: :raise} = ctx, idx) when idx >= length(entries) do
     raise "tape miss: #{ctx.name} #{inspect(ctx.normalized)}"
@@ -48,29 +47,29 @@ defmodule Tape.Play do
 
   defp untagged(ctx, idx) do
     entry = at(ctx.entries, idx)
-    check_untagged(entry, ctx, idx, get(entry["q"], "agent"))
+    scan(entry, ctx, idx, get(entry["q"], "agent"))
   end
 
-  defp check_untagged(entry, ctx, idx, nil) do
-    if_match(contains(entry["q"], ctx.normalized), entry, ctx, idx)
+  defp scan(entry, ctx, idx, nil) do
+    hit(contains(entry["q"], ctx.normalized), entry, ctx, idx)
   end
 
-  defp check_untagged(_entry, ctx, idx, _agent), do: untagged(ctx, idx + 1)
+  defp scan(_entry, ctx, idx, _agent), do: untagged(ctx, idx + 1)
 
-  defp if_match(true, entry, ctx, idx) do
-    claim(cassette_key(), idx, get_times(entry))
-    |> claim_result(entry, ctx, idx)
+  defp hit(true, entry, ctx, idx) do
+    claim(tape(), idx, ticks(entry))
+    |> keep(entry, ctx, idx)
   end
 
-  defp if_match(false, _entry, ctx, idx), do: untagged(ctx, idx + 1)
+  defp hit(false, _entry, ctx, idx), do: untagged(ctx, idx + 1)
 
-  defp claim_result(true, entry, _ctx, _idx), do: entry["a"]
-  defp claim_result(false, _entry, ctx, idx), do: untagged(ctx, idx + 1)
+  defp keep(true, entry, _ctx, _idx), do: entry["a"]
+  defp keep(false, _entry, ctx, idx), do: untagged(ctx, idx + 1)
 
-  defp get_times(%{"times" => times}), do: times
-  defp get_times(_), do: 1
+  defp ticks(%{"times" => times}), do: times
+  defp ticks(_), do: 1
 
-  defp cassette_key, do: get_env("CASSETTE")
+  defp tape, do: get_env("CASSETTE")
   defp normalize(req), do: req |> encode!() |> decode!()
   defp request(body), do: take(body, [:system, :messages, :tools])
 end

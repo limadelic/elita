@@ -7,31 +7,31 @@ defmodule Tape.Store do
 
   @app_root expand("../..", __DIR__)
 
-  def read_cassette do
-    path = cassette_file()
-    read_cassette_at(path, exists?(path))
+  def read do
+    path = file()
+    get(path, exists?(path))
   end
 
-  defp read_cassette_at(path, true), do: {:new_format, decode!(read!(path))}
-  defp read_cassette_at(_path, false), do: {:new_format, []}
+  defp get(path, true), do: {:new_format, decode!(read!(path))}
+  defp get(_path, false), do: {:new_format, []}
 
-  def load_entries do
-    load_entries_from(read_cassette())
+  def load do
+    open(read())
   end
 
-  defp load_entries_from({:new_format, e}), do: normalize(e)
+  defp open({:new_format, e}), do: normalize(e)
 
   defp normalize(list) when is_list(list), do: list
   defp normalize(_), do: []
 
-  def append_live(req, response) do
+  def add(req, response) do
     acquire(fn -> live(req, response) end)
   end
 
   defp live(req, response) do
-    entries = load_entries()
-    mkdir_p(cassette_dir())
-    path = cassette_file()
+    entries = load()
+    mkdir_p(base())
+    path = file()
     save(path, entries, req, response)
   end
 
@@ -40,12 +40,12 @@ defmodule Tape.Store do
     write(path, encode!(entries ++ entry, pretty: true))
   end
 
-  defp cassette_file do
-    dir = cassette_dir()
-    join(dir, "#{get_env("CASSETTE")}.json")
+  defp file do
+    d = base()
+    join(d, "#{get_env("CASSETTE")}.json")
   end
 
-  defp cassette_dir, do: dir(get_env("CASSETTE_DIR"))
+  defp base, do: dir(get_env("CASSETTE_DIR"))
 
   defp dir(nil), do: join(@app_root, "test/cassettes")
   defp dir(path), do: path

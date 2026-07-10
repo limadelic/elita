@@ -31,17 +31,17 @@ defmodule Elita do
 
   def init({name, configs}) do
     create()
-    tape_seed()
+    seed()
     {:ok, %{name: name, config: load(configs), history: [], configs: configs}}
   end
 
-  defp tape_seed do
+  defp seed do
     get_env("TAPE")
-    |> maybe_seed()
+    |> prime()
   end
 
-  defp maybe_seed(nil), do: :ok
-  defp maybe_seed(_), do: :rand.seed(:exsss, {1, 2, 3})
+  defp prime(nil), do: :ok
+  defp prime(_), do: :rand.seed(:exsss, {1, 2, 3})
 
   def handle_call({:act, msg}, _, state) do
     act(msg, state)

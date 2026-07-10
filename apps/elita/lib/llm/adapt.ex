@@ -5,11 +5,11 @@ defmodule Adapt do
   import Jason, only: [decode: 1]
 
   def resp({:ok, %{status: 200, body: %{"message" => %{"tool_calls" => calls}}}}) do
-    map(calls, &build_tool_use/1)
+    map(calls, &build/1)
   end
 
   def resp({:ok, %{status: 200, body: %{"message" => %{"content" => content}}}}) do
-    strip_think(content)
+    strip(content)
   end
 
   def resp({:ok, %{status: code, body: body}}) do
@@ -40,52 +40,52 @@ defmodule Adapt do
     err
   end
 
-  defp build_tool_use(%{"function" => %{"name" => name, "arguments" => args}}) do
-    %{"tool_use" => %{"id" => name, "name" => name, "input" => decode_args(args)}}
+  defp build(%{"function" => %{"name" => name, "arguments" => args}}) do
+    %{"tool_use" => %{"id" => name, "name" => name, "input" => args(args)}}
   end
 
-  defp decode_args(args) when is_map(args) do
+  defp args(args) when is_map(args) do
     args
-    |> new(fn {k, v} -> {k, decode_val(v)} end)
-    |> flatten_nested()
+    |> new(fn {k, v} -> {k, parse(v)} end)
+    |> flatten()
   end
 
-  defp decode_args(args) do
+  defp args(args) do
     args
   end
 
-  defp flatten_nested(args) do
+  defp flatten(args) do
     reduce(args, %{}, fn
-      {_k, v}, acc when is_map(v) -> merge(acc, flatten_nested(v))
+      {_k, v}, acc when is_map(v) -> merge(acc, flatten(v))
       {k, v}, acc -> put(acc, k, v)
     end)
   end
 
-  defp strip_think(c) do
-    c |> replace(~r/<think>.*?<\/think>\s*/s, "") |> trim() |> maybe_fallback(c)
+  defp strip(c) do
+    c |> replace(~r/<think>.*?<\/think>\s*/s, "") |> trim() |> fallback(c)
   end
 
-  defp maybe_fallback("", c) do
+  defp fallback("", c) do
     c |> replace(~r/<\/?think>/s, "") |> trim()
   end
 
-  defp maybe_fallback(s, _) do
+  defp fallback(s, _) do
     s
   end
 
-  defp decode_val(v) when is_binary(v) do
-    v |> replace("'", "\"") |> decode() |> decode_result(v)
+  defp parse(v) when is_binary(v) do
+    v |> replace("'", "\"") |> decode() |> result(v)
   end
 
-  defp decode_val(v) do
+  defp parse(v) do
     v
   end
 
-  defp decode_result({:ok, d}, _) do
+  defp result({:ok, d}, _) do
     d
   end
 
-  defp decode_result({:error, _}, fallback) do
+  defp result({:error, _}, fallback) do
     fallback
   end
 end

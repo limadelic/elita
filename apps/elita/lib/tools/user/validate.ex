@@ -31,7 +31,7 @@ defmodule Tools.User.Validate do
 
   defp vet(ast, allowed, name) do
     bad_var = find(refs(ast), &bad?(&1, allowed, bound(ast)))
-    handle_result(bad_var, name)
+    resolve(bad_var, name)
   end
 
   defp bad?(var, allowed, bound) do
@@ -40,8 +40,8 @@ defmodule Tools.User.Validate do
 
   defp skip?(list, var), do: not member?(list, var)
 
-  defp handle_result(nil, _), do: :ok
-  defp handle_result(undefined, name), do: {:error, name, undefined}
+  defp resolve(nil, _), do: :ok
+  defp resolve(undefined, name), do: {:error, name, undefined}
 
   defp unwrap(:ok, tool), do: tool
 

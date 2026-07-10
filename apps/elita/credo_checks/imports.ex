@@ -17,70 +17,70 @@ defmodule Elita.Credo.Imports do
     defaults = param_defaults()
     allowlist = Keyword.get(params, :allowlist, Keyword.get(defaults, :allowlist))
     ctx = %{allowlist: allowlist, filename: source_file.filename}
-    prewalk(source_file, &check_call(&1, &2, ctx))
+    prewalk(source_file, &visit(&1, &2, ctx))
   end
 
-  defp check_call({:import, _meta, [{:__aliases__, _ma, _parts} | _rest]} = ast, issues,
+  defp visit({:import, _meta, [{:__aliases__, _ma, _parts} | _rest]} = ast, issues,
                   _ctx), do: {ast, issues}
 
-  defp check_call({:alias, _meta, [{:__aliases__, _ma, _parts} | _rest]} = ast, issues,
+  defp visit({:alias, _meta, [{:__aliases__, _ma, _parts} | _rest]} = ast, issues,
                   _ctx), do: {ast, issues}
 
-  defp check_call({:alias, _meta, [{{:., _dm, [{:__aliases__, _ma, _parts}, :{}]},
+  defp visit({:alias, _meta, [{{:., _dm, [{:__aliases__, _ma, _parts}, :{}]},
                                      _call_meta, _children}]} = ast,
                   issues, _ctx),
        do: {ast, issues}
 
-  defp check_call({type, _meta, [_head | _tail]} = ast, issues, _ctx)
+  defp visit({type, _meta, [_head | _tail]} = ast, issues, _ctx)
        when type in [:def, :defp, :defmacro], do: {ast, issues}
 
-  defp check_call({{:., meta, [module, _func]}, _call_meta, args} = ast, issues, ctx) do
+  defp visit({{:., meta, [module, _func]}, _call_meta, args} = ast, issues, ctx) do
     cfg = %{generated: Keyword.get(meta, :generated, false), meta: meta, module: module, arity: length(args), ctx: ctx}
     handle_call(ast, issues, cfg)
   end
 
-  defp check_call(ast, issues, _ctx), do: {ast, issues}
+  defp visit(ast, issues, _ctx), do: {ast, issues}
 
   defp handle_call(ast, issues, %{generated: true}), do: {ast, issues}
   defp handle_call(ast, issues, cfg) do
-    {ast, check_module(cfg.module, cfg.arity, cfg.meta, issues, cfg.ctx)}
+    {ast, vet(cfg.module, cfg.arity, cfg.meta, issues, cfg.ctx)}
   end
 
-  defp check_module({:__MODULE__, _meta1}, _arity, _meta2, issues, _ctx), do: issues
-  defp check_module(:__MODULE__, _arity, _meta, issues, _ctx), do: issues
+  defp vet({:__MODULE__, _meta1}, _arity, _meta2, issues, _ctx), do: issues
+  defp vet(:__MODULE__, _arity, _meta, issues, _ctx), do: issues
 
-  defp check_module({:__aliases__, _meta_alias, [module]}, _arity, _meta, issues, _ctx)
+  defp vet({:__aliases__, _meta_alias, [module]}, _arity, _meta, issues, _ctx)
        when is_atom(module), do: issues
 
-  defp check_module({:__aliases__, _meta, [_,_|_] = parts}, _arity, meta, issues, ctx) do
+  defp vet({:__aliases__, _meta, [_,_|_] = parts}, _arity, meta, issues, ctx) do
     name = Enum.map_join(parts, ".", &to_string/1)
-    flag_nested(builtin?(name), name, meta, issues, ctx)
+    nest(builtin?(name), name, meta, issues, ctx)
   end
 
-  defp check_module(module, _arity, _meta, issues, _ctx) when not is_atom(module),
+  defp vet(module, _arity, _meta, issues, _ctx) when not is_atom(module),
        do: issues
 
-  defp check_module(module, _arity, meta, issues, ctx) when is_atom(module) do
-    flag_atomic(special?(module), module, meta, issues, ctx)
+  defp vet(module, _arity, meta, issues, ctx) when is_atom(module) do
+    atom(special?(module), module, meta, issues, ctx)
   end
 
-  defp flag_nested(true, _name, _meta, issues, _ctx), do: issues
-  defp flag_nested(false, name, meta, issues, ctx) do
-    flag_if_listed(listed?(name, ctx.allowlist), name, meta, issues, ctx)
+  defp nest(true, _name, _meta, issues, _ctx), do: issues
+  defp nest(false, name, meta, issues, ctx) do
+    list(listed?(name, ctx.allowlist), name, meta, issues, ctx)
   end
 
-  defp flag_if_listed(true, _name, _meta, issues, _ctx), do: issues
-  defp flag_if_listed(false, name, meta, issues, ctx) do
+  defp list(true, _name, _meta, issues, _ctx), do: issues
+  defp list(false, name, meta, issues, ctx) do
     [issue(name, meta, ctx.filename) | issues]
   end
 
-  defp flag_atomic(true, _module, _meta, issues, _ctx), do: issues
-  defp flag_atomic(false, module, meta, issues, ctx) do
-    flag_if_allowed(module in ctx.allowlist, module, meta, issues, ctx)
+  defp atom(true, _module, _meta, issues, _ctx), do: issues
+  defp atom(false, module, meta, issues, ctx) do
+    allow(module in ctx.allowlist, module, meta, issues, ctx)
   end
 
-  defp flag_if_allowed(true, _module, _meta, issues, _ctx), do: issues
-  defp flag_if_allowed(false, module, meta, issues, ctx) do
+  defp allow(true, _module, _meta, issues, _ctx), do: issues
+  defp allow(false, module, meta, issues, ctx) do
     [issue(module, meta, ctx.filename) | issues]
   end
 

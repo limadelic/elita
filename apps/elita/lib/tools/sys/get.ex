@@ -1,6 +1,6 @@
 defmodule Tools.Sys.Get do
   import Log, only: [log: 5]
-  import Mem, only: [depth_table: 0, table: 0]
+  import Mem, only: [depth: 0, table: 0]
 
   def spec(name, _state) do
     spec(name)
@@ -37,8 +37,8 @@ defmodule Tools.Sys.Get do
     found(key, :ets.lookup(table, key))
   end
 
-  defp pick("depth_" <> _), do: depth_table()
-  defp pick("tree_" <> _), do: depth_table()
+  defp pick("depth_" <> _), do: depth()
+  defp pick("tree_" <> _), do: depth()
   defp pick(_), do: table()
 
   defp found(key, [{key, value}]), do: value

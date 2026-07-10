@@ -5,28 +5,28 @@ defmodule Agent.Config do
 
   def load do
     get_env("AGENT_REGISTRATIONS")
-    |> load_entries()
+    |> fetch()
   end
 
-  defp load_entries(nil), do: []
-  defp load_entries(value), do: parse(value)
+  defp fetch(nil), do: []
+  defp fetch(value), do: parse(value)
 
   defp parse(value) do
     value
     |> split(",", [])
-    |> map(&parse_entry/1)
+    |> map(&item/1)
     |> reject(&is_nil/1)
   end
 
-  defp parse_entry(entry) do
+  defp item(entry) do
     entry
     |> split(":", parts: 2)
-    |> to_config()
+    |> build()
   end
 
-  defp to_config([name, folder]) do
+  defp build([name, folder]) do
     {to_atom(trim(name)), trim(folder)}
   end
 
-  defp to_config(_), do: nil
+  defp build(_), do: nil
 end

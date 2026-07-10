@@ -24,49 +24,49 @@ defmodule El.Commands.Ls do
     build()
     |> filter(&(&1.kind == :node))
     |> sort_by(& &1.name)
-    |> format_output()
+    |> show()
   end
 
   defp render(path) do
     target = normalize(path, cwd())
     world = build() |> filter(&(&1.kind != :node))
     visible = entries(world, target)
-    (visible ++ harvest(visible)) |> sort_by(& &1.name) |> format_output()
+    (visible ++ harvest(visible)) |> sort_by(& &1.name) |> show()
   end
 
   defp entries(world, nil), do: world
 
   defp entries(world, target) do
-    world |> filter(&match_path?(&1, target))
+    world |> filter(&fits?(&1, target))
   end
 
-  defp match_path?(%{path: p}, t) when p == t, do: true
-  defp match_path?(%{path: p}, t), do: hits?(p, t)
-  defp match_path?(_, _), do: false
+  defp fits?(%{path: p}, t) when p == t, do: true
+  defp fits?(%{path: p}, t), do: hits?(p, t)
+  defp fits?(_, _), do: false
 
-  defp format_output([]) do
+  defp show([]) do
     "no agents"
   end
 
-  defp format_output(entries) do
+  defp show(entries) do
     entries |> map(&format/1) |> join("\n")
   end
 
   defp format(%{kind: :node} = entry) do
-    "#{entry.name} #{kind_label(entry.kind)}"
+    "#{entry.name} #{label(entry.kind)}"
   end
 
   defp format(entry) do
-    "#{entry.name} #{kind_label(entry.kind)} #{status(entry.name)}"
+    "#{entry.name} #{label(entry.kind)} #{status(entry.name)}"
   end
 
   defp status(name) do
     normalized = downcase(to_string(name))
-    lookup(ElitaRegistry, normalized) |> map_status()
+    lookup(ElitaRegistry, normalized) |> flag()
   end
 
-  defp map_status([_ | _]), do: "active"
-  defp map_status([]), do: "asleep"
+  defp flag([_ | _]), do: "active"
+  defp flag([]), do: "asleep"
 
   defp harvest(visible) do
     names = map(visible, & &1.name)
@@ -76,10 +76,10 @@ defmodule El.Commands.Ls do
   defp headless(names) do
     ElitaRegistry
     |> select([{{:"$1", :_, %{kind: :headless}}, [], [:"$1"]}])
-    |> filter(&not_in?(names, &1))
+    |> filter(&absent?(names, &1))
   end
 
-  defp not_in?(list, name) do
+  defp absent?(list, name) do
     !any?(list, fn n ->
       downcase(to_string(n)) == downcase(to_string(name))
     end)
@@ -89,8 +89,8 @@ defmodule El.Commands.Ls do
     %{name: to_string(name), path: nil, kind: :session}
   end
 
-  defp kind_label(:file), do: "file"
-  defp kind_label(:folder), do: "folder"
-  defp kind_label(:session), do: "session"
-  defp kind_label(:node), do: "node"
+  defp label(:file), do: "file"
+  defp label(:folder), do: "folder"
+  defp label(:session), do: "session"
+  defp label(:node), do: "node"
 end

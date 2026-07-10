@@ -6,7 +6,7 @@ defmodule El.Pty do
   import Process, except: [alias: 1, info: 2]
 
   import El.Pty.Init, only: [call: 1]
-  import El.Pty.Size, only: [get_default: 0]
+  import El.Pty.Size, only: [default: 0]
   import El.Pty.Dispatch, only: [info: 2, call: 2, cast: 2]
 
   def boot(name, cmd, opts \\ []) do
@@ -27,12 +27,12 @@ defmodule El.Pty do
 
   def run(name, opts \\ []) do
     cmd = get(opts, :cmd, "claude --dangerously-skip-permissions")
-    full_opts = build_options(opts, cmd)
+    full_opts = finalize(opts, cmd)
     {:ok, pid} = boot(name, cmd, full_opts)
-    wait_exit(pid)
+    await(pid)
   end
 
-  defp build_options(opts, _cmd) do
+  defp finalize(opts, _cmd) do
     clean = opts |> drop([:input, :taps, :cmd])
     clean ++ defaults(opts)
   end
@@ -50,7 +50,7 @@ defmodule El.Pty do
     end
   end
 
-  defp wait_exit(pid) do
+  defp await(pid) do
     hang(monitor(pid), pid)
   end
 
@@ -70,7 +70,7 @@ defmodule El.Pty do
 
   defp file(opts), do: get(opts, :file, :file)
   defp port(opts), do: get(opts, :port, Port)
-  defp size(opts), do: get(opts, :get_size, &get_default/0)
+  defp size(opts), do: get(opts, :get_size, &default/0)
   defp input(opts), do: get(opts, :input, fn x -> x end)
   defp taps(opts), do: get(opts, :taps, [])
 

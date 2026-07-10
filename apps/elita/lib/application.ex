@@ -1,25 +1,25 @@
 defmodule Elita.Application do
   use Application
 
-  import Agent.Manager, only: [start_agents: 0]
+  import Agent.Manager, only: [launch: 0]
   import Elita, only: [spawn: 2]
-  import Mem, only: [init_global: 0]
+  import Mem, only: [setup: 0]
   import Registry, only: [child_spec: 1]
   import Supervisor, only: [start_link: 2]
 
   def start(_type, _args) do
-    init_global()
+    setup()
     boot()
   end
 
   defp boot do
-    {:ok, _} = start_supervisor()
-    start_agents()
+    {:ok, _} = run()
+    launch()
     {:ok, _} = spawn("el", ["el"])
     {:ok, self()}
   end
 
-  defp start_supervisor do
+  defp run do
     start_link([child_spec(keys: :unique, name: ElitaRegistry)], opts())
   end
 

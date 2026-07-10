@@ -19,14 +19,14 @@ defmodule Chat do
   end
 
   defp repl(agent) do
-    gets("#{agent} > ") |> handle_input(agent)
+    gets("#{agent} > ") |> feed(agent)
   end
 
-  defp handle_input(:eof, _agent) do
+  defp feed(:eof, _agent) do
     puts("Bye!")
   end
 
-  defp handle_input(input, agent) do
+  defp feed(input, agent) do
     puts(request(agent, trim(input)))
     repl(agent)
   end

@@ -1,15 +1,15 @@
 defmodule Llm do
   import System, only: [get_env: 2]
 
-  def llm(text) when is_binary(text), do: llm_impl(text)
-  def llm(state), do: llm_impl(state)
+  def llm(text) when is_binary(text), do: invoke(text)
+  def llm(state), do: invoke(state)
 
-  defp llm_impl(arg) do
+  defp invoke(arg) do
     get_env("LLM", "lite")
-    |> select_backend()
+    |> backend()
     |> apply(:llm, [arg])
   end
 
-  defp select_backend("mlm"), do: Mlm
-  defp select_backend(_), do: Lite
+  defp backend("mlm"), do: Mlm
+  defp backend(_), do: Lite
 end
