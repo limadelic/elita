@@ -56,11 +56,11 @@ defmodule El.Wrap.Input do
     |> dispatch(parent)
   end
 
-  defp dispatch("/exit", parent) do
+  def dispatch("/exit", parent) do
     send(parent, :exit_wrap)
   end
 
-  defp dispatch(_, _parent) do
+  def dispatch(_, _parent) do
     :ok
   end
 end
