@@ -69,11 +69,12 @@ defmodule El.Wrap.Input do
   def dispatch(_input, _parent, _agent_name), do: :forward
 
   defp route(input, _parent, agent_name) do
-    case String.split(input, " ", parts: 2) do
-      [_] -> :forward
-      [word, rest] -> puppet(word, rest, agent_name)
-    end
+    input |> String.split(" ", parts: 2) |> handle(agent_name)
   end
+
+  defp handle([_], _agent_name), do: :forward
+
+  defp handle([word, rest], agent_name), do: puppet(word, rest, agent_name)
 
   defp puppet(name, message, agent_name) do
     name |> to_atom() |> target() |> dial(message, agent_name)
@@ -82,13 +83,8 @@ defmodule El.Wrap.Input do
   defp dial(nil, _message, _agent_name), do: :forward
 
   defp dial(puppet_pid, message, agent_name) do
-    response = ask(puppet_pid, message)
-    format(response, agent_name) |> output()
+    spawn(fn -> ask(puppet_pid, message) |> format(agent_name) |> output() end)
     {:handled}
-  rescue
-    _ -> :forward
-  catch
-    :exit, _reason -> :forward
   end
 
   defp format(response, agent_name) do
