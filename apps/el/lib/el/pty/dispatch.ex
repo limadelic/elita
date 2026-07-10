@@ -82,15 +82,8 @@ defmodule El.Pty.Dispatch do
   end
 
   defp resize({rows, cols}) do
-    format(rows, cols) |> chars() |> cmd()
+    "stty rows #{rows} cols #{cols} < /dev/tty" |> String.to_charlist() |> cmd()
   rescue
     _ -> :ok
-  end
-
-  # credo:disable-for-lines:1
-  defp chars(s), do: String.to_charlist(s)
-
-  defp format(rows, cols) do
-    "stty rows #{rows} cols #{cols} < /dev/tty"
   end
 end
