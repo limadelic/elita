@@ -48,7 +48,6 @@ defmodule El.Pty.Dispatch do
     {:stop, :normal, state}
   end
 
-
   def call({:tap, pid}, %{taps: taps} = state) do
     {:reply, :ok, %{state | taps: [pid | taps]}}
   end

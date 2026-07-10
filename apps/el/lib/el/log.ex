@@ -33,7 +33,7 @@ defmodule El.Log do
   end
 
   def handle_cast({:write, message}, file) do
-    IO.write(file, message)
+    IO.binwrite(file, message)
     {:noreply, file}
   end
 
