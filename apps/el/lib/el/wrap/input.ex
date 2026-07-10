@@ -6,10 +6,16 @@ defmodule El.Wrap.Input do
   import El.Distribution, only: [target: 1]
   import El.Puppet, only: [ask: 2]
   import IO, only: [write: 2]
+  import El.Log, only: [write: 1]
 
   def open(parent, agent_name \\ nil) do
     {:ok, pid} = start_link(fn -> {[], parent, agent_name} end)
+    write("input handler opened for #{inspect(agent_name)}\n")
     pid
+  rescue
+    e ->
+      write("input open error: #{inspect(e)}\n")
+      raise e
   end
 
   def encode(buf, chunk) do
@@ -17,6 +23,10 @@ defmodule El.Wrap.Input do
       {data, new_line} = feed(chunk, line, parent, agent_name)
       {data, {new_line, parent, agent_name}}
     end)
+  rescue
+    e ->
+      write("encode error: #{inspect(e)}\n")
+      raise e
   end
 
   defp feed(<<>>, line, _parent, _agent_name), do: {"", line}
@@ -56,9 +66,14 @@ defmodule El.Wrap.Input do
     line |> join("") |> trim() |> dispatch(parent, agent_name)
   end
 
-  def dispatch("/exit", parent, _agent_name) do
+  def dispatch("/exit", parent, agent_name) do
+    write("exit received in #{inspect(agent_name)}\n")
     send(parent, :exit_wrap)
     :forward
+  rescue
+    e ->
+      write("exit dispatch error: #{inspect(e)}\n")
+      reraise e, __STACKTRACE__
   end
 
   def dispatch("", _parent, _agent_name), do: :forward
@@ -74,15 +89,28 @@ defmodule El.Wrap.Input do
   defp route(_, _parent, _agent_name), do: :forward
 
   defp puppet(name, message, agent_name) do
+    write("routing #{name} -> #{message}\n")
     name |> to_atom() |> target() |> dial(message, agent_name)
+  rescue
+    e ->
+      write("puppet routing error: #{inspect(e)}\n")
+      reraise e, __STACKTRACE__
   end
 
-  defp dial(nil, _message, _agent_name), do: :forward
+  defp dial(nil, _message, _agent_name) do
+    write("dial failed: no puppet found\n")
+    :forward
+  end
 
   defp dial(puppet_pid, message, agent_name) do
+    write("dial #{inspect(puppet_pid)} msg #{message}\n")
     ask(puppet_pid, message) |> format(agent_name) |> output(); {:handled}
-  rescue _ -> :forward
-  catch :exit, _reason -> :forward
+  rescue e ->
+    write("dial error: #{inspect(e)}\n")
+    :forward
+  catch :exit, reason ->
+    write("dial caught exit: #{inspect(reason)}\n")
+    :forward
   end
 
   defp format(response, agent_name) do

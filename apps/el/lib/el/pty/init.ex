@@ -7,15 +7,30 @@ defmodule El.Pty.Init do
   import Port, only: [info: 1]
 
   def call(cfg) do
+    import El.Log, only: [write: 1]
     size = cfg[:get_size].()
+    write("pty boot: size=#{inspect(size)}\n")
     {pty, os_pid, out} = boot(cfg, size)
+    write("pty boot done: pty=#{inspect(pty)} os_pid=#{os_pid}\n")
     finish(cfg, pty, size, out, os_pid)
+  rescue
+    e ->
+      import El.Log, only: [write: 1]
+      write("pty boot error: #{inspect(e)}\n")
+      reraise e, __STACKTRACE__
   end
 
   defp boot(cfg, size) do
+    import El.Log, only: [write: 1]
     {pty, os_pid} = pair(cfg[:port], cfg[:cmd], size)
+    write("pty pair done: pty=#{inspect(pty)}\n")
     {:ok, out} = cfg[:file].open("/dev/stdout", [:write, :binary])
     {pty, os_pid, out}
+  rescue
+    e ->
+      import El.Log, only: [write: 1]
+      write("pty boot detailed error: #{inspect(e)}\n")
+      reraise e, __STACKTRACE__
   end
 
   defp finish(cfg, pty, size, out, os_pid) do

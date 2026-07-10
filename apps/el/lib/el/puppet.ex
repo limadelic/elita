@@ -5,9 +5,14 @@ defmodule El.Puppet do
   import El.Pty, only: [watch: 2, unwatch: 2, inject: 2]
   import String, only: [ends_with?: 2]
   import Keyword, only: [fetch!: 2]
+  import El.Log, only: [write: 1]
 
   def ask(pid, message) do
     call(pid, {:ask, message}, :infinity)
+  rescue
+    e ->
+      write("ask error: #{inspect(e)}\n")
+      raise e
   end
 
   def start_link(opts) do
@@ -20,7 +25,12 @@ defmodule El.Puppet do
     via = {:via, Registry, {ElitaRegistry, name, %{kind: :puppet}}}
     {:ok, pid} = start_link(__MODULE__, pty, name: via)
     notify(name, pid)
+    write("puppet #{name} registered\n")
     {:ok, pid}
+  rescue
+    e ->
+      write("puppet register error: #{inspect(e)}\n")
+      reraise e, __STACKTRACE__
   end
 
   defp notify(name, pid) do

@@ -19,22 +19,42 @@ defmodule El.Distribution do
   end
 
   def target(name) do
+    import El.Log, only: [write: 1]
+    write("target lookup: #{name}\n")
     connect(:"claude_#{name}@127.0.0.1"); :global.sync()
-    pick(:global.whereis_name({name, :puppet}), name)
-  rescue _ -> find(name)
+    result = :global.whereis_name({name, :puppet})
+    write("global lookup #{name}: #{inspect(result)}\n")
+    pick(result, name)
+  rescue e ->
+    import El.Log, only: [write: 1]
+    write("target lookup error: #{inspect(e)}\n")
+    find(name)
   end
 
   defp pick(:undefined, name), do: find(name)
   defp pick(pid, _), do: pid
 
   defp find(name) do
+    import El.Log, only: [write: 1]
+    write("registry lookup #{name}\n")
     lookup(ElitaRegistry, name) |> extract()
-  rescue
-    _ -> nil
+  rescue e ->
+    import El.Log, only: [write: 1]
+    write("registry lookup error: #{inspect(e)}\n")
+    nil
   end
 
-  defp extract([{pid, %{kind: :puppet}}]), do: pid
-  defp extract(_), do: nil
+  defp extract([{pid, %{kind: :puppet}}]) do
+    import El.Log, only: [write: 1]
+    write("found puppet: #{inspect(pid)}\n")
+    pid
+  end
+
+  defp extract(other) do
+    import El.Log, only: [write: 1]
+    write("extract failed: #{inspect(other)}\n")
+    nil
+  end
 
   def daemon do
     boot(:"elita@127.0.0.1", :longnames)
