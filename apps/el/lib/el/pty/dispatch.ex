@@ -29,8 +29,7 @@ defmodule El.Pty.Dispatch do
     {:noreply, state}
   end
 
-  def info({pty, {:exit_status, status}}, %{pty: pty} = state) do
-    emit("pty_exit_status", inspect(status))
+  def info({pty, {:exit_status, _}}, %{pty: pty} = state) do
     finish(state)
     {:stop, :normal, state}
   end
@@ -40,20 +39,13 @@ defmodule El.Pty.Dispatch do
   end
 
   def info({:EXIT, _pid, reason}, %{os_pid: os_pid} = state) do
-    emit("linked_exit", inspect(reason))
     slay(os_pid)
     {:stop, reason, state}
   end
 
   def info({pty, :closed}, %{pty: pty, os_pid: os_pid} = state) do
-    emit("pty_closed")
     slay(os_pid)
     {:stop, :normal, state}
-  end
-
-  def info(msg, state) do
-    emit("unknown_info", inspect(msg))
-    {:noreply, state}
   end
 
   def call({:tap, pid}, %{taps: taps} = state) do
