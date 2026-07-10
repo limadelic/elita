@@ -67,6 +67,7 @@ def reap_all_sessions
 
   @reader&.close if @reader && !@reader.closed?
   @writer&.close if @writer && !@writer.closed?
+  @sessions.clear
 end
 
 def kill_process(pid)

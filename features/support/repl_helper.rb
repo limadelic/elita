@@ -12,13 +12,15 @@ module ReplHelper
 
   def store_session(args)
     name = session_name(args)
+    prompt = session_name(args)
     @sessions[name] = {
       reader: @reader,
       writer: @writer,
       pid: @pid,
       screen: @screen,
       transcript: @transcript,
-      transcript_stripped: @transcript_stripped
+      transcript_stripped: @transcript_stripped,
+      prompt: prompt
     }
     @current = name
   end
@@ -41,7 +43,8 @@ module ReplHelper
     if input == "/exit"
       raise "Session still alive" unless closed?
     else
-      wait(prompt)
+      actual_prompt = @sessions[prompt]&.dig(:prompt) || prompt
+      wait(actual_prompt)
     end
   end
 
