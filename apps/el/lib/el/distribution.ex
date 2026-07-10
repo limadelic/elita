@@ -35,11 +35,16 @@ defmodule El.Distribution do
 
   defp extract([{pid, %{kind: :puppet}}]), do: pid
   defp extract(_), do: nil
+
   def daemon do
     boot(:"elita@127.0.0.1", :longnames)
     ensure_all_started(:elita)
-    (try do load() |> each(&connect/1) rescue _ -> :ok end)
+    dial()
     sleep(:infinity)
+  end
+
+  defp dial do
+    try do load() |> each(&connect/1) rescue _ -> :ok end
   end
   defp node(name, opts) do
     :"claude_#{session(name)}@#{get(opts, :host, host())}"
@@ -84,8 +89,13 @@ defmodule El.Distribution do
   end
 
   def naming(opts) do
-    if contains?(get(opts, :host, "127.0.0.1"), "."), do: :longnames, else: :shortnames
+    opts |> get(:host, "127.0.0.1") |> has_dot?() |> mode()
   end
+
+  defp has_dot?(h), do: contains?(h, ".")
+
+  defp mode(true), do: :longnames
+  defp mode(false), do: :shortnames
 
   def fetch(opts \\ []) do
     get(opts, :host, host())
