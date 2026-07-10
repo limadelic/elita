@@ -85,7 +85,7 @@ defmodule El.Commands.Claude do
   end
 
   defp install(name) do
-    open(name: name, pty_pid: name)
+    open(name: name, pty: name)
   end
 
   defp resolve(:default), do: cwd!() |> basename()

@@ -32,10 +32,10 @@ defmodule Elita.Credo.Names do
     [check: @check]
   end
 
-  def run(source_file, params) do
+  def run(file, params) do
     allow = get(params, :allowlist, []) ++ @allow
-    filename = source_file.filename
-    prewalk(source_file, &check(&1, &2, filename, allow))
+    filename = file.filename
+    prewalk(file, &check(&1, &2, filename, allow))
   end
 
   defp check(
@@ -48,24 +48,24 @@ defmodule Elita.Credo.Names do
 
   defp check({:def, meta, [{name, _meta, args} | _rest]} = ast, issues, filename, allow)
        when is_atom(name) do
-    issues2 = check_params(args, issues, filename)
+    issues2 = params(args, issues, filename)
     visit({ast, issues2, meta, name, filename, allow})
   end
 
   defp check({:defp, meta, [{name, _meta, args} | _rest]} = ast, issues, filename, _allow)
        when is_atom(name) do
-    issues2 = check_params(args, issues, filename)
+    issues2 = params(args, issues, filename)
     visit({ast, issues2, meta, name, filename, []})
   end
 
   defp check({:defmacro, meta, [{name, _meta, args} | _rest]} = ast, issues, filename, allow)
        when is_atom(name) do
-    issues2 = check_params(args, issues, filename)
+    issues2 = params(args, issues, filename)
     visit({ast, issues2, meta, name, filename, allow})
   end
 
   defp check({:=, meta, [lhs, _rhs]} = ast, issues, filename, _allow) do
-    {ast, check_assignment(lhs, issues, filename, meta)}
+    {ast, capture(lhs, issues, filename, meta)}
   end
 
   defp check(ast, issues, _filename, _allow), do: {ast, issues}
@@ -90,27 +90,27 @@ defmodule Elita.Credo.Names do
   defp result(false, {ast, _meta, _name, _filename, issues}), do: {ast, issues}
   defp snake?(s), do: s |> trim_trailing("?!") |> contains?("_")
 
-  defp check_params(args, issues, filename) when is_list(args) do
+  defp params(args, issues, filename) when is_list(args) do
     args
-    |> filter(&is_atom_with_underscore?/1)
-    |> map(&param_issue(&1, filename))
+    |> filter(&hidden?/1)
+    |> map(&blame(&1, filename))
     |> concat(issues)
   end
 
-  defp check_params(_, issues, _filename), do: issues
+  defp params(_, issues, _filename), do: issues
 
-  defp is_atom_with_underscore?({name, _meta, nil}) when is_atom(name) do
-    name_str = "#{name}"
-    snake?(name_str) && !starts_with?(name_str, "_")
+  defp hidden?({name, _meta, nil}) when is_atom(name) do
+    str = "#{name}"
+    snake?(str) && !starts_with?(str, "_")
   end
 
-  defp is_atom_with_underscore?(_), do: false
+  defp hidden?(_), do: false
 
-  defp param_issue({name, meta, nil}, filename) do
+  defp blame({name, meta, nil}, filename) do
     issue("#{name}: Parameter is compound; use single words.", meta, filename)
   end
 
-  defp check_assignment({name, _meta, nil}, issues, filename, meta) when is_atom(name) do
+  defp capture({name, _meta, nil}, issues, filename, meta) when is_atom(name) do
     if snake?("#{name}") do
       [issue("#{name}: Variable is compound; use single words.", meta, filename) | issues]
     else
@@ -118,7 +118,7 @@ defmodule Elita.Credo.Names do
     end
   end
 
-  defp check_assignment(_, issues, _filename, _meta), do: issues
+  defp capture(_, issues, _filename, _meta), do: issues
 
   defp issue(msg, meta, filename),
     do:

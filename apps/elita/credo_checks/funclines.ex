@@ -16,15 +16,17 @@ defmodule Elita.Credo.Funclines do
     [check: @check_desc, params: [max_lines: @param_desc]]
   end
 
-  def run(source_file, params) do
-    cfg = config(source_file, params)
-    prewalk(source_file, &check(&1, &2, cfg))
+  def run(file, params) do
+    cfg = config(file, params)
+    prewalk(file, &check(&1, &2, cfg))
   end
 
-  defp config(source_file, params) do
-    %{max_lines: Keyword.get(params, :max_lines, 5),
-      filename: source_file.filename,
-      source: read!(source_file.filename)}
+  defp config(file, params) do
+    %{
+      max_lines: Keyword.get(params, :max_lines, 5),
+      filename: file.filename,
+      source: read!(file.filename)
+    }
   end
 
   defp check({type, meta, [_head | _tail]} = ast, issues, cfg)
@@ -41,6 +43,7 @@ defmodule Elita.Credo.Funclines do
   end
 
   defp handle(true, issues, _meta, _cfg), do: issues
+
   defp handle(false, issues, meta, cfg) do
     meta
     |> lines(cfg.source)

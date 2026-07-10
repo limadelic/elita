@@ -7,84 +7,84 @@ defmodule El.Wrap.Input do
   import El.Puppet, only: [ask: 2]
   import IO, only: [write: 2]
 
-  def open(parent, agent_name \\ nil) do
-    {:ok, pid} = start_link(fn -> {[], parent, agent_name} end)
+  def open(parent, agent \\ nil) do
+    {:ok, pid} = start_link(fn -> {[], parent, agent} end)
     pid
   end
 
   def encode(buf, chunk) do
-    get_and_update(buf, fn {line, parent, agent_name} ->
-      {data, new_line} = feed(chunk, line, parent, agent_name)
-      {data, {new_line, parent, agent_name}}
+    get_and_update(buf, fn {line, parent, agent} ->
+      {data, line} = feed(chunk, line, parent, agent)
+      {data, {line, parent, agent}}
     end)
   end
 
-  defp feed(<<>>, line, _parent, _agent_name), do: {"", line}
+  defp feed(<<>>, line, _parent, _agent), do: {"", line}
 
-  defp feed(<<13, rest::binary>>, line, parent, agent_name),
-    do: eol(line, rest, parent, agent_name, "\r")
+  defp feed(<<13, rest::binary>>, line, parent, agent),
+    do: eol(line, rest, parent, agent, "\r")
 
-  defp feed(<<10, rest::binary>>, line, parent, agent_name),
-    do: eol(line, rest, parent, agent_name, "\n")
+  defp feed(<<10, rest::binary>>, line, parent, agent),
+    do: eol(line, rest, parent, agent, "\n")
 
-  defp feed(<<byte, rest::binary>>, line, parent, agent_name) when byte in [8, 127] do
+  defp feed(<<byte, rest::binary>>, line, parent, agent) when byte in [8, 127] do
     chars = backspace(line)
-    feed(rest, chars, parent, agent_name)
+    feed(rest, chars, parent, agent)
   end
 
-  defp feed(<<char::utf8, rest::binary>>, line, parent, agent_name) do
-    feed(rest, line ++ [char], parent, agent_name)
+  defp feed(<<char::utf8, rest::binary>>, line, parent, agent) do
+    feed(rest, line ++ [char], parent, agent)
   end
 
-  defp feed(<<_, rest::binary>>, line, parent, agent_name) do
-    feed(rest, line, parent, agent_name)
+  defp feed(<<_, rest::binary>>, line, parent, agent) do
+    feed(rest, line, parent, agent)
   end
 
   defp backspace([]), do: []
   defp backspace(line), do: drop(line, -1)
 
-  defp eol(line, rest, parent, agent_name, eol) do
-    input_str = to_string(line)
-    result = check(line, parent, agent_name)
-    {data, new_line} = feed(rest, [], parent, agent_name)
-    finalize(result == {:handled}, input_str, eol, data, new_line)
+  defp eol(line, rest, parent, agent, eol) do
+    input = to_string(line)
+    result = check(line, parent, agent)
+    {data, line} = feed(rest, [], parent, agent)
+    finalize(result == {:handled}, input, eol, data, line)
   end
 
-  defp finalize(true, _input_str, _eol, _data, new_line), do: {"", new_line}
-  defp finalize(false, input_str, eol, data, new_line), do: {input_str <> eol <> data, new_line}
+  defp finalize(true, _input, _eol, _data, line), do: {"", line}
+  defp finalize(false, input, eol, data, line), do: {input <> eol <> data, line}
 
-  defp check(line, parent, agent_name),
-    do: line |> to_string() |> trim() |> dispatch(parent, agent_name)
+  defp check(line, parent, agent),
+    do: line |> to_string() |> trim() |> dispatch(parent, agent)
 
-  def dispatch("/exit", parent, _agent_name) do
+  def dispatch("/exit", parent, _agent) do
     send(parent, :exit_wrap)
     :forward
   end
 
-  def dispatch("", _parent, _agent_name), do: :forward
+  def dispatch("", _parent, _agent), do: :forward
 
-  def dispatch(input, parent, agent_name) when is_atom(agent_name) do
-    input |> split(" ", parts: 2) |> route(parent, agent_name)
+  def dispatch(input, parent, agent) when is_atom(agent) do
+    input |> split(" ", parts: 2) |> route(parent, agent)
   end
 
-  def dispatch(_input, _parent, _agent_name), do: :forward
+  def dispatch(_input, _parent, _agent), do: :forward
 
-  defp route([_], _parent, _agent_name), do: :forward
+  defp route([_], _parent, _agent), do: :forward
 
-  defp route([word, rest], _parent, agent_name) do
-    puppet(word, rest, agent_name)
+  defp route([word, rest], _parent, agent) do
+    puppet(word, rest, agent)
   end
 
-  defp route(_, _parent, _agent_name), do: :forward
+  defp route(_, _parent, _agent), do: :forward
 
-  defp puppet(name, message, agent_name) do
-    name |> to_atom() |> target() |> dial(message, agent_name)
+  defp puppet(name, message, agent) do
+    name |> to_atom() |> target() |> dial(message, agent)
   end
 
-  defp dial(nil, _message, _agent_name), do: :forward
+  defp dial(nil, _message, _agent), do: :forward
 
-  defp dial(puppet_pid, message, agent_name) do
-    ask(puppet_pid, message) |> format(agent_name) |> output()
+  defp dial(puppet, message, agent) do
+    ask(puppet, message) |> format(agent) |> output()
   rescue
     _ -> :forward
   catch
@@ -96,8 +96,8 @@ defmodule El.Wrap.Input do
     {:handled}
   end
 
-  defp format(response, agent_name) do
+  defp format(response, agent) do
     content = response |> split("\n") |> drop(-1) |> join("\n")
-    "#{content}\n#{agent_name}> "
+    "#{content}\n#{agent}> "
   end
 end

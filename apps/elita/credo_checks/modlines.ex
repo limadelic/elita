@@ -16,15 +16,15 @@ defmodule Elita.Credo.Modlines do
     [check: @check_desc, params: [max_lines: @param_desc]]
   end
 
-  def run(source_file, params) do
-    cfg = config(source_file, params)
-    prewalk(source_file, &visit(&1, &2, cfg))
+  def run(source, params) do
+    cfg = config(source, params)
+    prewalk(source, &visit(&1, &2, cfg))
   end
 
-  defp config(source_file, params) do
+  defp config(source, params) do
     %{max_lines: Keyword.get(params, :max_lines, 100),
-      filename: source_file.filename,
-      source: read!(source_file.filename)}
+      filename: source.filename,
+      source: read!(source.filename)}
   end
 
   defp visit({:defmodule, meta, [_ | _]} = ast, issues, cfg) do
@@ -49,7 +49,7 @@ defmodule Elita.Credo.Modlines do
   defp append({:ok, _}, _, _, issues, _), do: issues
   defp append(:error, _, _, issues, _), do: issues
 
-  defp item(body_lines, max_lines, meta, filename) do
-    flag(__MODULE__, "Module", body_lines, max_lines, {meta, filename})
+  defp item(lines, max, meta, filename) do
+    flag(__MODULE__, "Module", lines, max, {meta, filename})
   end
 end

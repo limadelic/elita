@@ -13,7 +13,7 @@ defmodule El.Puppet do
   def open(opts) do
     setup()
     name = fetch!(opts, :name)
-    pty = fetch!(opts, :pty_pid)
+    pty = fetch!(opts, :pty)
     register(name, pty)
   end
 
@@ -34,43 +34,43 @@ defmodule El.Puppet do
 
   defp alive?(false, _name, _pid), do: :ok
 
-  def init(pty_pid) do
-    {:ok, %{pty_pid: pty_pid}}
+  def init(pty) do
+    {:ok, %{pty: pty}}
   end
 
-  def handle_call({:ask, message}, _from, %{pty_pid: pty_pid} = state) do
-    output = query(pty_pid, message)
+  def handle_call({:ask, message}, _from, %{pty: pty} = state) do
+    output = query(pty, message)
     {:reply, output, state}
   end
 
-  defp query(pty_pid, message) do
-    watch(pty_pid, self())
-    inject(pty_pid, message <> "\r")
-    collect(pty_pid, "")
+  defp query(pty, message) do
+    watch(pty, self())
+    inject(pty, message <> "\r")
+    collect(pty, "")
   end
 
-  defp collect(pty_pid, buffer) do
+  defp collect(pty, buffer) do
     receive do
       {:output, data} ->
-        ready(pty_pid, buffer <> data, prompt?(buffer <> data))
+        ready(pty, buffer <> data, prompt?(buffer <> data))
     after
       5000 ->
-        cleanup(pty_pid)
+        cleanup(pty)
         buffer
     end
   end
 
-  defp ready(pty_pid, buffer, true) do
-    cleanup(pty_pid)
+  defp ready(pty, buffer, true) do
+    cleanup(pty)
     buffer
   end
 
-  defp ready(pty_pid, buffer, false) do
-    collect(pty_pid, buffer)
+  defp ready(pty, buffer, false) do
+    collect(pty, buffer)
   end
 
-  defp cleanup(pty_pid) do
-    unwatch(pty_pid, self())
+  defp cleanup(pty) do
+    unwatch(pty, self())
   rescue
     _ -> :ok
   end
