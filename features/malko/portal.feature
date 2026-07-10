@@ -3,7 +3,6 @@ Feature: Portal
 
   Scenario: Through the tunnel into Malkovich
     * > el claude malko
-      | ✳ |
       | ▐▛███▜▌ |
       | ▝▜█████▛▘ |
       | Claude Code |
