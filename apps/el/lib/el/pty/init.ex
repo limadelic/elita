@@ -7,8 +7,11 @@ defmodule El.Pty.Init do
   import Port, only: [info: 1]
 
   def call(cfg) do
+    emit("init_call_start")
     size = cfg[:get_size].()
+    emit("init_size_retrieved")
     {pty, os_pid, out} = boot(cfg, size)
+    emit("init_boot_complete")
     finish(cfg, pty, size, out, os_pid)
   end
 

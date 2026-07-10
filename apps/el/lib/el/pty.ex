@@ -63,7 +63,11 @@ defmodule El.Pty do
 
   @impl true
   def init({cmd, opts}) do
-    {:ok, build(cmd, opts)}
+    import El.Trace, only: [emit: 1]
+    emit("pty_init_start")
+    result = {:ok, build(cmd, opts)}
+    emit("pty_init_complete")
+    result
   end
 
   defp build(cmd, opts) do
