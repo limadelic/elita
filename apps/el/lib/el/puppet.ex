@@ -32,7 +32,11 @@ defmodule El.Puppet do
   defp alive?(true, name, pid) do
     import El.Log, only: [write: 1]
     result = :global.register_name({name, :puppet}, pid)
-    write("global register #{name}: #{inspect(result)} node=#{inspect(node())} alive=#{inspect(Node.alive?())}\n")
+
+    write(
+      "global register #{name}: #{inspect(result)} node=#{inspect(node())} alive=#{inspect(Node.alive?())}\n"
+    )
+
     result
   end
 
@@ -63,6 +67,7 @@ defmodule El.Puppet do
 
   defp collect(pty_pid, buffer) do
     import El.Log, only: [write: 1]
+
     receive do
       {:output, data} ->
         next = buffer <> data

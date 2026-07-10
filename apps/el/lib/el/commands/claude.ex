@@ -11,8 +11,9 @@ defmodule El.Commands.Claude do
   import Path, only: [basename: 1]
   import El.Wrap.Resize, only: [watch: 1]
   import El.Wrap.Input, only: [open: 2, encode: 2]
-  import Registry, only: [start_link: 1]
   import El.Log, only: [write: 1]
+  import El.Puppet, only: [start_link: 1]
+  alias Registry
 
   def claude(name \\ :default) do
     claude(name, deps())
@@ -24,9 +25,19 @@ defmodule El.Commands.Claude do
     write("boot: #{name}\n")
     go(resolve(name), deps)
   after
+    cleanup()
+  end
+
+  defp cleanup do
     write("shutdown\n")
-    restore()
+    reset()
     stty()
+  end
+
+  defp reset do
+    write!("/dev/tty", "\e[?1000l\e[?1002l\e[?1003l\e[?1006l\e[?2004l\e[?1049l\e[?25h")
+  rescue
+    _ -> :ok
   end
 
   defp stty do
@@ -36,13 +47,8 @@ defmodule El.Commands.Claude do
   end
 
   defp go(session_name, deps) do
-    ready(deps, session_name)
+    validate(Keyword.get(deps, :distribution_start).(session_name), session_name)
     boot(to_atom(session_name), deps)
-  end
-
-  defp ready(deps, session_name) do
-    Keyword.get(deps, :distribution_start).(session_name)
-    |> validate(session_name)
   end
 
   defp validate(:taken, session_name) do
@@ -59,14 +65,14 @@ defmodule El.Commands.Claude do
   end
 
   defp setup(deps) do
-    cmd_fn = Keyword.get(deps, :cmd)
-    cmd_fn.(~c"stty raw -echo -isig < /dev/tty")
+    Keyword.get(deps, :cmd).(~c"stty raw -echo -isig < /dev/tty")
   rescue
     _ -> :ok
   end
 
   defp execute(name, deps, buf) do
-    pid = Keyword.get(deps, :launch).(name, opts(buf, command()))
+    cmd = "claude --dangerously-skip-permissions --model #{get_env("CLAUDE_MODEL", "haiku")}"
+    pid = Keyword.get(deps, :launch).(name, opts(buf, cmd))
     install(name)
     hold(pid)
   end
@@ -79,30 +85,15 @@ defmodule El.Commands.Claude do
     [cmd: cmd, get_size: &size/0, input: input, resize: &watch/1]
   end
 
-  defp command do
-    model = get_env("CLAUDE_MODEL", "haiku")
-    "claude --dangerously-skip-permissions --model #{model}"
-  end
-
   defp install(name) do
     prepare()
-    El.Puppet.start_link([name: name, pty_pid: name])
+    start_link(name: name, pty_pid: name)
   end
 
   defp prepare do
-    start_link(keys: :unique, name: ElitaRegistry)
+    Registry.start_link(keys: :unique, name: ElitaRegistry)
   rescue
     _ -> :ok
-  end
-
-  defp restore do
-    sequence()
-  rescue
-    _ -> :ok
-  end
-
-  defp sequence do
-    write!("/dev/tty", "\e[?1000l\e[?1002l\e[?1003l\e[?1006l\e[?2004l\e[?1049l\e[?25h")
   end
 
   defp resolve(:default), do: cwd!() |> basename()
