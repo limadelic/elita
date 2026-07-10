@@ -82,7 +82,8 @@ defmodule El.Wrap.Input do
   defp dial(nil, _message, _agent_name), do: :forward
 
   defp dial(puppet_pid, message, agent_name) do
-    puppet_pid |> ask(message) |> format(agent_name) |> output()
+    response = ask(puppet_pid, message)
+    format(response, agent_name) |> output()
     {:handled}
   rescue
     _ -> :forward

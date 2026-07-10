@@ -55,6 +55,10 @@ defmodule El.Puppet do
       {:output, data} ->
         next = buffer <> data
         ready(pty_pid, next, prompt?(next))
+    after
+      3000 ->
+        unwatch(pty_pid, self())
+        buffer
     end
   end
 
