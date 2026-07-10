@@ -50,7 +50,7 @@ module Stub
       STDOUT.flush
 
       # Read stdin and respond
-      while line = STDIN.gets
+      while line = STDIN.gets("\r")
         input = line.strip
         case input
         when "/exit"

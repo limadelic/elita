@@ -21,7 +21,8 @@ defmodule El.Distribution do
   def target(name) do
     import El.Log, only: [write: 1]
     write("target lookup: #{name}\n")
-    connect(:"claude_#{name}@127.0.0.1")
+    connected = connect(:"claude_#{name}@127.0.0.1")
+    write("connect claude_#{name}: #{inspect(connected)} nodes=#{inspect(Node.list())}\n")
     :global.sync()
     result = :global.whereis_name({name, :puppet})
     write("global lookup #{name}: #{inspect(result)}\n")

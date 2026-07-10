@@ -11,7 +11,7 @@ defmodule El.Commands.Claude do
   import Path, only: [basename: 1]
   import El.Wrap.Resize, only: [watch: 1]
   import El.Wrap.Input, only: [open: 2, encode: 2]
-  import GenServer, only: [start_link: 3]
+  import Registry, only: [start_link: 1]
   import El.Log, only: [write: 1]
 
   def claude(name \\ :default) do
@@ -85,7 +85,14 @@ defmodule El.Commands.Claude do
   end
 
   defp install(name) do
-    start_link(El.Puppet, [name: name, pty_pid: name], [])
+    prepare()
+    El.Puppet.start_link([name: name, pty_pid: name])
+  end
+
+  defp prepare do
+    start_link(keys: :unique, name: ElitaRegistry)
+  rescue
+    _ -> :ok
   end
 
   defp restore do
