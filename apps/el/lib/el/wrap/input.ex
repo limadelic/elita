@@ -14,7 +14,8 @@ defmodule El.Wrap.Input do
 
   def encode(buf, chunk) do
     get_and_update(buf, fn {line, parent, agent_name} ->
-      feed(chunk, line, parent, agent_name)
+      {data, new_line} = feed(chunk, line, parent, agent_name)
+      {data, {new_line, parent, agent_name}}
     end)
   end
 
