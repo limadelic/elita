@@ -53,7 +53,15 @@ defmodule El.Pty.Init do
 
   defp args({rows, cols}, cmd) do
     stty = "stty rows #{rows} cols #{cols}; stty raw -echo -isig;"
+    argv(:os.type(), stty, cmd)
+  end
+
+  defp argv({:unix, :darwin}, stty, cmd) do
     ["-q", "/dev/null", "sh", "-c", "#{stty} exec #{cmd}"]
+  end
+
+  defp argv({:unix, _}, stty, cmd) do
+    ["-q", "-c", "#{stty} exec #{cmd}", "/dev/null"]
   end
 
   defp setup(file, _pty, size) do
