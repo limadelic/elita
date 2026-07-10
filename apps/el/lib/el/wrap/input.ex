@@ -49,6 +49,7 @@ defmodule El.Wrap.Input do
   defp eol(line, rest, parent, agent_name, eol) do
     result = check(line, parent, agent_name)
     {data, new_line} = feed(rest, [], parent, agent_name)
+
     if handled?(result) do
       {"", new_line}
     else
@@ -93,8 +94,11 @@ defmodule El.Wrap.Input do
 
   defp send_to_puppet(name, message, _parent, _agent_name) do
     atom_name = to_atom(name)
+
     case target(atom_name) do
-      nil -> :forward
+      nil ->
+        :forward
+
       puppet_pid ->
         Task.start(fn ->
           try do
@@ -103,6 +107,7 @@ defmodule El.Wrap.Input do
             _ -> :ok
           end
         end)
+
         {:handled}
     end
   end
