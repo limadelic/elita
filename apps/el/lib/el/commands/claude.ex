@@ -1,7 +1,7 @@
 defmodule El.Commands.Claude do
   @moduledoc false
   import :os, only: [cmd: 1]
-  import El.Pty, only: [run: 2]
+  import El.Pty, only: [launch: 2, wait: 1]
   import El.Distribution, only: [start: 1]
   import String, only: [to_atom: 1]
   import IO, only: [puts: 1]
@@ -18,7 +18,7 @@ defmodule El.Commands.Claude do
     claude(name, deps())
   end
 
-  defp deps, do: [distribution_start: &start/1, cmd: &cmd/1, run: &run/2]
+  defp deps, do: [distribution_start: &start/1, cmd: &cmd/1, launch: &launch/2]
 
   def claude(name, deps) when is_list(deps) do
     write("boot: #{name}\n")
@@ -66,9 +66,13 @@ defmodule El.Commands.Claude do
   end
 
   defp execute(name, deps, buf) do
-    Keyword.get(deps, :run).(name, opts(buf, command()))
+    pid = Keyword.get(deps, :launch).(name, opts(buf, command()))
     install(name)
+    hold(pid)
   end
+
+  defp hold(pid) when is_pid(pid), do: wait(pid)
+  defp hold(_), do: :ok
 
   defp opts(buf, cmd) do
     input = fn chunk -> encode(buf, chunk) end

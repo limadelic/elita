@@ -25,16 +25,19 @@ defmodule El.Pty do
     GenServer.call(name, {:untap, pid})
   end
 
-  def run(name, opts \\ []) do
+  def launch(name, opts \\ []) do
     cmd = get(opts, :cmd, "claude --dangerously-skip-permissions")
-    full_opts = finalize(opts, cmd)
-    {:ok, pid} = boot(name, cmd, full_opts)
-    startup(get(opts, :resize), pid)
+    {:ok, pid} = boot(name, cmd, finalize(opts, cmd))
+    invoke(get(opts, :resize), pid)
+    pid
   end
 
-  defp startup(resize_fn, pid) do
-    invoke(resize_fn, pid)
+  def wait(pid) do
     await(pid)
+  end
+
+  def run(name, opts \\ []) do
+    launch(name, opts) |> wait()
   end
 
   defp invoke(nil, _pid), do: :ok
