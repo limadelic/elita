@@ -22,6 +22,7 @@ Before do |scenario|
     ""
   ) : File.basename(scenario.location.file, ".feature")
   @scratch = Dir.mktmpdir
+  write_stub_claude
   init
 end
 
