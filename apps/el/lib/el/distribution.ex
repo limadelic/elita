@@ -76,6 +76,9 @@ defmodule El.Distribution do
     do: :"claude_#{name}@#{get(opts, :host, host())}"
 
   defp boot(node_name, mode) do
+    import El.Log, only: [write: 1]
+    epmd = System.find_executable("epmd")
+    write("boot: node_name=#{inspect(node_name)} mode=#{inspect(mode)} epmd=#{inspect(epmd)}\n")
     fn -> Node.start(node_name, mode) end
     |> then(&attempt(&1.(), &1, 5))
     |> act(node_name, mode)
@@ -86,24 +89,36 @@ defmodule El.Distribution do
   defp attempt({:error, {:already_started, pid}}, _fun, _tries),
     do: {:error, {:already_started, pid}}
 
-  defp attempt({:error, _reason}, fun, tries) when tries > 1 do
+  defp attempt({:error, reason}, fun, tries) when tries > 1 do
+    import El.Log, only: [write: 1]
+    write("boot attempt failed: #{inspect(reason)}, retrying... (#{tries - 1} tries left)\n")
     sleep(200)
     attempt(fun.(), fun, tries - 1)
   end
 
-  defp attempt({:error, _reason}, _fun, _tries), do: {:error, :max_retries_exceeded}
+  defp attempt({:error, reason}, _fun, _tries) do
+    import El.Log, only: [write: 1]
+    write("boot attempt failed: #{inspect(reason)}, max retries exceeded\n")
+    {:error, :max_retries_exceeded}
+  end
 
   defp act({:ok, _pid}, _node_name, _mode) do
+    import El.Log, only: [write: 1]
+    write("boot: Node.start succeeded\n")
     set_cookie(:elita)
     :ok
   end
 
   defp act({:error, {:already_started, _pid}}, _node_name, _mode) do
+    import El.Log, only: [write: 1]
+    write("boot: Node.start already_started\n")
     set_cookie(:elita)
     :taken
   end
 
   defp act({:error, reason}, _node_name, _mode) do
+    import El.Log, only: [write: 1]
+    write("boot: Node.start failed with error: #{inspect(reason)}\n")
     write(:stderr, "Error: Failed to start distribution: #{inspect(reason)}\n")
     :ok
   end
