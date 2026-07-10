@@ -1,0 +1,356 @@
+[
+  {
+    "a": [
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01TQkeyrqoqmTTLHhP2xsrv1",
+        "input": {
+          "configs": [
+            "triage"
+          ],
+          "name": "triage"
+        },
+        "name": "spawn",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "content": "get me a triage agent",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Now I'll tell the agent its role:",
+        "type": "text"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01SezcYLy9LgwfHZeGn8TjMA",
+        "input": {
+          "message": "You are triage, a triage agent. Stay in character.",
+          "recipient": "triage"
+        },
+        "name": "tell",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "content": [
+            {
+              "content": "spawned",
+              "tool_use_id": "toolu_01TQkeyrqoqmTTLHhP2xsrv1",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "n": 3
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Done.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "content": [
+            {
+              "content": "sent",
+              "tool_use_id": "toolu_01SezcYLy9LgwfHZeGn8TjMA",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "n": 5
+    }
+  },
+  {
+    "a": [
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01LZuBCUHRD1iqrowVcJUesE",
+        "input": {
+          "question": "email 1 says urgent payment overdue, your billing is past due. email 2 says claim your free prize, you have won a promotional offer. email 3 says new feature request, please add dark mode to the app",
+          "recipient": "triage"
+        },
+        "name": "ask",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "content": "ask triage - email 1 says urgent payment overdue, your billing is past due. email 2 says claim your free prize, you have won a promotional offer. email 3 says new feature request, please add dark mode to the app",
+          "role": "user"
+        }
+      ],
+      "n": 7
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "I understand. I'm **triage**, the email triage coordinator. I'm ready to receive emails and classify them.\n\nSend me a list of emails with their subjects and bodies, and I'll:\n1. Spawn a classifier agent for each email\n2. Ask each classifier to categorize it\n3. Give you a single-line summary of all verdicts\n\nWhat emails do you have for me to triage?",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "triage",
+      "messages": [
+        {
+          "content": "[from el] You are triage, a triage agent. Stay in character.",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "I'll classify these three emails for you. Let me spawn classifiers and get their verdicts.",
+        "type": "text"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01R5EqGN7xjW6tXJiesk3rD1",
+        "input": {
+          "configs": [
+            "classifier"
+          ],
+          "name": "classifier_1"
+        },
+        "name": "spawn",
+        "type": "tool_use"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01V2Qn7oqBb93K2LDYgMikQb",
+        "input": {
+          "configs": [
+            "classifier"
+          ],
+          "name": "classifier_2"
+        },
+        "name": "spawn",
+        "type": "tool_use"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01KCTJQTzSPPSbzLyPYfrNXu",
+        "input": {
+          "configs": [
+            "classifier"
+          ],
+          "name": "classifier_3"
+        },
+        "name": "spawn",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "triage",
+      "messages": [
+        {
+          "content": "email 1 says urgent payment overdue, your billing is past due. email 2 says claim your free prize, you have won a promotional offer. email 3 says new feature request, please add dark mode to the app",
+          "role": "user"
+        }
+      ],
+      "n": 3
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Now let me ask each classifier to categorize their assigned email:",
+        "type": "text"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01VehgjoUcBzWm1eU7BaQBik",
+        "input": {
+          "question": "Classify this email - Subject: urgent payment overdue, Body: your billing is past due.",
+          "recipient": "classifier_1"
+        },
+        "name": "ask",
+        "type": "tool_use"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_011kbHXTKumwC6Qw3rhWW7M2",
+        "input": {
+          "question": "Classify this email - Subject: claim your free prize, Body: you have won a promotional offer.",
+          "recipient": "classifier_2"
+        },
+        "name": "ask",
+        "type": "tool_use"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01K1yd1CZPg96N5bZupWyJvq",
+        "input": {
+          "question": "Classify this email - Subject: new feature request, Body: please add dark mode to the app",
+          "recipient": "classifier_3"
+        },
+        "name": "ask",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "triage",
+      "messages": [
+        {
+          "content": [
+            {
+              "content": "spawned",
+              "tool_use_id": "toolu_01KCTJQTzSPPSbzLyPYfrNXu",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "n": 7
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "urgent",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "classifier_1",
+      "messages": [
+        {
+          "content": "Classify this email - Subject: urgent payment overdue, Body: your billing is past due.",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "spam",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "classifier_2",
+      "messages": [
+        {
+          "content": "Classify this email - Subject: claim your free prize, Body: you have won a promotional offer.",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "feature",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "classifier_3",
+      "messages": [
+        {
+          "content": "Classify this email - Subject: new feature request, Body: please add dark mode to the app",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "**Triage Summary:** urgent (billing), spam (promo), feature (request)",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "triage",
+      "messages": [
+        {
+          "content": [
+            {
+              "content": "feature",
+              "tool_use_id": "toolu_01K1yd1CZPg96N5bZupWyJvq",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "n": 11
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "**Triage Summary:** urgent (billing), spam (promo), feature (request)",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "tool_result",
+              "content": "**Triage Summary:** urgent (billing), spam (promo), feature (request)",
+              "tool_use_id": "toolu_01LZuBCUHRD1iqrowVcJUesE"
+            }
+          ]
+        }
+      ],
+      "n": 9
+    }
+  }
+]

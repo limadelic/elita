@@ -18,13 +18,13 @@ defmodule Log do
   end
 
   defp eol(body) do
-    body |> has_newline() |> eol_char()
+    body |> newline() |> char()
   end
 
-  defp has_newline(body) do
+  defp newline(body) do
     contains?(body, "\n")
   end
 
-  defp eol_char(true), do: "\n"
-  defp eol_char(false), do: ""
+  defp char(true), do: "\n"
+  defp char(false), do: ""
 end

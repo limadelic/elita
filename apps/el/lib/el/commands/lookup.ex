@@ -1,5 +1,5 @@
 defmodule El.Commands.Lookup do
-  import Elita, only: [call: 2]
+  import Elita, only: [request: 2]
   import String, only: [downcase: 1]
   import Registry, only: [lookup: 2]
   import IO, only: [puts: 1]
@@ -25,5 +25,5 @@ defmodule El.Commands.Lookup do
   defp fallback(result, _), do: result
 
   defp dispatch([], agent, _msg), do: puts("unknown: #{agent}")
-  defp dispatch([{_pid, _meta}], agent, msg), do: call(agent, msg) |> puts()
+  defp dispatch([{_pid, _meta}], agent, msg), do: request(agent, msg) |> puts()
 end

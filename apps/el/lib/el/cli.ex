@@ -1,7 +1,14 @@
 defmodule El.CLI do
   import Application, only: [ensure_all_started: 1]
   import IO, only: [puts: 1]
-  import El.Command
+  import El.Commands.Ask, only: [ask: 3]
+  import El.Commands.Tell, only: [tell: 3]
+  import El.Commands.Spawn, only: [spawn: 2]
+  import El.Commands.Claude, only: [claude: 1]
+  import El.Commands.Cd, only: [cd: 1]
+  import El.Distribution, only: [daemon: 0]
+  import El.Command.Ls, only: [list: 1]
+  import El.REPL, only: [run: 1]
 
   @usage """
   Usage:
@@ -20,11 +27,7 @@ defmodule El.CLI do
 
   def main(argv) do
     ensure_all_started(:elita)
-    dispatch(argv)
-  end
-
-  defp dispatch(argv) do
-    argv |> parse() |> run()
+    argv |> parse() |> exec()
   end
 
   defp parse(["ask", agent, msg]), do: {:ask, nil, agent, msg}
@@ -45,24 +48,28 @@ defmodule El.CLI do
   defp parse(["ls", path]), do: {:ls, path}
   defp parse(["cd", path]), do: {:cd, path}
   defp parse(["daemon"]), do: :daemon
+  defp parse([]), do: {:repl, "el"}
+  defp parse([agent]), do: {:repl, agent}
   defp parse(_), do: :usage
 
   defp check(tool, cmd) when tool in @known_tools, do: cmd
   defp check(tool, _cmd), do: {:unknown_tool, tool}
 
-  defp run(:usage) do
+  defp exec(:usage) do
     @usage |> puts()
   end
 
-  defp run({:unknown_tool, tool}) do
+  defp exec({:unknown_tool, tool}) do
     puts("unknown tool: #{tool}")
   end
 
-  defp run({:ask, tool, agent, msg}), do: ask(agent, msg, tool)
-  defp run({:tell, tool, agent, msg}), do: tell(agent, msg, tool)
-  defp run({:spawn, name, agent}), do: spawn(name, agent)
-  defp run({:claude, name}), do: claude(name)
-  defp run({:ls, path}), do: ls(path)
-  defp run({:cd, path}), do: cd(path)
-  defp run(:daemon), do: daemon()
+  defp exec({:repl, agent}), do: run(agent)
+  defp exec({:ask, tool, agent, msg}), do: ask(agent, msg, tool)
+  defp exec({:tell, tool, agent, msg}), do: tell(agent, msg, tool)
+  defp exec({:spawn, name, agent}), do: spawn(name, agent)
+  defp exec({:claude, name}), do: claude(name)
+  defp exec({:ls, path}), do: list(path)
+  defp exec({:cd, path}), do: cd(path)
+  defp exec(:daemon), do: daemon()
+  defp exec(_), do: :usage
 end

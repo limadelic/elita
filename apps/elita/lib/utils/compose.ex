@@ -14,11 +14,11 @@ defmodule Compose do
   end
 
   defp combine(config, acc) do
-    tools = merge_tools(acc, config)
+    tools = fuse(acc, config)
     merge(acc, config) |> put(:tools, tools)
   end
 
-  defp merge_tools(acc, config) do
+  defp fuse(acc, config) do
     (tools(acc) ++ tools(config)) |> uniq()
   end
 

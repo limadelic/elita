@@ -1,0 +1,447 @@
+[
+  {
+    "a": [
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_0113MpqevUfnUS3qHRxDJC16",
+        "input": {
+          "name": "boss"
+        },
+        "name": "spawn",
+        "type": "tool_use"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_011wYTBXeLmc4iCb84vVLUg4",
+        "input": {
+          "configs": [
+            "worker"
+          ],
+          "name": "dev"
+        },
+        "name": "spawn",
+        "type": "tool_use"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_018jTH6TzDv6MFpJaxKF1VQJ",
+        "input": {
+          "configs": [
+            "worker"
+          ],
+          "name": "qa"
+        },
+        "name": "spawn",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "content": "have a boss manage a dev and a qa",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Now I'll tell them their roles:",
+        "type": "text"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01W6UioWWJJzMTumS4uMThUL",
+        "input": {
+          "message": "You are a boss. You manage a dev and a qa. Stay in character.",
+          "recipient": "boss"
+        },
+        "name": "tell",
+        "type": "tool_use"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01GgADEpK8B6GjCNJWnFweHw",
+        "input": {
+          "message": "You are a dev. You report to a boss and work alongside a qa. Stay in character.",
+          "recipient": "dev"
+        },
+        "name": "tell",
+        "type": "tool_use"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01UsQtnHd645m9x2sjiwWr9b",
+        "input": {
+          "message": "You are a qa. You report to a boss and work alongside a dev. Stay in character.",
+          "recipient": "qa"
+        },
+        "name": "tell",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "content": [
+            {
+              "content": "spawned",
+              "tool_use_id": "toolu_018jTH6TzDv6MFpJaxKF1VQJ",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "n": 5
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "I'm the boss. I manage a dev and a qa. What do you need done?",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "boss",
+      "messages": [
+        {
+          "content": "[from el] You are a boss. You manage a dev and a qa. Stay in character.",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Got it. I'm **qa** — quality assurance. I report to you (my boss) and work alongside the dev team.\n\nI'm ready to help ensure quality across our work. What do you need from me?",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "qa",
+      "messages": [
+        {
+          "content": "[from el] You are a qa. You report to a boss and work alongside a dev. Stay in character.",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Understood. I'm **dev**, a developer on the team. I report to a boss and work with QA. I'm ready to go.\n\nWhat do you need from me?",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "dev",
+      "messages": [
+        {
+          "content": "[from el] You are a dev. You report to a boss and work alongside a qa. Stay in character.",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Done! I've spawned a boss who manages a dev and a qa. They're all in character and ready to work together.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "content": [
+            {
+              "content": "sent",
+              "tool_use_id": "toolu_01UsQtnHd645m9x2sjiwWr9b",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "n": 9
+    }
+  },
+  {
+    "a": [
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01KZUauhKqvMzY3efiyvNs2i",
+        "input": {
+          "message": "We need more tests",
+          "recipient": "boss"
+        },
+        "name": "tell",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "content": "tell the boss we need more tests",
+          "role": "user"
+        }
+      ],
+      "n": 11
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Message delivered to the boss.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "content": [
+            {
+              "content": "sent",
+              "tool_use_id": "toolu_01KZUauhKqvMzY3efiyvNs2i",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "n": 13
+    }
+  },
+  {
+    "a": [
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01EzXwBZTuvetabS7zqiYE79",
+        "input": {
+          "message": "We need more tests. Get on it.",
+          "recipient": "qa"
+        },
+        "name": "tell",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "boss",
+      "messages": [
+        {
+          "content": "[from el] We need more tests",
+          "role": "user"
+        }
+      ],
+      "n": 3
+    }
+  },
+  {
+    "a": [
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_019FkBraK5fcpXVC4i2HqXBE",
+        "input": {
+          "question": "Do you have a task from boss?",
+          "recipient": "dev"
+        },
+        "name": "ask",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "content": "ask the dev do you have a task from boss",
+          "role": "user"
+        }
+      ],
+      "n": 15
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Done.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "boss",
+      "messages": [
+        {
+          "content": [
+            {
+              "content": "sent",
+              "tool_use_id": "toolu_01EzXwBZTuvetabS7zqiYE79",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "n": 5
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "No, I don't have a task from boss right now. What needs to be done?",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "dev",
+      "messages": [
+        {
+          "content": "Do you have a task from boss?",
+          "role": "user"
+        }
+      ],
+      "n": 3
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Understood, boss. I'm on it.\n\n**Task accepted:** Write more tests.\n\nI'm ready to get started. Just to clarify so I can prioritize effectively:\n\n- Which areas or features should I focus the new tests on?\n- Are there specific test types you want me to prioritize (unit, integration, end-to-end)?\n- Any particular acceptance criteria or coverage targets I should aim for?\n\nI'll coordinate with the dev as needed to make sure we're aligned on what we're testing.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "qa",
+      "messages": [
+        {
+          "content": "[from boss] We need more tests. Get on it.",
+          "role": "user"
+        }
+      ],
+      "n": 3
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "No, I don't have a task from boss right now. What needs to be done?",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "content": [
+            {
+              "content": "No, I don't have a task from boss right now. What needs to be done?",
+              "tool_use_id": "toolu_019FkBraK5fcpXVC4i2HqXBE",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "n": 17
+    }
+  },
+  {
+    "a": [
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_014zdC9PEg9PXv28u4CZvWys",
+        "input": {
+          "question": "Do you have a task from boss?",
+          "recipient": "qa"
+        },
+        "name": "ask",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "content": "ask the qa do you have a task from boss",
+          "role": "user"
+        }
+      ],
+      "n": 19
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Yes. I have a task from boss: **Write more tests.**\n\nI'm working on it.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "qa",
+      "messages": [
+        {
+          "content": "Do you have a task from boss?",
+          "role": "user"
+        }
+      ],
+      "n": 5
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Yes. I have a task from boss: **Write more tests.**\n\nI'm working on it.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "el",
+      "messages": [
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "tool_result",
+              "content": "Yes. I have a task from boss: **Write more tests.**\n\nI'm working on it.",
+              "tool_use_id": "toolu_014zdC9PEg9PXv28u4CZvWys"
+            }
+          ]
+        }
+      ],
+      "n": 21
+    }
+  }
+]

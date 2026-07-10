@@ -35,8 +35,8 @@ defmodule Elita.Umbrella do
   end
 
   defp run_lint(_) do
-    check("cd apps/elita && mix lint")
-    check("cd apps/el && mix lint")
+    check("mix format --check-formatted")
+    check("mix credo --strict")
   end
 
   defp run_build(_) do

@@ -2,6 +2,9 @@
 
 Agentic platform using OTP patterns for reliable agent behavior
 
+[![lint](https://img.shields.io/endpoint?url=https%3A%2F%2Flimadelic.github.io%2Felita%2Flint.json)](https://limadelic.github.io/elita/credo.html)
+[![cukes](https://img.shields.io/endpoint?url=https%3A%2F%2Flimadelic.github.io%2Felita%2Fcukes.json)](https://limadelic.github.io/elita/cukes.html)
+
 ## Installation
 
 If [available in Hex](https://hex.pm/docs/publish), the package can be installed

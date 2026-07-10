@@ -1,0 +1,42 @@
+defmodule Tape.Writer do
+  import Agent, only: [start_link: 2, get_and_update: 2]
+  import Map, only: [get: 3, put: 3]
+
+  def start_link(_) do
+    start_link(fn -> %{} end, name: __MODULE__)
+  end
+
+  def acquire(fun) do
+    get_and_update(__MODULE__, fn state ->
+      {fun.(), state}
+    end)
+  end
+
+  def claim(cassette_key, idx, times) do
+    key = {cassette_key, idx}
+    get_and_update(__MODULE__, &allow(&1, key, times))
+  end
+
+  def bind(cassette_key, agent, idx, times) do
+    key = {cassette_key, agent, idx}
+    get_and_update(__MODULE__, &allow(&1, key, times))
+  end
+
+  defp allow(state, key, "always") do
+    count = get(state, key, 0)
+    {true, put(state, key, count + 1)}
+  end
+
+  defp allow(state, key, times) do
+    count = get(state, key, 0)
+    admit(state, key, count, count < times)
+  end
+
+  defp admit(state, key, count, true) do
+    {true, put(state, key, count + 1)}
+  end
+
+  defp admit(state, _key, _count, false) do
+    {false, state}
+  end
+end

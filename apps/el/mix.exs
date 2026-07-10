@@ -9,7 +9,7 @@ defmodule El.MixProject do
       elixirc_paths: paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      escript: [main_module: El.CLI, emu_args: "-noinput"],
+      escript: [main_module: El.CLI, emu_args: ""],
       aliases: aliases(),
       build_path: "../../_build",
       config_path: "../../config/config.exs",
@@ -31,7 +31,7 @@ defmodule El.MixProject do
 
   def application do
     [
-      extra_applications: [:logger]
+      extra_applications: [:logger, :tools]
     ]
   end
 

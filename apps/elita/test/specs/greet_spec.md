@@ -24,7 +24,7 @@ Example: greet asks "Who am I talking to" when greeted.
 
 ### Learning Behavior  
 Verify agent processes and remembers information.  
-Example: greet acknowledges and stores the name "Mike".
+Example: greet remembers the name Mike.
 
 ### State Persistence
 Verify agent maintains learned state across messages.  

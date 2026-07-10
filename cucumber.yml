@@ -1,0 +1,2 @@
+default: --require features/step_definitions --require features/support --publish-quiet --format progress --format html --out reports/cucumber.html --tags 'not @wip'
+wip: --require features/step_definitions --require features/support --publish-quiet --format progress --format html --out reports/cucumber.html --tags '@wip'
