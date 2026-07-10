@@ -2,10 +2,6 @@ name: Cucumber Tests
 
 on:
   push:
-    branches:
-      - qa
-      - wip
-      - malko
   workflow_dispatch:
 
 permissions:
