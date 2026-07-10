@@ -3,6 +3,7 @@ defmodule Elita.Credo.Modlines do
 
   import Credo.Code, only: [prewalk: 2]
   import Elita.Credo.Lines
+  import File, only: [read!: 1]
 
   def param_defaults do
     [max_lines: 100]
@@ -23,7 +24,7 @@ defmodule Elita.Credo.Modlines do
   defp config(source_file, params) do
     %{max_lines: Keyword.get(params, :max_lines, 100),
       filename: source_file.filename,
-      source: File.read!(source_file.filename)}
+      source: read!(source_file.filename)}
   end
 
   defp visit({:defmodule, meta, [_ | _]} = ast, issues, cfg) do
