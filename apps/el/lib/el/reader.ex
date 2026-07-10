@@ -11,15 +11,18 @@ defmodule El.Reader do
 
   defp pump(parent) do
     write("reader: about to read line from stdin\n")
+
     case :io.get_line(~c'') do
       {:error, reason} ->
         write("reader: io.get_line error: #{inspect(reason)}\n")
         emit("stdin_error", inspect(reason))
         :ok
+
       :eof ->
         write("reader: io.get_line EOF\n")
         emit("stdin_eof")
         :ok
+
       data ->
         write("reader: got line, size=#{byte_size(data)}\n")
         write("reader: parent PID=#{inspect(parent)}, sending {:stdin, data}\n")

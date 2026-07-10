@@ -4,17 +4,7 @@ defmodule El.Pty.Handler do
   import El.Pty.Size
 
   def write(_port, _pty, :drop), do: :ok
-  def write(port, pty, transformed) do
-    import El.Log, only: [write: 1]
-    size = if is_binary(transformed), do: byte_size(transformed), else: "?"
-    write("handler: writing to pty, size=#{size}\n")
-    port.command(pty, transformed)
-  rescue
-    e ->
-      import El.Log, only: [write: 1]
-      write("handler: write error: #{inspect(e)}\n")
-      raise e
-  end
+  def write(port, pty, transformed), do: port.command(pty, transformed)
 
   def respond(port, pty, data, _state) do
     {rows, cols} = default()

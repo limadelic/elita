@@ -9,7 +9,11 @@ defmodule El.Pty.Dispatch do
 
   def info({pty, {:data, data}}, state) do
     import El.Log, only: [write: 1]
-    write("dispatch: received pty output, size=#{byte_size(data)}, first=#{inspect(String.slice(data, 0..30))}\n")
+
+    write(
+      "dispatch: received pty output, size=#{byte_size(data)}, first=#{inspect(String.slice(data, 0..30))}\n"
+    )
+
     process(pty, data, state)
     {:noreply, state}
   end
