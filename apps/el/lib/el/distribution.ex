@@ -23,19 +23,15 @@ defmodule El.Distribution do
   rescue
     _ -> find(name)
   end
-
   defp pick(:undefined, name), do: find(name)
   defp pick(pid, _), do: pid
-
   defp find(name) do
     lookup(ElitaRegistry, name) |> extract()
   rescue
     _ -> nil
   end
-
   defp extract([{pid, %{kind: :puppet}}]), do: pid
   defp extract(_), do: nil
-
   def daemon do
     boot(:"elita@127.0.0.1", :longnames)
     ensure_all_started(:elita)
