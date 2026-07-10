@@ -9,7 +9,7 @@ defmodule El.Pty.Dispatch do
 
   def info({pty, {:data, data}}, state) do
     import El.Log, only: [write: 1]
-    write("dispatch: received pty output, size=#{byte_size(data)}\n")
+    write("dispatch: received pty output, size=#{byte_size(data)}, first=#{inspect(String.slice(data, 0..30))}\n")
     process(pty, data, state)
     {:noreply, state}
   end
@@ -19,8 +19,7 @@ defmodule El.Pty.Dispatch do
     write("dispatch: received stdin, size=#{byte_size(data)}\n")
     record(data)
     transformed = input.(data)
-    tag = if is_tuple(transformed), do: elem(transformed, 0), else: transformed
-    write("dispatch: input function returned type=#{inspect(tag)}\n")
+    write("dispatch: input function returned #{inspect(transformed)}\n")
     write("handler: about to write to pty\n")
     write(port, pty, transformed)
     write("handler: write completed\n")
