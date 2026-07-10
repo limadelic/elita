@@ -83,13 +83,15 @@ defmodule El.REPL do
     dispatch(agent, input, :ask) |> puts()
   end
 
-  defp route(_a, p, i), do: i |> String.split(" ", parts: 2) |> ask_via(p, i)
+  defp route(_a, p, i), do: i |> String.split(" ", parts: 2) |> via(p, i)
 
-  defp ask_via([_w], p, i), do: ask(p, i)
-  defp ask_via([w, _], p, i), do: ask(choose(target(w), p), i)
+  defp via([_w], p, i), do: ask(p, i)
+  defp via([w, _], p, i), do: ask(choose(target(w), p), i)
 
   defp choose(nil, default), do: default
   defp choose(t, _), do: t
 
-  defp target(name), do: (try do :global.whereis_name({name, :puppet}) rescue _ -> nil end)
+  defp target(name) do
+    (try do :global.whereis_name({name, :puppet}) rescue _ -> nil end)
+  end
 end
