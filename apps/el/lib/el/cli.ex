@@ -27,8 +27,24 @@ defmodule El.CLI do
 
   def main(argv) do
     ensure_all_started(:elita)
-    argv |> parse() |> exec()
+    argv |> route() |> exec()
   end
+
+  defp route(argv) do
+    name = session_name(argv)
+    El.Log.setup(name)
+    argv |> parse()
+  end
+
+  defp session_name(["claude" | t]) do
+    case t do
+      [] -> "default"
+      [name | _] -> name
+      _ -> "default"
+    end
+  end
+
+  defp session_name(_), do: "default"
 
   defp parse(["ask", agent, msg]), do: {:ask, nil, agent, msg}
   defp parse(["tell", agent, msg]), do: {:tell, nil, agent, msg}
