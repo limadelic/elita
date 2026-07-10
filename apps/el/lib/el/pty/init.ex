@@ -83,6 +83,6 @@ defmodule El.Pty.Init do
     react(info(pty), parent, pty)
   end
 
-  defp react(false, parent, pty), do: send(parent, {pty, :closed})
+  defp react(nil, parent, pty), do: send(parent, {pty, :closed})
   defp react(_, _, _), do: :ok
 end
