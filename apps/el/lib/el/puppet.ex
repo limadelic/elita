@@ -5,6 +5,7 @@ defmodule El.Puppet do
   import El.Pty, only: [watch: 2, unwatch: 2, inject: 2]
   import String, only: [ends_with?: 2]
   import Keyword, only: [fetch!: 2]
+  import Process, only: [monitor: 1, demonitor: 1, whereis: 1]
 
   def ask(pid, message) do
     call(pid, {:ask, message}, :infinity)
@@ -46,25 +47,45 @@ defmodule El.Puppet do
 
   defp query(pty_pid, message) do
     watch(pty_pid, self())
+    actual_pid = whereis_pid(pty_pid)
+    monitor_ref = monitor(actual_pid)
     inject(pty_pid, message <> "\r")
-    collect(pty_pid, "")
+    collect(pty_pid, "", monitor_ref)
   end
 
-  defp collect(pty_pid, buffer) do
+  defp whereis_pid(name) when is_atom(name), do: whereis(name) || name
+  defp whereis_pid(pid), do: pid
+
+  defp collect(pty_pid, buffer, monitor_ref) do
     receive do
       {:output, data} ->
         next = buffer <> data
-        ready(pty_pid, next, prompt?(next))
+        ready(pty_pid, next, prompt?(next), monitor_ref)
+      {:DOWN, ^monitor_ref, :process, _pid, _} ->
+        safe_unwatch(pty_pid)
+        buffer
+    after
+      1000 ->
+        safe_unwatch(pty_pid)
+        demonitor(monitor_ref)
+        buffer
     end
   end
 
-  defp ready(pty_pid, buffer, true) do
-    unwatch(pty_pid, self())
+  defp ready(pty_pid, buffer, true, monitor_ref) do
+    demonitor(monitor_ref)
+    safe_unwatch(pty_pid)
     buffer
   end
 
-  defp ready(pty_pid, buffer, false) do
-    collect(pty_pid, buffer)
+  defp ready(pty_pid, buffer, false, monitor_ref) do
+    collect(pty_pid, buffer, monitor_ref)
+  end
+
+  defp safe_unwatch(pty_pid) do
+    unwatch(pty_pid, self())
+  rescue
+    _ -> :ok
   end
 
   defp prompt?(text) do
