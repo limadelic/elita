@@ -19,8 +19,17 @@ defmodule El.Distribution do
 
   def target(name) do
     case {name, :puppet} |> :global.whereis_name() do
-      :undefined -> nil
+      :undefined -> lookup_registry(name)
       pid -> pid
+    end
+  rescue
+    _ -> lookup_registry(name)
+  end
+
+  defp lookup_registry(name) do
+    case Registry.lookup(ElitaRegistry, name) do
+      [{pid, %{kind: :puppet}}] -> pid
+      _ -> nil
     end
   rescue
     _ -> nil
