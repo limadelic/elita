@@ -83,11 +83,16 @@ defmodule El.Wrap.Input do
   end
 
   defp send_to_puppet(name, message) do
-    case target(name) do
+    atom_name = to_atom(name)
+    case target(atom_name) do
       nil -> :ok
       puppet_pid ->
-        ask(puppet_pid, message) |> puts()
-        :ok
+        try do
+          ask(puppet_pid, message) |> puts()
+          :ok
+        rescue
+          _ -> :ok
+        end
     end
   end
 end
