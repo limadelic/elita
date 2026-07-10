@@ -88,7 +88,8 @@
           {Credo.Check.Warning.UnsafeToAtom, false},
           {Credo.Check.Refactor.Nesting, []},
           {Credo.Check.Refactor.NegatedConditionsWithElse, []},
-          {Credo.Check.Refactor.CondStatements, []}
+          {Credo.Check.Refactor.CondStatements, []},
+          {Credo.Check.Readability.NestedFunctionCalls, []}
         ],
         disabled: [
           {Credo.Check.Consistency.ExceptionNames, []},
@@ -111,7 +112,6 @@
           {Credo.Check.Readability.ModuleAttributeNames, []},
           {Credo.Check.Readability.ModuleDoc, []},
           {Credo.Check.Readability.MultiAlias, []},
-          {Credo.Check.Readability.NestedFunctionCalls, []},
           {Credo.Check.Readability.OneArityFunctionInPipe, []},
           {Credo.Check.Readability.OnePipePerLine, []},
           {Credo.Check.Readability.ParenthesesInCondition, []},
