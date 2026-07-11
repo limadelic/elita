@@ -60,6 +60,7 @@ defmodule El.Puppet.Collect do
         write("collect: burst #{state.burst} got #{byte_size(data)}b\n")
         now = monotonic_time(:millisecond)
         burst2 = if state.gap and state.burst == 1, do: 2, else: state.burst
+        note(state.burst, burst2)
         state2 = %{state | buffer: state.buffer <> data, last: now, burst: burst2}
         collect(state2)
     after
@@ -75,6 +76,12 @@ defmodule El.Puppet.Collect do
   end
 
   defp tick(_elapsed, _quiet), do: :ok
+
+  defp note(b1, b2) when b2 > b1 do
+    write("collect: burst transition #{b1} -> #{b2}\n")
+  end
+
+  defp note(_b1, _b2), do: :ok
 
   defp reply(buffer) do
     write("collect done bytes=#{byte_size(buffer)}\n")

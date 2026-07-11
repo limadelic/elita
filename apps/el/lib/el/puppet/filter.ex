@@ -11,8 +11,8 @@ defmodule El.Puppet.Filter do
 
   defp presence(_buffer, _question), do: false
 
-  defp removed?(question, buffer) do
-    buffer |> polish() |> noclutter() |> replace(question, "") |> trim() |> full?()
+  defp removed?(q, b) do
+    b |> polish() |> noclutter() |> replace(q, "") |> trim() |> full?()
   end
 
   defp full?(buffer), do: byte_size(buffer) > 0
