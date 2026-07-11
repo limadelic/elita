@@ -74,8 +74,15 @@ defmodule El.Distribution do
     :global.whereis_name({name, :puppet}) |> reply(name)
   end
 
-  defp reply(:undefined, name), do: find(name)
-  defp reply(pid, _name), do: pid
+  defp reply(:undefined, name) do
+    write("whereis_name #{name}: :undefined\n")
+    find(name)
+  end
+
+  defp reply(pid, name) do
+    write("whereis_name #{name}: #{inspect(pid)}\n")
+    pid
+  end
 
   defp find(name) do
     lookup(ElitaRegistry, name) |> extract()

@@ -5,6 +5,7 @@ defmodule El.Puppet do
   import El.Pty, only: [watch: 2, unwatch: 2, inject: 2]
   import String, only: [ends_with?: 2]
   import Keyword, only: [fetch!: 2]
+  import El.Log, only: [write: 1]
 
   def ask(pid, message) do
     GenServer.call(pid, {:ask, message}, :infinity)
@@ -43,7 +44,9 @@ defmodule El.Puppet do
   end
 
   def handle_call({:ask, message}, _from, %{pty: pty} = state) do
+    write("ask received: #{inspect(message)}\n")
     output = query(pty, message)
+    write("ask returned: #{inspect(String.slice(output, 0..50))}\n")
     {:reply, output, state}
   end
 
@@ -53,6 +56,7 @@ defmodule El.Puppet do
   end
 
   defp query(pty, message) do
+    write("inject to pty: #{inspect(message)}\n")
     watch(pty, self())
     inject(pty, message <> "\r")
     collect(pty, "")
@@ -64,12 +68,17 @@ defmodule El.Puppet do
         ready(pty, buffer <> data, prompt?(buffer <> data))
     after
       5000 ->
+        write(
+          "collect timeout after 5000ms, last chunk: #{inspect(String.slice(buffer, -50..-1))}\n"
+        )
+
         cleanup(pty)
         buffer
     end
   end
 
   defp ready(pty, buffer, true) do
+    write("collect got prompt, returning: #{inspect(String.slice(buffer, -50..-1))}\n")
     cleanup(pty)
     buffer
   end
