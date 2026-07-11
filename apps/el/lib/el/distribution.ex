@@ -5,8 +5,30 @@ defmodule El.Distribution do
   import Node, only: [connect: 1]
   import Enum, only: [each: 2]
   import Registry, only: [lookup: 2]
+  import El.Log, only: [write: 1]
 
-  defdelegate start(name \\ :default, opts \\ []), to: El.Boot
+  def start(name \\ :default, opts \\ []) do
+    El.Boot.start(name, opts)
+    bind(name, 50)
+  end
+
+  defp bind(name, tries) when tries > 0 do
+    via = {:via, Registry, {ElitaRegistry, name, %{kind: :puppet}}}
+    go(name, tries, Process.whereis(via))
+  end
+
+  defp bind(_name, 0), do: :ok
+
+  defp go(name, _tries, pid) when is_pid(pid) do
+    result = :global.register_name({name, :puppet}, pid)
+    write("global register #{name}: #{inspect(result)} node=#{inspect(Node.self())}\n")
+    result
+  end
+
+  defp go(name, tries, nil) do
+    sleep(100)
+    bind(name, tries - 1)
+  end
 
   def target(name) do
     connect(:"#{name}@127.0.0.1") |> route(name)

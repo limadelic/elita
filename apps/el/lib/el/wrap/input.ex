@@ -4,9 +4,11 @@ defmodule El.Wrap.Input do
   import Enum, only: [drop: 2]
   import String, only: [split: 3, trim: 1]
   import El.Wrap.Remote, only: [deliver: 3]
+  import El.Log, only: [write: 1]
 
   def open(parent, agent \\ nil) do
     {:ok, pid} = start_link(fn -> {[], parent, agent} end)
+    write("input handler opened for #{inspect(agent)}\n")
     pid
   end
 
