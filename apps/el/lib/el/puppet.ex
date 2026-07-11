@@ -188,6 +188,8 @@ defmodule El.Puppet do
 
   defp noclutter(text) do
     text
+    |> replace(~r/\(esc to interrupt\)/i, "")
+    |> replace(~r/·\s+\w+…/, "")
     |> replace(~r/Type \? for shortcuts[^\n]*/i, "")
     |> replace(~r/Press [Ctrl\+C]+ to exit[^\n]*/i, "")
     |> replace(~r/\(type .+ for help\)[^\n]*/i, "")
