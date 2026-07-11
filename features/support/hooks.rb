@@ -33,7 +33,7 @@ Before do |scenario|
 end
 
 Before('@malko') do
-  @scratch = Dir.mktmpdir
+  @scratch = Dir.mktmpdir('scratch', File.expand_path('../../tmp', __dir__))
   bin_dir = File.join(@scratch, 'bin')
   Dir.mkdir(bin_dir) unless Dir.exist?(bin_dir)
   el_escript = File.expand_path('../../apps/el/el', __dir__)
