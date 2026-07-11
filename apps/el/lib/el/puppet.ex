@@ -60,6 +60,7 @@ defmodule El.Puppet do
     watch(pty, self())
     inject(pty, message <> "\r")
     now = System.monotonic_time(:millisecond)
+    write("collect start node=#{node()} pid=#{inspect(self())}\n")
     collect(pty, "", now, now)
   end
 
@@ -84,12 +85,21 @@ defmodule El.Puppet do
         receive do
           {:output, data} -> collect(pty, buffer <> data, now, start)
         after
-          timeout -> collect(pty, buffer, last, start)
+          timeout ->
+            log_tick(elapsed, quiet, buffer)
+            collect(pty, buffer, last, start)
         end
     end
   end
 
+  defp log_tick(elapsed, quiet, buffer) when rem(div(elapsed, 1000), 10) == 0 and quiet >= 1000 do
+    write("collect tick quiet=#{quiet} elapsed=#{elapsed} bytes=#{byte_size(buffer)}\n")
+  end
+
+  defp log_tick(_elapsed, _quiet, _buffer), do: :ok
+
   defp reply(buffer) do
+    write("collect done bytes=#{byte_size(buffer)}\n")
     stripped = clean(buffer)
 
     trimmed =

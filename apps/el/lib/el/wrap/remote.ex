@@ -7,11 +7,15 @@ defmodule El.Wrap.Remote do
   import El.Log, only: [write: 1]
 
   def deliver(name, message, sender) do
-    target = name |> trim() |> to_atom()
-    write("deliver #{target} from #{inspect(sender)}\n")
-    target |> wait() |> query(message, sender)
+    prepare(name, sender) |> wait() |> query(message, sender)
   catch
     :exit, _ -> :forward
+  end
+
+  defp prepare(name, sender) do
+    target = name |> trim() |> to_atom()
+    write("deliver #{target} from #{inspect(sender)}\n")
+    target
   end
 
   defp query(nil, _message, _sender), do: :forward
@@ -29,28 +33,39 @@ defmodule El.Wrap.Remote do
   end
 
   defp call(pid, message) do
-    host = node(pid)
-    write("call erpc to #{host} pid=#{inspect(pid)}\n")
-    result = pid |> node() |> erpc(pid, message)
+    audit(pid)
+    result = erpc(node(pid), pid, message)
     write("erpc result: #{inspect(result)}\n")
     result
+  end
+
+  defp audit(pid) do
+    write("call erpc to #{node(pid)} pid=#{inspect(pid)}\n")
   end
 
   defp erpc(host, pid, message) do
     :erpc.call(host, El.Puppet, :ask, [pid, message])
   rescue
-    e ->
-      write("erpc error: #{inspect(e)}\n")
-      reraise(e, __STACKTRACE__)
+    e -> trap(e, __STACKTRACE__)
+  end
+
+  defp trap(error, trace) do
+    write("erpc error: #{inspect(error)}\n")
+    reraise(error, trace)
   end
 
   defp respond(:forward, _sender), do: :forward
 
   defp respond(output, sender) do
-    if pid = sender |> to_atom() |> target(),
-      do: put(pid, output |> split("\n") |> drop(-1) |> join("\n"))
-
+    pid = sender |> to_atom() |> target()
+    route(pid, output)
     {:handled}
+  end
+
+  defp route(nil, _output), do: :ok
+
+  defp route(pid, output) do
+    put(pid, output |> split("\n") |> drop(-1) |> join("\n"))
   end
 
   def known?(name) do
