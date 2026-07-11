@@ -49,27 +49,27 @@ defmodule El.Wrap.Remote do
   defp respond(:forward, _sender), do: :forward
 
   defp respond(output, sender) do
-    write("respond output: #{inspect(output)}\n")
-    pid = sender |> fix(sender) |> target()
-    route(pid, output)
+    agent = sender |> fix(sender)
+    route(agent |> target(), output, agent)
     {:handled}
   end
 
   defp fix(atom, _) when is_atom(atom), do: atom
   defp fix(_, binary) when is_binary(binary), do: to_atom(binary)
 
-  defp route(nil, _output) do
+  defp route(nil, _output, _agent) do
     write("route nil: cannot write\n")
     :ok
   end
 
-  defp route(pid, output) when is_binary(output) do
+  defp route(pid, output, agent) when is_binary(output) do
     cleaned = trim_trailing(output, "\n")
     write("route to: #{inspect(pid)} text: #{inspect(cleaned)}\n")
     put(pid, cleaned)
+    IO.write(:stdout, "#{agent}> ")
   end
 
-  defp route(_pid, output) do
+  defp route(_pid, output, _agent) do
     write("route drop: #{inspect(output)}\n")
     :ok
   end
