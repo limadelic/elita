@@ -1,8 +1,30 @@
 defmodule El.Puppet.Filter do
-  import String, only: [replace: 3, trim: 1]
+  import String, only: [replace: 3, trim: 1, split: 2, contains?: 2]
+  import Enum, only: [at: 3]
 
   def answer?(buffer, question) do
     buffer |> presence(question)
+  end
+
+  def mark(buffer) do
+    if contains?(buffer, "⏺") do
+      buffer
+      |> split("\e[H")
+      |> at(-1, "")
+      |> clean()
+      |> scan()
+    else
+      buffer |> polish() |> final()
+    end
+  end
+
+  defp scan(text) do
+    text
+    |> split("⏺")
+    |> at(1, text)
+    |> trim()
+    |> replace(~r/\r.*/, "")
+    |> trim()
   end
 
   defp presence(buffer, question) when byte_size(buffer) > 0 do

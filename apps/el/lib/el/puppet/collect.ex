@@ -1,9 +1,10 @@
 defmodule El.Puppet.Collect do
   import El.Log, only: [write: 1]
   import El.Pty, only: [unwatch: 2]
-  import El.Puppet.Filter, only: [answer?: 2, polish: 1, final: 1]
+  import El.Puppet.Filter, only: [answer?: 2, mark: 1, polish: 1]
   import System, only: [monotonic_time: 1]
-  import String, only: [slice: 2]
+  import String, only: [contains?: 2, slice: 2]
+  import Exception, only: [format: 3]
 
   def collect(state) do
     now = monotonic_time(:millisecond)
@@ -27,7 +28,7 @@ defmodule El.Puppet.Collect do
     end
   rescue
     e ->
-      write("collect exception: #{Exception.format(:error, e, __STACKTRACE__)}\n")
+      write("collect exception: #{format(:error, e, __STACKTRACE__)}\n")
       reraise e, __STACKTRACE__
   catch
     kind, reason ->
@@ -55,12 +56,22 @@ defmodule El.Puppet.Collect do
       unwatch(state.pty, self())
       reply(state.buffer)
     else
-      loop(state, quiet)
+      ready(state, quiet)
     end
   end
 
   defp decide(state, quiet, _elapsed) when true do
-    loop(state, quiet)
+    ready(state, quiet)
+  end
+
+  defp ready(state, quiet) do
+    if contains?(state.buffer, "⏺") and quiet >= 1000 do
+      write("collect: marker detected with #{quiet}ms quiet\n")
+      unwatch(state.pty, self())
+      reply(state.buffer)
+    else
+      loop(state, quiet)
+    end
   end
 
   defp loop(state, quiet) do
@@ -89,6 +100,6 @@ defmodule El.Puppet.Collect do
 
   defp reply(buffer) do
     write("collect done bytes=#{byte_size(buffer)}\n")
-    buffer |> polish() |> final()
+    mark(buffer)
   end
 end

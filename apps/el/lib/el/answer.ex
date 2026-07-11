@@ -19,7 +19,7 @@ defmodule El.Answer do
     receive do
       {^ref, answer} -> answer
     after
-      timeout -> collect(0)
+      timeout -> collect(timeout)
     end
   end
 
@@ -44,7 +44,7 @@ defmodule El.Answer do
   end
 
   defp done?(_combined, ""), do: false
-  defp done?(combined, _acc), do: contains?(combined, "\e[?2004h")
+  defp done?(combined, _acc), do: contains?(combined, "\e[?2004h") or contains?(combined, "⏺")
 
   defp text(input) do
     input |> codes() |> commands()
