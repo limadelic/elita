@@ -1,9 +1,9 @@
 defmodule El.Puppet.Collect do
   import El.Log, only: [write: 1]
   import El.Pty, only: [unwatch: 2]
-  import El.Puppet.Filter, only: [answer?: 2, mark: 1, polish: 1]
+  import El.Puppet.Filter, only: [answer?: 2, mark: 1]
   import System, only: [monotonic_time: 1]
-  import String, only: [contains?: 2, slice: 2]
+  import String, only: [contains?: 2]
   import Exception, only: [format: 3]
 
   def collect(state) do
@@ -36,11 +36,8 @@ defmodule El.Puppet.Collect do
       :erlang.raise(kind, reason, __STACKTRACE__)
   end
 
-  defp peek(buffer) do
-    raw = buffer |> inspect(limit: :infinity) |> slice(0..599)
-    p = buffer |> polish() |> inspect(limit: :infinity) |> slice(0..599)
-    write("collect buffer raw: #{raw}\n")
-    write("collect buffer polish: #{p}\n")
+  defp peek(_buffer) do
+    :ok
   end
 
   defp decide(state, quiet, elapsed) when state.burst >= 2 and quiet >= 1000 do

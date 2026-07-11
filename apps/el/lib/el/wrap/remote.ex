@@ -51,7 +51,6 @@ defmodule El.Wrap.Remote do
   end
 
   defp watch(pid) do
-    write("watchdog armed for #{inspect(pid)}\n")
     Process.monitor(pid)
 
     receive do

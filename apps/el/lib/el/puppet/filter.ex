@@ -1,7 +1,7 @@
 defmodule El.Puppet.Filter do
   import String, only: [replace: 3, trim: 1, split: 2, contains?: 2]
   import El.Log, only: [write: 1]
-  import Enum, only: [find: 3, reverse: 1, take: 2]
+  import Enum, only: [find: 3, reverse: 1]
   import List, only: [last: 1]
 
   def answer?(buffer, question) do
@@ -20,8 +20,6 @@ defmodule El.Puppet.Filter do
   end
 
   defp body(text) do
-    charlist = text |> String.to_charlist() |> take(80)
-    write("raw: #{inspect(charlist)}\n")
     pull(text) |> trim() |> strip() |> trim()
   end
 
