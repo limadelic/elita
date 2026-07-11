@@ -59,33 +59,33 @@ defmodule El.Puppet do
     write("inject to pty: #{inspect(message)}\n")
     watch(pty, self())
     inject(pty, message <> "\r")
-    collect(pty, "", 0, 0)
+    now = System.monotonic_time(:millisecond)
+    collect(pty, "", now, now)
   end
 
-  defp collect(pty, buffer, quiet, elapsed) do
-    receive do
-      {:output, data} ->
-        collect(pty, buffer <> data, 0, elapsed)
-    after
-      500 ->
-        elapsed = elapsed + 500
-        done?(pty, buffer, quiet, elapsed) || collect(pty, buffer, quiet + 500, elapsed)
-    end
-  end
+  defp collect(pty, buffer, last, start) do
+    now = System.monotonic_time(:millisecond)
+    quiet = now - last
+    elapsed = now - start
 
-  defp done?(pty, buffer, quiet, elapsed) do
-    case {quiet >= 4000 && trim(buffer) != "", elapsed >= 60_000} do
-      {true, _} ->
+    cond do
+      quiet >= 4000 && trim(buffer) != "" ->
         cleanup(pty)
         reply(buffer)
 
-      {false, true} ->
+      elapsed >= 60_000 ->
         write("collect hard timeout at 60s\n")
         cleanup(pty)
         reply(buffer)
 
-      {false, false} ->
-        nil
+      true ->
+        timeout = min(4000 - quiet, 60_000 - elapsed) |> max(0)
+
+        receive do
+          {:output, data} -> collect(pty, buffer <> data, now, start)
+        after
+          timeout -> collect(pty, buffer, last, start)
+        end
     end
   end
 
