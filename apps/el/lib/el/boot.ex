@@ -2,12 +2,12 @@ defmodule El.Boot do
   @moduledoc false
   import Process, only: [sleep: 1]
   import Node, only: [set_cookie: 1]
-  import IO, only: [write: 1, write: 2]
   import Keyword, only: [get: 3]
   import File, only: [cwd!: 0]
   import Path, only: [basename: 1]
   import El.Host, only: [host: 0]
   import String, only: [contains?: 2]
+  import El.Log, only: [write: 1]
 
   def start(name \\ :default, opts \\ []) do
     :os.cmd(~c"epmd -daemon")
@@ -37,15 +37,15 @@ defmodule El.Boot do
   end
 
   defp attempt({:error, reason}, _fun, _tries) do
-    write("boot failed: #{inspect(reason)}\n")
-    {:error, :max_retries_exceeded}
+    write("boot failed reason=#{inspect(reason)}\n")
+    {:error, reason}
   end
 
   defp act({:ok, _}, _, _), do: cookie(:ok)
   defp act({:error, {:already_started, _}}, _, _), do: cookie(:taken)
 
   defp act({:error, reason}, _, _) do
-    write(:stderr, "Error: Failed to start distribution: #{inspect(reason)}\n")
+    write("boot error: #{inspect(reason)}\n")
     :ok
   end
 
