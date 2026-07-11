@@ -18,6 +18,7 @@ defmodule El.Puppet.Collect do
       write("collect hard timeout at 60s\n")
       peek(state.buffer)
       unwatch(state.pty, self())
+      reply(state.buffer)
     else
       gap = state.gap or quiet >= 2000
       if not state.gap and gap, do: peek(state.buffer)
