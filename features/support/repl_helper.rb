@@ -39,7 +39,7 @@ module ReplHelper
           next unless ready
           chunk = reader.readpartial(4096)
           encoded = (chunk.force_encoding("UTF-8") rescue chunk.to_s)
-          stripped = (encoded.scrub("").gsub(/\e\[[0-9;?]*[a-zA-Z]|\e[78]|\e\][^\a]*\a/, "") rescue "")
+          stripped = (encoded.scrub("").gsub(/\e\[[0-9]*[GfH]/, " ").gsub(/\e\[[0-9;?]*[a-zA-Z]|\e[78]|\e\][^\a]*\a/, "") rescue "")
           mutex.synchronize do
             transcript << encoded if transcript
             transcript_stripped << stripped if transcript_stripped

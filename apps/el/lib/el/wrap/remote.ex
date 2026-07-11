@@ -66,7 +66,7 @@ defmodule El.Wrap.Remote do
     cleaned = trim_trailing(output, "\n")
     write("route to: #{inspect(pid)} text: #{inspect(cleaned)}\n")
     put(pid, cleaned)
-    IO.write(:stdout, "#{agent}> ")
+    File.write("/dev/stdout", "#{agent}> ")
   end
 
   defp route(_pid, output, _agent) do
