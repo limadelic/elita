@@ -20,6 +20,9 @@ module Drain
   end
 
   def fetch(pty)
+    if @mutex
+      return ""
+    end
     ready = IO.select([pty], nil, nil, 0.1)
     return "" unless ready
 
@@ -48,21 +51,52 @@ module Drain
 
   def poll(output, pattern, timeout)
     stripped = ""
-    while Time.now < timeout
-      next if (chunk = fetch(@reader)).empty?
+    if @mutex
+      last_pos_full = @transcript ? @transcript.length : 0
+      last_pos_stripped = @transcript_stripped ? @transcript_stripped.length : 0
+      while Time.now < timeout
+        @mutex.synchronize do
+          if @transcript && @transcript.length > last_pos_full
+            chunk = @transcript[last_pos_full...@transcript.length]
+            output << chunk
+            last_pos_full = @transcript.length
+          end
+          if @transcript_stripped && @transcript_stripped.length > last_pos_stripped
+            chunk = @transcript_stripped[last_pos_stripped...@transcript_stripped.length]
+            stripped << chunk
+            last_pos_stripped = @transcript_stripped.length
+          end
+        end
+        return output if stripped.include?(pattern)
+        sleep 0.01
+      end
+    else
+      while Time.now < timeout
+        next if (chunk = fetch(@reader)).empty?
 
-      log(chunk, output)
-      stripped << strip(chunk)
-      return output if stripped.include?(pattern)
+        log(chunk, output)
+        stripped << strip(chunk)
+        return output if stripped.include?(pattern)
+      end
     end
   end
 
   def log(chunk, output)
     output << chunk
-    @transcript << chunk if @transcript
-    @screen.feed(chunk) if @screen
-    stripped = strip(chunk)
-    stripped = encode(stripped)
-    @transcript_stripped << stripped if @transcript_stripped
+    if @mutex
+      @mutex.synchronize do
+        @transcript << chunk if @transcript
+        @screen.feed(chunk) if @screen
+        stripped = strip(chunk)
+        stripped = encode(stripped)
+        @transcript_stripped << stripped if @transcript_stripped
+      end
+    else
+      @transcript << chunk if @transcript
+      @screen.feed(chunk) if @screen
+      stripped = strip(chunk)
+      stripped = encode(stripped)
+      @transcript_stripped << stripped if @transcript_stripped
+    end
   end
 end

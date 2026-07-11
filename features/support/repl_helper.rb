@@ -13,6 +13,8 @@ module ReplHelper
   def store_session(args)
     name = session_name(args)
     prompt = session_name(args)
+    mutex = Mutex.new
+    drain_thread = start_background_drain(@reader, @transcript, @transcript_stripped, mutex)
     @sessions[name] = {
       reader: @reader,
       writer: @writer,
@@ -20,9 +22,33 @@ module ReplHelper
       screen: @screen,
       transcript: @transcript,
       transcript_stripped: @transcript_stripped,
-      prompt: prompt
+      prompt: prompt,
+      mutex: mutex,
+      drain_thread: drain_thread,
+      buffer_pos: 0
     }
     @current = name
+  end
+
+  def start_background_drain(reader, transcript, transcript_stripped, mutex)
+    return nil unless reader
+    Thread.new do
+      begin
+        loop do
+          ready = IO.select([reader], nil, nil, 0.05)
+          next unless ready
+          chunk = reader.readpartial(4096)
+          encoded = (chunk.force_encoding("UTF-8") rescue chunk.to_s)
+          stripped = (encoded.scrub("").gsub(/\e\[[0-9;?]*[a-zA-Z]|\e[78]|\e\][^\a]*\a/, "") rescue "")
+          mutex.synchronize do
+            transcript << encoded if transcript
+            transcript_stripped << stripped if transcript_stripped
+          end
+        end
+      rescue EOFError
+      rescue => _
+      end
+    end
   end
 
   def one(args)
@@ -57,6 +83,9 @@ module ReplHelper
     @screen = session[:screen]
     @transcript = session[:transcript]
     @transcript_stripped = session[:transcript_stripped]
+    @mutex = session[:mutex]
+    @buffer_pos = session[:buffer_pos]
+    @drain_thread = session[:drain_thread]
   end
 
   def transcript
@@ -65,6 +94,7 @@ module ReplHelper
 
   def drain
     return unless @reader
+    return if @mutex
 
     chunk = absorb(@reader)
     append(chunk, strip(chunk))
@@ -72,9 +102,17 @@ module ReplHelper
 
   def append(chunk, stripped)
     chunk = encode(chunk)
-    @transcript << chunk if @transcript
-    stripped = encode(stripped)
-    @transcript_stripped << stripped if @transcript_stripped
+    if @mutex
+      @mutex.synchronize do
+        @transcript << chunk if @transcript
+        stripped = encode(stripped)
+        @transcript_stripped << stripped if @transcript_stripped
+      end
+    else
+      @transcript << chunk if @transcript
+      stripped = encode(stripped)
+      @transcript_stripped << stripped if @transcript_stripped
+    end
   end
 
   def closed?
@@ -94,11 +132,15 @@ module ReplHelper
   def reader_eof?
     return false unless @reader
 
-    ready = IO.select([@reader], nil, nil, 0.1)
-    return false unless ready
+    if @drain_thread
+      !@drain_thread.alive?
+    else
+      ready = IO.select([@reader], nil, nil, 0.1)
+      return false unless ready
 
-    @reader.readpartial(1)
-    false
+      @reader.readpartial(1)
+      false
+    end
   rescue EOFError
     true
   end
