@@ -34,8 +34,9 @@ defmodule El.Wrap.Remote do
     caller = self()
     write("ask to #{node(pid)} from #{inspect(caller)}\n")
     spawn(fn -> watch(caller) end)
-    :erpc.call(node(pid), El.Puppet, :ask, [pid, message], 90_000)
+    result = :erpc.call(node(pid), El.Puppet, :ask, [pid, message], 90_000)
     write("ask ok\n")
+    result
   rescue
     _e -> (write("ask fail exception\n"); :forward)
   catch
@@ -62,10 +63,15 @@ defmodule El.Wrap.Remote do
     :ok
   end
 
-  defp route(pid, output) do
+  defp route(pid, output) when is_binary(output) do
     cleaned = output |> split("\n") |> drop(-1) |> join("\n")
     write("route to: #{inspect(pid)} text: #{inspect(cleaned)}\n")
     put(pid, cleaned)
+  end
+
+  defp route(_pid, output) do
+    write("route drop: #{inspect(output)}\n")
+    :ok
   end
 
   def known?(name) do
