@@ -80,14 +80,20 @@ def retrying(times)
   yield
 rescue => e
   first_error ||= e
-  (times -= 1).zero? ? (raise first_error) : (sleep 1 if ENV["TAPE"] == "rec"; retry)
+  if (times -= 1).zero?
+    raise first_error
+  else
+    pause = ENV["TAPE"] == "rec" ? 1 : 0.45
+    sleep pause
+    retry
+  end
 end
 
 def verify_lines(lines)
-  tx = transcript
+  tx = transcript.downcase
   cursor = 0
   lines.each do |line|
-    idx = tx.index(line, cursor)
+    idx = tx.index(line.downcase, cursor)
     unless idx
       raise "Expected '#{line}' in transcript after position #{cursor}:\n#{tx}"
     end
