@@ -12,6 +12,7 @@ defmodule El.Commands.Claude do
   import El.Log, only: [write: 1]
   import El.Distribution, only: [start: 1, bind: 1]
   import El.Puppet, only: [open: 1]
+  import Tape.Writer, only: [start_link: 1]
 
   def claude(name \\ :default) do
     claude(name, deps())
@@ -59,6 +60,7 @@ defmodule El.Commands.Claude do
 
   defp boot(name, deps) do
     setup(deps)
+    tape()
     buf = open(self(), name)
     execute(name, deps, buf)
   end
@@ -91,4 +93,10 @@ defmodule El.Commands.Claude do
 
   defp resolve(:default), do: cwd!() |> basename()
   defp resolve(name) when is_binary(name), do: name
+
+  defp tape do
+    start_link(nil)
+  rescue
+    _ -> :ok
+  end
 end

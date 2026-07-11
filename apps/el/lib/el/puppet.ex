@@ -73,10 +73,15 @@ defmodule El.Puppet do
   defp format(response), do: response
 
   defp record(message, response) do
-    if get_env("TAPE") == "rec" do
-      name = get_env("PUPPET_NAME") || "puppet"
-      request = %{"agent" => name, "messages" => [%{content: message}], "n" => 1}
-      add(request, response)
+    tape = get_env("TAPE")
+    if tape == "rec" do
+      try do
+        name = get_env("PUPPET_NAME") || "puppet"
+        request = %{"agent" => name, "messages" => [%{content: message}], "n" => 1}
+        add(request, response)
+      catch
+        _, _ -> write("record fail\n")
+      end
     end
   end
 
