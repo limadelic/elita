@@ -61,6 +61,10 @@ defmodule El.Pty.Dispatch do
     {:reply, :ok, %{state | taps: delete(taps, pid)}}
   end
 
+  def cast({:untap, pid}, %{taps: taps} = state) do
+    {:noreply, %{state | taps: delete(taps, pid)}}
+  end
+
   def cast({:inject, msg}, %{pty: pty, port: port} = state) do
     record(msg)
     port.command(pty, msg)

@@ -22,7 +22,7 @@ defmodule El.Pty do
   end
 
   def unwatch(name, pid) do
-    GenServer.call(name, {:untap, pid})
+    GenServer.cast(name, {:untap, pid})
   end
 
   def launch(name, opts \\ []) do

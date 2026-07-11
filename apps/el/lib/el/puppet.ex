@@ -79,11 +79,11 @@ defmodule El.Puppet do
     rescue
       e ->
         write("query exception: #{Exception.message(e)}\n")
-        raise e
+        reraise e, __STACKTRACE__
     catch
       kind, reason ->
         write("query caught: #{kind} #{inspect(reason)}\n")
-        raise {kind, reason}
+        :erlang.raise(kind, reason, __STACKTRACE__)
     end
   end
 
@@ -128,11 +128,11 @@ defmodule El.Puppet do
     rescue
       e ->
         write("collect exception: #{Exception.format(:error, e, __STACKTRACE__)}\n")
-        raise e
+        reraise e, __STACKTRACE__
     catch
       kind, reason ->
         write("collect caught: #{kind} #{inspect(reason)}\n")
-        raise {kind, reason}
+        :erlang.raise(kind, reason, __STACKTRACE__)
     end
   end
 
