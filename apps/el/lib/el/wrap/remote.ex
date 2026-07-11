@@ -32,10 +32,12 @@ defmodule El.Wrap.Remote do
 
   defp call(pid, message) do
     write("ask to #{node(pid)}\n")
-    :erpc.call(node(pid), El.Puppet, :ask, [pid, message])
+    :erpc.call(node(pid), El.Puppet, :ask, [pid, message], 90_000)
     write("ask ok\n")
   rescue
-    _ -> (write("ask fail\n"); :forward)
+    _e -> (write("ask fail exception\n"); :forward)
+  catch
+    k, _r -> (write("ask fail #{k}\n"); :forward)
   end
 
   defp respond(:forward, _sender), do: :forward
