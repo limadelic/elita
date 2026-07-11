@@ -12,7 +12,7 @@ defmodule El.Commands.Claude do
   import El.Log, only: [write: 1]
   import El.Distribution, only: [start: 1, bind: 1]
   import El.Puppet, only: [open: 1]
-  import Tape.Writer, only: [start_link: 1]
+  import Agent, only: [start: 2]
 
   def claude(name \\ :default) do
     claude(name, deps())
@@ -95,8 +95,14 @@ defmodule El.Commands.Claude do
   defp resolve(name) when is_binary(name), do: name
 
   defp tape do
-    start_link(nil)
-  rescue
-    _ -> :ok
+    if get_env("TAPE", nil) == "rec" do
+      try do
+        start(fn -> %{} end, name: Tape.Writer)
+      rescue
+        e -> write("tape start error: #{inspect(e)}\n")
+      catch
+        :exit, reason -> write("tape start exit: #{inspect(reason)}\n")
+      end
+    end
   end
 end
