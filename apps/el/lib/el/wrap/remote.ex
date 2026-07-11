@@ -1,8 +1,7 @@
 defmodule El.Wrap.Remote do
   @moduledoc false
   import El.Distribution, only: [target: 1, wait: 1]
-  import String, only: [to_atom: 1, trim: 1, split: 2]
-  import Enum, only: [drop: 2, join: 2]
+  import String, only: [to_atom: 1, trim: 1, trim_trailing: 2]
   import El.Puppet, only: [ask: 2, put: 2]
   import El.Log, only: [write: 1]
 
@@ -65,7 +64,7 @@ defmodule El.Wrap.Remote do
   end
 
   defp route(pid, output) when is_binary(output) do
-    cleaned = output |> split("\n") |> drop(-1) |> join("\n")
+    cleaned = trim_trailing(output, "\n")
     write("route to: #{inspect(pid)} text: #{inspect(cleaned)}\n")
     put(pid, cleaned)
   end
