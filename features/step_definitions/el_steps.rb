@@ -80,7 +80,13 @@ def retrying(times)
   yield
 rescue => e
   first_error ||= e
-  (times -= 1).zero? ? (raise first_error) : (sleep 1 if ENV["TAPE"] == "rec"; retry)
+  if (times -= 1).zero?
+    raise first_error
+  else
+    pause = ENV["TAPE"] == "rec" ? 1 : 0.5
+    sleep pause
+    retry
+  end
 end
 
 def verify_lines(lines)
