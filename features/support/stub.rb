@@ -53,22 +53,23 @@ module Stub
       while line = STDIN.gets("\r")
         input = line.strip
         puts "🤔 \#{input}"
-        case input
-        when "/exit"
-          break
-        when "1+1"
-          puts "2"
-        when "knock knock"
-          puts "who's there"
-        when "malko"
-          puts "malko who"
-        when "malkovich"
-          puts "MALKOVICH! MALKOVICH!"
-        when "malkovich knock knock"
-          puts "who's there"
-        when "malkovich malkovich"
-          puts "MALKOVICH! MALKOVICH!"
-        end
+        answer = case input
+                 when "/exit"
+                   break
+                 when "1+1"
+                   "2"
+                 when /^knock knock$/, /^malkovich knock knock$/
+                   "Who's there?"
+                 when /^malko$/, /^malkovich malko$/
+                   "malko who?"
+                 when /^malkovich$/
+                   "Ha! Well played. That's a whole other branch, man."
+                 when /^malkovich malkovich$/
+                   "MALKOVICH! MALKOVICH!"
+                 else
+                   nil
+                 end
+        puts "⏺ \#{answer}" if answer
         print prompt
         STDOUT.flush
       end
