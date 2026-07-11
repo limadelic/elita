@@ -51,6 +51,7 @@ defmodule El.Wrap.Input do
 
   defp finalize({:handled}, {input, line, agent, parent, eol, _data}) do
     send(parent, {:prompt, agent})
+    IO.write(:stdout, "#{agent}> ")
     {input <> eol, line}
   end
 
