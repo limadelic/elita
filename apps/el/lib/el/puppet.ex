@@ -52,8 +52,12 @@ defmodule El.Puppet do
       {:reply, output, state}
     rescue
       e ->
-        write("collect exception: #{Exception.format(:error, e, __STACKTRACE__)}\n")
-        reraise(e, __STACKTRACE__)
+        write("handle_call exception: #{Exception.message(e)}\n")
+        {:reply, {:error, e}, state}
+    catch
+      kind, reason ->
+        write("handle_call caught: #{kind} #{inspect(reason)}\n")
+        {:reply, {:error, {kind, reason}}, state}
     end
   end
 
@@ -63,39 +67,72 @@ defmodule El.Puppet do
   end
 
   defp query(pty, message) do
+    write("query on #{inspect(self())} (node #{inspect(node())})\n")
     write("inject to pty: #{inspect(message)}\n")
-    watch(pty, self())
-    inject(pty, message <> "\r")
-    now = System.monotonic_time(:millisecond)
-    write("collect start node=#{node()} pid=#{inspect(self())}\n")
-    collect(pty, "", now, now)
+
+    try do
+      watch(pty, self())
+      write("watched pty, caller self() = #{inspect(self())}\n")
+      inject(pty, message <> "\r")
+      now = System.monotonic_time(:millisecond)
+      collect(pty, "", now, now)
+    rescue
+      e ->
+        write("query exception: #{Exception.message(e)}\n")
+        raise e
+    catch
+      kind, reason ->
+        write("query caught: #{kind} #{inspect(reason)}\n")
+        raise {kind, reason}
+    end
   end
 
   defp collect(pty, buffer, last, start) do
-    now = System.monotonic_time(:millisecond)
-    quiet = now - last
-    elapsed = now - start
+    try do
+      now = System.monotonic_time(:millisecond)
+      quiet = now - last
+      elapsed = now - start
 
-    cond do
-      quiet >= 4000 && byte_size(buffer) > 0 ->
-        cleanup(pty)
-        reply(buffer)
+      if byte_size(buffer) == 0 do
+        write("collect entry on #{inspect(self())} (node #{inspect(node())}) at #{now}ms\n")
+      end
 
-      elapsed >= 60_000 ->
-        write("collect hard timeout at 60s\n")
-        cleanup(pty)
-        reply(buffer)
+      cond do
+        quiet >= 4000 && byte_size(buffer) > 0 ->
+          write("collect: quiesce after #{elapsed}ms\n")
+          cleanup(pty)
+          reply(buffer)
 
-      true ->
-        timeout = min(4000 - quiet, 60_000 - elapsed) |> max(0)
+        elapsed >= 60_000 ->
+          write("collect hard timeout at 60s (elapsed=#{elapsed}ms)\n")
+          cleanup(pty)
+          reply(buffer)
 
-        receive do
-          {:output, data} -> collect(pty, buffer <> data, now, start)
-        after
-          timeout ->
-            tick(elapsed, quiet, buffer)
-            collect(pty, buffer, last, start)
-        end
+        true ->
+          timeout = min(4000 - quiet, 60_000 - elapsed) |> max(0)
+          write("collect: waiting #{timeout}ms (quiet=#{quiet}, elapsed=#{elapsed})\n")
+
+          receive do
+            {:output, data} ->
+              write(
+                "collect got #{byte_size(data)}b data at #{System.monotonic_time(:millisecond)}ms\n"
+              )
+
+              collect(pty, buffer <> data, now, start)
+          after
+            timeout ->
+              tick(elapsed, quiet, buffer)
+              collect(pty, buffer, last, start)
+          end
+      end
+    rescue
+      e ->
+        write("collect exception: #{Exception.format(:error, e, __STACKTRACE__)}\n")
+        raise e
+    catch
+      kind, reason ->
+        write("collect caught: #{kind} #{inspect(reason)}\n")
+        raise {kind, reason}
     end
   end
 

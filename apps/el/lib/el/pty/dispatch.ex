@@ -68,7 +68,10 @@ defmodule El.Pty.Dispatch do
   end
 
   defp broadcast(taps, data) do
-    each(taps, fn pid -> send(pid, {:output, data}) end)
+    each(taps, fn pid ->
+      El.Log.write("broadcast: sending #{byte_size(data)}b to #{inspect(pid)}\n")
+      send(pid, {:output, data})
+    end)
   end
 
   defp cleanup(child, file, out) do
