@@ -1,6 +1,6 @@
 # Bowling — multi-lane agent delegation
 
-Working notes toward a future skill. Captured live during the malkovich sessions (2026-07-10/11).
+Draft of the bowling skill — multi-lane delegation. Promote to .claude/skills/bowling when stable. Captured live during the malkovich sessions (2026-07-10/11).
 
 ## The league
 
@@ -15,6 +15,13 @@ Working notes toward a future skill. Captured live during the malkovich sessions
 - NO worktrees: shared .git = shared invisible state; clones are dumb and honest (own git, own _build, own runtime)
 - Main lane is the ONLY lane that pushes to origin; side lanes hand findings to the main lane, ship as main-lane commits
 - Merge not rebase; lanes re-branch fresh from main after each merge
+
+## When to bowl
+
+- Split one wall into different attack strategies (fix / shrink repro / pin reference) — lanes race, first proof wins
+- Pipeline: main lane lands the current change while a side lane pre-solves the NEXT wall (e.g. replay-stub fix designed before the cassette exists)
+- Shenanigans lane: mechanical, high-churn, zero-design work (credo/lint fights, mass renames, formatting) gets its own lane so it never clogs feature work
+- DON'T bowl: single-file edits, anything needing one shared runtime, work faster to do than to brief
 
 ## Lane discipline (learned the hard way)
 
@@ -40,6 +47,14 @@ Working notes toward a future skill. Captured live during the malkovich sessions
 - Baby-step TODOs: one visible outcome each; supervisor chains automatically on notifications, only surfaces at done/blocked
 - The supervisor delegates EVERYTHING including doc edits like this one — "it's faster in my context" is how context dies; no middle ground
 
+## Brief anatomy (what every lane brief must contain)
+
+- Lane dir + branch + node names, stated explicitly (agents drift to familiar names)
+- The task as WHAT not HOW, with one visible outcome
+- Hard constraints repeated verbatim (never push from side lanes, never touch protected pids, sterile gate before live runs)
+- Required evidence in the report: pasted diffs, pasted command output, pids, shas — never narrative alone
+- Detached-run pattern for anything long: nohup + log in scratchpad, report pid immediately, a later task reads the log
+
 ## Honesty machinery
 
 - Remove the fake (stub) from live paths entirely + loud guard if one is found; re-add after the real path is proven
@@ -55,3 +70,10 @@ Working notes toward a future skill. Captured live during the malkovich sessions
 - whereis(via-tuple) raises → distribution silently dead for a whole day while suite stayed green
 - Three lanes on malko/malkovich names at once → nodistribution errors, uninterpretable runs
 - Five "live" runs that were secretly stub: TAPE default was replay; env verification (ps of actual spawned command) is mandatory
+
+## Endgame (why malkovich exists)
+
+- Today the supervisor is the switchboard: every inter-lane message flows through one context — micromanagement burns it down
+- Target: supervisors talk to supervisors over el (`malko> walter status?`) — Walter runs his own kenny, hands back a summary
+- Delegation goes recursive; main context holds outcomes, not operations
+- Bowling is the manual protocol we automate away once agents converse

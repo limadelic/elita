@@ -3,8 +3,8 @@ defmodule El.Puppet do
 
   import Registry, only: [start_link: 1]
   import El.Pty, only: [watch: 2, unwatch: 2, inject: 2]
-  import String, only: [ends_with?: 2]
   import Keyword, only: [fetch!: 2]
+  import String, only: [replace: 3, trim: 1]
   import El.Log, only: [write: 1]
 
   def ask(pid, message) do
@@ -59,32 +59,49 @@ defmodule El.Puppet do
     write("inject to pty: #{inspect(message)}\n")
     watch(pty, self())
     inject(pty, message <> "\r")
-    collect(pty, "")
+    collect(pty, "", 0, 0)
   end
 
-  defp collect(pty, buffer) do
+  defp collect(pty, buffer, quiet, elapsed) do
     receive do
       {:output, data} ->
-        ready(pty, buffer <> data, prompt?(buffer <> data))
+        collect(pty, buffer <> data, 0, elapsed)
     after
-      60_000 ->
-        write(
-          "collect timeout after 60000ms, last chunk: #{inspect(String.slice(buffer, -50..-1))}\n"
-        )
-
-        cleanup(pty)
-        buffer
+      500 ->
+        elapsed = elapsed + 500
+        done?(pty, buffer, quiet, elapsed) || collect(pty, buffer, quiet + 500, elapsed)
     end
   end
 
-  defp ready(pty, buffer, true) do
-    write("collect got prompt, returning: #{inspect(String.slice(buffer, -50..-1))}\n")
-    cleanup(pty)
-    buffer
+  defp done?(pty, buffer, quiet, elapsed) do
+    case {quiet >= 4000 && trim(buffer) != "", elapsed >= 60_000} do
+      {true, _} ->
+        cleanup(pty)
+        reply(buffer)
+
+      {false, true} ->
+        write("collect hard timeout at 60s\n")
+        cleanup(pty)
+        reply(buffer)
+
+      {false, false} ->
+        nil
+    end
   end
 
-  defp ready(pty, buffer, false) do
-    collect(pty, buffer)
+  defp reply(buffer) do
+    stripped = clean(buffer)
+
+    trimmed =
+      stripped
+      |> replace(~r/Type \? for shortcuts[^\n]*/i, "")
+      |> replace(~r/Press [Ctrl\+C]+ to exit[^\n]*/i, "")
+      |> replace(~r/\(type .+ for help\)[^\n]*/i, "")
+      |> replace(~r/[┌┐└┘─│├┤┬┴┼]/, "")
+      |> replace(~r/\s+/, " ")
+      |> trim()
+
+    if String.length(trimmed) > 20, do: trimmed, else: stripped
   end
 
   defp cleanup(pty) do
@@ -93,9 +110,7 @@ defmodule El.Puppet do
     _ -> :ok
   end
 
-  defp prompt?(text), do: ends_with?(ansi(text), "> ")
-
-  defp ansi(text),
+  defp clean(text),
     do: String.replace(text, ~r/\e\[[0-9;?]*[a-zA-Z]|\e[78]|\e\][^\a]*\a/, "")
 
   defp setup do
