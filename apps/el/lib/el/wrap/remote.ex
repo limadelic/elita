@@ -50,6 +50,7 @@ defmodule El.Wrap.Remote do
   defp respond(:forward, _sender), do: :forward
 
   defp respond(output, sender) do
+    write("respond output: #{inspect(output)}\n")
     pid = sender |> fix(sender) |> target()
     route(pid, output)
     {:handled}
