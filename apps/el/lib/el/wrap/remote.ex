@@ -31,13 +31,19 @@ defmodule El.Wrap.Remote do
   end
 
   defp call(pid, message) do
-    write("ask to #{node(pid)}\n")
+    caller = self()
+    write("ask to #{node(pid)} from #{inspect(caller)}\n")
+    spawn(fn -> watch(caller) end)
     :erpc.call(node(pid), El.Puppet, :ask, [pid, message], 90_000)
     write("ask ok\n")
   rescue
     _e -> (write("ask fail exception\n"); :forward)
   catch
     k, _r -> (write("ask fail #{k}\n"); :forward)
+  end
+
+  defp watch(pid) do
+    write("watchdog armed for #{inspect(pid)}\n"); Process.monitor(pid); receive do {:DOWN, _, _, _, r} -> write("DOWN: #{inspect(r)}\n") end
   end
 
   defp respond(:forward, _sender), do: :forward
