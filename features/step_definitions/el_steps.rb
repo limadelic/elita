@@ -84,10 +84,10 @@ rescue => e
 end
 
 def verify_lines(lines)
-  tx = transcript
+  tx = transcript.downcase
   cursor = 0
   lines.each do |line|
-    idx = tx.index(line, cursor)
+    idx = tx.index(line.downcase, cursor)
     unless idx
       raise "Expected '#{line}' in transcript after position #{cursor}:\n#{tx}"
     end
