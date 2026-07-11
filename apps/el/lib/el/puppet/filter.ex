@@ -1,6 +1,8 @@
 defmodule El.Puppet.Filter do
   import String, only: [replace: 3, trim: 1, split: 2, contains?: 2]
-  import Enum, only: [at: 3]
+  import El.Log, only: [write: 1]
+  import Enum, only: [find: 3, reverse: 1]
+  import List, only: [last: 1]
 
   def answer?(buffer, question) do
     buffer |> presence(question)
@@ -8,23 +10,25 @@ defmodule El.Puppet.Filter do
 
   def mark(buffer) do
     if contains?(buffer, "⏺") do
-      buffer
-      |> split("\e[H")
-      |> at(-1, "")
-      |> clean()
-      |> scan()
+      buffer |> split("\e[H") |> frame() |> body()
     else
       buffer |> polish() |> final()
     end
   end
 
-  defp scan(text) do
-    text
-    |> split("⏺")
-    |> at(1, text)
-    |> trim()
-    |> replace(~r/\r.*/, "")
-    |> trim()
+  defp frame(frames) do
+    find(reverse(frames), "", &contains?(&1, "⏺"))
+  end
+
+  defp body(text) do
+    answer = text |> clean() |> split("⏺") |> last()
+    raw = answer || text
+    write("extract frame: #{inspect(raw)}\n")
+    raw |> trim() |> strip() |> trim()
+  end
+
+  defp strip(text) do
+    text |> replace(~r/[✻❯].*/, "") |> replace(~r/\(esc.*/, "") |> replace(~r/\r.*/, "")
   end
 
   defp presence(buffer, question) when byte_size(buffer) > 0 do
