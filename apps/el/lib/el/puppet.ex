@@ -45,9 +45,16 @@ defmodule El.Puppet do
 
   def handle_call({:ask, message}, _from, %{pty: pty} = state) do
     write("ask received: #{inspect(message)}\n")
-    output = query(pty, message)
-    write("ask returned: #{inspect(String.slice(output, 0..50))}\n")
-    {:reply, output, state}
+
+    try do
+      output = query(pty, message)
+      write("ask returned: #{inspect(String.slice(output, 0..50))}\n")
+      {:reply, output, state}
+    rescue
+      e ->
+        write("collect exception: #{Exception.format(:error, e, __STACKTRACE__)}\n")
+        reraise(e, __STACKTRACE__)
+    end
   end
 
   def handle_cast({:put, output}, %{pty: pty} = state) do
@@ -70,7 +77,7 @@ defmodule El.Puppet do
     elapsed = now - start
 
     cond do
-      quiet >= 4000 && trim(buffer) != "" ->
+      quiet >= 4000 && byte_size(buffer) > 0 ->
         cleanup(pty)
         reply(buffer)
 
@@ -86,21 +93,29 @@ defmodule El.Puppet do
           {:output, data} -> collect(pty, buffer <> data, now, start)
         after
           timeout ->
-            log_tick(elapsed, quiet, buffer)
+            tick(elapsed, quiet, buffer)
             collect(pty, buffer, last, start)
         end
     end
   end
 
-  defp log_tick(elapsed, quiet, buffer) when rem(div(elapsed, 1000), 10) == 0 and quiet >= 1000 do
+  defp tick(elapsed, quiet, buffer) when rem(div(elapsed, 1000), 10) == 0 and quiet >= 1000 do
     write("collect tick quiet=#{quiet} elapsed=#{elapsed} bytes=#{byte_size(buffer)}\n")
   end
 
-  defp log_tick(_elapsed, _quiet, _buffer), do: :ok
+  defp tick(_elapsed, _quiet, _buffer), do: :ok
 
   defp reply(buffer) do
     write("collect done bytes=#{byte_size(buffer)}\n")
-    stripped = clean(buffer)
+
+    safe =
+      case :unicode.characters_to_binary(buffer, :utf8, :utf8) do
+        r when is_binary(r) -> r
+        {:incomplete, v, _} -> v
+        {:error, v, _} -> v
+      end
+
+    stripped = clean(safe)
 
     trimmed =
       stripped
