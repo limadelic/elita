@@ -47,11 +47,13 @@ module Drain
   end
 
   def poll(output, pattern, timeout)
+    stripped = ""
     while Time.now < timeout
       next if (chunk = fetch(@reader)).empty?
 
       log(chunk, output)
-      return output if output.include?(pattern)
+      stripped << strip(chunk)
+      return output if stripped.include?(pattern)
     end
   end
 

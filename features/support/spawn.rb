@@ -84,6 +84,6 @@ module Spawn
   end
 
   def strip(text)
-    text.force_encoding("UTF-8").scrub("").gsub(/\e\[[0-9;]*m/, "")
+    text.force_encoding("UTF-8").scrub("").gsub(/\e\[[0-9;?]*[a-zA-Z]|\e[78]|\e\][^\a]*\a/, "")
   end
 end

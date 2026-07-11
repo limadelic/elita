@@ -39,6 +39,7 @@ Before('@malko') do
   el_escript = File.expand_path('../../apps/el/el', __dir__)
   el_link = File.join(bin_dir, 'el')
   File.symlink(el_escript, el_link) unless File.exist?(el_link)
+  guard_live_claude if ENV['TAPE'] == 'rec'
   write_stub_claude unless ENV['TAPE'] == 'rec'
 end
 
@@ -49,6 +50,16 @@ end
 
 After('@malko') do
   FileUtils.rm_rf(@scratch) if @scratch && File.exist?(@scratch)
+end
+
+def guard_live_claude
+  bin_dir = File.join(@scratch, 'bin')
+  stub_path = File.join(bin_dir, 'claude')
+  raise "TAPE=rec but stub exists at #{stub_path}" if File.exist?(stub_path)
+
+  expected = '/opt/homebrew/bin/claude'
+  actual = `which claude 2>/dev/null`.strip
+  raise "TAPE=rec requires claude at #{expected}, found: #{actual}" unless actual == expected
 end
 
 def reap_all_sessions
