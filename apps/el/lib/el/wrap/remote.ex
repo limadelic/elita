@@ -62,6 +62,11 @@ defmodule El.Wrap.Remote do
     :ok
   end
 
+  defp route(pid, output, agent) when is_list(output) do
+    text = extract(output)
+    route(pid, text, agent)
+  end
+
   defp route(pid, output, agent) when is_binary(output) do
     cleaned = trim_trailing(output, "\n")
     write("route to: #{inspect(pid)} text: #{inspect(cleaned)}\n")
@@ -73,6 +78,9 @@ defmodule El.Wrap.Remote do
     write("route drop: #{inspect(output)}\n")
     :ok
   end
+
+  defp extract([%{"text" => text} | _]), do: text
+  defp extract(_), do: ""
 
   def known?(name) do
     name |> trim() |> to_atom() |> target() |> is_pid()

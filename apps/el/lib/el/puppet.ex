@@ -7,6 +7,8 @@ defmodule El.Puppet do
   import El.Log, only: [write: 1]
   import String, only: [slice: 2]
   import Exception, only: [message: 1]
+  import System, only: [get_env: 1]
+  import Tape, only: [handle: 3]
 
   def ask(pid, message) do
     GenServer.call(pid, {:ask, message}, :infinity)
@@ -48,9 +50,14 @@ defmodule El.Puppet do
     write("ask received: #{inspect(message)}\n")
 
     try do
-      output = El.Puppet.Query.call(pty, message)
-      write("ask returned: #{inspect(slice(output, 0..50))}\n")
-      {:reply, output, state}
+      body = %{messages: [%{content: message}]}
+      name = get_env("PUPPET_NAME") || "puppet"
+      response = handle(body, name, fn ->
+        output = El.Puppet.Query.call(pty, message)
+        format(output)
+      end)
+      write("ask returned: #{inspect(slice(inspect(response), 0..50))}\n")
+      {:reply, response, state}
     rescue
       e ->
         write("handle_call exception: #{message(e)}\n")
@@ -61,6 +68,12 @@ defmodule El.Puppet do
         {:reply, {:error, {kind, reason}}, state}
     end
   end
+
+  defp format(text) when is_binary(text) do
+    [%{"text" => text, "type" => "text"}]
+  end
+
+  defp format(response), do: response
 
   def handle_cast({:put, output}, %{pty: pty} = state) do
     inject(pty, output <> "\r")
