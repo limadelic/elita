@@ -75,7 +75,7 @@ defmodule El.Puppet do
       write("watched pty, caller self() = #{inspect(self())}\n")
       inject(pty, message <> "\r")
       now = System.monotonic_time(:millisecond)
-      collect(pty, "", now, now)
+      collect(pty, "", now, now, message)
     rescue
       e ->
         write("query exception: #{Exception.message(e)}\n")
@@ -87,7 +87,7 @@ defmodule El.Puppet do
     end
   end
 
-  defp collect(pty, buffer, last, start) do
+  defp collect(pty, buffer, last, start, question) do
     try do
       now = System.monotonic_time(:millisecond)
       quiet = now - last
@@ -98,7 +98,7 @@ defmodule El.Puppet do
       end
 
       cond do
-        quiet >= 4000 && byte_size(buffer) > 0 ->
+        quiet >= 4000 && answer?(buffer, question) ->
           write("collect: quiesce after #{elapsed}ms\n")
           cleanup(pty)
           reply(buffer)
@@ -118,11 +118,11 @@ defmodule El.Puppet do
                 "collect got #{byte_size(data)}b data at #{System.monotonic_time(:millisecond)}ms\n"
               )
 
-              collect(pty, buffer <> data, now, start)
+              collect(pty, buffer <> data, now, start, question)
           after
             timeout ->
               tick(elapsed, quiet, buffer)
-              collect(pty, buffer, last, start)
+              collect(pty, buffer, last, start, question)
           end
       end
     rescue
@@ -142,9 +142,11 @@ defmodule El.Puppet do
 
   defp tick(_elapsed, _quiet, _buffer), do: :ok
 
-  defp reply(buffer) do
-    write("collect done bytes=#{byte_size(buffer)}\n")
+  defp answer?(buffer, question) do
+    byte_size(buffer) > 0 && byte_size(trim(replace(polish(buffer), question, ""))) > 0
+  end
 
+  defp polish(buffer) do
     safe =
       case :unicode.characters_to_binary(buffer, :utf8, :utf8) do
         r when is_binary(r) -> r
@@ -152,18 +154,26 @@ defmodule El.Puppet do
         {:error, v, _} -> v
       end
 
-    stripped = clean(safe)
+    clean(safe)
+  end
 
-    trimmed =
-      stripped
-      |> replace(~r/Type \? for shortcuts[^\n]*/i, "")
-      |> replace(~r/Press [Ctrl\+C]+ to exit[^\n]*/i, "")
-      |> replace(~r/\(type .+ for help\)[^\n]*/i, "")
-      |> replace(~r/[┌┐└┘─│├┤┬┴┼]/, "")
-      |> replace(~r/\s+/, " ")
-      |> trim()
+  defp reply(buffer) do
+    write("collect done bytes=#{byte_size(buffer)}\n")
+    final(polish(buffer))
+  end
 
+  defp final(stripped) do
+    trimmed = stripped |> noclutter() |> trim()
     if String.length(trimmed) > 20, do: trimmed, else: stripped
+  end
+
+  defp noclutter(text) do
+    text
+    |> replace(~r/Type \? for shortcuts[^\n]*/i, "")
+    |> replace(~r/Press [Ctrl\+C]+ to exit[^\n]*/i, "")
+    |> replace(~r/\(type .+ for help\)[^\n]*/i, "")
+    |> replace(~r/[┌┐└┘─│├┤┬┴┼]/, "")
+    |> replace(~r/\s+/, " ")
   end
 
   defp cleanup(pty) do

@@ -65,11 +65,11 @@ defmodule El.Pty.Dispatch do
     {:noreply, %{state | taps: delete(taps, pid)}}
   end
 
-  def cast({:inject, msg}, %{pty: pty, port: port} = state) do
-    record(msg)
-    port.command(pty, msg)
-    {:noreply, state}
-  end
+  def cast({:inject, msg}, %{pty: pty, port: port} = state),
+    do: (record(msg); port.command(pty, msg); {:noreply, state})
+
+  def cast({:inject, msg, _reply}, %{pty: pty, port: port} = state),
+    do: (record(msg); port.command(pty, msg); {:noreply, state})
 
   defp broadcast(taps, data) do
     each(taps, fn pid ->
