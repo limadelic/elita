@@ -68,6 +68,8 @@ defmodule El.Distribution do
   defp route(false, name), do: find(name)
 
   defp locate(name) do
+    node = :"#{name}@127.0.0.1"
+    write("connect #{node}: #{inspect(connect(node))}\n")
     :global.sync()
     :global.whereis_name({name, :puppet}) |> reply(name)
   end
