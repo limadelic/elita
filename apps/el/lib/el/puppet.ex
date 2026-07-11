@@ -143,29 +143,48 @@ defmodule El.Puppet do
   defp tick(_elapsed, _quiet, _buffer), do: :ok
 
   defp answer?(buffer, question) do
-    byte_size(buffer) > 0 && byte_size(trim(replace(polish(buffer), question, ""))) > 0
+    buffer |> presence(question)
+  end
+
+  defp presence(buffer, question) when byte_size(buffer) > 0 do
+    question |> removed?(buffer)
+  end
+
+  defp presence(_buffer, _question), do: false
+
+  defp full?(buffer), do: byte_size(buffer) > 0
+
+  defp removed?(question, buffer) do
+    buffer |> polish() |> replace(question, "") |> trim() |> full?()
   end
 
   defp polish(buffer) do
-    safe =
-      case :unicode.characters_to_binary(buffer, :utf8, :utf8) do
-        r when is_binary(r) -> r
-        {:incomplete, v, _} -> v
-        {:error, v, _} -> v
-      end
-
-    clean(safe)
+    buffer |> safe() |> clean()
   end
+
+  defp safe(buffer) do
+    buffer |> validate() |> native()
+  end
+
+  defp validate(buffer) do
+    :unicode.characters_to_binary(buffer, :utf8, :utf8)
+  end
+
+  defp native(r) when is_binary(r), do: r
+  defp native({:incomplete, v, _}), do: v
+  defp native({:error, v, _}), do: v
 
   defp reply(buffer) do
     write("collect done bytes=#{byte_size(buffer)}\n")
-    final(polish(buffer))
+    buffer |> polish() |> final()
   end
 
   defp final(stripped) do
-    trimmed = stripped |> noclutter() |> trim()
-    if String.length(trimmed) > 20, do: trimmed, else: stripped
+    stripped |> noclutter() |> trim() |> pick(stripped)
   end
+
+  defp pick(cleaned, _stripped) when byte_size(cleaned) > 20, do: cleaned
+  defp pick(_cleaned, stripped), do: stripped
 
   defp noclutter(text) do
     text
