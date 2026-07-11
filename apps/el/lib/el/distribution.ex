@@ -45,9 +45,7 @@ defmodule El.Distribution do
     go(name, tries, locate(name), Node.alive?())
   end
 
-  defp loop(_name, 0) do
-    nil
-  end
+  defp loop(_name, 0), do: nil
 
   defp attach(name) do
     connect(:"#{name}@127.0.0.1")
@@ -64,9 +62,7 @@ defmodule El.Distribution do
     loop(name, tries - 1)
   end
 
-  defp go(_name, _tries, _pid, _) do
-    nil
-  end
+  defp go(_name, _tries, _pid, _), do: nil
 
   defp route(result, name) when result in [true, :ignored], do: locate(name)
   defp route(false, name), do: find(name)
