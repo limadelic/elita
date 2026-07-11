@@ -155,7 +155,7 @@ defmodule El.Puppet do
   defp full?(buffer), do: byte_size(buffer) > 0
 
   defp removed?(question, buffer) do
-    buffer |> polish() |> replace(question, "") |> trim() |> full?()
+    buffer |> polish() |> noclutter() |> replace(question, "") |> trim() |> full?()
   end
 
   defp polish(buffer) do
