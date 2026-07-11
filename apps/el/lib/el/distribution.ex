@@ -9,7 +9,7 @@ defmodule El.Distribution do
   defdelegate start(name \\ :default, opts \\ []), to: El.Boot
 
   def target(name) do
-    connect(:"claude_#{name}@127.0.0.1") |> route(name)
+    connect(:"#{name}@127.0.0.1") |> route(name)
   rescue
     _ -> find(name)
   end
@@ -19,11 +19,17 @@ defmodule El.Distribution do
   end
 
   defp loop(name, tries) when tries > 0 do
+    attach(name)
     go(name, tries, locate(name), Node.alive?())
   end
 
   defp loop(_name, 0) do
     nil
+  end
+
+  defp attach(name) do
+    connect(:"#{name}@127.0.0.1")
+    :global.sync()
   end
 
   defp go(_name, _tries, pid, true) when is_pid(pid) do

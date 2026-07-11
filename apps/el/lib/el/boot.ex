@@ -20,8 +20,8 @@ defmodule El.Boot do
     ]
   end
 
-  defp node(:default, opts), do: :"claude_#{cwd!() |> basename()}@#{get(opts, :host, host())}"
-  defp node(name, opts), do: :"claude_#{name}@#{get(opts, :host, host())}"
+  defp node(:default, opts), do: :"#{cwd!() |> basename()}@#{get(opts, :host, host())}"
+  defp node(name, opts), do: :"#{name}@#{get(opts, :host, host())}"
 
   defp boot(name, mode),
     do: fn -> Node.start(name, mode) end |> then(&attempt(&1.(), &1, 5)) |> act(name, mode)
