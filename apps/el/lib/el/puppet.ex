@@ -8,7 +8,7 @@ defmodule El.Puppet do
   import String, only: [slice: 2]
   import Exception, only: [message: 1]
   import System, only: [get_env: 1]
-  import Tape, only: [handle: 3]
+  import Tape.Store, only: [add: 2]
 
   def ask(pid, message) do
     GenServer.call(pid, {:ask, message}, :infinity)
@@ -50,13 +50,10 @@ defmodule El.Puppet do
     write("ask received: #{inspect(message)}\n")
 
     try do
-      body = %{messages: [%{content: message}]}
-      name = get_env("PUPPET_NAME") || "puppet"
-      response = handle(body, name, fn ->
-        output = El.Puppet.Query.call(pty, message)
-        format(output)
-      end)
+      output = El.Puppet.Query.call(pty, message)
+      response = format(output)
       write("ask returned: #{inspect(slice(inspect(response), 0..50))}\n")
+      record(message, response)
       {:reply, response, state}
     rescue
       e ->
@@ -74,6 +71,14 @@ defmodule El.Puppet do
   end
 
   defp format(response), do: response
+
+  defp record(message, response) do
+    if get_env("TAPE") == "rec" do
+      name = get_env("PUPPET_NAME") || "puppet"
+      request = %{"agent" => name, "messages" => [%{content: message}], "n" => 1}
+      add(request, response)
+    end
+  end
 
   def handle_cast({:put, output}, %{pty: pty} = state) do
     inject(pty, output <> "\r")
