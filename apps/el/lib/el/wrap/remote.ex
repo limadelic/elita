@@ -12,46 +12,35 @@ defmodule El.Wrap.Remote do
     :exit, _ -> :forward
   end
 
-  defp prepare(name, sender) do
-    target = name |> trim() |> to_atom()
-    write("deliver #{target} from #{inspect(sender)}\n")
-    target
+  defp prepare(name, _sender) do
+    name |> trim() |> to_atom()
   end
 
   defp query(nil, _message, _sender), do: :forward
 
   defp query(pid, message, sender) do
-    output = pid |> call(message)
-    respond(output, sender)
+    respond(call(pid, message), sender)
   catch
     :exit, _ -> :forward
   end
 
   defp call(pid, message) when node(pid) == node() do
-    write("call local ask pid=#{inspect(pid)}\n")
     ask(pid, message)
   end
 
   defp call(pid, message) do
-    audit(pid)
-    result = erpc(node(pid), pid, message)
-    write("erpc result: #{inspect(result)}\n")
-    result
+    note(erpc(node(pid), pid, message))
+  rescue
+    _ -> :forward
   end
 
-  defp audit(pid) do
-    write("call erpc to #{node(pid)} pid=#{inspect(pid)}\n")
+  defp note(result) do
+    write("erpc done: #{inspect(result)}\n")
+    result
   end
 
   defp erpc(host, pid, message) do
     :erpc.call(host, El.Puppet, :ask, [pid, message])
-  rescue
-    e -> trap(e, __STACKTRACE__)
-  end
-
-  defp trap(error, trace) do
-    write("erpc error: #{inspect(error)}\n")
-    reraise(error, trace)
   end
 
   defp respond(:forward, _sender), do: :forward
@@ -62,10 +51,15 @@ defmodule El.Wrap.Remote do
     {:handled}
   end
 
-  defp route(nil, _output), do: :ok
+  defp route(nil, _output) do
+    write("route nil: cannot write\n")
+    :ok
+  end
 
   defp route(pid, output) do
-    put(pid, output |> split("\n") |> drop(-1) |> join("\n"))
+    cleaned = output |> split("\n") |> drop(-1) |> join("\n")
+    write("route to: #{inspect(pid)} text: #{inspect(cleaned)}\n")
+    put(pid, cleaned)
   end
 
   def known?(name) do

@@ -1,7 +1,7 @@
 defmodule El.Puppet.Filter do
   import String, only: [replace: 3, trim: 1, split: 2, contains?: 2]
   import El.Log, only: [write: 1]
-  import Enum, only: [find: 3, reverse: 1]
+  import Enum, only: [find: 3, reverse: 1, take: 2]
   import List, only: [last: 1]
 
   def answer?(buffer, question) do
@@ -9,10 +9,9 @@ defmodule El.Puppet.Filter do
   end
 
   def mark(buffer) do
-    if contains?(buffer, "⏺") do
-      buffer |> split("\e[H") |> frame() |> body()
-    else
-      buffer |> polish() |> final()
+    case contains?(buffer, "⏺") do
+      true -> buffer |> split("\e[H") |> frame() |> body()
+      false -> buffer |> polish() |> final()
     end
   end
 
@@ -21,8 +20,14 @@ defmodule El.Puppet.Filter do
   end
 
   defp body(text) do
-    answer = text |> clean() |> split("⏺") |> last()
-    result = (answer || text) |> trim() |> strip() |> trim()
+    charlist = text |> String.to_charlist() |> take(80)
+    write("raw: #{inspect(charlist)}\n")
+    pull(text) |> trim() |> strip() |> trim()
+  end
+
+  defp pull(text) do
+    parts = text |> clean() |> split("⏺")
+    result = parts |> last() |> case do nil -> text; x -> x end
     write("extract: #{inspect(result)}\n")
     result
   end
