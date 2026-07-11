@@ -79,13 +79,16 @@ defmodule El.Wrap.Input do
   def dispatch(_input, _parent, _agent), do: :forward
 
   defp remote([name, message], agent) do
-    deliver(name, message, agent)
+    spawn(fn -> deliver(name, message, agent) end)
+    {:handled}
   end
 
   defp remote(_, _agent), do: :forward
 
-  defp implicit([word, rest], agent),
-    do: deliver(word, rest, agent)
+  defp implicit([word, rest], agent) do
+    spawn(fn -> deliver(word, rest, agent) end)
+    {:handled}
+  end
 
   defp implicit(_, _agent), do: :forward
 end
