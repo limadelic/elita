@@ -2,10 +2,13 @@ defmodule El.Puppet do
   use GenServer
 
   import Registry, only: [start_link: 1]
-  import El.Pty, only: [watch: 2, unwatch: 2, inject: 2]
+  import El.Pty, only: [inject: 2]
   import Keyword, only: [fetch!: 2]
-  import String, only: [replace: 3, trim: 1]
   import El.Log, only: [write: 1]
+  import String, only: [slice: 2]
+  import Exception, only: [message: 1]
+  import System, only: [get_env: 1]
+  import Tape.Store, only: [add: 2]
 
   def ask(pid, message) do
     GenServer.call(pid, {:ask, message}, :infinity)
@@ -47,12 +50,14 @@ defmodule El.Puppet do
     write("ask received: #{inspect(message)}\n")
 
     try do
-      output = query(pty, message)
-      write("ask returned: #{inspect(String.slice(output, 0..50))}\n")
-      {:reply, output, state}
+      output = El.Puppet.Query.call(pty, message)
+      response = format(output)
+      write("ask returned: #{inspect(slice(inspect(response), 0..50))}\n")
+      record(message, response)
+      {:reply, response, state}
     rescue
       e ->
-        write("handle_call exception: #{Exception.message(e)}\n")
+        write("handle_call exception: #{message(e)}\n")
         {:reply, {:error, e}, state}
     catch
       kind, reason ->
@@ -61,119 +66,30 @@ defmodule El.Puppet do
     end
   end
 
+  defp format(text) when is_binary(text) do
+    [%{"text" => text, "type" => "text"}]
+  end
+
+  defp format(response), do: response
+
+  defp record(message, response) do
+    tape = get_env("TAPE")
+
+    if tape == "rec" do
+      try do
+        name = get_env("PUPPET_NAME") || "puppet"
+        request = %{"agent" => name, "messages" => [%{content: message}], "n" => 1}
+        add(request, response)
+      catch
+        _, _ -> write("record fail\n")
+      end
+    end
+  end
+
   def handle_cast({:put, output}, %{pty: pty} = state) do
     inject(pty, output <> "\r")
     {:noreply, state}
   end
-
-  defp query(pty, message) do
-    write("query on #{inspect(self())} (node #{inspect(node())})\n")
-    write("inject to pty: #{inspect(message)}\n")
-
-    try do
-      watch(pty, self())
-      write("watched pty, caller self() = #{inspect(self())}\n")
-      inject(pty, message <> "\r")
-      now = System.monotonic_time(:millisecond)
-      collect(pty, "", now, now)
-    rescue
-      e ->
-        write("query exception: #{Exception.message(e)}\n")
-        raise e
-    catch
-      kind, reason ->
-        write("query caught: #{kind} #{inspect(reason)}\n")
-        raise {kind, reason}
-    end
-  end
-
-  defp collect(pty, buffer, last, start) do
-    try do
-      now = System.monotonic_time(:millisecond)
-      quiet = now - last
-      elapsed = now - start
-
-      if byte_size(buffer) == 0 do
-        write("collect entry on #{inspect(self())} (node #{inspect(node())}) at #{now}ms\n")
-      end
-
-      cond do
-        quiet >= 4000 && byte_size(buffer) > 0 ->
-          write("collect: quiesce after #{elapsed}ms\n")
-          cleanup(pty)
-          reply(buffer)
-
-        elapsed >= 60_000 ->
-          write("collect hard timeout at 60s (elapsed=#{elapsed}ms)\n")
-          cleanup(pty)
-          reply(buffer)
-
-        true ->
-          timeout = min(4000 - quiet, 60_000 - elapsed) |> max(0)
-          write("collect: waiting #{timeout}ms (quiet=#{quiet}, elapsed=#{elapsed})\n")
-
-          receive do
-            {:output, data} ->
-              write(
-                "collect got #{byte_size(data)}b data at #{System.monotonic_time(:millisecond)}ms\n"
-              )
-
-              collect(pty, buffer <> data, now, start)
-          after
-            timeout ->
-              tick(elapsed, quiet, buffer)
-              collect(pty, buffer, last, start)
-          end
-      end
-    rescue
-      e ->
-        write("collect exception: #{Exception.format(:error, e, __STACKTRACE__)}\n")
-        raise e
-    catch
-      kind, reason ->
-        write("collect caught: #{kind} #{inspect(reason)}\n")
-        raise {kind, reason}
-    end
-  end
-
-  defp tick(elapsed, quiet, buffer) when rem(div(elapsed, 1000), 10) == 0 and quiet >= 1000 do
-    write("collect tick quiet=#{quiet} elapsed=#{elapsed} bytes=#{byte_size(buffer)}\n")
-  end
-
-  defp tick(_elapsed, _quiet, _buffer), do: :ok
-
-  defp reply(buffer) do
-    write("collect done bytes=#{byte_size(buffer)}\n")
-
-    safe =
-      case :unicode.characters_to_binary(buffer, :utf8, :utf8) do
-        r when is_binary(r) -> r
-        {:incomplete, v, _} -> v
-        {:error, v, _} -> v
-      end
-
-    stripped = clean(safe)
-
-    trimmed =
-      stripped
-      |> replace(~r/Type \? for shortcuts[^\n]*/i, "")
-      |> replace(~r/Press [Ctrl\+C]+ to exit[^\n]*/i, "")
-      |> replace(~r/\(type .+ for help\)[^\n]*/i, "")
-      |> replace(~r/[┌┐└┘─│├┤┬┴┼]/, "")
-      |> replace(~r/\s+/, " ")
-      |> trim()
-
-    if String.length(trimmed) > 20, do: trimmed, else: stripped
-  end
-
-  defp cleanup(pty) do
-    unwatch(pty, self())
-  rescue
-    _ -> :ok
-  end
-
-  defp clean(text),
-    do: String.replace(text, ~r/\e\[[0-9;?]*[a-zA-Z]|\e[78]|\e\][^\a]*\a/, "")
 
   defp setup do
     start_link(keys: :unique, name: ElitaRegistry)
