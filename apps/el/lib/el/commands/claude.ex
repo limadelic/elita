@@ -94,15 +94,7 @@ defmodule El.Commands.Claude do
   defp resolve(:default), do: cwd!() |> basename()
   defp resolve(name) when is_binary(name), do: name
 
-  defp tape do
-    if get_env("TAPE", nil) == "rec" do
-      try do
-        start(fn -> %{} end, name: Tape.Writer)
-      rescue
-        e -> write("tape start error: #{inspect(e)}\n")
-      catch
-        :exit, reason -> write("tape start exit: #{inspect(reason)}\n")
-      end
-    end
-  end
+  defp tape, do: mode(get_env("TAPE", nil))
+  defp mode("rec"), do: start(fn -> %{} end, name: Tape.Writer)
+  defp mode(_), do: :ok
 end

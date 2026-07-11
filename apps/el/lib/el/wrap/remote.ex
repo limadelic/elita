@@ -8,7 +8,9 @@ defmodule El.Wrap.Remote do
   def deliver(name, message, sender) do
     prepare(name, sender) |> wait() |> query(message, sender)
   catch
-    :exit, reason -> (write("deliver exit: #{inspect(reason)}\n"); :forward)
+    :exit, reason ->
+      write("deliver exit: #{inspect(reason)}\n")
+      :forward
   end
 
   defp prepare(name, sender) do
@@ -22,7 +24,9 @@ defmodule El.Wrap.Remote do
   defp query(pid, message, sender) do
     respond(call(pid, message), sender)
   catch
-    :exit, reason -> (write("query exit: #{inspect(reason)}\n"); :forward)
+    :exit, reason ->
+      write("query exit: #{inspect(reason)}\n")
+      :forward
   end
 
   defp call(pid, message) when node(pid) == node() do
@@ -37,13 +41,22 @@ defmodule El.Wrap.Remote do
     write("ask ok\n")
     result
   rescue
-    _e -> (write("ask fail exception\n"); :forward)
+    _e ->
+      write("ask fail exception\n")
+      :forward
   catch
-    k, _r -> (write("ask fail #{k}\n"); :forward)
+    k, _r ->
+      write("ask fail #{k}\n")
+      :forward
   end
 
   defp watch(pid) do
-    write("watchdog armed for #{inspect(pid)}\n"); Process.monitor(pid); receive do {:DOWN, _, _, _, r} -> write("DOWN: #{inspect(r)}\n") end
+    write("watchdog armed for #{inspect(pid)}\n")
+    Process.monitor(pid)
+
+    receive do
+      {:DOWN, _, _, _, r} -> write("DOWN: #{inspect(r)}\n")
+    end
   end
 
   defp respond(:forward, _sender), do: :forward

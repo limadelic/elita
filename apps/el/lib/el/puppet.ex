@@ -74,6 +74,7 @@ defmodule El.Puppet do
 
   defp record(message, response) do
     tape = get_env("TAPE")
+
     if tape == "rec" do
       try do
         name = get_env("PUPPET_NAME") || "puppet"

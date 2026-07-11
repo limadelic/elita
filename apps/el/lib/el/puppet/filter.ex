@@ -27,7 +27,15 @@ defmodule El.Puppet.Filter do
 
   defp pull(text) do
     parts = text |> clean() |> split("⏺")
-    result = parts |> last() |> case do nil -> text; x -> x end
+
+    result =
+      parts
+      |> last()
+      |> case do
+        nil -> text
+        x -> x
+      end
+
     write("extract: #{inspect(result)}\n")
     result
   end
@@ -93,6 +101,8 @@ defmodule El.Puppet.Filter do
   end
 
   defp clean(text) do
-    text |> replace(~r/\e\[[0-9]*[GfH]/, " ") |> replace(~r/\e\[[0-9;?]*[a-zA-Z]|\e[78]|\e\][^\a]*\a/, "")
+    text
+    |> replace(~r/\e\[[0-9]*[GfH]/, " ")
+    |> replace(~r/\e\[[0-9;?]*[a-zA-Z]|\e[78]|\e\][^\a]*\a/, "")
   end
 end
