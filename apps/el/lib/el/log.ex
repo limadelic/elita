@@ -6,8 +6,8 @@ defmodule El.Log do
   import IO, only: [binwrite: 2]
   import GenServer, only: [start_link: 3, cast: 2]
   import Map, only: [new: 1]
-  import String, only: [to_atom: 1]
 
+  @name :session_logger
   @cfg [type: :file, modes: [:write, :append], formatter: {El.Log.Format, %{}}]
 
   def setup(name, argv) do
@@ -18,26 +18,22 @@ defmodule El.Log do
 
   defp prepare(name, p, argv) do
     mkdir_p!(dir(name))
-    start(p, name)
+    start(p)
     boot(p, argv)
     attach(p)
   end
 
   def write(message) do
-    cast(logger(), {:write, message})
+    cast(@name, {:write, message})
   rescue
     _ -> :ok
   end
 
-  def start(path, name \\ nil) do
-    start_link(__MODULE__, path, name: logger(name))
+  def start(path) do
+    start_link(__MODULE__, path, name: @name)
   rescue
     _ -> :ok
   end
-
-  defp logger(), do: to_atom("session_logger_#{node()}")
-  defp logger(nil), do: logger()
-  defp logger(name), do: to_atom("session_logger_#{name}")
 
   def init(path) do
     {:ok, file} = open(path, [:write, :append])
