@@ -10,7 +10,7 @@ defmodule El.Commands.Claude do
   import El.Wrap.Resize, only: [watch: 1]
   import El.Wrap.Input, only: [open: 2, encode: 2]
   import El.Log, only: [write: 1]
-  import El.Distribution, only: [start: 1]
+  import El.Distribution, only: [start: 1, bind: 1]
   import El.Puppet, only: [open: 1]
 
   def claude(name \\ :default) do
@@ -86,6 +86,7 @@ defmodule El.Commands.Claude do
 
   defp install(name) do
     open(name: name, pty: name)
+    bind(name)
   end
 
   defp resolve(:default), do: cwd!() |> basename()

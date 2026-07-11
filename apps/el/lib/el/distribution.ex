@@ -9,12 +9,12 @@ defmodule El.Distribution do
 
   def start(name \\ :default, opts \\ []) do
     El.Boot.start(name, opts)
-    bind(name, 50)
   end
 
+  def bind(name), do: bind(name, 50)
+
   defp bind(name, tries) when tries > 0 do
-    via = {:via, Registry, {ElitaRegistry, name, %{kind: :puppet}}}
-    go(name, tries, Process.whereis(via))
+    go(name, tries, find(name))
   end
 
   defp bind(_name, 0), do: :ok
