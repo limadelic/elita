@@ -22,9 +22,9 @@ defmodule El.Puppet.Filter do
 
   defp body(text) do
     answer = text |> clean() |> split("⏺") |> last()
-    raw = answer || text
-    write("extract frame: #{inspect(raw)}\n")
-    raw |> trim() |> strip() |> trim()
+    result = (answer || text) |> trim() |> strip() |> trim()
+    write("extract: #{inspect(result)}\n")
+    result
   end
 
   defp strip(text) do
