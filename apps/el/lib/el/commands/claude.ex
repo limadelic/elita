@@ -45,10 +45,16 @@ defmodule El.Commands.Claude do
   end
 
   defp go(name, deps) do
-    Task.start_link(fn -> Keyword.get(deps, :distribution_start).(name) end)
+    Task.start(fn -> distribute(name, deps) end)
     boot(to_atom(name), deps)
   rescue
     e -> write("boot error during claude setup: #{inspect(e)}\n")
+  end
+
+  defp distribute(name, deps) do
+    Keyword.get(deps, :distribution_start).(name)
+  rescue
+    e -> write("distribution error: #{inspect(e)}\n")
   end
 
   defp boot(name, deps) do
