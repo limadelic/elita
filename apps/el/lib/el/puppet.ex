@@ -10,6 +10,10 @@ defmodule El.Puppet do
     GenServer.call(pid, {:ask, message}, :infinity)
   end
 
+  def put(pid, output) do
+    GenServer.cast(pid, {:put, output})
+  end
+
   def open(opts) do
     setup()
     name = fetch!(opts, :name)
@@ -41,6 +45,11 @@ defmodule El.Puppet do
   def handle_call({:ask, message}, _from, %{pty: pty} = state) do
     output = query(pty, message)
     {:reply, output, state}
+  end
+
+  def handle_cast({:put, output}, %{pty: pty} = state) do
+    inject(pty, output <> "\r")
+    {:noreply, state}
   end
 
   defp query(pty, message) do

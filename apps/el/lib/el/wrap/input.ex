@@ -4,7 +4,6 @@ defmodule El.Wrap.Input do
   import Enum, only: [drop: 2]
   import String, only: [split: 3, trim: 1]
   import El.Wrap.Remote, only: [deliver: 3]
-  import IO, only: [write: 2]
 
   def open(parent, agent \\ nil) do
     {:ok, pid} = start_link(fn -> {[], parent, agent} end)
@@ -45,14 +44,15 @@ defmodule El.Wrap.Input do
     input = to_string(line)
     result = check(line, parent, agent)
     {data, line} = feed(rest, [], parent, agent)
-    finalize(result == {:handled}, input, line, agent, {eol, data})
+    finalize(result, {input, line, agent, parent, eol, data})
   end
 
-  defp finalize(true, input, line, agent, {eol, _data}) do
-    {input <> eol <> "#{agent}> ", line}
+  defp finalize({:handled}, {input, line, agent, _parent, eol, _data}) do
+    send(agent, {:prompt, agent})
+    {input <> eol, line}
   end
 
-  defp finalize(false, input, line, _agent, {eol, data}) do
+  defp finalize(:forward, {input, line, _agent, _parent, eol, data}) do
     {input <> eol <> data, line}
   end
 
@@ -77,20 +77,13 @@ defmodule El.Wrap.Input do
   def dispatch(_input, _parent, _agent), do: :forward
 
   defp remote([name, message], agent) do
-    deliver(name, message, agent) |> prompt(agent)
+    deliver(name, message, agent)
   end
 
   defp remote(_, _agent), do: :forward
 
   defp implicit([word, rest], agent),
-    do: deliver(word, rest, agent) |> prompt(agent)
+    do: deliver(word, rest, agent)
 
   defp implicit(_, _agent), do: :forward
-
-  defp prompt({:handled}, agent) do
-    write(:stdio, "#{agent}> ")
-    {:handled}
-  end
-
-  defp prompt(:forward, _agent), do: :forward
 end

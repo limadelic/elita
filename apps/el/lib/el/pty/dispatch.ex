@@ -24,6 +24,11 @@ defmodule El.Pty.Dispatch do
     {:stop, :normal, state}
   end
 
+  def info({:prompt, agent}, %{file: file, out: out} = state) do
+    file.write(out, "#{agent}> ")
+    {:noreply, state}
+  end
+
   def info({:resize, size}, %{port: _port} = state) do
     resize(size)
     {:noreply, state}
