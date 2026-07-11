@@ -93,6 +93,6 @@ defmodule El.Puppet.Filter do
   end
 
   defp clean(text) do
-    replace(text, ~r/\e\[[0-9;?]*[a-zA-Z]|\e[78]|\e\][^\a]*\a/, "")
+    text |> replace(~r/\e\[[0-9]*[GfH]/, " ") |> replace(~r/\e\[[0-9;?]*[a-zA-Z]|\e[78]|\e\][^\a]*\a/, "")
   end
 end

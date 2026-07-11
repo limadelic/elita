@@ -12,8 +12,10 @@ defmodule El.Wrap.Remote do
     :exit, _ -> :forward
   end
 
-  defp prepare(name, _sender) do
-    name |> trim() |> to_atom()
+  defp prepare(name, sender) do
+    target = name |> trim() |> to_atom()
+    write("prepare: target=#{target} from=#{inspect(sender)}\n")
+    target
   end
 
   defp query(nil, _message, _sender), do: :forward
@@ -29,18 +31,11 @@ defmodule El.Wrap.Remote do
   end
 
   defp call(pid, message) do
-    note(erpc(node(pid), pid, message))
+    write("ask to #{node(pid)}\n")
+    :erpc.call(node(pid), El.Puppet, :ask, [pid, message])
+    write("ask ok\n")
   rescue
-    _ -> :forward
-  end
-
-  defp note(result) do
-    write("erpc done: #{inspect(result)}\n")
-    result
-  end
-
-  defp erpc(host, pid, message) do
-    :erpc.call(host, El.Puppet, :ask, [pid, message])
+    _ -> (write("ask fail\n"); :forward)
   end
 
   defp respond(:forward, _sender), do: :forward
