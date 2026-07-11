@@ -6,19 +6,19 @@ defmodule El.Wrap.Remote do
   import El.Puppet, only: [ask: 2, put: 2]
   import El.Log, only: [write: 1]
 
-  def deliver(name, message, agent) do
+  def deliver(name, message, sender) do
     target = name |> trim() |> to_atom()
-    write("deliver #{target} from #{inspect(agent)}\n")
-    target |> wait() |> query(message)
+    write("deliver #{target} from #{inspect(sender)}\n")
+    target |> wait() |> query(message, sender)
   catch
     :exit, _ -> :forward
   end
 
-  defp query(nil, _message), do: :forward
+  defp query(nil, _message, _sender), do: :forward
 
-  defp query(pid, message) do
+  defp query(pid, message, sender) do
     output = pid |> call(message)
-    respond(output, pid)
+    respond(output, sender)
   catch
     :exit, _ -> :forward
   end
@@ -44,10 +44,12 @@ defmodule El.Wrap.Remote do
       reraise(e, __STACKTRACE__)
   end
 
-  defp respond(:forward, _pid), do: :forward
+  defp respond(:forward, _sender), do: :forward
 
-  defp respond(output, pid) do
-    put(pid, output |> split("\n") |> drop(-1) |> join("\n"))
+  defp respond(output, sender) do
+    if pid = sender |> to_atom() |> target(),
+      do: put(pid, output |> split("\n") |> drop(-1) |> join("\n"))
+
     {:handled}
   end
 

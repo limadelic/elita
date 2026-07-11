@@ -67,9 +67,9 @@ defmodule El.Puppet do
       {:output, data} ->
         ready(pty, buffer <> data, prompt?(buffer <> data))
     after
-      5000 ->
+      60_000 ->
         write(
-          "collect timeout after 5000ms, last chunk: #{inspect(String.slice(buffer, -50..-1))}\n"
+          "collect timeout after 60000ms, last chunk: #{inspect(String.slice(buffer, -50..-1))}\n"
         )
 
         cleanup(pty)
@@ -93,9 +93,10 @@ defmodule El.Puppet do
     _ -> :ok
   end
 
-  defp prompt?(text) do
-    ends_with?(text, "> ")
-  end
+  defp prompt?(text), do: ends_with?(ansi(text), "> ")
+
+  defp ansi(text),
+    do: String.replace(text, ~r/\e\[[0-9;?]*[a-zA-Z]|\e[78]|\e\][^\a]*\a/, "")
 
   defp setup do
     start_link(keys: :unique, name: ElitaRegistry)
