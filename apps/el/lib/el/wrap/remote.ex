@@ -11,17 +11,17 @@ defmodule El.Wrap.Remote do
 
   def deliver(name, message, sender) do
     target = prepare(name, sender) |> wait()
-    ask_tell(target, message, sender)
+    query(target, message, sender)
   catch
     :exit, _ -> halt("deliver")
   end
 
-  defp ask_tell(nil, _, _), do: :forward
+  defp query(nil, _, _), do: :forward
 
-  defp ask_tell(target, message, sender) do
+  defp query(target, message, sender) do
     respond(gather(target, message, sender), sender)
   catch
-    :exit, _ -> halt("ask_tell")
+    :exit, _ -> halt("query")
   end
 
   defp gather(pid, msg, sender) do
@@ -30,18 +30,17 @@ defmodule El.Wrap.Remote do
     text = "#{envelope}\n#{msg}"
     write("gather: ask to #{inspect(pid)} text: #{inspect(text)}\n")
     put(pid, text)
-    await_response(sender)
-  end
-
-  defp await_response(sender) do
     listen(sender, sender)
   end
 
   defp listen(pty, sender) do
     watch(pty, self())
-    task = Task.async(fn ->
-      collect(build(pty, sender, monotonic_time(:millisecond)))
-    end)
+
+    task =
+      Task.async(fn ->
+        collect(build(pty, sender, monotonic_time(:millisecond)))
+      end)
+
     try do
       Task.await(task, 90_000)
     rescue
@@ -54,6 +53,7 @@ defmodule El.Wrap.Remote do
         Task.shutdown(task, 1)
         write("listen fail: ask-on-tell timeout after 90s\n")
         :forward
+
       :exit, _ ->
         Task.shutdown(task, 1)
         :forward
@@ -65,8 +65,15 @@ defmodule El.Wrap.Remote do
   end
 
   defp build(pty, _sender, now) do
-    %{pty: pty, buffer: "", last: now, start: now,
-      question: "ask_response", burst: 1, gap: false}
+    %{
+      pty: pty,
+      buffer: "",
+      last: now,
+      start: now,
+      question: "ask_response",
+      burst: 1,
+      gap: false
+    }
   end
 
   defp halt(context) do
@@ -118,7 +125,9 @@ defmodule El.Wrap.Remote do
           [_sender, ""] -> message
           _ -> binary
         end
-      _ -> binary
+
+      _ ->
+        binary
     end
   end
 

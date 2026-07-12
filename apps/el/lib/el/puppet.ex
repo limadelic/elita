@@ -8,7 +8,7 @@ defmodule El.Puppet do
   import El.Puppet.Invoke, only: [invoke: 2]
   import El.Puppet.Collect, only: [collect: 1]
   import System, only: [monotonic_time: 1]
-  import String, only: [to_atom: 1, trim: 1]
+  import String, only: [to_atom: 1, trim: 1, split: 3, slice: 2]
 
   def ask(pid, message) do
     GenServer.call(pid, {:ask, message}, :infinity)
@@ -52,7 +52,6 @@ defmodule El.Puppet do
     {:reply, reply, state}
   end
 
-
   def handle_cast({:put, output}, %{pty: pty} = state) do
     answer(output, pty, state)
   end
@@ -62,12 +61,15 @@ defmodule El.Puppet do
       {:ask, sender, message} ->
         spawn(fn -> reply(pty, sender, message) end)
         {:noreply, state}
+
       {:reply, _sender, message} ->
         inject(pty, message <> "\r")
         {:noreply, state}
+
       {:tell, _sender, _message} ->
         inject(pty, output <> "\r")
         {:noreply, state}
+
       :none ->
         inject(pty, output <> "\r")
         {:noreply, state}
@@ -75,22 +77,25 @@ defmodule El.Puppet do
   end
 
   defp parse(text) do
-    case String.split(text, "\n", parts: 2) do
+    case split(text, "\n", parts: 2) do
       ["[ask " <> rest, message] ->
-        case String.split(rest, "]", parts: 2) do
+        case split(rest, "]", parts: 2) do
           [sender, ""] -> {:ask, to_atom(sender), message}
           _ -> :none
         end
+
       ["[reply " <> rest, message] ->
-        case String.split(rest, "]", parts: 2) do
+        case split(rest, "]", parts: 2) do
           [sender, ""] -> {:reply, to_atom(sender), message}
           _ -> :none
         end
+
       ["[from " <> rest, message] ->
-        case String.split(rest, "]", parts: 2) do
+        case split(rest, "]", parts: 2) do
           [sender, ""] -> {:tell, to_atom(sender), message}
           _ -> :none
         end
+
       _ ->
         :none
     end
@@ -101,7 +106,7 @@ defmodule El.Puppet do
     inject(pty, message <> "\r")
     response = collect(build(pty, message, monotonic_time(:millisecond)))
     unwatch(pty, self())
-    write("ask reply collected: #{inspect(String.slice(inspect(response), 0..50))}\n")
+    write("ask reply collected: #{inspect(slice(inspect(response), 0..50))}\n")
     signal(sender, format(response))
   catch
     :exit, _ -> write("reply exit\n")
@@ -130,6 +135,7 @@ defmodule El.Puppet do
       nil ->
         write("direct nil: cannot deliver\n")
         :ok
+
       pid ->
         put(pid, text)
     end
@@ -145,8 +151,15 @@ defmodule El.Puppet do
   end
 
   defp build(pty, message, now) do
-    %{pty: pty, buffer: "", last: now, start: now,
-      question: message, burst: 1, gap: false}
+    %{
+      pty: pty,
+      buffer: "",
+      last: now,
+      start: now,
+      question: message,
+      burst: 1,
+      gap: false
+    }
   end
 
   defp setup do
