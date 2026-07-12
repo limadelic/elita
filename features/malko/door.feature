@@ -29,3 +29,24 @@ Feature: Door
       | open sesame |
     * malko> /exit
     * keeper> /exit
+
+  Scenario: Ask through the door
+    * > el claude malko
+      | ▐▛███▜▌     |
+      | ▝▜█████▛▘   |
+      | Claude Code |
+      | Haiku       |
+    * > el claude keeper
+      | ▐▛███▜▌     |
+      | ▝▜█████▛▘   |
+      | Claude Code |
+      | Haiku       |
+    * malko> keeper what is sesame?
+      | 🤔 | gather: ask to |
+    * keeper:
+      | what is sesame? |  |
+      | ✨              | ask reply to |
+    * malko:
+      | sesame is a magic word |
+    * malko> /exit
+    * keeper> /exit
