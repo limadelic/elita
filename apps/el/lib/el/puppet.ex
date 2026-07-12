@@ -53,15 +53,21 @@ defmodule El.Puppet do
   end
 
   defp invoke(pty, message) do
-    attempt(pty, message)
+    wrap(fn -> attempt(pty, message) end)
+  end
+
+  defp wrap(fun) do
+    fun.()
+  rescue
+    e -> trap(e)
+  end
+
+  defp trap(reason) do
+    error("exception", reason)
   end
 
   defp attempt(pty, message) do
     respond(pty, message)
-  rescue
-    e -> error("exception", e)
-  catch
-    k, r -> error("caught", {k, r})
   end
 
   defp respond(pty, message) do

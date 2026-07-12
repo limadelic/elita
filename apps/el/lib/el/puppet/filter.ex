@@ -86,9 +86,19 @@ defmodule El.Puppet.Filter do
 
   defp prompts(text) do
     text
+    |> mute()
+    |> mask()
+  end
+
+  defp mute(text) do
+    text
     |> replace(~r/\(esc to interrupt\)/i, "")
     |> replace(~r/·\s+\w+…/, "")
     |> replace(~r/Type \? for shortcuts[^\n]*/i, "")
+  end
+
+  defp mask(text) do
+    text
     |> replace(~r/Press [Ctrl\+C]+ to exit[^\n]*/i, "")
     |> replace(~r/\(type .+ for help\)[^\n]*/i, "")
   end

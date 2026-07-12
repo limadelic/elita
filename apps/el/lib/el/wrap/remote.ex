@@ -58,7 +58,10 @@ defmodule El.Wrap.Remote do
 
   defp monitor(pid) do
     Process.monitor(pid)
+    await()
+  end
 
+  defp await do
     receive do
       {:DOWN, _, _, _, r} -> write("DOWN: #{inspect(r)}\n")
     end
