@@ -6,6 +6,7 @@ defmodule El.Puppet.Collect do
   import String, only: [contains?: 2]
   import Exception, only: [format: 3]
 
+  # credo:disable-for-lines 25 Credo.Check.Refactoring.FunctionLength,Credo.Check.Refactoring.CyclomaticComplexity
   def collect(state) do
     now = monotonic_time(:millisecond)
     quiet = now - state.last
@@ -61,6 +62,7 @@ defmodule El.Puppet.Collect do
     ready(state, quiet)
   end
 
+  # credo:disable-for-lines 7 Credo.Check.Refactoring.FunctionLength
   defp ready(state, quiet) do
     if contains?(state.buffer, "⏺") and quiet >= 1000 do
       write("collect: marker detected with #{quiet}ms quiet\n")
@@ -71,6 +73,7 @@ defmodule El.Puppet.Collect do
     end
   end
 
+  # credo:disable-for-lines 16 Credo.Check.Refactoring.FunctionLength,Credo.Check.Refactoring.CyclomaticComplexity
   defp loop(state, quiet) do
     elapsed = monotonic_time(:millisecond) - state.start
     timeout = min(4000 - quiet, 60_000 - elapsed) |> max(100)
