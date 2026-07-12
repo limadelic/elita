@@ -6,7 +6,7 @@ defmodule El.Commands.Tell do
   import GenServer, only: [cast: 2]
   import IO, only: [write: 2]
   import Keyword, only: [get: 3]
-  import Node, only: [connect: 1, start: 2]
+  import Node, only: [connect: 1, start: 2, set_cookie: 1]
   import String, only: [contains?: 2, to_atom: 1]
   def tell(agent, msg, tool \\ nil, opts \\ []) do
     prime()
@@ -53,9 +53,10 @@ defmodule El.Commands.Tell do
     route(agent, msg, :tell, tool)
   end
 
-  defp inject(msg, target, name, _tool) do
+  defp inject(msg, _target, name, _tool) do
     text = format(msg)
-    cast({name, target}, {:inject, text})
+    pid = :global.whereis_name({name, :puppet})
+    cast(pid, {:inject, text})
   end
 
   def target(agent, opts \\ []) do
@@ -95,5 +96,6 @@ defmodule El.Commands.Tell do
       :nonode@nohost -> start(:"tell_#{:erlang.system_time(:millisecond)}@127.0.0.1", :longnames)
       _ -> :ok
     end
+    set_cookie(:elita)
   end
 end
