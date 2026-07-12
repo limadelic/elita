@@ -1,9 +1,7 @@
 defmodule El.Puppet.Collect do
   import El.Log, only: [write: 1]
-  import El.Pty, only: [unwatch: 2]
-  import El.Puppet.Filter, only: [answer?: 2, mark: 1]
+  import El.Puppet.Settle, only: [hard: 2, peak: 3, solo: 3, ready: 2]
   import System, only: [monotonic_time: 1]
-  import String, only: [contains?: 2]
   import Exception, only: [format: 3]
 
   def collect(state) do
@@ -40,14 +38,6 @@ defmodule El.Puppet.Collect do
     result
   end
 
-  defp hard(state, elapsed) when elapsed >= 60_000 do
-    write("collect hard timeout at 60s\n")
-    unwatch(state.pty, self())
-    reply(state.buffer)
-  end
-
-  defp hard(_state, _elapsed), do: false
-
   defp go(state, quiet, elapsed) do
     gap = gap?(state, quiet)
     decide(%{state | gap: gap}, quiet, elapsed)
@@ -57,58 +47,21 @@ defmodule El.Puppet.Collect do
   defp gap?(_state, quiet), do: quiet >= 2000
 
   defp decide(state, quiet, elapsed) when state.burst >= 2 do
-    peak(state, quiet, elapsed)
+    result = peak(state, quiet, elapsed)
+    proceed(result, state, quiet)
   end
 
   defp decide(state, quiet, elapsed) when state.burst == 1 do
-    solo(state, quiet, elapsed)
+    result = solo(state, quiet, elapsed)
+    proceed(result, state, quiet)
   end
 
-  defp decide(state, quiet, _elapsed), do: ready(state, quiet)
-
-  defp peak(state, quiet, elapsed) when quiet >= 1000 do
-    write("collect: burst #{state.burst} settled after #{elapsed}ms\n")
-    unwatch(state.pty, self())
-    reply(state.buffer)
+  defp decide(state, quiet, _elapsed) do
+    proceed(ready(state, quiet), state, quiet)
   end
 
-  defp peak(state, quiet, _elapsed), do: ready(state, quiet)
-
-  defp solo(%{gap: false} = state, quiet, elapsed) when quiet >= 500 do
-    response(answer?(state.buffer, state.question), state, quiet, elapsed)
-  end
-
-  defp solo(state, quiet, _elapsed), do: ready(state, quiet)
-
-  defp response(true, state, _quiet, elapsed) do
-    write("collect: clean answer (burst 1) after #{elapsed}ms\n")
-    unwatch(state.pty, self())
-    reply(state.buffer)
-  end
-
-  defp response(false, state, quiet, _elapsed) do
-    ready(state, quiet)
-  end
-
-  defp ready(state, quiet) do
-    proceed(marker?(state, quiet), state, quiet)
-  end
-
-  defp marker?(%{buffer: buffer}, quiet) when quiet >= 1000 do
-    contains?(buffer, "⏺")
-  end
-
-  defp marker?(_state, _quiet), do: false
-
-  defp proceed(true, state, quiet) do
-    write("collect: marker detected with #{quiet}ms quiet\n")
-    unwatch(state.pty, self())
-    reply(state.buffer)
-  end
-
-  defp proceed(false, state, quiet) do
-    loop(state, quiet)
-  end
+  defp proceed(result, _state, _quiet) when result != false, do: result
+  defp proceed(false, state, quiet), do: loop(state, quiet)
 
   defp loop(state, quiet) do
     t = wait(state, quiet)
@@ -138,9 +91,4 @@ defmodule El.Puppet.Collect do
 
   defp mark(b1, b2) when b2 > b1, do: write("collect: burst transition #{b1} -> #{b2}\n")
   defp mark(_b1, _b2), do: :ok
-
-  defp reply(buffer) do
-    write("collect done bytes=#{byte_size(buffer)}\n")
-    mark(buffer)
-  end
 end
