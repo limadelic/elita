@@ -3,6 +3,7 @@ defmodule El.Answer do
 
   import Process, only: [send_after: 3, cancel_timer: 1]
   import String, only: [contains?: 2, replace: 3]
+  import Enum, only: [any?: 2]
 
   def collect(timeout) do
     timer = send_after(self(), :timeout, timeout)
@@ -47,7 +48,7 @@ defmodule El.Answer do
   defp done?(combined, _acc), do: complete?(combined)
 
   defp complete?(combined) do
-    contains?(combined, "\e[?2004h") or contains?(combined, "⏺")
+    ["\e[?2004h", "⏺"] |> any?(&contains?(combined, &1))
   end
 
   defp text(input) do
