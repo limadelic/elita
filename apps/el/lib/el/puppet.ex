@@ -28,19 +28,19 @@ defmodule El.Puppet do
   defp register(name, pty) do
     via = {:via, Registry, {ElitaRegistry, name, %{kind: :puppet}}}
     {:ok, pid} = GenServer.start_link(__MODULE__, pty, name: via)
-    spread(name, pid)
+    notify(name, pid)
     {:ok, pid}
   end
 
-  defp spread(name, pid) do
-    share(Node.alive?(), name, pid)
+  defp notify(name, pid) do
+    alive?(Node.alive?(), name, pid)
   end
 
-  defp share(true, name, pid) do
+  defp alive?(true, name, pid) do
     :global.register_name({name, :puppet}, pid)
   end
 
-  defp share(false, _name, _pid), do: :ok
+  defp alive?(false, _name, _pid), do: :ok
 
   def init(pty) do
     {:ok, %{pty: pty}}
@@ -49,41 +49,21 @@ defmodule El.Puppet do
   def handle_call({:ask, message}, _from, %{pty: pty} = state) do
     write("ask received: #{inspect(message)}\n")
 
-    case process(pty, message) do
-      {:ok, response} -> {:reply, response, state}
-      {:error, e} -> {:reply, {:error, e}, state}
-    end
-  end
-
-  defp process(pty, message) do
     try do
-      response = query(pty, message)
+      output = El.Puppet.Query.call(pty, message)
+      response = format(output)
+      write("ask returned: #{inspect(slice(inspect(response), 0..50))}\n")
       record(message, response)
-      {:ok, response}
+      {:reply, response, state}
     rescue
       e ->
-        mark(:rescue, e)
+        write("handle_call exception: #{message(e)}\n")
+        {:reply, {:error, e}, state}
     catch
       kind, reason ->
-        mark(:catch, {kind, reason})
+        write("handle_call caught: #{kind} #{inspect(reason)}\n")
+        {:reply, {:error, {kind, reason}}, state}
     end
-  end
-
-  defp query(pty, message) do
-    output = El.Puppet.Query.call(pty, message)
-    response = format(output)
-    write("ask returned: #{inspect(slice(inspect(response), 0..50))}\n")
-    response
-  end
-
-  defp mark(:rescue, e) do
-    write("handle_call exception: #{message(e)}\n")
-    {:error, e}
-  end
-
-  defp mark(:catch, {kind, reason}) do
-    write("handle_call caught: #{kind} #{inspect(reason)}\n")
-    {:error, {kind, reason}}
   end
 
   defp format(text) when is_binary(text) do
@@ -93,23 +73,17 @@ defmodule El.Puppet do
   defp format(response), do: response
 
   defp record(message, response) do
-    save(get_env("TAPE") == "rec", message, response)
-  end
+    tape = get_env("TAPE")
 
-  defp save(true, message, response) do
-    try do
-      name = get_env("PUPPET_NAME") || "puppet"
-      request = build(name, message)
-      add(request, response)
-    catch
-      _, _ -> write("record fail\n")
+    if tape == "rec" do
+      try do
+        name = get_env("PUPPET_NAME") || "puppet"
+        request = %{"agent" => name, "messages" => [%{content: message}], "n" => 1}
+        add(request, response)
+      catch
+        _, _ -> write("record fail\n")
+      end
     end
-  end
-
-  defp save(false, _message, _response), do: :ok
-
-  defp build(name, message) do
-    %{"agent" => name, "messages" => [%{content: message}], "n" => 1}
   end
 
   def handle_cast({:put, output}, %{pty: pty} = state) do
