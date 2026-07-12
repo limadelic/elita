@@ -9,15 +9,10 @@ defmodule El.Puppet.Filter do
   end
 
   def mark(buffer) do
-    buffer |> route()
-  end
-
-  defp route(buffer) when contains?(buffer, "⏺") do
-    buffer |> split("\e[H") |> frame() |> body()
-  end
-
-  defp route(buffer) do
-    buffer |> polish() |> final()
+    case contains?(buffer, "⏺") do
+      true -> buffer |> split("\e[H") |> frame() |> body()
+      false -> buffer |> polish() |> final()
+    end
   end
 
   defp frame(frames) do
@@ -30,13 +25,18 @@ defmodule El.Puppet.Filter do
 
   defp pull(text) do
     parts = text |> clean() |> split("⏺")
-    result = snap(last(parts), text)
+
+    result =
+      parts
+      |> last()
+      |> case do
+        nil -> text
+        x -> x
+      end
+
     write("extract: #{inspect(result)}\n")
     result
   end
-
-  defp snap(nil, text), do: text
-  defp snap(x, _text), do: x
 
   defp strip(text) do
     text |> replace(~r/[✻❯].*/, "") |> replace(~r/\(esc.*/, "") |> replace(~r/\r.*/, "")
@@ -82,14 +82,13 @@ defmodule El.Puppet.Filter do
   end
 
   defp prompts(text) do
-    text |> interrupt() |> dots() |> hints() |> quit() |> help()
+    text
+    |> replace(~r/\(esc to interrupt\)/i, "")
+    |> replace(~r/·\s+\w+…/, "")
+    |> replace(~r/Type \? for shortcuts[^\n]*/i, "")
+    |> replace(~r/Press [Ctrl\+C]+ to exit[^\n]*/i, "")
+    |> replace(~r/\(type .+ for help\)[^\n]*/i, "")
   end
-
-  defp interrupt(text), do: replace(text, ~r/\(esc to interrupt\)/i, "")
-  defp dots(text), do: replace(text, ~r/·\s+\w+…/, "")
-  defp hints(text), do: replace(text, ~r/Type \? for shortcuts[^\n]*/i, "")
-  defp quit(text), do: replace(text, ~r/Press [Ctrl\+C]+ to exit[^\n]*/i, "")
-  defp help(text), do: replace(text, ~r/\(type .+ for help\)[^\n]*/i, "")
 
   defp boxes(text) do
     replace(text, ~r/[┌┐└┘─│├┤┬┴┼]/, "")
