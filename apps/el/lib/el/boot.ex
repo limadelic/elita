@@ -42,7 +42,7 @@ defmodule El.Boot do
   end
 
   defp act({:ok, _}, name, _) do
-    write("boot distribution=#{name} actual_node=#{node()}\n")
+    write("🚀 boot distribution=#{name} actual_node=#{node()}\n")
     cookie(:ok)
   end
 

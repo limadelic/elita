@@ -32,7 +32,7 @@ defmodule El.Wrap.Remote do
 
   defp prepare(name, sender) do
     t = name |> trim() |> to_atom()
-    write("prepare: target=#{t} from=#{inspect(sender)}\n")
+    write("🤔 prepare: target=#{t} from=#{inspect(sender)}\n")
     t
   end
 
@@ -42,7 +42,7 @@ defmodule El.Wrap.Remote do
     name = sender |> fix(sender) |> to_string()
     envelope = "[from #{name}]"
     text = "#{envelope}\n#{message}"
-    write("inject to: #{inspect(pid)} text: #{inspect(text)}\n")
+    write("📢 inject to: #{inspect(pid)} text: #{inspect(text)}\n")
     put(pid, text)
   end
 
@@ -76,7 +76,7 @@ defmodule El.Wrap.Remote do
 
   defp route(pid, output, agent) when is_binary(output) do
     cleaned = trim_trailing(output, "\n")
-    write("route to: #{inspect(pid)} text: #{inspect(cleaned)}\n")
+    write("✨ route to: #{inspect(pid)} text: #{inspect(cleaned)}\n")
     put(pid, cleaned)
     write("/dev/stdout", "#{agent}> ")
   end

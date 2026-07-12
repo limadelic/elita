@@ -9,8 +9,14 @@ defmodule El.Puppet.Query do
 
   defp safe(pty, message) do
     perform(pty, message)
-  rescue e -> write("query exception: #{message(e)}\n"); reraise e, __STACKTRACE__
-  catch k, r -> write("query caught: #{k} #{inspect(r)}\n"); :erlang.raise(k, r, __STACKTRACE__)
+  rescue
+    e ->
+      write("query exception: #{message(e)}\n")
+      reraise e, __STACKTRACE__
+  catch
+    k, r ->
+      write("query caught: #{k} #{inspect(r)}\n")
+      :erlang.raise(k, r, __STACKTRACE__)
   end
 
   defp perform(pty, message) do
@@ -26,7 +32,6 @@ defmodule El.Puppet.Query do
   end
 
   defp build(pty, message, now) do
-    %{pty: pty, buffer: "", last: now, start: now,
-      question: message, burst: 1, gap: false}
+    %{pty: pty, buffer: "", last: now, start: now, question: message, burst: 1, gap: false}
   end
 end

@@ -8,7 +8,7 @@ defmodule El.Wrap.Input do
 
   def open(parent, agent \\ nil) do
     {:ok, pid} = start_link(fn -> {[], parent, agent} end)
-    write("input handler opened for #{inspect(agent)}\n")
+    write("🚀 input handler opened for #{inspect(agent)}\n")
     pid
   end
 
