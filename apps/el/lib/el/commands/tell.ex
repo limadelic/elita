@@ -60,10 +60,9 @@ defmodule El.Commands.Tell do
 
   def target(agent, opts \\ []) do
     env = get(opts, :env_module, El.Infra.Env)
-    node(agent, env.get("EL_NODE"))
+    node(agent, env.get("EL_NODE", "127.0.0.1"))
   end
 
-  defp node(_agent, nil), do: nil
   defp node(agent, host), do: :"claude_#{agent}@#{host}"
 
   def unreachable(agent, host) do

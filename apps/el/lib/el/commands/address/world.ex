@@ -49,7 +49,7 @@ defmodule El.Commands.Address.World do
   end
 
   defp peers do
-    [self() | list()]
+    [Node.self() | list()]
   end
 
   defp remote(node) do
