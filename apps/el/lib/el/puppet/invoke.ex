@@ -61,7 +61,9 @@ defmodule El.Puppet.Invoke do
   end
 
   defp persist(request, response) do
-    try do: add(request, response), catch: (_, _ -> fail())
+    add(request, response)
+  rescue
+    _ -> fail()
   end
 
   defp build(message) do

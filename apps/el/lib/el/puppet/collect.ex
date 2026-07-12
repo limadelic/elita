@@ -6,22 +6,14 @@ defmodule El.Puppet.Collect do
 
   def collect(state) do
     safe(state)
-  rescue
-    e ->
-      write("collect exception: #{format(:error, e, __STACKTRACE__)}\n")
-      reraise e, __STACKTRACE__
-  catch
-    kind, reason ->
-      write("collect caught: #{kind} #{inspect(reason)}\n")
-      :erlang.raise(kind, reason, __STACKTRACE__)
+  rescue e -> write("collect exception: #{format(:error, e, __STACKTRACE__)}\n"); reraise e, __STACKTRACE__
+  catch kind, reason -> write("collect caught: #{kind} #{inspect(reason)}\n"); :erlang.raise(kind, reason, __STACKTRACE__)
   end
 
-  defp safe(state) do
+  defp safe(%{last: last, start: start} = state) do
     now = monotonic_time(:millisecond)
-    quiet = now - state.last
-    elapsed = now - state.start
     emit(state, now)
-    defer(hard(state, elapsed), state, quiet, elapsed)
+    defer(hard(state, now - start), state, now - last, now - start)
   end
 
   defp emit(%{buffer: buffer}, now) when byte_size(buffer) == 0 do
@@ -64,14 +56,11 @@ defmodule El.Puppet.Collect do
   defp proceed(false, state, quiet), do: loop(state, quiet)
 
   defp loop(state, quiet) do
-    t = wait(state, quiet)
-
     receive do
       {:output, data} ->
         write("collect: burst #{state.burst} got #{byte_size(data)}b\n")
         collect(output(state, data))
-    after
-      t -> collect(state)
+    after wait(state, quiet) -> collect(state)
     end
   end
 
