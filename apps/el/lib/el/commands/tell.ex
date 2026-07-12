@@ -5,12 +5,13 @@ defmodule El.Commands.Tell do
   import Node, only: [start: 2, set_cookie: 1]
   import Keyword, only: [get: 3]
   import IO, only: [write: 2]
+  import El.Wrap.Remote, only: [tell: 3]
 
-  def tell(agent, msg, _tool \\ nil, _opts \\ []) do
+  def send(agent, msg, _tool \\ nil, _opts \\ []) do
     prime()
     start()
     sender = get_env("EL_FROM", node() |> to_string())
-    El.Wrap.Remote.tell(agent, msg, sender) |> code()
+    tell(agent, msg, sender) |> code()
   end
 
   defp code(:forward), do: halt(1)
