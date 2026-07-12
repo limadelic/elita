@@ -1,7 +1,7 @@
-@hamlet @malko @wip
-Feature: Hamlet Ghost
+@hamlet @malko
+Feature: Hamlet Ghost Tell
 
-  Scenario: Hamlet Ghost
+  Scenario: Tell fires and forgets with envelope and tell-back
     * > el claude ghost
       | ▐▛███▜▌     |
       | ▝▜█████▛▘   |
@@ -12,40 +12,17 @@ Feature: Hamlet Ghost
       | ▝▜█████▛▘   |
       | Claude Code |
       | Haiku       |
-    * hamlet> ghost knock knock
-    * ghost:
+    * hamlet> tell ghost knock knock
+    * hamlet:
       | knock knock |
-      | who's there |
-    * hamlet:
-      | who's there |
-    * hamlet> ghost hamlet
-    * ghost:
-      | hamlet     |
-      | hamlet who |
-    * hamlet:
-      | hamlet who |
-    * hamlet> ghost ghost
-    * ghost:
-      | ghost |
-    * hamlet> /exit
-    * ghost> /exit
-
-  Scenario: Tell fires and forgets
-    * > el claude ghost
-      | ▐▛███▜▌     |
-      | ▝▜█████▛▘   |
-      | Claude Code |
-      | Haiku       |
-    * > el claude hamlet
-      | ▐▛███▜▌     |
-      | ▝▜█████▛▘   |
-      | Claude Code |
-      | Haiku       |
-    * hamlet> tell ghost hello from hamlet
-    * hamlet:
-      | hello from hamlet |
     * ghost:
       | from hamlet |
-      | hello from hamlet |
+      | knock knock |
+    * ghost> tell hamlet who's there
+    * ghost:
+      | who's there |
+    * hamlet:
+      | from ghost |
+      | who's there |
     * hamlet> /exit
     * ghost> /exit

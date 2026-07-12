@@ -49,8 +49,8 @@ defmodule El.Wrap.Input do
     finalize(result, {input, line, agent, parent, eol, data})
   end
 
-  defp finalize({:handled}, {input, line, agent, parent, eol, _data}) do
-    send(parent, {:prompt, agent})
+  defp finalize({:handled}, {input, line, agent, _parent, eol, _data}) do
+    send(agent, {:prompt, agent})
     {input <> eol, line}
   end
 
