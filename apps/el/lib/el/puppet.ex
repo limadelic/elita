@@ -53,9 +53,15 @@ defmodule El.Puppet do
   end
 
   defp invoke(pty, message) do
-    try do: respond(pty, message),
-        rescue: (e -> error("exception", e)),
-        catch: (k, r -> error("caught", {k, r}))
+    attempt(pty, message)
+  end
+
+  defp attempt(pty, message) do
+    respond(pty, message)
+  rescue
+    e -> error("exception", e)
+  catch
+    k, r -> error("caught", {k, r})
   end
 
   defp respond(pty, message) do
@@ -81,15 +87,22 @@ defmodule El.Puppet do
   defp format(response), do: response
 
   defp record(message, response) do
-    recording?() && save(message, response)
+    store(message, response, recording?())
   end
+
+  defp store(message, response, true), do: save(message, response)
+  defp store(_message, _response, false), do: :ok
 
   defp recording? do
     get_env("TAPE") == "rec"
   end
 
   defp save(message, response) do
-    try do: add(build(message), response), catch: (_, _ -> fail())
+    persist(build(message), response)
+  end
+
+  defp persist(request, response) do
+    try do: add(request, response), catch: (_, _ -> fail())
   end
 
   defp build(message) do
@@ -97,8 +110,11 @@ defmodule El.Puppet do
   end
 
   defp agent do
-    get_env("PUPPET_NAME") || "puppet"
+    pick(get_env("PUPPET_NAME"))
   end
+
+  defp pick(nil), do: "puppet"
+  defp pick(name), do: name
 
   defp fail do
     write("record fail\n")
