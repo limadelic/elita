@@ -12,7 +12,7 @@ defmodule El.Puppet.Answer do
     watch(pty, self())
     act(pty, sender, message)
   catch
-    :exit, _ -> write("reply exit\n")
+    :exit, _ -> write("✨ reply exit\n")
   end
 
   defp act(pty, sender, message) do
@@ -23,7 +23,7 @@ defmodule El.Puppet.Answer do
   defp respond(pty, sender, message) do
     response = collect(build(pty, message, monotonic_time(:millisecond)))
     unwatch(pty, self())
-    write("ask reply collected: #{inspect(slice(inspect(response), 0..50))}\n")
+    write("✨ ask reply collected: #{inspect(slice(inspect(response), 0..50))}\n")
     signal(sender, format(response))
   end
 
@@ -36,7 +36,7 @@ defmodule El.Puppet.Answer do
 
   defp signal(sender, response) do
     text = envelope(sender, response)
-    write("ask reply to: #{inspect(sender)} text: #{inspect(text)}\n")
+    write("✨ ask reply to: #{inspect(sender)} text: #{inspect(text)}\n")
     direct(sender, text)
   end
 

@@ -13,7 +13,7 @@ defmodule El.Wrap.Remote do
     invoke(name, message, sender)
   catch
     :exit, _ ->
-      write("deliver exit\n")
+      write("✨ deliver exit\n")
       :forward
   end
 
@@ -37,7 +37,7 @@ defmodule El.Wrap.Remote do
 
   defp gather(pid, msg, sender) do
     text = "[ask #{sender |> fix(sender) |> to_string()}]\n#{msg}"
-    write("gather: ask to #{inspect(pid)} text: #{inspect(text)}\n")
+    write("🤔 gather: ask to #{inspect(pid)} text: #{inspect(text)}\n")
     put(pid, text)
     listen(sender, sender)
   end
@@ -86,7 +86,7 @@ defmodule El.Wrap.Remote do
     dispatch(name, message, sender)
   catch
     :exit, reason ->
-      write("tell exit: #{inspect(reason)}\n")
+      write("📢 tell exit: #{inspect(reason)}\n")
       :forward
   end
 
