@@ -4,6 +4,7 @@ defmodule El.Puppet.Query do
   import El.Puppet.Collect, only: [collect: 1]
   import Exception, only: [message: 1]
   import System, only: [monotonic_time: 1]
+  import Map, only: [merge: 2]
 
   def call(pty, message), do: safe(pty, message)
 
@@ -32,14 +33,14 @@ defmodule El.Puppet.Query do
   end
 
   defp build(pty, message, now) do
-    %{
-      pty: pty,
-      buffer: "",
-      last: now,
-      start: now,
-      question: message,
-      burst: 1,
-      gap: false
-    }
+    base(pty, message) |> timing(now)
+  end
+
+  defp base(pty, message) do
+    %{pty: pty, buffer: "", question: message, burst: 1, gap: false}
+  end
+
+  defp timing(map, now) do
+    merge(map, %{last: now, start: now})
   end
 end

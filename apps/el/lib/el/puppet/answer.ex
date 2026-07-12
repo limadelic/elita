@@ -5,6 +5,8 @@ defmodule El.Puppet.Answer do
   import GenServer, only: [cast: 2]
   import System, only: [monotonic_time: 1]
   import String, only: [trim: 1, slice: 2]
+  import :global, only: [whereis_name: 1]
+  import Map, only: [merge: 2]
 
   def reply(pty, sender, message) do
     watch(pty, self())
@@ -62,12 +64,20 @@ defmodule El.Puppet.Answer do
     _ -> nil
   end
 
-  defp lookup(name), do: :global.whereis_name({name, :puppet})
+  defp lookup(name), do: whereis_name({name, :puppet})
 
   defp found(:undefined), do: nil
   defp found(pid), do: pid
 
   defp build(pty, message, now) do
-    %{pty: pty, buffer: "", last: now, start: now, question: message, burst: 1, gap: false}
+    base(pty, message) |> timing(now)
+  end
+
+  defp base(pty, message) do
+    %{pty: pty, buffer: "", question: message, burst: 1, gap: false}
+  end
+
+  defp timing(map, now) do
+    merge(map, %{last: now, start: now})
   end
 end
