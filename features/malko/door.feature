@@ -44,7 +44,6 @@ Feature: Door
     * malko> keeper what is sesame?
       | 🤔 | gather: ask to |
     * keeper:
-      | what is sesame? |  |
       | ✨              | ask reply to |
     * malko:
       | sesame is a magic word |

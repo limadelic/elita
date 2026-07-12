@@ -26,7 +26,6 @@ Feature: Portal
     * malko> malkovich what is a portal?
       | 🤔 | gather: ask to |
     * malkovich:
-      | what is a portal? |  |
       | ✨                | ask reply to |
     * malko:
       | a portal is a gateway |
