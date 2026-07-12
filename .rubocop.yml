@@ -8,6 +8,7 @@ AllCops:
     - 'deps/**/*'
     - '_build/**/*'
     - 'features/support/**/*'
+    - 'tmp/**/*'
 
 # The ones we care about
 Metrics/MethodLength:
@@ -17,6 +18,8 @@ Metrics/MethodLength:
     - hash
     - heredoc
     - method_call
+  Exclude:
+    - 'features/step_definitions/**/*'
 
 Metrics/ClassLength:
   Max: 100
@@ -86,12 +89,6 @@ Layout/FirstArrayElementLineBreak:
 Layout/FirstMethodArgumentLineBreak:
   Enabled: true
 
-Lint:
-  Enabled: false
-
-Naming:
-  Enabled: false
-
 Naming/FileName:
   Enabled: true
   ExpectMatchingDefinition: true
@@ -102,19 +99,15 @@ Naming/FileName:
     - 'spec/**/*'
     - 'bin/**/*'
     - 'features/step_definitions/**/*'
+    - 'tmp/**/*'
 
-Style:
-  Enabled: false
+Lint/SuppressedException:
+  Exclude:
+    - 'spec/**/*'
 
 Style/ClassAndModuleChildren:
   Enabled: true
   EnforcedStyle: nested
 
-Bundler:
-  Enabled: false
-
 Gemspec:
-  Enabled: false
-
-Security:
   Enabled: false

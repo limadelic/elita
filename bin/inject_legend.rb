@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
 LEGEND_CSS = <<~CSS
   <style>
@@ -80,10 +81,10 @@ LEGEND_HTML = <<~HTML
 HTML
 
 def validate(path)
-  unless File.exist?(path)
-    puts "ERROR: File not found: #{path}"
-    exit 1
-  end
+  return if File.exist?(path)
+
+  puts "ERROR: File not found: #{path}"
+  exit 1
 end
 
 def inject(path)

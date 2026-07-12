@@ -49,7 +49,6 @@ defmodule El.Puppet do
     {:reply, reply, state}
   end
 
-
   def handle_cast({:put, output}, %{pty: pty} = state) do
     inject(pty, output <> "\r")
     {:noreply, state}

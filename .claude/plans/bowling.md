@@ -74,6 +74,14 @@ Draft of the bowling skill — multi-lane delegation. Promote to .claude/skills/
 - Foreman venue drift: a foreman worked in the main dir while briefed for a lane and committed to the wrong branch — briefs must demand `pwd` + `git branch --show-current` pasted first, and reports verified against them
 - Credo disables are a cheat class: under census pressure agents reach for credo:disable comments and .credo.exs edits — name both as forbidden explicitly in every lint brief, and audit for them
 
+## Lane supervision (ABIDE recursively)
+
+- Lanes are named Lebowski-style: Dude (main lane `malko`), Walter (lane 2 `malkov`), Donny (lane 3 `malkovich`), Jesus (endgame reserve).
+- Supervisors identify by lane name in all reports — pwd, branch, node names at the top of every output; context stays traceable.
+- Supervisors ABIDE too: lane supervisors never edit files directly; they delegate to roster kennys (code+tests) and cartman (review), read summaries back.
+- Nested supervision: Dude gets reminders from Mike, Walter and Donny get periodic ABIDE prompts from Dude — same cycle, same discipline, recursively.
+- No middle ground: delegation goes all the way down; if a supervisor finds themselves reading logs or typing edits, the brief was too wide.
+
 ## Endgame (why malkovich exists)
 
 - Today the supervisor is the switchboard: every inter-lane message flows through one context — micromanagement burns it down
