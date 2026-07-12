@@ -44,7 +44,11 @@ defmodule El.Answer do
   end
 
   defp done?(_combined, ""), do: false
-  defp done?(combined, _acc), do: contains?(combined, "\e[?2004h") or contains?(combined, "⏺")
+  defp done?(combined, _acc), do: complete?(combined)
+
+  defp complete?(combined) do
+    contains?(combined, "\e[?2004h") or contains?(combined, "⏺")
+  end
 
   defp text(input) do
     input |> codes() |> commands()
