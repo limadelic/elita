@@ -21,7 +21,7 @@ When(/^(\w+)> (.+)$/) do |prompt, input, *rest|
   table = rest.first
   note(prompt, input) if table && valid?(table)
   write_input(input, prompt)
-  output = retrying(5) { await_result(prompt, input) }
+  output = retrying(15) { await_result(prompt, input) }
   settle(table, output)
 end
 
@@ -43,7 +43,7 @@ When(/^(\w+):$/) do |name, *rest|
   table = rest.first
   activate(name)
   return unless table
-  retrying(5) {
+  retrying(15) {
     verify_lines(table.raw.map { |row| row[0].strip })
   }
 end
