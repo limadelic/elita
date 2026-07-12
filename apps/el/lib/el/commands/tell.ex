@@ -11,19 +11,17 @@ defmodule El.Commands.Tell do
   def tell(agent, msg, tool \\ nil, opts \\ []) do
     prime()
     start()
-    {t, o, env} = args(tool, opts); ctx = %{agent: agent, msg: msg, tool: t, env: env, opts: o}
-    dispatch(ctx, contains?(agent, "@"))
+    {t, o, env} = args(tool, opts)
+    dispatch(%{agent: agent, msg: msg, tool: t, env: env, opts: o}, contains?(agent, "@"))
   end
   defp args(tool, _opts) when is_list(tool) do
     env = get(tool, :env_module, El.Infra.Env)
     {nil, tool, env}
   end
-
   defp args(tool, opts) do
     env = get(opts, :env_module, El.Infra.Env)
     {tool, opts, env}
   end
-
   defp dispatch(ctx, true) do
     %{agent: agent, msg: msg, tool: tool} = ctx
     route(agent, msg, :tell, tool)
@@ -56,14 +54,16 @@ defmodule El.Commands.Tell do
   defp inject(msg, _target, name, _tool) do
     text = format(msg)
     pid = :global.whereis_name({name, :puppet})
+    write(:stderr, "📢 inject to #{name}: whereis_name returned #{inspect(pid)}\n")
     cast(pid, {:inject, text})
   end
 
   def target(agent, opts \\ []) do
     env = get(opts, :env_module, El.Infra.Env)
-    node(agent, env.get("EL_NODE", "127.0.0.1"))
+    node(agent, env.get("EL_NODE"))
   end
 
+  defp node(_agent, nil), do: nil
   defp node(agent, host), do: :"claude_#{agent}@#{host}"
 
   def unreachable(agent, host) do
@@ -93,9 +93,8 @@ defmodule El.Commands.Tell do
   defp special?(_), do: false
   defp prime do
     case Node.self() do
-      :nonode@nohost -> start(:"tell_#{:erlang.system_time(:millisecond)}@127.0.0.1", :longnames)
-      _ -> :ok
+      :nonode@nohost -> start(:"tell_#{:erlang.system_time(:millisecond)}@127.0.0.1", :longnames); set_cookie(:elita)
+      _ -> set_cookie(:elita)
     end
-    set_cookie(:elita)
   end
 end
