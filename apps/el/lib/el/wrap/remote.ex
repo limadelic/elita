@@ -10,10 +10,11 @@ defmodule El.Wrap.Remote do
   import System, only: [monotonic_time: 1]
 
   def deliver(name, message, sender) do
-    target = prepare(name, sender) |> wait()
-    query(target, message, sender)
+    prepare(name, sender) |> wait() |> query(message, sender)
   catch
-    :exit, _ -> halt("deliver")
+    :exit, _ ->
+      write("deliver exit\n")
+      :forward
   end
 
   defp query(nil, _, _), do: :forward
@@ -21,13 +22,13 @@ defmodule El.Wrap.Remote do
   defp query(target, message, sender) do
     respond(gather(target, message, sender), sender)
   catch
-    :exit, _ -> halt("query")
+    :exit, _ ->
+      write("query exit\n")
+      :forward
   end
 
   defp gather(pid, msg, sender) do
-    name = sender |> fix(sender) |> to_string()
-    envelope = "[ask #{name}]"
-    text = "#{envelope}\n#{msg}"
+    text = "[ask #{sender |> fix(sender) |> to_string()}]\n#{msg}"
     write("gather: ask to #{inspect(pid)} text: #{inspect(text)}\n")
     put(pid, text)
     listen(sender, sender)
@@ -35,54 +36,34 @@ defmodule El.Wrap.Remote do
 
   defp listen(pty, sender) do
     watch(pty, self())
+    task = Task.async(fn -> collect(build(pty, sender, monotonic_time(:millisecond))) end)
+    result = await(task)
+    unwatch(pty, self())
+    result
+  end
 
-    task =
-      Task.async(fn ->
-        collect(build(pty, sender, monotonic_time(:millisecond)))
-      end)
+  defp await(task) do
+    Task.await(task, 90_000)
+  rescue
+    _ -> timed(task)
+  catch
+    :exit, {:timeout, _} -> timed(task)
+    :exit, _ -> failed(task)
+  end
 
-    try do
-      Task.await(task, 90_000)
-    rescue
-      _ ->
-        Task.shutdown(task, 1)
-        write("listen fail: ask-on-tell timeout after 90s\n")
-        :forward
-    catch
-      :exit, {:timeout, _} ->
-        Task.shutdown(task, 1)
-        write("listen fail: ask-on-tell timeout after 90s\n")
-        :forward
+  defp timed(task) do
+    Task.shutdown(task, 1)
+    write("listen fail: ask-on-tell timeout after 90s\n")
+    :forward
+  end
 
-      :exit, _ ->
-        Task.shutdown(task, 1)
-        :forward
-    end
-    |> then(fn result ->
-      unwatch(pty, self())
-      result
-    end)
+  defp failed(task) do
+    Task.shutdown(task, 1)
+    :forward
   end
 
   defp build(pty, _sender, now) do
-    %{
-      pty: pty,
-      buffer: "",
-      last: now,
-      start: now,
-      question: "ask_response",
-      burst: 1,
-      gap: false
-    }
-  end
-
-  defp halt(context) do
-    fold("#{context} exit\n")
-  end
-
-  defp fold(msg) do
-    write(msg)
-    :forward
+    %{pty: pty, buffer: "", last: now, start: now, question: "ask_response", burst: 1, gap: false}
   end
 
   def tell(name, message, sender) do
@@ -102,9 +83,7 @@ defmodule El.Wrap.Remote do
   defp inject(nil, _message, _sender), do: :forward
 
   defp inject(pid, message, sender) do
-    name = sender |> fix(sender) |> to_string()
-    envelope = "[from #{name}]"
-    text = "#{envelope}\n#{message}"
+    text = "[from #{sender |> fix(sender) |> to_string()}]\n#{message}"
     write("inject to: #{inspect(pid)} text: #{inspect(text)}\n")
     put(pid, text)
   end
@@ -118,20 +97,18 @@ defmodule El.Wrap.Remote do
     {:handled}
   end
 
-  defp extract(binary) when is_binary(binary) do
-    case split(binary, "\n", parts: 2) do
-      ["[reply " <> rest, message] ->
-        case split(rest, "]", parts: 2) do
-          [_sender, ""] -> message
-          _ -> binary
-        end
-
-      _ ->
-        binary
-    end
-  end
+  defp extract(binary) when is_binary(binary),
+    do: binary |> split("\n", parts: 2) |> reply(binary)
 
   defp extract(other), do: other
+
+  defp reply(["[reply " <> rest, message], _original),
+    do: rest |> split("]", parts: 2) |> body(message)
+
+  defp reply(_, original), do: original
+
+  defp body([_sender, ""], message), do: message
+  defp body(_, original), do: original
 
   defp fix(a, _) when is_atom(a), do: a
   defp fix(_, b) when is_binary(b), do: to_atom(b)
@@ -141,9 +118,7 @@ defmodule El.Wrap.Remote do
     :ok
   end
 
-  defp route(pid, [%{"text" => text} | _], agent) do
-    route(pid, text, agent)
-  end
+  defp route(pid, [%{"text" => text} | _], agent), do: route(pid, text, agent)
 
   defp route(_pid, output, agent) when is_binary(output) do
     cleaned = trim_trailing(output, "\n")

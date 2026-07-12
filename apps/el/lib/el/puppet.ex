@@ -2,20 +2,20 @@ defmodule El.Puppet do
   use GenServer
 
   import Registry, only: [start_link: 1]
-  import El.Pty, only: [inject: 2, watch: 2, unwatch: 2]
+  import El.Pty, only: [inject: 2]
   import Keyword, only: [fetch!: 2]
   import El.Log, only: [write: 1]
   import El.Puppet.Invoke, only: [invoke: 2]
-  import El.Puppet.Collect, only: [collect: 1]
-  import System, only: [monotonic_time: 1]
-  import String, only: [to_atom: 1, trim: 1, split: 3, slice: 2]
+  import El.Puppet.Answer, only: [reply: 3]
+  import El.Puppet.Parse, only: [envelope: 1]
+  import GenServer, only: [call: 3, cast: 2, start_link: 3]
 
   def ask(pid, message) do
-    GenServer.call(pid, {:ask, message}, :infinity)
+    call(pid, {:ask, message}, :infinity)
   end
 
   def put(pid, output) do
-    GenServer.cast(pid, {:put, output})
+    cast(pid, {:put, output})
   end
 
   def open(opts) do
@@ -27,7 +27,7 @@ defmodule El.Puppet do
 
   defp register(name, pty) do
     via = {:via, Registry, {ElitaRegistry, name, %{kind: :puppet}}}
-    {:ok, pid} = GenServer.start_link(__MODULE__, pty, name: via)
+    {:ok, pid} = start_link(__MODULE__, pty, name: via)
     notify(name, pid)
     {:ok, pid}
   end
@@ -57,100 +57,27 @@ defmodule El.Puppet do
   end
 
   defp answer(output, pty, state) do
-    case parse(output) do
-      {:ask, sender, message} ->
-        spawn(fn -> reply(pty, sender, message) end)
-        {:noreply, state}
-
-      {:reply, _sender, message} ->
-        inject(pty, message <> "\r")
-        {:noreply, state}
-
-      {:tell, _sender, _message} ->
-        inject(pty, output <> "\r")
-        {:noreply, state}
-
-      :none ->
-        inject(pty, output <> "\r")
-        {:noreply, state}
-    end
+    envelope(output) |> route(pty, output, state)
   end
 
-  defp parse(text) do
-    case split(text, "\n", parts: 2) do
-      ["[ask " <> rest, message] -> unpack(:ask, rest, message)
-      ["[reply " <> rest, message] -> unpack(:reply, rest, message)
-      ["[from " <> rest, message] -> unpack(:tell, rest, message)
-      _ -> :none
-    end
+  defp route({:ask, sender, message}, pty, _output, state) do
+    spawn(fn -> reply(pty, sender, message) end)
+    {:noreply, state}
   end
 
-  defp unpack(kind, rest, message) do
-    case split(rest, "]", parts: 2) do
-      [sender, ""] -> {kind, to_atom(sender), message}
-      _ -> :none
-    end
-  end
-
-  defp reply(pty, sender, message) do
-    watch(pty, self())
+  defp route({:reply, _sender, message}, pty, _output, state) do
     inject(pty, message <> "\r")
-    response = collect(build(pty, message, monotonic_time(:millisecond)))
-    unwatch(pty, self())
-    write("ask reply collected: #{inspect(slice(inspect(response), 0..50))}\n")
-    signal(sender, format(response))
-  catch
-    :exit, _ -> write("reply exit\n")
+    {:noreply, state}
   end
 
-  defp format(response) when is_list(response) do
-    case response do
-      [%{"text" => text} | _] -> text
-      _ -> inspect(response)
-    end
+  defp route({:tell, _sender, _message}, pty, output, state) do
+    inject(pty, output <> "\r")
+    {:noreply, state}
   end
 
-  defp format(response) when is_binary(response), do: response
-  defp format(response), do: inspect(response)
-
-  defp signal(sender, response) do
-    name = trim(to_string(sender))
-    envelope = "[reply #{name}]"
-    text = "#{envelope}\n#{response}"
-    write("ask reply to: #{inspect(sender)} text: #{inspect(text)}\n")
-    direct(sender, text)
-  end
-
-  defp direct(target, text) do
-    case target(target) do
-      nil ->
-        write("direct nil: cannot deliver\n")
-        :ok
-
-      pid ->
-        put(pid, text)
-    end
-  end
-
-  defp target(name) when is_atom(name) do
-    case :global.whereis_name({name, :puppet}) do
-      :undefined -> nil
-      pid -> pid
-    end
-  rescue
-    _ -> nil
-  end
-
-  defp build(pty, message, now) do
-    %{
-      pty: pty,
-      buffer: "",
-      last: now,
-      start: now,
-      question: message,
-      burst: 1,
-      gap: false
-    }
+  defp route(:none, pty, output, state) do
+    inject(pty, output <> "\r")
+    {:noreply, state}
   end
 
   defp setup do
