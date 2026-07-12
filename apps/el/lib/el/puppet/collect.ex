@@ -72,26 +72,26 @@ defmodule El.Puppet.Collect do
   end
 
   defp loop(state, quiet) do
-    elapsed = monotonic_time(:millisecond) - state.start
-    timeout = min(4000 - quiet, 60_000 - elapsed) |> max(100)
+    t = wait(state, quiet)
 
     receive do
       {:output, data} ->
         write("collect: burst #{state.burst} got #{byte_size(data)}b\n")
-        burst2 = if state.gap and state.burst == 1, do: 2, else: state.burst
-        mark(state.burst, burst2)
-
-        state2 = %{
-          state
-          | buffer: state.buffer <> data,
-            last: monotonic_time(:millisecond),
-            burst: burst2
-        }
-
-        collect(state2)
+        collect(output(state, data))
     after
-      timeout -> collect(state)
+      t -> collect(state)
     end
+  end
+
+  defp wait(state, quiet) do
+    elapsed = monotonic_time(:millisecond) - state.start
+    min(4000 - quiet, 60_000 - elapsed) |> max(100)
+  end
+
+  defp output(state, data) do
+    burst2 = if state.gap and state.burst == 1, do: 2, else: state.burst
+    mark(state.burst, burst2)
+    %{state | buffer: state.buffer <> data, last: monotonic_time(:millisecond), burst: burst2}
   end
 
   defp mark(b1, b2) when b2 > b1, do: write("collect: burst transition #{b1} -> #{b2}\n")
