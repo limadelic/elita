@@ -78,26 +78,17 @@ defmodule El.Puppet do
 
   defp parse(text) do
     case split(text, "\n", parts: 2) do
-      ["[ask " <> rest, message] ->
-        case split(rest, "]", parts: 2) do
-          [sender, ""] -> {:ask, to_atom(sender), message}
-          _ -> :none
-        end
+      ["[ask " <> rest, message] -> unpack(:ask, rest, message)
+      ["[reply " <> rest, message] -> unpack(:reply, rest, message)
+      ["[from " <> rest, message] -> unpack(:tell, rest, message)
+      _ -> :none
+    end
+  end
 
-      ["[reply " <> rest, message] ->
-        case split(rest, "]", parts: 2) do
-          [sender, ""] -> {:reply, to_atom(sender), message}
-          _ -> :none
-        end
-
-      ["[from " <> rest, message] ->
-        case split(rest, "]", parts: 2) do
-          [sender, ""] -> {:tell, to_atom(sender), message}
-          _ -> :none
-        end
-
-      _ ->
-        :none
+  defp unpack(kind, rest, message) do
+    case split(rest, "]", parts: 2) do
+      [sender, ""] -> {kind, to_atom(sender), message}
+      _ -> :none
     end
   end
 
