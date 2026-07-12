@@ -55,3 +55,19 @@ Feature: Malkovich Malkovich
       | i am not |
     * malko> /exit
     * malkovich> /exit
+
+  Scenario: Ask with emoji beat
+    * > el claude malkovich
+      | ▐▛███▜▌     |
+      | ▝▜█████▛▘   |
+      | Claude Code |
+      | Haiku       |
+    * > el claude malko
+      | ▐▛███▜▌     |
+      | ▝▜█████▛▘   |
+      | Claude Code |
+      | Haiku       |
+    * malko> malkovich what is 2+2?
+      | 🤔 | gather: ask to |
+    * malko> /exit
+    * malkovich> /exit

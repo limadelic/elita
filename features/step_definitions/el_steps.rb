@@ -148,5 +148,12 @@ def find_session_log(name)
 
   return "" if logs.empty?
 
+  # Search logs in reverse order (newest first) for one with emoji markers
+  logs.reverse.each do |log_path|
+    content = File.read(log_path)
+    return content if content.include?("🤔") || content.include?("📢") || content.include?("✨")
+  end
+
+  # If no emoji markers found, return newest log
   File.read(logs.last)
 end
