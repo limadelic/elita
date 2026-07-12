@@ -12,6 +12,26 @@ Feature: Portal
       | 2 |
     * malko> /exit
 
+  Scenario: Ask across portal agents
+    * > el claude malkovich
+      | ▐▛███▜▌     |
+      | ▝▜█████▛▘   |
+      | Claude Code |
+      | Haiku       |
+    * > el claude malko
+      | ▐▛███▜▌     |
+      | ▝▜█████▛▘   |
+      | Claude Code |
+      | Haiku       |
+    * malko> malkovich what is a portal?
+      | 🤔 | gather: ask to |
+    * malkovich:
+      | ✨                | ask reply to |
+    * malko:
+      | a portal is a gateway |
+    * malko> /exit
+    * malkovich> /exit
+
   Scenario: Tell across portal agents
     * > el claude malkovich
       | ▐▛███▜▌     |
