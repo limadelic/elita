@@ -1,25 +1,69 @@
 defmodule El.Wrap.Remote do
   @moduledoc false
   import El.Distribution, only: [target: 1, wait: 1]
-  import String, only: [to_atom: 1, trim: 1, trim_trailing: 2]
+  import String, only: [to_atom: 1, trim: 1, trim_trailing: 2, split: 3]
   import El.Puppet, only: [put: 2]
   import El.Log, only: [write: 1]
   import File, only: [write: 2]
-  import El.Wrap.Rpc, only: [call: 2]
+  import El.Pty, only: [watch: 2, unwatch: 2]
+  import El.Puppet.Collect, only: [collect: 1]
+  import System, only: [monotonic_time: 1]
 
   def deliver(name, message, sender) do
     prepare(name, sender) |> wait() |> query(message, sender)
   catch
-    :exit, _ -> halt("deliver")
+    :exit, _ ->
+      write("deliver exit\n")
+      :forward
   end
 
-  defp halt(context) do
-    fold("#{context} exit\n")
+  defp query(nil, _, _), do: :forward
+
+  defp query(target, message, sender) do
+    respond(gather(target, message, sender), sender)
+  catch
+    :exit, _ ->
+      write("query exit\n")
+      :forward
   end
 
-  defp fold(msg) do
-    write(msg)
+  defp gather(pid, msg, sender) do
+    text = "[ask #{sender |> fix(sender) |> to_string()}]\n#{msg}"
+    write("gather: ask to #{inspect(pid)} text: #{inspect(text)}\n")
+    put(pid, text)
+    listen(sender, sender)
+  end
+
+  defp listen(pty, sender) do
+    watch(pty, self())
+    task = Task.async(fn -> collect(build(pty, sender, monotonic_time(:millisecond))) end)
+    result = await(task)
+    unwatch(pty, self())
+    result
+  end
+
+  defp await(task) do
+    Task.await(task, 90_000)
+  rescue
+    _ -> timed(task)
+  catch
+    :exit, {:timeout, _} -> timed(task)
+    :exit, _ -> failed(task)
+  end
+
+  defp timed(task) do
+    Task.shutdown(task, 1)
+    write("listen fail: ask-on-tell timeout after 90s\n")
     :forward
+  end
+
+  defp failed(task) do
+    Task.shutdown(task, 1)
+    :forward
+  end
+
+  defp build(pty, _sender, now) do
+    %{pty: pty, buffer: "", last: now, start: now, question: "ask_response", burst: 1, gap: false}
   end
 
   def tell(name, message, sender) do
@@ -39,28 +83,32 @@ defmodule El.Wrap.Remote do
   defp inject(nil, _message, _sender), do: :forward
 
   defp inject(pid, message, sender) do
-    name = sender |> fix(sender) |> to_string()
-    envelope = "[from #{name}]"
-    text = "#{envelope}\n#{message}"
+    text = "[from #{sender |> fix(sender) |> to_string()}]\n#{message}"
     write("📢 inject to: #{inspect(pid)} text: #{inspect(text)}\n")
     put(pid, text)
-  end
-
-  defp query(nil, _, _), do: :forward
-
-  defp query(pid, msg, sender) do
-    respond(call(pid, msg), sender)
-  catch
-    :exit, _ -> halt("query")
   end
 
   defp respond(:forward, _), do: :forward
 
   defp respond(output, sender) do
+    extracted = extract(output)
     agent = fix(sender, sender)
-    route(target(agent), output, agent)
+    route(target(agent), extracted, agent)
     {:handled}
   end
+
+  defp extract(binary) when is_binary(binary),
+    do: binary |> split("\n", parts: 2) |> reply(binary)
+
+  defp extract(other), do: other
+
+  defp reply(["[reply " <> rest, message], _original),
+    do: rest |> split("]", parts: 2) |> body(message)
+
+  defp reply(_, original), do: original
+
+  defp body([_sender, ""], message), do: message
+  defp body(_, original), do: original
 
   defp fix(a, _) when is_atom(a), do: a
   defp fix(_, b) when is_binary(b), do: to_atom(b)
@@ -70,15 +118,12 @@ defmodule El.Wrap.Remote do
     :ok
   end
 
-  defp route(pid, [%{"text" => text} | _], agent) do
-    route(pid, text, agent)
-  end
+  defp route(pid, [%{"text" => text} | _], agent), do: route(pid, text, agent)
 
-  defp route(pid, output, agent) when is_binary(output) do
+  defp route(_pid, output, agent) when is_binary(output) do
     cleaned = trim_trailing(output, "\n")
-    write("✨ route to: #{inspect(pid)} text: #{inspect(cleaned)}\n")
-    put(pid, cleaned)
-    write("/dev/stdout", "#{agent}> ")
+    write("✨ route: text: #{inspect(cleaned)}\n")
+    write("/dev/stdout", "#{cleaned}\n#{agent}> ")
   end
 
   defp route(_, output, _) do

@@ -32,6 +32,14 @@ defmodule El.Puppet.Query do
   end
 
   defp build(pty, message, now) do
-    %{pty: pty, buffer: "", last: now, start: now, question: message, burst: 1, gap: false}
+    %{
+      pty: pty,
+      buffer: "",
+      last: now,
+      start: now,
+      question: message,
+      burst: 1,
+      gap: false
+    }
   end
 end
