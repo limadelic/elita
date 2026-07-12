@@ -44,7 +44,7 @@ Before('@malko') do
 end
 
 Before('@autonomy') do
-  prompt = "Messages may arrive prefixed with from and a name. When that happens reply by typing a single line: tell NAME followed by your answer. Example: if banquo sends knock knock, type exactly: tell banquo who is there"
+  prompt = "You have bash. Messages may arrive prefixed with from and a name. When that happens respond by running the shell command el tell NAME your answer. Example: if banquo sends knock knock run: el tell banquo who is there"
   ENV['EL_SYSTEM_PROMPT'] = prompt
   ENV['AUTONOMY_PROBE'] = 'true'
 end
