@@ -20,7 +20,8 @@ end
 When(/^(\w+)> (.+)$/) do |prompt, input, *rest|
   table = rest.first
   note(prompt, input) if table && valid?(table)
-  output = retrying(5) { send(input, prompt) }
+  write_input(input, prompt)
+  output = retrying(5) { await_result(prompt, input) }
   settle(table, output)
 end
 
