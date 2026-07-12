@@ -46,9 +46,28 @@ When(/^(\w+):$/) do |name, *rest|
   table = rest.first
   activate(name)
   return unless table
-  retrying(15) {
-    verify_lines(table.raw.map { |row| row[0].strip })
-  }
+
+  # Separate emoji marker rows from transcript lines
+  emoji_rows = []
+  transcript_rows = []
+  table.raw.each do |row|
+    if row.length == 2 && has_traffic_emoji?(row[0])
+      emoji_rows << row
+    else
+      transcript_rows << row[0].strip
+    end
+  end
+
+  # Verify transcript lines
+  retrying(15) { verify_lines(transcript_rows) } if transcript_rows.any?
+
+  # Verify emoji markers in session log
+  retrying(5) { verify_session_markers(emoji_rows, name) } if emoji_rows.any?
+end
+
+def has_traffic_emoji?(text)
+  traffic_emojis = ['🤔', '📢', '✨']
+  traffic_emojis.any? { |emoji| text.strip.start_with?(emoji) }
 end
 
 private
@@ -126,7 +145,9 @@ def verify_session_markers(rows, prompt)
   return if rows.empty?
 
   name = prompt
-  log_content = find_session_log(name)
+  # Use first row's text to find the right log
+  search_text = rows.first[1].strip if rows.first && rows.first.length > 1
+  log_content = find_session_log(name, search_text)
   raise "Session log not found for #{name}" if log_content.empty?
 
   rows.each do |row|
@@ -139,7 +160,7 @@ def verify_session_markers(rows, prompt)
   end
 end
 
-def find_session_log(name)
+def find_session_log(name, search_text = nil)
   session_dir = File.join(File.expand_path("~"), ".elita/sessions")
   return "" unless Dir.exist?(session_dir)
 
@@ -147,6 +168,15 @@ def find_session_log(name)
   logs = Dir.glob(pattern).sort_by { |f| File.mtime(f) }
 
   return "" if logs.empty?
+
+  # If searching for specific text, find log with that text
+  if search_text
+    search_lower = search_text.downcase
+    logs.reverse.each do |log_path|
+      content = File.read(log_path)
+      return content if content.downcase.include?(search_lower)
+    end
+  end
 
   # Search logs in reverse order (newest first) for one with emoji markers
   logs.reverse.each do |log_path|

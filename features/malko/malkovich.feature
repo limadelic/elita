@@ -70,7 +70,8 @@ Feature: Malkovich Malkovich
     * malko> malkovich what is 2+2?
       | 🤔 | gather: ask to |
     * malkovich:
-      | what is 2+2? |
+      | what is 2+2? |  |
+      | ✨           | ask reply to |
     * malko:
       | 2 + 2 = 4 |
     * malko> /exit
