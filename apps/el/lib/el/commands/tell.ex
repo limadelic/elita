@@ -6,16 +6,14 @@ defmodule El.Commands.Tell do
   import GenServer, only: [cast: 2]
   import IO, only: [write: 2]
   import Keyword, only: [get: 3]
-  import Node, only: [connect: 1]
+  import Node, only: [connect: 1, start: 2]
   import String, only: [contains?: 2, to_atom: 1]
-
   def tell(agent, msg, tool \\ nil, opts \\ []) do
+    prime()
     start()
-    {t, o, env} = args(tool, opts)
-    ctx = %{agent: agent, msg: msg, tool: t, env: env, opts: o}
+    {t, o, env} = args(tool, opts); ctx = %{agent: agent, msg: msg, tool: t, env: env, opts: o}
     dispatch(ctx, contains?(agent, "@"))
   end
-
   defp args(tool, _opts) when is_list(tool) do
     env = get(tool, :env_module, El.Infra.Env)
     {nil, tool, env}
@@ -93,4 +91,10 @@ defmodule El.Commands.Tell do
   defp special?(byte) when byte < 32, do: true
   defp special?(0x1B), do: true
   defp special?(_), do: false
+  defp prime do
+    case Node.self() do
+      :nonode@nohost -> start(:"tell_#{:erlang.system_time(:millisecond)}@127.0.0.1", :longnames)
+      _ -> :ok
+    end
+  end
 end
