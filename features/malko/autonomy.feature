@@ -2,21 +2,21 @@
 Feature: Ghost Autonomy
 
   Scenario: Ghost replies to knock without prompt
-    * > el claude ghost
+    * > el claude yorick
       | ▐▛███▜▌     |
       | ▝▜█████▛▘   |
       | Claude Code |
       | Haiku       |
-    * > el claude hamlet
+    * > el claude banquo
       | ▐▛███▜▌     |
       | ▝▜█████▛▘   |
       | Claude Code |
       | Haiku       |
-    * hamlet> tell ghost knock knock
-    * hamlet:
+    * banquo> tell yorick knock knock
+    * banquo:
       | knock knock |
-    * ghost:
-      | from hamlet |
+    * yorick:
+      | from banquo |
       | knock knock |
-    * hamlet:
+    * banquo:
       | who's there |
