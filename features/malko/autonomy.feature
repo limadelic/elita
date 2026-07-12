@@ -18,5 +18,7 @@ Feature: Ghost Autonomy
     * yorick:
       | from banquo |
       | knock knock |
+    * yorick:
+      | el tell banquo |
     * banquo:
       | who's there |
