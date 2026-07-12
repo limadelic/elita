@@ -9,7 +9,7 @@ defmodule El.Wrap.Remote do
   def deliver(name, message, sender) do
     prepare(name, sender) |> wait() |> query(message, sender)
   catch
-    :exit, _r ->
+    :exit, _ ->
       write("deliver exit\n")
       :forward
   end
@@ -25,7 +25,7 @@ defmodule El.Wrap.Remote do
   defp query(pid, msg, sender) do
     respond(call(pid, msg), sender)
   catch
-    :exit, _r ->
+    :exit, _ ->
       write("query exit\n")
       :forward
   end
@@ -41,13 +41,14 @@ defmodule El.Wrap.Remote do
     spawn(fn -> monitor(self()) end)
     attempt(pid, msg)
   rescue
-    _ ->
-      write("ask fail exception\n")
-      :forward
+    _ -> fail("exception")
   catch
-    k, _ ->
-      write("ask fail #{k}\n")
-      :forward
+    k, _ -> fail("#{k}")
+  end
+
+  defp fail(reason) do
+    write("ask fail #{reason}\n")
+    :forward
   end
 
   defp attempt(pid, msg) do

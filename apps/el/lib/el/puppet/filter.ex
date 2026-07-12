@@ -9,10 +9,15 @@ defmodule El.Puppet.Filter do
   end
 
   def mark(buffer) do
-    case contains?(buffer, "⏺") do
-      true -> buffer |> split("\e[H") |> frame() |> body()
-      false -> buffer |> polish() |> final()
-    end
+    dispatch(buffer, contains?(buffer, "⏺"))
+  end
+
+  defp dispatch(buffer, true) do
+    buffer |> split("\e[H") |> frame() |> body()
+  end
+
+  defp dispatch(buffer, false) do
+    buffer |> polish() |> final()
   end
 
   defp frame(frames) do
@@ -24,19 +29,17 @@ defmodule El.Puppet.Filter do
   end
 
   defp pull(text) do
-    parts = text |> clean() |> split("⏺")
-
-    result =
-      parts
-      |> last()
-      |> case do
-        nil -> text
-        x -> x
-      end
-
+    result = extract(text)
     write("extract: #{inspect(result)}\n")
     result
   end
+
+  defp extract(text) do
+    text |> clean() |> split("⏺") |> last() |> fallback(text)
+  end
+
+  defp fallback(nil, text), do: text
+  defp fallback(x, _text), do: x
 
   defp strip(text) do
     text |> replace(~r/[✻❯].*/, "") |> replace(~r/\(esc.*/, "") |> replace(~r/\r.*/, "")
