@@ -41,15 +41,16 @@ defmodule El.Puppet.Settle do
   end
 
   def ready(state, quiet) do
-    case marker?(state, quiet) do
-      true ->
-        write("collect: marker detected with #{quiet}ms quiet\n")
-        unwatch(state.pty, self())
-        reply(state.buffer)
-      false ->
-        false
-    end
+    marked(marker?(state, quiet), state, quiet)
   end
+
+  defp marked(true, state, quiet) do
+    write("collect: marker detected with #{quiet}ms quiet\n")
+    unwatch(state.pty, self())
+    reply(state.buffer)
+  end
+
+  defp marked(false, _state, _quiet), do: false
 
   def marker?(%{buffer: buffer}, quiet) when quiet >= 1000 do
     contains?(buffer, "⏺")
