@@ -43,6 +43,15 @@ Before('@malko') do
   write_stub_claude unless ENV['TAPE'] == 'rec'
 end
 
+Before('@autonomy') do
+  prompt = "When you see a tell envelope '[from X]\\nmessage', respond by typing: tell X <your response>"
+  ENV['EL_SYSTEM_PROMPT'] = prompt
+end
+
+After('@autonomy') do
+  ENV.delete('EL_SYSTEM_PROMPT')
+end
+
 After do |scenario|
   ensure_stub_server_stopped
   reap_all_sessions

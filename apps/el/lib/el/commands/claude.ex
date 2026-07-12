@@ -72,12 +72,15 @@ defmodule El.Commands.Claude do
   end
 
   defp execute(name, deps, buf) do
-    cmd = "claude --dangerously-skip-permissions --model #{get_env("CLAUDE_MODEL", "haiku")}"
+    base = "claude --dangerously-skip-permissions --model #{get_env("CLAUDE_MODEL", "haiku")}"
+    cmd = base <> cli(get_env("EL_SYSTEM_PROMPT", nil))
     pid = Keyword.get(deps, :launch).(name, opts(buf, cmd))
     install(name)
     hold(pid)
   end
 
+  defp cli(p) when is_binary(p), do: " --append-system-prompt \"#{p}\""
+  defp cli(_), do: ""
   defp hold(pid) when is_pid(pid), do: wait(pid)
   defp hold(_), do: :ok
 
