@@ -8,10 +8,8 @@ defmodule El.Wrap.Remote do
 
   def deliver(name, message, sender) do
     prepare(name, sender) |> wait() |> query(message, sender)
-  catch
-    :exit, _r ->
-      write("deliver exit\n")
-      :forward
+  rescue
+    _ -> :forward
   end
 
   defp prepare(name, sender) do
@@ -23,11 +21,9 @@ defmodule El.Wrap.Remote do
   defp query(nil, _, _), do: :forward
 
   defp query(pid, msg, sender) do
-    respond(call(pid, msg), sender)
-  catch
-    :exit, _r ->
-      write("query exit\n")
-      :forward
+    pid |> call(msg) |> respond(sender)
+  rescue
+    _ -> :forward
   end
 
   defp call(pid, msg) when node(pid) == node(), do: ask(pid, msg)
@@ -40,24 +36,24 @@ defmodule El.Wrap.Remote do
   defp guard(pid, msg) do
     spawn(fn -> monitor(self()) end)
     attempt(pid, msg)
-  rescue
-    _ ->
-      write("ask fail exception\n")
-      :forward
-  catch
-    k, _ ->
-      write("ask fail #{k}\n")
-      :forward
   end
 
   defp attempt(pid, msg) do
-    :erpc.call(node(pid), El.Puppet, :ask, [pid, msg], 90_000)
-    |> tap(fn _ -> write("ask ok\n") end)
+    pid |> node() |> rpc(msg, pid) |> tap(fn _ -> write("ask ok\n") end)
+  rescue
+    _ -> :forward
+  end
+
+  defp rpc(n, msg, pid) do
+    :erpc.call(n, El.Puppet, :ask, [pid, msg], 90_000)
   end
 
   defp monitor(pid) do
     Process.monitor(pid)
+    trap()
+  end
 
+  defp trap do
     receive do
       {:DOWN, _, _, _, r} -> write("DOWN: #{inspect(r)}\n")
     end
