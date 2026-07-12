@@ -20,6 +20,6 @@ Feature: Ghost Autonomy
       | knock knock |
     * yorick:
       | el tell banquo |
-    * print transcript
     * banquo:
-      | who's there |
+      | from yorick |
+      | who |
