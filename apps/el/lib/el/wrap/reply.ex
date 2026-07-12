@@ -4,6 +4,7 @@ defmodule El.Wrap.Reply do
   import String, only: [to_atom: 1, trim: 1, trim_trailing: 2, split: 3]
   import El.Log, only: [write: 1]
   import File, only: [write: 2]
+  import El.Puppet, only: [put: 2]
 
   def handle(:forward, _), do: :forward
 
@@ -41,7 +42,7 @@ defmodule El.Wrap.Reply do
   def inject(pid, message, sender) do
     text = "[from #{sender |> fix(sender) |> to_string()}]\n#{message}"
     write("📢 inject to: #{inspect(pid)} text: #{inspect(text)}\n")
-    El.Puppet.put(pid, text)
+    put(pid, text)
   end
 
   defp route(nil, _, _) do

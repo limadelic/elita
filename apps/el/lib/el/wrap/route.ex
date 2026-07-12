@@ -1,10 +1,10 @@
 defmodule El.Wrap.Route do
   @moduledoc false
-  import String, only: [split: 3]
+  import String, only: [split: 3, trim: 1]
   import El.Wrap.Remote, only: [deliver: 3, tell: 3]
 
   def check(line, parent, agent),
-    do: line |> to_string() |> String.trim() |> dispatch(parent, agent)
+    do: line |> to_string() |> trim() |> dispatch(parent, agent)
 
   def dispatch("/exit", parent, _agent) do
     send(parent, :exit_wrap)
