@@ -4,4 +4,8 @@ defmodule El.Infra.Env do
   def get, do: get_env()
 
   def get(name), do: get_env(name)
+
+  def get(name, default) do
+    get_env(name) || default
+  end
 end

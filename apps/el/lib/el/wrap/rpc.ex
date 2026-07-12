@@ -5,7 +5,7 @@ defmodule El.Wrap.Rpc do
   def call(pid, msg) when node(pid) == node(), do: ask(pid, msg)
 
   def call(pid, msg) do
-    write("ask to #{node(pid)} from #{inspect(self())}\n")
+    write("🤔 ask to #{node(pid)} from #{inspect(self())}\n")
     guard(pid, msg)
   end
 
@@ -20,7 +20,7 @@ defmodule El.Wrap.Rpc do
     pid
     |> node()
     |> then(fn n -> :erpc.call(n, El.Puppet, :ask, [pid, msg], 90_000) end)
-    |> tap(fn _ -> write("ask ok\n") end)
+    |> tap(fn _ -> write("✨ ask ok\n") end)
   end
 
   defp monitor(pid) do

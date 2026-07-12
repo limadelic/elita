@@ -43,6 +43,17 @@ Before('@malko') do
   write_stub_claude unless ENV['TAPE'] == 'rec'
 end
 
+Before('@autonomy') do
+  prompt = "You have bash. Messages may arrive prefixed with from and a name. When that happens respond by running the shell command el tell NAME your answer. Example: if banquo sends knock knock run: el tell banquo who is there"
+  ENV['EL_SYSTEM_PROMPT'] = prompt
+  ENV['AUTONOMY_PROBE'] = 'true'
+end
+
+After('@autonomy') do
+  ENV.delete('EL_SYSTEM_PROMPT')
+  ENV.delete('AUTONOMY_PROBE')
+end
+
 After do |scenario|
   ensure_stub_server_stopped
   reap_all_sessions

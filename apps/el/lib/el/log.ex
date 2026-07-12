@@ -46,7 +46,7 @@ defmodule El.Log do
   end
 
   defp boot(_path, argv) do
-    write("boot node=#{node()} cwd=#{cwd!()} argv=#{inspect(argv)}\n")
+    write("🚀 boot node=#{node()} cwd=#{cwd!()} argv=#{inspect(argv)}\n")
   end
 
   defp attach(path) do
