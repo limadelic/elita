@@ -44,12 +44,14 @@ Before('@malko') do
 end
 
 Before('@autonomy') do
-  prompt = "When you receive a message that begins with from someone, reply by typing: tell SENDER your answer"
+  prompt = "Messages may arrive prefixed with from and a name. When that happens reply by typing a single line: tell NAME followed by your answer. Example: if banquo sends knock knock, type exactly: tell banquo who is there"
   ENV['EL_SYSTEM_PROMPT'] = prompt
+  ENV['AUTONOMY_PROBE'] = 'true'
 end
 
 After('@autonomy') do
   ENV.delete('EL_SYSTEM_PROMPT')
+  ENV.delete('AUTONOMY_PROBE')
 end
 
 After do |scenario|

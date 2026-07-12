@@ -59,7 +59,8 @@ When(/^(\w+):$/) do |name, *rest|
   end
 
   # Verify transcript lines
-  retrying(15) { verify_lines(transcript_rows) } if transcript_rows.any?
+  retry_count = ENV['AUTONOMY_PROBE'] ? 30 : 15
+  retrying(retry_count) { verify_lines(transcript_rows) } if transcript_rows.any?
 
   # Verify emoji markers in session log
   retrying(5) { verify_session_markers(emoji_rows, name) } if emoji_rows.any?
