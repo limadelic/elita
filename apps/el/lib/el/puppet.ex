@@ -9,6 +9,7 @@ defmodule El.Puppet do
   import Exception, only: [message: 1]
   import System, only: [get_env: 1]
   import Tape.Store, only: [add: 2]
+  import El.Puppet.Query, only: [call: 2]
 
   def ask(pid, message) do
     GenServer.call(pid, {:ask, message}, :infinity)
@@ -50,7 +51,7 @@ defmodule El.Puppet do
     write("ask received: #{inspect(message)}\n")
 
     try do
-      output = El.Puppet.Query.call(pty, message)
+      output = call(pty, message)
       response = format(output)
       write("ask returned: #{inspect(slice(inspect(response), 0..50))}\n")
       record(message, response)

@@ -6,6 +6,7 @@ defmodule El.Pty.Dispatch do
   import List, only: [delete: 2]
   import Enum, only: [each: 2]
   import :os, only: [cmd: 1]
+  import El.Log, only: [write: 1]
 
   def info({pty, {:data, data}}, state) do
     process(pty, data, state)
@@ -83,7 +84,7 @@ defmodule El.Pty.Dispatch do
 
   defp broadcast(taps, data) do
     each(taps, fn pid ->
-      El.Log.write("broadcast: sending #{byte_size(data)}b to #{inspect(pid)}\n")
+      write("broadcast: sending #{byte_size(data)}b to #{inspect(pid)}\n")
       send(pid, {:output, data})
     end)
   end

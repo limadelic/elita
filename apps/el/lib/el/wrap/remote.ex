@@ -51,7 +51,9 @@ defmodule El.Wrap.Remote do
   end
 
   defp attempt(pid, msg) do
-    :erpc.call(node(pid), El.Puppet, :ask, [pid, msg], 90_000)
+    pid
+    |> node()
+    |> then(fn n -> :erpc.call(n, El.Puppet, :ask, [pid, msg], 90_000) end)
     |> tap(fn _ -> write("ask ok\n") end)
   end
 
