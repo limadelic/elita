@@ -13,10 +13,28 @@ defmodule El.Wrap.Remote do
       :forward
   end
 
+  def tell(name, message, sender) do
+    prepare(name, sender) |> wait() |> inject(message, sender)
+  catch
+    :exit, reason ->
+      write("tell exit: #{inspect(reason)}\n")
+      :forward
+  end
+
   defp prepare(name, sender) do
     target = name |> trim() |> to_atom()
     write("prepare: target=#{target} from=#{inspect(sender)}\n")
     target
+  end
+
+  defp inject(nil, _message, _sender), do: :forward
+
+  defp inject(pid, message, sender) do
+    name = sender |> fix(sender) |> to_string()
+    envelope = "[from #{name}]"
+    text = "#{envelope}\n#{message}"
+    write("inject to: #{inspect(pid)} text: #{inspect(text)}\n")
+    put(pid, text)
   end
 
   defp query(nil, _message, _sender), do: :forward

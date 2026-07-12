@@ -3,7 +3,7 @@ defmodule El.Wrap.Input do
   import Agent
   import Enum, only: [drop: 2]
   import String, only: [split: 3, trim: 1]
-  import El.Wrap.Remote, only: [deliver: 3]
+  import El.Wrap.Remote, only: [deliver: 3, tell: 3]
   import El.Log, only: [write: 1]
 
   def open(parent, agent \\ nil) do
@@ -85,10 +85,21 @@ defmodule El.Wrap.Input do
 
   defp remote(_, _agent), do: :forward
 
+  defp implicit(["tell", names_msg], agent) do
+    names_msg |> split(" ", parts: 2) |> sender(agent)
+  end
+
   defp implicit([word, rest], agent) do
     spawn(fn -> deliver(word, rest, agent) end)
     {:handled}
   end
 
   defp implicit(_, _agent), do: :forward
+
+  defp sender([name, message], agent) do
+    spawn(fn -> tell(name, message, agent) end)
+    {:handled}
+  end
+
+  defp sender(_, _agent), do: :forward
 end
