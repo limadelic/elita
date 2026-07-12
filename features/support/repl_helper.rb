@@ -74,6 +74,26 @@ module ReplHelper
     end
   end
 
+  def write_input(input, prompt)
+    @sessions ||= {}
+    if @sessions.key?(prompt)
+      activate(prompt)
+    end
+    raise "PTY not initialized" unless @writer
+
+    @writer.write("#{input}\n")
+    @writer.flush
+  end
+
+  def await_result(prompt, input)
+    if input == "/exit"
+      raise "Session still alive" unless closed?
+    else
+      actual_prompt = @sessions[prompt]&.dig(:prompt) || prompt
+      wait(actual_prompt) || ""
+    end
+  end
+
   def activate(name)
     session = @sessions[name]
     return unless session

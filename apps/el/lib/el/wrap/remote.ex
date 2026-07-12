@@ -4,12 +4,13 @@ defmodule El.Wrap.Remote do
   import String, only: [to_atom: 1, trim: 1, trim_trailing: 2]
   import El.Puppet, only: [ask: 2, put: 2]
   import El.Log, only: [write: 1]
+  import File, only: [write: 2]
 
   def deliver(name, message, sender) do
     prepare(name, sender) |> wait() |> query(message, sender)
   catch
-    :exit, reason ->
-      write("deliver exit: #{inspect(reason)}\n")
+    :exit, _r ->
+      write("deliver exit\n")
       :forward
   end
 
@@ -22,9 +23,9 @@ defmodule El.Wrap.Remote do
   end
 
   defp prepare(name, sender) do
-    target = name |> trim() |> to_atom()
-    write("prepare: target=#{target} from=#{inspect(sender)}\n")
-    target
+    t = name |> trim() |> to_atom()
+    write("prepare: target=#{t} from=#{inspect(sender)}\n")
+    t
   end
 
   defp inject(nil, _message, _sender), do: :forward
@@ -37,38 +38,42 @@ defmodule El.Wrap.Remote do
     put(pid, text)
   end
 
-  defp query(nil, _message, _sender), do: :forward
+  defp query(nil, _, _), do: :forward
 
-  defp query(pid, message, sender) do
-    respond(call(pid, message), sender)
+  defp query(pid, msg, sender) do
+    respond(call(pid, msg), sender)
   catch
-    :exit, reason ->
-      write("query exit: #{inspect(reason)}\n")
+    :exit, _r ->
+      write("query exit\n")
       :forward
   end
 
-  defp call(pid, message) when node(pid) == node() do
-    ask(pid, message)
+  defp call(pid, msg) when node(pid) == node(), do: ask(pid, msg)
+
+  defp call(pid, msg) do
+    write("ask to #{node(pid)} from #{inspect(self())}\n")
+    guard(pid, msg)
   end
 
-  defp call(pid, message) do
-    caller = self()
-    write("ask to #{node(pid)} from #{inspect(caller)}\n")
-    spawn(fn -> watch(caller) end)
-    result = :erpc.call(node(pid), El.Puppet, :ask, [pid, message], 90_000)
-    write("ask ok\n")
-    result
+  defp guard(pid, msg) do
+    spawn(fn -> monitor(self()) end)
+    attempt(pid, msg)
   rescue
-    _e ->
+    _ ->
       write("ask fail exception\n")
       :forward
   catch
-    k, _r ->
+    k, _ ->
       write("ask fail #{k}\n")
       :forward
   end
 
-  defp watch(pid) do
+  defp attempt(pid, msg) do
+    :erpc.call(node(pid), El.Puppet, :ask, [pid, msg], 90_000)
+    |> tap(fn _ -> write("ask ok\n") end)
+  end
+
+  defp monitor(pid) do
     Process.monitor(pid)
 
     receive do
@@ -76,24 +81,23 @@ defmodule El.Wrap.Remote do
     end
   end
 
-  defp respond(:forward, _sender), do: :forward
+  defp respond(:forward, _), do: :forward
 
   defp respond(output, sender) do
-    agent = sender |> fix(sender)
-    route(agent |> target(), output, agent)
+    agent = fix(sender, sender)
+    route(target(agent), output, agent)
     {:handled}
   end
 
-  defp fix(atom, _) when is_atom(atom), do: atom
-  defp fix(_, binary) when is_binary(binary), do: to_atom(binary)
+  defp fix(a, _) when is_atom(a), do: a
+  defp fix(_, b) when is_binary(b), do: to_atom(b)
 
-  defp route(nil, _output, _agent) do
+  defp route(nil, _, _) do
     write("route nil: cannot write\n")
     :ok
   end
 
-  defp route(pid, output, agent) when is_list(output) do
-    text = extract(output)
+  defp route(pid, [%{"text" => text} | _], agent) do
     route(pid, text, agent)
   end
 
@@ -101,16 +105,13 @@ defmodule El.Wrap.Remote do
     cleaned = trim_trailing(output, "\n")
     write("route to: #{inspect(pid)} text: #{inspect(cleaned)}\n")
     put(pid, cleaned)
-    File.write("/dev/stdout", "#{agent}> ")
+    write("/dev/stdout", "#{agent}> ")
   end
 
-  defp route(_pid, output, _agent) do
+  defp route(_, output, _) do
     write("route drop: #{inspect(output)}\n")
     :ok
   end
-
-  defp extract([%{"text" => text} | _]), do: text
-  defp extract(_), do: ""
 
   def known?(name) do
     name |> trim() |> to_atom() |> target() |> is_pid()

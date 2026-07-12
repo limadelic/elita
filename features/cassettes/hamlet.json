@@ -1,0 +1,56 @@
+[
+  {
+    "screen": "▐▛███▜▌\n▝▜█████▛▘\nClaude Code\nHaiku\n"
+  },
+  {
+    "a": [
+      {
+        "text": "Who's there?",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "ghost",
+      "messages": [
+        {
+          "content": "knock knock"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "hamlet who?",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "ghost",
+      "messages": [
+        {
+          "content": "hamlet"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Ha! Well played. That's a whole other branch, man.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "ghost",
+      "messages": [
+        {
+          "content": "ghost"
+        }
+      ],
+      "n": 1
+    }
+  }
+]

@@ -85,11 +85,9 @@ module Stub
         input = line.strip
         puts "🤔 \#{input}"
 
-        answer = if input == "/exit"
-                   break
-                 else
-                   answers[input]
-                 end
+        lines = input.split("\n").map { |l| l.strip.gsub(/^\[from \w+\]\s+/, "") }
+        break if lines.include?("/exit")
+        answer = lines.map { |l| answers[l] }.compact.first
 
         puts "⏺ \#{answer}" if answer
         print prompt
