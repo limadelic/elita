@@ -21,6 +21,7 @@ Feature: Door
       | Claude Code |
       | Haiku       |
     * malko> tell keeper open sesame
+      | 📢 | inject to |
     * malko:
       | open sesame |
     * keeper:

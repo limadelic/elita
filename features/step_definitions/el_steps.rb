@@ -1,4 +1,5 @@
 require "pty"
+require_relative "../support/session_logs"
 
 When(/^> el tell (.+)$/) do |args, *rest|
   output = one("tell #{args}")
@@ -19,10 +20,12 @@ end
 
 When(/^(\w+)> (.+)$/) do |prompt, input, *rest|
   table = rest.first
-  note(prompt, input) if table && valid?(table)
+  is_malko_scenario = ['door', 'portal', 'malkovich', 'hamlet'].include?(@cassette)
+  has_emoji_rows = is_malko_scenario && has_emoji_markers?(table)
+  note(prompt, input) if table && valid?(table) && !has_emoji_rows
   write_input(input, prompt)
   output = retrying(15) { await_result(prompt, input) }
-  settle(table, output)
+  settle(table, output, prompt, is_malko_scenario)
 end
 
 Then(/^verify$/) do |table|
@@ -56,12 +59,18 @@ def handle(table, output)
   valid?(table) ? verify(table.raw) : table(table, output)
 end
 
-def settle(table, output)
+def settle(table, output, prompt = nil, is_malko = false)
   return unless table
 
-  valid?(table) ? retrying(5) { verify(table.raw) } : retrying(5) {
-    table(table, output)
-  }
+  if valid?(table)
+    if is_malko && has_emoji_markers?(table)
+      retrying(5) { verify_session_markers(table.raw, prompt) }
+    else
+      retrying(5) { verify(table.raw) }
+    end
+  else
+    retrying(5) { table(table, output) }
+  end
 end
 
 def track(chunk, stripped)
@@ -100,4 +109,44 @@ def verify_lines(lines)
     end
     cursor = idx + line.length
   end
+end
+
+def has_emoji_markers?(table)
+  return false unless table && table.raw
+
+  # Only match specific traffic emoji markers: 🤔 📢 ✨
+  traffic_emojis = ['🤔', '📢', '✨']
+  table.raw.any? do |row|
+    prefix = row[0].strip
+    traffic_emojis.any? { |emoji| prefix.start_with?(emoji) }
+  end
+end
+
+def verify_session_markers(rows, prompt)
+  return if rows.empty?
+
+  name = prompt
+  log_content = find_session_log(name)
+  raise "Session log not found for #{name}" if log_content.empty?
+
+  rows.each do |row|
+    prefix = row[0].strip
+    text = row[1].strip
+
+    unless log_content.include?(prefix) && (text.empty? || log_content.downcase.include?(text.downcase))
+      raise "Expected '#{prefix}' and '#{text}' in session log for #{name}:\n#{log_content}"
+    end
+  end
+end
+
+def find_session_log(name)
+  session_dir = File.join(File.expand_path("~"), ".elita/sessions")
+  return "" unless Dir.exist?(session_dir)
+
+  pattern = File.join(session_dir, "#{name}_*.log")
+  logs = Dir.glob(pattern).sort_by { |f| File.mtime(f) }
+
+  return "" if logs.empty?
+
+  File.read(logs.last)
 end
