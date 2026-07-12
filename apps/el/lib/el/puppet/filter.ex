@@ -3,6 +3,7 @@ defmodule El.Puppet.Filter do
   import El.Log, only: [write: 1]
   import Enum, only: [find: 3, reverse: 1]
   import List, only: [last: 1]
+  import El.Puppet.Polish, only: [polish: 1, final: 1, noclutter: 1]
 
   def answer?(buffer, question) do
     buffer |> presence(question)
@@ -56,60 +57,6 @@ defmodule El.Puppet.Filter do
   end
 
   defp full?(buffer), do: byte_size(buffer) > 0
-
-  def polish(buffer) do
-    buffer |> safe() |> clean()
-  end
-
-  defp safe(buffer) do
-    buffer |> validate() |> native()
-  end
-
-  defp validate(buffer) do
-    :unicode.characters_to_binary(buffer, :utf8, :utf8)
-  end
-
-  defp native(r) when is_binary(r), do: r
-  defp native({:incomplete, v, _}), do: v
-  defp native({:error, v, _}), do: v
-
-  def final(stripped) do
-    stripped |> noclutter() |> trim() |> pick(stripped)
-  end
-
-  defp pick(cleaned, _stripped) when byte_size(cleaned) > 20, do: cleaned
-  defp pick(_cleaned, stripped), do: stripped
-
-  defp noclutter(text) do
-    text |> prompts() |> boxes() |> spaces()
-  end
-
-  defp prompts(text) do
-    text
-    |> mute()
-    |> mask()
-  end
-
-  defp mute(text) do
-    text
-    |> replace(~r/\(esc to interrupt\)/i, "")
-    |> replace(~r/·\s+\w+…/, "")
-    |> replace(~r/Type \? for shortcuts[^\n]*/i, "")
-  end
-
-  defp mask(text) do
-    text
-    |> replace(~r/Press [Ctrl\+C]+ to exit[^\n]*/i, "")
-    |> replace(~r/\(type .+ for help\)[^\n]*/i, "")
-  end
-
-  defp boxes(text) do
-    replace(text, ~r/[┌┐└┘─│├┤┬┴┼]/, "")
-  end
-
-  defp spaces(text) do
-    replace(text, ~r/\s+/, " ")
-  end
 
   defp clean(text) do
     text
