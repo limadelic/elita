@@ -96,14 +96,12 @@ Naming/FileName:
   CheckDefinitionPathHierarchyRoots:
     - lib
   Exclude:
-    - 'spec/**/*'
     - 'bin/**/*'
     - 'features/step_definitions/**/*'
     - 'tmp/**/*'
 
 Lint/SuppressedException:
-  Exclude:
-    - 'spec/**/*'
+  Enabled: true
 
 Style/ClassAndModuleChildren:
   Enabled: true

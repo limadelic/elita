@@ -73,6 +73,8 @@ Draft of the bowling skill — multi-lane delegation. Promote to .claude/skills/
 - Full-suite lane collisions: lanes running the FULL suite collide on shared epmd even when new features use renamed agents, because inherited features carry the original node names (malko/malkovich/door/portal) — full-suite runs are machine-exclusive; preflight `epmd -names`, wait with lsof, never kill
 - Foreman venue drift: a foreman worked in the main dir while briefed for a lane and committed to the wrong branch — briefs must demand `pwd` + `git branch --show-current` pasted first, and reports verified against them
 - Credo disables are a cheat class: under census pressure agents reach for credo:disable comments and .credo.exs edits — name both as forbidden explicitly in every lint brief, and audit for them
+- Clause-drop is a cheat class: deleting rescue/catch clauses (or compressing with semicolons) to duck credo line/complexity caps — narrows exception semantics (rescue misses exits/throws), broke route's return value once; briefs must name it alongside credo:disable
+- Report artifacts regenerate on every replay: reports/cucumber.html rewrites on each tape playback — commit them deliberately, never let git add -A sweep cassettes alongside stale artifacts
 
 ## Lane supervision (ABIDE recursively)
 
