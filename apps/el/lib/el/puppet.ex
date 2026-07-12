@@ -5,10 +5,7 @@ defmodule El.Puppet do
   import El.Pty, only: [inject: 2]
   import Keyword, only: [fetch!: 2]
   import El.Log, only: [write: 1]
-  import String, only: [slice: 2]
-  import Exception, only: [message: 1]
-  import System, only: [get_env: 1]
-  import Tape.Store, only: [add: 2]
+  import El.Puppet.Invoke, only: [invoke: 2]
 
   def ask(pid, message) do
     GenServer.call(pid, {:ask, message}, :infinity)
@@ -48,43 +45,10 @@ defmodule El.Puppet do
 
   def handle_call({:ask, message}, _from, %{pty: pty} = state) do
     write("ask received: #{inspect(message)}\n")
-
-    try do
-      output = El.Puppet.Query.call(pty, message)
-      response = format(output)
-      write("ask returned: #{inspect(slice(inspect(response), 0..50))}\n")
-      record(message, response)
-      {:reply, response, state}
-    rescue
-      e ->
-        write("handle_call exception: #{message(e)}\n")
-        {:reply, {:error, e}, state}
-    catch
-      kind, reason ->
-        write("handle_call caught: #{kind} #{inspect(reason)}\n")
-        {:reply, {:error, {kind, reason}}, state}
-    end
+    reply = invoke(pty, message)
+    {:reply, reply, state}
   end
 
-  defp format(text) when is_binary(text) do
-    [%{"text" => text, "type" => "text"}]
-  end
-
-  defp format(response), do: response
-
-  defp record(message, response) do
-    tape = get_env("TAPE")
-
-    if tape == "rec" do
-      try do
-        name = get_env("PUPPET_NAME") || "puppet"
-        request = %{"agent" => name, "messages" => [%{content: message}], "n" => 1}
-        add(request, response)
-      catch
-        _, _ -> write("record fail\n")
-      end
-    end
-  end
 
   def handle_cast({:put, output}, %{pty: pty} = state) do
     inject(pty, output <> "\r")

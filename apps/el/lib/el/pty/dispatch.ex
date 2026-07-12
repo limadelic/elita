@@ -6,6 +6,7 @@ defmodule El.Pty.Dispatch do
   import List, only: [delete: 2]
   import Enum, only: [each: 2]
   import :os, only: [cmd: 1]
+  import El.Log, only: [write: 1]
 
   def info({pty, {:data, data}}, state) do
     process(pty, data, state)
@@ -35,7 +36,8 @@ defmodule El.Pty.Dispatch do
   end
 
   def info({pty, {:exit_status, _}}, %{pty: pty} = state) do
-    finish(state)
+    slay(state.child)
+    state.file.close(state.out)
     {:stop, :normal, state}
   end
 
@@ -65,42 +67,29 @@ defmodule El.Pty.Dispatch do
     {:noreply, %{state | taps: delete(taps, pid)}}
   end
 
-  def cast({:inject, msg}, %{pty: pty, port: port} = state),
-    do:
-      (
-        record(msg)
-        port.command(pty, msg)
-        {:noreply, state}
-      )
-
   def cast({:inject, msg, _reply}, %{pty: pty, port: port} = state),
-    do:
-      (
-        record(msg)
-        port.command(pty, msg)
-        {:noreply, state}
-      )
+    do: relay(msg, pty, port, state)
 
-  defp broadcast(taps, data) do
-    each(taps, fn pid ->
-      El.Log.write("broadcast: sending #{byte_size(data)}b to #{inspect(pid)}\n")
-      send(pid, {:output, data})
-    end)
-  end
+  def cast({:inject, msg}, %{pty: pty, port: port} = state),
+    do: relay(msg, pty, port, state)
 
-  defp cleanup(child, file, out) do
-    slay(child)
-    file.close(out)
+  defp relay(msg, pty, port, state) do
+    record(msg)
+    port.command(pty, msg)
+    {:noreply, state}
   end
 
   defp process(pty, data, %{port: port, file: file, out: out, taps: taps} = state) do
     file.write(out, data)
-    broadcast(taps, data)
+    notify(taps, data)
     respond(port, pty, data, state)
   end
 
-  defp finish(%{child: child, file: file, out: out}) do
-    cleanup(child, file, out)
+  defp notify(taps, data) do
+    each(taps, fn pid ->
+      write("broadcast: sending #{byte_size(data)}b to #{inspect(pid)}\n")
+      send(pid, {:output, data})
+    end)
   end
 
   defp resize({rows, cols}) do

@@ -1,9 +1,7 @@
 defmodule El.Puppet.Collect do
   import El.Log, only: [write: 1]
-  import El.Pty, only: [unwatch: 2]
-  import El.Puppet.Filter, only: [answer?: 2, mark: 1]
+  import El.Puppet.Settle, only: [hard: 2, peak: 3, solo: 3, ready: 2]
   import System, only: [monotonic_time: 1]
-  import String, only: [contains?: 2]
   import Exception, only: [format: 3]
 
   def collect(state) do
@@ -18,87 +16,77 @@ defmodule El.Puppet.Collect do
       :erlang.raise(kind, reason, __STACKTRACE__)
   end
 
-  defp safe(state) do
+  defp safe(%{last: last, start: start} = state) do
     now = monotonic_time(:millisecond)
-    quiet = now - state.last
-    elapsed = now - state.start
-
-    if byte_size(state.buffer) == 0,
-      do: write("collect entry on #{inspect(self())} at #{now}ms\n")
-
-    hard(state, elapsed) || go(state, quiet, elapsed)
+    emit(state, now)
+    defer(hard(state, now - start), state, now - last, now - start)
   end
 
-  defp hard(state, elapsed) when elapsed >= 60_000 do
-    write("collect hard timeout at 60s\n")
-    unwatch(state.pty, self())
-    reply(state.buffer)
+  defp emit(%{buffer: buffer}, now) when byte_size(buffer) == 0 do
+    write("collect entry on #{inspect(self())} at #{now}ms\n")
   end
 
-  defp hard(_state, _elapsed), do: false
+  defp emit(_state, _now), do: :ok
+
+  defp defer(false, state, quiet, elapsed) do
+    go(state, quiet, elapsed)
+  end
+
+  defp defer(result, _state, _quiet, _elapsed) do
+    result
+  end
 
   defp go(state, quiet, elapsed) do
-    gap = state.gap or quiet >= 2000
+    gap = gap?(state, quiet)
     decide(%{state | gap: gap}, quiet, elapsed)
   end
 
-  defp decide(state, quiet, elapsed) when state.burst >= 2 and quiet >= 1000 do
-    write("collect: burst #{state.burst} settled after #{elapsed}ms\n")
-    unwatch(state.pty, self())
-    reply(state.buffer)
+  defp gap?(%{gap: true}, _quiet), do: true
+  defp gap?(_state, quiet), do: quiet >= 2000
+
+  defp decide(state, quiet, elapsed) when state.burst >= 2 do
+    result = peak(state, quiet, elapsed)
+    proceed(result, state, quiet)
   end
 
-  defp decide(state, quiet, elapsed)
-       when state.burst == 1 and not state.gap and quiet >= 500 do
-    if answer?(state.buffer, state.question) do
-      write("collect: clean answer (burst 1) after #{elapsed}ms\n")
-      unwatch(state.pty, self())
-      reply(state.buffer)
-    else
-      ready(state, quiet)
-    end
+  defp decide(state, quiet, elapsed) when state.burst == 1 do
+    result = solo(state, quiet, elapsed)
+    proceed(result, state, quiet)
   end
 
-  defp decide(state, quiet, _elapsed), do: ready(state, quiet)
-
-  defp ready(state, quiet) do
-    if contains?(state.buffer, "⏺") and quiet >= 1000 do
-      write("collect: marker detected with #{quiet}ms quiet\n")
-      unwatch(state.pty, self())
-      reply(state.buffer)
-    else
-      loop(state, quiet)
-    end
+  defp decide(state, quiet, _elapsed) do
+    proceed(ready(state, quiet), state, quiet)
   end
+
+  defp proceed(result, _state, _quiet) when result != false, do: result
+  defp proceed(false, state, quiet), do: loop(state, quiet)
 
   defp loop(state, quiet) do
-    elapsed = monotonic_time(:millisecond) - state.start
-    timeout = min(4000 - quiet, 60_000 - elapsed) |> max(100)
+    t = wait(state, quiet)
 
     receive do
       {:output, data} ->
         write("collect: burst #{state.burst} got #{byte_size(data)}b\n")
-        burst2 = if state.gap and state.burst == 1, do: 2, else: state.burst
-        mark(state.burst, burst2)
-
-        state2 = %{
-          state
-          | buffer: state.buffer <> data,
-            last: monotonic_time(:millisecond),
-            burst: burst2
-        }
-
-        collect(state2)
+        collect(output(state, data))
     after
-      timeout -> collect(state)
+      t -> collect(state)
     end
   end
 
+  defp wait(state, quiet) do
+    elapsed = monotonic_time(:millisecond) - state.start
+    min(4000 - quiet, 60_000 - elapsed) |> max(100)
+  end
+
+  defp output(state, data) do
+    burst2 = surge(state)
+    mark(state.burst, burst2)
+    %{state | buffer: state.buffer <> data, last: monotonic_time(:millisecond), burst: burst2}
+  end
+
+  defp surge(%{gap: true, burst: 1}), do: 2
+  defp surge(%{burst: b}), do: b
+
   defp mark(b1, b2) when b2 > b1, do: write("collect: burst transition #{b1} -> #{b2}\n")
   defp mark(_b1, _b2), do: :ok
-
-  defp reply(buffer) do
-    write("collect done bytes=#{byte_size(buffer)}\n")
-    mark(buffer)
-  end
 end

@@ -1,11 +1,9 @@
 defmodule El.Distribution do
   import Application, only: [ensure_all_started: 1]
-  import El.Peers, only: [load: 0]
   import Process, only: [sleep: 1]
   import Node, only: [connect: 1]
-  import Enum, only: [each: 2]
-  import Registry, only: [lookup: 2]
   import El.Log, only: [write: 1]
+  import El.Distribution.Helpers
 
   def start(name \\ :default, opts \\ []) do
     El.Boot.start(name, opts)
@@ -47,11 +45,6 @@ defmodule El.Distribution do
 
   defp loop(_name, 0), do: nil
 
-  defp attach(name) do
-    connect(:"#{name}@127.0.0.1")
-    :global.sync()
-  end
-
   defp go(_name, _tries, pid, true) when is_pid(pid) do
     pid
   end
@@ -64,45 +57,10 @@ defmodule El.Distribution do
 
   defp go(_name, _tries, _pid, _), do: nil
 
-  defp route(result, name) when result in [true, :ignored], do: locate(name)
-  defp route(false, name), do: find(name)
-
-  defp locate(name) do
-    node = :"#{name}@127.0.0.1"
-    write("connect #{node}: #{inspect(connect(node))}\n")
-    :global.sync()
-    :global.whereis_name({name, :puppet}) |> reply(name)
-  end
-
-  defp reply(:undefined, name) do
-    write("whereis_name #{name}: :undefined\n")
-    find(name)
-  end
-
-  defp reply(pid, name) do
-    write("whereis_name #{name}: #{inspect(pid)}\n")
-    pid
-  end
-
-  defp find(name) do
-    lookup(ElitaRegistry, name) |> extract()
-  rescue
-    _ -> nil
-  end
-
-  defp extract([{pid, %{kind: :puppet}}]), do: pid
-  defp extract(_), do: nil
-
   def daemon do
     Node.start(:"elita@127.0.0.1", :longnames)
     ensure_all_started(:elita)
     dial()
     sleep(:infinity)
-  end
-
-  defp dial do
-    load() |> each(&connect/1)
-  rescue
-    _ -> :ok
   end
 end
