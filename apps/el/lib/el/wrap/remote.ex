@@ -9,9 +9,16 @@ defmodule El.Wrap.Remote do
   def deliver(name, message, sender) do
     prepare(name, sender) |> wait() |> query(message, sender)
   catch
-    :exit, _ ->
-      write("deliver exit\n")
-      :forward
+    :exit, _ -> halt("deliver")
+  end
+
+  defp halt(context) do
+    fold("#{context} exit\n")
+  end
+
+  defp fold(msg) do
+    write(msg)
+    :forward
   end
 
   defp prepare(name, sender) do
@@ -25,9 +32,7 @@ defmodule El.Wrap.Remote do
   defp query(pid, msg, sender) do
     respond(call(pid, msg), sender)
   catch
-    :exit, _ ->
-      write("query exit\n")
-      :forward
+    :exit, _ -> halt("query")
   end
 
   defp call(pid, msg) when node(pid) == node(), do: ask(pid, msg)
@@ -41,14 +46,7 @@ defmodule El.Wrap.Remote do
     spawn(fn -> monitor(self()) end)
     attempt(pid, msg)
   rescue
-    _ -> fail("exception")
-  catch
-    k, _ -> fail("#{k}")
-  end
-
-  defp fail(reason) do
-    write("ask fail #{reason}\n")
-    :forward
+    _ -> fold("ask fail exception\n")
   end
 
   defp attempt(pid, msg) do
