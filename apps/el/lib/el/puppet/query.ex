@@ -8,12 +8,16 @@ defmodule El.Puppet.Query do
 
   def call(pty, message) do
     safe(pty, message)
-  rescue
-    e -> reject(e, __STACKTRACE__)
   end
 
   defp safe(pty, message) do
     perform(pty, message)
+  rescue
+    e -> reject(e, __STACKTRACE__)
+  catch
+    k, r ->
+      write("query caught: #{k} #{inspect(r)}\n")
+      :erlang.raise(k, r, __STACKTRACE__)
   end
 
   defp reject(e, stack) do
