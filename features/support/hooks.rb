@@ -44,7 +44,7 @@ Before('@malko') do
 end
 
 Before('@autonomy') do
-  prompt = "When you see a tell envelope '[from X]\\nmessage', respond by typing: tell X <your response>"
+  prompt = "When you receive a message that begins with from someone, reply by typing: tell SENDER your answer"
   ENV['EL_SYSTEM_PROMPT'] = prompt
 end
 
