@@ -37,7 +37,6 @@ defmodule El.Wrap.Remote do
     guard(pid, msg)
   end
 
-  # credo:disable-for-lines 7 Credo.Check.Refactoring.FunctionLength
   defp guard(pid, msg) do
     spawn(fn -> monitor(self()) end)
     attempt(pid, msg)
