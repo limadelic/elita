@@ -24,6 +24,7 @@ Feature: Portal
       | Claude Code |
       | Haiku       |
     * malko> tell malkovich hello
+      | 🤔 | tell malkovich hello |
     * malkovich:
       | from malko |
       | hello      |
