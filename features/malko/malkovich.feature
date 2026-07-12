@@ -29,3 +29,29 @@ Feature: Malkovich Malkovich
       | malkovich |
     * malko> /exit
     * malkovich> /exit
+
+  Scenario: Tell between Malko and Malkovich
+    * > el claude malkovich
+      | ▐▛███▜▌     |
+      | ▝▜█████▛▘   |
+      | Claude Code |
+      | Haiku       |
+    * > el claude malko
+      | ▐▛███▜▌     |
+      | ▝▜█████▛▘   |
+      | Claude Code |
+      | Haiku       |
+    * malko> tell malkovich i am malko
+    * malko:
+      | i am malko |
+    * malkovich:
+      | from malko |
+      | i am malko |
+    * malkovich> tell malko i am not
+    * malkovich:
+      | i am not |
+    * malko:
+      | from malkovich |
+      | i am not |
+    * malko> /exit
+    * malkovich> /exit
