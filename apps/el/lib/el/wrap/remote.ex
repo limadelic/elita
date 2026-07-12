@@ -39,14 +39,29 @@ defmodule El.Wrap.Remote do
 
   defp listen(pty, sender) do
     watch(pty, self())
-    result = collect(build(pty, sender, monotonic_time(:millisecond)))
-    unwatch(pty, self())
-    result
-  catch
-    :exit, _ ->
-      write("listen exit\n")
+    task = Task.async(fn ->
+      collect(build(pty, sender, monotonic_time(:millisecond)))
+    end)
+    try do
+      Task.await(task, 90_000)
+    rescue
+      _ ->
+        Task.shutdown(task, 1)
+        write("listen fail: ask-on-tell timeout after 90s\n")
+        :forward
+    catch
+      :exit, {:timeout, _} ->
+        Task.shutdown(task, 1)
+        write("listen fail: ask-on-tell timeout after 90s\n")
+        :forward
+      :exit, _ ->
+        Task.shutdown(task, 1)
+        :forward
+    end
+    |> then(fn result ->
       unwatch(pty, self())
-      :forward
+      result
+    end)
   end
 
   defp build(pty, _sender, now) do
