@@ -37,6 +37,7 @@ defmodule Elita.Umbrella do
   defp run_lint(_) do
     check("mix format --check-formatted")
     check("mix credo --strict")
+    check("bundle exec rubocop")
   end
 
   defp run_build(_) do

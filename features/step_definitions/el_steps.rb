@@ -43,6 +43,7 @@ When(/^(\w+):$/) do |name, *rest|
   table = rest.first
   activate(name)
   return unless table
+
   retrying(15) {
     verify_lines(table.raw.map { |row| row[0].strip })
   }
@@ -76,28 +77,36 @@ def note(prompt, input)
   @transcript_stripped << "\n🤔 el → #{prompt}: #{input}\n"
 end
 
-def retrying(times)
-  first_error = nil
-  yield
-rescue => e
-  first_error ||= e
-  if (times -= 1).zero?
-    raise first_error
-  else
-    pause = ENV["TAPE"] == "rec" ? 1 : 0.5
-    sleep pause
-    retry
-  end
+def retrying(times, &block)
+  attempt_with_retries(times, &block)
 end
 
 def verify_lines(lines)
-  tx = transcript.downcase
+  iterate_and_verify_lines(transcript.downcase, lines)
+end
+
+def attempt_with_retries(times, &block)
+  block.call
+rescue => e
+  raise e if (times -= 1).zero?
+
+  sleep pause_time
+  attempt_with_retries(times, &block)
+end
+
+def iterate_and_verify_lines(tx, lines)
   cursor = 0
-  lines.each do |line|
-    idx = tx.index(line.downcase, cursor)
-    unless idx
-      raise "Expected '#{line}' in transcript after position #{cursor}:\n#{tx}"
-    end
-    cursor = idx + line.length
-  end
+  lines.each { |line| cursor = verify_line(line, tx, cursor) }
+end
+
+def pause_time
+  ENV["TAPE"] == "rec" ? 1 : 0.5
+end
+
+def verify_line(line, tx, cursor)
+  idx = tx.index(line.downcase, cursor)
+  return idx + line.length if idx
+
+  msg = "Expected '#{line}' in transcript after position #{cursor}:\n#{tx}"
+  raise msg
 end
