@@ -1,2 +1,3 @@
 default: --require features/step_definitions --require features/support --publish-quiet --format progress --format html --out reports/cucumber.html --tags '((not @wip) or @malko)' --tags 'not @autonomy'
 wip: --require features/step_definitions --require features/support --publish-quiet --format progress --format html --out reports/cucumber.html --tags '@wip'
+autonomy: --require features/step_definitions --require features/support --publish-quiet --format progress --format html --out reports/cucumber.html --tags '@autonomy'

@@ -1,4 +1,4 @@
-@malko @wip @autonomy
+@malko @autonomy
 Feature: Ghost Autonomy
 
   Scenario: Ghost replies to knock without prompt
