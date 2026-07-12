@@ -69,5 +69,9 @@ Feature: Malkovich Malkovich
       | Haiku       |
     * malko> malkovich what is 2+2?
       | 🤔 | gather: ask to |
+    * malkovich:
+      | what is 2+2? |
+    * malko:
+      | 2 + 2 = 4 |
     * malko> /exit
     * malkovich> /exit
