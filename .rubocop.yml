@@ -9,9 +9,10 @@ AllCops:
     - '_build/**/*'
     - 'tmp/**/*'
 
-# BlockNesting: allow up to 3 levels (while + synchronize + if)
+# BlockNesting: Max 2 enforces one conditional layer only
+# (allows while+synchronize wrapping one if; bans if-inside-if)
 Metrics/BlockNesting:
-  Max: 3
+  Max: 2
 
 # Other Metrics: generous ceilings, just above current worst offenders
 Metrics/MethodLength:
