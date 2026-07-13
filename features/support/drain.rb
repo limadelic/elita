@@ -52,32 +52,56 @@ module Drain
   def poll(output, pattern, timeout)
     stripped = ""
     if @mutex
-      last_pos_full = @transcript ? @transcript.length : 0
-      last_pos_stripped = @transcript_stripped ? @transcript_stripped.length : 0
-      while Time.now < timeout
-        @mutex.synchronize do
-          if @transcript && @transcript.length > last_pos_full
-            chunk = @transcript[last_pos_full...@transcript.length]
-            output << chunk
-            last_pos_full = @transcript.length
-          end
-          if @transcript_stripped && @transcript_stripped.length > last_pos_stripped
-            chunk = @transcript_stripped[last_pos_stripped...@transcript_stripped.length]
-            stripped << chunk
-            last_pos_stripped = @transcript_stripped.length
-          end
-        end
-        return output if stripped.include?(pattern)
-        sleep 0.01
-      end
+      poll_with_mutex(output, pattern, timeout, stripped)
     else
-      while Time.now < timeout
-        next if (chunk = fetch(@reader)).empty?
+      poll_without_mutex(output, pattern, timeout, stripped)
+    end
+  end
 
-        log(chunk, output)
-        stripped << strip(chunk)
-        return output if stripped.include?(pattern)
-      end
+  def poll_with_mutex(output, pattern, timeout, stripped)
+    @_pos_full = @transcript&.length || 0
+    @_pos_stripped = @transcript_stripped&.length || 0
+    while Time.now < timeout
+      poll_iteration_safe(output, pattern, stripped)
+    end
+  end
+
+  def poll_iteration_safe(output, pattern, stripped)
+    @mutex.synchronize do
+      sync_full_chunk(output) if can_update_full?
+      sync_stripped_chunk(stripped) if can_update_stripped?
+    end
+    return output if stripped.include?(pattern)
+    sleep 0.01
+  end
+
+  def can_update_full?
+    @transcript && @transcript.length > @_pos_full
+  end
+
+  def sync_full_chunk(output)
+    chunk = @transcript[@_pos_full...@transcript.length]
+    output << chunk
+    @_pos_full = @transcript.length
+  end
+
+  def can_update_stripped?
+    @transcript_stripped && @transcript_stripped.length > @_pos_stripped
+  end
+
+  def sync_stripped_chunk(stripped)
+    chunk = @transcript_stripped[@_pos_stripped...@transcript_stripped.length]
+    stripped << chunk
+    @_pos_stripped = @transcript_stripped.length
+  end
+
+  def poll_without_mutex(output, pattern, timeout, stripped)
+    while Time.now < timeout
+      next if (chunk = fetch(@reader)).empty?
+
+      log(chunk, output)
+      stripped << strip(chunk)
+      return output if stripped.include?(pattern)
     end
   end
 

@@ -71,10 +71,13 @@ module Search
 
   def split(line)
     c, e = line.index(": "), line.index(" = ")
-    c && (!e || c < e) ? [
-      line[0...c],
-      line[c + 2..-1]
-    ] : e ? [line[0...e], line[e + 3..-1]] : [line, line]
+    if c && (!e || c < e)
+      [line[0...c], line[c + 2..-1]]
+    elsif e
+      [line[0...e], line[e + 3..-1]]
+    else
+      [line, line]
+    end
   end
 
   def match?(folded_line, want_prefix, want_text)

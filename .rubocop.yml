@@ -7,7 +7,6 @@ AllCops:
     - 'node_modules/**/*'
     - 'deps/**/*'
     - '_build/**/*'
-    - 'features/support/**/*'
     - 'tmp/**/*'
 
 # The ones we care about
