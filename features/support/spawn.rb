@@ -70,6 +70,7 @@ module Spawn
 
   def wait_prompt(args)
     return "claude" if args.include?("claude")
+
     words = args.split
     words.empty? ? "el" : words.last
   end
@@ -84,6 +85,8 @@ module Spawn
   end
 
   def strip(text)
-    text.force_encoding("UTF-8").scrub("").gsub(/\e\[[0-9]*[GfH]/, " ").gsub(/\e\[[0-9;?]*[a-zA-Z]|\e[78]|\e\][^\a]*\a/, "")
+    text.force_encoding("UTF-8").scrub("").gsub(/\e\[[0-9]*[GfH]/, " ").gsub(
+      /\e\[[0-9;?]*[a-zA-Z]|\e[78]|\e\][^\a]*\a/, ""
+    )
   end
 end

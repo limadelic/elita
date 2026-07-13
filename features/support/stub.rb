@@ -28,7 +28,7 @@ module Stub
       data = JSON.parse(File.read(cassette_path))
       entry = data.find { |e| e.is_a?(Hash) && e.key?('screen') }
       entry&.fetch('screen', nil)
-    rescue => e
+    rescue
       nil
     end
   end
@@ -56,7 +56,7 @@ module Stub
         answer_text = a.find { |item| item.is_a?(Hash) && item['type'] == 'text' }
         map[input] = answer_text['text'] if answer_text
       end
-    rescue => e
+    rescue
       {}
     end
   end
@@ -95,7 +95,6 @@ module Stub
       end
     SCRIPT
   end
-
 end
 
 World(Stub)

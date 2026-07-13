@@ -50,7 +50,7 @@ Before('@malko') do
   write_stub_claude unless ENV['TAPE'] == 'rec'
 end
 
-After do |scenario|
+After do |_scenario|
   ensure_stub_server_stopped
   reap_all_sessions
 end
@@ -73,8 +73,9 @@ def reap_all_sessions
   @sessions ||= {}
   killed_any = false
 
-  @sessions.each do |name, session|
+  @sessions.each do |_name, session|
     next unless session && session[:pid]
+
     kill_process(session[:pid])
     killed_any = true
     session[:reader]&.close
@@ -95,6 +96,7 @@ end
 
 def kill_process(pid)
   return unless pid
+
   begin
     pgid = Process.getpgid(pid)
     Process.kill("TERM", -pgid)
@@ -142,9 +144,11 @@ def start_stub_server
   @stub_server.mount_proc("/v1/messages") do |req, res|
     if req.request_method == "POST"
       res["Content-Type"] = "application/json"
-      res.body = JSON.generate({
-        content: [{ type: "text", text: "response from stubbed server" }]
-      })
+      res.body = JSON.generate(
+        {
+          content: [{ type: "text", text: "response from stubbed server" }]
+        }
+      )
     end
   end
 
@@ -159,6 +163,6 @@ def ensure_stub_server_stopped
     @stub_thread&.join(1) if @stub_thread
     ENV.delete("ANTHROPIC_BASE_URL")
   end
-rescue => e
+rescue
   # Ignore errors during shutdown
 end
