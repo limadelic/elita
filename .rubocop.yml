@@ -21,6 +21,12 @@ Metrics/MethodLength:
   Exclude:
     - 'features/step_definitions/**/*'
 
+Metrics/BlockNesting:
+  Max: 1
+
+Metrics/CyclomaticComplexity:
+  Max: 3
+
 Metrics/ClassLength:
   Max: 100
 
