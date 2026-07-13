@@ -11,13 +11,11 @@ defmodule El.Puppet.Query do
   end
 
   defp safe(pty, message) do
-    guard(fn -> perform(pty, message) end)
-  end
-
-  defp guard(fun) do
-    fun.()
-  rescue e -> reject(e, __STACKTRACE__)
-  catch k, r -> raise(k, r, __STACKTRACE__)
+    perform(pty, message)
+  rescue
+    e -> reject(e, __STACKTRACE__)
+  catch
+    k, r -> raise(k, r, __STACKTRACE__)
   end
 
   defp raise(k, r, stack) do
