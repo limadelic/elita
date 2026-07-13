@@ -16,29 +16,51 @@ Splunk is pre-installed at ~/splunk (unpacked from tarball).
 
 Splunk will start and listen on `http://127.0.0.1:8000` and `http://localhost:8000`.
 
-### 3. Admin Credentials (First Time)
+### 3. Admin Credentials
 
-On first access, Splunk prompts for admin credentials. Default:
-- **Username**: admin
-- **Password**: changeme (change on first login)
+Splunk Free license login credentials:
+- **Username**: mike
+- **Password**: mikemike
 
-For automation (scripted startup), set via environment:
-```bash
-export SPLUNK_USERNAME=admin
-export SPLUNK_PASSWORD=1234qwer
-~/splunk/bin/splunk start --accept-license --no-prompt
-```
+**Session Duration**: 30 days (configured in `splunk/etc/system/local/web.conf`)
+
+After login, the session persists for 30 days of inactivity, so you only need to log in once per month. No re-authentication required for daily use.
+
+Note: The user account is created via `etc/system/local/user-seed.conf` during Splunk startup. If this file is deleted after startup, the user account remains active in `etc/passwd`.
 
 ### 4. Switch to Free License
 
-1. Go to **Settings > Licensing** (or http://127.0.0.1:8000/en-US/app/launcher/licensing)
-2. Click **Change License Group** (if license slave is configured)
+Free license applies automatically on startup (500MB/day ingest, perpetual use, single instance).
+
+If you need to manually switch:
+1. Go to **Settings > Licensing** (http://127.0.0.1:8000/en-US/app/launcher/licensing)
+2. Click **Change License Group**
 3. Or via CLI:
 ```bash
-~/splunk/bin/splunk set licenses-location ~/splunk/etc/licenses/elita_free -auth admin:1234qwer
+~/splunk/bin/splunk set licenses-location ~/splunk/etc/licenses/elita_free -auth mike:mikemike
 ```
 
-Free license applies automatically (500MB/day ingest, perpetual use, single instance).
+### 4.5. Web Configuration (Session Timeout & Credentials)
+
+Two configuration files handle session management and user authentication:
+
+**etc/system/local/user-seed.conf** — Creates the admin user on first startup:
+```
+[user_info]
+USERNAME = mike
+PASSWORD = mikemike
+```
+
+This file is processed during startup and then removed by Splunk. The user account persists in `etc/passwd`.
+
+**etc/system/local/web.conf** — Extends session timeout to 30 days:
+```
+[settings]
+ui_inactivity_timeout = 2592000
+tools.sessions.timeout = 2592000
+```
+
+These values (in seconds) mean: after logging in once, your session persists for 30 days, even if inactive. You only need to re-login approximately monthly.
 
 ### 5. Install Monitoring Configuration
 
@@ -59,8 +81,8 @@ Restart Splunk to apply:
 Check if Splunk is monitoring the elita sessions directory:
 
 ```bash
-~/splunk/bin/splunk list forward-server -auth admin:1234qwer
-~/splunk/bin/splunk list inputs -auth admin:1234qwer | grep -A3 "elita"
+~/splunk/bin/splunk list forward-server -auth mike:mikemike
+~/splunk/bin/splunk list inputs -auth mike:mikemike | grep -A3 "elita"
 ```
 
 Or in the Web UI: **Settings > Data Inputs > Files & Directories**.
@@ -136,6 +158,13 @@ sourcetype=elita_session (kind=ask OR kind=tell OR kind=reply)
 
 ## Configuration Files
 
+### Session & Authentication (Web)
+Located in: **splunk/etc/system/local/**
+
+- **web.conf** — Session timeout configuration (30-day inactivity timeout)
+- **user-seed.conf** — Initial admin user creation (processed on startup, then auto-deleted)
+
+### Monitoring & Parsing
 Located in: **observability/splunk/**
 
 - **inputs.conf** — Monitoring input definition (directory, index, sourcetype)
@@ -200,7 +229,7 @@ If you hit the 500MB/day limit, either:
 
 1. **Check monitoring configuration**:
    ```bash
-   ~/splunk/bin/splunk list inputs -auth admin:1234qwer | grep -A5 "monitor"
+   ~/splunk/bin/splunk list inputs -auth mike:mikemike | grep -A5 "monitor"
    ```
 
 2. **Verify file permissions**:
@@ -227,7 +256,7 @@ If you hit the 500MB/day limit, either:
 
 If you exceed 500MB/day:
 ```bash
-~/splunk/bin/splunk list license-usage -auth admin:1234qwer
+~/splunk/bin/splunk list license-usage -auth mike:mikemike
 ```
 
 ## References
