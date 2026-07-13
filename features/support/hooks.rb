@@ -33,7 +33,9 @@ Before do |scenario|
 end
 
 Before('@malko') do
-  @scratch = Dir.mktmpdir('scratch', File.expand_path('../../tmp', __dir__))
+  tmp_dir = File.expand_path('../../tmp', __dir__)
+  FileUtils.mkdir_p(tmp_dir)
+  @scratch = Dir.mktmpdir('scratch', tmp_dir)
   bin_dir = File.join(@scratch, 'bin')
   Dir.mkdir(bin_dir) unless Dir.exist?(bin_dir)
   el_escript = File.expand_path('../../apps/el/el', __dir__)
