@@ -1,4 +1,4 @@
-@malko
+@malko @live
 @autonomy
 Feature: Ghost Autonomy
 
