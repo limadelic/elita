@@ -83,7 +83,6 @@ module Stub
       # Read stdin and respond
       while line = STDIN.gets("\r")
         input = line.strip
-        puts "🤔 \#{input}"
 
         lines = input.split("\n").map { |l| l.strip.gsub(/^\[from \w+\]\s+/, "") }
         break if lines.include?("/exit")
