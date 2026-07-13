@@ -71,41 +71,67 @@ end
 
 def reap_all_sessions
   @sessions ||= {}
-  killed_any = false
-
-  @sessions.each do |_name, session|
-    next unless session && session[:pid]
-
-    kill_process(session[:pid])
-    killed_any = true
-    session[:reader]&.close
-    session[:writer]&.close
-  end
-
-  if killed_any
-    kill_orphaned_scripts
-  elsif @pid
-    kill_process(@pid)
-    kill_orphaned_scripts
-  end
-
-  @reader&.close if @reader && !@reader.closed?
-  @writer&.close if @writer && !@writer.closed?
+  killed_any = reap_sessions
+  kill_after_reap(killed_any)
+  close_main_pty
   @sessions.clear
+end
+
+def reap_sessions
+  killed = false
+  @sessions.each do |_name, session|
+    killed = true if close_session(session)
+  end
+  killed
+end
+
+def close_session(session)
+  return false unless session&.[](:pid)
+
+  kill_process(session[:pid])
+  session[:reader]&.close
+  session[:writer]&.close
+  true
+end
+
+def kill_after_reap(killed_any)
+  return kill_orphaned_scripts if killed_any
+  return unless @pid
+
+  kill_process(@pid)
+  kill_orphaned_scripts
+end
+
+def close_main_pty
+  safe_close(@reader)
+  safe_close(@writer)
+end
+
+def safe_close(io)
+  return unless io
+  return if io.closed?
+
+  io.close
 end
 
 def kill_process(pid)
   return unless pid
 
+  kill_process_group(pid)
+  wait_process_end(pid)
+end
+
+def kill_process_group(pid)
   begin
     pgid = Process.getpgid(pid)
     Process.kill("TERM", -pgid)
     sleep 0.1
     Process.kill("KILL", -pgid)
-  rescue Errno::ESRCH
-  rescue Errno::EPERM
+  rescue Errno::ESRCH, Errno::EPERM
   end
+end
 
+def wait_process_end(pid)
   begin
     Process.wait(pid, Process::WNOHANG)
   rescue Errno::ESRCH
@@ -135,23 +161,29 @@ end
 
 def start_stub_server
   @stub_port = 19999
-  @stub_server = WEBrick::HTTPServer.new(
+  @stub_server = create_webrick_server
+  setup_stub_route
+  start_stub_thread
+end
+
+def create_webrick_server
+  WEBrick::HTTPServer.new(
     Port: @stub_port,
     AccessLog: [],
     Logger: WEBrick::Log.new("/dev/null")
   )
+end
 
+def setup_stub_route
   @stub_server.mount_proc("/v1/messages") do |req, res|
-    if req.request_method == "POST"
-      res["Content-Type"] = "application/json"
-      res.body = JSON.generate(
-        {
-          content: [{ type: "text", text: "response from stubbed server" }]
-        }
-      )
-    end
-  end
+    next unless req.request_method == "POST"
 
+    res["Content-Type"] = "application/json"
+    res.body = JSON.generate(content: [{ type: "text", text: "response from stubbed server" }])
+  end
+end
+
+def start_stub_thread
   @stub_thread = Thread.new { @stub_server.start }
   sleep 0.1
   ENV["ANTHROPIC_BASE_URL"] = "http://localhost:#{@stub_port}"

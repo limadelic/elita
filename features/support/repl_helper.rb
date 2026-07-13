@@ -33,26 +33,31 @@ module ReplHelper
   def start_background_drain(reader, transcript, transcript_stripped, mutex)
     return nil unless reader
 
-    Thread.new do
-      begin
-        loop do
-          ready = IO.select([reader], nil, nil, 0.05)
-          next unless ready
+    Thread.new { drain_thread_loop(reader, transcript, transcript_stripped, mutex) }
+  end
 
-          chunk = reader.readpartial(4096)
-          encoded = (chunk.force_encoding("UTF-8") rescue chunk.to_s)
-          stripped = (encoded.scrub("").gsub(/\e\[[0-9]*[GfH]/, " ").gsub(
-            /\e\[[0-9;?]*[a-zA-Z]|\e[78]|\e\][^\a]*\a/,
-            ""
-          ) rescue "")
-          mutex.synchronize do
-            transcript << encoded if transcript
-            transcript_stripped << stripped if transcript_stripped
-          end
-        end
-      rescue EOFError
-      rescue => _e
-      end
+  def drain_thread_loop(reader, transcript, transcript_stripped, mutex)
+    loop { drain_process_chunk(reader, transcript, transcript_stripped, mutex) }
+  rescue StandardError
+  end
+
+  def drain_process_chunk(reader, transcript, transcript_stripped, mutex)
+    ready = IO.select([reader], nil, nil, 0.05)
+    return unless ready
+
+    chunk = reader.readpartial(4096)
+    drain_encode_and_store(chunk, transcript, transcript_stripped, mutex)
+  end
+
+  def drain_encode_and_store(chunk, transcript, transcript_stripped, mutex)
+    encoded = (chunk.force_encoding("UTF-8") rescue chunk.to_s)
+    stripped = (encoded.scrub("").gsub(/\e\[[0-9]*[GfH]/, " ").gsub(
+      /\e\[[0-9;?]*[a-zA-Z]|\e[78]|\e\][^\a]*\a/,
+      ""
+    ) rescue "")
+    mutex.synchronize do
+      transcript << encoded if transcript
+      transcript_stripped << stripped if transcript_stripped
     end
   end
 
@@ -64,19 +69,23 @@ module ReplHelper
 
   def send(input, prompt)
     @sessions ||= {}
-    if @sessions.key?(prompt)
-      activate(prompt)
-    end
+    activate(prompt) if @sessions.key?(prompt)
     raise "PTY not initialized" unless @writer
 
     @writer.write("#{input}\n")
     @writer.flush
-    if input == "/exit"
-      raise "Session still alive" unless closed?
-    else
-      actual_prompt = @sessions[prompt]&.dig(:prompt) || prompt
-      wait(actual_prompt)
-    end
+    send_handle_result(input, prompt)
+  end
+
+  def send_handle_result(input, prompt)
+    return verify_closed if input == "/exit"
+
+    actual_prompt = @sessions[prompt]&.dig(:prompt) || prompt
+    wait(actual_prompt)
+  end
+
+  def verify_closed
+    raise "Session still alive" unless closed?
   end
 
   def write_input(input, prompt)
@@ -91,27 +100,22 @@ module ReplHelper
   end
 
   def await_result(prompt, input)
-    if input == "/exit"
-      raise "Session still alive" unless closed?
-    else
-      actual_prompt = @sessions[prompt]&.dig(:prompt) || prompt
-      wait(actual_prompt) || ""
-    end
+    return verify_closed if input == "/exit"
+
+    actual_prompt = @sessions[prompt]&.dig(:prompt) || prompt
+    wait(actual_prompt) || ""
   end
 
   def activate(name)
-    session = @sessions[name]
-    return unless session
+    return unless (session = @sessions[name])
 
-    @reader = session[:reader]
-    @writer = session[:writer]
-    @pid = session[:pid]
-    @screen = session[:screen]
-    @transcript = session[:transcript]
-    @transcript_stripped = session[:transcript_stripped]
-    @mutex = session[:mutex]
-    @buffer_pos = session[:buffer_pos]
-    @drain_thread = session[:drain_thread]
+    assign_session_attrs(session)
+  end
+
+  def assign_session_attrs(session)
+    %i[reader writer pid screen transcript transcript_stripped mutex buffer_pos drain_thread].each do |key|
+      instance_variable_set("@#{key}", session[key])
+    end
   end
 
   def transcript
@@ -128,21 +132,29 @@ module ReplHelper
 
   def append(chunk, stripped)
     chunk = encode(chunk)
-    if @mutex
-      @mutex.synchronize do
-        @transcript << chunk if @transcript
-        stripped = encode(stripped)
-        @transcript_stripped << stripped if @transcript_stripped
-      end
-    else
+    @mutex ? append_with_mutex(chunk, stripped) : append_without_mutex(chunk, stripped)
+  end
+
+  def append_with_mutex(chunk, stripped)
+    @mutex.synchronize do
       @transcript << chunk if @transcript
       stripped = encode(stripped)
       @transcript_stripped << stripped if @transcript_stripped
     end
   end
 
+  def append_without_mutex(chunk, stripped)
+    @transcript << chunk if @transcript
+    stripped = encode(stripped)
+    @transcript_stripped << stripped if @transcript_stripped
+  end
+
   def closed?
     timeout = Time.now + 2
+    close_loop(timeout)
+  end
+
+  def close_loop(timeout)
     loop do
       break if reader_eof?
       break if process_exited?
@@ -158,15 +170,19 @@ module ReplHelper
   def reader_eof?
     return false unless @reader
 
-    if @drain_thread
-      !@drain_thread.alive?
-    else
-      ready = IO.select([@reader], nil, nil, 0.1)
-      return false unless ready
+    @drain_thread ? drain_thread_eof? : reader_io_eof?
+  end
 
-      @reader.readpartial(1)
-      false
-    end
+  def drain_thread_eof?
+    !@drain_thread.alive?
+  end
+
+  def reader_io_eof?
+    ready = IO.select([@reader], nil, nil, 0.1)
+    return false unless ready
+
+    @reader.readpartial(1)
+    false
   rescue EOFError
     true
   end

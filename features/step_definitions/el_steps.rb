@@ -60,13 +60,7 @@ end
 def settle(table, output)
   return unless table
 
-  if valid?(table)
-    retrying(5) { verify(table.raw) }
-  else
-    retrying(5) do
-      table(table, output)
-    end
-  end
+  valid?(table) ? retrying(5) { verify(table.raw) } : retrying(5) { table(table, output) }
 end
 
 def track(chunk, stripped)
