@@ -62,18 +62,20 @@ When(/^(\w+):$/) do |name, *rest|
 
   # Verify transcript lines
   retry_count = ENV['AUTONOMY_PROBE'] ? 30 : 15
-  retrying(retry_count) { verify_lines(transcript_rows) } if transcript_rows.any?
+  if transcript_rows.any?
+    retrying(retry_count) { verify_lines(transcript_rows) }
+  end
 
   # Verify emoji markers in session log
-  retrying(5) { verify_session_markers(emoji_rows, name) } if emoji_rows.any?
+  if emoji_rows.any?
+    retrying(5) { verify_session_markers(emoji_rows, name) }
+  end
 end
 
 def traffic_emoji?(text)
   traffic_emojis = %w[🤔 📢 ✨]
   traffic_emojis.any? { |emoji| text.strip.start_with?(emoji) }
 end
-
-private
 
 def handle(table, output)
   return unless table
