@@ -22,6 +22,8 @@
     <dict>
         <key>SPLUNK_HOME</key>
         <string>/Users/mike/splunk</string>
+        <key>SPLUNK_DB</key>
+        <string>/Users/mike/splunk/var/lib/splunk</string>
     </dict>
 </dict>
 </plist>
