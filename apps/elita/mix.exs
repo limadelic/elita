@@ -52,7 +52,14 @@ defmodule Elita.MixProject do
   end
 
   defp test(_args) do
-    Mix.shell().cmd("cd ../.. && TAPE=replay bundle exec cucumber")
+    check("cd ../.. && TAPE=replay bundle exec cucumber")
+  end
+
+  defp check(cmd) do
+    case Mix.shell().cmd(cmd) do
+      0 -> :ok
+      _ -> raise Mix.Error, "command failed: #{cmd}"
+    end
   end
 
   defp tape(args) do
