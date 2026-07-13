@@ -33,6 +33,7 @@ Before do |scenario|
 end
 
 Before('@malko') do
+  wait_for_nodes_deregistered(['malko@127.0.0.1', 'keeper@127.0.0.1', 'malkovich@127.0.0.1'])
   tmp_parent = File.expand_path('../../tmp', __dir__)
   FileUtils.mkdir_p(tmp_parent)
   @scratch = Dir.mktmpdir('scratch', tmp_parent)
@@ -181,12 +182,12 @@ end
 
 def wait_for_nodes_deregistered(node_names)
   return if node_names.empty?
-  deadline = Time.now + 5
+  deadline = Time.now + 10
   loop do
     epmd_output = `epmd -names 2>/dev/null`
     remaining = node_names.select { |name| epmd_output.include?(name) }
     return if remaining.empty?
     break if Time.now > deadline
-    sleep 0.1
+    sleep 0.3
   end
 end
