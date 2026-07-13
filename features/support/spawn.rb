@@ -44,12 +44,14 @@ module Spawn
     env["EL_FROM"] = puppet_name if puppet_name
     env["EL_SYSTEM_PROMPT"] = ENV["EL_SYSTEM_PROMPT"] if ENV["EL_SYSTEM_PROMPT"]
     @reader, @writer, @pid = PTY.spawn(env, "/bin/sh", "-c", cmd)
+    track_pid(@pid)
     wait(prompt)
   end
 
   def run(cmd)
     output = ""
     reader, writer, pid = PTY.spawn("/bin/sh", "-c", cmd)
+    track_pid(pid)
     extract(reader, Time.now + 30, output)
     kill(writer, pid)
     output

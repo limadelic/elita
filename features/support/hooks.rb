@@ -28,6 +28,7 @@ Before do |scenario|
   @cassette = tape_tag ? tape_tag.sub("@tape:", "") : File.basename(scenario.location.file, ".feature")
   @tape_on_miss = scenario.tags.map(&:name).find { |t| t.start_with?("@tape_on_miss:") }
   @tape_on_miss = @tape_on_miss ? @tape_on_miss.sub("@tape_on_miss:", "") : nil
+  @tracked_pids = []
   init
   start_stub_server if @tape_on_miss == "live"
 end
@@ -66,6 +67,7 @@ end
 
 After do |scenario|
   ensure_stub_server_stopped
+  kill_tracked_pids
   reap_all_sessions
 end
 
@@ -190,4 +192,53 @@ def wait_for_nodes_deregistered(node_names)
     break if Time.now > deadline
     sleep 0.3
   end
+end
+
+def track_pid(pid)
+  @tracked_pids ||= []
+  @tracked_pids << pid if pid && pid > 0
+end
+
+def kill_tracked_pids
+  return if @tracked_pids.nil? || @tracked_pids.empty?
+
+  # TERM all tracked pids
+  @tracked_pids.each do |pid|
+    next unless pid_alive?(pid)
+    begin
+      Process.kill("TERM", pid)
+    rescue Errno::ESRCH, Errno::EPERM
+    end
+  end
+
+  # Bounded wait (~2s) for graceful shutdown
+  deadline = Time.now + 2.0
+  remaining = @tracked_pids.select { |pid| pid_alive?(pid) }
+
+  loop do
+    break if remaining.empty?
+    break if Time.now > deadline
+    remaining = @tracked_pids.select { |pid| pid_alive?(pid) }
+    sleep 0.05
+  end
+
+  # KILL any still alive
+  @tracked_pids.each do |pid|
+    next unless pid_alive?(pid)
+    begin
+      Process.kill("KILL", pid)
+    rescue Errno::ESRCH, Errno::EPERM
+    end
+  end
+
+  @tracked_pids.clear
+end
+
+def pid_alive?(pid)
+  Process.kill(0, pid)
+  true
+rescue Errno::ESRCH
+  false
+rescue Errno::EPERM
+  true
 end
