@@ -1,14 +1,16 @@
-require "pty"
-require_relative "../support/session_logs"
+# frozen_string_literal: true
+
+require 'pty'
+require_relative '../support/session_logs'
 
 When(/^> el tell (.+)$/) do |args, *rest|
   output = one("tell #{args}")
-  track(output, output.gsub(/\e\[[0-9;]*m/, ""))
+  track(output, output.gsub(/\e\[[0-9;]*m/, ''))
   handle(rest.first, output)
 end
 
 When(/^> el$/) do |*rest|
-  boot("")
+  boot('')
   handle(rest.first, transcript)
 end
 
@@ -20,7 +22,7 @@ end
 
 When(/^(\w+)> (.+)$/) do |prompt, input, *rest|
   table = rest.first
-  is_malko_scenario = ['door', 'portal', 'malkovich', 'hamlet'].include?(@cassette)
+  is_malko_scenario = %w[door portal malkovich hamlet].include?(@cassette)
   has_emoji_rows = is_malko_scenario && has_emoji_markers?(table)
   note(prompt, input) if table && valid?(table) && !has_emoji_rows
   write_input(input, prompt)
