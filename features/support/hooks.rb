@@ -182,10 +182,14 @@ rescue Errno::ESRCH, Errno::EPERM
   nil
 end
 
+def living_pids
+  @tracked_pids.select { |pid| pid_alive?(pid) }
+end
+
 def wait_graceful
   deadline = Time.now + 2.0
   loop do
-    remaining = @tracked_pids.select { |pid| pid_alive?(pid) }
+    remaining = living_pids
     break if remaining.empty? || Time.now > deadline
 
     sleep 0.05
