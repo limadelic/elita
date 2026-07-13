@@ -27,7 +27,7 @@ When(/^(\w+)> (.+)$/) do |prompt, input, *rest|
   note(prompt, input) if table && valid?(table) && !has_emoji_rows
   write_input(input, prompt)
   output = retrying(15) { await_result(prompt, input) }
-  settle(table, output, prompt, is_malko_scenario)
+  settle(table, output, prompt, is_malko: is_malko_scenario)
 end
 
 Then(/^verify$/) do |table|
@@ -81,7 +81,7 @@ def handle(table, output)
   valid?(table) ? verify(table.raw) : table(table, output)
 end
 
-def settle(table, output, prompt = nil, is_malko = false)
+def settle(table, output, prompt = nil, is_malko: false)
   return unless table
 
   if valid?(table)
