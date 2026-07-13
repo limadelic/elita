@@ -33,19 +33,32 @@ module Spawn
   end
 
   def launch(cmd, prompt, puppet_name = nil)
-    env = {
+    env = build_launch_env(puppet_name)
+    @reader, @writer, @pid = PTY.spawn(env, "/bin/sh", "-c", cmd)
+    track_pid(@pid)
+    wait(prompt)
+  end
+
+  def build_launch_env(puppet_name)
+    env = base_env
+    env["PATH"] = build_path
+    env["PUPPET_NAME"] = puppet_name if puppet_name
+    env["EL_FROM"] = puppet_name if puppet_name
+    env["EL_SYSTEM_PROMPT"] = ENV["EL_SYSTEM_PROMPT"] if ENV["EL_SYSTEM_PROMPT"]
+    env
+  end
+
+  def base_env
+    {
       "TAPE" => ENV["TAPE"] || "replay",
       "CASSETTE" => @cassette,
       "CASSETTE_DIR" => dir,
       "MIX_ENV" => "test"
     }
-    env["PATH"] = [(@scratch ? "#{@scratch}/bin" : nil), ENV["PATH"]].compact.join(":")
-    env["PUPPET_NAME"] = puppet_name if puppet_name
-    env["EL_FROM"] = puppet_name if puppet_name
-    env["EL_SYSTEM_PROMPT"] = ENV["EL_SYSTEM_PROMPT"] if ENV["EL_SYSTEM_PROMPT"]
-    @reader, @writer, @pid = PTY.spawn(env, "/bin/sh", "-c", cmd)
-    track_pid(@pid)
-    wait(prompt)
+  end
+
+  def build_path
+    [(@scratch ? "#{@scratch}/bin" : nil), ENV["PATH"]].compact.join(":")
   end
 
   def run(cmd)

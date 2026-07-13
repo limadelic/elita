@@ -1,9 +1,4 @@
-<<<<<<< HEAD
 @malko @live
-=======
-@malko
-@live
->>>>>>> origin/malko
 Feature: Portal
 
   Scenario: Through the tunnel into Malkovich

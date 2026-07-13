@@ -1,9 +1,4 @@
-<<<<<<< HEAD
 @malko @live
-=======
-@malko
-@live
->>>>>>> origin/malko
 Feature: Door
 
   Scenario: First trip into Malkovich
