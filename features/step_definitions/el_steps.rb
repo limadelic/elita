@@ -147,21 +147,22 @@ def verify_session_markers(rows, prompt)
   return if rows.empty?
 
   name = prompt
-  # Use first row's text to find the right log
   search_text = rows.first[1].strip if rows.first && rows.first.length > 1
   log_content = find_session_log(name, search_text)
   raise "Session log not found for #{name}" if log_content.empty?
 
-  rows.each do |row|
-    prefix = row[0].strip
-    text = row[1].strip
+  rows.each { |row| check_marker_row(row, name, log_content) }
+end
 
-    has_prefix = log_content.include?(prefix)
-    has_text = text.empty? || log_content.downcase.include?(text.downcase)
-    next if has_prefix && has_text
+def check_marker_row(row, name, log_content)
+  prefix = row[0].strip
+  text = row[1].strip
 
-    raise "Expected '#{prefix}' and '#{text}' in #{name}:\n#{log_content}"
-  end
+  has_prefix = log_content.include?(prefix)
+  has_text = text.empty? || log_content.downcase.include?(text.downcase)
+  return if has_prefix && has_text
+
+  raise "Expected '#{prefix}' and '#{text}' in #{name}:\n#{log_content}"
 end
 
 def find_session_log(name, search_text = nil)
