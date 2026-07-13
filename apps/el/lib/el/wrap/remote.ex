@@ -6,7 +6,7 @@ defmodule El.Wrap.Remote do
   import El.Pty, only: [watch: 2, unwatch: 2]
   import El.Puppet.Collect, only: [collect: 1]
   import System, only: [monotonic_time: 1]
-  import El.Wrap.Reply, only: [handle: 2, fix: 2, prepare: 2, inject: 3]
+  import El.Wrap.Reply, only: [handle: 2, fix: 2, prepare: 2, inject: 4]
   import Map, only: [merge: 2]
 
   def deliver(name, message, sender) do
@@ -16,24 +16,25 @@ defmodule El.Wrap.Remote do
   end
 
   defp invoke(name, message, sender) do
-    prepare(name, sender) |> wait() |> query(message, sender)
+    target = prepare(name, sender) |> wait()
+    query(target, name, message, sender)
   end
 
-  defp query(nil, _, _), do: :forward
+  defp query(nil, _, _, _), do: :forward
 
-  defp query(target, message, sender) do
-    fetch(target, message, sender)
+  defp query(target, name, message, sender) do
+    fetch(target, name, message, sender)
   catch
     :exit, _ -> trap("query exit\n")
   end
 
-  defp fetch(target, message, sender) do
-    handle(gather(target, message, sender), sender)
+  defp fetch(target, name, message, sender) do
+    handle(gather(target, message, sender, name), sender)
   end
 
-  defp gather(pid, msg, sender) do
+  defp gather(pid, msg, sender, target) do
     text = "[ask #{sender |> fix(sender) |> to_string()}]\n#{msg}"
-    write("🤔 gather: ask to #{inspect(pid)} text: #{inspect(text)}\n")
+    write("🤔 #{sender} → #{target} | #{msg}\n")
     put(pid, text)
     listen(sender, sender)
   end
@@ -87,7 +88,6 @@ defmodule El.Wrap.Remote do
     write(msg)
     :forward
   end
-
   def tell(name, message, sender) do
     dispatch(name, message, sender)
   catch
@@ -95,6 +95,7 @@ defmodule El.Wrap.Remote do
   end
 
   defp dispatch(name, message, sender) do
-    prepare(name, sender) |> wait() |> inject(message, sender)
+    target = prepare(name, sender) |> wait()
+    inject(target, name, message, sender)
   end
 end

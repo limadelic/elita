@@ -21,7 +21,7 @@ Feature: Door
       | Claude Code |
       | Haiku       |
     * malko> tell keeper open sesame
-      | 📢 | inject to |
+      | 📢 malko → keeper | open sesame |
     * malko:
       | open sesame |
     * keeper:
@@ -42,9 +42,9 @@ Feature: Door
       | Claude Code |
       | Haiku       |
     * malko> keeper what is sesame?
-      | 🤔 | gather: ask to |
+      | 🤔 malko → keeper | what is sesame? |
     * keeper:
-      | ✨ | ask reply to |
+      | ✨ keeper | sesame is a magic word |
     * malko:
       | sesame is a magic word |
     * malko> /exit

@@ -37,11 +37,12 @@ defmodule El.Wrap.Reply do
     t
   end
 
-  def inject(nil, _message, _sender), do: :forward
+  def inject(nil, _target, _message, _sender), do: :forward
+  def inject(_pid, _target, _message, nil), do: :forward
 
-  def inject(pid, message, sender) do
+  def inject(pid, target, message, sender) do
     text = "[from #{sender |> fix(sender) |> to_string()}]\n#{message}"
-    write("📢 inject to: #{inspect(pid)} text: #{inspect(text)}\n")
+    write("📢 #{sender} → #{target} | #{message}\n")
     put(pid, text)
   end
 

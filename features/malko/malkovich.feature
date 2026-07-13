@@ -69,10 +69,9 @@ Feature: Malkovich Malkovich
       | Claude Code |
       | Haiku       |
     * malko> malkovich what is 2+2?
-      | 🤔 | gather: ask to |
+      | 🤔 malko → malkovich | what is 2+2? |
     * malkovich:
-      | what is 2+2? |              |
-      | ✨            | ask reply to |
+      | ✨ malkovich | 2 + 2 = 4 |
     * malko:
       | 2 + 2 = 4 |
     * malko> /exit

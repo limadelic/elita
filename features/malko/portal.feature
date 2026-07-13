@@ -25,9 +25,9 @@ Feature: Portal
       | Claude Code |
       | Haiku       |
     * malko> malkovich what is a portal?
-      | 🤔 | gather: ask to |
+      | 🤔 malko → malkovich | what is a portal? |
     * malkovich:
-      | ✨ | ask reply to |
+      | ✨ malkovich | a portal is a gateway |
     * malko:
       | a portal is a gateway |
     * malko> /exit
@@ -45,7 +45,7 @@ Feature: Portal
       | Claude Code |
       | Haiku       |
     * malko> tell malkovich hello
-      | 📢 | inject to |
+      | 📢 malko → malkovich | hello |
     * malkovich:
       | from malko |
       | hello      |
