@@ -24,8 +24,4 @@ if [ $test_status -ne 0 ]; then
   exit 1
 fi
 
-# Final cleanup: kill any BEAM/epmd spawned during test run
-pkill -9 beam.smp 2>/dev/null || true
-pkill -9 epmd 2>/dev/null || true
-
 exit 0
