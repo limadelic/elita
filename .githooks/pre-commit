@@ -1,0 +1,15 @@
+#!/bin/bash
+
+mix lint
+if [ $? -ne 0 ]; then
+  echo "pre-commit: lint failed, commit blocked"
+  exit 1
+fi
+
+mix test
+if [ $? -ne 0 ]; then
+  echo "pre-commit: test failed, commit blocked"
+  exit 1
+fi
+
+exit 0

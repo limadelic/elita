@@ -32,21 +32,26 @@ module ReplHelper
 
   def start_background_drain(reader, transcript, transcript_stripped, mutex)
     return nil unless reader
+
     Thread.new do
       begin
         loop do
           ready = IO.select([reader], nil, nil, 0.05)
           next unless ready
+
           chunk = reader.readpartial(4096)
           encoded = (chunk.force_encoding("UTF-8") rescue chunk.to_s)
-          stripped = (encoded.scrub("").gsub(/\e\[[0-9]*[GfH]/, " ").gsub(/\e\[[0-9;?]*[a-zA-Z]|\e[78]|\e\][^\a]*\a/, "") rescue "")
+          stripped = (encoded.scrub("").gsub(/\e\[[0-9]*[GfH]/, " ").gsub(
+            /\e\[[0-9;?]*[a-zA-Z]|\e[78]|\e\][^\a]*\a/,
+            ""
+          ) rescue "")
           mutex.synchronize do
             transcript << encoded if transcript
             transcript_stripped << stripped if transcript_stripped
           end
         end
       rescue EOFError
-      rescue => _
+      rescue => _e
       end
     end
   end
@@ -97,6 +102,7 @@ module ReplHelper
   def activate(name)
     session = @sessions[name]
     return unless session
+
     @reader = session[:reader]
     @writer = session[:writer]
     @pid = session[:pid]

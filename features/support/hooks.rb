@@ -42,20 +42,20 @@ Before('@malko') do
   Dir.mkdir(bin_dir) unless Dir.exist?(bin_dir)
   el_escript = File.expand_path('../../apps/el/el', __dir__)
   el_link = File.join(bin_dir, 'el')
-  unless File.exist?(el_link)
-    if File.exist?(el_escript)
-      FileUtils.cp(el_escript, el_link)
-      File.chmod(0755, el_link)
-    else
-      raise "el escript not found at #{el_escript}"
-    end
-  end
+  return if File.exist?(el_link)
+
+  raise "el escript not found at #{el_escript}" unless File.exist?(el_escript)
+
+  FileUtils.cp(el_escript, el_link)
+  File.chmod(0755, el_link)
   guard_live_claude if ENV['TAPE'] == 'rec'
   write_stub_claude unless ENV['TAPE'] == 'rec'
 end
 
 Before('@autonomy') do
-  prompt = "You have bash. Messages may arrive prefixed with from and a name. When that happens respond by running the shell command el tell NAME your answer. Example: if banquo sends knock knock run: el tell banquo who is there"
+  prompt = "You have bash. Messages may arrive prefixed with from and name. " \
+           "When that happens respond by running: el tell NAME your answer. " \
+           "Example: if banquo sends knock knock run: el tell banquo who is there"
   ENV['EL_SYSTEM_PROMPT'] = prompt
   ENV['AUTONOMY_PROBE'] = 'true'
 end
@@ -65,7 +65,7 @@ After('@autonomy') do
   ENV.delete('AUTONOMY_PROBE')
 end
 
-After do |scenario|
+After do |_scenario|
   ensure_stub_server_stopped
   kill_tracked_pids
   reap_all_sessions
@@ -92,6 +92,7 @@ def reap_all_sessions
 
   @sessions.each do |name, session|
     next unless session && session[:pid]
+
     node_names << "#{name}@127.0.0.1"
     kill_process(session[:pid])
     killed_any = true
@@ -114,6 +115,7 @@ end
 
 def kill_process(pid)
   return unless pid
+
   begin
     pgid = Process.getpgid(pid)
     Process.kill("TERM", -pgid)
@@ -161,9 +163,11 @@ def start_stub_server
   @stub_server.mount_proc("/v1/messages") do |req, res|
     if req.request_method == "POST"
       res["Content-Type"] = "application/json"
-      res.body = JSON.generate({
-        content: [{ type: "text", text: "response from stubbed server" }]
-      })
+      res.body = JSON.generate(
+        {
+          content: [{ type: "text", text: "response from stubbed server" }]
+        }
+      )
     end
   end
 
@@ -178,18 +182,21 @@ def ensure_stub_server_stopped
     @stub_thread&.join(1) if @stub_thread
     ENV.delete("ANTHROPIC_BASE_URL")
   end
-rescue => e
+rescue
   # Ignore errors during shutdown
 end
 
 def wait_for_nodes_deregistered(node_names)
   return if node_names.empty?
+
   deadline = Time.now + 10
   loop do
     epmd_output = `epmd -names 2>/dev/null`
     remaining = node_names.select { |name| epmd_output.include?(name) }
     return if remaining.empty?
+
     break if Time.now > deadline
+
     sleep 0.3
   end
 end
@@ -205,6 +212,7 @@ def kill_tracked_pids
   # TERM all tracked pids
   @tracked_pids.each do |pid|
     next unless pid_alive?(pid)
+
     begin
       Process.kill("TERM", pid)
     rescue Errno::ESRCH, Errno::EPERM
@@ -217,7 +225,9 @@ def kill_tracked_pids
 
   loop do
     break if remaining.empty?
+
     break if Time.now > deadline
+
     remaining = @tracked_pids.select { |pid| pid_alive?(pid) }
     sleep 0.05
   end
@@ -225,6 +235,7 @@ def kill_tracked_pids
   # KILL any still alive
   @tracked_pids.each do |pid|
     next unless pid_alive?(pid)
+
     begin
       Process.kill("KILL", pid)
     rescue Errno::ESRCH, Errno::EPERM

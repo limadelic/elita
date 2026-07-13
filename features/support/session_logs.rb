@@ -6,6 +6,7 @@ module SessionLogs
   def read_session_log(name, pid)
     path = session_log_path(name, pid)
     return "" unless File.exist?(path)
+
     File.read(path)
   end
 

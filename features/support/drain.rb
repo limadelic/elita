@@ -23,6 +23,7 @@ module Drain
     if @mutex
       return ""
     end
+
     ready = IO.select([pty], nil, nil, 0.1)
     return "" unless ready
 
@@ -56,18 +57,21 @@ module Drain
       last_pos_stripped = @transcript_stripped ? @transcript_stripped.length : 0
       while Time.now < timeout
         @mutex.synchronize do
-          if @transcript && @transcript.length > last_pos_full
-            chunk = @transcript[last_pos_full...@transcript.length]
-            output << chunk
-            last_pos_full = @transcript.length
-          end
-          if @transcript_stripped && @transcript_stripped.length > last_pos_stripped
-            chunk = @transcript_stripped[last_pos_stripped...@transcript_stripped.length]
-            stripped << chunk
-            last_pos_stripped = @transcript_stripped.length
-          end
+          next unless @transcript && @transcript.length > last_pos_full
+
+          chunk = @transcript[last_pos_full...@transcript.length]
+          output << chunk
+          last_pos_full = @transcript.length
+        end
+        @mutex.synchronize do
+          next unless @transcript_stripped && @transcript_stripped.length > last_pos_stripped
+
+          chunk = @transcript_stripped[last_pos_stripped...@transcript_stripped.length]
+          stripped << chunk
+          last_pos_stripped = @transcript_stripped.length
         end
         return output if stripped.include?(pattern)
+
         sleep 0.01
       end
     else
