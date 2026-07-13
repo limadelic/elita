@@ -67,9 +67,7 @@ When(/^(\w+):$/) do |name, *rest|
   end
 
   # Verify emoji markers in session log
-  if emoji_rows.any?
-    retrying(5) { verify_session_markers(emoji_rows, name) }
-  end
+  retrying(5) { verify_session_markers(emoji_rows, name) } if emoji_rows.any?
 end
 
 def traffic_emoji?(text)
@@ -165,13 +163,13 @@ def verify_session_markers(rows, prompt)
 end
 
 def find_session_log(name, search_text = nil)
-  session_dir = File.join(File.expand_path("~"), ".elita/sessions")
-  return "" unless Dir.exist?(session_dir)
+  session_dir = File.join(File.expand_path('~'), '.elita/sessions')
+  return '' unless Dir.exist?(session_dir)
 
   pattern = File.join(session_dir, "#{name}_*.log")
   logs = Dir.glob(pattern).sort_by { |f| File.mtime(f) }
 
-  return "" if logs.empty?
+  return '' if logs.empty?
 
   # If searching for specific text, find log with that text
   if search_text
@@ -183,9 +181,10 @@ def find_session_log(name, search_text = nil)
   end
 
   # Search logs in reverse order (newest first) for one with emoji markers
+  traffic_emojis = %w[🤔 📢 ✨]
   logs.reverse.each do |log_path|
     content = File.read(log_path)
-    return content if content.include?("🤔") || content.include?("📢") || content.include?("✨")
+    return content if traffic_emojis.any? { |emoji| content.include?(emoji) }
   end
 
   # If no emoji markers found, return newest log
