@@ -6,7 +6,7 @@ defmodule Tools.User.Exec do
   import Map, only: [to_list: 1]
 
   def exec(tool, args) when tool != nil do
-    log("🛠️", tool.name, ": ", args, :red)
+    log("exec", tool.name, ": ", args, :red)
     result = first(tool.code, tool, args)
     log("", "", "", result, :yellow)
     result
