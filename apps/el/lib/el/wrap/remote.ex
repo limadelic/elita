@@ -78,7 +78,6 @@ defmodule El.Wrap.Remote do
     write("listen fail: ask-on-tell timeout after 90s\n")
     :forward
   end
-
   defp build(pty, _sender, now) do
     %{pty: pty, buffer: "", question: "ask_response", burst: 1, gap: false}
     |> merge(%{last: now, start: now})
@@ -88,6 +87,7 @@ defmodule El.Wrap.Remote do
     write(msg)
     :forward
   end
+
   def tell(name, message, sender) do
     dispatch(name, message, sender)
   catch
