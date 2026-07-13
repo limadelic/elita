@@ -25,7 +25,7 @@ Feature: Door
     * malko:
       | open sesame |
     * keeper:
-      | from malko |
+      | from malko  |
       | open sesame |
     * malko> /exit
     * keeper> /exit
@@ -44,7 +44,7 @@ Feature: Door
     * malko> keeper what is sesame?
       | 🤔 | gather: ask to |
     * keeper:
-      | ✨              | ask reply to |
+      | ✨ | ask reply to |
     * malko:
       | sesame is a magic word |
     * malko> /exit

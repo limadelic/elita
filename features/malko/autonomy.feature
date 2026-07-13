@@ -1,5 +1,7 @@
-@malko @autonomy
+@malko
+@autonomy
 Feature: Ghost Autonomy
+
   # LIVE-ONLY: Autonomy requires live claude bash execution.
   # When wrapped claude receives an envelope "[from sender]\nmessage",
   # the system prompt instructs it to respond by running `el tell sender answer`.
@@ -7,7 +9,6 @@ Feature: Ghost Autonomy
   # so the message injection on the receiver end never happens in replay mode.
   # This loop is proven REAL with unscripted round-trips (rec15 verified),
   # but cassette replay is structurally impossible — kept @autonomy excluded.
-
   Scenario: Ghost replies to knock without prompt
     * > el claude yorick
       | ▐▛███▜▌     |
@@ -29,4 +30,4 @@ Feature: Ghost Autonomy
       | el tell banquo |
     * banquo:
       | from yorick |
-      | who |
+      | who         |

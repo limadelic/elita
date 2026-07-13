@@ -1,4 +1,5 @@
-@malko @wip
+@malko
+@wip
 Feature: Malkovich Malkovich
 
   Scenario: Malkovich Malkovich
@@ -52,7 +53,7 @@ Feature: Malkovich Malkovich
       | i am not |
     * malko:
       | from malkovich |
-      | i am not |
+      | i am not       |
     * malko> /exit
     * malkovich> /exit
 
@@ -70,8 +71,8 @@ Feature: Malkovich Malkovich
     * malko> malkovich what is 2+2?
       | 🤔 | gather: ask to |
     * malkovich:
-      | what is 2+2? |  |
-      | ✨           | ask reply to |
+      | what is 2+2? |              |
+      | ✨            | ask reply to |
     * malko:
       | 2 + 2 = 4 |
     * malko> /exit

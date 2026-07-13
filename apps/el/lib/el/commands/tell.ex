@@ -31,8 +31,12 @@ defmodule El.Commands.Tell do
 
   defp prime do
     case Node.self() do
-      :nonode@nohost -> start(:"tell_#{:erlang.system_time(:millisecond)}@127.0.0.1", :longnames); set_cookie(:elita)
-      _ -> set_cookie(:elita)
+      :nonode@nohost ->
+        start(:"tell_#{:erlang.system_time(:millisecond)}@127.0.0.1", :longnames)
+        set_cookie(:elita)
+
+      _ ->
+        set_cookie(:elita)
     end
   end
 end

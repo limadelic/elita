@@ -1,4 +1,5 @@
-@hamlet @malko
+@hamlet
+@malko
 Feature: Hamlet Ghost Tell
 
   Scenario: Tell fires and forgets with envelope and tell-back
@@ -22,7 +23,7 @@ Feature: Hamlet Ghost Tell
     * ghost:
       | who's there |
     * hamlet:
-      | from ghost |
+      | from ghost  |
       | who's there |
     * hamlet> /exit
     * ghost> /exit
