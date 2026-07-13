@@ -5,7 +5,7 @@
     <key>Label</key>
     <string>com.splunk.splunkd</string>
     <key>Program</key>
-    <string>/Users/mike/splunk/bin/launchd_start.sh
+    <string>/Users/mike/splunk/bin/launchd_start.sh</string>
     <key>Arguments</key>
     <array>
         <string>start</string>
