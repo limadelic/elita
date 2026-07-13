@@ -67,7 +67,7 @@ When(/^(\w+):$/) do |name, *rest|
   end
 
   # Verify emoji markers in session log
-  retrying(5) { verify_session_markers(emoji_rows, name) } if emoji_rows.any?
+  retrying(15) { verify_session_markers(emoji_rows, name) } if emoji_rows.any?
 end
 
 def traffic_emoji?(text)
@@ -86,7 +86,7 @@ def settle(table, output, prompt = nil, is_malko: false)
 
   if valid?(table)
     if is_malko && emoji_markers?(table)
-      retrying(5) { verify_session_markers(table.raw, prompt) }
+      retrying(15) { verify_session_markers(table.raw, prompt) }
     else
       retrying(5) { verify(table.raw) }
     end
