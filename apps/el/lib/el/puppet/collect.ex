@@ -5,9 +5,13 @@ defmodule El.Puppet.Collect do
   import Exception, only: [format: 3]
 
   def collect(state) do
-    safe(state)
+    fence(state)
   rescue
     e -> abort(e, __STACKTRACE__)
+  end
+
+  defp fence(state) do
+    safe(state)
   catch
     k, r -> abort(k, r, __STACKTRACE__)
   end
@@ -81,8 +85,7 @@ defmodule El.Puppet.Collect do
   end
 
   defp wait(state, quiet) do
-    elapsed = monotonic_time(:millisecond) - state.start
-    min(4000 - quiet, 60_000 - elapsed) |> max(100)
+    min(4000 - quiet, 60_000 - (monotonic_time(:millisecond) - state.start)) |> max(100)
   end
 
   defp output(state, data) do
@@ -93,7 +96,6 @@ defmodule El.Puppet.Collect do
 
   defp surge(%{gap: true, burst: 1}), do: 2
   defp surge(%{burst: b}), do: b
-
   defp mark(b1, b2) when b2 > b1, do: write("collect: burst transition #{b1} -> #{b2}\n")
-  defp mark(_b1, _b2), do: :ok
+  defp mark(_, _), do: :ok
 end

@@ -13,9 +13,13 @@ defmodule El.Puppet.Query do
   end
 
   defp guarded(pty, message) do
-    perform(pty, message)
+    gate(pty, message)
   rescue
     e -> trap(e, __STACKTRACE__)
+  end
+
+  defp gate(pty, message) do
+    perform(pty, message)
   catch
     k, r -> settle(k, r, __STACKTRACE__)
   end
