@@ -1,14 +1,16 @@
 #!/bin/bash
 
-mix lint
+mix lint < /dev/null > /tmp/hook_lint.log 2>&1
 if [ $? -ne 0 ]; then
   echo "pre-push: lint failed, push blocked"
+  tail -30 /tmp/hook_lint.log
   exit 1
 fi
 
-mix test
+mix test < /dev/null > /tmp/hook_test.log 2>&1
 if [ $? -ne 0 ]; then
   echo "pre-push: test failed, push blocked"
+  tail -30 /tmp/hook_test.log
   exit 1
 fi
 
