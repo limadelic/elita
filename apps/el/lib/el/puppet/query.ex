@@ -9,16 +9,23 @@ defmodule El.Puppet.Query do
   def call(pty, message), do: safe(pty, message)
 
   defp safe(pty, message) do
-    perform(pty, message)
-  rescue
-    e ->
-      write("query exception: #{message(e)}\n")
-      reraise e, __STACKTRACE__
-  catch
-    k, r -> raise(k, r, __STACKTRACE__)
+    guarded(pty, message)
   end
 
-  defp raise(k, r, stack) do
+  defp guarded(pty, message) do
+    perform(pty, message)
+  rescue
+    e -> trap(e, __STACKTRACE__)
+  catch
+    k, r -> settle(k, r, __STACKTRACE__)
+  end
+
+  defp trap(e, stack) do
+    write("query exception: #{message(e)}\n")
+    reraise e, stack
+  end
+
+  defp settle(k, r, stack) do
     write("query caught: #{k} #{inspect(r)}\n")
     :erlang.raise(k, r, stack)
   end
