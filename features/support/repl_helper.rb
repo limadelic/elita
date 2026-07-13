@@ -204,7 +204,7 @@ module ReplHelper
   end
 
   def deadline
-    duration = ENV["TAPE"] == "rec" ? 300 : 30
+    duration = ENV["TAPE"] == "rec" ? 300 : 60
     Time.now + duration
   end
 

@@ -46,8 +46,7 @@ Before('@malko') do
 
   FileUtils.cp(el_escript, el_link)
   File.chmod(0755, el_link)
-  guard_live_claude if ENV['TAPE'] == 'rec'
-  write_stub_claude unless ENV['TAPE'] == 'rec'
+  guard_live_claude
 end
 
 After do |_scenario|
@@ -62,11 +61,11 @@ end
 def guard_live_claude
   bin_dir = File.join(@scratch, 'bin')
   stub_path = File.join(bin_dir, 'claude')
-  raise "TAPE=rec but stub exists at #{stub_path}" if File.exist?(stub_path)
+  raise "Fake claude stub detected at #{stub_path}" if File.exist?(stub_path)
 
   expected = '/opt/homebrew/bin/claude'
   actual = `which claude 2>/dev/null`.strip
-  raise "TAPE=rec requires claude at #{expected}, found: #{actual}" unless actual == expected
+  raise "Claude not found at #{expected}, found: #{actual}" unless actual == expected
 end
 
 def reap_all_sessions
