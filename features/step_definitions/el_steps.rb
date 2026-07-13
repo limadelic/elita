@@ -23,7 +23,7 @@ end
 When(/^(\w+)> (.+)$/) do |prompt, input, *rest|
   table = rest.first
   is_malko_scenario = %w[door portal malkovich hamlet].include?(@cassette)
-  has_emoji_rows = is_malko_scenario && has_emoji_markers?(table)
+  has_emoji_rows = is_malko_scenario && emoji_markers?(table)
   note(prompt, input) if table && valid?(table) && !has_emoji_rows
   write_input(input, prompt)
   output = retrying(15) { await_result(prompt, input) }
@@ -87,7 +87,7 @@ def settle(table, output, prompt = nil, is_malko = false)
   return unless table
 
   if valid?(table)
-    if is_malko && has_emoji_markers?(table)
+    if is_malko && emoji_markers?(table)
       retrying(5) { verify_session_markers(table.raw, prompt) }
     else
       retrying(5) { verify(table.raw) }
@@ -129,12 +129,13 @@ def verify_lines(lines)
     unless idx
       raise "Expected '#{line}' in transcript after position #{cursor}:\n#{tx}"
     end
+
     cursor = idx + line.length
   end
 end
 
-def has_emoji_markers?(table)
-  return false unless table && table.raw
+def emoji_markers?(table)
+  return false unless table&.raw
 
   # Only match specific traffic emoji markers: 🤔 📢 ✨
   traffic_emojis = %w[🤔 📢 ✨]
