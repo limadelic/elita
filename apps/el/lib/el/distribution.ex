@@ -19,7 +19,7 @@ defmodule El.Distribution do
 
   defp go(name, _tries, pid) when is_pid(pid) do
     result = :global.register_name({name, :puppet}, pid)
-    write("🚀 global register #{name}: #{inspect(result)} node=#{inspect(Node.self())}\n")
+    write("global register #{name}: #{inspect(result)} node=#{inspect(Node.self())}\n")
     result
   end
 

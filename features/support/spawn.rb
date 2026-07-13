@@ -41,8 +41,6 @@ module Spawn
     }
     env["PATH"] = [(@scratch ? "#{@scratch}/bin" : nil), ENV["PATH"]].compact.join(":")
     env["PUPPET_NAME"] = puppet_name if puppet_name
-    env["EL_FROM"] = puppet_name if puppet_name
-    env["EL_SYSTEM_PROMPT"] = ENV["EL_SYSTEM_PROMPT"] if ENV["EL_SYSTEM_PROMPT"]
     @reader, @writer, @pid = PTY.spawn(env, "/bin/sh", "-c", cmd)
     wait(prompt)
   end

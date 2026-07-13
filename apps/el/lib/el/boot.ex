@@ -37,22 +37,22 @@ defmodule El.Boot do
   end
 
   defp attempt({:error, reason}, _fun, _tries) do
-    write("🚀 boot failed reason=#{inspect(reason)}\n")
+    write("boot failed reason=#{inspect(reason)}\n")
     {:error, reason}
   end
 
   defp act({:ok, _}, name, _) do
-    write("🚀 boot distribution=#{name} actual_node=#{node()}\n")
+    write("boot distribution=#{name} actual_node=#{node()}\n")
     cookie(:ok)
   end
 
   defp act({:error, {:already_started, _}}, name, _) do
-    write("🚀 boot distribution=#{name} status=already_started actual_node=#{node()}\n")
+    write("boot distribution=#{name} status=already_started actual_node=#{node()}\n")
     cookie(:taken)
   end
 
   defp act({:error, reason}, _, _) do
-    write("🚀 boot error: #{inspect(reason)}\n")
+    write("boot error: #{inspect(reason)}\n")
     :ok
   end
 
