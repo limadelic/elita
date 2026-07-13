@@ -9,6 +9,7 @@ Feature: Portal
       | Haiku       |
     * > el malko
     * malko> 1+1
+    * malko:
       | 2 |
     * malko> /exit
 

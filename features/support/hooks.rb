@@ -67,8 +67,8 @@ end
 
 After do |_scenario|
   ensure_stub_server_stopped
-  kill_tracked_pids
   reap_all_sessions
+  kill_tracked_pids
 end
 
 After('@malko') do
