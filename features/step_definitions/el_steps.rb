@@ -53,7 +53,7 @@ When(/^(\w+):$/) do |name, *rest|
   emoji_rows = []
   transcript_rows = []
   table.raw.each do |row|
-    if row.length == 2 && has_traffic_emoji?(row[0])
+    if row.length == 2 && traffic_emoji?(row[0])
       emoji_rows << row
     else
       transcript_rows << row[0].strip
@@ -68,8 +68,8 @@ When(/^(\w+):$/) do |name, *rest|
   retrying(5) { verify_session_markers(emoji_rows, name) } if emoji_rows.any?
 end
 
-def has_traffic_emoji?(text)
-  traffic_emojis = ['🤔', '📢', '✨']
+def traffic_emoji?(text)
+  traffic_emojis = %w[🤔 📢 ✨]
   traffic_emojis.any? { |emoji| text.strip.start_with?(emoji) }
 end
 
@@ -135,7 +135,7 @@ def has_emoji_markers?(table)
   return false unless table && table.raw
 
   # Only match specific traffic emoji markers: 🤔 📢 ✨
-  traffic_emojis = ['🤔', '📢', '✨']
+  traffic_emojis = %w[🤔 📢 ✨]
   table.raw.any? do |row|
     prefix = row[0].strip
     traffic_emojis.any? { |emoji| prefix.start_with?(emoji) }
