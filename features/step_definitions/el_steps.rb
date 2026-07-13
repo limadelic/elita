@@ -166,30 +166,46 @@ def check_marker_row(row, name, log_content)
 end
 
 def find_session_log(name, search_text = nil)
-  session_dir = File.join(File.expand_path('~'), '.elita/sessions')
+  session_dir = session_directory
   return '' unless Dir.exist?(session_dir)
 
-  pattern = File.join(session_dir, "#{name}_*.log")
-  logs = Dir.glob(pattern).sort_by { |f| File.mtime(f) }
-
+  logs = logs_for(session_dir, name)
   return '' if logs.empty?
 
-  # If searching for specific text, find log with that text
-  if search_text
-    search_lower = search_text.downcase
-    logs.reverse.each do |log_path|
-      content = File.read(log_path)
-      return content if content.downcase.include?(search_lower)
-    end
-  end
+  by_text = search_text_in_logs(logs, search_text)
+  return by_text if by_text
 
-  # Search logs in reverse order (newest first) for one with emoji markers
+  by_emoji = search_emoji_in_logs(logs)
+  return by_emoji if by_emoji
+
+  File.read(logs.last)
+end
+
+def session_directory
+  File.join(File.expand_path('~'), '.elita/sessions')
+end
+
+def logs_for(session_dir, name)
+  pattern = File.join(session_dir, "#{name}_*.log")
+  Dir.glob(pattern).sort_by { |f| File.mtime(f) }
+end
+
+def search_text_in_logs(logs, search_text)
+  return nil unless search_text
+
+  search_lower = search_text.downcase
+  logs.reverse.each do |log_path|
+    content = File.read(log_path)
+    return content if content.downcase.include?(search_lower)
+  end
+  nil
+end
+
+def search_emoji_in_logs(logs)
   traffic_emojis = %w[🤔 📢 ✨]
   logs.reverse.each do |log_path|
     content = File.read(log_path)
     return content if traffic_emojis.any? { |emoji| content.include?(emoji) }
   end
-
-  # If no emoji markers found, return newest log
-  File.read(logs.last)
+  nil
 end
