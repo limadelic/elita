@@ -31,7 +31,7 @@ defmodule El.Puppet.Settle do
   end
 
   defp response(true, state, _quiet, elapsed) do
-    write("collect: clean answer (burst 1) after #{elapsed}ms\n")
+    write("✨ collect: clean answer (burst 1) after #{elapsed}ms\n")
     unwatch(state.pty, self())
     reply(state.buffer)
   end
@@ -59,7 +59,7 @@ defmodule El.Puppet.Settle do
   def marker?(_state, _quiet), do: false
 
   defp reply(buffer) do
-    write("collect done bytes=#{byte_size(buffer)}\n")
+    write("✨ collect done bytes=#{byte_size(buffer)}\n")
     mark(buffer)
   end
 end
