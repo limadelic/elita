@@ -193,6 +193,11 @@ jobs:
       - name: Test
         run: mix test
 
+      - name: Cleanup Erlang processes
+        if: always()
+        run: |
+          pkill -9 beam.smp || true
+
   deploy:
     runs-on: ubuntu-latest
     environment:
