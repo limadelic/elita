@@ -25,7 +25,7 @@ On first access, Splunk prompts for admin credentials. Default:
 For automation (scripted startup), set via environment:
 ```bash
 export SPLUNK_USERNAME=admin
-export SPLUNK_PASSWORD=your_password
+export SPLUNK_PASSWORD=1234qwer
 ~/splunk/bin/splunk start --accept-license --no-prompt
 ```
 
@@ -35,7 +35,7 @@ export SPLUNK_PASSWORD=your_password
 2. Click **Change License Group** (if license slave is configured)
 3. Or via CLI:
 ```bash
-~/splunk/bin/splunk set licenses-location ~/splunk/etc/licenses/elita_free -auth admin:changeme
+~/splunk/bin/splunk set licenses-location ~/splunk/etc/licenses/elita_free -auth admin:1234qwer
 ```
 
 Free license applies automatically (500MB/day ingest, perpetual use, single instance).
@@ -59,8 +59,8 @@ Restart Splunk to apply:
 Check if Splunk is monitoring the elita sessions directory:
 
 ```bash
-~/splunk/bin/splunk list forward-server -auth admin:changeme
-~/splunk/bin/splunk list inputs -auth admin:changeme | grep -A3 "elita"
+~/splunk/bin/splunk list forward-server -auth admin:1234qwer
+~/splunk/bin/splunk list inputs -auth admin:1234qwer | grep -A3 "elita"
 ```
 
 Or in the Web UI: **Settings > Data Inputs > Files & Directories**.
@@ -200,7 +200,7 @@ If you hit the 500MB/day limit, either:
 
 1. **Check monitoring configuration**:
    ```bash
-   ~/splunk/bin/splunk list inputs -auth admin:changeme | grep -A5 "monitor"
+   ~/splunk/bin/splunk list inputs -auth admin:1234qwer | grep -A5 "monitor"
    ```
 
 2. **Verify file permissions**:
@@ -227,7 +227,7 @@ If you hit the 500MB/day limit, either:
 
 If you exceed 500MB/day:
 ```bash
-~/splunk/bin/splunk list license-usage -auth admin:changeme
+~/splunk/bin/splunk list license-usage -auth admin:1234qwer
 ```
 
 ## References
