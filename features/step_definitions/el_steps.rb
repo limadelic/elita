@@ -96,29 +96,27 @@ def settle(table, output, prompt = nil, is_malko = false)
 end
 
 def track(chunk, stripped)
-  @transcript ||= ""
-  @transcript_stripped ||= ""
+  @transcript ||= ''
+  @transcript_stripped ||= ''
   @transcript << chunk
   @transcript_stripped << stripped
 end
 
 def note(prompt, input)
-  @transcript_stripped ||= ""
+  @transcript_stripped ||= ''
   @transcript_stripped << "\n🤔 el → #{prompt}: #{input}\n"
 end
 
 def retrying(times)
   first_error = nil
   yield
-rescue => e
+rescue StandardError => e
   first_error ||= e
-  if (times -= 1).zero?
-    raise first_error
-  else
-    pause = ENV["TAPE"] == "rec" ? 1 : 0.5
-    sleep pause
-    retry
-  end
+  raise first_error if (times -= 1).zero?
+
+  pause = ENV['TAPE'] == 'rec' ? 1 : 0.5
+  sleep pause
+  retry
 end
 
 def verify_lines(lines)
