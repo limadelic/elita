@@ -2,15 +2,16 @@ defmodule El.Puppet.Collect do
   import El.Log, only: [write: 1]
   import El.Puppet.Settle, only: [hard: 2, peak: 3, solo: 3, ready: 2]
   import System, only: [monotonic_time: 1]
-  import Exception, only: [format: 3]
+  import Exception, only: [format: 3, normalize: 3]
 
   def collect(state) do
     safe(state)
-  rescue
-    e -> abort(e, __STACKTRACE__)
   catch
-    k, r -> abort(k, r, __STACKTRACE__)
+    k, v -> trap(k, v, __STACKTRACE__)
   end
+
+  defp trap(:error, e, stack), do: abort(normalize(:error, e, stack), stack)
+  defp trap(k, r, stack), do: abort(k, r, stack)
 
   defp abort(e, stack) do
     write("collect exception: #{format(:error, e, stack)}\n")

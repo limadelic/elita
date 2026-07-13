@@ -2,7 +2,7 @@ defmodule El.Puppet.Query do
   import El.Pty, only: [watch: 2, inject: 2]
   import El.Log, only: [write: 1]
   import El.Puppet.Collect, only: [collect: 1]
-  import Exception, only: [message: 1]
+  import Exception, only: [message: 1, normalize: 3]
   import System, only: [monotonic_time: 1]
   import Map, only: [merge: 2]
 
@@ -12,11 +12,12 @@ defmodule El.Puppet.Query do
 
   defp safe(pty, message) do
     perform(pty, message)
-  rescue
-    e -> reject(e, __STACKTRACE__)
   catch
-    k, r -> raise(k, r, __STACKTRACE__)
+    k, v -> trap(k, v, __STACKTRACE__)
   end
+
+  defp trap(:error, e, stack), do: reject(normalize(:error, e, stack), stack)
+  defp trap(k, r, stack), do: raise(k, r, stack)
 
   defp raise(k, r, stack) do
     write("query caught: #{k} #{inspect(r)}\n")
