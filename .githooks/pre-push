@@ -6,9 +6,9 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-TAPE=replay bundle exec cucumber
+mix test
 if [ $? -ne 0 ]; then
-  echo "pre-push: cucumber failed, push blocked"
+  echo "pre-push: test failed, push blocked"
   exit 1
 fi
 
