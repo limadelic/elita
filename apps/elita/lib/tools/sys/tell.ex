@@ -25,13 +25,13 @@ end
 
 defmodule Tools.Sys.Tell do
   import Agent.Harness, only: [dispatch: 3]
-  import Log, only: [log: 5]
+  import Log, only: [write: 1]
 
   defdelegate spec(name, state), to: Tools.Sys.Tell.Schema, as: :get
 
   def exec(_, %{"recipient" => recipient, "message" => message}, %{name: sender} = state) do
     msg = "[from #{sender}] #{message}"
-    log("📢", "#{sender} → #{recipient}", ": ", message, :yellow)
+    write("📢 #{sender} → #{recipient} | #{message}\n")
     dispatch(recipient, msg, :tell)
     {"sent", state}
   end

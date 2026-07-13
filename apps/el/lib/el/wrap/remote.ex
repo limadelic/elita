@@ -34,7 +34,7 @@ defmodule El.Wrap.Remote do
 
   defp gather(pid, msg, sender, target) do
     text = "[ask #{sender |> fix(sender) |> to_string()}]\n#{msg}"
-    write("🤔 #{sender} → #{target} | #{msg}\n")
+    write("gather: sender=#{sender} target=#{target}\n")
     put(pid, text)
     listen(sender, sender)
   end

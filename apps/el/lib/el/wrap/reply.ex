@@ -42,7 +42,7 @@ defmodule El.Wrap.Reply do
 
   def inject(pid, target, message, sender) do
     text = "[from #{sender |> fix(sender) |> to_string()}]\n#{message}"
-    write("📢 #{sender} → #{target} | #{message}\n")
+    write("inject: sender=#{sender} target=#{target}\n")
     put(pid, text)
   end
 
