@@ -1,0 +1,15 @@
+#!/bin/bash
+
+mix lint
+if [ $? -ne 0 ]; then
+  echo "pre-push: lint failed, push blocked"
+  exit 1
+fi
+
+TAPE=replay bundle exec cucumber
+if [ $? -ne 0 ]; then
+  echo "pre-push: cucumber failed, push blocked"
+  exit 1
+fi
+
+exit 0
