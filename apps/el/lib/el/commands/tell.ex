@@ -29,10 +29,12 @@ defmodule El.Commands.Tell do
     write(:stderr, "session #{agent} unreachable at #{host}\n")
   end
 
-  defp prime do
-    case Node.self() do
-      :nonode@nohost -> start(:"tell_#{:erlang.system_time(:millisecond)}@127.0.0.1", :longnames); set_cookie(:elita)
-      _ -> set_cookie(:elita)
-    end
+  defp prime, do: prime(Node.self())
+
+  defp prime(:nonode@nohost) do
+    start(:"tell_#{:erlang.system_time(:millisecond)}@127.0.0.1", :longnames)
+    set_cookie(:elita)
   end
+
+  defp prime(_), do: set_cookie(:elita)
 end

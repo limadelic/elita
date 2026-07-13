@@ -6,6 +6,9 @@ defmodule El.Infra.Env do
   def get(name), do: get_env(name)
 
   def get(name, default) do
-    get_env(name) || default
+    resolve(get_env(name), default)
   end
+
+  defp resolve(nil, default), do: default
+  defp resolve(value, _), do: value
 end

@@ -12,9 +12,7 @@ defmodule El.Wrap.Remote do
   def deliver(name, message, sender) do
     invoke(name, message, sender)
   catch
-    :exit, _ ->
-      write("✨ deliver exit\n")
-      :forward
+    :exit, _ -> trap("✨ deliver exit\n")
   end
 
   defp invoke(name, message, sender) do
@@ -26,9 +24,7 @@ defmodule El.Wrap.Remote do
   defp query(target, message, sender) do
     fetch(target, message, sender)
   catch
-    :exit, _ ->
-      write("query exit\n")
-      :forward
+    :exit, _ -> trap("query exit\n")
   end
 
   defp fetch(target, message, sender) do
@@ -44,19 +40,36 @@ defmodule El.Wrap.Remote do
 
   defp listen(pty, sender) do
     watch(pty, self())
-    task = Task.async(fn -> collect(build(pty, sender, monotonic_time(:millisecond))) end)
+    spawn(pty, sender) |> reap(pty)
+  end
+
+  defp spawn(pty, sender) do
+    Task.async(fn -> collect(build(pty, sender, monotonic_time(:millisecond))) end)
+  end
+
+  defp reap(task, pty) do
     result = await(task)
     unwatch(pty, self())
     result
   end
 
   defp await(task) do
+    guard(task)
+  catch
+    :exit, error -> fault(error, task)
+  end
+
+  defp guard(task) do
     Task.await(task, 90_000)
   rescue
     _ -> timed(task)
-  catch
-    :exit, {:timeout, _} -> timed(task)
-    :exit, _ -> failed(task)
+  end
+
+  defp fault({:timeout, _}, task), do: timed(task)
+
+  defp fault(_, task) do
+    Task.shutdown(task, 1)
+    :forward
   end
 
   defp timed(task) do
@@ -65,29 +78,20 @@ defmodule El.Wrap.Remote do
     :forward
   end
 
-  defp failed(task) do
-    Task.shutdown(task, 1)
-    :forward
-  end
-
   defp build(pty, _sender, now) do
-    base(pty) |> timing(now)
-  end
-
-  defp base(pty) do
     %{pty: pty, buffer: "", question: "ask_response", burst: 1, gap: false}
+    |> merge(%{last: now, start: now})
   end
 
-  defp timing(map, now) do
-    merge(map, %{last: now, start: now})
+  defp trap(msg) do
+    write(msg)
+    :forward
   end
 
   def tell(name, message, sender) do
     dispatch(name, message, sender)
   catch
-    :exit, reason ->
-      write("📢 tell exit: #{inspect(reason)}\n")
-      :forward
+    :exit, reason -> trap("📢 tell exit: #{inspect(reason)}\n")
   end
 
   defp dispatch(name, message, sender) do
