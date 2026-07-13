@@ -13,7 +13,6 @@ defmodule El.Commands.Claude do
   import El.Distribution, only: [start: 1, bind: 1]
   import El.Puppet, only: [open: 1]
   import Agent, only: [start: 2]
-  import El.Cmd, only: [build: 0]
 
   def claude(name \\ :default) do
     claude(name, deps())
@@ -22,14 +21,14 @@ defmodule El.Commands.Claude do
   defp deps, do: [distribution_start: &start/1, cmd: &cmd/1, launch: &launch/2]
 
   def claude(name, deps) when is_list(deps) do
-    write("🚀 boot: #{name}\n")
+    write("boot: #{name}\n")
     go(resolve(name), deps)
   after
     cleanup()
   end
 
   defp cleanup do
-    write("🚀 shutdown\n")
+    write("shutdown\n")
     reset()
     stty()
   end
@@ -50,7 +49,7 @@ defmodule El.Commands.Claude do
     Task.start(fn -> distribute(name, deps) end)
     boot(to_atom(name), deps)
   rescue
-    e -> write("🚀 boot error during claude setup: #{inspect(e)}\n")
+    e -> write("boot error during claude setup: #{inspect(e)}\n")
   end
 
   defp distribute(name, deps) do
@@ -73,7 +72,7 @@ defmodule El.Commands.Claude do
   end
 
   defp execute(name, deps, buf) do
-    cmd = build()
+    cmd = "claude --dangerously-skip-permissions --model #{get_env("CLAUDE_MODEL", "haiku")}"
     pid = Keyword.get(deps, :launch).(name, opts(buf, cmd))
     install(name)
     hold(pid)

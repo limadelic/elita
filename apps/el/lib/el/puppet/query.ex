@@ -6,18 +6,26 @@ defmodule El.Puppet.Query do
   import System, only: [monotonic_time: 1]
   import Map, only: [merge: 2]
 
-  def call(pty, message), do: safe(pty, message)
+  def call(pty, message) do
+    safe(pty, message)
+  end
 
   defp safe(pty, message) do
     perform(pty, message)
   rescue
-    e ->
-      write("query exception: #{message(e)}\n")
-      reraise e, __STACKTRACE__
+    e -> reject(e, __STACKTRACE__)
   catch
-    k, r ->
-      write("query caught: #{k} #{inspect(r)}\n")
-      :erlang.raise(k, r, __STACKTRACE__)
+    k, r -> raise(k, r, __STACKTRACE__)
+  end
+
+  defp raise(k, r, stack) do
+    write("query caught: #{k} #{inspect(r)}\n")
+    :erlang.raise(k, r, stack)
+  end
+
+  defp reject(e, stack) do
+    write("query exception: #{message(e)}\n")
+    reraise e, stack
   end
 
   defp perform(pty, message) do
@@ -27,20 +35,17 @@ defmodule El.Puppet.Query do
 
   defp setup(pty, message) do
     write("query on #{inspect(self())} (node #{inspect(node())})\n")
-    write("📢 inject to pty: #{inspect(message)}\n")
+    write("inject to pty: #{inspect(message)}\n")
     watch(pty, self())
     inject(pty, message <> "\r")
   end
 
   defp build(pty, message, now) do
-    base(pty, message) |> timing(now)
+    state(pty, message, now)
   end
 
-  defp base(pty, message) do
-    %{pty: pty, buffer: "", question: message, burst: 1, gap: false}
-  end
-
-  defp timing(map, now) do
-    merge(map, %{last: now, start: now})
+  defp state(pty, message, now) do
+    %{pty: pty, buffer: "", last: now, start: now}
+    |> merge(%{question: message, burst: 1, gap: false})
   end
 end

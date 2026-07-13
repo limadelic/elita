@@ -7,13 +7,19 @@ defmodule El.Puppet.Collect do
   def collect(state) do
     safe(state)
   rescue
-    e ->
-      write("collect exception: #{format(:error, e, __STACKTRACE__)}\n")
-      reraise e, __STACKTRACE__
+    e -> abort(e, __STACKTRACE__)
   catch
-    kind, reason ->
-      write("collect caught: #{kind} #{inspect(reason)}\n")
-      :erlang.raise(kind, reason, __STACKTRACE__)
+    k, r -> abort(k, r, __STACKTRACE__)
+  end
+
+  defp abort(e, stack) do
+    write("collect exception: #{format(:error, e, stack)}\n")
+    reraise e, stack
+  end
+
+  defp abort(k, r, stack) do
+    write("collect caught: #{k} #{inspect(r)}\n")
+    :erlang.raise(k, r, stack)
   end
 
   defp safe(%{last: last, start: start} = state) do
@@ -62,15 +68,16 @@ defmodule El.Puppet.Collect do
   defp proceed(false, state, quiet), do: loop(state, quiet)
 
   defp loop(state, quiet) do
-    t = wait(state, quiet)
-
     receive do
-      {:output, data} ->
-        write("collect: burst #{state.burst} got #{byte_size(data)}b\n")
-        collect(output(state, data))
+      {:output, data} -> digest(state, data)
     after
-      t -> collect(state)
+      wait(state, quiet) -> collect(state)
     end
+  end
+
+  defp digest(state, data) do
+    write("collect: burst #{state.burst} got #{byte_size(data)}b\n")
+    collect(output(state, data))
   end
 
   defp wait(state, quiet) do

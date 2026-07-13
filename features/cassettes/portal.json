@@ -16,22 +16,5 @@
       ],
       "n": 1
     }
-  },
-  {
-    "a": [
-      {
-        "text": "a portal is a gateway",
-        "type": "text"
-      }
-    ],
-    "q": {
-      "agent": "malkovich",
-      "messages": [
-        {
-          "content": "what is a portal?"
-        }
-      ],
-      "n": 1
-    }
   }
 ]

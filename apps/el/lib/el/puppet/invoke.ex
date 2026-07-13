@@ -31,7 +31,7 @@ defmodule El.Puppet.Invoke do
   end
 
   defp log(response) do
-    write("🤔 ask returned: #{inspect(slice(inspect(response), 0..50))}\n")
+    write("ask returned: #{inspect(slice(inspect(response), 0..50))}\n")
   end
 
   defp error(kind, reason) do
@@ -61,7 +61,9 @@ defmodule El.Puppet.Invoke do
   end
 
   defp persist(request, response) do
-    try do: add(request, response), catch: (_, _ -> fail())
+    add(request, response)
+  catch
+    _, _ -> fail()
   end
 
   defp build(message) do

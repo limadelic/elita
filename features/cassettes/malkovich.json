@@ -53,7 +53,7 @@
   {
     "a": [
       {
-        "text": "2 + 2 = 4",
+        "text": "Who's there?",
         "type": "text"
       }
     ],
@@ -61,7 +61,24 @@
       "agent": "malkovich",
       "messages": [
         {
-          "content": "what is 2+2?"
+          "content": "knock knock"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Malko who?",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "malkovich",
+      "messages": [
+        {
+          "content": "malko"
         }
       ],
       "n": 1

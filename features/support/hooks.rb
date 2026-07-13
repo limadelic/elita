@@ -40,20 +40,16 @@ Before('@malko') do
   Dir.mkdir(bin_dir) unless Dir.exist?(bin_dir)
   el_escript = File.expand_path('../../apps/el/el', __dir__)
   el_link = File.join(bin_dir, 'el')
-  File.symlink(el_escript, el_link) unless File.exist?(el_link)
+  unless File.exist?(el_link)
+    if File.exist?(el_escript)
+      FileUtils.cp(el_escript, el_link)
+      File.chmod(0755, el_link)
+    else
+      raise "el escript not found at #{el_escript}"
+    end
+  end
   guard_live_claude if ENV['TAPE'] == 'rec'
   write_stub_claude unless ENV['TAPE'] == 'rec'
-end
-
-Before('@autonomy') do
-  prompt = "You have bash. Messages may arrive prefixed with from and a name. When that happens respond by running the shell command el tell NAME your answer. Example: if banquo sends knock knock run: el tell banquo who is there"
-  ENV['EL_SYSTEM_PROMPT'] = prompt
-  ENV['AUTONOMY_PROBE'] = 'true'
-end
-
-After('@autonomy') do
-  ENV.delete('EL_SYSTEM_PROMPT')
-  ENV.delete('AUTONOMY_PROBE')
 end
 
 After do |scenario|
