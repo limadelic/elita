@@ -12,7 +12,7 @@ defmodule El.Wrap.Remote do
   def deliver(name, message, sender) do
     invoke(name, message, sender)
   catch
-    :exit, _ -> trap("✨ deliver exit\n")
+    :exit, _ -> trap("deliver exit\n")
   end
 
   defp invoke(name, message, sender) do
@@ -91,7 +91,7 @@ defmodule El.Wrap.Remote do
   def tell(name, message, sender) do
     dispatch(name, message, sender)
   catch
-    :exit, reason -> trap("📢 tell exit: #{inspect(reason)}\n")
+    :exit, reason -> trap("tell exit: #{inspect(reason)}\n")
   end
 
   defp dispatch(name, message, sender) do

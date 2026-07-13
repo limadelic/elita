@@ -41,7 +41,7 @@ defmodule El.Puppet.Query do
 
   defp setup(pty, message) do
     write("query on #{inspect(self())} (node #{inspect(node())})\n")
-    write("📢 inject to pty: #{inspect(message)}\n")
+    write("inject to pty: #{inspect(message)}\n")
     watch(pty, self())
     inject(pty, message <> "\r")
   end

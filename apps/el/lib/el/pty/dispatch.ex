@@ -87,7 +87,7 @@ defmodule El.Pty.Dispatch do
 
   defp notify(taps, data) do
     each(taps, fn pid ->
-      write("📢 broadcast: sending #{byte_size(data)}b to #{inspect(pid)}\n")
+      write("broadcast: sending #{byte_size(data)}b to #{inspect(pid)}\n")
       send(pid, {:output, data})
     end)
   end

@@ -33,7 +33,7 @@ defmodule El.Wrap.Reply do
 
   def prepare(name, sender) do
     t = name |> trim() |> to_atom()
-    write("🤔 prepare: target=#{t} from=#{inspect(sender)}\n")
+    write("prepare: target=#{t} from=#{inspect(sender)}\n")
     t
   end
 
@@ -55,7 +55,7 @@ defmodule El.Wrap.Reply do
 
   defp route(_pid, output, agent) when is_binary(output) do
     cleaned = trim_trailing(output, "\n")
-    write("✨ route: text: #{inspect(cleaned)}\n")
+    write("route: text: #{inspect(cleaned)}\n")
     write("/dev/stdout", "#{cleaned}\n#{agent}> ")
   end
 

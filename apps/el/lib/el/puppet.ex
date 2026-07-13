@@ -47,7 +47,7 @@ defmodule El.Puppet do
   end
 
   def handle_call({:ask, message}, _from, %{pty: pty} = state) do
-    write("🤔 ask received: #{inspect(message)}\n")
+    write("ask received: #{inspect(message)}\n")
     reply = invoke(pty, message)
     {:reply, reply, state}
   end
