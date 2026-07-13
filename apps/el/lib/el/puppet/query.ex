@@ -11,13 +11,20 @@ defmodule El.Puppet.Query do
   end
 
   defp safe(pty, message) do
-    perform(pty, message)
+    guard(fn -> perform(pty, message) end)
+  end
+
+  defp guard(fun) do
+    fun.()
   rescue
     e -> reject(e, __STACKTRACE__)
   catch
-    k, r ->
-      write("query caught: #{k} #{inspect(r)}\n")
-      :erlang.raise(k, r, __STACKTRACE__)
+    k, r -> raise(k, r, __STACKTRACE__)
+  end
+
+  defp raise(k, r, stack) do
+    write("query caught: #{k} #{inspect(r)}\n")
+    :erlang.raise(k, r, stack)
   end
 
   defp reject(e, stack) do
