@@ -4,10 +4,9 @@ defmodule El.Puppet.Answer do
   import El.Puppet.Collect, only: [collect: 1]
   import GenServer, only: [cast: 2]
   import System, only: [monotonic_time: 1]
-  import String, only: [trim: 1, slice: 2, split: 2]
+  import String, only: [trim: 1, slice: 2]
   import :global, only: [whereis_name: 1]
   import Map, only: [merge: 2]
-  import List, only: [first: 1]
 
   def reply(pty, sender, message) do
     watch(pty, self())
@@ -37,7 +36,7 @@ defmodule El.Puppet.Answer do
 
   defp signal(sender, response) do
     text = envelope(sender, response)
-    write("✨ #{node() |> to_string() |> split("@") |> first()} | #{response}\n")
+    write("signal: sender=#{sender} response=#{inspect(slice(inspect(response), 0..50))}\n")
     direct(sender, text)
   end
 

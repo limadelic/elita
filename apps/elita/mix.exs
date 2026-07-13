@@ -47,15 +47,27 @@ defmodule Elita.MixProject do
       test: [&test/1],
       t: [&test/1],
       lint: ["format --check-formatted", "credo --strict"],
+      live: [&live/1],
       tape: [&tape/1]
     ]
   end
 
   defp test(_args) do
-    Mix.shell().cmd("cd ../.. && TAPE=replay bundle exec cucumber")
+    check("cd ../.. && TAPE=replay bundle exec cucumber")
+  end
+
+  defp live(_args) do
+    check("cd ../.. && bundle exec cucumber --profile live")
+  end
+
+  defp check(cmd) do
+    case Mix.shell().cmd(cmd) do
+      0 -> :ok
+      _ -> raise Mix.Error, "command failed: #{cmd}"
+    end
   end
 
   defp tape(args) do
-    Mix.shell().cmd("cd ../.. && TAPE=rec bundle exec cucumber #{Enum.join(args, " ")}")
+    check("cd ../.. && TAPE=rec bundle exec cucumber #{Enum.join(args, " ")}")
   end
 end
