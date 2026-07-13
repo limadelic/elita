@@ -16,3 +16,4 @@ node_modules/
 *.bak
 /tmp/
 /reports/
+!reports/.gitkeep
