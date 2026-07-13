@@ -1,5 +1,22 @@
 [
   {
     "screen": "✳\n▐▛███▜▌\n▝▜█████▛▘\nClaude Code\nHaiku\nmalko> "
+  },
+  {
+    "a": [
+      {
+        "text": "sesame is a magic word",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "keeper",
+      "messages": [
+        {
+          "content": "what is sesame?"
+        }
+      ],
+      "n": 1
+    }
   }
 ]
