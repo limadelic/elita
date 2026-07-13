@@ -156,9 +156,11 @@ def verify_session_markers(rows, prompt)
     prefix = row[0].strip
     text = row[1].strip
 
-    unless log_content.include?(prefix) && (text.empty? || log_content.downcase.include?(text.downcase))
-      raise "Expected '#{prefix}' and '#{text}' in session log for #{name}:\n#{log_content}"
-    end
+    has_prefix = log_content.include?(prefix)
+    has_text = text.empty? || log_content.downcase.include?(text.downcase)
+    next if has_prefix && has_text
+
+    raise "Expected '#{prefix}' and '#{text}' in #{name}:\n#{log_content}"
   end
 end
 
