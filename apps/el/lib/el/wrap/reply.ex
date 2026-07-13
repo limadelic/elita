@@ -3,7 +3,6 @@ defmodule El.Wrap.Reply do
   import El.Distribution, only: [target: 1]
   import String, only: [to_atom: 1, trim: 1, trim_trailing: 2, split: 3]
   import El.Log, only: [write: 1]
-  import File, only: [write: 2]
   import El.Puppet, only: [put: 2]
 
   def handle(:forward, _), do: :forward
@@ -40,9 +39,8 @@ defmodule El.Wrap.Reply do
   def inject(nil, _target, _message, _sender), do: :forward
   def inject(_pid, _target, _message, nil), do: :forward
 
-  def inject(pid, target, message, sender) do
+  def inject(pid, _target, message, sender) do
     text = "[from #{sender |> fix(sender) |> to_string()}]\n#{message}"
-    write("inject: sender=#{sender} target=#{target}\n")
     put(pid, text)
   end
 
@@ -56,7 +54,8 @@ defmodule El.Wrap.Reply do
   defp route(_pid, output, agent) when is_binary(output) do
     cleaned = trim_trailing(output, "\n")
     write("route: text: #{inspect(cleaned)}\n")
-    write("/dev/stdout", "#{cleaned}\n#{agent}> ")
+    # credo:disable-for-next-line
+    IO.write("#{cleaned}\n#{agent}> ")
   end
 
   defp route(_, output, _) do

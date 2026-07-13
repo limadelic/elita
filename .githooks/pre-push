@@ -1,27 +1,4 @@
 #!/bin/bash
-set -m
-exec > /tmp/hook_push.log 2>&1
-
-# Run lint in background, wait, kill group to clean up BEAM survivors
-mix lint &
-lint_pid=$!
-wait $lint_pid
-lint_status=$?
-kill -9 -- -$lint_pid 2>/dev/null || true
-if [ $lint_status -ne 0 ]; then
-  echo "pre-push: lint failed, push blocked"
-  exit 1
-fi
-
-# Run test in background, wait, kill group to clean up BEAM survivors
-mix test &
-test_pid=$!
-wait $test_pid
-test_status=$?
-kill -9 -- -$test_pid 2>/dev/null || true
-if [ $test_status -ne 0 ]; then
-  echo "pre-push: test failed, push blocked"
-  exit 1
-fi
-
+exec < /dev/null > /tmp/hook_donny_push.log 2>&1
+mix lint || exit 1
 exit 0

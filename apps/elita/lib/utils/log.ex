@@ -4,7 +4,7 @@ defmodule Log do
   import String, only: [contains?: 2]
   import System, only: [pid: 0, get_env: 2]
   import Utils.Yaml, only: [yaml: 1]
-  import File, only: [mkdir_p!: 1]
+  import File, only: [mkdir_p!: 1, write: 3]
 
   @colors %{
     green: 82,
@@ -27,8 +27,7 @@ defmodule Log do
   end
 
   defp ensure(_dir, message) do
-    # credo:disable-for-next-line
-    File.write(path("elita"), message, [:append])
+    write(path("elita"), message, [:append])
   end
 
   defp eol(body) do

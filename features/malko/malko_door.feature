@@ -1,4 +1,4 @@
-@malko @wip
+@malko @wip @live
 Feature: Routing Emojis
 
   Scenario: Ask routing emits canonical format
@@ -7,11 +7,13 @@ Feature: Routing Emojis
       | ▝▜█████▛▘   |
       | Claude Code |
       | Haiku       |
+      | 🚀 malko as claude |
     * > el claude keeper
       | ▐▛███▜▌     |
       | ▝▜█████▛▘   |
       | Claude Code |
       | Haiku       |
+      | 🚀 keeper as claude |
     * malko> keeper what is the password?
       | 🤔 malko → keeper | what is the password? |
     * keeper:
@@ -27,11 +29,13 @@ Feature: Routing Emojis
       | ▝▜█████▛▘   |
       | Claude Code |
       | Haiku       |
+      | 🚀 malko as claude |
     * > el claude keeper
       | ▐▛███▜▌     |
       | ▝▜█████▛▘   |
       | Claude Code |
       | Haiku       |
+      | 🚀 keeper as claude |
     * malko> tell keeper the code is 1234
       | 📢 malko → keeper | the code is 1234 |
     * malko:
@@ -48,11 +52,13 @@ Feature: Routing Emojis
       | ▝▜█████▛▘   |
       | Claude Code |
       | Haiku       |
+      | 🚀 malko as claude |
     * > el claude keeper
       | ▐▛███▜▌     |
       | ▝▜█████▛▘   |
       | Claude Code |
       | Haiku       |
+      | 🚀 keeper as claude |
     * malko> keeper who are you?
       | 🤔 malko → keeper | who are you? |
     * keeper:

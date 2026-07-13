@@ -32,9 +32,8 @@ defmodule El.Wrap.Remote do
     handle(gather(target, message, sender, name), sender)
   end
 
-  defp gather(pid, msg, sender, target) do
+  defp gather(pid, msg, sender, _target) do
     text = "[ask #{sender |> fix(sender) |> to_string()}]\n#{msg}"
-    write("gather: sender=#{sender} target=#{target}\n")
     put(pid, text)
     listen(sender, sender)
   end
@@ -88,6 +87,7 @@ defmodule El.Wrap.Remote do
     write(msg)
     :forward
   end
+
   def tell(name, message, sender) do
     dispatch(name, message, sender)
   catch
