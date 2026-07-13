@@ -85,9 +85,11 @@ end
 def reap_all_sessions
   @sessions ||= {}
   killed_any = false
+  node_names = []
 
   @sessions.each do |name, session|
     next unless session && session[:pid]
+    node_names << "#{name}@127.0.0.1"
     kill_process(session[:pid])
     killed_any = true
     session[:reader]&.close
@@ -96,6 +98,7 @@ def reap_all_sessions
 
   if killed_any
     kill_orphaned_scripts
+    wait_for_nodes_deregistered(node_names)
   elsif @pid
     kill_process(@pid)
     kill_orphaned_scripts
@@ -174,4 +177,16 @@ def ensure_stub_server_stopped
   end
 rescue => e
   # Ignore errors during shutdown
+end
+
+def wait_for_nodes_deregistered(node_names)
+  return if node_names.empty?
+  deadline = Time.now + 5
+  loop do
+    epmd_output = `epmd -names 2>/dev/null`
+    remaining = node_names.select { |name| epmd_output.include?(name) }
+    return if remaining.empty?
+    break if Time.now > deadline
+    sleep 0.1
+  end
 end
