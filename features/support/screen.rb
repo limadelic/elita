@@ -96,16 +96,19 @@ class Screen
   end
 
   def cursor_seq(seq)
-    case seq
-    when /\e\[([0-9]*)A/ then cursor_up($1.to_i)
-    when /\e\[([0-9]*)B/ then cursor_down($1.to_i)
-    when /\e\[([0-9]*)C/ then cursor_right($1.to_i)
-    when /\e\[([0-9]*)D/ then cursor_left($1.to_i)
-    when /\e\[([0-9]*);([0-9]*)H/,
-         /\e\[([0-9]*);([0-9]*)f/ then cursor_pos($1.to_i, $2.to_i)
-    else
-      false
-    end
+    return cursor_up($1.to_i) if seq =~ /\e\[([0-9]*)A/
+    return cursor_down($1.to_i) if seq =~ /\e\[([0-9]*)B/
+    return cursor_right($1.to_i) if seq =~ /\e\[([0-9]*)C/
+    return cursor_left($1.to_i) if seq =~ /\e\[([0-9]*)D/
+
+    handle_cursor_pos(seq)
+  end
+
+  def handle_cursor_pos(seq)
+    return cursor_pos($1.to_i, $2.to_i) if seq =~ /\e\[([0-9]*);([0-9]*)H/
+    return cursor_pos($1.to_i, $2.to_i) if seq =~ /\e\[([0-9]*);([0-9]*)f/
+
+    false
   end
 
   def edit_seq(seq)

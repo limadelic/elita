@@ -9,24 +9,20 @@ AllCops:
     - '_build/**/*'
     - 'tmp/**/*'
 
-# BlockNesting: Max 2 enforces one conditional layer only
-# (allows while+synchronize wrapping one if; bans if-inside-if)
-Metrics/BlockNesting:
-  Max: 2
-
-# Other Metrics: generous ceilings, just above current worst offenders
+# HARD CONSTRAINTS: seven-line methods, zero nesting, guard clauses
 Metrics/MethodLength:
-  Max: 30
+  Max: 7
   CountAsOne:
     - array
     - hash
     - heredoc
     - method_call
-  Exclude:
-    - 'features/step_definitions/**/*'
+
+Metrics/BlockNesting:
+  Max: 1
 
 Metrics/CyclomaticComplexity:
-  Max: 20
+  Max: 5
 
 Metrics/PerceivedComplexity:
   Max: 20
