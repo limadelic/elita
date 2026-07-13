@@ -38,7 +38,14 @@ Before('@malko') do
   Dir.mkdir(bin_dir) unless Dir.exist?(bin_dir)
   el_escript = File.expand_path('../../apps/el/el', __dir__)
   el_link = File.join(bin_dir, 'el')
-  File.symlink(el_escript, el_link) unless File.exist?(el_link)
+  unless File.exist?(el_link)
+    if File.exist?(el_escript)
+      FileUtils.cp(el_escript, el_link)
+      File.chmod(0755, el_link)
+    else
+      raise "el escript not found at #{el_escript}"
+    end
+  end
   guard_live_claude if ENV['TAPE'] == 'rec'
   write_stub_claude unless ENV['TAPE'] == 'rec'
 end
