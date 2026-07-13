@@ -1,5 +1,6 @@
 @malko
 @wip
+@live
 Feature: Malkovich Malkovich
 
   Scenario: Malkovich Malkovich
