@@ -1,4 +1,4 @@
-@malko
+@malko @live
 Feature: Door
 
   Scenario: First trip into Malkovich

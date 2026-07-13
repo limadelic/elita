@@ -1,5 +1,5 @@
 @hamlet
-@malko
+@malko @live
 Feature: Hamlet Ghost Tell
 
   Scenario: Tell fires and forgets with envelope and tell-back
