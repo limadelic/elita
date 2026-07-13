@@ -6,10 +6,8 @@ defmodule El.Puppet.Collect do
 
   def collect(state) do
     safe(state)
-  rescue
-    e -> abort(e, __STACKTRACE__)
-  catch
-    k, r -> abort(k, r, __STACKTRACE__)
+  rescue e -> abort(e, __STACKTRACE__)
+  catch k, r -> abort(k, r, __STACKTRACE__)
   end
 
   defp abort(e, stack) do
@@ -68,12 +66,8 @@ defmodule El.Puppet.Collect do
   defp proceed(false, state, quiet), do: loop(state, quiet)
 
   defp loop(state, quiet) do
-    t = wait(state, quiet)
-    receive do
-      {:output, data} -> digest(state, data)
-    after
-      t -> collect(state)
-    end
+    receive do {:output, data} -> digest(state, data)
+    after wait(state, quiet) -> collect(state) end
   end
 
   defp digest(state, data) do

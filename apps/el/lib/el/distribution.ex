@@ -5,9 +5,7 @@ defmodule El.Distribution do
   import El.Log, only: [write: 1]
   import El.Distribution.Helpers
 
-  def start(name \\ :default, opts \\ []) do
-    El.Boot.start(name, opts)
-  end
+  defdelegate start(name \\ :default, opts \\ []), to: El.Boot
 
   def bind(name), do: bind(name, 50)
 

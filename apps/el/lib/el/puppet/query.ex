@@ -16,10 +16,8 @@ defmodule El.Puppet.Query do
 
   defp guard(fun) do
     fun.()
-  rescue
-    e -> reject(e, __STACKTRACE__)
-  catch
-    k, r -> raise(k, r, __STACKTRACE__)
+  rescue e -> reject(e, __STACKTRACE__)
+  catch k, r -> raise(k, r, __STACKTRACE__)
   end
 
   defp raise(k, r, stack) do
