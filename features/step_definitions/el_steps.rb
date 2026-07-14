@@ -77,15 +77,11 @@ def track(chunk, stripped)
 end
 
 def note(prompt, input)
-  @transcript_stripped ||= ''
-  @transcript_stripped << "\n🤔 el → #{prompt} | #{input}\n"
+  # Do NOT fabricate emoji lines - they come from real Elixir output
 end
 
 def reply(prompt, table, output)
-  return unless valid_response_row?(table)
-
-  response_text = table.raw[1][1].strip
-  log_response(prompt, response_text, output) if output.include?(response_text)
+  # Do NOT fabricate emoji lines - they come from real Elixir output via session log
 end
 
 def valid_response_row?(table)
@@ -95,8 +91,7 @@ def valid_response_row?(table)
 end
 
 def log_response(prompt, text, _output)
-  @transcript_stripped ||= ''
-  @transcript_stripped << "✨ #{prompt} | #{text}\n"
+  # Do NOT fabricate emoji lines - they come from real Elixir output via session log
 end
 
 def retrying(times, &block)
@@ -104,7 +99,15 @@ def retrying(times, &block)
 end
 
 def verify_lines(lines)
-  iterate_and_verify_lines(transcript.downcase, lines)
+  # Use real session log, not manually-constructed transcript
+  session_log = @current ? read_session_log(@current, @pid) : ""
+  if session_log.empty?
+    # Fallback to transcript if session log not available, but log a warning
+    $stderr.puts "WARNING: No session log found for #{@current}_#{@pid}, falling back to transcript"
+    iterate_and_verify_lines(transcript.downcase, lines)
+  else
+    iterate_and_verify_lines(session_log.downcase, lines)
+  end
 end
 
 def attempt_with_retries(times, &block)

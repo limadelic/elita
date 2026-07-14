@@ -73,4 +73,8 @@ defmodule Log do
   end
 
   def answer(_agent, _text), do: :ok
+
+  def tell(sender, recipient, message) do
+    write("📢 #{sender} → #{recipient} | #{message}\n")
+  end
 end

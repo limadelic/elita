@@ -217,5 +217,6 @@ require_relative "spawn"
 require_relative "drain"
 require_relative "search"
 require_relative "assert"
+require_relative "session_logs"
 
-World(ReplHelper, Spawn, Drain, Search, Assert)
+World(ReplHelper, Spawn, Drain, Search, Assert, SessionLogs)

@@ -1,24 +1,20 @@
 defmodule El.Log.Reply do
   import String, only: [trim: 1]
-  import Log, only: [write: 1]
+  import Log, only: [answer: 2]
 
   def handle(response, agent) do
     match(response, agent)
   end
 
   defp match([%{"text" => text} | _], agent) do
-    text |> trim() |> build(agent) |> emit()
+    text |> trim() |> emit(agent)
   end
 
   defp match(response, _agent) do
     response
   end
 
-  defp build(text, agent) do
-    "✨ #{agent} | #{text}\n"
-  end
-
-  defp emit(line) do
-    write(line)
+  defp emit(text, agent) do
+    answer(agent, text)
   end
 end
