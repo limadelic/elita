@@ -18,7 +18,7 @@ defmodule Log do
     msg = message(head, neck, yaml(body))
     emit(emoji, msg, color)
   rescue
-    _ -> :ok
+    _ in [File.Error, ErlangError] -> :ok
   end
 
   defp emit(emoji, msg, color) do
@@ -33,7 +33,7 @@ defmodule Log do
   def write(message) do
     dir() |> mkdir_p!() |> ensure(message)
   rescue
-    _ -> :ok
+    _ in [File.Error, ErlangError] -> :ok
   end
 
   defp ensure(_dir, message) do

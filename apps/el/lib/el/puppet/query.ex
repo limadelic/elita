@@ -30,7 +30,6 @@ defmodule El.Puppet.Query do
   end
 
   defp settle(k, r, stack) do
-    write("query caught: #{k} #{inspect(r)}\n")
     :erlang.raise(k, r, stack)
   end
 

@@ -1,10 +1,9 @@
 defmodule El.Puppet.Answer do
   import El.Pty, only: [inject: 2, watch: 2, unwatch: 2]
-  import El.Log, only: [write: 1]
   import El.Puppet.Collect, only: [collect: 1]
   import GenServer, only: [cast: 2]
   import System, only: [monotonic_time: 1]
-  import String, only: [trim: 1, slice: 2]
+  import String, only: [trim: 1]
   import :global, only: [whereis_name: 1]
   import Map, only: [merge: 2]
 
@@ -12,7 +11,7 @@ defmodule El.Puppet.Answer do
     watch(pty, self())
     act(pty, sender, message)
   catch
-    :exit, _ -> write("reply exit\n")
+    :exit, _ -> :ok
   end
 
   defp act(pty, sender, message) do
@@ -23,7 +22,6 @@ defmodule El.Puppet.Answer do
   defp respond(pty, sender, message) do
     response = collect(build(pty, message, monotonic_time(:millisecond)))
     unwatch(pty, self())
-    write("ask reply collected: #{inspect(slice(inspect(response), 0..50))}\n")
     signal(sender, format(response))
   end
 
@@ -36,7 +34,6 @@ defmodule El.Puppet.Answer do
 
   defp signal(sender, response) do
     text = envelope(sender, response)
-    write("signal: sender=#{sender} response=#{inspect(slice(inspect(response), 0..50))}\n")
     direct(sender, text)
   end
 
@@ -51,7 +48,7 @@ defmodule El.Puppet.Answer do
   end
 
   defp deliver(nil, _text) do
-    write("direct nil: cannot deliver\n")
+    :ok
   end
 
   defp deliver(pid, text), do: cast(pid, {:put, text})

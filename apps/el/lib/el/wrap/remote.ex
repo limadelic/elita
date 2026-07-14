@@ -74,7 +74,6 @@ defmodule El.Wrap.Remote do
 
   defp timed(task) do
     Task.shutdown(task, 1)
-    write("listen fail: ask-on-tell timeout after 90s\n")
     :forward
   end
 
