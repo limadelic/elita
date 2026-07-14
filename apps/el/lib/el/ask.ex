@@ -4,7 +4,7 @@ defmodule El.Ask do
   import Application, only: [ensure_all_started: 1]
   import System, only: [pid: 0]
   import Enum, only: [find_value: 3]
-  import Log, only: [ask: 3, answer: 2]
+  import Log, only: [ask: 3]
 
   def invoke(agent, msg) do
     prime()
@@ -12,8 +12,7 @@ defmodule El.Ask do
     reach(agent) |> call(agent, msg) |> done(agent)
   end
 
-  defp done(agent, result) do
-    answer(agent, result)
+  defp done(_agent, result) do
     puts(result)
   end
 

@@ -25,7 +25,7 @@ end
 
 defmodule Tools.Sys.Ask do
   import Agent.Harness, only: [dispatch: 3]
-  import Log, only: [ask: 3, answer: 2]
+  import Log, only: [ask: 3]
 
   defdelegate spec(name, state), to: Tools.Sys.Ask.Schema, as: :get
 
@@ -40,7 +40,6 @@ defmodule Tools.Sys.Ask do
   defp route(recipient, question, sender, state) do
     ask(sender, recipient, question)
     result = dispatch(recipient, question, :ask)
-    answer(bare(recipient), result)
     {result, state}
   end
 

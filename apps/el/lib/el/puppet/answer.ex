@@ -24,12 +24,7 @@ defmodule El.Puppet.Answer do
     signal(sender, format(response))
   end
 
-  defp format(response) when is_list(response), do: pull(response)
-  defp format(response) when is_binary(response), do: response
-  defp format(response), do: inspect(response)
-
-  defp pull([%{"text" => text} | _]), do: text
-  defp pull(response), do: inspect(response)
+  defp format(response), do: response
 
   defp signal(sender, response) do
     text = envelope(sender, response)

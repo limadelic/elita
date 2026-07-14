@@ -18,17 +18,14 @@ defmodule El.Puppet.Settle do
     reply(state.buffer)
   end
 
-  def peak(state, quiet, _elapsed) do
-    ready(state, quiet)
+  def peak(state, quiet, _elapsed), do: ready(state, quiet)
+
+  def solo(%{gap: false} = state, quiet, elapsed) do
+    ans = answer?(state.buffer, state.question)
+    response(ans, state, quiet, elapsed)
   end
 
-  def solo(%{gap: false} = state, quiet, elapsed) when quiet >= 500 do
-    response(answer?(state.buffer, state.question), state, quiet, elapsed)
-  end
-
-  def solo(state, quiet, _elapsed) do
-    ready(state, quiet)
-  end
+  def solo(state, quiet, _elapsed), do: ready(state, quiet)
 
   defp response(true, state, _quiet, elapsed) do
     write("collect: clean answer (burst 1) after #{elapsed}ms\n")
@@ -41,7 +38,8 @@ defmodule El.Puppet.Settle do
   end
 
   def ready(state, quiet) do
-    marked(marker?(state, quiet), state, quiet)
+    found = marker?(state, quiet)
+    marked(found, state, quiet)
   end
 
   defp marked(true, state, quiet) do
