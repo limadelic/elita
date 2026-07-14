@@ -1,25 +1,29 @@
 defmodule El.Ask do
   import IO, only: [puts: 1]
-  import Tools
   import Node, only: [start: 2, set_cookie: 1, connect: 1]
   import Application, only: [ensure_all_started: 1]
   import System, only: [pid: 0]
   import Enum, only: [find_value: 3]
+  import Log, only: [ask: 3, answer: 2]
 
   def invoke(agent, msg) do
     prime()
-    reach(agent)
-    {parts, _} = exec({[spec(agent, msg)], %{name: "user"}})
-    print(parts)
+    session_node = reach(agent)
+
+    ask("user", "el.#{agent}", msg)
+    result = erpc_response(session_node, agent, msg)
+    answer(agent, result)
+
+    puts(result)
   end
 
-  defp spec(agent, msg) do
-    %{"id" => "1", "name" => "ask",
-      "input" => %{"recipient" => "el.#{agent}", "question" => msg}}
+  defp erpc_response(session_node, agent, msg) do
+    try do
+      :erpc.call(session_node, Agent.Portal, :response, [agent, msg])
+    rescue
+      _ -> "unknown: el.#{agent}"
+    end
   end
-
-  defp print([%{"result" => result} | _]), do: puts(result)
-  defp print(_), do: :ok
 
   defp prime do
     :os.cmd(~c"epmd -daemon")
@@ -39,11 +43,13 @@ defmodule El.Ask do
   end
 
   defp sync({:ok, name}) do
-    connect(:"#{name}@127.0.0.1")
+    target = :"#{name}@127.0.0.1"
+    connect(target)
     :global.sync()
+    target
   end
 
-  defp sync({:error, :absent}), do: :ok
+  defp sync({:error, :absent}), do: nil
 
   defp discover(agent) do
     :net_adm.names(~c"127.0.0.1") |> locate(agent)
