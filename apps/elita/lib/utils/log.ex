@@ -65,16 +65,30 @@ defmodule Log do
   end
 
   def ask(sender, recipient, question) do
-    write("🤔 #{sender} → #{recipient} | #{question}\n")
+    msg = "🤔 #{sender} → #{recipient} | #{question}\n"
+    write(msg)
+    delegate_write(msg)
   end
 
   def answer(agent, text) when is_binary(text) do
-    write("✨ #{agent} | #{trim(text)}\n")
+    msg = "✨ #{agent} | #{trim(text)}\n"
+    write(msg)
+    delegate_write(msg)
   end
 
   def answer(_agent, _text), do: :ok
 
   def tell(sender, recipient, message) do
-    write("📢 #{sender} → #{recipient} | #{message}\n")
+    msg = "📢 #{sender} → #{recipient} | #{message}\n"
+    write(msg)
+    delegate_write(msg)
+  end
+
+  defp delegate_write(msg) do
+    try do
+      :erlang.apply(:"Elixir.El.Log", :write, [msg])
+    rescue
+      _ -> :ok
+    end
   end
 end
