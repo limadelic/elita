@@ -1,10 +1,11 @@
 defmodule El.Ask do
   import IO, only: [puts: 1]
   import Tools
-  import Elita, only: [spawn: 2]
+  import Node, only: [start: 2, set_cookie: 1]
+  import Application, only: [ensure_all_started: 1]
 
   def invoke(agent, msg) do
-    register()
+    prime()
     {parts, _} = exec({[spec(agent, msg)], %{name: "el"}})
     print(parts)
   end
@@ -17,10 +18,16 @@ defmodule El.Ask do
   defp print([%{"result" => result} | _]), do: puts(result)
   defp print(_), do: :ok
 
-  defp register do
-    spawn("el", []) |> ok()
+  defp prime do
+    :os.cmd(~c"epmd -daemon")
+    Node.self() |> boot()
+    set_cookie(:elita)
+    ensure_all_started(:elita)
   end
 
-  defp ok({:error, {:already_started, _}}), do: :ok
-  defp ok({:ok, _}), do: :ok
+  defp boot(:nonode@nohost) do
+    start(:"ask_#{:erlang.system_time(:millisecond)}@127.0.0.1", :longnames)
+  end
+
+  defp boot(_), do: :ok
 end

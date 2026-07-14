@@ -63,11 +63,21 @@ module Spawn
 
   def run(cmd)
     output = ""
-    reader, writer, pid = PTY.spawn("/bin/sh", "-c", cmd)
+    reader, writer, pid = spawn_pty(cmd)
     track_pid(pid)
     extract(reader, Time.now + 30, output)
     kill(writer, pid)
     output
+  end
+
+  def spawn_pty(cmd)
+    cmd_env = cmd.include?("@") ? env_wrap(cmd) : cmd
+    PTY.spawn("/bin/sh", "-c", cmd_env)
+  end
+
+  def env_wrap(cmd)
+    unique_id = "ask_#{Time.now.to_i}#{rand(1000)}"
+    "ELITA_RUN=#{unique_id} #{cmd}"
   end
 
   def kill(writer, pid)

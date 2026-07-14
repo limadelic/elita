@@ -19,13 +19,19 @@ module Assert
   end
 
   def assert(expected, output)
-    sprite_chars = ["▐▛███▜▌", "▝▜█████▛▘"]
-    return if sprite_chars.any? { |char| expected.include?(char) } && output.downcase.include?("claude code")
+    return if sprite_prompt?(expected, output)
 
-    expected.split.each { |w|
-      msg = "Expected '#{w}' in:\n#{output}"
-      (output.downcase.include?(w.downcase) or raise(msg))
-    }
+    expected.split.each { |w| check_word(w, output) }
+  end
+
+  def sprite_prompt?(expected, output)
+    sprite_chars = ["▐▛███▜▌", "▝▜█████▛▘"]
+    sprite_chars.any? { |char| expected.include?(char) } && output.downcase.include?("claude code")
+  end
+
+  def check_word(word, output)
+    msg = "Expected '#{word}' in:\n#{output}"
+    (output.downcase.include?(word.downcase) or raise(msg))
   end
 
   def refute(unexpected, output)
