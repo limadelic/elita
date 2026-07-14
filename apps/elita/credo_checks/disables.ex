@@ -22,7 +22,7 @@ defmodule Elita.Credo.Disables do
 
   def run(%Credo.SourceFile{} = source_file, _params) do
     file = source_file.filename
-    path(ends_with?(file, "disables.ex"), file)
+    path(ends_with?(file, "/credo_checks/disables.ex"), file)
   end
 
   defp path(true, _file), do: []
