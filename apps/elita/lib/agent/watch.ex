@@ -35,7 +35,7 @@ defmodule Agent.Watch do
     proceed(state, elapsed)
   end
 
-  defp proceed(_, elapsed) when elapsed > 7000, do: :ok
+  defp proceed(_, elapsed) when elapsed > 90000, do: :ok
 
   defp proceed({agent, question, folder, start, pos}, _) do
     {agent, question, folder, start, pos} |> fetch()

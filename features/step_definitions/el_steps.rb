@@ -95,7 +95,12 @@ def log_response(prompt, text, _output)
 end
 
 def retrying(times, &block)
-  attempt_with_retries(times, &block)
+  effective_times = ENV["LIVE"] == "1" ? live_retry_count : times
+  attempt_with_retries(effective_times, &block)
+end
+
+def live_retry_count
+  (60.0 / pause_time).ceil
 end
 
 def verify_lines(lines)
