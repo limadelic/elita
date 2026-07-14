@@ -30,9 +30,10 @@ defmodule Elita.Umbrella do
   end
 
   defp run_test(_) do
-    check("cd apps/elita && mix test")
-    check("cd apps/el && mix test")
-    System.halt(0)
+    unless Mix.Task.recursing?() do
+      check("cd apps/elita && mix test")
+      check("cd apps/el && mix test")
+    end
   end
 
   defp run_lint(_) do
