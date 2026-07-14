@@ -5,6 +5,7 @@ defmodule El.REPL do
   import El.Tunnel, only: [boot: 1, reach: 1]
   import El.Puppet, only: [ask: 2]
   import Agent.Harness, only: [dispatch: 3]
+  import El.Log.Reply, only: [handle: 2]
   import IO, only: [read: 2, puts: 1, write: 1]
   import String, only: [trim: 1, split: 3]
 
@@ -86,14 +87,8 @@ defmodule El.REPL do
   defp choose(nil, default), do: default
   defp choose(t, _), do: t
 
-  defp reply([%{"text" => text} | _], agent) do
-    line = "✨ #{agent} | #{text}\n"
-    write(line)
-    El.Log.write(line)
+  defp reply(response, agent) do
+    handle(response, agent)
     :ok
-  end
-
-  defp reply(response, _agent) do
-    puts(inspect(response))
   end
 end
