@@ -1,7 +1,6 @@
 name: Cucumber Tests
 
 on:
-  push:
   workflow_dispatch:
 
 permissions:
@@ -23,6 +22,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 'lts/*'
+          cache: npm
 
       - name: Lint el
         run: |
@@ -43,6 +43,7 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - uses: actions/checkout@v4
@@ -56,6 +57,15 @@ jobs:
         with:
           ruby-version: '3.3'
           bundler-cache: true
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            deps
+            _build
+          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-
 
       - name: Build el escript
         run: |
@@ -72,14 +82,9 @@ jobs:
       - name: Run Cucumber tests
         run: |
           mkdir -p reports
-          TAPE=replay timeout -k 10 300 bundle exec cucumber --format html --out reports/cucumber.html --format json --out reports/cucumber.json --publish-quiet
+          TAPE=replay bundle exec cucumber --format html --out reports/cucumber.html --format json --out reports/cucumber.json --publish-quiet
         env:
           MIX_ENV: test
-
-      - name: Cleanup Erlang processes
-        if: always()
-        run: |
-          pkill -9 beam.smp || true
 
       - name: Upload session logs
         if: failure()
@@ -164,7 +169,7 @@ jobs:
         uses: actions/configure-pages@v4
 
       - name: Upload to Pages
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: site
 
