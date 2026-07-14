@@ -3,6 +3,7 @@ defmodule El.Pty.Dispatch do
   import El.Trace
   import El.Pty.Handler
   import El.Pty.Cleanup
+  import El.Pty.Buffer, only: [prime: 2, gate: 2]
   import List, only: [delete: 2]
   import Enum, only: [each: 2]
   import :os, only: [cmd: 1]
@@ -10,8 +11,9 @@ defmodule El.Pty.Dispatch do
   import IO, only: [binwrite: 2]
 
   def info({pty, {:data, data}}, state) do
-    process(pty, data, state)
-    {:noreply, state}
+    updated = prime(state, data)
+    process(pty, data, updated)
+    {:noreply, updated}
   end
 
   def info({:stdin, data}, %{pty: pty, port: port, input: input} = state) do
@@ -67,17 +69,8 @@ defmodule El.Pty.Dispatch do
     {:noreply, %{state | taps: delete(taps, pid)}}
   end
 
-  def cast({:inject, msg, _reply}, %{pty: pty, port: port} = state),
-    do: relay(msg, pty, port, state)
-
-  def cast({:inject, msg}, %{pty: pty, port: port} = state),
-    do: relay(msg, pty, port, state)
-
-  defp relay(msg, pty, port, state) do
-    record(msg)
-    port.command(pty, msg)
-    {:noreply, state}
-  end
+  def cast({:inject, msg, _reply}, state), do: {:noreply, gate(msg, state)}
+  def cast({:inject, msg}, state), do: {:noreply, gate(msg, state)}
 
   defp process(pty, data, %{port: port, out: out, taps: taps} = state) do
     binwrite(out, data)

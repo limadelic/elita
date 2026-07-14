@@ -25,7 +25,7 @@ defmodule El.Pty.Init do
   end
 
   defp core(pty, out, child) do
-    %{pty: pty, out: out, child: child}
+    %{pty: pty, out: out, child: child, ready: false, buffer: []}
   end
   defp attach(state, cfg) do
     merge(state, %{
