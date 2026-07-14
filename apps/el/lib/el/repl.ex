@@ -71,7 +71,7 @@ defmodule El.REPL do
   defp handle(_agent, _puppet, "/exit"), do: :stop
 
   defp handle(agent, puppet, input) when is_pid(puppet) do
-    route(agent, puppet, input) |> puts()
+    route(agent, puppet, input) |> reply(agent)
   end
 
   defp handle(agent, nil, input) do
@@ -85,4 +85,15 @@ defmodule El.REPL do
 
   defp choose(nil, default), do: default
   defp choose(t, _), do: t
+
+  defp reply([%{"text" => text} | _], agent) do
+    line = "✨ #{agent} | #{text}\n"
+    write(line)
+    El.Log.write(line)
+    :ok
+  end
+
+  defp reply(response, _agent) do
+    puts(inspect(response))
+  end
 end
