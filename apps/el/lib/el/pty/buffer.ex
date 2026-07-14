@@ -38,7 +38,7 @@ defmodule El.Pty.Buffer do
   end
 
   defp ready?(data) when is_binary(data) do
-    contains?(data, "\e[?1049h")
+    contains?(data, "❯")
   end
 
   defp flush(%{buffer: buf, pty: pty, port: port} = state) do
