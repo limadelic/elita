@@ -33,8 +33,7 @@ defmodule Agent.Harness do
   end
 
   defp global(name) do
-    normalized = to_atom(name) |> Kernel.to_string() |> downcase()
-    whereis_name({normalized, :puppet}) |> wrap()
+    whereis_name({to_atom(name), :puppet}) |> wrap()
   end
 
   defp fallback([], recipient) do
