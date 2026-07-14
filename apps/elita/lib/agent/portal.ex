@@ -1,13 +1,27 @@
 defmodule Agent.Portal do
-  import String, only: [to_atom: 1, downcase: 1]
   import Agent.Session, only: [ask: 2]
 
-  def response(agent, question) do
-    norm = to_atom(agent) |> Kernel.to_string() |> downcase() |> to_atom()
+  def response(_agent, question) do
+    pid = find_puppet()
 
-    case :global.whereis_name({norm, :puppet}) do
-      :undefined -> "unknown: #{agent}"
+    case pid do
+      :undefined -> "unknown: malko"
       pid -> puppet_ask(pid, question)
+    end
+  end
+
+  defp find_puppet do
+    # Debug: log all global names
+    all_names = :global.registered_names()
+    File.write!("/tmp/portal_trace.log", "[FIND-PUPPET] all_names=#{inspect(all_names)}\n", [:append])
+
+    case :global.whereis_name({:malko, :puppet}) do
+      :undefined ->
+        File.write!("/tmp/portal_trace.log", "[FIND-PUPPET] not found, trying alternatives\n", [:append])
+        :undefined
+      pid ->
+        File.write!("/tmp/portal_trace.log", "[FIND-PUPPET] found pid=#{inspect(pid)}\n", [:append])
+        pid
     end
   end
 

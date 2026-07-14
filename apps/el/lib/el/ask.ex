@@ -12,16 +12,24 @@ defmodule El.Ask do
 
     ask("user", "el.#{agent}", msg)
     result = erpc_response(session_node, agent, msg)
+    puts("DEBUG: session_node=#{inspect(session_node)} result=#{inspect(result)}")
     answer(agent, result)
 
     puts(result)
   end
 
+  defp erpc_response(nil, agent, _msg) do
+    "unknown: el.#{agent}"
+  end
+
   defp erpc_response(session_node, agent, msg) do
     try do
-      :erpc.call(session_node, Agent.Portal, :response, [agent, msg])
-    rescue
-      _ -> "unknown: el.#{agent}"
+      resp = :erpc.call(session_node, Agent.Portal, :response, [agent, msg])
+      puts("DEBUG: erpc succeeded: #{inspect(resp)}")
+      resp
+    rescue e ->
+      puts("DEBUG: erpc failed: #{inspect(e)}")
+      "unknown: el.#{agent}"
     end
   end
 
