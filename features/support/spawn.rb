@@ -11,6 +11,7 @@ module Spawn
     (
       "cd #{work_dir} && " +
       "TAPE=#{ENV['TAPE'] || 'replay'} " +
+      "LIVE=#{ENV['LIVE'] || ''} " +
       "CASSETTE=#{@cassette} " +
       "CASSETTE_DIR=#{dir} " +
       "MIX_ENV=test " +
@@ -24,6 +25,7 @@ module Spawn
     (
       "cd #{work_dir} && " +
       "TAPE=#{tape} " +
+      "LIVE=#{ENV['LIVE'] || ''} " +
       "CASSETTE=#{@cassette} " +
       "CASSETTE_DIR=#{dir} " +
       "MIX_ENV=test " +
@@ -51,6 +53,7 @@ module Spawn
   def base_env
     {
       "TAPE" => ENV["TAPE"] || "replay",
+      "LIVE" => ENV["LIVE"] || "",
       "CASSETTE" => @cassette,
       "CASSETTE_DIR" => dir,
       "MIX_ENV" => "test"
