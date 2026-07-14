@@ -14,8 +14,13 @@ When(/^> el$/) do |*rest|
 end
 
 When(/^> el (.+)$/) do |args, *rest|
-  boot(args)
-  drain
+  if args.start_with?("@")
+    output = one(args)
+    track(output, output.gsub(/\e\[[0-9;]*m/, ''))
+  else
+    boot(args)
+    drain
+  end
   handle(rest.first, transcript)
 end
 

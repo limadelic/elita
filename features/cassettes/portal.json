@@ -10,7 +10,6 @@
       "agent": "malko",
       "messages": [
         {
-          "role": "user",
           "content": "1+1"
         }
       ],
