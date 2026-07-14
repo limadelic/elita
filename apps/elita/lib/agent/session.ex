@@ -2,11 +2,13 @@ defmodule Agent.Session do
   use GenServer
 
   import Agent.Spawn, only: [run: 2]
-  import Agent.Watch, only: [start: 2]
   import GenServer, only: [start_link: 3, call: 3]
   import Keyword, only: [fetch!: 2, get: 3]
   import Map, only: [put: 3]
   import String, only: [downcase: 1]
+  import Tape, only: [handle: 3]
+  import Log, only: [answer: 2]
+  import System, only: [get_env: 1]
 
   def start_link(opts) do
     folder = fetch!(opts, :folder)
@@ -40,8 +42,20 @@ defmodule Agent.Session do
 
   @impl true
   def handle_call({:ask, message}, _from, state) do
-    start(state.name, message)
+    body = %{messages: [%{content: message}]}
+    spawn(fn -> reply(state.name, message, body, state.folder, state.runner) end)
     {:reply, {:ok, ""}, state}
+  end
+
+  defp reply(name, message, body, folder, runner) do
+    response = handle(body, name, fn -> runner.(message, folder) end)
+    case response do
+      [%{"text" => text, "type" => "text"}] -> answer(name, String.trim(text))
+      [%{"text" => text}] -> answer(name, String.trim(text))
+      _ -> :ok
+    end
+  rescue
+    _ -> :ok
   end
 
   def handle_call({:act, message}, _from, state) do
