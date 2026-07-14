@@ -2,6 +2,7 @@ defmodule El.Pty.Buffer do
   @moduledoc false
   import Enum, only: [each: 2]
   import String, only: [contains?: 2]
+  import El.Trace, only: [record: 1]
   import El.Log, only: [write: 1]
 
   def prime(%{ready: true} = s, _), do: s
@@ -11,7 +12,7 @@ defmodule El.Pty.Buffer do
   defp check(s, false), do: s
 
   def gate(msg, %{ready: true, pty: pty, port: port} = state) do
-    record(msg)
+    log(msg)
     port.command(pty, msg)
     state
   end
@@ -25,11 +26,12 @@ defmodule El.Pty.Buffer do
   end
 
   defp flush(%{buffer: buf, pty: pty, port: port} = state) do
-    each(buf, fn msg -> record(msg); port.command(pty, msg) end)
+    each(buf, fn msg -> log(msg); port.command(pty, msg) end)
     %{state | ready: true, buffer: []}
   end
 
-  defp record(msg) do
+  defp log(msg) do
+    record(msg)
     write("inject: #{byte_size(msg)}b\n")
   end
 end
