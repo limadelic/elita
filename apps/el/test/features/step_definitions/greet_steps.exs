@@ -31,7 +31,7 @@ defmodule GreetSteps do
 
     # Check if actual response contains or matches expected
     assert String.downcase(actual) =~ String.downcase(expected),
-      "Expected '#{expected}' in response '#{actual}'"
+           "Expected '#{expected}' in response '#{actual}'"
 
     context
   end
@@ -78,7 +78,8 @@ defmodule GreetSteps do
         Map.put(session, :greeted, true)
 
       # User providing name
-      session.greeted and is_nil(session.name) and String.contains?(response, ["Wonderful", "wonderful"]) ->
+      session.greeted and is_nil(session.name) and
+          String.contains?(response, ["Wonderful", "wonderful"]) ->
         Map.put(session, :name, String.downcase(message))
 
       true ->
