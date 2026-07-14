@@ -1,10 +1,12 @@
 defmodule Agent.Portal do
   import Agent.Session, only: [ask: 2]
+  import Agent.Watch, only: [start: 2]
   import Log, only: [ask: 3, answer: 2]
   import String, only: [trim: 1]
 
   def response(agent, question) do
     ask("user", "el.#{agent}", question)
+    start(agent, question)
     reply = process(locate(), agent, question)
     log(agent, reply)
     reply
