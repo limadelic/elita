@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(nohup *)",
+      "Bash(env LIVE=1 *)",
+      "Bash(bundle exec cucumber *)",
+      "Bash(tail *)",
+      "Bash(sleep *)",
+      "Bash(ps *)"
+    ]
+  }
+}

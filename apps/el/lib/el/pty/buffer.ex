@@ -24,7 +24,10 @@ defmodule El.Pty.Buffer do
     latch(contains?(d, "bypass permissions"), s, msg, rest)
   end
 
-  defp mark(s, _d), do: s
+  defp mark(s, d), do: ready(contains?(d, "bypass permissions"), s)
+
+  defp ready(true, s), do: %{s | idle: true}
+  defp ready(false, s), do: s
 
   defp latch(true, s, msg, rest) do
     %{s | idle: true, buffer: rest} |> fire(msg)
