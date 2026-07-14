@@ -3,7 +3,7 @@ defmodule El.Wrap.Reply do
   import El.Distribution, only: [target: 1]
   import String, only: [to_atom: 1, trim: 1, trim_trailing: 2, split: 3]
   import El.Puppet, only: [put: 2]
-  import El.Log, only: [write: 1]
+  import IO, only: [write: 1]
 
   def handle(:forward, _), do: :forward
 
@@ -30,10 +30,8 @@ defmodule El.Wrap.Reply do
   def fix(a, _) when is_atom(a), do: a
   def fix(_, b) when is_binary(b), do: to_atom(b)
 
-  def prepare(name, sender) do
-    t = name |> trim() |> to_atom()
-    write("prepare: target=#{t} from=#{inspect(sender)}\n")
-    t
+  def prepare(name, _sender) do
+    name |> trim() |> to_atom()
   end
 
   def inject(nil, _target, _message, _sender), do: :forward
@@ -44,29 +42,20 @@ defmodule El.Wrap.Reply do
     put(pid, text)
   end
 
-  defp route(nil, _, _) do
-    write("route nil: cannot write\n")
-    :ok
-  end
+  defp route(nil, _, _), do: :ok
 
   defp route(pid, [%{"text" => text} | _], agent), do: route(pid, text, agent)
 
   defp route(_pid, output, agent) when is_binary(output) do
     cleaned = trim_trailing(output, "\n")
-    write("route: text: #{inspect(cleaned)}\n")
-    term("#{cleaned}\n#{agent}> ")
+    write("#{cleaned}\n#{agent}> ")
   end
 
-  defp route(_, output, _) do
-    write("route drop: #{inspect(output)}\n")
-    :ok
-  end
+  defp route(_, _, _), do: :ok
 
   def known?(name) do
     name |> trim() |> to_atom() |> target() |> is_pid()
   rescue
     _ -> false
   end
-
-  defp term(text), do: IO.write(text)
 end
