@@ -1,0 +1,5 @@
+#!/bin/bash
+exec </dev/null >/tmp/hook_push.log 2>&1
+mix lint || exit 1
+mix test
+exit $?

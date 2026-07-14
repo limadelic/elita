@@ -3,16 +3,16 @@ defmodule El.Commands.Claude do
   import :os, only: [cmd: 1]
   import El.Pty, only: [launch: 2, wait: 1]
   import String, only: [to_atom: 1]
-  import IO, only: [puts: 1]
-  import System, only: [halt: 1, get_env: 2]
+  import System, only: [get_env: 2]
   import El.Commands.Size, only: [size: 0]
   import File, only: [write!: 2, cwd!: 0]
   import Path, only: [basename: 1]
   import El.Wrap.Resize, only: [watch: 1]
   import El.Wrap.Input, only: [open: 2, encode: 2]
   import El.Log, only: [write: 1]
-  import El.Distribution, only: [start: 1]
+  import El.Distribution, only: [start: 1, bind: 1]
   import El.Puppet, only: [open: 1]
+  import Agent, only: [start: 2]
 
   def claude(name \\ :default) do
     claude(name, deps())
@@ -46,19 +46,21 @@ defmodule El.Commands.Claude do
   end
 
   defp go(name, deps) do
-    validate(Keyword.get(deps, :distribution_start).(name), name)
+    Task.start(fn -> distribute(name, deps) end)
     boot(to_atom(name), deps)
+  rescue
+    e -> write("boot error during claude setup: #{inspect(e)}\n")
   end
 
-  defp validate(:taken, name) do
-    puts("session #{name} already live — el tell #{name} <msg>, or /exit it")
-    halt(1)
+  defp distribute(name, deps) do
+    Keyword.get(deps, :distribution_start).(name)
+  rescue
+    e -> write("distribution error: #{inspect(e)}\n")
   end
-
-  defp validate(_, _), do: :ok
 
   defp boot(name, deps) do
     setup(deps)
+    tape()
     buf = open(self(), name)
     execute(name, deps, buf)
   end
@@ -86,8 +88,13 @@ defmodule El.Commands.Claude do
 
   defp install(name) do
     open(name: name, pty: name)
+    bind(name)
   end
 
   defp resolve(:default), do: cwd!() |> basename()
   defp resolve(name) when is_binary(name), do: name
+
+  defp tape, do: mode(get_env("TAPE", nil))
+  defp mode("rec"), do: start(fn -> %{} end, name: Tape.Writer)
+  defp mode(_), do: :ok
 end

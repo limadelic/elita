@@ -1,13 +1,15 @@
-require "pty"
+# frozen_string_literal: true
+
+require 'pty'
 
 When(/^> el tell (.+)$/) do |args, *rest|
   output = one("tell #{args}")
-  track(output, output.gsub(/\e\[[0-9;]*m/, ""))
+  track(output, output.gsub(/\e\[[0-9;]*m/, ''))
   handle(rest.first, output)
 end
 
 When(/^> el$/) do |*rest|
-  boot("")
+  boot('')
   handle(rest.first, transcript)
 end
 
@@ -20,7 +22,8 @@ end
 When(/^(\w+)> (.+)$/) do |prompt, input, *rest|
   table = rest.first
   note(prompt, input) if table && valid?(table)
-  output = retrying(5) { send(input, prompt) }
+  write_input(input, prompt)
+  output = retrying(15) { await_result(prompt, input) }
   settle(table, output)
 end
 
@@ -38,7 +41,15 @@ Then(/^screen shows (.+)$/) do |text|
   end
 end
 
-private
+When(/^(\w+):$/) do |name, *rest|
+  table = rest.first
+  activate(name)
+  return unless table
+
+  retrying(15) do
+    verify_lines(table.raw.map { |row| row[0].strip })
+  end
+end
 
 def handle(table, output)
   return unless table
@@ -49,27 +60,51 @@ end
 def settle(table, output)
   return unless table
 
-  valid?(table) ? retrying(5) { verify(table.raw) } : retrying(5) {
-    table(table, output)
-  }
+  valid?(table) ? retrying(5) { verify(table.raw) } : retrying(5) { table(table, output) }
 end
 
 def track(chunk, stripped)
-  @transcript ||= ""
-  @transcript_stripped ||= ""
+  @transcript ||= ''
+  @transcript_stripped ||= ''
   @transcript << chunk
   @transcript_stripped << stripped
 end
 
 def note(prompt, input)
-  @transcript_stripped ||= ""
+  @transcript_stripped ||= ''
   @transcript_stripped << "\n🤔 el → #{prompt}: #{input}\n"
 end
 
-def retrying(times)
-  first_error = nil
-  yield
-rescue => e
-  first_error ||= e
-  (times -= 1).zero? ? (raise first_error) : (sleep 1 if ENV["TAPE"] == "rec"; retry)
+def retrying(times, &block)
+  attempt_with_retries(times, &block)
+end
+
+def verify_lines(lines)
+  iterate_and_verify_lines(transcript.downcase, lines)
+end
+
+def attempt_with_retries(times, &block)
+  block.call
+rescue StandardError => e
+  raise e if (times -= 1).zero?
+
+  sleep pause_time
+  attempt_with_retries(times, &block)
+end
+
+def iterate_and_verify_lines(transcript, lines)
+  cursor = 0
+  lines.each { |line| cursor = verify_line(line, transcript, cursor) }
+end
+
+def pause_time
+  ENV['TAPE'] == 'rec' ? 1 : 0.5
+end
+
+def verify_line(line, transcript, cursor)
+  idx = transcript.index(line.downcase, cursor)
+  return idx + line.length if idx
+
+  msg = "Expected '#{line}' in transcript after #{cursor}:\n#{transcript}"
+  raise msg
 end

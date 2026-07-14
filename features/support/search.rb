@@ -70,11 +70,11 @@ module Search
   end
 
   def split(line)
-    c, e = line.index(": "), line.index(" = ")
-    c && (!e || c < e) ? [
-      line[0...c],
-      line[c + 2..-1]
-    ] : e ? [line[0...e], line[e + 3..-1]] : [line, line]
+    colon_idx, equals_idx = line.index(": "), line.index(" = ")
+    return [line[0...colon_idx], line[colon_idx + 2..-1]] if colon_idx && (!equals_idx || colon_idx < equals_idx)
+    return [line[0...equals_idx], line[equals_idx + 3..-1]] if equals_idx
+
+    [line, line]
   end
 
   def match?(folded_line, want_prefix, want_text)
@@ -105,11 +105,23 @@ module Search
   end
 
   def fold(lines)
-    lines.each_with_object([]) { |line, result|
-      is_log = PATTERNS.any? { |p| (line.match?(p) rescue false) }
-      result << line if is_log
-      result[-1] << " " << line if !is_log && result.any?
-    }
+    lines.each_with_object([]) { |line, result| fold_line(line, result) }
+  end
+
+  def fold_line(line, result)
+    is_log = check_log_pattern(line)
+    add_or_append(line, result, is_log)
+  end
+
+  def check_log_pattern(line)
+    PATTERNS.any? { |p| (line.match?(p) rescue false) }
+  end
+
+  def add_or_append(line, result, is_log)
+    return result << line if is_log
+    return if result.empty?
+
+    result[-1] << " " << line
   end
 
   def nudge

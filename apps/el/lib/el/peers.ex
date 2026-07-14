@@ -1,9 +1,9 @@
 defmodule El.Peers do
   import Enum, only: [join: 2, map: 2, reject: 2, uniq: 1]
   import File, only: [mkdir_p!: 1, read: 1, write!: 2]
-  import Path, only: [dirname: 1, join: 1]
+  import Path, only: [dirname: 1]
   import String, only: [split: 2, to_atom: 1, trim: 1]
-  import System, only: [get_env: 2]
+  import El.Run, only: [file: 0]
 
   def load do
     path() |> read() |> parse()
@@ -19,8 +19,7 @@ defmodule El.Peers do
   end
 
   defp path do
-    home = get_env("HOME", get_env("USERPROFILE", "."))
-    join([home, ".elita", "peers"])
+    file()
   end
 
   defp store(file, lines) do

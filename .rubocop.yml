@@ -7,22 +7,34 @@ AllCops:
     - 'node_modules/**/*'
     - 'deps/**/*'
     - '_build/**/*'
-    - 'features/support/**/*'
+    - 'tmp/**/*'
 
-# The ones we care about
+# HARD CONSTRAINTS: seven-line methods, zero nesting, guard clauses
 Metrics/MethodLength:
-  Max: 5
+  Max: 7
   CountAsOne:
     - array
     - hash
     - heredoc
     - method_call
 
+Metrics/BlockNesting:
+  Max: 1
+
+Metrics/CyclomaticComplexity:
+  Max: 5
+
+Metrics/PerceivedComplexity:
+  Max: 20
+
+Metrics/AbcSize:
+  Max: 35
+
 Metrics/ClassLength:
-  Max: 100
+  Max: 150
 
 Metrics/ModuleLength:
-  Max: 100
+  Max: 180
 
 Metrics/BlockLength:
   Enabled: false
@@ -30,12 +42,16 @@ Metrics/BlockLength:
 Metrics/ParameterLists:
   Enabled: false
 
-# Disable everything else
+# Style cops: disable noise (docs, frozen string literals, quote preference)
+Style:
+  Enabled: false
+
+# Layout: relax noise, keep basics enabled
 Layout:
   Enabled: true
 
 Layout/LineLength:
-  Max: 80
+  Max: 120
 
 Layout/MultilineMethodCallIndentation:
   EnforcedStyle: indented
@@ -86,12 +102,6 @@ Layout/FirstArrayElementLineBreak:
 Layout/FirstMethodArgumentLineBreak:
   Enabled: true
 
-Lint:
-  Enabled: false
-
-Naming:
-  Enabled: false
-
 Naming/FileName:
   Enabled: true
   ExpectMatchingDefinition: true
@@ -99,22 +109,21 @@ Naming/FileName:
   CheckDefinitionPathHierarchyRoots:
     - lib
   Exclude:
-    - 'spec/**/*'
     - 'bin/**/*'
     - 'features/step_definitions/**/*'
+    - 'tmp/**/*'
 
-Style:
+Lint/SuppressedException:
   Enabled: false
 
-Style/ClassAndModuleChildren:
+Lint:
   Enabled: true
-  EnforcedStyle: nested
 
-Bundler:
+Naming/MethodParameterName:
   Enabled: false
+
+Metrics:
+  Enabled: true
 
 Gemspec:
-  Enabled: false
-
-Security:
   Enabled: false

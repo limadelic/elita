@@ -2,12 +2,17 @@ defmodule El.Puppet do
   use GenServer
 
   import Registry, only: [start_link: 1]
-  import El.Pty, only: [watch: 2, unwatch: 2, inject: 2]
-  import String, only: [ends_with?: 2]
+  import El.Pty, only: [inject: 2]
   import Keyword, only: [fetch!: 2]
+  import El.Log, only: [write: 1]
+  import El.Puppet.Invoke, only: [invoke: 2]
 
   def ask(pid, message) do
     GenServer.call(pid, {:ask, message}, :infinity)
+  end
+
+  def put(pid, output) do
+    GenServer.cast(pid, {:put, output})
   end
 
   def open(opts) do
@@ -39,44 +44,14 @@ defmodule El.Puppet do
   end
 
   def handle_call({:ask, message}, _from, %{pty: pty} = state) do
-    output = query(pty, message)
-    {:reply, output, state}
+    write("ask received: #{inspect(message)}\n")
+    reply = invoke(pty, message)
+    {:reply, reply, state}
   end
 
-  defp query(pty, message) do
-    watch(pty, self())
-    inject(pty, message <> "\r")
-    collect(pty, "")
-  end
-
-  defp collect(pty, buffer) do
-    receive do
-      {:output, data} ->
-        ready(pty, buffer <> data, prompt?(buffer <> data))
-    after
-      5000 ->
-        cleanup(pty)
-        buffer
-    end
-  end
-
-  defp ready(pty, buffer, true) do
-    cleanup(pty)
-    buffer
-  end
-
-  defp ready(pty, buffer, false) do
-    collect(pty, buffer)
-  end
-
-  defp cleanup(pty) do
-    unwatch(pty, self())
-  rescue
-    _ -> :ok
-  end
-
-  defp prompt?(text) do
-    ends_with?(text, "> ")
+  def handle_cast({:put, output}, %{pty: pty} = state) do
+    inject(pty, output <> "\r")
+    {:noreply, state}
   end
 
   defp setup do

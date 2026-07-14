@@ -2,61 +2,7 @@
   {
     "a": [
       {
-        "text": "1 + 1 = 2",
-        "type": "text"
-      }
-    ],
-    "q": {
-      "agent": "malko",
-      "messages": [
-        {
-          "content": "1+1",
-          "role": "user"
-        }
-      ],
-      "n": 1
-    }
-  },
-  {
-    "a": [
-      {
         "text": "1 + 1 = **2**",
-        "type": "text"
-      }
-    ],
-    "q": {
-      "agent": "malko",
-      "messages": [
-        {
-          "content": "1+1",
-          "role": "user"
-        }
-      ],
-      "n": 1
-    }
-  },
-  {
-    "a": [
-      {
-        "text": "1 + 1 = **2**",
-        "type": "text"
-      }
-    ],
-    "q": {
-      "agent": "malko",
-      "messages": [
-        {
-          "content": "1+1",
-          "role": "user"
-        }
-      ],
-      "n": 1
-    }
-  },
-  {
-    "a": [
-      {
-        "text": "1 + 1 = 2",
         "type": "text"
       }
     ],

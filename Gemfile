@@ -1,6 +1,8 @@
-source "https://rubygems.org"
+# frozen_string_literal: true
 
-gem "cucumber"
-gem "rspec"
-gem "webrick"
-gem "rubocop"
+source 'https://rubygems.org'
+
+gem 'cucumber'
+gem 'rspec'
+gem 'rubocop'
+gem 'webrick'

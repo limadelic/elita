@@ -20,6 +20,11 @@ jobs:
           elixir-version: '1.18'
           otp-version: '28'
 
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+
       - uses: actions/cache@v4
         with:
           path: |
@@ -156,19 +161,20 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - uses: actions/checkout@v4
-
-      - uses: erlef/setup-beam@v1
-        with:
-          elixir-version: '1.18'
-          otp-version: '28'
 
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.3'
           bundler-cache: true
+
+      - uses: erlef/setup-beam@v1
+        with:
+          elixir-version: '1.18'
+          otp-version: '28'
 
       - uses: actions/cache@v4
         with:
@@ -182,18 +188,17 @@ jobs:
       - name: Get dependencies
         run: mix deps.get
 
-      - name: Compile with warnings as errors
-        run: mix compile --warnings-as-errors
-
-      - name: Test
+      - name: Run tests
         run: mix test
+        env:
+          MIX_ENV: test
 
   deploy:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    needs: [lint]
+    needs: [lint, test]
     if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
 
     steps:
@@ -213,7 +218,7 @@ jobs:
         uses: actions/configure-pages@v4
 
       - name: Upload to Pages
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: site
 

@@ -31,3 +31,8 @@ Agent calls replay from cassettes in `test/cassettes/` — readable JSON, `q` ma
 - `mix live` — live, no tape
 
 Edit the tape and the tape is the spec.
+
+## Test Suites
+
+- `mix test` — default suite (27 scenarios, ~19s): pure el mechanics only, no Claude interaction
+- `mix live` — live suite (3 scenarios, ~33s): full end-to-end with real Claude API calls (@live tagged scenarios)
