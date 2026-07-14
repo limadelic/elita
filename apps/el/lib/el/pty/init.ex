@@ -5,26 +5,28 @@ defmodule El.Pty.Init do
   import Map
   import Process, except: [alias: 1, info: 1]
   import Port, only: [info: 1]
-
   def call(cfg) do
     size = cfg[:get_size].()
-    {pty, child, out} = boot(cfg, size)
-    finish(cfg, pty, size, out, child)
+    {pty, child, out, raw} = boot(cfg, size)
+    finish(cfg, pty, size, {out, raw, child})
   end
-
   defp boot(cfg, size) do
     {pty, child} = pair(cfg[:port], cfg[:cmd], size)
-    out = :stdio
-    {pty, child, out}
+    {pty, child, :stdio, snap()}
   end
-
-  defp finish(cfg, pty, size, out, child) do
+  defp snap do
+    n = Process.info(self(), :registered_name) |> elem(1)
+    p = "#{System.get_env("HOME", "~")}/.elita/sessions/#{n}.raw"
+    p |> to_charlist() |> :file.open([:write, :binary]) |> elem(1)
+  rescue _ -> nil
+  end
+  defp finish(cfg, pty, size, {out, raw, child}) do
     setup(cfg[:file], pty, size)
     watch(pty)
-    core(pty, out, child) |> attach(cfg)
+    core(pty, out, raw, child) |> attach(cfg)
   end
-  defp core(pty, out, child) do
-    %{pty: pty, out: out, child: child, ready: false, buffer: [],
+  defp core(pty, out, raw, child) do
+    %{pty: pty, out: out, raw: raw, child: child, ready: false, buffer: [],
       tail: "", pending_msg: nil, idle: false, idle_count: 0}
   end
   defp attach(state, cfg) do
@@ -33,7 +35,6 @@ defmodule El.Pty.Init do
       input: cfg[:input], taps: cfg[:taps]
     })
   end
-
   defp pair(port, cmd, size) do
     pty = launch(port, cmd, size)
     child = port.info(pty, :os_pid)
@@ -42,13 +43,11 @@ defmodule El.Pty.Init do
 
   defp pid({:os_pid, pid_val}), do: pid_val
   defp pid(_), do: nil
-
   defp launch(port, cmd, size) do
     argv = args(size, cmd)
     opts = [:binary, :stream, :exit_status, {:args, argv}]
     port.open({:spawn_executable, "/usr/bin/script"}, opts)
   end
-
   defp args({rows, cols}, cmd) do
     stty = "stty rows #{rows} cols #{cols}; stty raw -echo -isig;"
     argv(:os.type(), stty, cmd)
