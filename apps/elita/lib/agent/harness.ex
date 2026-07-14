@@ -33,7 +33,23 @@ defmodule Agent.Harness do
   end
 
   defp global(name) do
-    whereis_name({to_atom(name), :puppet}) |> wrap()
+    atom_name = to_atom(name)
+    local_result = whereis_name({atom_name, :puppet})
+
+    case local_result do
+      :undefined ->
+        # Fallback: try erpc on connected nodes
+        connected = Node.list()
+        Enum.find_value(connected, :undefined, fn node ->
+          try do
+            :erpc.call(node, :global, :whereis_name, [{atom_name, :puppet}])
+          rescue
+            _ -> nil
+          end
+        end) |> wrap()
+      _ ->
+        local_result |> wrap()
+    end
   end
 
   defp fallback([], recipient) do
