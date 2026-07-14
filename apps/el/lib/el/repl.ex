@@ -27,21 +27,10 @@ defmodule El.REPL do
   end
 
   defp find(agent) do
-    locate(agent)
+    agent |> reach() |> pick(agent)
   rescue
-    _ -> tunnel(agent)
+    _ -> native(agent)
   end
-
-  defp locate(agent) do
-    {agent, :puppet} |> :global.whereis_name() |> via(agent)
-  end
-
-  defp tunnel(agent) do
-    reach(agent) |> pick(agent)
-  end
-
-  defp via(:undefined, agent), do: tunnel(agent)
-  defp via(pid, _agent), do: pid
 
   defp pick(nil, agent), do: native(agent)
   defp pick(pid, _agent), do: pid
