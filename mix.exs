@@ -32,6 +32,7 @@ defmodule Elita.Umbrella do
   defp run_test(_) do
     check("cd apps/elita && mix test")
     check("cd apps/el && mix test")
+    System.halt(0)
   end
 
   defp run_lint(_) do

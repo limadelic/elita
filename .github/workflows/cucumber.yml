@@ -76,6 +76,11 @@ jobs:
         env:
           MIX_ENV: test
 
+      - name: Cleanup Erlang processes
+        if: always()
+        run: |
+          pkill -9 beam.smp || true
+
       - name: Upload session logs
         if: failure()
         uses: actions/upload-artifact@v4
