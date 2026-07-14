@@ -9,7 +9,6 @@ defmodule Agent.Session do
   import String, only: [downcase: 1]
   import Tape, only: [handle: 3]
   import Log, only: [answer: 2]
-  import System, only: [get_env: 1]
 
   def start_link(opts) do
     folder = fetch!(opts, :folder)
@@ -30,6 +29,7 @@ defmodule Agent.Session do
   def ask(pid, message), do: call(pid, {:ask, message}, :infinity)
   def cast(pid, message), do: GenServer.cast(pid, {:cast, message})
   def fetch(pid), do: call(pid, :fetch, :infinity)
+
   @impl true
   def init(opts) do
     {:ok, state(opts)}
@@ -48,6 +48,17 @@ defmodule Agent.Session do
     {:reply, {:ok, ""}, state}
   end
 
+  @impl true
+  def handle_call({:act, message}, _from, state) do
+    response = state.runner.(message, state.folder)
+    {:reply, response, state}
+  end
+
+  @impl true
+  def handle_call(:fetch, _from, state) do
+    {:reply, state, state}
+  end
+
   defp reply(name, message, body, folder, runner) do
     start(name, message)
     response = handle(body, name, fn -> runner.(message, folder) end)
@@ -58,15 +69,6 @@ defmodule Agent.Session do
     end
   rescue
     _ -> :ok
-  end
-
-  def handle_call({:act, message}, _from, state) do
-    response = state.runner.(message, state.folder)
-    {:reply, response, state}
-  end
-
-  def handle_call(:fetch, _from, state) do
-    {:reply, state, state}
   end
 
   @impl true

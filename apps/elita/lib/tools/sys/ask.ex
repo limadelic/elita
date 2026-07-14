@@ -42,7 +42,4 @@ defmodule Tools.Sys.Ask do
     result = dispatch(recipient, question, :ask)
     {result, state}
   end
-
-  defp bare("el." <> name), do: name
-  defp bare(name), do: name
 end
