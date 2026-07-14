@@ -42,8 +42,8 @@ defmodule El.Pty.Buffer do
   defp cap(t) when byte_size(t) > 4096, do: slice(t, -4096..-1)
   defp cap(t), do: t
 
-  defp submit(s) do
-    port.command(s.pty, "\r")
+  defp submit(%{pty: pty, port: port} = s) do
+    port.command(pty, "\r")
     record("\r")
     write("ECHO VERIFIED send \\r\n")
     flush(s)
@@ -62,15 +62,15 @@ defmodule El.Pty.Buffer do
   end
 
   defp ship(nil, _), do: nil
-  defp ship(msg, s) do
+  defp ship(msg, %{pty: pty, port: port}) do
     write("RESEND #{byte_size(msg)}b (no echo yet)\n")
-    port.command(s.pty, msg)
+    port.command(pty, msg)
     record(msg)
   end
 
-  defp start(msg, state) do
-    txt = slice(msg, 0..-2)
-    write("GATE FIRST #{byte_size(msg)}b\n"); port.command(state.pty, txt); log(txt)
+  defp start(msg, %{pty: pty, port: port} = state) do
+    txt = slice(msg, 0..-2//-1)
+    write("GATE FIRST #{byte_size(msg)}b\n"); port.command(pty, txt); log(txt)
     %{state | pending_msg: txt}
   end
 
