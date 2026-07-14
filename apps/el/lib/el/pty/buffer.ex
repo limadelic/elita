@@ -33,7 +33,7 @@ defmodule El.Pty.Buffer do
   end
 
   defp fire(%{pty: pty, port: port} = s, msg) do
-    txt = slice(msg, 0..-2//-1)
+    txt = slice(msg, 0..-2//1)
     write("GATE FIRST #{byte_size(msg)}b\n"); port.command(pty, txt); log(txt)
     %{s | pending_msg: txt}
   end
