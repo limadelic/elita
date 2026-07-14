@@ -25,7 +25,7 @@ module Assert
   end
 
   def sprite_prompt?(expected, output)
-    sprite_chars = ["▐▛███▜▌", "▝▜█████▛▘"]
+    sprite_chars = ["▗ ▗   ▖", "▘▘ ▝▝"]
     sprite_chars.any? { |char| expected.include?(char) } && output.downcase.include?("claude code")
   end
 

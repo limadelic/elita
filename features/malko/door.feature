@@ -4,21 +4,21 @@ Feature: Door
 
   Scenario: First trip into Malkovich
     * > el claude malko
-      | ▐▛███▜▌     |
-      | ▝▜█████▛▘   |
+      | ▗ ▗   ▖     |
+      | ▘▘ ▝▝   |
       | Claude Code |
       | Haiku       |
     * malko> /exit
 
   Scenario: Tell through the door
     * > el claude malko
-      | ▐▛███▜▌     |
-      | ▝▜█████▛▘   |
+      | ▗ ▗   ▖     |
+      | ▘▘ ▝▝   |
       | Claude Code |
       | Haiku       |
     * > el claude keeper
-      | ▐▛███▜▌     |
-      | ▝▜█████▛▘   |
+      | ▗ ▗   ▖     |
+      | ▘▘ ▝▝   |
       | Claude Code |
       | Haiku       |
     * malko> tell keeper open sesame
@@ -33,13 +33,13 @@ Feature: Door
 
   Scenario: Ask through the door
     * > el claude malko
-      | ▐▛███▜▌     |
-      | ▝▜█████▛▘   |
+      | ▗ ▗   ▖     |
+      | ▘▘ ▝▝   |
       | Claude Code |
       | Haiku       |
     * > el claude keeper
-      | ▐▛███▜▌     |
-      | ▝▜█████▛▘   |
+      | ▗ ▗   ▖     |
+      | ▘▘ ▝▝   |
       | Claude Code |
       | Haiku       |
     * malko> keeper what is sesame?

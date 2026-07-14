@@ -4,8 +4,6 @@ Feature: Portal
 
   Scenario: Through the tunnel into Malkovich
     * > el claude malko
-      | ▐▛███▜▌     |
-      | ▝▜█████▛▘   |
       | Claude Code |
       | Haiku       |
     * > el malko
@@ -17,8 +15,6 @@ Feature: Portal
   @wip
   Scenario: Ask the supervisor privately
     * > el claude malko
-      | ▐▛███▜▌     |
-      | ▝▜█████▛▘   |
       | Claude Code |
       | Haiku       |
     * > el malko
@@ -32,8 +28,6 @@ Feature: Portal
   @wip
   Scenario: Supervisor asks the agent
     * > el claude malko
-      | ▐▛███▜▌     |
-      | ▝▜█████▛▘   |
       | Claude Code |
       | Haiku       |
     * > el malko
@@ -49,8 +43,6 @@ Feature: Portal
   @wip
   Scenario: Root asks through el
     * > el claude malko
-      | ▐▛███▜▌     |
-      | ▝▜█████▛▘   |
       | Claude Code |
       | Haiku       |
     * > el malko
@@ -66,8 +58,6 @@ Feature: Portal
   @wip
   Scenario: Root tells through el
     * > el claude malko
-      | ▐▛███▜▌     |
-      | ▝▜█████▛▘   |
       | Claude Code |
       | Haiku       |
     * > el malko
