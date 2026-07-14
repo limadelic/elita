@@ -8,7 +8,18 @@ defmodule Agent.Watch do
   end
 
   defp begin(agent, question) do
+    log("WATCHER START #{agent} #{question}\n")
     loop(agent, question, monotonic_time(:millisecond), 0)
+  rescue
+    e ->
+      log("WATCHER ERROR #{inspect(e)}\n")
+      reraise e, __STACKTRACE__
+  end
+
+  defp log(msg) do
+    :erlang.apply(:"Elixir.El.Log", :write, [msg])
+  rescue
+    _ -> :ok
   end
 
   defp loop(agent, question, start, pos) do
@@ -32,7 +43,11 @@ defmodule Agent.Watch do
   defp scan(question, pos) do
     Agent.Jsonl.find(question, pos)
   catch
-    :exit, _ -> :wait
-    _, _ -> :wait
+    :exit, e ->
+      log("WATCHER CATCH EXIT #{inspect(e)}\n")
+      :wait
+    k, r ->
+      log("WATCHER CATCH #{k} #{inspect(r)}\n")
+      :wait
   end
 end
