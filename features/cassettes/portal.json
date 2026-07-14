@@ -32,5 +32,131 @@
       ],
       "n": 1
     }
+  },
+  {
+    "a": [
+      {
+        "text": "I don't have access to the `@el` command or system you're referring to. However, I can help you with the math:\n\n**1 + 1 = 2**\n\nIf you're trying to use a specific command or tool, could you provide more context about what system you're working with?",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "malko",
+      "messages": [
+        {
+          "content": "@el 1+1",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "# 1 + 1 = 2\n\nThat's basic arithmetic! Is there something more complex you'd like help with?",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "malko",
+      "messages": [
+        {
+          "content": "@malko 1+1",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "# 1+1 = 2\n\nThat's basic arithmetic! Is there something more complex you'd like help with?",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "malko",
+      "messages": [
+        {
+          "content": "@el 1+1",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "# 1 + 1 = 2\n\nA simple but fundamental arithmetic operation! Is there something more complex you'd like to calculate?",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "malko",
+      "messages": [
+        {
+          "content": "@malko 1+1",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "1 + 1 = **2**",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "malko",
+      "messages": [
+        {
+          "content": "1+1",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "@el is not a recognized command or user mention in this context.\n\nHowever, I can answer your math question:\n\n**1 + 1 = 2**\n\nIs there something else I can help you with?",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "malko",
+      "messages": [
+        {
+          "content": "@el 1+1",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "# 1 + 1 = 2\n\nThat's basic arithmetic! Is there something more complex you'd like help with?",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "malko",
+      "messages": [
+        {
+          "role": "user",
+          "content": "@malko 1+1"
+        }
+      ],
+      "n": 1
+    }
   }
 ]
