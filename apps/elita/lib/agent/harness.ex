@@ -5,18 +5,39 @@ defmodule Agent.Harness do
   import Elita, only: [request: 2, dispatch: 2]
   import Registry, only: [lookup: 2]
   import String, only: [to_atom: 1, downcase: 1]
+  import :global, only: [whereis_name: 1]
 
   def dispatch(recipient, message, :ask) do
     recipient
-    |> entry()
+    |> locate()
     |> ask!(recipient, message)
   end
 
   def dispatch(recipient, message, :tell) do
     recipient
-    |> entry()
+    |> locate()
     |> tell!(recipient, message)
   end
+
+  defp locate(recipient) do
+    entry(recipient) |> nearby(recipient)
+  end
+
+  defp nearby([], recipient) do
+    global(bare(recipient))
+  end
+
+  defp nearby(found, _recipient) do
+    found
+  end
+
+  defp global(name) do
+    normalized = to_atom(name) |> Kernel.to_string() |> downcase()
+    whereis_name({normalized, :puppet}) |> wrap()
+  end
+
+  defp wrap(:undefined), do: []
+  defp wrap(pid), do: [{pid, %{kind: :puppet}}]
 
   defp entry(recipient) do
     clean = bare(recipient)
