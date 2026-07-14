@@ -19,8 +19,14 @@ defmodule Elita do
   end
 
   defp publish(name) do
+    publish(name, :global.whereis_name({name, :puppet}))
+  end
+
+  defp publish(name, :undefined) do
     :global.register_name({name, :puppet}, self())
   end
+
+  defp publish(_name, _pid), do: :ok
 
   def dispatch(name, msg) do
     cast(via(name), {:act, msg})

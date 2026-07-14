@@ -17,7 +17,7 @@ defmodule El.Distribution do
   defp bind(_name, 0), do: :ok
 
   defp go(name, _tries, pid) when is_pid(pid) do
-    result = :global.register_name({name, :puppet}, pid)
+    result = sync(name, pid)
     write("global register #{name}: #{inspect(result)} node=#{inspect(Node.self())}\n")
     result
   end
@@ -26,6 +26,16 @@ defmodule El.Distribution do
     sleep(100)
     bind(name, tries - 1)
   end
+
+  defp sync(name, pid) do
+    sync(name, pid, :global.whereis_name({name, :puppet}))
+  end
+
+  defp sync(name, pid, :undefined) do
+    :global.register_name({name, :puppet}, pid)
+  end
+
+  defp sync(_name, _pid, _existing), do: :yes
 
   def target(name) do
     connect(:"#{name}#{suffix()}@127.0.0.1") |> route(name)

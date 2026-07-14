@@ -25,8 +25,7 @@ end
 
 defmodule Tools.Sys.Ask do
   import Agent.Harness, only: [dispatch: 3]
-  import Log, only: [write: 1]
-  import String, only: [trim: 1]
+  import Log, only: [ask: 3, answer: 2]
 
   defdelegate spec(name, state), to: Tools.Sys.Ask.Schema, as: :get
 
@@ -39,18 +38,12 @@ defmodule Tools.Sys.Ask do
   end
 
   defp route(recipient, question, sender, state) do
-    write("🤔 #{sender} → #{recipient} | #{question}\n")
-    answer = dispatch(recipient, question, :ask)
-    reply(bare(recipient), answer)
-    {answer, state}
+    ask(sender, recipient, question)
+    result = dispatch(recipient, question, :ask)
+    answer(bare(recipient), result)
+    {result, state}
   end
 
   defp bare("el." <> name), do: name
   defp bare(name), do: name
-
-  defp reply(agent, text) when is_binary(text) do
-    write("✨ #{agent} | #{trim(text)}\n")
-  end
-
-  defp reply(_agent, _answer), do: :ok
 end
