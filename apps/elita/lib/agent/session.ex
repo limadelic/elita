@@ -2,6 +2,7 @@ defmodule Agent.Session do
   use GenServer
 
   import Agent.Spawn, only: [run: 2]
+  import Agent.Watch, only: [start: 2]
   import GenServer, only: [start_link: 3, call: 3]
   import Keyword, only: [fetch!: 2, get: 3]
   import Map, only: [put: 3]
@@ -48,6 +49,7 @@ defmodule Agent.Session do
   end
 
   defp reply(name, message, body, folder, runner) do
+    start(name, message)
     response = handle(body, name, fn -> runner.(message, folder) end)
     case response do
       [%{"text" => text, "type" => "text"}] -> answer(name, String.trim(text))
