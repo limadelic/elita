@@ -41,7 +41,17 @@ defmodule El.CLI do
 
   defp name(["claude", name | _]), do: name
   defp name(["claude"]), do: "default"
-  defp name(_), do: "default"
+  defp name(["ask", agent | _]), do: agent
+  defp name(["tell", agent | _]), do: agent
+  defp name(["spawn", _name, agent]), do: agent
+  defp name(["@" <> agent | _]), do: agent
+  defp name([tool, "ask", agent | _]) when tool in @known_tools, do: agent
+  defp name([tool, "tell", agent | _]) when tool in @known_tools, do: agent
+  defp name(["ls" | _]), do: "default"
+  defp name(["cd" | _]), do: "default"
+  defp name(["daemon"]), do: "default"
+  defp name([agent]), do: agent
+  defp name([]), do: "el"
 
   defp parse(["ask", agent, msg]), do: {:ask, nil, agent, msg}
   defp parse(["tell", agent, msg]), do: {:tell, nil, agent, msg}

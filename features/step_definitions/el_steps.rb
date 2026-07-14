@@ -99,15 +99,9 @@ def retrying(times, &block)
 end
 
 def verify_lines(lines)
-  # Use real session log, not manually-constructed transcript
   session_log = @current ? read_session_log(@current, @pid) : ""
-  if session_log.empty?
-    # Fallback to transcript if session log not available, but log a warning
-    $stderr.puts "WARNING: No session log found for #{@current}_#{@pid}, falling back to transcript"
-    iterate_and_verify_lines(transcript.downcase, lines)
-  else
-    iterate_and_verify_lines(session_log.downcase, lines)
-  end
+  raise "No session log for #{@current}_#{@pid}" if session_log.empty?
+  iterate_and_verify_lines(session_log.downcase, lines)
 end
 
 def attempt_with_retries(times, &block)

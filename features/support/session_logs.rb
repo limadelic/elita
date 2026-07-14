@@ -4,10 +4,15 @@ module SessionLogs
   end
 
   def read_session_log(name, pid)
-    path = session_log_path(name, pid)
-    return "" unless File.exist?(path)
+    # Find the most recently modified name_*.log file
+    # (the Erlang VM's PID differs from the shell's PID)
+    dir = File.join(File.expand_path("~"), ".elita/sessions")
+    return "" unless Dir.exist?(dir)
 
-    File.read(path)
+    logs = Dir.glob("#{dir}/#{name}_*.log").sort_by { |f| File.mtime(f) }
+    return "" if logs.empty?
+
+    File.read(logs.last)
   end
 
   def verify_session_markers(rows, name, pid)

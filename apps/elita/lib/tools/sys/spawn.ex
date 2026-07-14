@@ -70,10 +70,6 @@ defmodule Tools.Sys.Spawn do
 
   defp started({:ok, _pid}, _name), do: :ok
 
-  defp started({:error, {:already_started, _pid}}, _name) do
-    :ok
-  end
-
   defp log(name, [name]) do
     log("🚀", name, "", "", :green)
   end
