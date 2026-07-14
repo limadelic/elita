@@ -25,7 +25,7 @@ defmodule El.Pty.Init do
   end
   defp core(pty, out, child) do
     %{pty: pty, out: out, child: child, ready: false, buffer: [],
-      tail: "", pending_msg: nil}
+      tail: "", pending_msg: nil, idle: false, idle_count: 0}
   end
   defp attach(state, cfg) do
     merge(state, %{

@@ -1,19 +1,46 @@
 defmodule El.Pty.Buffer do
   @moduledoc false
-  import Enum, only: [each: 2]
+  import Enum, only: [each: 2, any?: 2]
   import String, only: [contains?: 2, slice: 2]
   import El.Trace, only: [record: 1]
   import El.Log, only: [write: 1]
 
-  def prime(%{ready: true} = s, d) do
-    write("PTY DATA #{byte_size(d)}b: #{peek(d)}\n")
-    record(d)
-    s
+  def prime(%{idle: true, pending_msg: nil, buffer: []} = s, d) do
+    write("PTY DATA #{byte_size(d)}b: #{peek(d)}\n"); record(d)
+    path(s, grow(Map.get(s, :tail), d), nil)
+  end
+
+  def prime(%{idle: true} = s, d) do
+    write("PTY DATA #{byte_size(d)}b: #{peek(d)}\n"); record(d)
+    path(s, grow(Map.get(s, :tail), d), Map.get(s, :pending_msg))
   end
 
   def prime(s, d) do
     write("PTY DATA #{byte_size(d)}b: #{peek(d)}\n")
-    path(s, grow(Map.get(s, :tail), d), Map.get(s, :pending_msg))
+    idle(s, quiet(d))
+  end
+
+  defp idle(%{buffer: [msg | rest], idle_count: c} = s, true) when c >= 2 do
+    %{s | idle: true, buffer: rest} |> fire(msg)
+  end
+
+  defp idle(%{idle_count: c} = s, true) do
+    %{s | idle_count: c + 1}
+  end
+
+  defp idle(s, false) do
+    %{s | idle_count: 0}
+  end
+
+  defp fire(%{pty: pty, port: port} = s, msg) do
+    txt = slice(msg, 0..-2//-1)
+    write("GATE FIRST #{byte_size(msg)}b\n"); port.command(pty, txt); log(txt)
+    %{s | pending_msg: txt}
+  end
+
+  defp quiet(d) do
+    spins = ["thinking", "✶", "✳", "♢", "✻", "✽", "·", "…"]
+    not any?(spins, &contains?(d, &1))
   end
 
   defp path(s, tail, msg) when is_binary(msg), do: echo(s, tail, contains?(tail, msg))
@@ -22,19 +49,16 @@ defmodule El.Pty.Buffer do
   defp echo(s, _tail, true), do: submit(s)
   defp echo(s, tail, false), do: resend(s, tail)
 
-  def gate(msg, %{ready: true, pty: pty, port: port} = state) do
-    write("GATE PASSTHROUGH #{byte_size(msg)}b\n")
-    log(msg)
-    port.command(pty, msg)
+  def gate(msg, %{idle: true, pty: pty, port: port} = state) do
+    write("GATE PASSTHROUGH #{byte_size(msg)}b\n"); log(msg); port.command(pty, msg)
     state
   end
 
   def gate(msg, state) do
-    flow(msg, state, Map.get(state, :pending_msg))
+    buf = Map.get(state, :buffer, [])
+    write("GATE BUFFER #{byte_size(msg)}b (#{length(buf) + 1} queued)\n")
+    %{state | buffer: buf ++ [msg]}
   end
-
-  defp flow(msg, state, nil), do: start(msg, state)
-  defp flow(msg, state, _), do: queue(msg, state)
 
   defp grow(nil, d), do: cap(d)
   defp grow(tail, d), do: cap(tail <> d)
@@ -43,9 +67,7 @@ defmodule El.Pty.Buffer do
   defp cap(t), do: t
 
   defp submit(%{pty: pty, port: port} = s) do
-    port.command(pty, "\r")
-    record("\r")
-    write("ECHO VERIFIED send \\r\n")
+    port.command(pty, "\r"); record("\r"); write("ECHO VERIFIED send \\r\n")
     flush(s)
   end
 
@@ -53,47 +75,27 @@ defmodule El.Pty.Buffer do
     write("FLUSH START #{length(buf)} buffered\n")
     each(buf, fn msg -> emit(msg, pty, port) end)
     write("FLUSH DONE\n")
-    %{s | ready: true, pending_msg: nil, tail: "", buffer: []}
+    %{s | idle: true, pending_msg: nil, tail: "", buffer: []}
   end
 
   defp resend(s, tail) do
-    ship(Map.get(s, :pending_msg), s)
-    %{s | tail: tail}
+    ship(Map.get(s, :pending_msg), s); %{s | tail: tail}
   end
 
   defp ship(nil, _), do: nil
   defp ship(msg, %{pty: pty, port: port}) do
-    write("RESEND #{byte_size(msg)}b (no echo yet)\n")
-    port.command(pty, msg)
-    record(msg)
-  end
-
-  defp start(msg, %{pty: pty, port: port} = state) do
-    txt = slice(msg, 0..-2//-1)
-    write("GATE FIRST #{byte_size(msg)}b\n"); port.command(pty, txt); log(txt)
-    %{state | pending_msg: txt}
-  end
-
-  defp queue(msg, state) do
-    buf = Map.get(state, :buffer, [])
-    write("GATE BUFFER #{byte_size(msg)}b (#{length(buf) + 1} queued)\n")
-    %{state | buffer: buf ++ [msg]}
+    write("RESEND #{byte_size(msg)}b (no echo yet)\n"); port.command(pty, msg); record(msg)
   end
 
   defp emit(msg, pty, port) do
-    write("SEND #{byte_size(msg)}b\n")
-    log(msg)
-    port.command(pty, msg)
+    write("SEND #{byte_size(msg)}b\n"); log(msg); port.command(pty, msg)
   end
   defp log(msg) do
-    record(msg)
-    write("inject: #{byte_size(msg)}b\n")
+    record(msg); write("inject: #{byte_size(msg)}b\n")
   end
 
   defp peek(data) when byte_size(data) > 40 do
-    <<head::binary-size(40), _::binary>> = data
-    inspect(head)
+    <<head::binary-size(40), _::binary>> = data; inspect(head)
   end
-
   defp peek(data), do: inspect(data)
 end
