@@ -15,5 +15,5 @@ status.json
 node_modules/
 *.bak
 /tmp/
-/reports/
+reports/
 !reports/.gitkeep

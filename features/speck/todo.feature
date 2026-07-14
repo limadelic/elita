@@ -5,7 +5,6 @@ Feature: Todo
     * > el speck
     * speck> exec todo
       | 🧪 todo_spec | mem tools    |
-      | 🤖 todo      | task manager |
     * verify
       | 🎭 speck as tplan |                   |
       | ✏️ scenarios      | Store single task |

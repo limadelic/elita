@@ -46,12 +46,23 @@ Before('@malko') do
 end
 
 After do |_scenario|
-  reap_all_sessions
-  kill_tracked_pids
+  reap_without_orphans
+end
+
+AfterAll do
+  kill_orphaned_scripts
 end
 
 After('@malko') do
   FileUtils.rm_rf(@scratch) if @scratch && File.exist?(@scratch)
+end
+
+def reap_without_orphans
+  @sessions ||= {}
+  reap_sessions
+  close_main_pty
+  @sessions.clear
+  kill_orphaned_scripts
 end
 
 def guard_live_claude
@@ -141,7 +152,10 @@ def kill_orphaned_scripts
 end
 
 def find_script_orphans
-  cmd = "ps aux | grep 'script -q /dev/null' | grep -v grep | awk '{print $2}'"
+  run_id = ENV["ELITA_RUN"]
+  return [] unless run_id
+
+  cmd = "ps eww | grep 'script -q /dev/null' | grep ELITA_RUN=#{run_id} | awk '{print $1}'"
   `#{cmd}`.strip.split("\n")
 end
 

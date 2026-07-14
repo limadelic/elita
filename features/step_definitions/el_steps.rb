@@ -24,6 +24,7 @@ When(/^(\w+)> (.+)$/) do |prompt, input, *rest|
   note(prompt, input) if table && valid?(table)
   write_input(input, prompt)
   output = retrying(15) { await_result(prompt, input) }
+  reply(prompt, table, output) if table && valid?(table)
   settle(table, output)
 end
 
@@ -72,7 +73,25 @@ end
 
 def note(prompt, input)
   @transcript_stripped ||= ''
-  @transcript_stripped << "\n🤔 el → #{prompt}: #{input}\n"
+  @transcript_stripped << "\n🤔 el → #{prompt} | #{input}\n"
+end
+
+def reply(prompt, table, output)
+  return unless valid_response_row?(table)
+
+  response_text = table.raw[1][1].strip
+  log_response(prompt, response_text, output) if output.include?(response_text)
+end
+
+def valid_response_row?(table)
+  return false unless table&.raw&.size.to_i > 1
+
+  table.raw[1]&.size == 2
+end
+
+def log_response(prompt, text, _output)
+  @transcript_stripped ||= ''
+  @transcript_stripped << "✨ #{prompt} | #{text}\n"
 end
 
 def retrying(times, &block)

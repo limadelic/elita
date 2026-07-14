@@ -22,14 +22,14 @@ defmodule El.Commands.Claude do
   defp deps, do: [distribution_start: &start/1, cmd: &cmd/1, launch: &launch/2]
 
   def claude(name, deps) when is_list(deps) do
-    write("🚀 boot: #{name}\n")
+    write("boot: #{name}\n")
     go(resolve(name), deps)
   after
     cleanup()
   end
 
   defp cleanup do
-    write("🚀 shutdown\n")
+    write("shutdown\n")
     reset()
     stty()
   end
@@ -50,7 +50,7 @@ defmodule El.Commands.Claude do
     Task.start(fn -> distribute(name, deps) end)
     boot(to_atom(name), deps)
   rescue
-    e -> write("🚀 boot error during claude setup: #{inspect(e)}\n")
+    e -> write("boot error during claude setup: #{inspect(e)}\n")
   end
 
   defp distribute(name, deps) do

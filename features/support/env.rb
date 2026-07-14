@@ -1,9 +1,6 @@
 require "rspec/expectations"
 
-module Env
-end
+ENV["ELITA_RUN"] = Process.pid.to_s
 
-BeforeAll do
-  cmd = "cd apps/el && mix escript.build 2>&1 > /dev/null"
-  system(cmd) or abort("mix escript.build failed")
+module Env
 end

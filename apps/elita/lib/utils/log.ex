@@ -15,9 +15,19 @@ defmodule Log do
   }
 
   def log(emoji, head, neck, body, color) do
-    body = yaml(body)
-    neck = neck <> eol(body)
-    puts("\e[38;5;#{@colors[color]}m#{emoji} #{head}#{neck}#{body}\e[0m")
+    msg = message(head, neck, yaml(body))
+    emit(emoji, msg, color)
+  rescue
+    _ -> :ok
+  end
+
+  defp emit(emoji, msg, color) do
+    puts("\e[38;5;#{@colors[color]}m#{emoji} #{msg}\e[0m")
+    dir() |> mkdir_p!() |> append("#{emoji} #{msg}")
+  end
+
+  defp message(head, neck, body) do
+    "#{head}#{neck <> eol(body)}#{body}"
   end
 
   def write(message) do
@@ -27,6 +37,11 @@ defmodule Log do
   end
 
   defp ensure(_dir, message) do
+    write(path("elita"), message, [:append])
+    puts(message)
+  end
+
+  defp append(_dir, message) do
     write(path("elita"), message, [:append])
   end
 

@@ -72,9 +72,14 @@ jobs:
       - name: Run Cucumber tests
         run: |
           mkdir -p reports
-          TAPE=replay bundle exec cucumber --format html --out reports/cucumber.html --format json --out reports/cucumber.json --publish-quiet
+          TAPE=replay timeout -k 10 300 bundle exec cucumber --format html --out reports/cucumber.html --format json --out reports/cucumber.json --publish-quiet
         env:
           MIX_ENV: test
+
+      - name: Cleanup Erlang processes
+        if: always()
+        run: |
+          pkill -9 beam.smp || true
 
       - name: Upload session logs
         if: failure()

@@ -1,4 +1,4 @@
 #!/bin/bash
-exec < /dev/null > /tmp/hook_walter.log 2>&1
+exec < /dev/null > /tmp/hook_push.log 2>&1
 mix lint || exit 1
 exit 0
