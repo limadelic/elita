@@ -13,8 +13,16 @@ defmodule Elita do
   import Tools
 
   def spawn(name, configs) do
-    start_link(__MODULE__, {name, configs}, name: via(name))
+    res = start_link(__MODULE__, {name, configs}, name: via(name))
+    alive(name)
+    res
   end
+
+  defp alive(name) when Node.alive?() do
+    :global.register_name({name, :puppet}, self())
+  end
+
+  defp alive(_name), do: :ok
 
   def dispatch(name, msg) do
     cast(via(name), {:act, msg})
