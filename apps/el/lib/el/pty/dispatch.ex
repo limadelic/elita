@@ -7,6 +7,7 @@ defmodule El.Pty.Dispatch do
   import Enum, only: [each: 2]
   import :os, only: [cmd: 1]
   import El.Log, only: [write: 1]
+  import IO, only: [binwrite: 2]
 
   def info({pty, {:data, data}}, state) do
     process(pty, data, state)
@@ -25,8 +26,8 @@ defmodule El.Pty.Dispatch do
     {:stop, :normal, state}
   end
 
-  def info({:prompt, agent}, %{file: file, out: out} = state) do
-    file.write(out, "#{agent}> ")
+  def info({:prompt, agent}, %{out: out} = state) do
+    binwrite(out, "#{agent}> ")
     {:noreply, state}
   end
 
@@ -37,7 +38,6 @@ defmodule El.Pty.Dispatch do
 
   def info({pty, {:exit_status, _}}, %{pty: pty} = state) do
     slay(state.child)
-    state.file.close(state.out)
     {:stop, :normal, state}
   end
 
@@ -79,8 +79,8 @@ defmodule El.Pty.Dispatch do
     {:noreply, state}
   end
 
-  defp process(pty, data, %{port: port, file: file, out: out, taps: taps} = state) do
-    file.write(out, data)
+  defp process(pty, data, %{port: port, out: out, taps: taps} = state) do
+    binwrite(out, data)
     notify(taps, data)
     respond(port, pty, data, state)
   end

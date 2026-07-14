@@ -14,7 +14,7 @@ defmodule El.Pty.Init do
 
   defp boot(cfg, size) do
     {pty, child} = pair(cfg[:port], cfg[:cmd], size)
-    {:ok, out} = cfg[:file].open("/dev/stdout", [:write, :binary])
+    out = :stdio
     {pty, child, out}
   end
 
