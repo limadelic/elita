@@ -2,11 +2,11 @@ defmodule Agent.Session do
   use GenServer
 
   import Agent.Spawn, only: [run: 2]
-  import Agent.Watch, only: [start: 2]
+  import Agent.Watch, only: [start: 3]
   import GenServer, only: [start_link: 3, call: 3]
   import Keyword, only: [fetch!: 2, get: 3]
   import Map, only: [put: 3]
-  import String, only: [downcase: 1]
+  import String, only: [downcase: 1, trim: 1]
   import Tape, only: [handle: 3]
   import Log, only: [answer: 2]
 
@@ -60,16 +60,26 @@ defmodule Agent.Session do
   end
 
   defp reply(name, message, body, folder, runner) do
-    start(name, message)
-    response = handle(body, name, fn -> runner.(message, folder) end)
-    case response do
-      [%{"text" => text, "type" => "text"}] -> answer(name, String.trim(text))
-      [%{"text" => text}] -> answer(name, String.trim(text))
-      _ -> :ok
-    end
+    start(name, message, folder)
+    process(name, body, message, folder, runner)
   rescue
     _ -> :ok
   end
+
+  defp process(name, body, message, folder, runner) do
+    response = handle(body, name, fn -> runner.(message, folder) end)
+    emit(response, name)
+  end
+
+  defp emit([%{"text" => text, "type" => "text"}], name) do
+    answer(name, trim(text))
+  end
+
+  defp emit([%{"text" => text}], name) do
+    answer(name, trim(text))
+  end
+
+  defp emit(_, _), do: :ok
 
   @impl true
   def handle_cast({:cast, message}, state) do

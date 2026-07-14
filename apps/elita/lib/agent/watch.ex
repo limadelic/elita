@@ -2,18 +2,22 @@ defmodule Agent.Watch do
   import Log, only: [answer: 2]
   import String, only: [trim: 1]
   import System, only: [monotonic_time: 1]
+  import Agent.Jsonl, only: [find: 3]
 
-  def start(agent, question) do
-    spawn(fn -> begin(agent, question) end)
+  def start(agent, question, folder \\ nil) do
+    spawn(fn -> init(agent, question, folder) end)
   end
 
-  defp begin(agent, question) do
+  defp init(agent, question, folder) do
     log("WATCHER START #{agent} #{question}\n")
-    loop(agent, question, monotonic_time(:millisecond), 0)
+    boot(agent, question, folder)
   rescue
-    e ->
-      log("WATCHER ERROR #{inspect(e)}\n")
-      reraise e, __STACKTRACE__
+    e -> reraise e, __STACKTRACE__
+  end
+
+  defp boot(agent, question, folder) do
+    state = {agent, question, folder, monotonic_time(:millisecond), 0}
+    loop(state)
   end
 
   defp log(msg) do
@@ -22,32 +26,56 @@ defmodule Agent.Watch do
     _ -> :ok
   end
 
-  defp loop(agent, question, start, pos) do
+  defp loop({_, _, _, start, _pos} = state) do
     elapsed = monotonic_time(:millisecond) - start
-    if elapsed > 7000 do
-      :ok
-    else
-      case scan(question, pos) do
-        {:found, text} -> answer(agent, trim(text))
-        {:continue, newpos} -> sleep(agent, question, start, newpos)
-        :wait -> sleep(agent, question, start, pos)
-      end
-    end
+    proceed(state, elapsed)
   end
 
-  defp sleep(agent, question, start, pos) do
+  defp proceed(_, elapsed) when elapsed > 7000, do: :ok
+
+  defp proceed({agent, question, folder, start, pos}, _) do
+    {agent, question, folder, start, pos} |> fetch()
+  end
+
+  defp fetch({_agent, question, folder, _start, pos} = state) do
+    check(scan(question, folder, pos), state)
+  end
+
+  defp check({:found, text}, {agent, _, _, _, _}) do
+    answer(agent, trim(text))
+  end
+
+  defp check({:continue, newpos}, {agent, q, f, s, _}) do
+    wait(agent, q, f, s, newpos)
+  end
+
+  defp check(:wait, {agent, q, f, s, p}) do
+    wait(agent, q, f, s, p)
+  end
+
+  defp wait(agent, question, folder, start, pos) do
     Process.sleep(100)
-    loop(agent, question, start, pos)
+    loop({agent, question, folder, start, pos})
   end
 
-  defp scan(question, pos) do
-    Agent.Jsonl.find(question, pos)
+  defp scan(question, folder, pos) do
+    guard(find(question, folder, pos))
+  end
+
+  defp guard(result) do
+    result
   catch
-    :exit, e ->
-      log("WATCHER CATCH EXIT #{inspect(e)}\n")
-      :wait
-    k, r ->
-      log("WATCHER CATCH #{k} #{inspect(r)}\n")
-      :wait
+    :exit, e -> oops(:exit, e)
+    k, r -> oops(k, r)
+  end
+
+  defp oops(:exit, e) do
+    log("WATCHER CATCH EXIT #{inspect(e)}\n")
+    :wait
+  end
+
+  defp oops(k, r) do
+    log("WATCHER CATCH #{k} #{inspect(r)}\n")
+    :wait
   end
 end
