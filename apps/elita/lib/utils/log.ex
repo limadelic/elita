@@ -42,7 +42,7 @@ defmodule Log do
   end
 
   defp append(_dir, message) do
-    write(path("elita"), message, [:append])
+    write(path("elita"), message <> "\n", [:append])
   end
 
   defp eol(body) do
