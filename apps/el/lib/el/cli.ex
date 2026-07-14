@@ -56,19 +56,9 @@ defmodule El.CLI do
   defp parse(["ask", agent, msg]), do: {:ask, nil, agent, msg}
   defp parse(["tell", agent, msg]), do: {:tell, nil, agent, msg}
   defp parse(["spawn", name, agent]), do: {:spawn, name, agent}
-  defp parse(["@" <> agent | rest]) do
-    msg = rest |> join(" ")
-    {:ask_tool, agent, msg}
-  end
-
-  defp parse([tool, "ask", agent, msg]) do
-    check(tool, {:ask, tool, agent, msg})
-  end
-
-  defp parse([tool, "tell", agent, msg]) do
-    check(tool, {:tell, tool, agent, msg})
-  end
-
+  defp parse(["@" <> agent | rest]), do: {:ask_tool, agent, rest |> join(" ")}
+  defp parse([tool, "ask", agent, msg]), do: check(tool, {:ask, tool, agent, msg})
+  defp parse([tool, "tell", agent, msg]), do: check(tool, {:tell, tool, agent, msg})
   defp parse(["claude"]), do: {:claude, :default}
   defp parse(["claude", name]), do: {:claude, name}
   defp parse(["ls"]), do: {:ls, nil}

@@ -101,6 +101,7 @@ end
 def verify_lines(lines)
   session_log = @current ? read_session_log(@current, @pid) : ""
   raise "No session log for #{@current}_#{@pid}" if session_log.empty?
+
   iterate_and_verify_lines(session_log.downcase, lines)
 end
 

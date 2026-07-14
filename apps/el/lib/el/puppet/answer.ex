@@ -4,7 +4,6 @@ defmodule El.Puppet.Answer do
   import GenServer, only: [cast: 2]
   import System, only: [monotonic_time: 1]
   import String, only: [trim: 1]
-  import :global, only: [whereis_name: 1]
   import Map, only: [merge: 2]
 
   def reply(pty, sender, message) do
@@ -56,15 +55,12 @@ defmodule El.Puppet.Answer do
   defp locate(addr), do: target(addr)
 
   defp target(name) when is_atom(name) do
-    lookup(name) |> found()
+    lookup(name)
   rescue
     _ -> nil
   end
 
-  defp lookup(name), do: whereis_name({name, :puppet})
-
-  defp found(:undefined), do: nil
-  defp found(pid), do: pid
+  defp lookup(_name), do: Process.whereis(:puppet)
 
   defp build(pty, message, now) do
     base(pty, message) |> timing(now)

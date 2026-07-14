@@ -8,30 +8,32 @@ defmodule El.Ask do
 
   def invoke(agent, msg) do
     prime()
-    session_node = reach(agent)
-
     ask("user", "el.#{agent}", msg)
-    result = erpc_response(session_node, agent, msg)
-    puts("DEBUG: session_node=#{inspect(session_node)} result=#{inspect(result)}")
-    answer(agent, result)
+    reach(agent) |> call(agent, msg) |> done(agent)
+  end
 
+  defp done(agent, result) do
+    answer(agent, result)
     puts(result)
   end
 
-  defp erpc_response(nil, agent, _msg) do
-    "unknown: el.#{agent}"
+  defp call(nil, agent, _msg), do: miss(agent)
+  defp call(node, agent, msg), do: retry(node, agent, msg, 3)
+
+  defp retry(_node, agent, _msg, 0), do: miss(agent)
+
+  defp retry(node, agent, msg, tries) do
+    rpc(node, agent, msg)
+  rescue _ ->
+    Process.sleep(100)
+    retry(node, agent, msg, tries - 1)
   end
 
-  defp erpc_response(session_node, agent, msg) do
-    try do
-      resp = :erpc.call(session_node, Agent.Portal, :response, [agent, msg])
-      puts("DEBUG: erpc succeeded: #{inspect(resp)}")
-      resp
-    rescue e ->
-      puts("DEBUG: erpc failed: #{inspect(e)}")
-      "unknown: el.#{agent}"
-    end
+  defp rpc(node, agent, msg) do
+    :erpc.call(node, Agent.Portal, :response, [agent, msg])
   end
+
+  defp miss(agent), do: "unknown: el.#{agent}"
 
   defp prime do
     :os.cmd(~c"epmd -daemon")
@@ -47,17 +49,16 @@ defmodule El.Ask do
   defp boot(_), do: :ok
 
   defp reach(agent) do
-    agent |> discover() |> sync()
+    agent |> discover() |> sync(agent)
   end
 
-  defp sync({:ok, name}) do
+  defp sync({:ok, name}, _agent) do
     target = :"#{name}@127.0.0.1"
     connect(target)
-    :global.sync()
     target
   end
 
-  defp sync({:error, :absent}), do: nil
+  defp sync({:error, :absent}, _agent), do: nil
 
   defp discover(agent) do
     :net_adm.names(~c"127.0.0.1") |> locate(agent)

@@ -32,21 +32,9 @@ defmodule El.Puppet do
     {:ok, pid}
   end
 
-  defp notify(name, pid) do
-    alive?(Node.alive?(), name, pid)
+  defp notify(_name, pid) do
+    Process.register(pid, :puppet)
   end
-
-  defp alive?(true, name, pid) do
-    alive(name, pid, :global.whereis_name({name, :puppet}))
-  end
-
-  defp alive?(false, _name, _pid), do: :ok
-
-  defp alive(name, pid, :undefined) do
-    :global.register_name({name, :puppet}, pid)
-  end
-
-  defp alive(_name, _pid, _existing), do: :ok
 
   def init(pty) do
     {:ok, %{pty: pty}}

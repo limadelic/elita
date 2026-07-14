@@ -1,31 +1,19 @@
 defmodule Agent.Portal do
   import Agent.Session, only: [ask: 2]
 
-  def response(_agent, question) do
-    pid = find_puppet()
-
-    case pid do
-      :undefined -> "unknown: malko"
-      pid -> puppet_ask(pid, question)
-    end
+  def response(agent, question) do
+    locate() |> handle(agent, question)
   end
 
-  defp find_puppet do
-    # Debug: log all global names
-    all_names = :global.registered_names()
-    File.write!("/tmp/portal_trace.log", "[FIND-PUPPET] all_names=#{inspect(all_names)}\n", [:append])
-
-    case :global.whereis_name({:malko, :puppet}) do
-      :undefined ->
-        File.write!("/tmp/portal_trace.log", "[FIND-PUPPET] not found, trying alternatives\n", [:append])
-        :undefined
-      pid ->
-        File.write!("/tmp/portal_trace.log", "[FIND-PUPPET] found pid=#{inspect(pid)}\n", [:append])
-        pid
-    end
+  defp locate do
+    Process.whereis(:puppet)
   end
 
-  defp puppet_ask(pid, question) do
+  defp handle(nil, agent, _question) do
+    "unknown: #{agent}"
+  end
+
+  defp handle(pid, _agent, question) do
     {:ok, resp} = ask(pid, question)
     resp
   end

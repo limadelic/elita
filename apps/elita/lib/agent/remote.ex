@@ -3,28 +3,51 @@ defmodule Agent.Remote do
   import String, only: [to_atom: 1, downcase: 1]
 
   def find(agent) do
-    case :net_adm.names(~c"127.0.0.1") do
-      {:ok, list} -> find_value(list, :undefined, &pick(&1, agent))
-      _ -> :undefined
-    end
+    :net_adm.names(~c"127.0.0.1") |> list() |> search(agent)
   rescue
     _ -> :undefined
   end
 
-  defp pick({name, _}, agent) do
+  defp list({:ok, n}), do: n
+  defp list(_), do: []
+
+  defp search(names, agent) do
+    find_value(names, :undefined, &match(&1, agent))
+  end
+
+  defp match({name, _}, agent) do
     node = :erlang.list_to_binary(name)
-    len = min(byte_size(agent) + 1, byte_size(node))
-    case binary_part(node, 0, len) == <<agent::binary, "-">> do
-      true -> call(node, agent)
-      _ -> nil
-    end
+    run(node, agent, agent)
   rescue
     _ -> nil
   end
 
-  defp call(node, agent) do
-    norm = to_atom(agent) |> Kernel.to_string() |> downcase() |> to_atom()
-    :erpc.call(to_atom("#{node}@127.0.0.1"), :global, :whereis_name, [{norm, :puppet}])
+  defp run(node, agent, name) do
+    <<name::binary, "-">> |> ok(node) |> exec(agent, node)
+  end
+
+  defp ok(prefix, node) do
+    take(node, byte_size(prefix)) == prefix
+  end
+
+  defp exec(true, agent, node) do
+    agent |> norm() |> fetch(node)
+  end
+  defp exec(false, _, _), do: nil
+
+  defp take(node, size) do
+    binary_part(node, 0, size)
+  rescue
+    _ -> nil
+  end
+
+  defp norm(agent) do
+    agent |> to_atom() |> Kernel.to_string() |> downcase() |> to_atom()
+  end
+
+  defp fetch(norm, node) do
+    addr = "#{node}@127.0.0.1" |> to_atom()
+    :erpc.call(addr, :global, :whereis_name, [{norm, :puppet}])
   rescue
     _ -> nil
   end

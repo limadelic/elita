@@ -3,7 +3,7 @@ module SessionLogs
     File.join(File.expand_path("~"), ".elita/sessions/#{name}_#{pid}.log")
   end
 
-  def read_session_log(name, pid)
+  def read_session_log(name, _pid)
     # Find the most recently modified name_*.log file
     # (the Erlang VM's PID differs from the shell's PID)
     dir = File.join(File.expand_path("~"), ".elita/sessions")
