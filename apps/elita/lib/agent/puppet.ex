@@ -3,25 +3,41 @@ defmodule Agent.Puppet do
   import Registry, only: [select: 2]
 
   def cwd do
-    select()
-    |> scan()
+    log("puppet:cwd called\n")
+    select() |> track()
   catch
-    _, _ -> nil
+    _, e -> handle(e)
+  end
+
+  defp track(entries) do
+    log("puppet:entries=#{inspect(entries)}\n")
+    entries |> scan()
+  end
+
+  defp handle(e) do
+    log("puppet:catch=#{inspect(e)}\n")
+    nil
   end
 
   defp select do
-    ElitaRegistry
-    |> select([{{:_, :_, :"$1"}, [], [:"$1"]}])
-    |> pick()
+    log("puppet:select start\n")
+    entries = ElitaRegistry |> select([{{:_, :"$2", :"$1"}, [], [{{:"$2", :"$1"}}]}])
+    log("puppet:selected #{entries |> length()} entries\n")
+    entries |> pick()
   end
 
   defp pick(entries) do
-    entries
-    |> map(&extract/1)
-    |> filter(& &1)
+    log("puppet:pick entries=#{inspect(entries)}\n")
+    result = entries |> map(&extract/1)
+    log("puppet:after map=#{inspect(result)}\n")
+    result |> filter(& &1)
   end
 
-  defp extract(%{pid: pid, kind: :puppet}), do: {pid, %{kind: :puppet}}
+  defp extract({pid, %{kind: :puppet}}) do
+    log("puppet:extract found pid=#{inspect(pid)}\n")
+    {pid, %{kind: :puppet}}
+  end
+
   defp extract(_), do: nil
 
   defp scan([]), do: nil
@@ -37,7 +53,10 @@ defmodule Agent.Puppet do
     rpc(node)
   end
 
-  defp query(_), do: nil
+  defp query(entry) do
+    log("puppet:query skip entry=#{inspect(entry)}\n")
+    nil
+  end
 
   defp rpc(node) do
     :erpc.call(node, System, :cwd, [])

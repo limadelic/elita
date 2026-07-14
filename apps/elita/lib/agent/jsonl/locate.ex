@@ -26,16 +26,25 @@ defmodule Agent.Jsonl.Locate do
 
   defp direct(encoded) do
     log("watcher:target=#{encoded}\n")
-    accept(encoded, dir?(encoded))
+    accept(encoded, report(dir?(encoded)))
   rescue
     _ -> nil
   end
 
+  defp report(exists) do
+    log("watcher:exists=#{exists}\n")
+    exists
+  end
+
   defp accept(dir, true) do
+    log("watcher:scanning=#{dir}\n")
     ls!(dir) |> filter(&ends_with?(&1, ".jsonl")) |> pick(dir)
   end
 
-  defp accept(_, false), do: nil
+  defp accept(_, false) do
+    log("watcher:wait for dir\n")
+    nil
+  end
 
   defp pick([], _), do: nil
 
