@@ -45,12 +45,10 @@ defmodule Elita.Umbrella do
     check("cd apps/el && mix escript.build")
   end
 
-  defp check(cmd) do
-    case Mix.shell().cmd(cmd) do
-      0 -> :ok
-      _ -> raise Mix.Error, "command failed: #{cmd}"
-    end
-  end
+  defp check(cmd), do: confirm(Mix.shell().cmd(cmd), cmd)
+
+  defp confirm(0, _), do: :ok
+  defp confirm(_, cmd), do: raise(Mix.Error, message: "command failed: #{cmd}")
 
   defp deps do
     []
