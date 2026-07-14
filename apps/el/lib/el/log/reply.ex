@@ -20,6 +20,5 @@ defmodule El.Log.Reply do
 
   defp emit(line) do
     write(line)
-    El.Log.write(line)
   end
 end
