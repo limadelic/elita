@@ -2,8 +2,8 @@ defmodule Agent.Jsonl do
   import File, only: [exists?: 1, read!: 1]
   import String, only: [split: 2]
   import Enum, only: [drop: 2, with_index: 2, find_value: 3, count: 1]
-  import Agent.Jsonl.Scan, only: [find: 0]
   import Jason, only: [decode: 1]
+  import Agent.Jsonl.Locate, only: [find: 1]
 
   def find(question, folder, pos) when is_binary(folder) do
     source(folder) |> load(question, pos)
@@ -19,6 +19,8 @@ defmodule Agent.Jsonl do
 
   defp source(folder) do
     find(folder)
+  catch
+    _, _ -> nil
   end
 
   defp load(nil, _, _), do: :wait

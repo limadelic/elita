@@ -3,26 +3,25 @@ defmodule Agent.Watch do
   import String, only: [trim: 1]
   import System, only: [monotonic_time: 1]
   import Agent.Jsonl, only: [find: 3]
+  import Agent.Puppet, only: [cwd: 0]
 
   def start(agent, question, folder \\ nil) do
     spawn(fn -> init(agent, question, folder) end)
   end
 
   defp init(agent, question, folder) do
-    report(agent, question, folder)
-    boot(agent, question, folder)
+    boot(agent, question, resolve(folder))
   rescue
     e -> reraise e, __STACKTRACE__
   end
 
-  defp report(agent, question, folder) do
-    log("WATCHER START #{agent} #{question}\n")
-    log("watcher:folder=#{inspect(folder)}\n")
-  end
+  defp resolve(nil), do: cwd()
+  defp resolve(folder), do: folder
 
   defp boot(agent, question, folder) do
-    state = {agent, question, folder, monotonic_time(:millisecond), 0}
-    loop(state)
+    log("WATCHER START #{agent} #{question}\n")
+    log("watcher:folder=#{inspect(folder)}\n")
+    {agent, question, folder, monotonic_time(:millisecond), 0} |> loop()
   end
 
   defp log(msg) do
