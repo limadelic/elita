@@ -53,7 +53,7 @@ When(/^(\w+):$/) do |name, *rest|
   return unless table
 
   retrying(15) do
-    verify_lines(table.raw.map { |row| row[0].strip })
+    verify_lines(table.raw.map { |row| row.map(&:strip).join(" | ") })
   end
 end
 
