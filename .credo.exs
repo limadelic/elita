@@ -32,7 +32,7 @@
       # If you create your own checks, you must specify the source files for
       # them here, so they can be loaded by Credo before running the analysis.
       #
-      requires: Enum.map(["lines.ex", "check.ex", "funclines.ex", "modlines.ex", "imports.ex", "names.ex", "aliases.ex"], &Path.expand("apps/elita/credo_checks/#{&1}", __DIR__)),
+      requires: Enum.map(["lines.ex", "check.ex", "funclines.ex", "modlines.ex", "imports.ex", "names.ex", "aliases.ex", "disables.ex"], &Path.expand("apps/elita/credo_checks/#{&1}", __DIR__)),
       #
       # If you want to enforce a style guide and need a more traditional linting
       # experience, you can change `strict` to `true` below:
@@ -69,6 +69,7 @@
           {Elita.Credo.Imports, [allowlist: [:ets, :erlang, :rand, :cover], modules: [:GenServer, :Supervisor, :Application, :Task, :Node, :Process, :System]]},
           {Elita.Credo.Names, []},
           {Elita.Credo.Aliases, []},
+          {Elita.Credo.Disables, []},
           {Credo.Check.Warning.Dbg, []},
           {Credo.Check.Warning.IoInspect, []},
           {Credo.Check.Warning.IExPry, []},
