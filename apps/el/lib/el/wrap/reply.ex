@@ -3,7 +3,7 @@ defmodule El.Wrap.Reply do
   import El.Distribution, only: [target: 1]
   import String, only: [to_atom: 1, trim: 1, trim_trailing: 2, split: 3]
   import El.Puppet, only: [put: 2]
-  import IO, only: [write: 1]
+  import El.Log, only: [write: 1]
 
   def handle(:forward, _), do: :forward
 
@@ -32,7 +32,7 @@ defmodule El.Wrap.Reply do
 
   def prepare(name, sender) do
     t = name |> trim() |> to_atom()
-    El.Log.write("prepare: target=#{t} from=#{inspect(sender)}\n")
+    write("prepare: target=#{t} from=#{inspect(sender)}\n")
     t
   end
 
@@ -45,7 +45,7 @@ defmodule El.Wrap.Reply do
   end
 
   defp route(nil, _, _) do
-    El.Log.write("route nil: cannot write\n")
+    write("route nil: cannot write\n")
     :ok
   end
 
@@ -53,12 +53,12 @@ defmodule El.Wrap.Reply do
 
   defp route(_pid, output, agent) when is_binary(output) do
     cleaned = trim_trailing(output, "\n")
-    El.Log.write("route: text: #{inspect(cleaned)}\n")
-    write("#{cleaned}\n#{agent}> ")
+    write("route: text: #{inspect(cleaned)}\n")
+    term("#{cleaned}\n#{agent}> ")
   end
 
   defp route(_, output, _) do
-    El.Log.write("route drop: #{inspect(output)}\n")
+    write("route drop: #{inspect(output)}\n")
     :ok
   end
 
@@ -67,4 +67,6 @@ defmodule El.Wrap.Reply do
   rescue
     _ -> false
   end
+
+  defp term(text), do: IO.write(text)
 end
