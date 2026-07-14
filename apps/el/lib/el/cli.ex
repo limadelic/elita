@@ -10,6 +10,8 @@ defmodule El.CLI do
   import El.Command.Ls, only: [list: 1]
   import El.REPL, only: [run: 1]
   import El.Log, only: [setup: 2]
+  import Enum, only: [join: 2]
+  import El.Ask, only: [invoke: 2]
 
   @usage """
   Usage:
@@ -44,6 +46,10 @@ defmodule El.CLI do
   defp parse(["ask", agent, msg]), do: {:ask, nil, agent, msg}
   defp parse(["tell", agent, msg]), do: {:tell, nil, agent, msg}
   defp parse(["spawn", name, agent]), do: {:spawn, name, agent}
+  defp parse(["@" <> agent | rest]) do
+    msg = rest |> join(" ")
+    {:ask_tool, agent, msg}
+  end
 
   defp parse([tool, "ask", agent, msg]) do
     check(tool, {:ask, tool, agent, msg})
@@ -78,6 +84,7 @@ defmodule El.CLI do
   defp exec({:ask, tool, agent, msg}), do: ask(agent, msg, tool)
   defp exec({:tell, tool, agent, msg}), do: send(agent, msg, tool)
   defp exec({:spawn, name, agent}), do: spawn(name, agent)
+  defp exec({:ask_tool, agent, msg}), do: invoke(agent, msg)
   defp exec({:claude, name}), do: claude(name)
   defp exec({:ls, path}), do: list(path)
   defp exec({:cd, path}), do: cd(path)
