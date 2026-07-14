@@ -1,0 +1,58 @@
+<dashboard version="1.1">
+  <label>Elita Traffic</label>
+  <row>
+    <panel>
+      <title>Live traffic</title>
+      <table>
+        <search>
+          <query>index=elita ("🤔" OR "📢" OR "✨") | sort - _time | table _time source _raw | head 50</query>
+          <earliest>-60m@m</earliest>
+          <latest>now</latest>
+          <refresh>30s</refresh>
+        </search>
+        <option name="count">50</option>
+        <option name="drilldown">none</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Traffic by tool</title>
+      <table>
+        <search>
+          <query>index=elita | eval kind=case(searchmatch("🤔"),"ask", searchmatch("📢"),"tell", searchmatch("✨"),"reply", searchmatch("👀"),"get", searchmatch("✏️"),"set", searchmatch("🚀"),"spawn", searchmatch("🧪"),"spec", searchmatch("🎭"),"become") | where isnotnull(kind) | stats count by kind</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Events per agent</title>
+      <table>
+        <search>
+          <query>index=elita | rex field=source "sessions/(?&lt;agent&gt;[^_]+)_" | stats count by agent | sort - count</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>All recent log lines</title>
+      <table>
+        <search>
+          <query>index=elita | sort - _time | table _time source _raw | head 100</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="count">100</option>
+        <option name="drilldown">none</option>
+      </table>
+    </panel>
+  </row>
+</dashboard>
