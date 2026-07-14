@@ -3,6 +3,7 @@ defmodule El.Ask do
   import Tools
   import Node, only: [start: 2, set_cookie: 1]
   import Application, only: [ensure_all_started: 1]
+  import System, only: [pid: 0]
 
   def invoke(agent, msg) do
     prime()
@@ -26,7 +27,7 @@ defmodule El.Ask do
   end
 
   defp boot(:nonode@nohost) do
-    start(:"ask_#{:erlang.system_time(:millisecond)}@127.0.0.1", :longnames)
+    start(:"ask_#{pid()}@127.0.0.1", :longnames)
   end
 
   defp boot(_), do: :ok
