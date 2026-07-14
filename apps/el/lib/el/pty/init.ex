@@ -27,13 +27,11 @@ defmodule El.Pty.Init do
   defp core(pty, out, child) do
     %{pty: pty, out: out, child: child}
   end
-
   defp attach(state, cfg) do
-    merge(state, extras(cfg))
-  end
-
-  defp extras(cfg) do
-    %{file: cfg[:file], port: cfg[:port], input: cfg[:input], taps: cfg[:taps]}
+    merge(state, %{
+      file: cfg[:file], port: cfg[:port],
+      input: cfg[:input], taps: cfg[:taps]
+    })
   end
 
   defp pair(port, cmd, size) do
@@ -65,10 +63,16 @@ defmodule El.Pty.Init do
   end
 
   defp setup(file, _pty, size) do
-    {:ok, fd} = file.open("/dev/tty", [:read, :binary, :raw])
+    file.open("/dev/tty", [:read, :binary, :raw])
+    |> mirror(file, size)
+  end
+
+  defp mirror({:ok, fd}, file, size) do
     mark(size, sink(fd, file))
     pump(file)
   end
+
+  defp mirror({:error, reason}, _, _) when reason in [:enxio, :ebadf, :enotty], do: :ok
 
   defp pump(file) do
     flag(:trap_exit, true)
@@ -89,10 +93,6 @@ defmodule El.Pty.Init do
 
   defp probe(parent, pty) do
     sleep(500)
-    test(parent, pty)
-  end
-
-  defp test(parent, pty) do
     react(info(pty), parent, pty)
   end
 
