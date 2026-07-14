@@ -1,7 +1,8 @@
 defmodule El.REPL do
   import Application, only: [ensure_all_started: 1]
   import Elita, only: [spawn: 2]
-  import El.Distribution, only: [start: 1, wait: 1]
+  import El.Distribution, only: [wait: 1]
+  import El.Tunnel, only: [boot: 1, reach: 1]
   import El.Puppet, only: [ask: 2]
   import Agent.Harness, only: [dispatch: 3]
   import IO, only: [read: 2, puts: 1, write: 1]
@@ -25,19 +26,24 @@ defmodule El.REPL do
     tape() |> settle()
   end
 
-  defp boot(agent) do
-    start(agent)
-  rescue
-    _ -> :ok
-  end
-
   defp find(agent) do
-    {agent, :puppet} |> :global.whereis_name() |> pick(agent)
+    locate(agent)
   rescue
-    _ -> native(agent)
+    _ -> tunnel(agent)
   end
 
-  defp pick(:undefined, agent), do: native(agent)
+  defp locate(agent) do
+    {agent, :puppet} |> :global.whereis_name() |> via(agent)
+  end
+
+  defp tunnel(agent) do
+    reach(agent) |> pick(agent)
+  end
+
+  defp via(:undefined, agent), do: tunnel(agent)
+  defp via(pid, _agent), do: pid
+
+  defp pick(nil, agent), do: native(agent)
   defp pick(pid, _agent), do: pid
 
   defp native(agent) do
@@ -86,14 +92,8 @@ defmodule El.REPL do
   defp route(_a, p, i), do: i |> split(" ", parts: 2) |> via(p, i)
 
   defp via([_w], p, i), do: ask(p, i)
-  defp via([w, _], p, i), do: ask(choose(target(w), p), i)
+  defp via([w, _], p, i), do: ask(choose(wait(w), p), i)
 
   defp choose(nil, default), do: default
   defp choose(t, _), do: t
-
-  defp target(name), do: lookup(name)
-
-  defp lookup(name) do
-    wait(name)
-  end
 end
