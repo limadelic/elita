@@ -85,10 +85,8 @@ defmodule Log do
   end
 
   defp delegate_write(msg) do
-    try do
-      :erlang.apply(:"Elixir.El.Log", :write, [msg])
-    rescue
-      _ -> :ok
-    end
+    :erlang.apply(:"Elixir.El.Log", :write, [msg])
+  rescue
+    _ -> :ok
   end
 end
