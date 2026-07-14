@@ -35,7 +35,7 @@ defmodule El.Puppet.Query do
 
   defp perform(pty, message) do
     setup(pty, message)
-    collect(build(pty, message, monotonic_time(:millisecond)))
+    []
   end
 
   defp setup(pty, message) do
