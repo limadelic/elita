@@ -151,7 +151,10 @@ def kill_orphaned_scripts
 end
 
 def find_script_orphans
-  cmd = "ps aux | grep 'script -q /dev/null' | grep -v grep | awk '{print $2}'"
+  run_id = ENV["ELITA_RUN"]
+  return [] unless run_id
+
+  cmd = "ps eww | grep 'script -q /dev/null' | grep ELITA_RUN=#{run_id} | awk '{print $1}'"
   `#{cmd}`.strip.split("\n")
 end
 

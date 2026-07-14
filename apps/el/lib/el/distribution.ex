@@ -4,6 +4,7 @@ defmodule El.Distribution do
   import Node, only: [connect: 1]
   import El.Log, only: [write: 1]
   import El.Distribution.Helpers
+  import El.Run, only: [address: 0]
 
   defdelegate start(name \\ :default, opts \\ []), to: El.Boot
 
@@ -27,7 +28,7 @@ defmodule El.Distribution do
   end
 
   def target(name) do
-    connect(:"#{name}@127.0.0.1") |> route(name)
+    connect(address()) |> route(name)
   rescue
     _ -> find(name)
   end
@@ -56,7 +57,7 @@ defmodule El.Distribution do
   defp go(_name, _tries, _pid, _), do: nil
 
   def daemon do
-    Node.start(:"elita@127.0.0.1", :longnames)
+    Node.start(address(), :longnames)
     ensure_all_started(:elita)
     dial()
     sleep(:infinity)
