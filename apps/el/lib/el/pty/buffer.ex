@@ -21,7 +21,7 @@ defmodule El.Pty.Buffer do
   end
 
   defp mark(%{buffer: [msg | rest]} = s, d) do
-    latch(contains?(d, " ?"), s, msg, rest)
+    latch(contains?(d, "bypass permissions"), s, msg, rest)
   end
 
   defp mark(s, _d), do: s
