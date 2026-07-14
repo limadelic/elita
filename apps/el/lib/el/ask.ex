@@ -7,6 +7,7 @@ defmodule El.Ask do
 
   def invoke(agent, msg) do
     prime()
+    reach(agent)
     {parts, _} = exec({[spec(agent, msg)], %{name: "el"}})
     print(parts)
   end
@@ -31,4 +32,8 @@ defmodule El.Ask do
   end
 
   defp boot(_), do: :ok
+
+  defp reach(_agent) do
+    :ok
+  end
 end
