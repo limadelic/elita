@@ -10,6 +10,7 @@ defmodule El.Pty.Dispatch do
   import El.Log, only: [write: 1]
   import IO, only: [binwrite: 2]
   def info({pty, {:data, data}}, state) do
+    write("PTY CHUNK #{byte_size(data)}b idle=#{state.idle}\n")
     updated = prime(state, data)
     process(pty, data, updated)
     {:noreply, updated}
