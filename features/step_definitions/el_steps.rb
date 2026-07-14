@@ -126,7 +126,9 @@ def pause_time
 end
 
 def verify_line(line, transcript, cursor)
-  idx = transcript.index(line.downcase, cursor)
+  transcript_str = transcript.force_encoding('UTF-8').downcase
+  line_lower = line.downcase
+  idx = transcript_str.index(line_lower, cursor)
   return idx + line.length if idx
 
   msg = "Expected '#{line}' in transcript after #{cursor}:\n#{transcript}"

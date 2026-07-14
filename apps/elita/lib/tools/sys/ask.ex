@@ -29,8 +29,10 @@ defmodule Tools.Sys.Ask do
 
   defdelegate spec(name, state), to: Tools.Sys.Ask.Schema, as: :get
 
-  def exec(_, %{"recipient" => recipient, "question" => question}, %{name: sender} = state) do
-    write("🤔 #{sender} → #{recipient} | #{question}\n")
+  def exec(_, %{"recipient" => recipient, "question" => question}, %{name: _sender} = state) do
+    origin = state[:origin] || "user"
+    target = "el.#{recipient}"
+    write("🤔 #{origin} → #{target} | #{question}\n")
     {dispatch(recipient, question, :ask), state}
   end
 

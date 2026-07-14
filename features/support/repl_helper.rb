@@ -198,7 +198,7 @@ module ReplHelper
 
   def wait(prompt_word)
     output = ""
-    pattern = prompt_word == "claude" ? "▐▛███▜▌" : "#{prompt_word}>"
+    pattern = prompt_word == "claude" ? "Claude Code" : "#{prompt_word}>"
     timeout = deadline
     attempt(output, pattern, timeout) || timeout_error(pattern, output)
   end

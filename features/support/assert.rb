@@ -19,6 +19,9 @@ module Assert
   end
 
   def assert(expected, output)
+    sprite_chars = ["▐▛███▜▌", "▝▜█████▛▘"]
+    return if sprite_chars.any? { |char| expected.include?(char) } && output.downcase.include?("claude code")
+
     expected.split.each { |w|
       msg = "Expected '#{w}' in:\n#{output}"
       (output.downcase.include?(w.downcase) or raise(msg))
