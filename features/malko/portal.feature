@@ -42,6 +42,7 @@ Feature: Portal
       | 🤔 el.malko → malko | 1+1 |
     * malko:
       | ✨ malko | 2 |
+    * user:
       | 2 |
     * malko> /exit
 
@@ -54,10 +55,11 @@ Feature: Portal
       | Haiku       |
     * > el malko
     * > el @malko 1+1
-    * user:
+    * el:
       | 🤔 user → el.malko | 1+1 |
     * malko:
       | ✨ malko | 2 |
+    * user:
       | 2 |
     * malko> /exit
 
@@ -74,5 +76,6 @@ Feature: Portal
       | 📢 user → el.malko | 1+1 |
     * malko:
       | from user |
+    * malko:
       | 1+1 |
     * malko> /exit
