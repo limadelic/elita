@@ -23,7 +23,7 @@ defmodule Tools.Sys.Who do
   defdelegate spec(name, state), to: Tools.Sys.Who.Schema, as: :get
 
   def exec(_, _args, state) do
-    log("who", "who", "", "", :green)
+    log("👥", "who", "", "", :green)
     {result(sessions(), agents()), state}
   end
 
