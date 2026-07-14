@@ -2,6 +2,7 @@ defmodule Agent.Harness do
   @moduledoc "Routes ask/tell messages to agents based on registration kind."
 
   import Agent.Session, only: [ask: 2, cast: 2]
+  import Agent.Remote, only: [find: 1]
   import Elita, only: [request: 2, dispatch: 2]
   import Registry, only: [lookup: 2]
   import String, only: [to_atom: 1, downcase: 1]
@@ -24,7 +25,7 @@ defmodule Agent.Harness do
   end
 
   defp nearby([], recipient) do
-    global(bare(recipient))
+    global(bare(recipient)) |> fallback(recipient)
   end
 
   defp nearby(found, _recipient) do
@@ -35,6 +36,12 @@ defmodule Agent.Harness do
     normalized = to_atom(name) |> Kernel.to_string() |> downcase()
     whereis_name({normalized, :puppet}) |> wrap()
   end
+
+  defp fallback([], recipient) do
+    bare(recipient) |> find() |> wrap()
+  end
+
+  defp fallback(found, _), do: found
 
   defp wrap(:undefined), do: []
   defp wrap(pid), do: [{pid, %{kind: :puppet}}]
