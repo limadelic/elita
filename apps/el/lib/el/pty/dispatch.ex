@@ -69,8 +69,15 @@ defmodule El.Pty.Dispatch do
     {:noreply, %{state | taps: delete(taps, pid)}}
   end
 
-  def cast({:inject, msg, _reply}, state), do: {:noreply, gate(msg, state)}
-  def cast({:inject, msg}, state), do: {:noreply, gate(msg, state)}
+  def cast({:inject, msg, _reply}, state) do
+    write("INJECT CAST RECEIVED reply #{byte_size(msg)}b\n")
+    {:noreply, gate(msg, state)}
+  end
+
+  def cast({:inject, msg}, state) do
+    write("INJECT CAST RECEIVED plain #{byte_size(msg)}b\n")
+    {:noreply, gate(msg, state)}
+  end
 
   defp process(pty, data, %{port: port, out: out, taps: taps} = state) do
     binwrite(out, data)
