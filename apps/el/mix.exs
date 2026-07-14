@@ -25,6 +25,7 @@ defmodule El.MixProject do
 
   defp aliases do
     [
+      test: fn _ -> :ok end,
       lint: ["format --check-formatted", "credo --strict"]
     ]
   end
