@@ -2,6 +2,7 @@ defmodule El.Pty.Init do
   @moduledoc false
   import El.Reader
   import El.Trace
+  import El.Pty.Env
   import Map
   import Process, except: [alias: 1, info: 1]
   import Port, only: [info: 1]
@@ -45,8 +46,8 @@ defmodule El.Pty.Init do
   defp pid(_), do: nil
   defp launch(port, cmd, size) do
     argv = args(size, cmd)
-    env = [{~c"CLAUDE_CODE_SESSION_ID", false}, {~c"CLAUDECODE", false}, {~c"CLAUDE_CODE_ENTRYPOINT", false}]
-    port.open({:spawn_executable, "/usr/bin/script"}, [:binary, :stream, :exit_status, {:args, argv}, {:env, env}])
+    port.open({:spawn_executable, "/usr/bin/script"},
+      [:binary, :stream, :exit_status, {:args, argv}, {:env, unset()}])
   end
   defp args({rows, cols}, cmd) do
     stty = "stty rows #{rows} cols #{cols}; stty raw -echo -isig;"
