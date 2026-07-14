@@ -60,12 +60,10 @@ defmodule Elita.MixProject do
     check("cd ../.. && bundle exec cucumber --profile live")
   end
 
-  defp check(cmd) do
-    case Mix.shell().cmd(cmd) do
-      0 -> :ok
-      _ -> raise Mix.Error, "command failed: #{cmd}"
-    end
-  end
+  defp check(cmd), do: confirm(Mix.shell().cmd(cmd), cmd)
+
+  defp confirm(0, _), do: :ok
+  defp confirm(_, cmd), do: raise(Mix.Error, message: "command failed: #{cmd}")
 
   defp tape(args) do
     check("cd ../.. && TAPE=rec bundle exec cucumber #{Enum.join(args, " ")}")

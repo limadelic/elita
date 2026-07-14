@@ -25,20 +25,8 @@ defmodule El.MixProject do
 
   defp aliases do
     [
-      test: [&test/1],
       lint: ["format --check-formatted", "credo --strict"]
     ]
-  end
-
-  defp test(_args) do
-    check("mix test")
-  end
-
-  defp check(cmd) do
-    case Mix.shell().cmd(cmd) do
-      0 -> :ok
-      _ -> raise Mix.Error, "command failed: #{cmd}"
-    end
   end
 
   def application do
