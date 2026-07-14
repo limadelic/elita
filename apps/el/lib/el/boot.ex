@@ -8,7 +8,7 @@ defmodule El.Boot do
   import El.Host, only: [host: 0]
   import String, only: [contains?: 2]
   import El.Log, only: [write: 1]
-  import El.Run, only: [make_suffix: 1]
+  import El.Run, only: [suffix: 0]
 
   def start(name \\ :default, opts \\ []) do
     :os.cmd(~c"epmd -daemon")
@@ -21,8 +21,8 @@ defmodule El.Boot do
     ]
   end
 
-  defp node(:default, opts), do: :"#{cwd!() |> basename()}#{make_suffix("<-")}@#{get(opts, :host, host())}"
-  defp node(name, opts), do: :"#{name}#{make_suffix("<-")}@#{get(opts, :host, host())}"
+  defp node(:default, opts), do: :"#{cwd!() |> basename()}#{suffix()}@#{get(opts, :host, host())}"
+  defp node(name, opts), do: :"#{name}#{suffix()}@#{get(opts, :host, host())}"
 
   defp boot(name, mode),
     do: fn -> Node.start(name, mode) end |> then(&attempt(&1.(), &1, 5)) |> act(name, mode)
