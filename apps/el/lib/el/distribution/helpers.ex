@@ -4,7 +4,7 @@ defmodule El.Distribution.Helpers do
   import El.Peers, only: [load: 0]
   import El.Log, only: [write: 1]
   import Registry, only: [lookup: 2]
-  import El.Run, only: [address: 0]
+  import El.Run, only: [suffix: 0]
 
   def extract([{pid, %{kind: :puppet}}]), do: pid
   def extract(_), do: nil
@@ -18,13 +18,13 @@ defmodule El.Distribution.Helpers do
     _ -> :ok
   end
 
-  def attach(_name) do
-    connect(address())
+  def attach(name) do
+    connect(:"#{name}#{suffix()}@127.0.0.1")
     :global.sync()
   end
 
   def locate(name) do
-    a = address()
+    a = :"#{name}#{suffix()}@127.0.0.1"
     write("connect #{a}: #{inspect(connect(a))}\n")
     :global.sync()
     :global.whereis_name({name, :puppet}) |> reply(name)

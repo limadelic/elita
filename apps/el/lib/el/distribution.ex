@@ -4,7 +4,7 @@ defmodule El.Distribution do
   import Node, only: [connect: 1]
   import El.Log, only: [write: 1]
   import El.Distribution.Helpers
-  import El.Run, only: [address: 0]
+  import El.Run, only: [address: 0, suffix: 0]
 
   defdelegate start(name \\ :default, opts \\ []), to: El.Boot
 
@@ -28,7 +28,7 @@ defmodule El.Distribution do
   end
 
   def target(name) do
-    connect(address()) |> route(name)
+    connect(:"#{name}#{suffix()}@127.0.0.1") |> route(name)
   rescue
     _ -> find(name)
   end

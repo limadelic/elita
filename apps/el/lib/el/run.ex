@@ -18,7 +18,7 @@ defmodule El.Run do
   end
 
   def address do
-    :"elita#{expand("<-")}@127.0.0.1"
+    :"elita#{suffix()}@127.0.0.1"
   end
 
   def file do
