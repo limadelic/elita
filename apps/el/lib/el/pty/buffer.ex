@@ -1,6 +1,6 @@
 defmodule El.Pty.Buffer do
   @moduledoc false
-  import Enum, only: [each: 2, any?: 2]
+  import Enum, only: [each: 2]
   import String, only: [contains?: 2, slice: 2]
   import El.Trace, only: [record: 1]
   import El.Log, only: [write: 1]
@@ -17,30 +17,25 @@ defmodule El.Pty.Buffer do
 
   def prime(s, d) do
     write("PTY DATA #{byte_size(d)}b: #{peek(d)}\n")
-    idle(s, quiet(d))
+    mark(s, d)
   end
 
-  defp idle(%{buffer: [msg | rest], idle_count: c} = s, true) when c >= 2 do
+  defp mark(%{buffer: [msg | rest]} = s, d) do
+    latch(contains?(d, "?"), s, msg, rest)
+  end
+
+  defp mark(s, _d), do: s
+
+  defp latch(true, s, msg, rest) do
     %{s | idle: true, buffer: rest} |> fire(msg)
   end
 
-  defp idle(%{idle_count: c} = s, true) do
-    %{s | idle_count: c + 1}
-  end
-
-  defp idle(s, false) do
-    %{s | idle_count: 0}
-  end
+  defp latch(false, s, _msg, _rest), do: s
 
   defp fire(%{pty: pty, port: port} = s, msg) do
     txt = slice(msg, 0..-2//1)
     write("GATE FIRST #{byte_size(msg)}b\n"); port.command(pty, txt); log(txt)
     %{s | pending_msg: txt}
-  end
-
-  defp quiet(d) do
-    spins = ["thinking", "✶", "✳", "♢", "✻", "✽", "·", "…"]
-    not any?(spins, &contains?(d, &1))
   end
 
   defp path(s, tail, msg) when is_binary(msg), do: echo(s, tail, contains?(tail, msg))
