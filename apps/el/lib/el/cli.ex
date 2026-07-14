@@ -4,6 +4,7 @@ defmodule El.CLI do
   import El.Commands.Ask, only: [ask: 3]
   import El.Commands.Tell, only: [tell: 3]
   import El.Commands.Spawn, only: [spawn: 2]
+  import El.Commands.Stop, only: [stop: 1]
   import El.Commands.Claude, only: [claude: 1]
   import El.Commands.Cd, only: [cd: 1]
   import El.Distribution, only: [daemon: 0]
@@ -16,6 +17,7 @@ defmodule El.CLI do
     el ask <agent> <message>
     el tell <agent> <message>
     el spawn <name> <agent>
+    el stop <agent>
     el [tool] ask <agent> <message>
     el [tool] tell <agent> <message>
     el claude [name]
@@ -44,6 +46,7 @@ defmodule El.CLI do
   defp parse(["ask", agent, msg]), do: {:ask, nil, agent, msg}
   defp parse(["tell", agent, msg]), do: {:tell, nil, agent, msg}
   defp parse(["spawn", name, agent]), do: {:spawn, name, agent}
+  defp parse(["stop", agent]), do: {:stop, agent}
 
   defp parse([tool, "ask", agent, msg]) do
     check(tool, {:ask, tool, agent, msg})
@@ -78,6 +81,7 @@ defmodule El.CLI do
   defp exec({:ask, tool, agent, msg}), do: ask(agent, msg, tool)
   defp exec({:tell, tool, agent, msg}), do: tell(agent, msg, tool)
   defp exec({:spawn, name, agent}), do: spawn(name, agent)
+  defp exec({:stop, agent}), do: stop(agent)
   defp exec({:claude, name}), do: claude(name)
   defp exec({:ls, path}), do: list(path)
   defp exec({:cd, path}), do: cd(path)
