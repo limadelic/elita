@@ -17,15 +17,10 @@ defmodule El.Ask do
   end
 
   defp call(nil, agent, _msg), do: miss(agent)
-  defp call(node, agent, msg), do: retry(node, agent, msg, 3)
-
-  defp retry(_node, agent, _msg, 0), do: miss(agent)
-
-  defp retry(node, agent, msg, tries) do
+  defp call(node, agent, msg) do
     rpc(node, agent, msg)
-  rescue _ ->
-    Process.sleep(100)
-    retry(node, agent, msg, tries - 1)
+  rescue
+    _ -> miss(agent)
   end
 
   defp rpc(node, agent, msg) do

@@ -59,13 +59,18 @@ defmodule Agent.Jsonl do
   defp path do
     home = get_env("HOME", "~")
     projects = join(home, ".claude/projects")
+    Log.write("watcher: home=#{home}\n")
+    Log.write("watcher: projects=#{projects}\n")
     if dir?(projects) do
-      projects |> ls!() |> map(&join(projects, &1)) |> filter(&dir?/1) |> sort()
+      dirs = ls!(projects) |> map(&join(projects, &1)) |> filter(&dir?/1)
+      Log.write("watcher: found #{Enum.count(dirs)} dirs\n")
+      dirs |> sort()
     else
+      Log.write("watcher: no projects dir\n")
       nil
     end
   rescue
-    _ -> nil
+    e -> Log.write("watcher: error=#{inspect(e)}\n"); nil
   end
 
   defp sort(dirs) do
@@ -75,13 +80,18 @@ defmodule Agent.Jsonl do
   defp pick_dir(nil), do: nil
 
   defp pick_dir(dir) do
-    dir
-    |> ls!()
-    |> filter(&ends_with?(&1, ".jsonl"))
-    |> max_by(&mtime_at(&1, dir), fn -> nil end)
+    Log.write("watcher: scanning dir=#{dir}\n")
+    files = ls!(dir) |> filter(&ends_with?(&1, ".jsonl"))
+    Log.write("watcher: found #{Enum.count(files)} jsonl\n")
+    max_by(files, &mtime_at(&1, dir), fn -> nil end)
     |> case do
-      nil -> nil
-      file -> join(dir, file)
+      nil ->
+        Log.write("watcher: no file\n")
+        nil
+      file ->
+        p = join(dir, file)
+        Log.write("watcher: using #{p}\n")
+        p
     end
   end
 
