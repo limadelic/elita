@@ -16,7 +16,8 @@ defmodule El.MixProject do
       deps_path: "../../deps",
       lockfile: "../../mix.lock",
       compilers: [:yecc, :leex, :erlang, :elixir, :app],
-      elixirc_options: [warnings_as_errors: true]
+      elixirc_options: [warnings_as_errors: true],
+      cucumber: [features: "test/features"]
     ]
   end
 
@@ -37,7 +38,8 @@ defmodule El.MixProject do
 
   defp deps do
     [
-      {:elita, in_umbrella: true}
+      {:elita, in_umbrella: true},
+      {:cucumber, "~> 1.0", only: :test}
     ]
   end
 end
