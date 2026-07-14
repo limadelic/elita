@@ -9,10 +9,15 @@ defmodule Agent.Watch do
   end
 
   defp init(agent, question, folder) do
-    log("WATCHER START #{agent} #{question}\n")
+    report(agent, question, folder)
     boot(agent, question, folder)
   rescue
     e -> reraise e, __STACKTRACE__
+  end
+
+  defp report(agent, question, folder) do
+    log("WATCHER START #{agent} #{question}\n")
+    log("watcher:folder=#{inspect(folder)}\n")
   end
 
   defp boot(agent, question, folder) do

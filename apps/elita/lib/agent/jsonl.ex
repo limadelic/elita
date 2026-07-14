@@ -6,19 +6,19 @@ defmodule Agent.Jsonl do
   import Jason, only: [decode: 1]
 
   def find(question, folder, pos) when is_binary(folder) do
-    source() |> load(question, pos)
+    source(folder) |> load(question, pos)
   end
 
   def find(question, nil, pos) do
-    source() |> load(question, pos)
+    source(nil) |> load(question, pos)
   end
 
   def find(question, pos) do
-    source() |> load(question, pos)
+    source(nil) |> load(question, pos)
   end
 
-  defp source do
-    find()
+  defp source(folder) do
+    find(folder)
   end
 
   defp load(nil, _, _), do: :wait
