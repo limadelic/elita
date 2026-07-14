@@ -19,9 +19,13 @@ defmodule Agent.Harness do
   end
 
   defp entry(recipient) do
-    normalized = recipient |> to_atom() |> Kernel.to_string() |> downcase()
+    clean = bare(recipient)
+    normalized = clean |> to_atom() |> Kernel.to_string() |> downcase()
     lookup(ElitaRegistry, normalized)
   end
+
+  defp bare("el." <> name), do: name
+  defp bare(name), do: name
 
   defp ask!([{_pid, %{kind: :native}}], recipient, message) do
     request(to_atom(recipient), message)

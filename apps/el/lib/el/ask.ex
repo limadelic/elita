@@ -9,13 +9,13 @@ defmodule El.Ask do
   def invoke(agent, msg) do
     prime()
     reach(agent)
-    {parts, _} = exec({[spec(agent, msg)], %{name: "el"}})
+    {parts, _} = exec({[spec(agent, msg)], %{name: "user"}})
     print(parts)
   end
 
   defp spec(agent, msg) do
     %{"id" => "1", "name" => "ask",
-      "input" => %{"recipient" => agent, "question" => msg}}
+      "input" => %{"recipient" => "el.#{agent}", "question" => msg}}
   end
 
   defp print([%{"result" => result} | _]), do: puts(result)
