@@ -4,7 +4,7 @@ Feature: Boss
   Scenario: speck reads, writes, and runs boss scenarios
     * > el speck
     * speck> exec boss
-      | 🧪 boss_spec | Hierarchical Delegation                          |
+      | 🧪 boss_spec | Hierarchical Delegation |
     * verify
       | 🎭 speck as tplan |                                         |
       | ✏️ scenario_1     | Single Level Direct Delegation          |
