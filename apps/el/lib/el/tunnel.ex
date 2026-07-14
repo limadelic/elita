@@ -41,6 +41,7 @@ defmodule El.Tunnel do
 
   defp peer(agent) do
     connect(:"#{agent}#{suffix()}@127.0.0.1")
+    :global.sync()
   rescue
     _ -> :ok
   end
