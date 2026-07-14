@@ -5,8 +5,6 @@ Feature: Boss
     * > el speck
     * speck> exec boss
       | 🧪 boss_spec | Hierarchical Delegation                          |
-      | 🤖 boss      | Gets things done like a boss. Delegating.        |
-      | 🤖 worker    | Team member who takes tasks and reports honestly |
     * verify
       | 🎭 speck as tplan |                                         |
       | ✏️ scenario_1     | Single Level Direct Delegation          |

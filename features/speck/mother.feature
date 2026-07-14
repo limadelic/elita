@@ -5,7 +5,6 @@ Feature: Mother
     * > el speck
     * speck> exec mother
       | 🧪 mother_spec | spawn |
-      | 🤖 mother      | spawn |
     * verify
       | 🎭 speck as tplan |                                 |
       | ✏️ scenario_1     | Mother Spawns Baby Successfully |
