@@ -18,6 +18,9 @@ defmodule El.Ask do
   defp print(_), do: :ok
 
   defp register do
-    spawn("el", []) rescue _ -> :ok
+    spawn("el", []) |> ok()
   end
+
+  defp ok({:error, {:already_started, _}}), do: :ok
+  defp ok({:ok, _}), do: :ok
 end
