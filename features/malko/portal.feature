@@ -1,4 +1,5 @@
-@malko @live
+@malko
+@live
 Feature: Portal
 
   Scenario: Through the tunnel into Malkovich
