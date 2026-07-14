@@ -28,6 +28,7 @@ defmodule Log do
 
   defp ensure(_dir, message) do
     write(path("elita"), message, [:append])
+    puts(message)
   end
 
   defp eol(body) do
