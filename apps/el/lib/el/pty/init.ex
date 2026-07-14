@@ -45,8 +45,8 @@ defmodule El.Pty.Init do
   defp pid(_), do: nil
   defp launch(port, cmd, size) do
     argv = args(size, cmd)
-    opts = [:binary, :stream, :exit_status, {:args, argv}]
-    port.open({:spawn_executable, "/usr/bin/script"}, opts)
+    env = [{~c"CLAUDE_CODE_SESSION_ID", false}, {~c"CLAUDECODE", false}, {~c"CLAUDE_CODE_ENTRYPOINT", false}]
+    port.open({:spawn_executable, "/usr/bin/script"}, [:binary, :stream, :exit_status, {:args, argv}, {:env, env}])
   end
   defp args({rows, cols}, cmd) do
     stty = "stty rows #{rows} cols #{cols}; stty raw -echo -isig;"
