@@ -42,6 +42,7 @@ defmodule El.Log do
 
   def handle_cast({:write, message}, file) do
     binwrite(file, message)
+    :file.sync(file)
     {:noreply, file}
   end
 
