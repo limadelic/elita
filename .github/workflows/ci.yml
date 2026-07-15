@@ -79,87 +79,12 @@ jobs:
         if: steps.lint.outcome == 'failure'
         run: exit 1
 
-      - name: Generate lint badge
-        run: |
-          ruby << 'RUBY'
-            require 'json'
-            require 'fileutils'
-            branch = ENV['BRANCH'].sub(%r{/merge$}, '')
-            FileUtils.mkdir_p("site/#{branch}")
-            if File.exist?('/tmp/credo.json')
-              credo = JSON.parse(File.read('/tmp/credo.json'))
-              issue_count = credo['issues'].length
-            else
-              issue_count = 0
-            end
-            color = issue_count == 0 ? '23D96C' : 'e05d44'
-            message = issue_count == 0 ? 'clean' : "#{issue_count} issues"
-            badge = {
-              schemaVersion: 1,
-              label: 'credo',
-              message: message,
-              color: color,
-              labelColor: '173647'
-            }
-            File.write("site/#{branch}/lint.json", JSON.generate(badge))
-          RUBY
+      - run: bin/lint_badge.rb
         env:
           BRANCH: ${{ github.ref_name }}
         if: always()
-        continue-on-error: true
 
-      - name: Generate credo report
-        run: |
-          ruby << 'RUBY'
-            require 'json'
-            require 'fileutils'
-            branch = ENV['BRANCH'].sub(%r{/merge$}, '')
-            FileUtils.mkdir_p("site/#{branch}")
-            html = <<~HTML
-              <!DOCTYPE html>
-              <html lang="en">
-              <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1">
-                <title>Credo Report</title>
-                <style>
-                  body { background: #1a1a1a; color: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 20px; }
-                  h1 { color: #fff; margin: 0 0 20px 0; }
-                  .clean { color: #23D96C; font-size: 1.1em; margin: 20px 0; }
-                  table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-                  th { background: #173647; color: #fff; padding: 12px; text-align: left; border-bottom: 1px solid #444; font-weight: 600; }
-                  td { padding: 12px; border-bottom: 1px solid #333; }
-                  tr:hover { background: #2a2a2a; }
-                </style>
-              </head>
-              <body>
-            HTML
-
-            if File.exist?('/tmp/credo.json')
-              credo = JSON.parse(File.read('/tmp/credo.json'))
-              issues = credo['issues'] || []
-            else
-              issues = []
-            end
-
-            if issues.empty?
-              html << "<h1>credo</h1>\n<div class=\"clean\">✓ 0 issues — clean</div>\n"
-            else
-              html << "<h1>credo — #{issues.length} issues</h1>\n"
-              html << "<table>\n<thead>\n<tr><th>File</th><th>Line</th><th>Check</th><th>Message</th></tr>\n</thead>\n<tbody>\n"
-              issues.each do |issue|
-                file = issue['filename'] || ''
-                line = issue['line_no'] || ''
-                check = issue['check'] || ''
-                message = (issue['message'] || '').gsub(/&/, '&amp;').gsub(/</, '&lt;').gsub(/>/, '&gt;').gsub(/"/, '&quot;')
-                html << "<tr><td>#{file}</td><td>#{line}</td><td>#{check}</td><td>#{message}</td></tr>\n"
-              end
-              html << "</tbody>\n</table>\n"
-            end
-
-            html << "</body>\n</html>"
-            File.write("site/#{branch}/credo.html", html)
-          RUBY
+      - run: bin/credo_report.rb
         env:
           BRANCH: ${{ github.ref_name }}
         if: always()
@@ -268,73 +193,19 @@ jobs:
           ruby bin/inject_legend.rb reports/cucumber.html
         if: always()
 
-      - name: Compute badge counts
-        run: |
-          ruby << 'RUBY'
-            require 'json'
-            require 'fileutils'
-            branch = ENV['BRANCH'].sub(%r{/merge$}, '')
-            FileUtils.mkdir_p("site/#{branch}")
-            if File.exist?('reports/cucumber.json')
-              data = JSON.parse(File.read('reports/cucumber.json'))
-              scenarios = data.flat_map { |f| f['elements'] || [] }
-              passed = scenarios.count { |sc| (sc['steps'] || []).all? { |s| s.dig('result','status') == 'passed' } }
-              total = scenarios.length
-              color = passed == total && total > 0 ? '23D96C' : 'e05d44'
-              message = "#{passed}/#{total}"
-            else
-              color = 'e05d44'
-              message = '0/0'
-            end
-            badge = {
-              schemaVersion: 1,
-              label: 'cukes',
-              message: message,
-              color: color,
-              namedLogo: 'cucumber',
-              logoColor: 'white',
-              labelColor: '173647'
-            }
-            File.write("site/#{branch}/cukes.json", JSON.generate(badge))
-            File.write("site/#{branch}/cukes_badge.txt", "cukes: #{message}")
-          RUBY
+      - run: bin/cukes_badge.rb
         env:
           BRANCH: ${{ github.ref_name }}
         if: always()
 
-      - name: Append summary
-        run: |
-          ruby << 'RUBY'
-            require 'json'
-            if File.exist?('reports/cucumber.json')
-              data = JSON.parse(File.read('reports/cucumber.json'))
-              scenarios = data.flat_map { |f| f['elements'] || [] }
-              passed = scenarios.count { |sc| (sc['steps'] || []).all? { |s| s.dig('result','status') == 'passed' } }
-              total = scenarios.length
-              summary = "## Cucumber Tests\n\n✅ **#{passed}/#{total}** scenarios passed\n\n"
-              data.each do |feature|
-                feature_name = File.basename(feature['uri'])
-                feature_scenarios = feature['elements'] || []
-                feature_passed = feature_scenarios.count { |sc| (sc['steps'] || []).all? { |s| s.dig('result','status') == 'passed' } }
-                summary << "- #{feature_name}: #{feature_passed}/#{feature_scenarios.length}\n"
-              end
-              File.write(ENV['GITHUB_STEP_SUMMARY'], summary)
-            end
-          RUBY
+      - run: bin/cukes_summary.rb
         if: always()
-        shell: bash
 
-      - name: Copy cucumber report to site
-        run: |
-          ruby << 'RUBY'
-            require 'fileutils'
-            branch = ENV['BRANCH'].sub(%r{/merge$}, '')
-            FileUtils.mkdir_p("site/#{branch}")
-            FileUtils.cp('reports/cucumber.html', "site/#{branch}/cukes.html")
-          RUBY
+      - run: ruby -e "require 'fileutils'; b = ENV['BRANCH'].sub(%r{/merge$}, ''); FileUtils.mkdir_p('site/#{b}'); FileUtils.cp('reports/cucumber.html', "site/#{b}/cukes.html")"
         env:
           BRANCH: ${{ github.ref_name }}
         if: always()
+        name: Copy cucumber report to site
 
       - name: Upload Cucumber report artifact
         uses: actions/upload-artifact@v4
@@ -358,58 +229,13 @@ jobs:
           path: site/
           retention-days: 1
 
-      - name: Update PR badge
+      - run: bin/update_pr_badge.rb
         if: github.event_name == 'pull_request' && always()
-        run: |
-          ruby << 'RUBY'
-            require 'json'
-            require 'open3'
-            require 'uri'
-
-            branch = ENV['HEAD_REF'] || ENV['BRANCH']
-            prefix = branch == 'main' ? '' : "#{branch}/"
-            pages_url = "https://limadelic.github.io/elita"
-
-            # Credo badge with endpoint URL
-            credo_json_url = "#{pages_url}/#{prefix}lint.json"
-            credo_json_encoded = URI.encode_www_form_component(credo_json_url)
-            credo_report_url = "#{pages_url}/#{prefix}credo.html"
-            credo_badge = "[![credo](https://img.shields.io/endpoint?url=#{credo_json_encoded})](#{credo_report_url})"
-
-            # Cukes badge with endpoint URL
-            cukes_json_url = "#{pages_url}/#{prefix}cukes.json"
-            cukes_json_encoded = URI.encode_www_form_component(cukes_json_url)
-            cukes_report_url = "#{pages_url}/#{prefix}cukes.html"
-            cukes_badge = "[![cukes](https://img.shields.io/endpoint?url=#{cukes_json_encoded})](#{cukes_report_url})"
-
-            badge_content = "#{credo_badge} #{cukes_badge}"
-
-            # Get current PR body
-            cmd = "gh pr view #{ENV['PR_NUMBER']} --json body -q .body"
-            body, status = Open3.capture2(cmd)
-            body = body.strip
-
-            # Replace or append badge block
-            marker_start = '<!-- cukes-badge-start -->'
-            marker_end = '<!-- cukes-badge-end -->'
-
-            if body.include?(marker_start) && body.include?(marker_end)
-              body.gsub!(/#{Regexp.escape(marker_start)}.*?#{Regexp.escape(marker_end)}/m,
-                        "#{marker_start}\n#{badge_content}\n#{marker_end}")
-            else
-              body = "#{marker_start}\n#{badge_content}\n#{marker_end}\n\n#{body}"
-            end
-
-            # Update PR body
-            File.write('/tmp/pr_body.txt', body)
-            system("gh pr edit #{ENV['PR_NUMBER']} --body-file /tmp/pr_body.txt")
-          RUBY
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           BRANCH: ${{ github.ref_name }}
           HEAD_REF: ${{ github.event.pull_request.head.ref }}
           GH_TOKEN: ${{ github.token }}
-        continue-on-error: true
 
       - name: Fail if tests failed
         if: steps.cukes.outcome == 'failure'
