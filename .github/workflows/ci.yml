@@ -2,11 +2,13 @@ name: CI
 
 on:
   push:
+  pull_request:
   workflow_dispatch:
 
 permissions:
   pages: write
   id-token: write
+  pull-requests: write
 
 jobs:
   lint:
@@ -320,11 +322,49 @@ jobs:
           name: cukes-report-${{ github.ref_name }}
           path: reports/
 
-      - name: Update PR badge (manual post-run)
-        if: github.event_name == 'push' && always()
+      - name: Update PR badge
+        if: github.event_name == 'pull_request' && always()
         run: |
-          echo "Note: PR badge update requires manual gh pr edit after workflow completes"
-          echo "Run: gh pr edit 24 --body-file /tmp/pr_body.txt"
+          ruby << 'RUBY'
+            require 'json'
+            require 'open3'
+
+            # Read scenario counts
+            if File.exist?('reports/cucumber.json')
+              data = JSON.parse(File.read('reports/cucumber.json'))
+              scenarios = data.flat_map { |f| f['elements'] || [] }
+              passed = scenarios.count { |sc| (sc['steps'] || []).all? { |s| s.dig('result','status') == 'passed' } }
+              total = scenarios.length
+              status_emoji = passed == total && total > 0 ? '✅' : '❌'
+              badge_line = "#{status_emoji} **#{passed}/#{total}** scenarios | [run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) | [report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}#artifacts)"
+            else
+              badge_line = "❌ **0/0** scenarios"
+            end
+
+            # Get current PR body
+            cmd = "gh pr view #{ENV['PR_NUMBER']} --json body -q .body"
+            body, status = Open3.capture2(cmd)
+            body = body.strip
+
+            # Replace or append badge block
+            marker_start = '<!-- cukes-badge-start -->'
+            marker_end = '<!-- cukes-badge-end -->'
+
+            if body.include?(marker_start) && body.include?(marker_end)
+              # Replace existing badge block
+              body.gsub!(/#{Regexp.escape(marker_start)}.*?#{Regexp.escape(marker_end)}/m,
+                        "#{marker_start}\n#{badge_line}\n#{marker_end}")
+            else
+              # Prepend new badge block
+              body = "#{marker_start}\n#{badge_line}\n#{marker_end}\n\n#{body}"
+            end
+
+            # Update PR body
+            File.write('/tmp/pr_body.txt', body)
+            system("gh pr edit #{ENV['PR_NUMBER']} --body-file /tmp/pr_body.txt")
+          RUBY
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         continue-on-error: true
 
       - name: Fail if tests failed

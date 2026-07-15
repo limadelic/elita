@@ -9,8 +9,8 @@ defmodule GreetTest do
       System.delete_env("CASSETTE")
     end)
 
-    spawn :greet
-    spawn :judge
+    spawn(:greet)
+    spawn(:judge)
     :ok
   end
 
