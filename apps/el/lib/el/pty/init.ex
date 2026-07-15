@@ -5,8 +5,7 @@ defmodule El.Pty.Init do
   import El.Pty.State, only: [initial: 4, config: 2]
   import El.Pty.Boot, only: [launch: 3]
   import El.Pty.Watch, only: [start: 1]
-  import Process, only: [info: 2, flag: 2]
-  import System, only: [get_env: 2]
+  import Process, only: [flag: 2]
 
   def call(cfg) do
     size = cfg[:get_size].()
@@ -16,19 +15,7 @@ defmodule El.Pty.Init do
 
   defp boot(cfg, size) do
     {pty, child} = pair(cfg[:port], cfg[:cmd], size)
-    {pty, child, :stdio, snap()}
-  end
-
-  defp snap do
-    n = info(self(), :registered_name) |> elem(1)
-    p = "#{get_env("HOME", "~")}/.elita/sessions/#{n}.raw"
-    safely(fn -> p |> to_charlist() |> :file.open([:write, :binary]) |> elem(1) end, nil)
-  end
-
-  defp safely(fun, default) do
-    fun.()
-  rescue
-    _ -> default
+    {pty, child, :stdio, nil}
   end
 
   defp finish(cfg, pty, size, {out, raw, child}) do
@@ -64,13 +51,10 @@ defmodule El.Pty.Init do
     spawn_link(fn -> start(file, parent) end)
   end
 
-  defp sink(fd, file),
-    do:
-      safely(
-        fn ->
-          file.close(fd)
-          :tty
-        end,
-        :user
-      )
+  defp sink(fd, file) do
+    file.close(fd)
+    :tty
+  rescue
+    _ -> :user
+  end
 end
