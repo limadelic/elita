@@ -13,10 +13,15 @@ defmodule Elita do
   import Tools
 
   def spawn(name, configs) do
-    {:ok, _} = res = start_link(__MODULE__, {name, configs}, name: via(name))
+    {:ok, pid} = started(__MODULE__, {name, configs}, via(name))
     publish(name)
-    res
+    {:ok, pid}
   end
+
+  defp started(m, a, k), do: start_link(m, a, name: k) |> accept()
+
+  defp accept({:ok, p}), do: {:ok, p}
+  defp accept({:error, {:already_started, p}}), do: {:ok, p}
 
   defp publish(name) do
     publish(name, :global.whereis_name({name, :puppet}))
@@ -69,13 +74,8 @@ defmodule Elita do
     act(%{state | history: history})
   end
 
-  defp branch(true, _history, msg) do
-    [msg]
-  end
-
-  defp branch(false, history, msg) do
-    history ++ [msg]
-  end
+  defp branch(true, _, msg), do: [msg]
+  defp branch(false, history, msg), do: history ++ [msg]
 
   defp judge?(configs) do
     "judge" in configs
