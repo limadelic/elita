@@ -2,11 +2,14 @@ name: CI
 
 on:
   push:
+  pull_request:
   workflow_dispatch:
 
 permissions:
+  contents: write
   pages: write
   id-token: write
+  pull-requests: write
 
 jobs:
   lint:
@@ -25,6 +28,11 @@ jobs:
           ruby-version: '3.3'
           bundler-cache: true
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          cache: npm
+
       - uses: actions/cache@v4
         with:
           path: |
@@ -40,33 +48,28 @@ jobs:
       - name: Lint
         id: lint
         run: mix lint
-        continue-on-error: true
+
+      - name: Check Gherkin formatting
+        run: |
+          npm install
+          npm run fmt:check
 
       - name: Credo failure detail
         if: steps.lint.outcome == 'failure'
         run: |
-          # Get detailed JSON output
           mix credo list --format json > /tmp/credo.json
-
-          # Parse and create summary
           echo "## Lint Violations" >> $GITHUB_STEP_SUMMARY
           ISSUE_COUNT=$(jq '.issues | length' /tmp/credo.json)
           echo "Found $ISSUE_COUNT issues" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-
           if [ "$ISSUE_COUNT" -gt 0 ]; then
             echo "| File | Line | Check | Message |" >> $GITHUB_STEP_SUMMARY
             echo "|------|------|-------|---------|" >> $GITHUB_STEP_SUMMARY
-
             jq -r '.issues[] | [.filename, .line_no, .check, .message] | @csv' /tmp/credo.json | while IFS=',' read -r file line check message; do
               file=$(echo "$file" | tr -d '"')
               check=$(echo "$check" | tr -d '"')
               message=$(echo "$message" | tr -d '"')
-
-              # Emit GitHub annotation
               echo "::error file=$file,line=$line,title=$check::$message"
-
-              # Add to summary table
               file_short=$(basename "$file")
               echo "| $file_short | $line | $check | $message |" >> $GITHUB_STEP_SUMMARY
             done
@@ -76,80 +79,14 @@ jobs:
         if: steps.lint.outcome == 'failure'
         run: exit 1
 
-      - name: Generate lint badge
-        run: |
-          mkdir -p site
-          ruby << 'RUBY'
-            require 'json'
-            if File.exist?('/tmp/credo.json')
-              credo = JSON.parse(File.read('/tmp/credo.json'))
-              issue_count = credo['issues'].length
-            else
-              issue_count = 0
-            end
-            color = issue_count == 0 ? '23D96C' : 'e05d44'
-            message = issue_count == 0 ? 'clean' : "#{issue_count} issues"
-            badge = {
-              schemaVersion: 1,
-              label: 'credo',
-              message: message,
-              color: color,
-              labelColor: '173647'
-            }
-            File.write('site/lint.json', JSON.generate(badge))
-          RUBY
+      - run: bin/lint_badge.rb
+        env:
+          BRANCH: ${{ github.ref_name }}
         if: always()
 
-      - name: Generate credo report
-        run: |
-          mkdir -p site
-          ruby << 'RUBY'
-            require 'json'
-            html = <<~HTML
-              <!DOCTYPE html>
-              <html lang="en">
-              <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1">
-                <title>Credo Report</title>
-                <style>
-                  body { background: #1a1a1a; color: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 20px; }
-                  h1 { color: #fff; margin: 0 0 20px 0; }
-                  .clean { color: #23D96C; font-size: 1.1em; margin: 20px 0; }
-                  table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-                  th { background: #173647; color: #fff; padding: 12px; text-align: left; border-bottom: 1px solid #444; font-weight: 600; }
-                  td { padding: 12px; border-bottom: 1px solid #333; }
-                  tr:hover { background: #2a2a2a; }
-                </style>
-              </head>
-              <body>
-            HTML
-
-            if File.exist?('/tmp/credo.json')
-              credo = JSON.parse(File.read('/tmp/credo.json'))
-              issues = credo['issues'] || []
-            else
-              issues = []
-            end
-
-            if issues.empty?
-              html << "<h1>credo</h1>\n<div class=\"clean\">✓ 0 issues — clean</div>\n"
-            else
-              html << "<h1>credo — #{issues.length} issues</h1>\n"
-              html << "<table>\n<thead>\n<tr><th>File</th><th>Line</th><th>Check</th><th>Message</th></tr>\n</thead>\n<tbody>\n"
-              issues.each do |issue|
-                file = issue['filename'] || ''
-                line = issue['line_no'] || ''
-                check = issue['check'] || ''
-                message = (issue['message'] || '').gsub(/&/, '&amp;').gsub(/</, '&lt;').gsub(/>/, '&gt;').gsub(/"/, '&quot;')
-                html << "<tr><td>#{file}</td><td>#{line}</td><td>#{check}</td><td>#{message}</td></tr>\n"
-              end
-              html << "</tbody>\n</table>\n"
-            end
-
-            html << "</body>\n</html>"
-            File.write('site/credo.html', html)
-          RUBY
+      - run: bin/credo_report.rb
+        env:
+          BRANCH: ${{ github.ref_name }}
         if: always()
 
       - name: Upload lint badge artifact
@@ -204,26 +141,161 @@ jobs:
         env:
           MIX_ENV: test
 
-  deploy:
+  cukes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+
+      - uses: erlef/setup-beam@v1
+        with:
+          elixir-version: '1.18'
+          otp-version: '28'
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            deps
+            _build
+          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-
+
+      - name: Get dependencies
+        run: mix deps.get
+
+      - name: Build el escript
+        run: |
+          cd apps/el
+          mix escript.build
+
+      - name: Prepare elita
+        run: |
+          cd apps/elita
+          mix compile
+
+      - name: Run Cucumber tests
+        id: cukes
+        run: |
+          mkdir -p reports
+          TAPE=replay mix cukes --format html --out reports/cucumber.html --format json --out reports/cucumber.json --publish-quiet
+        env:
+          MIX_ENV: test
+
+      - name: Inject legend into report
+        run: |
+          ruby bin/inject_legend.rb reports/cucumber.html
+        if: always()
+
+      - run: bin/cukes_badge.rb
+        env:
+          BRANCH: ${{ github.ref_name }}
+        if: always()
+
+      - run: bin/cukes_summary.rb
+        if: always()
+
+      - run: ruby -e 'require "fileutils"; b = ENV["BRANCH"].sub(%r{/merge$}, ""); FileUtils.mkdir_p("site/#{b}"); FileUtils.cp("reports/cucumber.html", "site/#{b}/cukes.html")'
+        env:
+          BRANCH: ${{ github.ref_name }}
+        if: always()
+        name: Copy cucumber report to site
+
+      - name: Upload Cucumber report artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cukes-report-${{ github.run_id }}
+          path: reports/
+
+      - name: Sanitize branch name for artifact
+        id: branch_slug
+        run: |
+          branch="${{ github.ref_name }}"
+          slug="${branch//\//-}"
+          echo "slug=$slug" >> "$GITHUB_OUTPUT"
+
+      - name: Upload cukes HTML artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cukes-html-${{ steps.branch_slug.outputs.slug }}
+          path: site/
+          retention-days: 1
+
+      - run: bin/update_pr_badge.rb
+        if: github.event_name == 'pull_request' && always()
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BRANCH: ${{ github.ref_name }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Fail if tests failed
+        if: steps.cukes.outcome == 'failure'
+        run: exit 1
+
+  site:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    needs: [lint, test, lock]
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
+    needs: [lint, test, cukes, lock]
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    permissions:
+      pages: write
+      id-token: write
 
     steps:
-      - name: Download lint badge
+      - name: Compute deployment prefix
+        id: prefix
+        run: |
+          BRANCH="${{ github.ref_name }}"
+          PREFIX=""
+          [ "$BRANCH" != "main" ] && PREFIX="$BRANCH/"
+          echo "prefix=$PREFIX" >> "$GITHUB_OUTPUT"
+
+      - name: Sanitize branch name for artifact
+        id: branch_slug
+        run: |
+          branch="${{ github.ref_name }}"
+          slug="${branch//\//-}"
+          echo "slug=$slug" >> "$GITHUB_OUTPUT"
+
+      - name: Create site directory
+        run: mkdir -p site
+
+      - name: Download lint badge artifact
         uses: actions/download-artifact@v4
         with:
           name: lint-badge
           path: site
+        continue-on-error: true
 
-      - name: Preserve cucumber files
+      - name: Download cukes HTML artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: cukes-html-${{ steps.branch_slug.outputs.slug }}
+          path: site/
+        continue-on-error: true
+
+      - name: Seed site from live Pages
         run: |
-          curl -sf https://limadelic.github.io/elita/cukes.json -o site/cukes.json || true
-          curl -sf https://limadelic.github.io/elita/index.html -o site/index.html || true
-          curl -sf https://limadelic.github.io/elita/index.html -o site/cukes.html || true
+          PREFIX="${{ steps.prefix.outputs.prefix }}"
+          mkdir -p site
+          if [ -n "$PREFIX" ]; then
+            curl -sfL https://limadelic.github.io/elita/index.html -o site/index.html || true
+            curl -sfL https://limadelic.github.io/elita/cukes.json -o site/cukes.json || true
+            curl -sfL https://limadelic.github.io/elita/cukes.html -o site/cukes.html || true
+            curl -sfL https://limadelic.github.io/elita/lint.json -o site/lint.json || true
+            curl -sfL https://limadelic.github.io/elita/credo.html -o site/credo.html || true
+          fi
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
