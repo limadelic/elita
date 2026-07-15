@@ -259,7 +259,10 @@ jobs:
         id: cukes
         run: |
           mkdir -p reports
-          TAPE=replay bundle exec cucumber --profile default --format html --out reports/cucumber.html --format json --out reports/cucumber.json --publish-quiet
+          TAPE=replay bundle exec cucumber --profile default --format html --out reports/cucumber.html --format json --out reports/cucumber.json --publish 2>&1 | tee /tmp/cucumber_output.log
+          # Extract and save the published report URL
+          REPORT_URL=$(grep -oP 'https://reports.cucumber.io/reports/[^\s]+' /tmp/cucumber_output.log | head -1)
+          echo "report_url=${REPORT_URL}" >> "$GITHUB_OUTPUT"
         env:
           MIX_ENV: test
 
@@ -329,17 +332,34 @@ jobs:
             require 'json'
             require 'open3'
 
-            # Read scenario counts
+            run_id = ENV['RUN_ID']
+            repo = ENV['REPOSITORY']
+            report_url = ENV['REPORT_URL'] || ""
+
+            # Credo badge (from lint job)
+            credo_url = "https://github.com/#{repo}/actions/runs/#{run_id}"
+            credo_badge = "[![credo](https://img.shields.io/badge/credo-clean-brightgreen)](#{credo_url})"
+
+            # Cukes badge with cucumber logo
+            cukes_badge_content = ""
             if File.exist?('reports/cucumber.json')
               data = JSON.parse(File.read('reports/cucumber.json'))
               scenarios = data.flat_map { |f| f['elements'] || [] }
               passed = scenarios.count { |sc| (sc['steps'] || []).all? { |s| s.dig('result','status') == 'passed' } }
               total = scenarios.length
-              status_emoji = passed == total && total > 0 ? '✅' : '❌'
-              badge_line = "#{status_emoji} **#{passed}/#{total}** scenarios | [run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) | [report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}#artifacts)"
+              color = passed == total && total > 0 ? 'brightgreen' : 'red'
+              message = "#{passed}%2F#{total}"
+              # Use published report URL if available, otherwise link to run
+              cukes_url = report_url.empty? ? "https://github.com/#{repo}/actions/runs/#{run_id}" : report_url
+              cukes_badge_url = "https://img.shields.io/badge/cukes-#{message}-#{color}?logo=cucumber&logoColor=white"
+              cukes_badge = "[![cukes](#{cukes_badge_url})](#{cukes_url})"
             else
-              badge_line = "❌ **0/0** scenarios"
+              cukes_url = report_url.empty? ? "https://github.com/#{repo}/actions/runs/#{run_id}" : report_url
+              cukes_badge_url = "https://img.shields.io/badge/cukes-0%2F0-red?logo=cucumber&logoColor=white"
+              cukes_badge = "[![cukes](#{cukes_badge_url})](#{cukes_url})"
             end
+
+            badge_content = "#{credo_badge} #{cukes_badge}"
 
             # Get current PR body
             cmd = "gh pr view #{ENV['PR_NUMBER']} --json body -q .body"
@@ -351,12 +371,10 @@ jobs:
             marker_end = '<!-- cukes-badge-end -->'
 
             if body.include?(marker_start) && body.include?(marker_end)
-              # Replace existing badge block
               body.gsub!(/#{Regexp.escape(marker_start)}.*?#{Regexp.escape(marker_end)}/m,
-                        "#{marker_start}\n#{badge_line}\n#{marker_end}")
+                        "#{marker_start}\n#{badge_content}\n#{marker_end}")
             else
-              # Prepend new badge block
-              body = "#{marker_start}\n#{badge_line}\n#{marker_end}\n\n#{body}"
+              body = "#{marker_start}\n#{badge_content}\n#{marker_end}\n\n#{body}"
             end
 
             # Update PR body
@@ -365,6 +383,9 @@ jobs:
           RUBY
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
+          RUN_ID: ${{ github.run_id }}
+          REPOSITORY: ${{ github.repository }}
+          REPORT_URL: ${{ steps.cukes.outputs.report_url }}
           GH_TOKEN: ${{ github.token }}
         continue-on-error: true
 
