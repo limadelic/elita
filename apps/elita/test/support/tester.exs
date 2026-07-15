@@ -19,6 +19,7 @@ defmodule Tester do
           |> String.downcase()
 
         System.put_env("CASSETTE", cassette)
+        System.put_env("CASSETTE_DIR", Path.expand("../../../../features/cassettes", __DIR__))
 
         on_exit(fn ->
           System.delete_env("CASSETTE")
