@@ -1,6 +1,7 @@
 defmodule Tape.Writer do
   import Agent, only: [start_link: 2, get_and_update: 2, get: 2]
   import Map, only: [get: 3, put: 3]
+  import System, only: [get_env: 1]
 
   def start_link(tape) do
     start_link(fn -> %{cassette: tape} end, name: __MODULE__)
@@ -8,6 +9,8 @@ defmodule Tape.Writer do
 
   def cassette do
     get(__MODULE__, fn state -> Map.get(state, :cassette) end)
+  rescue
+    _ -> get_env("CASSETTE")
   end
 
   def acquire(fun) do
