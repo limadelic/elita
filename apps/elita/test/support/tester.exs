@@ -10,7 +10,9 @@ defmodule Tester do
       import Tester
 
       setup_all do
-        module_name = __MODULE__ |> Atom.to_string() |> String.split(".") |> List.last() |> String.downcase()
+        module_name =
+          __MODULE__ |> Atom.to_string() |> String.split(".") |> List.last() |> String.downcase()
+
         cassette_base = String.slice(module_name, 0..-5//1)
         cassette_name = cassette_base <> "_xunit"
         {:ok, _} = Tape.Writer.start_link(cassette_name)
@@ -47,6 +49,7 @@ defmodule Tester do
     answer = ask(name, query)
 
     assert is_binary(answer), "Expected binary answer, got: #{inspect(answer)}"
+
     assert contains?(downcase(answer), downcase("#{expected}")),
            "Expected '#{answer}' to contain '#{expected}'"
   end
