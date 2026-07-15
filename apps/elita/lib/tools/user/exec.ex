@@ -1,14 +1,11 @@
 defmodule Tools.User.Exec do
   import Code, only: [eval_string: 2]
   import Enum, only: [map: 2, join: 2, at: 2]
-  import Log, only: [log: 5]
   import String, only: [split: 2, trim: 1, to_atom: 1]
   import Map, only: [to_list: 1]
 
   def exec(tool, args) when tool != nil do
-    log("🛠️", tool.name, ": ", args, :red)
     result = first(tool.code, tool, args)
-    log("", "", "", result, :yellow)
     result
   end
 
