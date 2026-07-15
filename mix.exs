@@ -24,6 +24,7 @@ defmodule Elita.Umbrella do
     [
       test: [&run_test/1],
       lint: [&run_lint/1],
+      cukes: [&run_cukes/1],
       build: [&run_build/1],
       ship: "cmd bin/release"
     ]
@@ -40,6 +41,12 @@ defmodule Elita.Umbrella do
     check("mix format --check-formatted")
     check("mix credo --strict")
     check("bundle exec rubocop")
+  end
+
+  defp run_cukes(args) do
+    extra = args |> Enum.join(" ") |> String.trim()
+    cmd = "bundle exec cucumber --profile default" <> (if extra != "", do: " #{extra}", else: "")
+    check(cmd)
   end
 
   defp run_build(_) do
