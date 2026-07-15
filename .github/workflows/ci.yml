@@ -319,7 +319,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: cukes-report-${{ github.ref_name }}
+          name: cukes-report-${{ github.run_id }}
           path: reports/
 
       - name: Update PR badge
@@ -389,7 +389,7 @@ jobs:
       - name: Download cukes report
         uses: actions/download-artifact@v4
         with:
-          name: cukes-report-main
+          name: cukes-report-${{ github.run_id }}
           path: site/cukes-latest
         if: github.ref == 'refs/heads/main'
         continue-on-error: true

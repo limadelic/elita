@@ -48,6 +48,7 @@ defmodule Tester do
     verdict = ask(:judge, prompt)
 
     assert is_binary(verdict), "Expected binary verdict, got: #{inspect(verdict)}"
+
     assert downcase(verdict) == "yes",
            "Judge said: #{verdict}. Expectation failed: #{expectation}"
   end
