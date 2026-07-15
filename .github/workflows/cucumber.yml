@@ -145,34 +145,3 @@ jobs:
           name: test-site
           path: site/
 
-  deploy:
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    needs: [test]
-    if: github.ref == 'refs/heads/main'
-
-    steps:
-      - name: Download test report
-        uses: actions/download-artifact@v4
-        with:
-          name: test-site
-          path: site
-
-      - name: Preserve lint badge
-        run: |
-          curl -sf https://limadelic.github.io/elita/lint.json -o site/lint.json || true
-          curl -sf https://limadelic.github.io/elita/credo.html -o site/credo.html || true
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-
-      - name: Upload to Pages
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: site
-
-      - name: Deploy to Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
