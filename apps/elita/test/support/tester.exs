@@ -2,7 +2,6 @@ defmodule Tester do
   import ExUnit.Assertions
   import Elita, only: [request: 2, dispatch: 2]
   import String, only: [downcase: 1]
-  import Log, only: [log: 5]
 
   defmacro __using__(_opts) do
     quote do
@@ -34,12 +33,10 @@ defmodule Tester do
   end
 
   def tell(name, msg) do
-    log("📢", "user → #{name}", ": ", msg, :yellow)
     dispatch(to_string(name), msg)
   end
 
   def ask(name, query) do
-    log("🤔", "user → #{name}", ": ", query, :green)
     request(to_string(name), query)
   end
 
