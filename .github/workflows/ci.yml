@@ -427,6 +427,7 @@ jobs:
         with:
           ref: gh-pages
           fetch-depth: 0
+          persist-credentials: true
         continue-on-error: true
 
       - name: Sanitize branch name for artifact
