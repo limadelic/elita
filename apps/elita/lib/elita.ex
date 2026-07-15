@@ -7,6 +7,7 @@ defmodule Elita do
   import Llm, only: [llm: 1]
   import Mem, only: [create: 0]
   import Msg, only: [user: 1]
+  import Reply, only: [deliver: 2]
   import String, only: [downcase: 1, trim: 1]
   import System, only: [get_env: 1]
   import Tools
@@ -87,14 +88,10 @@ defmodule Elita do
   defp done({:act, state}) do
     act(state)
   end
+
   defp done({:reply, txt, %{name: name} = state}) do
     txt = trim(txt)
-    answer(name, txt)
+    deliver(name, txt)
     {:reply, txt, state}
-  end
-  defp answer(agent, text) do
-    :erlang.apply(:"Elixir.Tools.Sys.Ask", :answer, [agent, text])
-  rescue
-    _ -> :ok
   end
 end
