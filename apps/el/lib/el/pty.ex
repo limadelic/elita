@@ -21,11 +21,9 @@ defmodule El.Pty do
   def watch(name, pid) do
     call(name, {:tap, pid})
   end
-
   def unwatch(name, pid) do
     cast(name, {:untap, pid})
   end
-
   def launch(name, opts \\ []) do
     cmd = get(opts, :cmd, "claude --dangerously-skip-permissions")
     {:ok, pid} = boot(name, cmd, finalize(opts, cmd))

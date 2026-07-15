@@ -18,9 +18,7 @@ defmodule El.Commands.Claude do
   def claude(name \\ :default) do
     claude(name, deps())
   end
-
   defp deps, do: [distribution_start: &start/1, cmd: &cmd/1, launch: &launch/2]
-
   def claude(name, deps) when is_list(deps) do
     write("boot: #{name}\n")
     go(resolve(name), deps)

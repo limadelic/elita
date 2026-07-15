@@ -20,9 +20,7 @@ defmodule El.Wrap.Remote do
     target = prepare(name, sender) |> wait()
     query(target, name, message, sender)
   end
-
   defp query(nil, _, _, _), do: :forward
-
   defp query(target, name, message, sender) do
     fetch(target, name, message, sender)
   catch
