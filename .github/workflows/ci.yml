@@ -346,12 +346,20 @@ jobs:
           name: cukes-report-${{ github.run_id }}
           path: reports/
 
+      - name: Sanitize branch name for artifact
+        id: branch_slug
+        run: |
+          branch="${{ github.ref_name }}"
+          slug="${branch//\//-}"
+          echo "slug=$slug" >> "$GITHUB_OUTPUT"
+
       - name: Upload cukes HTML artifact
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: cukes-html-${{ github.ref_name }}
+          name: cukes-html-${{ steps.branch_slug.outputs.slug }}
           path: site/
+          retention-days: 1
 
       - name: Update PR badge
         if: github.event_name == 'pull_request' && always()
@@ -417,6 +425,13 @@ jobs:
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
 
     steps:
+      - name: Sanitize branch name for artifact
+        id: branch_slug
+        run: |
+          branch="${{ github.ref_name }}"
+          slug="${branch//\//-}"
+          echo "slug=$slug" >> "$GITHUB_OUTPUT"
+
       - name: Create site directory
         run: mkdir -p site
 
@@ -429,7 +444,7 @@ jobs:
       - name: Download branch cukes HTML
         uses: actions/download-artifact@v4
         with:
-          name: cukes-html-${{ github.ref_name }}
+          name: cukes-html-${{ steps.branch_slug.outputs.slug }}
           path: site/
         continue-on-error: true
 
