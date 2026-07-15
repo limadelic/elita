@@ -419,13 +419,14 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     needs: [lint, test, cukes, lock]
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
 
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Sanitize branch name for artifact
         id: branch_slug
         run: |
@@ -457,14 +458,12 @@ jobs:
           curl -sf https://limadelic.github.io/elita/index.html -o site/index.html || true
           curl -sf https://limadelic.github.io/elita/cukes.html -o site/cukes.html || true
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-
-      - name: Upload to Pages
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: site
-
-      - name: Deploy to Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Push to gh-pages
+        run: |
+          cd site
+          git init
+          git config user.email "github-actions@github.com"
+          git config user.name "GitHub Actions"
+          git add .
+          git commit -m "Deploy from ${{ github.ref_name }} at ${{ github.sha }}" || exit 0
+          git push -f https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:gh-pages
