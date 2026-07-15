@@ -21,6 +21,7 @@ defmodule Tester do
           |> then(&"#{&1}_xunit")
 
         System.put_env("CASSETTE", cassette)
+        Tester.spawn(:judge)
 
         on_exit(fn ->
           System.delete_env("CASSETTE")

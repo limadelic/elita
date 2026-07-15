@@ -4,7 +4,6 @@ defmodule GreetTest do
 
   test "greet conversation flow" do
     spawn(:greet)
-    spawn(:judge)
 
     verify("asks who they are talking to", ask(:greet, "hello"))
     verify("greets Mike by name", ask(:greet, "Mike"))
