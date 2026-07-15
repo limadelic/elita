@@ -466,6 +466,6 @@ jobs:
           git config user.name "GitHub Actions"
           git add site
           git commit -m "Deploy ${{ github.ref_name }} at ${{ github.sha }}" || true
-          git push origin HEAD:gh-pages
+          git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git" HEAD:gh-pages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
