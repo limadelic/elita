@@ -327,12 +327,26 @@ jobs:
         if: always()
         shell: bash
 
+      - name: Copy cucumber report to site
+        run: |
+          branch="${GITHUB_REF#refs/heads/}"
+          mkdir -p "site/$branch"
+          cp reports/cucumber.html "site/$branch/cukes.html"
+        if: always()
+
       - name: Upload Cucumber report artifact
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: cukes-report-${{ github.run_id }}
           path: reports/
+
+      - name: Upload cukes HTML artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cukes-html-${{ github.ref_name }}
+          path: site/
 
       - name: Update PR badge
         if: github.event_name == 'pull_request' && always()
@@ -401,11 +415,18 @@ jobs:
       - name: Create site directory
         run: mkdir -p site
 
-      - name: Download branch artifacts
+      - name: Download branch lint badge
         uses: actions/download-artifact@v4
         with:
           name: lint-badge
           path: site/${{ github.ref_name }}
+
+      - name: Download branch cukes HTML
+        uses: actions/download-artifact@v4
+        with:
+          name: cukes-html-${{ github.ref_name }}
+          path: site/
+        continue-on-error: true
 
       - name: Preserve main files
         if: github.ref != 'refs/heads/main'
