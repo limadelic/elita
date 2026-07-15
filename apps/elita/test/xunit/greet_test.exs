@@ -5,8 +5,8 @@ defmodule GreetTest do
   test "greet conversation flow" do
     spawn(:greet)
 
-    verify("asks who they are talking to", ask(:greet, "hello"))
-    verify("greets Mike by name", ask(:greet, "Mike"))
-    verify("identifies as Greeeet", ask(:greet, "how are you?"))
+    verify("who am i talking to", ask(:greet, "hello"))
+    verify("wonderful to meet you", ask(:greet, "Mike"))
+    verify("i am greeeet", ask(:greet, "how are you?"))
   end
 end

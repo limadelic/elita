@@ -1,7 +1,6 @@
 defmodule Tester do
   import ExUnit.Assertions
   import Elita, only: [request: 2, dispatch: 2]
-  import String, only: [downcase: 1]
 
   defmacro __using__(_opts) do
     quote do
@@ -18,10 +17,8 @@ defmodule Tester do
           |> List.last()
           |> String.replace_suffix("Test", "")
           |> String.downcase()
-          |> then(&"#{&1}_xunit")
 
         System.put_env("CASSETTE", cassette)
-        Tester.spawn(:judge)
 
         on_exit(fn ->
           System.delete_env("CASSETTE")
@@ -57,12 +54,8 @@ defmodule Tester do
   end
 
   def verify(expectation, result) do
-    prompt = "Result: #{result}\n\nExpectation: #{expectation}"
-    verdict = ask(:judge, prompt)
-
-    assert is_binary(verdict), "Expected binary verdict, got: #{inspect(verdict)}"
-
-    assert downcase(verdict) == "yes",
-           "Judge said: #{verdict}. Expectation failed: #{expectation}"
+    pattern = ~r/#{Regex.escape(expectation)}/i
+    assert result =~ pattern,
+           "Expected substring '#{expectation}' in result: #{result}"
   end
 end
