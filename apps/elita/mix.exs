@@ -44,16 +44,11 @@ defmodule Elita.MixProject do
 
   defp aliases do
     [
-      test: [&test/1],
-      t: [&test/1],
+      t: ["test"],
       lint: ["format --check-formatted", "credo --strict"],
       live: [&live/1],
       tape: [&tape/1]
     ]
-  end
-
-  defp test(_args) do
-    check("cd ../.. && TAPE=replay bundle exec cucumber")
   end
 
   defp live(_args) do

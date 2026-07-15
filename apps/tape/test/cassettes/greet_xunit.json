@@ -1,0 +1,110 @@
+[
+  {
+    "q": {
+      "agent": "greet",
+      "messages": [
+        {
+          "role": "user",
+          "content": "hello"
+        }
+      ],
+      "n": 1
+    },
+    "a": [
+      {
+        "text": "Who am I talking to?",
+        "type": "text"
+      }
+    ]
+  },
+  {
+    "q": {
+      "agent": "judge",
+      "messages": [
+        {
+          "role": "user",
+          "content": "Result: Who am I talking to?\n\nExpectation: the greeter asks a question to identify who they are talking to"
+        }
+      ],
+      "n": 1
+    },
+    "a": [
+      {
+        "text": "yes",
+        "type": "text"
+      }
+    ]
+  },
+  {
+    "q": {
+      "agent": "greet",
+      "messages": [
+        {
+          "role": "user",
+          "content": "Mike"
+        }
+      ],
+      "n": 1
+    },
+    "a": [
+      {
+        "text": "Nice to meet you, Mike! I'm Greeeet, your friendly greeter agent. How can I help you today?",
+        "type": "text"
+      }
+    ]
+  },
+  {
+    "q": {
+      "agent": "judge",
+      "messages": [
+        {
+          "role": "user",
+          "content": "Result: Nice to meet you, Mike! I'm Greeeet, your friendly greeter agent. How can I help you today?\n\nExpectation: the greeter acknowledges and uses the name Mike"
+        }
+      ],
+      "n": 1
+    },
+    "a": [
+      {
+        "text": "yes",
+        "type": "text"
+      }
+    ]
+  },
+  {
+    "q": {
+      "agent": "greet",
+      "messages": [
+        {
+          "role": "user",
+          "content": "how are you?"
+        }
+      ],
+      "n": 1
+    },
+    "a": [
+      {
+        "text": "I am Greeeet, and I'm doing great! Thanks for asking, Mike. How are you doing today?",
+        "type": "text"
+      }
+    ]
+  },
+  {
+    "q": {
+      "agent": "judge",
+      "messages": [
+        {
+          "role": "user",
+          "content": "Result: I am Greeeet, and I'm doing great! Thanks for asking, Mike. How are you doing today?\n\nExpectation: the greeter identifies itself as Greeeet"
+        }
+      ],
+      "n": 1
+    },
+    "a": [
+      {
+        "text": "yes",
+        "type": "text"
+      }
+    ]
+  }
+]
