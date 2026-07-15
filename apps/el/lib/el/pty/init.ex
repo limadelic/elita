@@ -18,8 +18,13 @@ defmodule El.Pty.Init do
   defp snap do
     n = Process.info(self(), :registered_name) |> elem(1)
     p = "#{System.get_env("HOME", "~")}/.elita/sessions/#{n}.raw"
-    p |> to_charlist() |> :file.open([:write, :binary]) |> elem(1)
-  rescue _ -> nil
+    safely(fn -> p |> to_charlist() |> :file.open([:write, :binary]) |> elem(1) end, nil)
+  end
+
+  defp safely(fun, default) do
+    fun.()
+  rescue
+    _ -> default
   end
   defp finish(cfg, pty, size, {out, raw, child}) do
     setup(cfg[:file], pty, size)
@@ -27,14 +32,13 @@ defmodule El.Pty.Init do
     core(pty, out, raw, child) |> attach(cfg)
   end
   defp core(pty, out, raw, child) do
-    %{pty: pty, out: out, raw: raw, child: child, ready: false, buffer: [],
-      tail: "", pending_msg: nil, idle: false, idle_count: 0}
+    %{pty: pty, out: out, raw: raw, child: child,
+      ready: false, buffer: [], tail: "",
+      pending_msg: nil, idle: false, idle_count: 0}
   end
   defp attach(state, cfg) do
-    merge(state, %{
-      file: cfg[:file], port: cfg[:port],
-      input: cfg[:input], taps: cfg[:taps]
-    })
+    merge(state, %{file: cfg[:file], port: cfg[:port],
+      input: cfg[:input], taps: cfg[:taps]})
   end
   defp pair(port, cmd, size) do
     pty = launch(port, cmd, size)
@@ -80,12 +84,7 @@ defmodule El.Pty.Init do
     spawn_link(fn -> start(file, parent) end)
   end
 
-  defp sink(fd, file) do
-    file.close(fd)
-    :tty
-  rescue
-    _ -> :user
-  end
+  defp sink(fd, file), do: safely(fn -> file.close(fd); :tty end, :user)
 
   defp watch(pty) do
     spawn(fn -> probe(self(), pty) end, [])

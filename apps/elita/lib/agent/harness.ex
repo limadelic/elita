@@ -34,7 +34,8 @@ defmodule Agent.Harness do
   defp fetch(node, atom) do
     :erpc.call(node, :global, :whereis_name, [{atom, :puppet}])
   rescue
-    _ -> nil
+    _ ->
+      nil
   end
 
   defp fallback([], recipient), do: bare(recipient) |> find() |> wrap()

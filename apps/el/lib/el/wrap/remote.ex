@@ -62,7 +62,8 @@ defmodule El.Wrap.Remote do
   defp guard(task) do
     Task.await(task, 90_000)
   rescue
-    _ -> timed(task)
+    _ ->
+      timed(task)
   end
 
   defp fault({:timeout, _}, task), do: timed(task)

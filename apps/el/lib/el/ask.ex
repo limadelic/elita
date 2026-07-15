@@ -6,6 +6,12 @@ defmodule El.Ask do
   import Enum, only: [find_value: 3]
   import Log, only: [ask: 3]
 
+  defp safely(fun, default) do
+    fun.()
+  rescue
+    _ -> default
+  end
+
   def invoke(agent, msg) do
     prime()
     ask("user", "el.#{agent}", msg)
@@ -20,7 +26,8 @@ defmodule El.Ask do
   defp call(node, agent, msg) do
     rpc(node, agent, msg)
   rescue
-    _ -> miss(agent)
+    _ ->
+      miss(agent)
   end
 
   defp rpc(node, agent, msg) do
@@ -80,8 +87,6 @@ defmodule El.Ask do
 
   defp part(node, agent) do
     len = min(byte_size(agent) + 1, byte_size(node))
-    binary_part(node, 0, len) == <<agent::binary, "-">>
-  rescue
-    _ -> false
+    safely(fn -> binary_part(node, 0, len) == <<agent::binary, "-">> end, false)
   end
 end

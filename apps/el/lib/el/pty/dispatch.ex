@@ -4,35 +4,42 @@ defmodule El.Pty.Dispatch do
   import El.Pty.Handler
   import El.Pty.Cleanup
   import El.Pty.Buffer, only: [prime: 2, gate: 2]
+  import El.Pty.Notify, only: [notify: 2]
+  import El.Pty.Log, only: [dump: 2]
   import List, only: [delete: 2]
-  import Enum, only: [each: 2]
   import :os, only: [cmd: 1]
   import El.Log, only: [write: 1]
   import IO, only: [binwrite: 2]
+
   def info({pty, {:data, data}}, state) do
     write("PTY CHUNK #{byte_size(data)}b idle=#{state.idle}\n")
     updated = prime(state, data)
     process(pty, data, updated)
     {:noreply, updated}
   end
+
   def info({:stdin, data}, %{pty: pty, port: port, input: input} = state) do
     record(data)
     write(port, pty, input.(data))
     {:noreply, state}
   end
+
   def info(:exit_wrap, %{port: port, child: child} = state) do
     port.close(port)
     slay(child)
     {:stop, :normal, state}
   end
+
   def info({:prompt, agent}, %{out: out} = state) do
     binwrite(out, "#{agent}> ")
     {:noreply, state}
   end
+
   def info({:resize, size}, %{port: _port} = state) do
     resize(size)
     {:noreply, state}
   end
+
   def info({pty, {:exit_status, _}}, %{pty: pty} = state) do
     slay(state.child)
     {:stop, :normal, state}
@@ -81,21 +88,10 @@ defmodule El.Pty.Dispatch do
     respond(port, pty, data, state)
   end
 
-  defp dump(nil, _), do: :ok
-  defp dump(fd, data) do
-    binwrite(fd, data)
-  end
-
-  defp notify(taps, data) do
-    each(taps, fn pid ->
-      write("broadcast: sending #{byte_size(data)}b to #{inspect(pid)}\n")
-      send(pid, {:output, data})
-    end)
-  end
-
   defp resize({rows, cols}) do
     "stty rows #{rows} cols #{cols} < /dev/tty" |> to_charlist() |> cmd()
   rescue
-    _ -> :ok
+    _ ->
+      :ok
   end
 end
