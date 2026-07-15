@@ -3,11 +3,10 @@ defmodule Agent.Portal do
   import Agent.Watch, only: [start: 2]
   import String, only: [trim: 1]
   import Process, only: [whereis: 1]
-  import Tools.Reply, only: [answer: 2]
-  import Tools.Ask, only: [prompt: 3]
+  import Tools.Sys.Ask, only: [answer: 2, query: 3]
 
   def response(agent, question) do
-    prompt("user", "el.#{agent}", question)
+    query("user", "el.#{agent}", question)
     start(agent, question)
     handle(agent, question)
   end

@@ -5,7 +5,7 @@ defmodule El.Ask do
   import Application, only: [ensure_all_started: 1]
   import System, only: [pid: 0]
   import Enum, only: [find_value: 3]
-  import Tools.Ask, only: [prompt: 3]
+  import Tools.Sys.Ask, only: [query: 3]
 
   defp safely(fun, default) do
     fun.()
@@ -15,7 +15,7 @@ defmodule El.Ask do
 
   def invoke(agent, msg) do
     prime()
-    prompt("user", "el.#{agent}", msg)
+    query("user", "el.#{agent}", msg)
     reach(agent) |> call(agent, msg) |> done(agent)
   end
 
