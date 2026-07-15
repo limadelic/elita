@@ -20,9 +20,7 @@ defmodule El.Wrap.Remote do
     target = prepare(name, sender) |> wait()
     query(target, name, message, sender)
   end
-
   defp query(nil, _, _, _), do: :forward
-
   defp query(target, name, message, sender) do
     fetch(target, name, message, sender)
   catch
@@ -43,9 +41,11 @@ defmodule El.Wrap.Remote do
     watch(pty, self())
     spawn(pty, sender) |> reap(pty)
   end
+
   defp spawn(pty, sender) do
     async(fn -> collect(build(pty, sender, monotonic_time(:millisecond))) end)
   end
+
   defp reap(task, pty) do
     result = await(task)
     unwatch(pty, self())
