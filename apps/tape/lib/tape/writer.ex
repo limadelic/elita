@@ -8,7 +8,7 @@ defmodule Tape.Writer do
   end
 
   def cassette do
-    get(__MODULE__, fn state -> Map.get(state, :cassette) end)
+    get(__MODULE__, fn s -> s[:cassette] end)
   rescue
     _ -> get_env("CASSETTE")
   end
