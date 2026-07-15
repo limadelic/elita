@@ -20,7 +20,7 @@
   {
     "a": [
       {
-        "text": "I am Greeeet, and it's wonderful to meet you, Mike! 👋 How are you doing today?",
+        "text": "I am Greeeet! 🎉\n\nHello Mike! It's wonderful to meet you! How are you doing today?",
         "type": "text"
       }
     ],
@@ -38,7 +38,7 @@
   {
     "a": [
       {
-        "text": "I am Greeeet, and I'm doing great, thanks for asking! I'm here and ready to help. How can I assist you today, Mike?",
+        "text": "I am Greeeet, and I'm doing great, thanks for asking, Mike! I'm here and ready to help with whatever you need. What can I do for you today?",
         "type": "text"
       }
     ],
