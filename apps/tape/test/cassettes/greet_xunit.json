@@ -23,7 +23,7 @@
       "messages": [
         {
           "role": "user",
-          "content": "Result: Who am I talking to?\n\nExpectation: the greeter asks a question to identify who they are talking to"
+          "content": "Result: Who am I talking to?\n\nExpectation: asks who they are talking to"
         }
       ],
       "n": 1
@@ -59,7 +59,7 @@
       "messages": [
         {
           "role": "user",
-          "content": "Result: Nice to meet you, Mike! I'm Greeeet, your friendly greeter agent. How can I help you today?\n\nExpectation: the greeter acknowledges and uses the name Mike"
+          "content": "Result: Nice to meet you, Mike! I'm Greeeet, your friendly greeter agent. How can I help you today?\n\nExpectation: greets Mike by name"
         }
       ],
       "n": 1
@@ -95,7 +95,7 @@
       "messages": [
         {
           "role": "user",
-          "content": "Result: I am Greeeet, and I'm doing great! Thanks for asking, Mike. How are you doing today?\n\nExpectation: the greeter identifies itself as Greeeet"
+          "content": "Result: I am Greeeet, and I'm doing great! Thanks for asking, Mike. How are you doing today?\n\nExpectation: identifies as Greeeet"
         }
       ],
       "n": 1
