@@ -9,6 +9,8 @@ prefix = branch == 'main' ? '' : "#{branch}/"
 pages_url = "https://limadelic.github.io/elita"
 
 credo_json_url = "#{pages_url}/#{prefix}lint.json"
+status = `curl -s -o /dev/null -w "%{http_code}" '#{credo_json_url}'`
+exit 0 unless status.strip == '200'
 credo_json_encoded = URI.encode_www_form_component(credo_json_url)
 credo_report_url = "#{pages_url}/#{prefix}credo.html"
 credo_badge = "[![credo](https://img.shields.io/endpoint?url=#{credo_json_encoded})](#{credo_report_url})"
