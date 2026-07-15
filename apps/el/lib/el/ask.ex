@@ -1,6 +1,6 @@
 defmodule El.Ask do
   import IO, only: [puts: 1]
-  import Node, only: [start: 2, set_cookie: 1, connect: 1]
+  import Node, only: [start: 2, set_cookie: 1, connect: 1, self: 0]
   import Application, only: [ensure_all_started: 1]
   import System, only: [pid: 0]
   import Enum, only: [find_value: 3]
@@ -39,7 +39,7 @@ defmodule El.Ask do
 
   defp prime do
     :os.cmd(~c"epmd -daemon")
-    Node.self() |> boot()
+    self() |> boot()
     set_cookie(:elita)
     ensure_all_started(:elita)
   end
