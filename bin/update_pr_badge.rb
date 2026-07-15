@@ -12,13 +12,12 @@ credo_json_url = "#{pages_url}/#{prefix}lint.json"
 status = `curl -s -o /dev/null -w "%{http_code}" '#{credo_json_url}'`
 exit 0 unless status.strip == '200'
 credo_json_encoded = URI.encode_www_form_component(credo_json_url)
-credo_report_url = "#{pages_url}/#{prefix}credo.html"
-credo_badge = "[![credo](https://img.shields.io/endpoint?url=#{credo_json_encoded})](#{credo_report_url})"
+report_url = "#{pages_url}/#{prefix}report.html"
+credo_badge = "[![credo](https://img.shields.io/endpoint?url=#{credo_json_encoded})](#{report_url})"
 
 cukes_json_url = "#{pages_url}/#{prefix}cukes.json"
 cukes_json_encoded = URI.encode_www_form_component(cukes_json_url)
-cukes_report_url = "#{pages_url}/#{prefix}cukes.html"
-cukes_badge = "[![cukes](https://img.shields.io/endpoint?url=#{cukes_json_encoded})](#{cukes_report_url})"
+cukes_badge = "[![cukes](https://img.shields.io/endpoint?url=#{cukes_json_encoded})](#{report_url})"
 
 badge_content = "#{credo_badge} #{cukes_badge}"
 

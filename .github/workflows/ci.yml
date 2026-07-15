@@ -84,7 +84,7 @@ jobs:
           BRANCH: ${{ github.ref_name }}
         if: always()
 
-      - run: bin/credo_report.rb
+      - run: bin/report.rb
         env:
           BRANCH: ${{ github.ref_name }}
         if: always()
@@ -201,11 +201,10 @@ jobs:
       - run: bin/cukes_summary.rb
         if: always()
 
-      - run: ruby -e 'require "fileutils"; b = ENV["BRANCH"].sub(%r{/merge$}, ""); FileUtils.mkdir_p("site/#{b}"); FileUtils.cp("reports/cucumber.html", "site/#{b}/cukes.html")'
+      - run: bin/report.rb
         env:
           BRANCH: ${{ github.ref_name }}
         if: always()
-        name: Copy cucumber report to site
 
       - name: Upload Cucumber report artifact
         uses: actions/upload-artifact@v4
