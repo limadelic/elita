@@ -420,20 +420,16 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     needs: [lint, test, cukes, lock]
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    if: (github.event_name == 'push' && github.ref != 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.ref != 'refs/heads/main')
     permissions:
-      contents: write
       pages: write
       id-token: write
-      pull-requests: write
 
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          persist-credentials: true
-
       - name: Sanitize branch name for artifact
         id: branch_slug
         run: |
@@ -458,22 +454,20 @@ jobs:
         continue-on-error: true
 
       - name: Preserve main files
-        if: github.ref != 'refs/heads/main'
         run: |
           mkdir -p site
-          curl -sf https://limadelic.github.io/elita/cukes.json -o site/cukes.json || true
-          curl -sf https://limadelic.github.io/elita/index.html -o site/index.html || true
-          curl -sf https://limadelic.github.io/elita/cukes.html -o site/cukes.html || true
+          curl -sfL https://limadelic.github.io/elita/cukes.json -o site/cukes.json || true
+          curl -sfL https://limadelic.github.io/elita/index.html -o site/index.html || true
+          curl -sfL https://limadelic.github.io/elita/cukes.html -o site/cukes.html || true
 
-      - name: Commit and push to gh-pages
-        run: |
-          mkdir -p /tmp/pages
-          cd /tmp/pages
-          git init
-          git config user.email "github-actions@github.com"
-          git config user.name "GitHub Actions"
-          cp -r $GITHUB_WORKSPACE/site/* .
-          git add .
-          git commit -m "Deploy ${{ github.ref_name }} at ${{ github.sha }}"
-          git remote add origin https://github.com/${{ github.repository }}.git
-          git push -f https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:gh-pages
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload to Pages
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+
+      - name: Deploy to Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
