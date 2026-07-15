@@ -44,7 +44,8 @@ defmodule El.Tunnel do
 
   defp peer(agent), do: safely(fn -> connect(:"#{agent}#{suffix()}@127.0.0.1") end, :ok)
 
-  def reach(agent), do: safely(fn -> :net_adm.names(~c"127.0.0.1") |> node(agent) |> fetch(agent) end, nil)
+  def reach(agent),
+    do: safely(fn -> :net_adm.names(~c"127.0.0.1") |> node(agent) |> fetch(agent) end, nil)
 
   defp node({:error, _}, _), do: nil
   defp node({:ok, list}, agent), do: find_value(list, nil, &fits(&1, agent))

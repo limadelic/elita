@@ -23,6 +23,7 @@ defmodule El.Ask do
   end
 
   defp call(nil, agent, _msg), do: miss(agent)
+
   defp call(node, agent, msg) do
     rpc(node, agent, msg)
   rescue

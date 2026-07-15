@@ -90,10 +90,10 @@ defmodule El.Pty.Buffer do
   end
 
   defp ship(nil, _), do: nil
+
   defp ship(msg, %{pty: pty, port: port}) do
     write("RESEND #{byte_size(msg)}b (no echo yet)\n")
     port.command(pty, msg)
     record(msg)
   end
-
 end

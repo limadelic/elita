@@ -33,6 +33,7 @@ defmodule Agent.Remote do
   defp exec(true, agent, node) do
     agent |> norm() |> fetch(node)
   end
+
   defp exec(false, _, _), do: nil
 
   defp take(node, size) do

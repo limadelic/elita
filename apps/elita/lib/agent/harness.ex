@@ -11,6 +11,7 @@ defmodule Agent.Harness do
   def dispatch(recipient, message, :ask) do
     recipient |> locate() |> ask!(recipient, message)
   end
+
   def dispatch(recipient, message, :tell) do
     recipient |> locate() |> tell!(recipient, message)
   end
@@ -18,6 +19,7 @@ defmodule Agent.Harness do
   defp locate(recipient) do
     entry(recipient) |> nearby(recipient)
   end
+
   defp nearby([], recipient), do: global(bare(recipient)) |> fallback(recipient)
   defp nearby(found, _recipient), do: found
 

@@ -14,5 +14,6 @@ defmodule El.Puppet.Burst do
   defp log(b1, b2) when b2 > b1 do
     write("collect: burst transition #{b1} -> #{b2}\n")
   end
+
   defp log(_, _), do: :ok
 end
