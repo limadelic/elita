@@ -28,11 +28,15 @@ defmodule Agent.Harness do
     result = whereis_name({atom, :puppet})
     result |> local() |> remote(atom, result)
   end
+
   defp local(:undefined), do: :undefined
   defp local(found), do: found |> wrap()
+
   defp remote(:undefined, atom, _), do: Node.list() |> search(atom)
   defp remote(found, _, _), do: found
+
   defp search(nodes, atom), do: find_value(nodes, :undefined, &fetch(&1, atom)) |> wrap()
+
   defp fetch(node, atom) do
     :erpc.call(node, :global, :whereis_name, [{atom, :puppet}])
   rescue
@@ -42,6 +46,7 @@ defmodule Agent.Harness do
 
   defp fallback([], recipient), do: bare(recipient) |> find() |> wrap()
   defp fallback(found, _), do: found
+
   defp wrap(:undefined), do: []
   defp wrap(pid), do: [{pid, %{kind: :puppet}}]
 
@@ -50,25 +55,30 @@ defmodule Agent.Harness do
     normalized = clean |> to_atom() |> Kernel.to_string() |> downcase()
     lookup(ElitaRegistry, normalized)
   end
+
   defp bare("el." <> name), do: name
   defp bare(name), do: name
 
   defp ask!([{_pid, %{kind: :native}}], recipient, message) do
     request(to_atom(recipient), message)
   end
+
   defp ask!([{pid, %{kind: kind}}], _recipient, message)
        when kind in [:headless, :puppet] do
     {:ok, response} = ask(pid, message)
     response
   end
+
   defp ask!([], recipient, _message), do: "unknown: #{recipient}"
 
   defp tell!([{_pid, %{kind: :native}}], recipient, message) do
     dispatch(to_atom(recipient), message)
   end
+
   defp tell!([{pid, %{kind: kind}}], _recipient, message)
        when kind in [:headless, :puppet] do
     cast(pid, message)
   end
+
   defp tell!([], recipient, _message), do: "unknown: #{recipient}"
 end

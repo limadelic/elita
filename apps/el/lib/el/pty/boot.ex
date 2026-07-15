@@ -4,7 +4,11 @@ defmodule El.Pty.Boot do
 
   def launch(port, cmd, size) do
     argv = args(size, cmd)
-    port.open({:spawn_executable, "/usr/bin/script"}, [:binary, :stream, :exit_status, {:args, argv}, {:env, unset()}])
+    port.open({:spawn_executable, "/usr/bin/script"}, opts(argv))
+  end
+
+  defp opts(argv) do
+    [:binary, :stream, :exit_status, {:args, argv}, {:env, unset()}]
   end
 
   defp args({rows, cols}, cmd) do
