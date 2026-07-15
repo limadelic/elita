@@ -99,6 +99,7 @@ jobs:
             File.write('site/lint.json', JSON.generate(badge))
           RUBY
         if: always()
+        continue-on-error: true
 
       - name: Generate credo report
         run: |
@@ -311,39 +312,24 @@ jobs:
           name: cukes-report-${{ github.ref_name }}
           path: reports/
 
-      - name: Update PR with badge
+      - name: Prepare PR badge
         if: github.event_name == 'pull_request' && always()
         run: |
-          ruby << 'RUBY'
-            require 'json'
-            if File.exist?('reports/cucumber.json')
+          if [ -f "reports/cucumber.json" ]; then
+            ruby << 'RUBY'
+              require 'json'
               data = JSON.parse(File.read('reports/cucumber.json'))
               scenarios = data.flat_map { |f| f['elements'] || [] }
               passed = scenarios.count { |sc| (sc['steps'] || []).all? { |s| s.dig('result','status') == 'passed' } }
               total = scenarios.length
               status = passed == total && total > 0 ? '✅' : '❌'
-              badge_line = "#{status} **#{passed}/#{total}** cucumber scenarios — [run summary](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) — [report artifact](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}#artifacts)"
-            else
-              badge_line = "❌ **0/0** cucumber scenarios"
-            end
-
-            body = `gh pr view ${{ github.event.pull_request.number }} --json body --jq '.body'`
-            marker_start = '<!-- cukes-badge start -->'
-            marker_end = '<!-- cukes-badge end -->'
-
-            if body.include?(marker_start)
-              # Update existing badge
-              body = body.sub(/#{Regexp.escape(marker_start)}.*?#{Regexp.escape(marker_end)}/m, "#{marker_start}\n#{badge_line}\n#{marker_end}")
-            else
-              # Add new badge at top
-              body = "#{marker_start}\n#{badge_line}\n#{marker_end}\n\n#{body}"
-            end
-
-            File.write('/tmp/pr_body.txt', body)
-          RUBY
-          gh pr edit ${{ github.event.pull_request.number }} --body-file /tmp/pr_body.txt
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              File.write('/tmp/badge_status.txt', "#{status} **#{passed}/#{total}** cucumber scenarios")
+            RUBY
+          else
+            echo "❌ **0/0** cucumber scenarios" > /tmp/badge_status.txt
+          fi
+        shell: bash
+        continue-on-error: true
 
       - name: Fail if tests failed
         if: steps.cukes.outcome == 'failure'
