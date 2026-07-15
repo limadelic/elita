@@ -79,6 +79,10 @@ defmodule El.REPL do
     dispatch(agent, input, :ask) |> puts()
   end
 
+  defp handle(agent, :undefined, input) do
+    dispatch(agent, input, :ask) |> puts()
+  end
+
   defp route(_a, p, i), do: i |> split(" ", parts: 2) |> via(p, i)
 
   defp via([_w], p, i), do: ask(p, i)
