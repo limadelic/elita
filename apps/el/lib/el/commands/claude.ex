@@ -78,8 +78,11 @@ defmodule El.Commands.Claude do
     install(name)
     hold(pid)
   end
+
   defp hold(pid) when is_pid(pid), do: wait(pid)
+
   defp hold(_), do: :ok
+
   defp opts(buf, cmd) do
     input = fn chunk -> encode(buf, chunk) end
     [cmd: cmd, get_size: &size/0, input: input, resize: &watch/1]

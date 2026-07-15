@@ -60,9 +60,11 @@ defmodule El.Pty do
       {:DOWN, ^ref, :process, ^pid, _} -> :ok
     end
   end
+
   defp await(pid) do
     hang(monitor(pid), pid)
   end
+
   @impl true
   def init({cmd, opts}) do
     {:ok, build(cmd, opts)}
