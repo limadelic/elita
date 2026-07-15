@@ -1,7 +1,7 @@
 defmodule Log do
   import IO, only: [puts: 1]
   import Path, only: [join: 2]
-  import String, only: [contains?: 2, trim: 1]
+  import String, only: [contains?: 2]
   import System, only: [pid: 0, get_env: 2]
   import Utils.Yaml, only: [yaml: 1]
   import File, only: [mkdir_p!: 1, write: 3]
@@ -62,25 +62,5 @@ defmodule Log do
 
   defp dir do
     join(get_env("HOME", "~"), ".elita/sessions")
-  end
-
-  def ask(sender, recipient, question) do
-    msg = "🤔 #{sender} → #{recipient} | #{question}\n"
-    write(msg)
-    el(msg)
-  end
-
-  def answer(agent, text) when is_binary(text) do
-    msg = "✨ #{agent} | #{trim(text)}\n"
-    write(msg)
-    el(msg)
-  end
-
-  def answer(_agent, _text), do: :ok
-
-  defp el(msg) do
-    :erlang.apply(:"Elixir.El.Log", :write, [msg])
-  rescue
-    _ -> :ok
   end
 end

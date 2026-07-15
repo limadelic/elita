@@ -1,6 +1,6 @@
 defmodule El.Log.Reply do
   import String, only: [trim: 1]
-  import Log, only: [answer: 2]
+  import Tools.Reply, only: [answer: 2]
 
   def handle(response, agent) do
     match(response, agent)

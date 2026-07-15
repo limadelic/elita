@@ -8,7 +8,7 @@ defmodule Agent.Session do
   import Map, only: [put: 3]
   import String, only: [downcase: 1, trim: 1]
   import Tape, only: [handle: 3]
-  import Log, only: [answer: 2]
+  import Tools.Reply, only: [answer: 2]
 
   def start_link(opts) do
     folder = fetch!(opts, :folder)

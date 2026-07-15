@@ -5,7 +5,7 @@ defmodule Elita do
   import GenServer, only: [call: 3, cast: 2, start_link: 3]
   import History, only: [record: 1]
   import Llm, only: [llm: 1]
-  import Log, only: [answer: 2]
+  import Tools.Reply, only: [answer: 2]
   import Mem, only: [create: 0]
   import Msg, only: [user: 1]
   import String, only: [downcase: 1, trim: 1]

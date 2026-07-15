@@ -5,9 +5,13 @@ defmodule Tools.Sys.Spawn do
   import Map, only: [get: 2, get: 3]
   import Utils.World, only: [agents: 0]
 
+  @icon "🚀"
+
   def spec(name, state) do
     %{name: name, description: description(state), parameters: parameters()}
   end
+
+  def icon, do: @icon
 
   defp description(state) do
     "Spawn an agent with the person's name and one or more configs. Configs must be existing agent files (boss, worker, actor, etc).#{help(state)}"
@@ -71,10 +75,10 @@ defmodule Tools.Sys.Spawn do
   defp started({:ok, _pid}, _name), do: :ok
 
   defp log(name, [name]) do
-    log("🚀", name, "", "", :green)
+    log(@icon, name, "", "", :green)
   end
 
   defp log(name, config) do
-    log("🚀", name, " as ", join(config, ", "), :green)
+    log(@icon, name, " as ", join(config, ", "), :green)
   end
 end

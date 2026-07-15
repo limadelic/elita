@@ -1,19 +1,20 @@
 defmodule Agent.Portal do
   import Agent.Session, only: [ask: 2]
   import Agent.Watch, only: [start: 2]
-  import Log, only: [ask: 3, answer: 2]
   import String, only: [trim: 1]
   import Process, only: [whereis: 1]
+  import Tools.Reply, only: [answer: 2]
+  import Tools.Ask, only: [prompt: 3]
 
   def response(agent, question) do
-    ask("user", "el.#{agent}", question)
+    prompt("user", "el.#{agent}", question)
     start(agent, question)
     handle(agent, question)
   end
 
   defp handle(agent, question) do
     reply = process(locate(), agent, question)
-    log(agent, reply)
+    respond(agent, reply)
     reply
   end
 
@@ -26,9 +27,9 @@ defmodule Agent.Portal do
     resp
   end
 
-  defp log(_, reply) when not is_binary(reply), do: :ok
-  defp log(_, reply) when byte_size(reply) == 0, do: :ok
-  defp log(agent, reply), do: answer(agent, trim(reply))
+  defp respond(_, reply) when not is_binary(reply), do: :ok
+  defp respond(_, reply) when byte_size(reply) == 0, do: :ok
+  defp respond(agent, reply), do: answer(agent, trim(reply))
 
   defp locate do
     whereis(:puppet)

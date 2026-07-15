@@ -20,11 +20,15 @@ defmodule Tools.Sys.Agent do
   import Log, only: [log: 5]
   import Utils.File, only: [file: 1]
 
+  @icon "🤖"
+
   defdelegate spec(name, state), to: Tools.Sys.Agent.Schema, as: :get
+
+  def icon, do: @icon
 
   def exec(_, %{"name" => name}, state) do
     agent = file("#{name}.md")
-    log("🤖", name, ":", "\n#{agent}\n", :white)
+    log(@icon, name, ":", "\n#{agent}\n", :white)
     {agent, state}
   end
 end

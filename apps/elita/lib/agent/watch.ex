@@ -1,5 +1,5 @@
 defmodule Agent.Watch do
-  import Log, only: [answer: 2]
+  import Tools.Reply, only: [answer: 2]
   import String, only: [trim: 1]
   import System, only: [monotonic_time: 1]
   import Agent.Jsonl, only: [find: 3]
