@@ -1,0 +1,101 @@
+name: Site
+
+on: workflow_call
+
+permissions:
+  pages: write
+  id-token: write
+
+jobs:
+  site:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Compute deployment prefix
+        id: prefix
+        run: |
+          BRANCH="${{ github.ref_name }}"
+          PREFIX=""
+          [ "$BRANCH" != "main" ] && PREFIX="$BRANCH/"
+          echo "prefix=$PREFIX" >> "$GITHUB_OUTPUT"
+
+      - name: Sanitize branch name for artifact
+        id: branch_slug
+        run: |
+          branch="${{ github.ref_name }}"
+          slug="${branch//\//-}"
+          echo "slug=$slug" >> "$GITHUB_OUTPUT"
+
+      - name: Create site directory
+        run: mkdir -p site
+
+      - name: Merge previous github-pages artifact as base
+        run: |
+          set +e
+          ARTIFACT_ID=$(gh api repos/${{ github.repository }}/actions/artifacts \
+            --paginate --jq '.artifacts[] | select(.name == "github-pages") | .id' | head -1)
+
+          if [ -z "$ARTIFACT_ID" ]; then
+            echo "No previous github-pages artifact found, starting empty"
+            exit 0
+          fi
+
+          echo "Found artifact $ARTIFACT_ID, downloading..."
+          TEMP_DIR=$(mktemp -d)
+          cd "$TEMP_DIR"
+          gh api repos/${{ github.repository }}/actions/artifacts/$ARTIFACT_ID/zip -H "Accept: application/zip" > artifact.zip
+          unzip -q artifact.zip
+
+          if [ -f artifact.tar ]; then
+            tar xf artifact.tar -C /tmp
+            if [ -d /tmp/artifact ]; then
+              cp -r /tmp/artifact/* "$GITHUB_WORKSPACE/site/" 2>/dev/null || true
+              echo "Base merged from previous deploy"
+            fi
+          fi
+
+          rm -rf "$TEMP_DIR"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+      - name: Download lint badge artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: lint-badge
+          path: site
+        continue-on-error: true
+
+      - name: Download cukes HTML artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: cukes-html-${{ steps.branch_slug.outputs.slug }}
+          path: site/
+        continue-on-error: true
+
+      - name: Seed site from live Pages
+        run: |
+          PREFIX="${{ steps.prefix.outputs.prefix }}"
+          mkdir -p site
+          if [ -n "$PREFIX" ]; then
+            curl -sfL https://limadelic.github.io/elita/index.html -o site/index.html || true
+            curl -sfL https://limadelic.github.io/elita/cukes.json -o site/cukes.json || true
+            curl -sfL https://limadelic.github.io/elita/cukes.html -o site/cukes.html || true
+            curl -sfL https://limadelic.github.io/elita/lint.json -o site/lint.json || true
+            curl -sfL https://limadelic.github.io/elita/credo.html -o site/credo.html || true
+          fi
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload to Pages
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+
+      - name: Deploy to Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

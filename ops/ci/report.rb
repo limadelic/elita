@@ -3,8 +3,8 @@
 require 'json'
 require 'fileutils'
 
-branch = ENV['BRANCH'].sub(%r{/merge$}, '')
-FileUtils.mkdir_p("site/#{branch}")
+branch = ENV['BRANCH']&.sub(%r{/merge$}, '')
+FileUtils.mkdir_p("site/#{branch}") if branch
 
 html = <<~HTML
   <!DOCTYPE html>
@@ -22,12 +22,12 @@ html = <<~HTML
       th { background: #173647; color: #fff; padding: 12px; text-align: left; border-bottom: 1px solid #444; font-weight: 600; }
       td { padding: 12px; border-bottom: 1px solid #333; }
       tr:hover { background: #2a2a2a; }
-      .cukes-section { margin-top: 30px; }
     </style>
   </head>
   <body>
 HTML
 
+# Credo report
 if File.exist?('/tmp/credo.json')
   credo = JSON.parse(File.read('/tmp/credo.json'))
   issues = credo['issues'] || []
@@ -50,6 +50,7 @@ else
   html << "</tbody>\n</table>\n"
 end
 
+# Cucumber report
 html << "<h2>Cucumber</h2>\n"
 if File.exist?('reports/cucumber.html')
   cukes_content = File.read('reports/cucumber.html')
@@ -58,4 +59,24 @@ if File.exist?('reports/cucumber.html')
 end
 
 html << "</body>\n</html>"
-File.write("site/#{branch}/report.html", html)
+File.write("site/#{branch}/report.html", html) if branch
+
+# Cucumber summary for GitHub step summary
+def scenario_passed?(scenario)
+  (scenario['steps'] || []).all? { |s| s.dig('result', 'status') == 'passed' }
+end
+
+if File.exist?('reports/cucumber.json') && ENV['GITHUB_STEP_SUMMARY']
+  data = JSON.parse(File.read('reports/cucumber.json'))
+  scenarios = data.flat_map { |f| f['elements'] || [] }
+  passed = scenarios.count { |sc| scenario_passed?(sc) }
+  total = scenarios.length
+  summary = "## Cucumber Tests\n\n✅ **#{passed}/#{total}** scenarios passed\n\n"
+  data.each do |feature|
+    feature_name = File.basename(feature['uri'])
+    feature_scenarios = feature['elements'] || []
+    feature_passed = feature_scenarios.count { |sc| scenario_passed?(sc) }
+    summary << "- #{feature_name}: #{feature_passed}/#{feature_scenarios.length}\n"
+  end
+  File.write(ENV['GITHUB_STEP_SUMMARY'], summary)
+end

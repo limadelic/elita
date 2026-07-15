@@ -1,0 +1,71 @@
+name: Lint
+
+on: workflow_call
+
+permissions:
+  contents: write
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/workflows/setup-beam.yml
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          cache: npm
+
+      - name: Lint
+        id: lint
+        run: mix lint
+
+      - name: Check Gherkin formatting
+        run: |
+          npm install
+          npm run fmt:check
+
+      - name: Credo failure detail
+        if: steps.lint.outcome == 'failure'
+        run: |
+          mix credo list --format json > /tmp/credo.json
+          echo "## Lint Violations" >> $GITHUB_STEP_SUMMARY
+          ISSUE_COUNT=$(jq '.issues | length' /tmp/credo.json)
+          echo "Found $ISSUE_COUNT issues" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "$ISSUE_COUNT" -gt 0 ]; then
+            echo "| File | Line | Check | Message |" >> $GITHUB_STEP_SUMMARY
+            echo "|------|------|-------|---------|" >> $GITHUB_STEP_SUMMARY
+            jq -r '.issues[] | [.filename, .line_no, .check, .message] | @csv' /tmp/credo.json | while IFS=',' read -r file line check message; do
+              file=$(echo "$file" | tr -d '"')
+              check=$(echo "$check" | tr -d '"')
+              message=$(echo "$message" | tr -d '"')
+              echo "::error file=$file,line=$line,title=$check::$message"
+              file_short=$(basename "$file")
+              echo "| $file_short | $line | $check | $message |" >> $GITHUB_STEP_SUMMARY
+            done
+          fi
+
+      - name: Fail if credo had issues
+        if: steps.lint.outcome == 'failure'
+        run: exit 1
+
+      - run: ops/ci/badges.rb
+        env:
+          BRANCH: ${{ github.ref_name }}
+        if: always()
+
+      - run: ops/ci/report.rb
+        env:
+          BRANCH: ${{ github.ref_name }}
+        if: always()
+
+      - name: Upload lint badge artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lint-badge
+          path: site/

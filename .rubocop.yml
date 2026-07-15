@@ -110,6 +110,7 @@ Naming/FileName:
     - lib
   Exclude:
     - 'bin/**/*'
+    - 'ops/ci/**/*'
     - 'features/step_definitions/**/*'
     - 'tmp/**/*'
 
