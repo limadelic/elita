@@ -4,10 +4,10 @@ Feature: Greet
     * > el
 
     * el> greet hello
-      | ✨ el | who am i talking to |
+      | who am i talking to |
 
     * el> greet Mike
-      | ✨ el | wonderful to meet you |
+      | wonderful to meet you |
 
     * el> greet how are you?
-      | ✨ el | i am greeeet |
+      | i am greeeet |
