@@ -27,10 +27,14 @@ defmodule Tools.Sys.Ask do
   import Agent.Harness, only: [dispatch: 3]
   import Log, only: [log: 5]
 
+  @icon "🤔"
+
   defdelegate spec(name, state), to: Tools.Sys.Ask.Schema, as: :get
 
+  def icon, do: @icon
+
   def exec(_, %{"recipient" => recipient, "question" => question}, %{name: sender} = state) do
-    log("🤔", "#{sender} → #{recipient}", ": ", question, :green)
+    log(@icon, "#{sender} → #{recipient}", ": ", question, :green)
     {dispatch(recipient, question, :ask), state}
   end
 
