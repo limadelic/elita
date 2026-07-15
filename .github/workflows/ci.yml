@@ -260,8 +260,8 @@ jobs:
         run: |
           mkdir -p reports
           TAPE=replay bundle exec cucumber --profile default --format html --out reports/cucumber.html --format json --out reports/cucumber.json --publish 2>&1 | tee /tmp/cucumber_output.log
-          # Extract and save the published report URL
-          REPORT_URL=$(grep -oP 'https://reports.cucumber.io/reports/[^\s]+' /tmp/cucumber_output.log | head -1)
+          # Extract and save the published report URL, strip ANSI codes
+          REPORT_URL=$(grep -oP 'https://reports.cucumber.io/reports/[^\s]+' /tmp/cucumber_output.log | head -1 | sed 's/\x1b\[[0-9;]*m//g')
           echo "report_url=${REPORT_URL}" >> "$GITHUB_OUTPUT"
         env:
           MIX_ENV: test
