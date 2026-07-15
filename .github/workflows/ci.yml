@@ -425,10 +425,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: gh-pages
           fetch-depth: 0
           persist-credentials: true
-        continue-on-error: true
 
       - name: Sanitize branch name for artifact
         id: branch_slug
@@ -465,6 +463,8 @@ jobs:
         run: |
           git config user.email "github-actions@github.com"
           git config user.name "GitHub Actions"
+          git fetch origin gh-pages --depth=1 || true
+          git checkout gh-pages || git checkout -b gh-pages
           git add site
           git commit -m "Deploy ${{ github.ref_name }} at ${{ github.sha }}" || true
-          git push -f origin HEAD:gh-pages
+          git push -u origin gh-pages
