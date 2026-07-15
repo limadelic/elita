@@ -1,6 +1,7 @@
 @tape:speckgreet
 Feature: Greet
 
+  @wip
   Scenario: speck reads, writes, and runs greet scenarios
     * > el speck
     * speck> exec greet

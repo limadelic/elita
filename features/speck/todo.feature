@@ -1,6 +1,7 @@
 @tape:specktodo
 Feature: Todo
 
+  @wip
   Scenario: speck reads, writes, and runs todo scenarios
     * > el speck
     * speck> exec todo

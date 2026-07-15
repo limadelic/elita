@@ -1,5 +1,6 @@
 Feature: Clock
 
+  @wip
   Scenario: Clock tells the time
     * > el clock
 

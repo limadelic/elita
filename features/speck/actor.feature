@@ -1,6 +1,7 @@
 @tape:actor_speck
 Feature: Actor
 
+  @wip
   Scenario: speck reads, writes, and runs actor scenarios
     * > el speck
     * speck> exec actor

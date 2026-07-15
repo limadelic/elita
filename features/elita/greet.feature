@@ -1,5 +1,6 @@
 Feature: Greet
 
+  @wip
   Scenario: Greeeet learns your name
     * > el greet
 

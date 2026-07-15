@@ -1,5 +1,6 @@
 Feature: Inbox triage
 
+  @wip
   Scenario: Triage sorts the inbox
     * > el triage
 

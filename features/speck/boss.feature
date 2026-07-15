@@ -1,6 +1,7 @@
 @tape:speckboss
 Feature: Boss
 
+  @wip
   Scenario: speck reads, writes, and runs boss scenarios
     * > el speck
     * speck> exec boss

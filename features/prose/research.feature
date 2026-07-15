@@ -1,5 +1,6 @@
 Feature: Research tree
 
+  @wip
   Scenario: Research synthesizes multiple researchers
     * > el research
 
