@@ -4,37 +4,66 @@ require 'json'
 require 'open3'
 require 'uri'
 
-branch = ENV['HEAD_REF'] || ENV['BRANCH']
-prefix = branch == 'main' ? '' : "#{branch}/"
-pages_url = "https://limadelic.github.io/elita"
+module UpdatePrBadge
+  MARKER_START = '<!-- cukes-badge-start -->'
+  MARKER_END = '<!-- cukes-badge-end -->'
 
-credo_json_url = "#{pages_url}/#{prefix}lint.json"
-status = `curl -s -o /dev/null -w "%{http_code}" '#{credo_json_url}'`
-exit 0 unless status.strip == '200'
-credo_json_encoded = URI.encode_www_form_component(credo_json_url)
-report_url = "#{pages_url}/#{prefix}report.html"
-credo_badge = "[![credo](https://img.shields.io/endpoint?url=#{credo_json_encoded})](#{report_url})"
+  def self.run
+    branch = ENV['HEAD_REF'] || ENV['BRANCH']
+    return if branch_health_ok?(branch)
 
-cukes_json_url = "#{pages_url}/#{prefix}cukes.json"
-cukes_json_encoded = URI.encode_www_form_component(cukes_json_url)
-cukes_badge = "[![cukes](https://img.shields.io/endpoint?url=#{cukes_json_encoded})](#{report_url})"
+    badge_content = build_badges(branch)
+    body = fetch_pr_body
+    body = update_pr_body(body, badge_content)
+    File.write('/tmp/pr_body.txt', body)
+    system("gh pr edit #{ENV['PR_NUMBER']} --body-file /tmp/pr_body.txt")
+  end
 
-badge_content = "#{credo_badge} #{cukes_badge}"
+  def self.branch_health_ok?(branch)
+    url = credo_url(branch)
+    status = `curl -s -o /dev/null -w "%{http_code}" '#{url}'`
+    status.strip != '200'
+  end
 
-cmd = "gh pr view #{ENV['PR_NUMBER']} --json body -q .body"
-body, _status = Open3.capture2(cmd)
-body = body.strip
+  def self.credo_url(branch)
+    prefix = branch == 'main' ? '' : "#{branch}/"
+    "https://limadelic.github.io/elita/#{prefix}lint.json"
+  end
 
-marker_start = '<!-- cukes-badge-start -->'
-marker_end = '<!-- cukes-badge-end -->'
+  def self.build_badges(branch)
+    prefix = branch == 'main' ? '' : "#{branch}/"
+    url = "https://limadelic.github.io/elita"
+    report = "#{url}/#{prefix}report.html"
+    credo_badge = build_badge(url, prefix, 'lint.json', 'credo', report)
+    cukes_badge = build_badge(url, prefix, 'cukes.json', 'cukes', report)
+    "#{credo_badge} #{cukes_badge}"
+  end
 
-if body.include?(marker_start) && body.include?(marker_end)
-  regex = /#{Regexp.escape(marker_start)}.*?#{Regexp.escape(marker_end)}/m
-  replacement = "#{marker_start}\n#{badge_content}\n#{marker_end}"
-  body.gsub!(regex, replacement)
-else
-  body = "#{marker_start}\n#{badge_content}\n#{marker_end}\n\n#{body}"
+  def self.build_badge(url, prefix, json, name, report)
+    json_url = "#{url}/#{prefix}#{json}"
+    encoded = URI.encode_www_form_component(json_url)
+    "[![#{name}](https://img.shields.io/endpoint?url=#{encoded})](#{report})"
+  end
+
+  def self.fetch_pr_body
+    cmd = "gh pr view #{ENV['PR_NUMBER']} --json body -q .body"
+    body, _status = Open3.capture2(cmd)
+    body.strip
+  end
+
+  def self.update_pr_body(body, badge_content)
+    body.include?(MARKER_START) ? replace_badges(body, badge_content) : prepend_badges(body, badge_content)
+  end
+
+  def self.replace_badges(body, badge_content)
+    regex = /#{Regexp.escape(MARKER_START)}.*?#{Regexp.escape(MARKER_END)}/m
+    replacement = "#{MARKER_START}\n#{badge_content}\n#{MARKER_END}"
+    body.gsub(regex, replacement)
+  end
+
+  def self.prepend_badges(body, badge_content)
+    "#{MARKER_START}\n#{badge_content}\n#{MARKER_END}\n\n#{body}"
+  end
 end
 
-File.write('/tmp/pr_body.txt', body)
-system("gh pr edit #{ENV['PR_NUMBER']} --body-file /tmp/pr_body.txt")
+UpdatePrBadge.run
