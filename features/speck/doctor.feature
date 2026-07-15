@@ -6,6 +6,7 @@ Feature: Doctor
     * > el speck
     * speck> exec doctor
       | 🧪 doctor_spec | ask tool |
+      | 🤖 doctor      | ask tool |
     * verify
       | 🎭 speck as tplan |                                    |
       | ✏️ scenario_1     | Doctor asks one question and waits |

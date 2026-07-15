@@ -6,6 +6,7 @@ Feature: Greet
     * > el speck
     * speck> exec greet
       | 🧪 greet_spec | Who am I talking |
+      | 🤖 greet      | friendly greeter |
     * verify
       | 🎭 speck as tplan   |                      |
       | ✏️ greet_scenario_1 | Initial Question     |

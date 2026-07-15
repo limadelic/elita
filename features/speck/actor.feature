@@ -6,6 +6,7 @@ Feature: Actor
     * > el speck
     * speck> exec actor
       | 🧪 actor_spec | A professional actor who inhabits roles |
+      | 🤖 actor      | Versatile actor who plays any role      |
 
     * verify
       | 🎭 speck as tplan  |                                            |

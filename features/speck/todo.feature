@@ -5,7 +5,8 @@ Feature: Todo
   Scenario: speck reads, writes, and runs todo scenarios
     * > el speck
     * speck> exec todo
-      | 🧪 todo_spec | mem tools |
+      | 🧪 todo_spec | mem tools    |
+      | 🤖 todo      | task manager |
     * verify
       | 🎭 speck as tplan |                   |
       | ✏️ scenarios      | Store single task |
