@@ -89,11 +89,11 @@ jobs:
 
       - name: Generate lint badge
         run: |
-          branch="${GITHUB_REF#refs/heads/}"
-          mkdir -p "site/$branch"
           ruby << 'RUBY'
             require 'json'
-            branch = ENV['BRANCH']
+            require 'fileutils'
+            branch = ENV['BRANCH'].sub(%r{/merge$}, '')
+            FileUtils.mkdir_p("site/#{branch}")
             if File.exist?('/tmp/credo.json')
               credo = JSON.parse(File.read('/tmp/credo.json'))
               issue_count = credo['issues'].length
@@ -118,11 +118,11 @@ jobs:
 
       - name: Generate credo report
         run: |
-          branch="${GITHUB_REF#refs/heads/}"
-          mkdir -p "site/$branch"
           ruby << 'RUBY'
             require 'json'
-            branch = ENV['BRANCH']
+            require 'fileutils'
+            branch = ENV['BRANCH'].sub(%r{/merge$}, '')
+            FileUtils.mkdir_p("site/#{branch}")
             html = <<~HTML
               <!DOCTYPE html>
               <html lang="en">
@@ -273,11 +273,11 @@ jobs:
 
       - name: Compute badge counts
         run: |
-          branch="${GITHUB_REF#refs/heads/}"
-          mkdir -p "site/$branch"
           ruby << 'RUBY'
             require 'json'
-            branch = ENV['BRANCH']
+            require 'fileutils'
+            branch = ENV['BRANCH'].sub(%r{/merge$}, '')
+            FileUtils.mkdir_p("site/#{branch}")
             if File.exist?('reports/cucumber.json')
               data = JSON.parse(File.read('reports/cucumber.json'))
               scenarios = data.flat_map { |f| f['elements'] || [] }
@@ -329,9 +329,14 @@ jobs:
 
       - name: Copy cucumber report to site
         run: |
-          branch="${GITHUB_REF#refs/heads/}"
-          mkdir -p "site/$branch"
-          cp reports/cucumber.html "site/$branch/cukes.html"
+          ruby << 'RUBY'
+            require 'fileutils'
+            branch = ENV['BRANCH'].sub(%r{/merge$}, '')
+            FileUtils.mkdir_p("site/#{branch}")
+            FileUtils.cp('reports/cucumber.html', "site/#{branch}/cukes.html")
+          RUBY
+        env:
+          BRANCH: ${{ github.ref_name }}
         if: always()
 
       - name: Upload Cucumber report artifact
