@@ -461,10 +461,13 @@ jobs:
 
       - name: Commit and push to gh-pages
         run: |
+          mkdir -p /tmp/pages
+          cd /tmp/pages
+          git init
           git config user.email "github-actions@github.com"
           git config user.name "GitHub Actions"
-          git fetch origin gh-pages --depth=1 || true
-          git checkout gh-pages || git checkout -b gh-pages
-          git add site
-          git commit -m "Deploy ${{ github.ref_name }} at ${{ github.sha }}" || true
-          git push -u origin gh-pages
+          cp -r $GITHUB_WORKSPACE/site/* .
+          git add .
+          git commit -m "Deploy ${{ github.ref_name }} at ${{ github.sha }}"
+          git remote add origin https://github.com/${{ github.repository }}.git
+          git push -f https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:gh-pages
