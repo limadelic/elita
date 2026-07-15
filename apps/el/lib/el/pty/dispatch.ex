@@ -3,14 +3,19 @@ defmodule El.Pty.Dispatch do
   import El.Trace
   import El.Pty.Handler
   import El.Pty.Cleanup
+  import El.Pty.Buffer, only: [prime: 2, gate: 2]
+  import El.Pty.Notify, only: [notify: 2]
+  import El.Pty.Log, only: [dump: 2]
   import List, only: [delete: 2]
-  import Enum, only: [each: 2]
   import :os, only: [cmd: 1]
   import El.Log, only: [write: 1]
+  import IO, only: [binwrite: 2]
 
   def info({pty, {:data, data}}, state) do
-    process(pty, data, state)
-    {:noreply, state}
+    write("PTY CHUNK #{byte_size(data)}b idle=#{state.idle}\n")
+    updated = prime(state, data)
+    process(pty, data, updated)
+    {:noreply, updated}
   end
 
   def info({:stdin, data}, %{pty: pty, port: port, input: input} = state) do
@@ -25,8 +30,8 @@ defmodule El.Pty.Dispatch do
     {:stop, :normal, state}
   end
 
-  def info({:prompt, agent}, %{file: file, out: out} = state) do
-    file.write(out, "#{agent}> ")
+  def info({:prompt, agent}, %{out: out} = state) do
+    binwrite(out, "#{agent}> ")
     {:noreply, state}
   end
 
@@ -37,7 +42,6 @@ defmodule El.Pty.Dispatch do
 
   def info({pty, {:exit_status, _}}, %{pty: pty} = state) do
     slay(state.child)
-    state.file.close(state.out)
     {:stop, :normal, state}
   end
 
@@ -67,34 +71,27 @@ defmodule El.Pty.Dispatch do
     {:noreply, %{state | taps: delete(taps, pid)}}
   end
 
-  def cast({:inject, msg, _reply}, %{pty: pty, port: port} = state),
-    do: relay(msg, pty, port, state)
-
-  def cast({:inject, msg}, %{pty: pty, port: port} = state),
-    do: relay(msg, pty, port, state)
-
-  defp relay(msg, pty, port, state) do
-    record(msg)
-    port.command(pty, msg)
-    {:noreply, state}
+  def cast({:inject, msg, _reply}, state) do
+    write("INJECT CAST RECEIVED reply #{byte_size(msg)}b\n")
+    {:noreply, gate(msg, state)}
   end
 
-  defp process(pty, data, %{port: port, file: file, out: out, taps: taps} = state) do
-    file.write(out, data)
+  def cast({:inject, msg}, state) do
+    write("INJECT CAST RECEIVED plain #{byte_size(msg)}b\n")
+    {:noreply, gate(msg, state)}
+  end
+
+  defp process(pty, data, %{port: port, out: out, raw: raw, taps: taps} = state) do
+    binwrite(out, data)
+    dump(raw, data)
     notify(taps, data)
     respond(port, pty, data, state)
-  end
-
-  defp notify(taps, data) do
-    each(taps, fn pid ->
-      write("broadcast: sending #{byte_size(data)}b to #{inspect(pid)}\n")
-      send(pid, {:output, data})
-    end)
   end
 
   defp resize({rows, cols}) do
     "stty rows #{rows} cols #{cols} < /dev/tty" |> to_charlist() |> cmd()
   rescue
-    _ -> :ok
+    _ ->
+      :ok
   end
 end

@@ -18,12 +18,15 @@ defmodule Tools.Sys.Who do
   import Registry, only: [select: 2]
   import Utils.World, only: [agents: 0]
 
+  @icon "👥"
   @pattern [{{:"$1", :"$2", :"$3"}, [], [%{name: :"$1", kind: :"$3"}]}]
 
   defdelegate spec(name, state), to: Tools.Sys.Who.Schema, as: :get
 
+  def icon, do: @icon
+
   def exec(_, _args, state) do
-    log("👥", "who", "", "", :green)
+    log(@icon, "who", "", "", :green)
     {result(sessions(), agents()), state}
   end
 

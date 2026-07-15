@@ -30,10 +30,14 @@ defmodule Tools.Sys.Become do
   import Log, only: [log: 5]
   import Map, only: [put: 3]
 
+  @icon "🎭"
+
   defdelegate spec(name, state), to: Tools.Sys.Become.Schema, as: :get
 
+  def icon, do: @icon
+
   def exec(_, %{"role" => role}, state) do
-    log("🎭", state.name, " as ", role, :magenta)
+    log(@icon, state.name, " as ", role, :magenta)
     {"switched to #{role}", switch(state, role)}
   end
 

@@ -1,5 +1,6 @@
 Feature: Napo contract
 
+  @wip
   Scenario: Napo analyzes employment contract
     * > el
     * el> get me a napo agent

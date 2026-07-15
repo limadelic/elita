@@ -5,7 +5,8 @@ defmodule Tape.Play do
   import Tape.Play.Pick, only: [agent: 1]
   import System, only: [get_env: 1]
   import Enum, only: [at: 2]
-  import Map, only: [get: 2, take: 2]
+  import Map, only: [get: 2, get: 3]
+  import List, only: [last: 1]
   import Jason, only: [decode!: 1, encode!: 1]
 
   def play(body, name, fun, on_miss \\ :raise) do
@@ -14,11 +15,21 @@ defmodule Tape.Play do
   end
 
   defp context(entries, body, name, fun, miss) do
-    %{entries: entries, normalized: norm(body), body: body,
+    %{entries: entries, normalized: norm(body, name), body: body,
       name: name, fun: fun, on_miss: miss}
   end
 
-  defp norm(body), do: normalize(request(body))
+  defp norm(body, name) do
+    messages = get(body, :messages, [])
+    sparse(name, messages) |> normalize()
+  end
+
+  defp sparse(name, messages) do
+    %{"agent" => name, "messages" => recent(messages), "n" => length(messages)}
+  end
+
+  defp recent([]), do: []
+  defp recent(messages), do: [last(messages)]
 
   defp seed([]), do: guard(get_env("CASSETTE"))
   defp seed(_), do: :ok
@@ -71,5 +82,4 @@ defmodule Tape.Play do
 
   defp tape, do: get_env("CASSETTE")
   defp normalize(req), do: req |> encode!() |> decode!()
-  defp request(body), do: take(body, [:system, :messages, :tools])
 end

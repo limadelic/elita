@@ -3,6 +3,8 @@ defmodule Tools.Sys.Set do
   import Map, only: [put: 3]
   import Mem, only: [depth: 0, table: 0]
 
+  @icon "✏️"
+
   def spec(name, _state) do
     spec(name)
   end
@@ -15,8 +17,10 @@ defmodule Tools.Sys.Set do
     "Store data with a key"
   end
 
+  def icon, do: @icon
+
   def exec(_tool, %{"value" => value, "key" => key}, state) do
-    log("✏️", key, " = ", value, :blue)
+    log(@icon, key, " = ", value, :blue)
     store(key, value)
     {"stored", state}
   end

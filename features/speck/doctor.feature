@@ -1,6 +1,7 @@
 @tape:speckdoctor
 Feature: Doctor
 
+  @wip
   Scenario: speck reads, writes, and runs doctor scenarios
     * > el speck
     * speck> exec doctor

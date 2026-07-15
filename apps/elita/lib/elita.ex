@@ -5,16 +5,33 @@ defmodule Elita do
   import GenServer, only: [call: 3, cast: 2, start_link: 3]
   import History, only: [record: 1]
   import Llm, only: [llm: 1]
-  import Log, only: [log: 5]
   import Mem, only: [create: 0]
   import Msg, only: [user: 1]
+  import Reply, only: [deliver: 2]
   import String, only: [downcase: 1, trim: 1]
   import System, only: [get_env: 1]
   import Tools
 
   def spawn(name, configs) do
-    start_link(__MODULE__, {name, configs}, name: via(name))
+    {:ok, pid} = started(__MODULE__, {name, configs}, via(name))
+    publish(name)
+    {:ok, pid}
   end
+
+  defp started(m, a, k), do: start_link(m, a, name: k) |> accept()
+
+  defp accept({:ok, p}), do: {:ok, p}
+  defp accept({:error, {:already_started, p}}), do: {:ok, p}
+
+  defp publish(name) do
+    publish(name, :global.whereis_name({name, :puppet}))
+  end
+
+  defp publish(name, :undefined) do
+    :global.register_name({name, :puppet}, self())
+  end
+
+  defp publish(_name, _pid), do: :ok
 
   def dispatch(name, msg) do
     cast(via(name), {:act, msg})
@@ -57,13 +74,8 @@ defmodule Elita do
     act(%{state | history: history})
   end
 
-  defp branch(true, _history, msg) do
-    [msg]
-  end
-
-  defp branch(false, history, msg) do
-    history ++ [msg]
-  end
+  defp branch(true, _, msg), do: [msg]
+  defp branch(false, history, msg), do: history ++ [msg]
 
   defp judge?(configs) do
     "judge" in configs
@@ -79,7 +91,7 @@ defmodule Elita do
 
   defp done({:reply, txt, %{name: name} = state}) do
     txt = trim(txt)
-    log("✨", name, ": ", txt, :white)
+    deliver(name, txt)
     {:reply, txt, state}
   end
 end

@@ -10,7 +10,35 @@
       "agent": "malko",
       "messages": [
         {
-          "role": "user",
+          "content": "1+1"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "a portal is a gateway",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "malkovich",
+      "messages": [
+        {
+          "content": "what is a portal?"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [],
+    "q": {
+      "agent": "malko",
+      "messages": [
+        {
           "content": "1+1"
         }
       ],

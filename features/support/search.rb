@@ -70,11 +70,12 @@ module Search
   end
 
   def split(line)
-    colon_idx, equals_idx = line.index(": "), line.index(" = ")
-    return [line[0...colon_idx], line[colon_idx + 2..-1]] if colon_idx && (!equals_idx || colon_idx < equals_idx)
-    return [line[0...equals_idx], line[equals_idx + 3..-1]] if equals_idx
+    seps = [[line.index(" | "), 3], [line.index(": "), 2], [line.index(" = "), 3]]
+    valid_seps = seps.select { |idx, _| idx }.min_by { |idx, _| idx }
+    return [line, line] unless valid_seps
 
-    [line, line]
+    first_idx, skip_len = valid_seps
+    [line[0...first_idx], line[first_idx + skip_len..-1]]
   end
 
   def match?(folded_line, want_prefix, want_text)

@@ -1,5 +1,11 @@
 #!/bin/bash
+if git diff --cached --name-only | grep -qE '^(\.credo\.exs|\.githooks/)'; then
+  if ! sh -c ': > /dev/tty' 2>/dev/null; then
+    echo "BLOCKED: config files require boss tty"
+    exit 1
+  fi
+fi
 exec </dev/null >/tmp/hook_commit.log 2>&1
 mix lint || exit 1
-mix test
-exit $?
+mix test || exit 1
+exit 0

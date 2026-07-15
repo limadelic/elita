@@ -1,30 +1,17 @@
 defmodule El.Distribution do
   import Application, only: [ensure_all_started: 1]
   import Process, only: [sleep: 1]
-  import Node, only: [connect: 1]
-  import El.Log, only: [write: 1]
+  import Node, only: [connect: 1, alive?: 0, start: 2]
+  import El.Boot, only: [go: 2]
   import El.Distribution.Helpers
   import El.Run, only: [address: 0, suffix: 0]
 
-  defdelegate start(name \\ :default, opts \\ []), to: El.Boot
+  def start(name \\ :default), do: run(name, [])
 
-  def bind(name), do: bind(name, 50)
+  defp run(name, opts), do: go(name, opts)
 
-  defp bind(name, tries) when tries > 0 do
-    go(name, tries, find(name))
-  end
-
-  defp bind(_name, 0), do: :ok
-
-  defp go(name, _tries, pid) when is_pid(pid) do
-    result = :global.register_name({name, :puppet}, pid)
-    write("global register #{name}: #{inspect(result)} node=#{inspect(Node.self())}\n")
-    result
-  end
-
-  defp go(name, tries, nil) do
-    sleep(100)
-    bind(name, tries - 1)
+  def bind(_name) do
+    :ok
   end
 
   def target(name) do
@@ -39,7 +26,7 @@ defmodule El.Distribution do
 
   defp loop(name, tries) when tries > 0 do
     attach(name)
-    go(name, tries, locate(name), Node.alive?())
+    go(name, tries, locate(name), alive?())
   end
 
   defp loop(_name, 0), do: nil
@@ -50,16 +37,19 @@ defmodule El.Distribution do
 
   defp go(name, tries, _pid, _) when tries > 1 do
     sleep(100)
-    :global.sync()
     loop(name, tries - 1)
   end
 
   defp go(_name, _tries, _pid, _), do: nil
 
   def daemon do
-    Node.start(address(), :longnames)
+    boot(address())
     ensure_all_started(:elita)
     dial()
     sleep(:infinity)
+  end
+
+  defp boot(addr) do
+    start(addr, :longnames)
   end
 end

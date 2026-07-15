@@ -2,6 +2,8 @@ defmodule Tools.Sys.Get do
   import Log, only: [log: 5]
   import Mem, only: [depth: 0, table: 0]
 
+  @icon "👀"
+
   def spec(name, _state) do
     spec(name)
   end
@@ -14,9 +16,11 @@ defmodule Tools.Sys.Get do
     "Retrieve data by key"
   end
 
+  def icon, do: @icon
+
   def exec(_, %{"key" => key}, state) do
     value = fetch(key)
-    log("👀", key, ": ", value, :blue)
+    log(@icon, key, ": ", value, :blue)
     {value, state}
   end
 

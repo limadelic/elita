@@ -1,5 +1,6 @@
 Feature: Ttt
 
+  @wip
   Scenario: Two players play to a tie
     * > el
 

@@ -159,6 +159,17 @@ jobs:
           name: lint-badge
           path: site/
 
+  lock:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check config drift from lock baseline
+        run: git diff --quiet 83f9450451defb72333e61ed83a51770a526f0db HEAD -- .credo.exs .githooks/ || { echo "config drift from lock baseline"; exit 1; }
+
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -198,7 +209,7 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    needs: [lint, test]
+    needs: [lint, test, lock]
     if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
 
     steps:

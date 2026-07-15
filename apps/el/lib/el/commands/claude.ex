@@ -5,14 +5,16 @@ defmodule El.Commands.Claude do
   import String, only: [to_atom: 1]
   import System, only: [get_env: 2]
   import El.Commands.Size, only: [size: 0]
-  import File, only: [write!: 2, cwd!: 0]
+  import El.Commands.Reset, only: [cleanup: 0]
+  import File, only: [cwd!: 0]
   import Path, only: [basename: 1]
   import El.Wrap.Resize, only: [watch: 1]
   import El.Wrap.Input, only: [open: 2, encode: 2]
   import El.Log, only: [write: 1]
-  import El.Distribution, only: [start: 1, bind: 1]
+  import El.Distribution, only: [bind: 1, start: 1]
   import El.Puppet, only: [open: 1]
   import Agent, only: [start: 2]
+  import El.Cmd, only: [build: 0]
 
   def claude(name \\ :default) do
     claude(name, deps())
@@ -27,26 +29,8 @@ defmodule El.Commands.Claude do
     cleanup()
   end
 
-  defp cleanup do
-    write("shutdown\n")
-    reset()
-    stty()
-  end
-
-  defp reset do
-    write!("/dev/tty", "\e[?1000l\e[?1002l\e[?1003l\e[?1006l\e[?2004l\e[?1049l\e[?25h")
-  rescue
-    _ -> :ok
-  end
-
-  defp stty do
-    cmd(~c"stty sane < /dev/tty")
-  rescue
-    _ -> :ok
-  end
-
   defp go(name, deps) do
-    Task.start(fn -> distribute(name, deps) end)
+    spawn(fn -> distribute(name, deps) end)
     boot(to_atom(name), deps)
   rescue
     e -> write("boot error during claude setup: #{inspect(e)}\n")
@@ -72,13 +56,14 @@ defmodule El.Commands.Claude do
   end
 
   defp execute(name, deps, buf) do
-    cmd = "claude --dangerously-skip-permissions --model #{get_env("CLAUDE_MODEL", "haiku")}"
+    cmd = build()
     pid = Keyword.get(deps, :launch).(name, opts(buf, cmd))
     install(name)
     hold(pid)
   end
 
   defp hold(pid) when is_pid(pid), do: wait(pid)
+
   defp hold(_), do: :ok
 
   defp opts(buf, cmd) do

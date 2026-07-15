@@ -12,6 +12,9 @@ elita-*.tar
 CLAUDE.local.md
 status.json
 .claude/worktrees/
+.claude/settings.json
 node_modules/
 *.bak
 /tmp/
+reports/
+!reports/.gitkeep

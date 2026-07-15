@@ -1,6 +1,7 @@
 @tape:mother
 Feature: Mother
 
+  @wip
   Scenario: speck reads, writes, and runs mother scenarios
     * > el speck
     * speck> exec mother

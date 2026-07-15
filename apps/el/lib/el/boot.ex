@@ -1,7 +1,7 @@
 defmodule El.Boot do
   @moduledoc false
   import Process, only: [sleep: 1]
-  import Node, only: [set_cookie: 1]
+  import Node, only: [set_cookie: 1, start: 2]
   import Keyword, only: [get: 3]
   import File, only: [cwd!: 0]
   import Path, only: [basename: 1]
@@ -10,7 +10,7 @@ defmodule El.Boot do
   import El.Log, only: [write: 1]
   import El.Run, only: [suffix: 0]
 
-  def start(name \\ :default, opts \\ []) do
+  def go(name \\ :default, opts \\ []) do
     :os.cmd(~c"epmd -daemon")
     boot(node(name, opts), mode(opts))
   end
@@ -24,8 +24,11 @@ defmodule El.Boot do
   defp node(:default, opts), do: :"#{cwd!() |> basename()}#{suffix()}@#{get(opts, :host, host())}"
   defp node(name, opts), do: :"#{name}#{suffix()}@#{get(opts, :host, host())}"
 
-  defp boot(name, mode),
-    do: fn -> Node.start(name, mode) end |> then(&attempt(&1.(), &1, 5)) |> act(name, mode)
+  defp boot(name, mode) do
+    fn -> start(name, mode) end
+    |> then(&attempt(&1.(), &1, 5))
+    |> act(name, mode)
+  end
 
   defp attempt({:ok, pid}, _fun, _tries), do: {:ok, pid}
 

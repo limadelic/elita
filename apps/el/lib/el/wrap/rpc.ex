@@ -1,6 +1,7 @@
 defmodule El.Wrap.Rpc do
   import El.Log, only: [write: 1]
   import El.Puppet, only: [ask: 2]
+  import Process, only: [monitor: 1]
 
   def call(pid, msg) when node(pid) == node(), do: ask(pid, msg)
 
@@ -10,7 +11,7 @@ defmodule El.Wrap.Rpc do
   end
 
   defp guard(pid, msg) do
-    spawn(fn -> monitor(self()) end)
+    spawn(fn -> track(self()) end)
     attempt(pid, msg)
   rescue
     _ -> :error
@@ -23,8 +24,8 @@ defmodule El.Wrap.Rpc do
     |> tap(fn _ -> write("ask ok\n") end)
   end
 
-  defp monitor(pid) do
-    Process.monitor(pid)
+  defp track(pid) do
+    monitor(pid)
     await()
   end
 

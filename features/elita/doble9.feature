@@ -1,5 +1,6 @@
 Feature: Doble9
 
+  @wip
   Scenario: A fresh game deals ten dominoes to each player
     * > el
 

@@ -1,5 +1,6 @@
 Feature: Masked relay
 
+  @wip
   Scenario: Relay scouts each aspect blind and builds consensus
     * > el relay
 

@@ -39,10 +39,6 @@ defmodule El.Puppet.Invoke do
     {:error, reason}
   end
 
-  defp format(text) when is_binary(text) do
-    [%{"text" => text, "type" => "text"}]
-  end
-
   defp format(response), do: response
 
   defp record(message, response) do

@@ -2,7 +2,7 @@ defmodule El.CLI do
   import Application, only: [ensure_all_started: 1]
   import IO, only: [puts: 1]
   import El.Commands.Ask, only: [ask: 3]
-  import El.Commands.Tell, only: [tell: 3]
+  import El.Commands.Tell, only: [send: 3]
   import El.Commands.Spawn, only: [spawn: 2]
   import El.Commands.Stop, only: [stop: 1]
   import El.Commands.Claude, only: [claude: 1]
@@ -11,6 +11,8 @@ defmodule El.CLI do
   import El.Command.Ls, only: [list: 1]
   import El.REPL, only: [run: 1]
   import El.Log, only: [setup: 2]
+  import Enum, only: [join: 2]
+  import El.Ask, only: [invoke: 2]
 
   @usage """
   Usage:
@@ -41,21 +43,25 @@ defmodule El.CLI do
 
   defp name(["claude", name | _]), do: name
   defp name(["claude"]), do: "default"
-  defp name(_), do: "default"
+  defp name(["ask", agent | _]), do: agent
+  defp name(["tell", agent | _]), do: agent
+  defp name(["spawn", _name, agent]), do: agent
+  defp name(["@" <> agent | _]), do: agent
+  defp name([tool, "ask", agent | _]) when tool in @known_tools, do: agent
+  defp name([tool, "tell", agent | _]) when tool in @known_tools, do: agent
+  defp name(["ls" | _]), do: "default"
+  defp name(["cd" | _]), do: "default"
+  defp name(["daemon"]), do: "default"
+  defp name([agent]), do: agent
+  defp name([]), do: "el"
 
   defp parse(["ask", agent, msg]), do: {:ask, nil, agent, msg}
   defp parse(["tell", agent, msg]), do: {:tell, nil, agent, msg}
   defp parse(["spawn", name, agent]), do: {:spawn, name, agent}
   defp parse(["stop", agent]), do: {:stop, agent}
-
-  defp parse([tool, "ask", agent, msg]) do
-    check(tool, {:ask, tool, agent, msg})
-  end
-
-  defp parse([tool, "tell", agent, msg]) do
-    check(tool, {:tell, tool, agent, msg})
-  end
-
+  defp parse(["@" <> agent | rest]), do: {:ask_tool, agent, rest |> join(" ")}
+  defp parse([tool, "ask", agent, msg]), do: check(tool, {:ask, tool, agent, msg})
+  defp parse([tool, "tell", agent, msg]), do: check(tool, {:tell, tool, agent, msg})
   defp parse(["claude"]), do: {:claude, :default}
   defp parse(["claude", name]), do: {:claude, name}
   defp parse(["ls"]), do: {:ls, nil}
@@ -79,9 +85,10 @@ defmodule El.CLI do
 
   defp exec({:repl, agent}), do: run(agent)
   defp exec({:ask, tool, agent, msg}), do: ask(agent, msg, tool)
-  defp exec({:tell, tool, agent, msg}), do: tell(agent, msg, tool)
+  defp exec({:tell, tool, agent, msg}), do: send(agent, msg, tool)
   defp exec({:spawn, name, agent}), do: spawn(name, agent)
   defp exec({:stop, agent}), do: stop(agent)
+  defp exec({:ask_tool, agent, msg}), do: invoke(agent, msg)
   defp exec({:claude, name}), do: claude(name)
   defp exec({:ls, path}), do: list(path)
   defp exec({:cd, path}), do: cd(path)

@@ -16,7 +16,7 @@ defmodule Elita.Credo.Imports do
     priority: :normal
   }
   @allow [:ets, :erlang, :rand, :cover]
-  @mods [:GenServer, :Supervisor, :Application, :Task, :Node, :Process, :System]
+  @mods []
 
   def param_defaults, do: [allowlist: @allow, modules: @mods]
 

@@ -2,10 +2,11 @@ defmodule Agent.Session do
   use GenServer
 
   import Agent.Spawn, only: [run: 2]
-  import GenServer, only: [start_link: 3, call: 3]
+  import Agent.Watch, only: [start: 3]
+  import GenServer, only: [start_link: 3, call: 3, cast: 2]
   import Keyword, only: [fetch!: 2, get: 3]
   import Map, only: [put: 3]
-  import String, only: [downcase: 1]
+  import String, only: [downcase: 1, trim: 1]
   import Tape, only: [handle: 3]
 
   def start_link(opts) do
@@ -25,8 +26,9 @@ defmodule Agent.Session do
   end
 
   def ask(pid, message), do: call(pid, {:ask, message}, :infinity)
-  def cast(pid, message), do: GenServer.cast(pid, {:cast, message})
+  def forward(pid, message), do: cast(pid, {:cast, message})
   def fetch(pid), do: call(pid, :fetch, :infinity)
+
   @impl true
   def init(opts) do
     {:ok, state(opts)}
@@ -41,22 +43,52 @@ defmodule Agent.Session do
   @impl true
   def handle_call({:ask, message}, _from, state) do
     body = %{messages: [%{content: message}]}
-    response = handle(body, state.name, fn -> state.runner.(message, state.folder) end)
-    {:reply, {:ok, response}, state}
+    spawn(fn -> reply(state.name, message, body, state.folder, state.runner) end)
+    {:reply, {:ok, ""}, state}
   end
 
+  @impl true
   def handle_call({:act, message}, _from, state) do
     response = state.runner.(message, state.folder)
     {:reply, response, state}
   end
 
+  @impl true
   def handle_call(:fetch, _from, state) do
     {:reply, state, state}
   end
+
+  defp reply(name, message, body, folder, runner) do
+    start(name, message, folder)
+    process(name, body, message, folder, runner)
+  rescue
+    _ -> :ok
+  end
+
+  defp process(name, body, message, folder, runner) do
+    response = handle(body, name, fn -> runner.(message, folder) end)
+    emit(response, name)
+  end
+
+  defp emit([%{"text" => text, "type" => "text"}], name) do
+    answer(name, trim(text))
+  end
+
+  defp emit([%{"text" => text}], name) do
+    answer(name, trim(text))
+  end
+
+  defp emit(_, _), do: :ok
 
   @impl true
   def handle_cast({:cast, message}, state) do
     state.runner.(message, state.folder)
     {:noreply, state}
+  end
+
+  defp answer(agent, text) do
+    :erlang.apply(:"Elixir.Tools.Sys.Ask", :answer, [agent, text])
+  rescue
+    _ -> :ok
   end
 end

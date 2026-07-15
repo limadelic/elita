@@ -1,76 +1,78 @@
 defmodule El.Wrap.Remote do
   @moduledoc false
-  import El.Distribution, only: [target: 1, wait: 1]
-  import String, only: [to_atom: 1, trim: 1, trim_trailing: 2]
+  import El.Distribution, only: [wait: 1]
   import El.Puppet, only: [put: 2]
   import El.Log, only: [write: 1]
-  import File, only: [write: 2]
-  import El.Wrap.Rpc, only: [call: 2]
+  import El.Pty, only: [watch: 2, unwatch: 2]
+  import El.Puppet.Collect, only: [collect: 1]
+  import System, only: [monotonic_time: 1]
+  import El.Wrap.Reply, only: [handle: 2, fix: 2, prepare: 2, inject: 4]
+  import El.Wrap.Guard, only: [await: 1]
+  import Map, only: [merge: 2]
+  import Task, only: [async: 1]
 
   def deliver(name, message, sender) do
-    prepare(name, sender) |> wait() |> query(message, sender)
+    invoke(name, message, sender)
   catch
-    :exit, _ -> halt("deliver")
+    :exit, _ -> trap("deliver exit\n")
   end
 
-  defp halt(context) do
-    fold("#{context} exit\n")
+  defp invoke(name, message, sender) do
+    target = prepare(name, sender) |> wait()
+    query(target, name, message, sender)
   end
 
-  defp fold(msg) do
+  defp query(nil, _, _, _), do: :forward
+
+  defp query(target, name, message, sender) do
+    fetch(target, name, message, sender)
+  catch
+    :exit, _ -> trap("query exit\n")
+  end
+
+  defp fetch(target, name, message, sender) do
+    handle(gather(target, message, sender, name), sender)
+  end
+
+  defp gather(pid, msg, sender, _target) do
+    text = "[ask #{sender |> fix(sender) |> to_string()}]\n#{msg}"
+    put(pid, text)
+    listen(sender, sender)
+  end
+
+  defp listen(pty, sender) do
+    watch(pty, self())
+    spawn(pty, sender) |> reap(pty)
+  end
+
+  defp spawn(pty, sender) do
+    async(fn -> collect(build(pty, sender, monotonic_time(:millisecond))) end)
+  end
+
+  defp reap(task, pty) do
+    result = await(task)
+    unwatch(pty, self())
+    result
+  end
+
+  defp build(pty, _sender, now) do
+    %{pty: pty, buffer: "", question: "ask_response", burst: 1, gap: false}
+    |> merge(%{last: now, start: now})
+  end
+
+  defp trap(msg) do
     write(msg)
     :forward
   end
 
-  defp prepare(name, sender) do
-    t = name |> trim() |> to_atom()
-    write("prepare: target=#{t} from=#{inspect(sender)}\n")
-    t
-  end
-
-  defp query(nil, _, _), do: :forward
-
-  defp query(pid, msg, sender) do
-    respond(call(pid, msg), sender)
+  def tell(name, message, sender) do
+    dispatch(name, message, sender)
   catch
-    :exit, _ -> halt("query")
+    :exit, reason -> trap("tell exit: #{inspect(reason)}\n")
   end
 
-  defp respond(:forward, _), do: :forward
-
-  defp respond(output, sender) do
-    agent = fix(sender, sender)
-    route(target(agent), output, agent)
-    {:handled}
-  end
-
-  defp fix(a, _) when is_atom(a), do: a
-  defp fix(_, b) when is_binary(b), do: to_atom(b)
-
-  defp route(nil, _, _) do
-    write("route nil: cannot write\n")
-    :ok
-  end
-
-  defp route(pid, [%{"text" => text} | _], agent) do
-    route(pid, text, agent)
-  end
-
-  defp route(pid, output, agent) when is_binary(output) do
-    cleaned = trim_trailing(output, "\n")
-    write("route to: #{inspect(pid)} text: #{inspect(cleaned)}\n")
-    put(pid, cleaned)
-    write("/dev/stdout", "#{agent}> ")
-  end
-
-  defp route(_, output, _) do
-    write("route drop: #{inspect(output)}\n")
-    :ok
-  end
-
-  def known?(name) do
-    name |> trim() |> to_atom() |> target() |> is_pid()
-  rescue
-    _ -> false
+  defp dispatch(name, message, sender) do
+    target = prepare(name, sender) |> wait()
+    inject(target, name, message, sender)
   end
 end

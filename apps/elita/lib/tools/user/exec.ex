@@ -5,8 +5,12 @@ defmodule Tools.User.Exec do
   import String, only: [split: 2, trim: 1, to_atom: 1]
   import Map, only: [to_list: 1]
 
+  @icon "🛠️"
+
+  def icon, do: @icon
+
   def exec(tool, args) when tool != nil do
-    log("🛠️", tool.name, ": ", args, :red)
+    log(@icon, tool.name, ": ", args, :red)
     result = first(tool.code, tool, args)
     log("", "", "", result, :yellow)
     result

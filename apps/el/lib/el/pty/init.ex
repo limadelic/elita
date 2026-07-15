@@ -2,38 +2,26 @@ defmodule El.Pty.Init do
   @moduledoc false
   import El.Reader
   import El.Trace
-  import Map
-  import Process, except: [alias: 1, info: 1]
-  import Port, only: [info: 1]
+  import El.Pty.State, only: [initial: 4, config: 2]
+  import El.Pty.Boot, only: [launch: 3]
+  import El.Pty.Watch, only: [start: 1]
+  import Process, only: [flag: 2]
 
   def call(cfg) do
     size = cfg[:get_size].()
-    {pty, child, out} = boot(cfg, size)
-    finish(cfg, pty, size, out, child)
+    {pty, child, out, raw} = boot(cfg, size)
+    finish(cfg, pty, size, {out, raw, child})
   end
 
   defp boot(cfg, size) do
     {pty, child} = pair(cfg[:port], cfg[:cmd], size)
-    {:ok, out} = cfg[:file].open("/dev/stdout", [:write, :binary])
-    {pty, child, out}
+    {pty, child, :stdio, nil}
   end
 
-  defp finish(cfg, pty, size, out, child) do
+  defp finish(cfg, pty, size, {out, raw, child}) do
     setup(cfg[:file], pty, size)
-    watch(pty)
-    core(pty, out, child) |> attach(cfg)
-  end
-
-  defp core(pty, out, child) do
-    %{pty: pty, out: out, child: child}
-  end
-
-  defp attach(state, cfg) do
-    merge(state, extras(cfg))
-  end
-
-  defp extras(cfg) do
-    %{file: cfg[:file], port: cfg[:port], input: cfg[:input], taps: cfg[:taps]}
+    start(pty)
+    initial(pty, out, raw, child) |> config(cfg)
   end
 
   defp pair(port, cmd, size) do
@@ -45,30 +33,17 @@ defmodule El.Pty.Init do
   defp pid({:os_pid, pid_val}), do: pid_val
   defp pid(_), do: nil
 
-  defp launch(port, cmd, size) do
-    argv = args(size, cmd)
-    opts = [:binary, :stream, :exit_status, {:args, argv}]
-    port.open({:spawn_executable, "/usr/bin/script"}, opts)
-  end
-
-  defp args({rows, cols}, cmd) do
-    stty = "stty rows #{rows} cols #{cols}; stty raw -echo -isig;"
-    argv(:os.type(), stty, cmd)
-  end
-
-  defp argv({:unix, :darwin}, stty, cmd) do
-    ["-q", "/dev/null", "sh", "-c", "#{stty} exec #{cmd}"]
-  end
-
-  defp argv({:unix, _}, stty, cmd) do
-    ["-q", "-c", "#{stty} exec #{cmd}", "/dev/null"]
-  end
-
   defp setup(file, _pty, size) do
-    {:ok, fd} = file.open("/dev/tty", [:read, :binary, :raw])
+    file.open("/dev/tty", [:read, :binary, :raw])
+    |> mirror(file, size)
+  end
+
+  defp mirror({:ok, fd}, file, size) do
     mark(size, sink(fd, file))
     pump(file)
   end
+
+  defp mirror({:error, reason}, _, _) when reason in [:enxio, :ebadf, :enotty], do: :ok
 
   defp pump(file) do
     flag(:trap_exit, true)
@@ -82,20 +57,4 @@ defmodule El.Pty.Init do
   rescue
     _ -> :user
   end
-
-  defp watch(pty) do
-    spawn(fn -> probe(self(), pty) end, [])
-  end
-
-  defp probe(parent, pty) do
-    sleep(500)
-    test(parent, pty)
-  end
-
-  defp test(parent, pty) do
-    react(info(pty), parent, pty)
-  end
-
-  defp react(nil, parent, pty), do: send(parent, {pty, :closed})
-  defp react(_, _, _), do: :ok
 end

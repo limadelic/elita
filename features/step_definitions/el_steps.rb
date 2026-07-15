@@ -14,8 +14,13 @@ When(/^> el$/) do |*rest|
 end
 
 When(/^> el (.+)$/) do |args, *rest|
-  boot(args)
-  drain
+  if args.start_with?("@")
+    output = one(args)
+    track(output, output.gsub(/\e\[[0-9;]*m/, ''))
+  else
+    boot(args)
+    drain
+  end
   handle(rest.first, transcript)
 end
 
@@ -24,6 +29,7 @@ When(/^(\w+)> (.+)$/) do |prompt, input, *rest|
   note(prompt, input) if table && valid?(table)
   write_input(input, prompt)
   output = retrying(15) { await_result(prompt, input) }
+  reply(prompt, table, output) if table && valid?(table)
   settle(table, output)
 end
 
@@ -47,7 +53,7 @@ When(/^(\w+):$/) do |name, *rest|
   return unless table
 
   retrying(15) do
-    verify_lines(table.raw.map { |row| row[0].strip })
+    verify_lines(table.raw.map { |row| row.map(&:strip).join(" | ") })
   end
 end
 
@@ -71,16 +77,37 @@ def track(chunk, stripped)
 end
 
 def note(prompt, input)
-  @transcript_stripped ||= ''
-  @transcript_stripped << "\n🤔 el → #{prompt}: #{input}\n"
+  # Do NOT fabricate emoji lines - they come from real Elixir output
+end
+
+def reply(prompt, table, output)
+  # Do NOT fabricate emoji lines - they come from real Elixir output via session log
+end
+
+def valid_response_row?(table)
+  return false unless table&.raw&.size.to_i > 1
+
+  table.raw[1]&.size == 2
+end
+
+def log_response(prompt, text, _output)
+  # Do NOT fabricate emoji lines - they come from real Elixir output via session log
 end
 
 def retrying(times, &block)
-  attempt_with_retries(times, &block)
+  effective_times = ENV["LIVE"] == "1" ? live_retry_count : times
+  attempt_with_retries(effective_times, &block)
+end
+
+def live_retry_count
+  (60.0 / pause_time).ceil
 end
 
 def verify_lines(lines)
-  iterate_and_verify_lines(transcript.downcase, lines)
+  session_log = @current ? read_session_log(@current, @pid) : ""
+  raise "No session log for #{@current}_#{@pid}" if session_log.empty?
+
+  iterate_and_verify_lines(session_log.downcase, lines)
 end
 
 def attempt_with_retries(times, &block)
@@ -102,7 +129,9 @@ def pause_time
 end
 
 def verify_line(line, transcript, cursor)
-  idx = transcript.index(line.downcase, cursor)
+  transcript_str = transcript.force_encoding('UTF-8').downcase
+  line_lower = line.downcase
+  idx = transcript_str.index(line_lower, cursor)
   return idx + line.length if idx
 
   msg = "Expected '#{line}' in transcript after #{cursor}:\n#{transcript}"
