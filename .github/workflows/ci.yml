@@ -462,11 +462,10 @@ jobs:
 
       - name: Commit and push to gh-pages
         run: |
-          cd site
           git config user.email "github-actions@github.com"
           git config user.name "GitHub Actions"
-          git add .
+          git add site
           git commit -m "Deploy ${{ github.ref_name }} at ${{ github.sha }}" || true
-          git push -u origin gh-pages
+          git push origin HEAD:gh-pages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
