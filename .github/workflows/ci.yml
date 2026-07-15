@@ -201,7 +201,7 @@ jobs:
       - run: bin/cukes_summary.rb
         if: always()
 
-      - run: ruby -e "require 'fileutils'; b = ENV['BRANCH'].sub(%r{/merge$}, ''); FileUtils.mkdir_p('site/#{b}'); FileUtils.cp('reports/cucumber.html', "site/#{b}/cukes.html")"
+      - run: ruby -e 'require "fileutils"; b = ENV["BRANCH"].sub(%r{/merge$}, ""); FileUtils.mkdir_p("site/#{b}"); FileUtils.cp("reports/cucumber.html", "site/#{b}/cukes.html")'
         env:
           BRANCH: ${{ github.ref_name }}
         if: always()
