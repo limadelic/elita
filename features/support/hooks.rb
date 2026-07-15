@@ -7,7 +7,22 @@ end
 BeforeAll do
   root = File.expand_path("../../..", __FILE__)
   el_dir = File.join(root, "apps/el")
-  system("cd #{el_dir} && mix escript.build") || raise("Failed to build el escript")
+  el_escript = File.join(el_dir, "el")
+
+  need_rebuild = !File.exist?(el_escript) || needs_escript_rebuild?(el_dir, el_escript)
+  if need_rebuild
+    system("cd #{el_dir} && mix escript.build") || raise("Failed to build el escript")
+  end
+end
+
+def needs_escript_rebuild?(el_dir, el_escript)
+  lib_dir = File.join(el_dir, "lib")
+  return true unless Dir.exist?(lib_dir)
+
+  escript_time = File.mtime(el_escript)
+  Dir.glob(File.join(lib_dir, "**/*.ex")).any? do |source|
+    File.mtime(source) > escript_time
+  end
 end
 
 Around do |scenario, block|
