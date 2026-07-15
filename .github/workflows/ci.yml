@@ -369,7 +369,7 @@ jobs:
             require 'open3'
             require 'uri'
 
-            branch = ENV['BRANCH']
+            branch = ENV['HEAD_REF'] || ENV['BRANCH']
             pages_url = "https://limadelic.github.io/elita"
 
             # Credo badge with endpoint URL
@@ -409,6 +409,7 @@ jobs:
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           BRANCH: ${{ github.ref_name }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
           GH_TOKEN: ${{ github.token }}
         continue-on-error: true
 
