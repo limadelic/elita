@@ -55,6 +55,7 @@ defmodule Tester do
 
   def verify(expectation, result) do
     pattern = ~r/#{Regex.escape(expectation)}/i
+
     assert result =~ pattern,
            "Expected substring '#{expectation}' in result: #{result}"
   end
