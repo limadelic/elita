@@ -471,12 +471,14 @@ jobs:
         run: |
           PREFIX="${{ steps.prefix.outputs.prefix }}"
           mkdir -p site
-          # Skip cuking the prefix being rewritten; seed everything else from live pages
-          [ -z "$PREFIX" ] && curl -sfL https://limadelic.github.io/elita/index.html -o site/index.html || true
-          curl -sfL https://limadelic.github.io/elita/cukes.json -o site/cukes.json || true
-          curl -sfL https://limadelic.github.io/elita/cukes.html -o site/cukes.html || true
-          curl -sfL https://limadelic.github.io/elita/lint.json -o site/lint.json || true
-          curl -sfL https://limadelic.github.io/elita/credo.html -o site/credo.html || true
+          if [ -n "$PREFIX" ]; then
+            # On branch, preserve main files from live pages
+            curl -sfL https://limadelic.github.io/elita/index.html -o site/index.html || true
+            curl -sfL https://limadelic.github.io/elita/cukes.json -o site/cukes.json || true
+            curl -sfL https://limadelic.github.io/elita/cukes.html -o site/cukes.html || true
+            curl -sfL https://limadelic.github.io/elita/lint.json -o site/lint.json || true
+            curl -sfL https://limadelic.github.io/elita/credo.html -o site/credo.html || true
+          fi
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
