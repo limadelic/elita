@@ -11,6 +11,20 @@ defmodule Tester do
 
       setup_all do
         {:ok, _} = Tape.Writer.start_link(nil)
+
+        cassette = __MODULE__
+          |> Module.split()
+          |> List.last()
+          |> String.replace_suffix("Test", "")
+          |> String.downcase()
+          |> then(&"#{&1}_xunit")
+
+        System.put_env("CASSETTE", cassette)
+
+        on_exit(fn ->
+          System.delete_env("CASSETTE")
+        end)
+
         :ok
       end
     end
@@ -38,6 +52,14 @@ defmodule Tester do
 
   def ask(name, query) do
     request(to_string(name), query)
+  end
+
+  def verify(name, expected, query) do
+    answer = ask(name, query)
+
+    assert is_binary(answer), "Expected binary answer, got: #{inspect(answer)}"
+    assert String.contains?(downcase(answer), downcase(expected)),
+           "Expected '#{answer}' to contain '#{expected}'"
   end
 
   def judge(result, expectation) do
