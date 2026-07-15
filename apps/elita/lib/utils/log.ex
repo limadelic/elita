@@ -78,12 +78,6 @@ defmodule Log do
 
   def answer(_agent, _text), do: :ok
 
-  def tell(sender, recipient, message) do
-    msg = "📢 #{sender} → #{recipient} | #{message}\n"
-    write(msg)
-    el(msg)
-  end
-
   defp el(msg) do
     :erlang.apply(:"Elixir.El.Log", :write, [msg])
   rescue

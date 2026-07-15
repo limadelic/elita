@@ -14,6 +14,7 @@ end
 
 defmodule Tools.Sys.Who do
   import Enum, only: [map: 2, join: 2]
+  import Log, only: [log: 5]
   import Registry, only: [select: 2]
   import Utils.World, only: [agents: 0]
 
@@ -22,6 +23,7 @@ defmodule Tools.Sys.Who do
   defdelegate spec(name, state), to: Tools.Sys.Who.Schema, as: :get
 
   def exec(_, _args, state) do
+    log("👥", "who", "", "", :green)
     {result(sessions(), agents()), state}
   end
 

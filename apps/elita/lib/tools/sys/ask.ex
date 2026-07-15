@@ -25,21 +25,16 @@ end
 
 defmodule Tools.Sys.Ask do
   import Agent.Harness, only: [dispatch: 3]
-  import Log, only: [ask: 3]
+  import Log, only: [log: 5]
 
   defdelegate spec(name, state), to: Tools.Sys.Ask.Schema, as: :get
 
   def exec(_, %{"recipient" => recipient, "question" => question}, %{name: sender} = state) do
-    route(recipient, question, sender, state)
+    log("🤔", "#{sender} → #{recipient}", ": ", question, :green)
+    {dispatch(recipient, question, :ask), state}
   end
 
   def exec(_, _args, state) do
     {"ask needs recipient and question", state}
-  end
-
-  defp route(recipient, question, sender, state) do
-    ask(sender, recipient, question)
-    result = dispatch(recipient, question, :ask)
-    {result, state}
   end
 end
