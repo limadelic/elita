@@ -1,7 +1,7 @@
 defmodule Tester do
   import ExUnit.Assertions
   import Elita, only: [request: 2, dispatch: 2]
-  import String, only: [downcase: 1]
+  import String, only: [downcase: 1, contains?: 2]
 
   defmacro __using__(_opts) do
     quote do
@@ -10,7 +10,10 @@ defmodule Tester do
       import Tester
 
       setup_all do
-        {:ok, _} = Tape.Writer.start_link(nil)
+        module_name = __MODULE__ |> Atom.to_string() |> String.split(".") |> List.last() |> String.downcase()
+        cassette_base = String.slice(module_name, 0..-5//1)
+        cassette_name = cassette_base <> "_xunit"
+        {:ok, _} = Tape.Writer.start_link(cassette_name)
         :ok
       end
     end
@@ -38,6 +41,14 @@ defmodule Tester do
 
   def ask(name, query) do
     request(to_string(name), query)
+  end
+
+  def verify(name, expected, query) do
+    answer = ask(name, query)
+
+    assert is_binary(answer), "Expected binary answer, got: #{inspect(answer)}"
+    assert contains?(downcase(answer), downcase("#{expected}")),
+           "Expected '#{answer}' to contain '#{expected}'"
   end
 
   def judge(result, expectation) do

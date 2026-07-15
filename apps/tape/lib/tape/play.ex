@@ -1,9 +1,8 @@
 defmodule Tape.Play do
   import Tape.Matcher, only: [contains: 2]
   import Tape.Store, only: [load: 0]
-  import Tape.Writer, only: [claim: 3]
+  import Tape.Writer, only: [claim: 3, cassette: 0]
   import Tape.Play.Pick, only: [agent: 1]
-  import System, only: [get_env: 1]
   import Enum, only: [at: 2]
   import Map, only: [get: 2, get: 3]
   import List, only: [last: 1]
@@ -31,11 +30,11 @@ defmodule Tape.Play do
   defp recent([]), do: []
   defp recent(messages), do: [last(messages)]
 
-  defp seed([]), do: guard(get_env("CASSETTE"))
+  defp seed([]), do: guard(cassette())
   defp seed(_), do: :ok
 
   defp guard(nil), do: :ok
-  defp guard(cassette), do: raise("no cassette: #{cassette}")
+  defp guard(c), do: raise("no cassette: #{c}")
 
   defp answer(ctx) do
     agent(ctx) |> process(ctx)
@@ -80,6 +79,6 @@ defmodule Tape.Play do
   defp ticks(%{"times" => times}), do: times
   defp ticks(_), do: 1
 
-  defp tape, do: get_env("CASSETTE")
+  defp tape, do: cassette()
   defp normalize(req), do: req |> encode!() |> decode!()
 end

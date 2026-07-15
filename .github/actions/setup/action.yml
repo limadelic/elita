@@ -1,0 +1,44 @@
+name: Setup Beam, Ruby & Dependencies
+description: Checkout, setup Elixir/OTP/Ruby, cache deps, and fetch dependencies
+inputs:
+  setup-node:
+    description: Setup Node.js for gherkin formatting
+    required: false
+    default: 'false'
+  fetch-depth:
+    description: Number of commits to fetch (0 = all)
+    required: false
+    default: '1'
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: ${{ inputs.fetch-depth }}
+
+    - uses: erlef/setup-beam@v1
+      with:
+        elixir-version: '1.18'
+        otp-version: '28'
+
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.3'
+        bundler-cache: true
+
+    - if: inputs.setup-node == 'true'
+      uses: actions/setup-node@v4
+      with:
+        node-version: 'lts/*'
+        cache: npm
+
+    - uses: actions/cache@v4
+      with:
+        path: |
+          deps
+          _build
+        key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+        restore-keys: ${{ runner.os }}-mix-
+
+    - shell: bash
+      run: mix deps.get

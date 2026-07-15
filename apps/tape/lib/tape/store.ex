@@ -3,7 +3,7 @@ defmodule Tape.Store do
   import Path, only: [expand: 2, join: 2]
   import Jason
   import System, only: [get_env: 1]
-  import Tape.Writer, only: [acquire: 1]
+  import Tape.Writer, only: [acquire: 1, cassette: 0]
 
   @app_root expand("../..", __DIR__)
 
@@ -42,7 +42,7 @@ defmodule Tape.Store do
 
   defp file do
     d = base()
-    join(d, "#{get_env("CASSETTE")}.json")
+    join(d, "#{cassette()}.json")
   end
 
   defp base, do: dir(get_env("CASSETTE_DIR"))
