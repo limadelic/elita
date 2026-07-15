@@ -57,28 +57,19 @@ jobs:
       - name: Credo failure detail
         if: steps.lint.outcome == 'failure'
         run: |
-          # Get detailed JSON output
           mix credo list --format json > /tmp/credo.json
-
-          # Parse and create summary
           echo "## Lint Violations" >> $GITHUB_STEP_SUMMARY
           ISSUE_COUNT=$(jq '.issues | length' /tmp/credo.json)
           echo "Found $ISSUE_COUNT issues" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-
           if [ "$ISSUE_COUNT" -gt 0 ]; then
             echo "| File | Line | Check | Message |" >> $GITHUB_STEP_SUMMARY
             echo "|------|------|-------|---------|" >> $GITHUB_STEP_SUMMARY
-
             jq -r '.issues[] | [.filename, .line_no, .check, .message] | @csv' /tmp/credo.json | while IFS=',' read -r file line check message; do
               file=$(echo "$file" | tr -d '"')
               check=$(echo "$check" | tr -d '"')
               message=$(echo "$message" | tr -d '"')
-
-              # Emit GitHub annotation
               echo "::error file=$file,line=$line,title=$check::$message"
-
-              # Add to summary table
               file_short=$(basename "$file")
               echo "| $file_short | $line | $check | $message |" >> $GITHUB_STEP_SUMMARY
             done
@@ -268,7 +259,7 @@ jobs:
         id: cukes
         run: |
           mkdir -p reports
-          TAPE=replay bundle exec cucumber --profile default --format html --out reports/cucumber.html --format json --out reports/cucumber.json --publish-quiet
+          TAPE=replay mix cukes --format html --out reports/cucumber.html --format json --out reports/cucumber.json --publish-quiet
         env:
           MIX_ENV: test
 
@@ -473,7 +464,6 @@ jobs:
           PREFIX="${{ steps.prefix.outputs.prefix }}"
           mkdir -p site
           if [ -n "$PREFIX" ]; then
-            # On branch, preserve main files from live pages
             curl -sfL https://limadelic.github.io/elita/index.html -o site/index.html || true
             curl -sfL https://limadelic.github.io/elita/cukes.json -o site/cukes.json || true
             curl -sfL https://limadelic.github.io/elita/cukes.html -o site/cukes.html || true

@@ -43,8 +43,10 @@ defmodule Elita.Umbrella do
     check("bundle exec rubocop")
   end
 
-  defp run_cukes(_) do
-    check("bundle exec cucumber --profile default")
+  defp run_cukes(args) do
+    extra = args |> Enum.join(" ") |> String.trim()
+    cmd = "bundle exec cucumber --profile default" <> (if extra != "", do: " #{extra}", else: "")
+    check(cmd)
   end
 
   defp run_build(_) do
