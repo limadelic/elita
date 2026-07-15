@@ -1,7 +1,7 @@
 defmodule El.Distribution do
   import Application, only: [ensure_all_started: 1]
   import Process, only: [sleep: 1]
-  import Node, only: [connect: 1, alive?: 0, start: 2]
+  import Node, only: [connect: 1, alive?: 0]
   import El.Boot, only: [go: 2]
   import El.Distribution.Helpers
   import El.Run, only: [address: 0, suffix: 0]
@@ -43,7 +43,7 @@ defmodule El.Distribution do
   defp go(_name, _tries, _pid, _), do: nil
 
   def daemon do
-    start(address(), :longnames)
+    Node.start(address(), :longnames)
     ensure_all_started(:elita)
     dial()
     sleep(:infinity)
