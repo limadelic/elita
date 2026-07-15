@@ -40,7 +40,6 @@ jobs:
       - name: Lint
         id: lint
         run: mix lint
-        continue-on-error: true
 
       - name: Credo failure detail
         if: steps.lint.outcome == 'failure'
@@ -251,7 +250,6 @@ jobs:
           TAPE=replay bundle exec cucumber --profile default --format html --out reports/cucumber.html --format json --out reports/cucumber.json --publish-quiet
         env:
           MIX_ENV: test
-        continue-on-error: true
 
       - name: Compute badge counts
         run: |
@@ -312,23 +310,49 @@ jobs:
           name: cukes-report-${{ github.ref_name }}
           path: reports/
 
-      - name: Prepare PR badge
-        if: github.event_name == 'pull_request' && always()
+      - name: Update PR with cukes badge
+        if: github.event_name == 'pull_request'
         run: |
-          if [ -f "reports/cucumber.json" ]; then
-            ruby << 'RUBY'
-              require 'json'
+          ruby << 'RUBY'
+            require 'json'
+
+            # Get cukes data
+            if File.exist?('reports/cucumber.json')
               data = JSON.parse(File.read('reports/cucumber.json'))
               scenarios = data.flat_map { |f| f['elements'] || [] }
               passed = scenarios.count { |sc| (sc['steps'] || []).all? { |s| s.dig('result','status') == 'passed' } }
               total = scenarios.length
               status = passed == total && total > 0 ? '✅' : '❌'
-              File.write('/tmp/badge_status.txt', "#{status} **#{passed}/#{total}** cucumber scenarios")
-            RUBY
-          else
-            echo "❌ **0/0** cucumber scenarios" > /tmp/badge_status.txt
-          fi
-        shell: bash
+            else
+              status = '❌'
+              passed = 0
+              total = 0
+            end
+
+            # Build badge block with marker delimiters
+            run_url = "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            artifact_url = "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}#artifacts"
+            badge_block = "<!-- cukes-badge-start -->\n#{status} **#{passed}/#{total}** scenarios — [run summary](#{run_url}) — [report](#{artifact_url})\n<!-- cukes-badge-end -->"
+
+            # Get current PR body
+            current_body = `gh pr view ${{ github.event.pull_request.number }} --json body --jq '.body'`.strip
+
+            # Check if badge already exists
+            if current_body.include?('<!-- cukes-badge-start -->')
+              # Replace existing badge
+              new_body = current_body.sub(/<!-- cukes-badge-start -->.*?<!-- cukes-badge-end -->/m, badge_block)
+            else
+              # Prepend badge to body
+              new_body = "#{badge_block}\n\n#{current_body}"
+            end
+
+            # Write body to temp file
+            File.write('/tmp/pr_body.txt', new_body)
+          RUBY
+
+          gh pr edit ${{ github.event.pull_request.number }} --body-file /tmp/pr_body.txt
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
 
       - name: Fail if tests failed
