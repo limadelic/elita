@@ -441,7 +441,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: lint-badge
-          path: site/${{ github.ref_name }}
+          path: site
 
       - name: Download branch cukes HTML
         uses: actions/download-artifact@v4
@@ -459,11 +459,14 @@ jobs:
           curl -sf https://limadelic.github.io/elita/cukes.html -o site/cukes.html || true
 
       - name: Push to gh-pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd site
           git init
           git config user.email "github-actions@github.com"
           git config user.name "GitHub Actions"
+          git config http.https://github.com/.extraheader "AUTHORIZATION: basic $(echo -n x-access-token:$GITHUB_TOKEN | base64)"
           git add .
           git commit -m "Deploy from ${{ github.ref_name }} at ${{ github.sha }}" || exit 0
-          git push -f https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:gh-pages
+          git push -f https://github.com/${{ github.repository }}.git HEAD:gh-pages
