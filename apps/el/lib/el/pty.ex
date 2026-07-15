@@ -8,21 +8,22 @@ defmodule El.Pty do
   import El.Pty.Init, only: [call: 1]
   import El.Pty.Size, only: [default: 0]
   import El.Pty.Dispatch, only: [info: 2, call: 2, cast: 2]
+  import GenServer, only: [start_link: 3]
 
   def boot(name, cmd, opts \\ []) do
-    GenServer.start_link(__MODULE__, {cmd, opts}, name: name)
+    start_link(__MODULE__, {cmd, opts}, name: name)
   end
 
   def inject(name, message) do
-    GenServer.cast(name, {:inject, message})
+    cast(name, {:inject, message})
   end
 
   def watch(name, pid) do
-    GenServer.call(name, {:tap, pid})
+    call(name, {:tap, pid})
   end
 
   def unwatch(name, pid) do
-    GenServer.cast(name, {:untap, pid})
+    cast(name, {:untap, pid})
   end
 
   def launch(name, opts \\ []) do

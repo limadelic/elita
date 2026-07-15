@@ -1,12 +1,13 @@
 defmodule Agent.Harness do
   @moduledoc "Routes ask/tell messages to agents based on registration kind."
-  import Agent.Session, only: [ask: 2, cast: 2]
+  import Agent.Session, only: [ask: 2, forward: 2]
   import Agent.Remote, only: [find: 1]
   import Elita, only: [request: 2, dispatch: 2]
   import Registry, only: [lookup: 2]
   import String, only: [to_atom: 1, downcase: 1]
   import :global, only: [whereis_name: 1]
   import Enum, only: [find_value: 3]
+  import Node, only: [list: 0]
 
   def dispatch(recipient, message, :ask) do
     recipient |> locate() |> ask!(recipient, message)
@@ -32,7 +33,7 @@ defmodule Agent.Harness do
   defp local(:undefined), do: :undefined
   defp local(found), do: found |> wrap()
 
-  defp remote(:undefined, atom, _), do: Node.list() |> search(atom)
+  defp remote(:undefined, atom, _), do: list() |> search(atom)
   defp remote(found, _, _), do: found
 
   defp search(nodes, atom), do: find_value(nodes, :undefined, &fetch(&1, atom)) |> wrap()
@@ -77,7 +78,7 @@ defmodule Agent.Harness do
 
   defp tell!([{pid, %{kind: kind}}], _recipient, message)
        when kind in [:headless, :puppet] do
-    cast(pid, message)
+    forward(pid, message)
   end
 
   defp tell!([], recipient, _message), do: "unknown: #{recipient}"

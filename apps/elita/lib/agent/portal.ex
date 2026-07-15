@@ -3,6 +3,7 @@ defmodule Agent.Portal do
   import Agent.Watch, only: [start: 2]
   import Log, only: [ask: 3, answer: 2]
   import String, only: [trim: 1]
+  import Process, only: [whereis: 1]
 
   def response(agent, question) do
     ask("user", "el.#{agent}", question)
@@ -30,6 +31,6 @@ defmodule Agent.Portal do
   defp log(agent, reply), do: answer(agent, trim(reply))
 
   defp locate do
-    Process.whereis(:puppet)
+    whereis(:puppet)
   end
 end

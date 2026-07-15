@@ -5,6 +5,7 @@ defmodule El.Puppet.Answer do
   import System, only: [monotonic_time: 1]
   import String, only: [trim: 1]
   import Map, only: [merge: 2]
+  import Process, only: [whereis: 1]
 
   def reply(pty, sender, message) do
     watch(pty, self())
@@ -55,7 +56,7 @@ defmodule El.Puppet.Answer do
     _ -> nil
   end
 
-  defp lookup(_name), do: Process.whereis(:puppet)
+  defp lookup(_name), do: whereis(:puppet)
 
   defp build(pty, message, now) do
     base(pty, message) |> timing(now)

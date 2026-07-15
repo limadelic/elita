@@ -4,6 +4,7 @@ defmodule Agent.Watch do
   import System, only: [monotonic_time: 1]
   import Agent.Jsonl, only: [find: 3]
   import Agent.Puppet, only: [cwd: 0]
+  import Process, only: [sleep: 1]
 
   def start(agent, question, folder \\ nil) do
     spawn(fn -> init(agent, question, folder) end)
@@ -58,7 +59,7 @@ defmodule Agent.Watch do
   end
 
   defp wait(agent, question, folder, start, pos) do
-    Process.sleep(100)
+    sleep(100)
     loop({agent, question, folder, start, pos})
   end
 

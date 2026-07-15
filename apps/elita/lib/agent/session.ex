@@ -3,7 +3,7 @@ defmodule Agent.Session do
 
   import Agent.Spawn, only: [run: 2]
   import Agent.Watch, only: [start: 3]
-  import GenServer, only: [start_link: 3, call: 3]
+  import GenServer, only: [start_link: 3, call: 3, cast: 2]
   import Keyword, only: [fetch!: 2, get: 3]
   import Map, only: [put: 3]
   import String, only: [downcase: 1, trim: 1]
@@ -27,7 +27,7 @@ defmodule Agent.Session do
   end
 
   def ask(pid, message), do: call(pid, {:ask, message}, :infinity)
-  def cast(pid, message), do: GenServer.cast(pid, {:cast, message})
+  def forward(pid, message), do: cast(pid, {:cast, message})
   def fetch(pid), do: call(pid, :fetch, :infinity)
 
   @impl true

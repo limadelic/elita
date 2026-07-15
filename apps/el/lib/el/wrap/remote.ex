@@ -8,6 +8,7 @@ defmodule El.Wrap.Remote do
   import System, only: [monotonic_time: 1]
   import El.Wrap.Reply, only: [handle: 2, fix: 2, prepare: 2, inject: 4]
   import Map, only: [merge: 2]
+  import Task, only: [async: 1, await: 2, shutdown: 2]
 
   def deliver(name, message, sender) do
     invoke(name, message, sender)
@@ -44,7 +45,7 @@ defmodule El.Wrap.Remote do
   end
 
   defp spawn(pty, sender) do
-    Task.async(fn -> collect(build(pty, sender, monotonic_time(:millisecond))) end)
+    async(fn -> collect(build(pty, sender, monotonic_time(:millisecond))) end)
   end
 
   defp reap(task, pty) do
@@ -60,7 +61,7 @@ defmodule El.Wrap.Remote do
   end
 
   defp guard(task) do
-    Task.await(task, 90_000)
+    await(task, 90_000)
   rescue
     _ ->
       timed(task)
@@ -69,12 +70,12 @@ defmodule El.Wrap.Remote do
   defp fault({:timeout, _}, task), do: timed(task)
 
   defp fault(_, task) do
-    Task.shutdown(task, 1)
+    shutdown(task, 1)
     :forward
   end
 
   defp timed(task) do
-    Task.shutdown(task, 1)
+    shutdown(task, 1)
     :forward
   end
 

@@ -5,7 +5,8 @@ defmodule El.Pty.Init do
   import El.Pty.State, only: [initial: 4, config: 2]
   import El.Pty.Boot, only: [launch: 3]
   import El.Pty.Watch, only: [start: 1]
-  import Process, except: [alias: 1, info: 1]
+  import Process, only: [info: 2, flag: 2]
+  import System, only: [get_env: 2]
 
   def call(cfg) do
     size = cfg[:get_size].()
@@ -19,8 +20,8 @@ defmodule El.Pty.Init do
   end
 
   defp snap do
-    n = Process.info(self(), :registered_name) |> elem(1)
-    p = "#{System.get_env("HOME", "~")}/.elita/sessions/#{n}.raw"
+    n = info(self(), :registered_name) |> elem(1)
+    p = "#{get_env("HOME", "~")}/.elita/sessions/#{n}.raw"
     safely(fn -> p |> to_charlist() |> :file.open([:write, :binary]) |> elem(1) end, nil)
   end
 

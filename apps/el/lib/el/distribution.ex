@@ -1,11 +1,13 @@
 defmodule El.Distribution do
   import Application, only: [ensure_all_started: 1]
   import Process, only: [sleep: 1]
-  import Node, only: [connect: 1]
+  import Node, only: [connect: 1, alive?: 0]
   import El.Distribution.Helpers
   import El.Run, only: [address: 0, suffix: 0]
 
-  defdelegate start(name \\ :default, opts \\ []), to: El.Boot
+  def start(name \\ :default, opts \\ []) do
+    El.Boot.go(name, opts)
+  end
 
   def bind(_name) do
     :ok
@@ -23,7 +25,7 @@ defmodule El.Distribution do
 
   defp loop(name, tries) when tries > 0 do
     attach(name)
-    go(name, tries, locate(name), Node.alive?())
+    go(name, tries, locate(name), alive?())
   end
 
   defp loop(_name, 0), do: nil

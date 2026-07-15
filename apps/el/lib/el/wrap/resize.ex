@@ -1,13 +1,14 @@
 defmodule El.Wrap.Resize do
   @moduledoc false
   import El.Commands.Size, only: [size: 0]
+  import Process, only: [sleep: 1]
 
   def watch(pid) do
     spawn(fn -> poll(pid) end)
   end
 
   defp poll(pid) do
-    Process.sleep(500)
+    sleep(500)
     size = size()
     notify(pid, size)
     poll(pid)

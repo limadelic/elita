@@ -9,6 +9,7 @@ defmodule El.Puppet do
   import El.Puppet.Answer, only: [reply: 3]
   import El.Puppet.Parse, only: [envelope: 1]
   import GenServer, only: [call: 3, cast: 2, start_link: 3]
+  import Process, only: [register: 2]
 
   def ask(pid, message) do
     call(pid, {:ask, message}, :infinity)
@@ -22,10 +23,10 @@ defmodule El.Puppet do
     setup()
     name = fetch!(opts, :name)
     pty = fetch!(opts, :pty)
-    register(name, pty)
+    enlist(name, pty)
   end
 
-  defp register(name, pty) do
+  defp enlist(name, pty) do
     via = {:via, Registry, {ElitaRegistry, name, %{kind: :puppet}}}
     {:ok, pid} = start_link(__MODULE__, pty, name: via)
     notify(name, pid)
@@ -33,7 +34,7 @@ defmodule El.Puppet do
   end
 
   defp notify(_name, pid) do
-    Process.register(pid, :puppet)
+    register(pid, :puppet)
   end
 
   def init(pty) do
