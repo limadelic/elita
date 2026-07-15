@@ -13,6 +13,7 @@ defmodule El.Commands.Claude do
   import El.Distribution, only: [bind: 1]
   import El.Puppet, only: [open: 1]
   import Agent, only: [start: 2]
+  import Task, only: [start: 1]
   import El.Cmd, only: [build: 0]
 
   def claude(name \\ :default) do
@@ -47,7 +48,7 @@ defmodule El.Commands.Claude do
   end
 
   defp go(name, deps) do
-    Task.start(fn -> distribute(name, deps) end)
+    start(fn -> distribute(name, deps) end)
     boot(to_atom(name), deps)
   rescue
     e -> write("boot error during claude setup: #{inspect(e)}\n")
@@ -78,10 +79,8 @@ defmodule El.Commands.Claude do
     install(name)
     hold(pid)
   end
-
   defp hold(pid) when is_pid(pid), do: wait(pid)
   defp hold(_), do: :ok
-
   defp opts(buf, cmd) do
     input = fn chunk -> encode(buf, chunk) end
     [cmd: cmd, get_size: &size/0, input: input, resize: &watch/1]

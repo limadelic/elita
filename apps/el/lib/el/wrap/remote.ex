@@ -43,11 +43,9 @@ defmodule El.Wrap.Remote do
     watch(pty, self())
     spawn(pty, sender) |> reap(pty)
   end
-
   defp spawn(pty, sender) do
     async(fn -> collect(build(pty, sender, monotonic_time(:millisecond))) end)
   end
-
   defp reap(task, pty) do
     result = await(task)
     unwatch(pty, self())
