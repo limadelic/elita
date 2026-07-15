@@ -12,7 +12,8 @@ defmodule Tester do
       setup_all do
         {:ok, _} = Tape.Writer.start_link(nil)
 
-        cassette = __MODULE__
+        cassette =
+          __MODULE__
           |> Module.split()
           |> List.last()
           |> String.replace_suffix("Test", "")
@@ -58,6 +59,7 @@ defmodule Tester do
     answer = ask(name, query)
 
     assert is_binary(answer), "Expected binary answer, got: #{inspect(answer)}"
+
     assert String.contains?(downcase(answer), downcase(expected)),
            "Expected '#{answer}' to contain '#{expected}'"
   end
