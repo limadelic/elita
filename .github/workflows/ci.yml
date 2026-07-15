@@ -89,9 +89,11 @@ jobs:
 
       - name: Generate lint badge
         run: |
-          mkdir -p site
+          branch="${GITHUB_REF#refs/heads/}"
+          mkdir -p "site/$branch"
           ruby << 'RUBY'
             require 'json'
+            branch = ENV['BRANCH']
             if File.exist?('/tmp/credo.json')
               credo = JSON.parse(File.read('/tmp/credo.json'))
               issue_count = credo['issues'].length
@@ -107,16 +109,20 @@ jobs:
               color: color,
               labelColor: '173647'
             }
-            File.write('site/lint.json', JSON.generate(badge))
+            File.write("site/#{branch}/lint.json", JSON.generate(badge))
           RUBY
+        env:
+          BRANCH: ${{ github.ref_name }}
         if: always()
         continue-on-error: true
 
       - name: Generate credo report
         run: |
-          mkdir -p site
+          branch="${GITHUB_REF#refs/heads/}"
+          mkdir -p "site/$branch"
           ruby << 'RUBY'
             require 'json'
+            branch = ENV['BRANCH']
             html = <<~HTML
               <!DOCTYPE html>
               <html lang="en">
@@ -160,8 +166,10 @@ jobs:
             end
 
             html << "</body>\n</html>"
-            File.write('site/credo.html', html)
+            File.write("site/#{branch}/credo.html", html)
           RUBY
+        env:
+          BRANCH: ${{ github.ref_name }}
         if: always()
 
       - name: Upload lint badge artifact
@@ -259,18 +267,17 @@ jobs:
         id: cukes
         run: |
           mkdir -p reports
-          TAPE=replay bundle exec cucumber --profile default --format html --out reports/cucumber.html --format json --out reports/cucumber.json --publish 2>&1 | tee /tmp/cucumber_output.log
-          # Extract and save the published report URL, strip ANSI codes
-          REPORT_URL=$(grep -oP 'https://reports.cucumber.io/reports/[^\s]+' /tmp/cucumber_output.log | head -1 | sed 's/\x1b\[[0-9;]*m//g')
-          echo "report_url=${REPORT_URL}" >> "$GITHUB_OUTPUT"
+          TAPE=replay bundle exec cucumber --profile default --format html --out reports/cucumber.html --format json --out reports/cucumber.json --publish-quiet
         env:
           MIX_ENV: test
 
       - name: Compute badge counts
         run: |
-          mkdir -p site
+          branch="${GITHUB_REF#refs/heads/}"
+          mkdir -p "site/$branch"
           ruby << 'RUBY'
             require 'json'
+            branch = ENV['BRANCH']
             if File.exist?('reports/cucumber.json')
               data = JSON.parse(File.read('reports/cucumber.json'))
               scenarios = data.flat_map { |f| f['elements'] || [] }
@@ -291,9 +298,11 @@ jobs:
               logoColor: 'white',
               labelColor: '173647'
             }
-            File.write('site/cukes.json', JSON.generate(badge))
-            File.write('site/cukes_badge.txt', "cukes: #{message}")
+            File.write("site/#{branch}/cukes.json", JSON.generate(badge))
+            File.write("site/#{branch}/cukes_badge.txt", "cukes: #{message}")
           RUBY
+        env:
+          BRANCH: ${{ github.ref_name }}
         if: always()
 
       - name: Append summary
@@ -331,33 +340,22 @@ jobs:
           ruby << 'RUBY'
             require 'json'
             require 'open3'
+            require 'uri'
 
-            run_id = ENV['RUN_ID']
-            repo = ENV['REPOSITORY']
-            report_url = ENV['REPORT_URL'] || ""
+            branch = ENV['BRANCH']
+            pages_url = "https://limadelic.github.io/elita"
 
-            # Credo badge (from lint job)
-            credo_url = "https://github.com/#{repo}/actions/runs/#{run_id}"
-            credo_badge = "[![credo](https://img.shields.io/badge/credo-clean-brightgreen)](#{credo_url})"
+            # Credo badge with endpoint URL
+            credo_json_url = "#{pages_url}/#{branch}/lint.json"
+            credo_json_encoded = URI.encode_www_form_component(credo_json_url)
+            credo_report_url = "#{pages_url}/#{branch}/credo.html"
+            credo_badge = "[![credo](https://img.shields.io/endpoint?url=#{credo_json_encoded})](#{credo_report_url})"
 
-            # Cukes badge with cucumber logo
-            cukes_badge_content = ""
-            if File.exist?('reports/cucumber.json')
-              data = JSON.parse(File.read('reports/cucumber.json'))
-              scenarios = data.flat_map { |f| f['elements'] || [] }
-              passed = scenarios.count { |sc| (sc['steps'] || []).all? { |s| s.dig('result','status') == 'passed' } }
-              total = scenarios.length
-              color = passed == total && total > 0 ? 'brightgreen' : 'red'
-              message = "#{passed}%2F#{total}"
-              # Use published report URL if available, otherwise link to run
-              cukes_url = report_url.empty? ? "https://github.com/#{repo}/actions/runs/#{run_id}" : report_url
-              cukes_badge_url = "https://img.shields.io/badge/cukes-#{message}-#{color}?logo=cucumber&logoColor=white"
-              cukes_badge = "[![cukes](#{cukes_badge_url})](#{cukes_url})"
-            else
-              cukes_url = report_url.empty? ? "https://github.com/#{repo}/actions/runs/#{run_id}" : report_url
-              cukes_badge_url = "https://img.shields.io/badge/cukes-0%2F0-red?logo=cucumber&logoColor=white"
-              cukes_badge = "[![cukes](#{cukes_badge_url})](#{cukes_url})"
-            end
+            # Cukes badge with endpoint URL
+            cukes_json_url = "#{pages_url}/#{branch}/cukes.json"
+            cukes_json_encoded = URI.encode_www_form_component(cukes_json_url)
+            cukes_report_url = "#{pages_url}/#{branch}/cukes.html"
+            cukes_badge = "[![cukes](https://img.shields.io/endpoint?url=#{cukes_json_encoded})](#{cukes_report_url})"
 
             badge_content = "#{credo_badge} #{cukes_badge}"
 
@@ -383,9 +381,7 @@ jobs:
           RUBY
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
-          RUN_ID: ${{ github.run_id }}
-          REPOSITORY: ${{ github.repository }}
-          REPORT_URL: ${{ steps.cukes.outputs.report_url }}
+          BRANCH: ${{ github.ref_name }}
           GH_TOKEN: ${{ github.token }}
         continue-on-error: true
 
@@ -399,28 +395,25 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     needs: [lint, test, cukes, lock]
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
 
     steps:
-      - name: Download lint badge
+      - name: Create site directory
+        run: mkdir -p site
+
+      - name: Download branch artifacts
         uses: actions/download-artifact@v4
         with:
           name: lint-badge
-          path: site
+          path: site/${{ github.ref_name }}
 
-      - name: Download cukes report
-        uses: actions/download-artifact@v4
-        with:
-          name: cukes-report-${{ github.run_id }}
-          path: site/cukes-latest
-        if: github.ref == 'refs/heads/main'
-        continue-on-error: true
-
-      - name: Preserve cucumber files
+      - name: Preserve main files
+        if: github.ref != 'refs/heads/main'
         run: |
+          mkdir -p site
           curl -sf https://limadelic.github.io/elita/cukes.json -o site/cukes.json || true
           curl -sf https://limadelic.github.io/elita/index.html -o site/index.html || true
-          curl -sf https://limadelic.github.io/elita/index.html -o site/cukes.html || true
+          curl -sf https://limadelic.github.io/elita/cukes.html -o site/cukes.html || true
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
