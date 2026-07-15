@@ -5,7 +5,8 @@ defmodule El.Commands.Claude do
   import String, only: [to_atom: 1]
   import System, only: [get_env: 2]
   import El.Commands.Size, only: [size: 0]
-  import File, only: [write!: 2, cwd!: 0]
+  import El.Commands.Reset, only: [cleanup: 0]
+  import File, only: [cwd!: 0]
   import Path, only: [basename: 1]
   import El.Wrap.Resize, only: [watch: 1]
   import El.Wrap.Input, only: [open: 2, encode: 2]
@@ -18,30 +19,14 @@ defmodule El.Commands.Claude do
   def claude(name \\ :default) do
     claude(name, deps())
   end
+
   defp deps, do: [distribution_start: &start/1, cmd: &cmd/1, launch: &launch/2]
+
   def claude(name, deps) when is_list(deps) do
     write("boot: #{name}\n")
     go(resolve(name), deps)
   after
     cleanup()
-  end
-
-  defp cleanup do
-    write("shutdown\n")
-    reset()
-    stty()
-  end
-
-  defp reset do
-    write!("/dev/tty", "\e[?1000l\e[?1002l\e[?1003l\e[?1006l\e[?2004l\e[?1049l\e[?25h")
-  rescue
-    _ -> :ok
-  end
-
-  defp stty do
-    cmd(~c"stty sane < /dev/tty")
-  rescue
-    _ -> :ok
   end
 
   defp go(name, deps) do

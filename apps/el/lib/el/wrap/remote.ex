@@ -7,8 +7,9 @@ defmodule El.Wrap.Remote do
   import El.Puppet.Collect, only: [collect: 1]
   import System, only: [monotonic_time: 1]
   import El.Wrap.Reply, only: [handle: 2, fix: 2, prepare: 2, inject: 4]
+  import El.Wrap.Guard, only: [await: 1]
   import Map, only: [merge: 2]
-  import Task, only: [async: 1, await: 2, shutdown: 2]
+  import Task, only: [async: 1]
 
   def deliver(name, message, sender) do
     invoke(name, message, sender)
@@ -20,7 +21,9 @@ defmodule El.Wrap.Remote do
     target = prepare(name, sender) |> wait()
     query(target, name, message, sender)
   end
+
   defp query(nil, _, _, _), do: :forward
+
   defp query(target, name, message, sender) do
     fetch(target, name, message, sender)
   catch
@@ -50,31 +53,6 @@ defmodule El.Wrap.Remote do
     result = await(task)
     unwatch(pty, self())
     result
-  end
-
-  defp await(task) do
-    guard(task)
-  catch
-    :exit, error -> fault(error, task)
-  end
-
-  defp guard(task) do
-    await(task, 90_000)
-  rescue
-    _ ->
-      timed(task)
-  end
-
-  defp fault({:timeout, _}, task), do: timed(task)
-
-  defp fault(_, task) do
-    shutdown(task, 1)
-    :forward
-  end
-
-  defp timed(task) do
-    shutdown(task, 1)
-    :forward
   end
 
   defp build(pty, _sender, now) do
