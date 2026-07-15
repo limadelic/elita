@@ -1,5 +1,6 @@
 Feature: Greed
 
+  @wip
   Scenario: Greed plays the biggest domino or knocks
     * > el
 

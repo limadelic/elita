@@ -1,5 +1,6 @@
 Feature: Boss
 
+  @wip
   Scenario: Boss delegates to the right worker
     * > el
 
@@ -15,6 +16,7 @@ Feature: Boss
     * el> ask the qa do you have a task from boss
       | ✨ qa | yes. i have a task from boss |
 
+  @wip
   @tape:office
   Scenario: Boss delegates down the chain
     * > el

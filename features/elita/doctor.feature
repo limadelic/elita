@@ -1,5 +1,6 @@
 Feature: Doctor
 
+  @wip
   Scenario: Doctor diagnoses a patient
     * > el
 

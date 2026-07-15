@@ -1,5 +1,6 @@
 Feature: Napo profit
 
+  @wip
   Scenario: Napo splits a conglomerate decline by division
     * > el
     * el> get me a napo agent

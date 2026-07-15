@@ -204,12 +204,157 @@ jobs:
         env:
           MIX_ENV: test
 
+  cukes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+
+      - uses: erlef/setup-beam@v1
+        with:
+          elixir-version: '1.18'
+          otp-version: '28'
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            deps
+            _build
+          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-
+
+      - name: Get dependencies
+        run: mix deps.get
+
+      - name: Build el escript
+        run: |
+          cd apps/el
+          mix escript.build
+
+      - name: Prepare elita
+        run: |
+          cd apps/elita
+          mix compile
+
+      - name: Run Cucumber tests
+        id: cukes
+        run: |
+          mkdir -p reports
+          TAPE=replay bundle exec cucumber --profile default --format html --out reports/cucumber.html --format json --out reports/cucumber.json --publish-quiet
+        env:
+          MIX_ENV: test
+        continue-on-error: true
+
+      - name: Compute badge counts
+        run: |
+          mkdir -p site
+          ruby << 'RUBY'
+            require 'json'
+            if File.exist?('reports/cucumber.json')
+              data = JSON.parse(File.read('reports/cucumber.json'))
+              scenarios = data.flat_map { |f| f['elements'] || [] }
+              passed = scenarios.count { |sc| (sc['steps'] || []).all? { |s| s.dig('result','status') == 'passed' } }
+              total = scenarios.length
+              color = passed == total && total > 0 ? '23D96C' : 'e05d44'
+              message = "#{passed}/#{total}"
+            else
+              color = 'e05d44'
+              message = '0/0'
+            end
+            badge = {
+              schemaVersion: 1,
+              label: 'cukes',
+              message: message,
+              color: color,
+              namedLogo: 'cucumber',
+              logoColor: 'white',
+              labelColor: '173647'
+            }
+            File.write('site/cukes.json', JSON.generate(badge))
+            File.write('site/cukes_badge.txt', "cukes: #{message}")
+          RUBY
+        if: always()
+
+      - name: Append summary
+        run: |
+          ruby << 'RUBY'
+            require 'json'
+            if File.exist?('reports/cucumber.json')
+              data = JSON.parse(File.read('reports/cucumber.json'))
+              scenarios = data.flat_map { |f| f['elements'] || [] }
+              passed = scenarios.count { |sc| (sc['steps'] || []).all? { |s| s.dig('result','status') == 'passed' } }
+              total = scenarios.length
+              summary = "## Cucumber Tests\n\n✅ **#{passed}/#{total}** scenarios passed\n\n"
+              data.each do |feature|
+                feature_name = File.basename(feature['uri'])
+                feature_scenarios = feature['elements'] || []
+                feature_passed = feature_scenarios.count { |sc| (sc['steps'] || []).all? { |s| s.dig('result','status') == 'passed' } }
+                summary << "- #{feature_name}: #{feature_passed}/#{feature_scenarios.length}\n"
+              end
+              File.write(ENV['GITHUB_STEP_SUMMARY'], summary)
+            end
+          RUBY
+        if: always()
+        shell: bash
+
+      - name: Upload Cucumber report artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cukes-report-${{ github.ref_name }}
+          path: reports/
+
+      - name: Update PR with badge
+        if: github.event_name == 'pull_request' && always()
+        run: |
+          ruby << 'RUBY'
+            require 'json'
+            if File.exist?('reports/cucumber.json')
+              data = JSON.parse(File.read('reports/cucumber.json'))
+              scenarios = data.flat_map { |f| f['elements'] || [] }
+              passed = scenarios.count { |sc| (sc['steps'] || []).all? { |s| s.dig('result','status') == 'passed' } }
+              total = scenarios.length
+              status = passed == total && total > 0 ? '✅' : '❌'
+              badge_line = "#{status} **#{passed}/#{total}** cucumber scenarios — [run summary](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) — [report artifact](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}#artifacts)"
+            else
+              badge_line = "❌ **0/0** cucumber scenarios"
+            end
+
+            body = `gh pr view ${{ github.event.pull_request.number }} --json body --jq '.body'`
+            marker_start = '<!-- cukes-badge start -->'
+            marker_end = '<!-- cukes-badge end -->'
+
+            if body.include?(marker_start)
+              # Update existing badge
+              body = body.sub(/#{Regexp.escape(marker_start)}.*?#{Regexp.escape(marker_end)}/m, "#{marker_start}\n#{badge_line}\n#{marker_end}")
+            else
+              # Add new badge at top
+              body = "#{marker_start}\n#{badge_line}\n#{marker_end}\n\n#{body}"
+            end
+
+            File.write('/tmp/pr_body.txt', body)
+          RUBY
+          gh pr edit ${{ github.event.pull_request.number }} --body-file /tmp/pr_body.txt
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Fail if tests failed
+        if: steps.cukes.outcome == 'failure'
+        run: exit 1
+
   deploy:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    needs: [lint, test, lock]
+    needs: [lint, test, cukes, lock]
     if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
 
     steps:
@@ -218,6 +363,14 @@ jobs:
         with:
           name: lint-badge
           path: site
+
+      - name: Download cukes report
+        uses: actions/download-artifact@v4
+        with:
+          name: cukes-report-main
+          path: site/cukes-latest
+        if: github.ref == 'refs/heads/main'
+        continue-on-error: true
 
       - name: Preserve cucumber files
         run: |
