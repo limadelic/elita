@@ -55,16 +55,7 @@ defmodule Tester do
     request(to_string(name), query)
   end
 
-  def verify(name, expected, query) do
-    answer = ask(name, query)
-
-    assert is_binary(answer), "Expected binary answer, got: #{inspect(answer)}"
-
-    assert String.contains?(downcase(answer), downcase(expected)),
-           "Expected '#{answer}' to contain '#{expected}'"
-  end
-
-  def judge(result, expectation) do
+  def verify(expectation, result) do
     prompt = "Result: #{result}\n\nExpectation: #{expectation}"
     verdict = ask(:judge, prompt)
 

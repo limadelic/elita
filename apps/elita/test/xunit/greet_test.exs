@@ -6,8 +6,8 @@ defmodule GreetTest do
     spawn(:greet)
     spawn(:judge)
 
-    judge(ask(:greet, "hello"), "asks who they are talking to")
-    judge(ask(:greet, "Mike"), "greets Mike by name")
-    judge(ask(:greet, "how are you?"), "identifies as Greeeet")
+    verify("asks who they are talking to", ask(:greet, "hello"))
+    verify("greets Mike by name", ask(:greet, "Mike"))
+    verify("identifies as Greeeet", ask(:greet, "how are you?"))
   end
 end
