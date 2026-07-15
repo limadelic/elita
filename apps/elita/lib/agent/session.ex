@@ -8,7 +8,6 @@ defmodule Agent.Session do
   import Map, only: [put: 3]
   import String, only: [downcase: 1, trim: 1]
   import Tape, only: [handle: 3]
-  import Tools.Sys.Ask, only: [answer: 2]
 
   def start_link(opts) do
     folder = fetch!(opts, :folder)
@@ -85,5 +84,11 @@ defmodule Agent.Session do
   def handle_cast({:cast, message}, state) do
     state.runner.(message, state.folder)
     {:noreply, state}
+  end
+
+  defp answer(agent, text) do
+    :erlang.apply(:"Elixir.Tools.Sys.Ask", :answer, [agent, text])
+  rescue
+    _ -> :ok
   end
 end

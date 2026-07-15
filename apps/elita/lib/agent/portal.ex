@@ -3,7 +3,6 @@ defmodule Agent.Portal do
   import Agent.Watch, only: [start: 2]
   import String, only: [trim: 1]
   import Process, only: [whereis: 1]
-  import Tools.Sys.Ask, only: [answer: 2, query: 3]
 
   def response(agent, question) do
     query("user", "el.#{agent}", question)
@@ -32,5 +31,17 @@ defmodule Agent.Portal do
 
   defp locate do
     whereis(:puppet)
+  end
+
+  defp answer(agent, text) do
+    :erlang.apply(:"Elixir.Tools.Sys.Ask", :answer, [agent, text])
+  rescue
+    _ -> :ok
+  end
+
+  defp query(role, context, question) do
+    :erlang.apply(:"Elixir.Tools.Sys.Ask", :query, [role, context, question])
+  rescue
+    _ -> :ok
   end
 end

@@ -1,5 +1,4 @@
 defmodule Agent.Watch do
-  import Tools.Sys.Ask, only: [answer: 2]
   import String, only: [trim: 1]
   import System, only: [monotonic_time: 1]
   import Agent.Jsonl, only: [find: 3]
@@ -82,5 +81,11 @@ defmodule Agent.Watch do
   defp oops(k, r) do
     log("WATCHER CATCH #{k} #{inspect(r)}\n")
     :wait
+  end
+
+  defp answer(agent, text) do
+    :erlang.apply(:"Elixir.Tools.Sys.Ask", :answer, [agent, text])
+  rescue
+    _ -> :ok
   end
 end
