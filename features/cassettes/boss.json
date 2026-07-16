@@ -1484,8 +1484,130 @@
       "agent": "qa",
       "messages": [
         {
+          "content": "[from boss] We need more tests. Get on it and expand our test coverage.",
+          "role": "user"
+        }
+      ],
+      "n": 3
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "I understand! I'm the boss of a software development team with a dev and a qa on my team.\n\nWhat would you like me to delegate to them? Just let me know what tasks need to be done, and I'll assign them accordingly.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "boss",
+      "messages": [
+        {
+          "content": "you manage a software development team with a dev and a qa",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01HBnRSsiXSEzZu2LGcyiPDo",
+        "input": {
+          "message": "We need more tests created. Please prioritize creating additional test cases to improve our coverage.",
+          "recipient": "qa"
+        },
+        "name": "tell",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "boss",
+      "messages": [
+        {
+          "content": "we need more test created",
+          "role": "user"
+        }
+      ],
+      "n": 3
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "done",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "boss",
+      "messages": [
+        {
+          "content": [
+            {
+              "content": "sent",
+              "tool_use_id": "toolu_01HBnRSsiXSEzZu2LGcyiPDo",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "n": 5
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Yes, I received that task. You've asked me to prioritize creating additional test cases to improve our test coverage.\n\nI understand the priority and I'm ready to get started on it. To make sure I create the most valuable tests, it would help to know:\n\n- Which areas or features should I focus on first?\n- Are there specific modules or components with gaps in coverage?\n- Do you have any particular testing standards or frameworks you want me to follow?\n- What's the target coverage percentage you're aiming for?\n\nI'll track this work and keep you updated on progress.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "qa",
+      "messages": [
+        {
+          "content": "[from boss] We need more tests created. Please prioritize creating additional test cases to improve our coverage.",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Yes, I did. Boss told me to stay in character as a team member named dev and to remember any work assignments given to me in this conversation. I'm also supposed to answer questions about whether I received tasks by saying yes or no and then adding factual details about what happened. I shouldn't explain what I am or how I work—just stick to my role.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "dev",
+      "messages": [
+        {
+          "content": "did you receive a task from boss?",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Yes, I received a task from boss. They asked me to prioritize creating additional test cases to improve our test coverage.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "qa",
+      "messages": [
+        {
           "role": "user",
-          "content": "[from boss] We need more tests. Get on it and expand our test coverage."
+          "content": "did you receive a task from boss?"
         }
       ],
       "n": 3
