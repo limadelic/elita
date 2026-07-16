@@ -5,11 +5,23 @@ require 'fileutils'
 
 module Report
   def self.run
-    branch = ENV['BRANCH']&.sub(%r{/merge$}, '')
-    FileUtils.mkdir_p("site/#{branch}") if branch
+    prefix = compute_prefix
+    FileUtils.mkdir_p("site/#{prefix}")
     html = build_html
-    File.write("site/#{branch}/report.html", html) if branch
+    File.write("site/#{prefix}/report.html", html)
     write_summary if summary_ready?
+  end
+
+  def self.compute_prefix
+    branch = ENV['BRANCH']&.sub(%r{/merge$}, '')
+    return '' if branch == 'main' || branch == 'test'
+
+    repo = ENV['GITHUB_REPOSITORY']
+    cmd = %Q{gh api repos/#{repo}/pulls -q '.[] | select(.head.ref=="#{branch}") | .number' | head -1}
+    pr_num = `#{cmd}`.strip
+    return "#{pr_num}/" unless pr_num.empty?
+
+    "#{branch}/"
   end
 
   def self.build_html

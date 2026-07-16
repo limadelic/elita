@@ -88,7 +88,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: lint-badge
-          path: site/${{ steps.prefix.outputs.prefix }}
+          path: /tmp/lint-art
         continue-on-error: true
 
       - name: Download cukes HTML artifact
@@ -96,6 +96,16 @@ jobs:
         with:
           name: cukes-html-${{ steps.branch_slug.outputs.slug }}
           path: /tmp/cukes-art
+        continue-on-error: true
+
+      - name: Copy lint files flat into prefix
+        run: |
+          PREFIX="${{ steps.prefix.outputs.prefix }}"
+          if [ -d "/tmp/lint-art" ] && [ -n "$PREFIX" ]; then
+            mkdir -p "site/$PREFIX"
+            find /tmp/lint-art -type f -exec cp {} site/$PREFIX/ \;
+            rm -rf /tmp/lint-art
+          fi
         continue-on-error: true
 
       - name: Copy cukes files flat into prefix
