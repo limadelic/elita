@@ -24,7 +24,9 @@ jobs:
           BRANCH="${{ github.ref_name }}"
           PR_NUM=""
           if [ "$BRANCH" != "main" ] && [ "$BRANCH" != "test" ]; then
-            PR_NUM=$(gh pr list --head "$BRANCH" --json number --jq '.[0].number' 2>/dev/null || true)
+            echo "DEBUG: Resolving PR for branch $BRANCH" >&2
+            PR_NUM=$(gh pr list --head "$BRANCH" --json number --jq '.[0].number' 2>&1 || true)
+            echo "DEBUG: PR result: PR_NUM=$PR_NUM" >&2
           fi
           echo "number=$PR_NUM" >> "$GITHUB_OUTPUT"
         env:
@@ -41,6 +43,7 @@ jobs:
           elif [ "$BRANCH" != "main" ]; then
             PREFIX="$BRANCH/"
           fi
+          echo "DEBUG: BRANCH=$BRANCH PR_NUM=$PR_NUM PREFIX=$PREFIX" >&2
           echo "prefix=$PREFIX" >> "$GITHUB_OUTPUT"
           echo "target=$PREFIX" >> "$GITHUB_OUTPUT"
 
