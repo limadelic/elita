@@ -3,47 +3,12 @@ defmodule BossTest do
   @moduletag :xunit
 
   setup context do
-    reset_tape_writer()
-    cassette = cassette_for(context.test)
-    System.put_env("CASSETTE", cassette)
-    kill_all()
-    spawn_agents()
-    on_exit(fn -> kill_all() end)
+    System.put_env("CASSETTE", cassette_for(context.test))
     :ok
-  end
-
-  defp reset_tape_writer do
-    Tape.Writer.acquire(fn -> :ok end)
   end
 
   defp cassette_for(:"test boss delegates task to worker"), do: "boss"
   defp cassette_for(:"test michael asks dwight to photocopy sales reports"), do: "boss2"
-
-  defp kill_all do
-    kill(:boss)
-    kill(:dev)
-    kill(:qa)
-    kill(:michael)
-    kill(:dwight)
-    kill(:pam)
-    kill(:jim)
-  end
-
-  defp spawn_agents do
-    :ok
-  end
-
-  defp kill(name) do
-    name
-    |> to_string()
-    |> String.downcase()
-    |> then(&{:via, Registry, {ElitaRegistry, &1, %{kind: :native, folder: nil}}})
-    |> GenServer.whereis()
-    |> case do
-      nil -> :ok
-      pid -> GenServer.stop(pid)
-    end
-  end
 
   test "boss delegates task to worker" do
     spawn(:boss)

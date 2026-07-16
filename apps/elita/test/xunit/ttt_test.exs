@@ -3,39 +3,13 @@ defmodule TttTest do
   @moduletag :xunit
 
   setup context do
-    reset_tape_writer()
-    cassette = cassette_for(context.test)
-    System.put_env("CASSETTE", cassette)
-    kill(:alice)
-    kill(:bob)
+    System.put_env("CASSETTE", cassette_for(context.test))
     spawn(:alice, :ttt)
     spawn(:bob, :ttt)
-
-    on_exit(fn ->
-      kill(:alice)
-      kill(:bob)
-    end)
-
     :ok
   end
 
-  defp reset_tape_writer do
-    Tape.Writer.acquire(fn -> :ok end)
-  end
-
   defp cassette_for(:"test ttt agents play to finish"), do: "ttt"
-
-  defp kill(name) do
-    name
-    |> to_string()
-    |> String.downcase()
-    |> then(&{:via, Registry, {ElitaRegistry, &1, %{kind: :native, folder: nil}}})
-    |> GenServer.whereis()
-    |> case do
-      nil -> :ok
-      pid -> GenServer.stop(pid)
-    end
-  end
 
   test "ttt agents play to finish" do
     tell(:bob, "alice is gonna be your opponent, wait for her move")

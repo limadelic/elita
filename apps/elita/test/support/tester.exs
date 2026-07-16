@@ -1,5 +1,6 @@
 defmodule Tester do
   import ExUnit.Assertions
+  import ExUnit.Callbacks
   import Elita, only: [request: 2, dispatch: 2]
 
   defmacro __using__(_opts) do
@@ -24,10 +25,6 @@ defmodule Tester do
         System.put_env("CASSETTE", cassette)
         System.put_env("CASSETTE_DIR", Path.expand("../../../../features/cassettes", __DIR__))
 
-        on_exit(fn ->
-          System.delete_env("CASSETTE")
-        end)
-
         :ok
       end
     end
@@ -38,7 +35,10 @@ defmodule Tester do
   end
 
   def spawn(name, configs) do
+    kill(name)
+    reset_tape_writer()
     Elita.spawn(to_string(name), to_configs(configs))
+    on_exit(fn -> kill(name) end)
   end
 
   defp to_configs(configs) when is_list(configs) do
@@ -47,6 +47,21 @@ defmodule Tester do
 
   defp to_configs(config) do
     [to_string(config)]
+  end
+
+  defp kill(name) do
+    normalized = name |> to_string() |> String.downcase()
+
+    {:via, Registry, {ElitaRegistry, normalized, %{kind: :native, folder: nil}}}
+    |> GenServer.whereis()
+    |> case do
+      nil -> :ok
+      pid -> GenServer.stop(pid)
+    end
+  end
+
+  defp reset_tape_writer do
+    Tape.Writer.acquire(fn -> :ok end)
   end
 
   def tell(name, msg) do

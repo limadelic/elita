@@ -3,34 +3,14 @@ defmodule TodoTest do
   @moduletag :xunit
 
   setup context do
-    reset_tape_writer()
-    cassette = cassette_for(context.test)
-    System.put_env("CASSETTE", cassette)
-    kill(:todo)
+    System.put_env("CASSETTE", cassette_for(context.test))
     spawn(:todo)
-    on_exit(fn -> kill(:todo) end)
     :ok
-  end
-
-  defp reset_tape_writer do
-    Tape.Writer.acquire(fn -> :ok end)
   end
 
   defp cassette_for(:"test todo marks tasks complete"), do: "todomark"
   defp cassette_for(:"test todo remembers tasks"), do: "todoremember"
   defp cassette_for(:"test todo handles multiple tasks"), do: "todomultiple"
-
-  defp kill(name) do
-    name
-    |> to_string()
-    |> String.downcase()
-    |> then(&{:via, Registry, {ElitaRegistry, &1, %{kind: :native, folder: nil}}})
-    |> GenServer.whereis()
-    |> case do
-      nil -> :ok
-      pid -> GenServer.stop(pid)
-    end
-  end
 
   test "todo marks tasks complete" do
     tell(:todo, "Add call dentist to my list")
