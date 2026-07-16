@@ -18,4 +18,5 @@ node_modules/
 /tmp/
 reports/
 !reports/.gitkeep
-site/greet/
+site/*
+!site/lint.json
