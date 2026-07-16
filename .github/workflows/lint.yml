@@ -43,6 +43,10 @@ jobs:
         id: lint
         run: mix lint
 
+      - name: Generate credo JSON
+        run: mix credo list --format json > /tmp/credo.json
+        if: always()
+
       - name: Check Gherkin formatting
         run: |
           npm install
