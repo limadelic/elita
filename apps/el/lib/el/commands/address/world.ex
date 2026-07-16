@@ -37,16 +37,27 @@ defmodule El.Commands.Address.World do
   defp pick(false, _path), do: nil
 
   defp scan(%{path: folder}) do
-    ls!(folder) |> filter(&ends_with?(&1, ".exs")) |> map(&file(folder, &1))
+    read(folder) |> filter(&agent?/1) |> map(&file(folder, &1))
+  end
+
+  defp read(folder) do
+    ls!(folder)
   rescue
     _ -> []
   end
 
+  defp agent?(<< _::binary, ".exs" >>), do: true
+  defp agent?(<< _::binary, ".md" >>), do: true
+  defp agent?(_), do: false
+
   defp file(folder, filename) do
-    name = trim_trailing(filename, ".exs")
+    n = name(filename)
     path = join(folder, filename)
-    %{name: name, path: folder, file_path: path, kind: :file}
+    %{name: n, path: folder, file_path: path, kind: :file}
   end
+
+  defp name(<< text::binary, ".md" >>), do: text
+  defp name(<< text::binary, ".exs" >>), do: text
 
   defp peers do
     [node() | list()]
