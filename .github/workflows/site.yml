@@ -22,11 +22,11 @@ jobs:
         id: pr
         run: |
           BRANCH="${{ github.ref_name }}"
+          REPO="${{ github.repository }}"
           PR_NUM=""
           if [ "$BRANCH" != "main" ] && [ "$BRANCH" != "test" ]; then
-            PR_NUM=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-              "https://api.github.com/repos/${{ github.repository }}/pulls?head=$BRANCH&state=open" | \
-              jq -r '.[0].number // ""' 2>/dev/null || true)
+            RESP=$(curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/repos/$REPO/pulls?head=$BRANCH&state=open")
+            PR_NUM=$(echo "$RESP" | jq -r '.[0].number // ""' 2>/dev/null || true)
           fi
           echo "number=$PR_NUM" >> "$GITHUB_OUTPUT"
         env:
