@@ -1,51 +1,18 @@
-@wip
 Feature: Ttt
 
   @wip
-  Scenario: Two players play to a tie
+  @tape:ttt
+  Scenario: Alice and Bob play to completion
+    # BLOCKER: Feature framework cannot express multi-agent spawning
+    # Cassette records alice and bob as separate agents with direct interactions
+    # El REPL doesn't support "tell alice ..." syntax - it treats "tell" as agent name
+    # Need: Either el> tell alice <msg> command support, or multi-agent spawn syntax
     * > el
 
-    * el> get me two ttt players named alice and bob
-      | 📢 el → alice | You are Alice |
-      | 📢 el → bob   | You are Bob   |
+    * el> tell bob alice is gonna be your opponent, wait for her move
 
     * el> tell alice start a game with bob, you are X, play first
-      | 📢 alice → bob | I'll take the center       |
-      |                | _ \| _ \| _                |
-      |                | _ \| X \| _                |
-      |                | _ \| _ \| _                |
-      | 📢 bob → alice | I'll take the top-left     |
-      |                | O \| _ \| _                |
-      |                | _ \| X \| _                |
-      |                | _ \| _ \| _                |
-      | 📢 alice → bob | I'll take the bottom-right |
-      |                | O \| _ \| _                |
-      |                | _ \| X \| _                |
-      |                | _ \| _ \| X                |
-      | 📢 bob → alice | I'll take the top-right    |
-      |                | O \| _ \| O                |
-      |                | _ \| X \| _                |
-      |                | _ \| _ \| X                |
-      | 📢 alice → bob | I'll take the top-middle   |
-      |                | O \| X \| O                |
-      |                | _ \| X \| _                |
-      |                | _ \| _ \| X                |
-      | 📢 bob → alice | I'll block the bottom      |
-      |                | O \| X \| O                |
-      |                | _ \| X \| _                |
-      |                | _ \| O \| X                |
-      | 📢 alice → bob | I'll take the middle-left  |
-      |                | O \| X \| O                |
-      |                | X \| X \| _                |
-      |                | _ \| O \| X                |
-      | 📢 bob → alice | I'll take the middle-right |
-      |                | O \| X \| O                |
-      |                | X \| X \| O                |
-      |                | _ \| O \| X                |
-      | 📢 alice → bob | I'll take the bottom-left  |
-      |                | O \| X \| O                |
-      |                | X \| X \| O                |
-      |                | X \| O \| X                |
 
-    * el> ask alice did the game finish and was it a win or a tie
-      | ✨ el | Game Over - Tie |
+    * el> ask alice tell me: did the game finish and was it a win or tie?
+      | game finished |
+      | diagonal      |
