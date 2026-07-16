@@ -15,17 +15,23 @@ defmodule Tester do
           {:error, {:already_started, _}} -> :ok
         end
 
-        cassette =
-          __MODULE__
-          |> Module.split()
-          |> List.last()
-          |> String.replace_suffix("Test", "")
-          |> String.downcase()
-
-        System.put_env("CASSETTE", cassette)
         System.put_env("CASSETTE_DIR", Path.expand("../../../../features/cassettes", __DIR__))
 
         :ok
+      end
+
+      setup context do
+        cassette = context[:cassette] || default_cassette()
+        System.put_env("CASSETTE", cassette)
+        :ok
+      end
+
+      defp default_cassette do
+        __MODULE__
+        |> Module.split()
+        |> List.last()
+        |> String.replace_suffix("Test", "")
+        |> String.downcase()
       end
     end
   end

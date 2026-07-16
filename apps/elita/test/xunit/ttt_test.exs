@@ -2,14 +2,11 @@ defmodule TttTest do
   use Tester
   @moduletag :xunit
 
-  setup context do
-    System.put_env("CASSETTE", cassette_for(context.test))
+  setup _context do
     spawn(:alice, :ttt)
     spawn(:bob, :ttt)
     :ok
   end
-
-  defp cassette_for(:"test ttt agents play to finish"), do: "ttt"
 
   test "ttt agents play to finish" do
     tell(:bob, "alice is gonna be your opponent, wait for her move")

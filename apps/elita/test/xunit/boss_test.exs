@@ -2,14 +2,7 @@ defmodule BossTest do
   use Tester
   @moduletag :xunit
 
-  setup context do
-    System.put_env("CASSETTE", cassette_for(context.test))
-    :ok
-  end
-
-  defp cassette_for(:"test boss delegates task to worker"), do: "boss"
-  defp cassette_for(:"test michael asks dwight to photocopy sales reports"), do: "boss2"
-
+  @tag cassette: "boss"
   test "boss delegates task to worker" do
     spawn(:boss)
     spawn(:dev, :worker)
@@ -20,6 +13,7 @@ defmodule BossTest do
     verify("yes", ask(:qa, "did you receive a task from boss?"))
   end
 
+  @tag cassette: "boss2"
   test "michael asks dwight to photocopy sales reports" do
     spawn(:michael, :boss)
     spawn(:dwight, :boss)
