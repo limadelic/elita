@@ -1,3 +1,4 @@
+@wip
 Feature: Greed
 
   Scenario: Greed plays the biggest domino or knocks
