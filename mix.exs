@@ -45,8 +45,23 @@ defmodule Elita.Umbrella do
 
   defp run_cukes(args) do
     extra = args |> Enum.join(" ") |> String.trim()
-    cmd = "bundle exec cucumber --profile default" <> (if extra != "", do: " #{extra}", else: "")
+    files = untagged_features()
+    files_arg = if Enum.any?(files), do: " #{Enum.join(files, " ")}", else: ""
+    cmd = "bundle exec cucumber --profile default" <> files_arg <> (if extra != "", do: " #{extra}", else: "")
     check(cmd)
+  end
+
+  defp untagged_features do
+    "features/**/*.feature"
+    |> Path.wildcard()
+    |> Enum.filter(fn f -> !has_tag?(f, "@wip") and !has_tag?(f, "@live") end)
+    |> Enum.sort()
+  end
+
+  defp has_tag?(file, tag) do
+    file
+    |> File.read!()
+    |> String.contains?(tag)
   end
 
   defp run_build(_) do
