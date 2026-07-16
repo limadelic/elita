@@ -60,6 +60,14 @@ jobs:
           cp reports/cucumber.html site/report.html
         if: always()
 
+      - name: Generate cucumber badge
+        run: ops/ci/badges.rb
+        env:
+          BRANCH: ${{ github.ref_name }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
+        if: always()
+
       - name: Upload Cucumber report artifact
         uses: actions/upload-artifact@v4
         if: always()
