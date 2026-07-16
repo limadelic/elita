@@ -5,7 +5,7 @@
         "caller": {
           "type": "direct"
         },
-        "id": "toolu_01ArTm2WKWLKvxFheE4TSdve",
+        "id": "toolu_01TnG95N1QMKMgCZU3WnGRs3",
         "input": {
           "key": "todo"
         },
@@ -14,25 +14,27 @@
       }
     ],
     "q": {
+      "agent": "todo",
       "messages": [
         {
-          "content": "Add call dentist to my list",
-          "role": "user"
+          "role": "user",
+          "content": "Add call dentist to my list"
         }
-      ]
+      ],
+      "n": 1
     }
   },
   {
     "a": [
       {
-        "text": "Now I'll add the task to your list:",
+        "text": "Now I'll add \"call dentist\" to your task list:",
         "type": "text"
       },
       {
         "caller": {
           "type": "direct"
         },
-        "id": "toolu_01H6VT1iSDYUsruNtWR2Ldcp",
+        "id": "toolu_018iNzyXY8GjV9QZLGyW78ST",
         "input": {
           "key": "todo",
           "value": "call dentist"
@@ -42,71 +44,40 @@
       }
     ],
     "q": {
+      "agent": "todo",
       "messages": [
         {
+          "role": "user",
           "content": [
             {
-              "id": "toolu_01ArTm2WKWLKvxFheE4TSdve",
-              "input": {
-                "key": "todo"
-              },
-              "name": "get",
-              "type": "tool_use"
+              "content": "(empty)"
             }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": [
-            {
-              "content": "(empty)",
-              "tool_use_id": "toolu_01ArTm2WKWLKvxFheE4TSdve",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
+          ]
         }
-      ]
+      ],
+      "n": 3
     }
   },
   {
     "a": [
       {
-        "text": "Done! I've added \"call dentist\" to your todo list.",
+        "text": "Done! I've added \"call dentist\" to your task list.",
         "type": "text"
       }
     ],
     "q": {
+      "agent": "todo",
       "messages": [
         {
+          "role": "user",
           "content": [
             {
-              "text": "Now I'll add the task to your list:",
-              "type": "text"
-            },
-            {
-              "id": "toolu_01H6VT1iSDYUsruNtWR2Ldcp",
-              "input": {
-                "key": "todo",
-                "value": "call dentist"
-              },
-              "name": "set",
-              "type": "tool_use"
+              "content": "stored"
             }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": [
-            {
-              "content": "stored",
-              "tool_use_id": "toolu_01H6VT1iSDYUsruNtWR2Ldcp",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
+          ]
         }
-      ]
+      ],
+      "n": 5
     }
   },
   {
@@ -115,7 +86,7 @@
         "caller": {
           "type": "direct"
         },
-        "id": "toolu_01LxBdGGm8f2iJANisKzgTTp",
+        "id": "toolu_015WFJFBBcghxPym2BCKmf2c",
         "input": {
           "key": "todo"
         },
@@ -124,21 +95,14 @@
       }
     ],
     "q": {
+      "agent": "todo",
       "messages": [
         {
-          "content": [
-            {
-              "text": "Done! I've added \"call dentist\" to your todo list.",
-              "type": "text"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": "Mark call dentist as done",
-          "role": "user"
+          "role": "user",
+          "content": "Mark call dentist as done"
         }
-      ]
+      ],
+      "n": 7
     }
   },
   {
@@ -151,81 +115,50 @@
         "caller": {
           "type": "direct"
         },
-        "id": "toolu_014aUr5GfvhsZh7rM4VpYmXR",
+        "id": "toolu_01TTqn13TJn6vy9H4XMrdZaj",
         "input": {
           "key": "todo",
-          "value": ""
+          "value": "(empty)"
         },
         "name": "set",
         "type": "tool_use"
       }
     ],
     "q": {
+      "agent": "todo",
       "messages": [
         {
+          "role": "user",
           "content": [
             {
-              "id": "toolu_01LxBdGGm8f2iJANisKzgTTp",
-              "input": {
-                "key": "todo"
-              },
-              "name": "get",
-              "type": "tool_use"
+              "content": "call dentist"
             }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": [
-            {
-              "content": "call dentist",
-              "tool_use_id": "toolu_01LxBdGGm8f2iJANisKzgTTp",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
+          ]
         }
-      ]
+      ],
+      "n": 9
     }
   },
   {
     "a": [
       {
-        "text": "Done! I've marked \"call dentist\" as complete and removed it from your todo list.",
+        "text": "Done! I've marked \"call dentist\" as complete and removed it from your list.",
         "type": "text"
       }
     ],
     "q": {
+      "agent": "todo",
       "messages": [
         {
+          "role": "user",
           "content": [
             {
-              "text": "Now I'll remove it from your list:",
-              "type": "text"
-            },
-            {
-              "id": "toolu_014aUr5GfvhsZh7rM4VpYmXR",
-              "input": {
-                "key": "todo",
-                "value": ""
-              },
-              "name": "set",
-              "type": "tool_use"
+              "content": "stored"
             }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": [
-            {
-              "content": "stored",
-              "tool_use_id": "toolu_014aUr5GfvhsZh7rM4VpYmXR",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
+          ]
         }
-      ]
+      ],
+      "n": 11
     }
   },
   {
@@ -234,7 +167,7 @@
         "caller": {
           "type": "direct"
         },
-        "id": "toolu_01PdUdbceqnRGx4b9ChuBSt3",
+        "id": "toolu_01Crs5NDUMMxZZ5SsMN8mpRi",
         "input": {
           "key": "todo"
         },
@@ -243,69 +176,45 @@
       }
     ],
     "q": {
+      "agent": "todo",
       "messages": [
         {
-          "content": [
-            {
-              "text": "Done! I've marked \"call dentist\" as complete and removed it from your todo list.",
-              "type": "text"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": "What do I need to do?",
-          "role": "user"
+          "role": "user",
+          "content": "What do I need to do?"
         }
-      ]
+      ],
+      "n": 13
     }
   },
   {
     "a": [
       {
-        "text": "You have no tasks on your todo list. You're all caught up!",
+        "text": "You have no tasks on your list! You're all caught up. 🎉",
         "type": "text"
       }
     ],
     "q": {
+      "agent": "todo",
       "messages": [
         {
+          "role": "user",
           "content": [
             {
-              "id": "toolu_01PdUdbceqnRGx4b9ChuBSt3",
-              "input": {
-                "key": "todo"
-              },
-              "name": "get",
-              "type": "tool_use"
+              "content": "(empty)"
             }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": [
-            {
-              "content": "",
-              "tool_use_id": "toolu_01PdUdbceqnRGx4b9ChuBSt3",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
+          ]
         }
-      ]
+      ],
+      "n": 15
     }
   },
   {
     "a": [
-      {
-        "text": "I'll add \"buy groceries\" to your task list.",
-        "type": "text"
-      },
       {
         "caller": {
           "type": "direct"
         },
-        "id": "toolu_01EQTuVchM2PA3XHgXc1LJG6",
+        "id": "toolu_01KkMMUgGysTB7KGD9NHcMLt",
         "input": {
           "key": "todo"
         },
@@ -314,12 +223,14 @@
       }
     ],
     "q": {
+      "agent": "todo",
       "messages": [
         {
-          "content": "Add buy groceries to my list",
-          "role": "user"
+          "role": "user",
+          "content": "Add buy groceries to my list"
         }
-      ]
+      ],
+      "n": 1
     }
   },
   {
@@ -332,7 +243,7 @@
         "caller": {
           "type": "direct"
         },
-        "id": "toolu_01X9ydcp2UafxEbP7NuQcSZX",
+        "id": "toolu_014pqou9J8YYpBLAQKNfvcs8",
         "input": {
           "key": "todo",
           "value": "buy groceries"
@@ -342,35 +253,18 @@
       }
     ],
     "q": {
+      "agent": "todo",
       "messages": [
         {
+          "role": "user",
           "content": [
             {
-              "text": "I'll add \"buy groceries\" to your task list.",
-              "type": "text"
-            },
-            {
-              "id": "toolu_01EQTuVchM2PA3XHgXc1LJG6",
-              "input": {
-                "key": "todo"
-              },
-              "name": "get",
-              "type": "tool_use"
+              "content": "(empty)"
             }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": [
-            {
-              "content": "(empty)",
-              "tool_use_id": "toolu_01EQTuVchM2PA3XHgXc1LJG6",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
+          ]
         }
-      ]
+      ],
+      "n": 3
     }
   },
   {
@@ -381,36 +275,18 @@
       }
     ],
     "q": {
+      "agent": "todo",
       "messages": [
         {
+          "role": "user",
           "content": [
             {
-              "text": "Now I'll add the task to your list:",
-              "type": "text"
-            },
-            {
-              "id": "toolu_01X9ydcp2UafxEbP7NuQcSZX",
-              "input": {
-                "key": "todo",
-                "value": "buy groceries"
-              },
-              "name": "set",
-              "type": "tool_use"
+              "content": "stored"
             }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": [
-            {
-              "content": "stored",
-              "tool_use_id": "toolu_01X9ydcp2UafxEbP7NuQcSZX",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
+          ]
         }
-      ]
+      ],
+      "n": 5
     }
   },
   {
@@ -419,7 +295,7 @@
         "caller": {
           "type": "direct"
         },
-        "id": "toolu_01QE8eTTMX76SHT7SxPujiL1",
+        "id": "toolu_012PGCvm5MXFPVJomGQJQS1C",
         "input": {
           "key": "todo"
         },
@@ -428,56 +304,36 @@
       }
     ],
     "q": {
+      "agent": "todo",
       "messages": [
         {
-          "content": [
-            {
-              "text": "Done! I've added \"buy groceries\" to your task list.",
-              "type": "text"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": "What do I need to do?",
-          "role": "user"
+          "role": "user",
+          "content": "What do I need to do?"
         }
-      ]
+      ],
+      "n": 7
     }
   },
   {
     "a": [
       {
-        "text": "You have 1 task on your list:\n\n1. buy groceries",
+        "text": "You have 1 task on your list:\n- buy groceries",
         "type": "text"
       }
     ],
     "q": {
+      "agent": "todo",
       "messages": [
         {
+          "role": "user",
           "content": [
             {
-              "id": "toolu_01QE8eTTMX76SHT7SxPujiL1",
-              "input": {
-                "key": "todo"
-              },
-              "name": "get",
-              "type": "tool_use"
+              "content": "buy groceries"
             }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": [
-            {
-              "content": "buy groceries",
-              "tool_use_id": "toolu_01QE8eTTMX76SHT7SxPujiL1",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
+          ]
         }
-      ]
+      ],
+      "n": 9
     }
   },
   {
@@ -486,7 +342,7 @@
         "caller": {
           "type": "direct"
         },
-        "id": "toolu_01G9usT2hVRDxxrGkHfXW2VM",
+        "id": "toolu_01VzcNHVFybJTA3RpFSxV5JM",
         "input": {
           "key": "todo"
         },
@@ -495,25 +351,27 @@
       }
     ],
     "q": {
+      "agent": "todo",
       "messages": [
         {
-          "content": "Add buy milk to my list",
-          "role": "user"
+          "role": "user",
+          "content": "Add buy milk to my list"
         }
-      ]
+      ],
+      "n": 1
     }
   },
   {
     "a": [
       {
-        "text": "Now I'll add \"buy milk\" to your todo list:",
+        "text": "Now I'll add \"buy milk\" to your list:",
         "type": "text"
       },
       {
         "caller": {
           "type": "direct"
         },
-        "id": "toolu_01Pp4U6mn9hj96JWNz3TCakB",
+        "id": "toolu_01SQX832sqptiW4TqMq88ehZ",
         "input": {
           "key": "todo",
           "value": "buy milk"
@@ -523,31 +381,18 @@
       }
     ],
     "q": {
+      "agent": "todo",
       "messages": [
         {
+          "role": "user",
           "content": [
             {
-              "id": "toolu_01G9usT2hVRDxxrGkHfXW2VM",
-              "input": {
-                "key": "todo"
-              },
-              "name": "get",
-              "type": "tool_use"
+              "content": "(empty)"
             }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": [
-            {
-              "content": "(empty)",
-              "tool_use_id": "toolu_01G9usT2hVRDxxrGkHfXW2VM",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
+          ]
         }
-      ]
+      ],
+      "n": 3
     }
   },
   {
@@ -558,36 +403,18 @@
       }
     ],
     "q": {
+      "agent": "todo",
       "messages": [
         {
+          "role": "user",
           "content": [
             {
-              "text": "Now I'll add \"buy milk\" to your todo list:",
-              "type": "text"
-            },
-            {
-              "id": "toolu_01Pp4U6mn9hj96JWNz3TCakB",
-              "input": {
-                "key": "todo",
-                "value": "buy milk"
-              },
-              "name": "set",
-              "type": "tool_use"
+              "content": "stored"
             }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": [
-            {
-              "content": "stored",
-              "tool_use_id": "toolu_01Pp4U6mn9hj96JWNz3TCakB",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
+          ]
         }
-      ]
+      ],
+      "n": 5
     }
   },
   {
@@ -596,7 +423,7 @@
         "caller": {
           "type": "direct"
         },
-        "id": "toolu_01Eb7aSsTijXUztaJJA2mZaZ",
+        "id": "toolu_015PtE97n97MCef1ZZ7ijhMx",
         "input": {
           "key": "todo"
         },
@@ -605,21 +432,14 @@
       }
     ],
     "q": {
+      "agent": "todo",
       "messages": [
         {
-          "content": [
-            {
-              "text": "Done! I've added \"buy milk\" to your todo list.",
-              "type": "text"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": "Add walk dog to my list",
-          "role": "user"
+          "role": "user",
+          "content": "Add walk dog to my list"
         }
-      ]
+      ],
+      "n": 7
     }
   },
   {
@@ -632,7 +452,7 @@
         "caller": {
           "type": "direct"
         },
-        "id": "toolu_01Qhv8A8V121Zy4WxxV7fmjq",
+        "id": "toolu_01SCG4UCjDd5aQ4RJGdfcgF6",
         "input": {
           "key": "todo",
           "value": "buy milk\nwalk dog"
@@ -642,31 +462,18 @@
       }
     ],
     "q": {
+      "agent": "todo",
       "messages": [
         {
+          "role": "user",
           "content": [
             {
-              "id": "toolu_01Eb7aSsTijXUztaJJA2mZaZ",
-              "input": {
-                "key": "todo"
-              },
-              "name": "get",
-              "type": "tool_use"
+              "content": "buy milk"
             }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": [
-            {
-              "content": "buy milk",
-              "tool_use_id": "toolu_01Eb7aSsTijXUztaJJA2mZaZ",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
+          ]
         }
-      ]
+      ],
+      "n": 9
     }
   },
   {
@@ -677,36 +484,18 @@
       }
     ],
     "q": {
+      "agent": "todo",
       "messages": [
         {
+          "role": "user",
           "content": [
             {
-              "text": "Now I'll add \"walk dog\" to your list:",
-              "type": "text"
-            },
-            {
-              "id": "toolu_01Qhv8A8V121Zy4WxxV7fmjq",
-              "input": {
-                "key": "todo",
-                "value": "buy milk\nwalk dog"
-              },
-              "name": "set",
-              "type": "tool_use"
+              "content": "stored"
             }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": [
-            {
-              "content": "stored",
-              "tool_use_id": "toolu_01Qhv8A8V121Zy4WxxV7fmjq",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
+          ]
         }
-      ]
+      ],
+      "n": 11
     }
   },
   {
@@ -715,7 +504,7 @@
         "caller": {
           "type": "direct"
         },
-        "id": "toolu_01MDPYisz1quLRuG4KjNZZkN",
+        "id": "toolu_01QdPsJqCqzLs6bnWt8CgpYu",
         "input": {
           "key": "todo"
         },
@@ -724,21 +513,14 @@
       }
     ],
     "q": {
+      "agent": "todo",
       "messages": [
         {
-          "content": [
-            {
-              "text": "Done! I've added \"walk dog\" to your todo list.",
-              "type": "text"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": "What do I need to do?",
-          "role": "user"
+          "role": "user",
+          "content": "What do I need to do?"
         }
-      ]
+      ],
+      "n": 13
     }
   },
   {
@@ -749,31 +531,18 @@
       }
     ],
     "q": {
+      "agent": "todo",
       "messages": [
         {
+          "role": "user",
           "content": [
             {
-              "id": "toolu_01MDPYisz1quLRuG4KjNZZkN",
-              "input": {
-                "key": "todo"
-              },
-              "name": "get",
-              "type": "tool_use"
+              "content": "buy milk\nwalk dog"
             }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": [
-            {
-              "content": "buy milk\nwalk dog",
-              "tool_use_id": "toolu_01MDPYisz1quLRuG4KjNZZkN",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
+          ]
         }
-      ]
+      ],
+      "n": 15
     }
   },
   {
@@ -782,7 +551,7 @@
         "caller": {
           "type": "direct"
         },
-        "id": "toolu_0188qoP25F2BbmwEytR7caJb",
+        "id": "toolu_01VUTDQ78yoLxSqq3yJ24ZVT",
         "input": {
           "key": "todo"
         },
@@ -791,21 +560,14 @@
       }
     ],
     "q": {
+      "agent": "todo",
       "messages": [
         {
-          "content": [
-            {
-              "text": "Here are your tasks:\n1. buy milk\n2. walk dog",
-              "type": "text"
-            }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": "What do I need to do?",
-          "role": "user"
+          "role": "user",
+          "content": "What do I need to do?"
         }
-      ]
+      ],
+      "n": 17
     }
   },
   {
@@ -816,31 +578,18 @@
       }
     ],
     "q": {
+      "agent": "todo",
       "messages": [
         {
+          "role": "user",
           "content": [
             {
-              "id": "toolu_0188qoP25F2BbmwEytR7caJb",
-              "input": {
-                "key": "todo"
-              },
-              "name": "get",
-              "type": "tool_use"
+              "content": "buy milk\nwalk dog"
             }
-          ],
-          "role": "assistant"
-        },
-        {
-          "content": [
-            {
-              "content": "buy milk\nwalk dog",
-              "tool_use_id": "toolu_0188qoP25F2BbmwEytR7caJb",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
+          ]
         }
-      ]
+      ],
+      "n": 19
     }
   }
 ]
