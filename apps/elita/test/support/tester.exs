@@ -9,7 +9,10 @@ defmodule Tester do
       import Tester
 
       setup_all do
-        {:ok, _} = Tape.Writer.start_link(nil)
+        case Tape.Writer.start_link(nil) do
+          {:ok, _} -> :ok
+          {:error, {:already_started, _}} -> :ok
+        end
 
         cassette =
           __MODULE__
