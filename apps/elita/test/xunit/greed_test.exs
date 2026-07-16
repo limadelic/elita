@@ -1,7 +1,6 @@
 defmodule GreedTest do
   use Tester
   @moduletag :xunit
-  @moduletag :skip
 
   setup context do
     reset_tape_writer()
