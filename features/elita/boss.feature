@@ -1,20 +1,14 @@
-@wip
 Feature: Boss
 
-  Scenario: Boss delegates to the right worker
-    * > el
+  @tape:boss
+  Scenario: Boss manages and delegates
+    * > el boss
 
-    * el> have a boss manage a dev and a qa
+    * boss> you manage a software development team with a dev and a qa
+      | I'm ready to manage the team |
 
-    * el> tell the boss we need more tests
-      | 📢 el → boss | we need more tests |
-      | 📢 boss → qa | we need more tests |
-
-    * el> ask the dev do you have a task from boss
-      | ✨ dev | no, i don't have a task from boss |
-
-    * el> ask the qa do you have a task from boss
-      | ✨ qa | yes. i have a task from boss |
+    * boss> we need more test created
+      | Done |
 
   @tape:office
   Scenario: Boss delegates down the chain
