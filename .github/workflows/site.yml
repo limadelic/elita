@@ -18,29 +18,23 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Resolve PR number
-        id: pr
+      - name: Compute deployment prefix
+        id: prefix
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           BRANCH="${{ github.ref_name }}"
-          PR_NUM=""
+          PREFIX=""
+
           if [ "$BRANCH" != "main" ] && [ "$BRANCH" != "test" ]; then
             PR_NUM=$(gh api repos/${{ github.repository }}/pulls -q ".[] | select(.head.ref==\"$BRANCH\") | .number" | head -1 || echo "")
+            if [ -n "$PR_NUM" ]; then
+              PREFIX="$PR_NUM/"
+            else
+              PREFIX="$BRANCH/"
+            fi
           fi
-          echo "number=$PR_NUM" >> "$GITHUB_OUTPUT"
 
-      - name: Compute deployment prefix
-        id: prefix
-        run: |
-          BRANCH="${{ github.ref_name }}"
-          PR_NUM="${{ steps.pr.outputs.number }}"
-          PREFIX=""
-          if [ -n "$PR_NUM" ]; then
-            PREFIX="$PR_NUM/"
-          elif [ "$BRANCH" != "main" ]; then
-            PREFIX="$BRANCH/"
-          fi
           echo "prefix=$PREFIX" >> "$GITHUB_OUTPUT"
           echo "target=$PREFIX" >> "$GITHUB_OUTPUT"
 
@@ -53,10 +47,11 @@ jobs:
 
       - name: Create site directory
         run: |
-          mkdir -p site
           PREFIX="${{ steps.prefix.outputs.prefix }}"
           if [ -n "$PREFIX" ]; then
             mkdir -p "site/$PREFIX"
+          else
+            mkdir -p site
           fi
 
       - name: Merge previous github-pages artifact as base
@@ -114,6 +109,8 @@ jobs:
         continue-on-error: true
 
       - name: Seed site from live Pages
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p site
           BASE_URL="https://limadelic.github.io/elita"
@@ -135,14 +132,12 @@ jobs:
             done
           done
 
-          # Seed numeric PR directories (discover from live site)
-          for pr_num in $(seq 1 100); do
-            curl -sfL "$BASE_URL/$pr_num/report.html" -o /dev/null 2>/dev/null && {
-              mkdir -p "site/$pr_num"
-              for file in $FILES; do
-                curl -sfL "$BASE_URL/$pr_num/$file" -o "site/$pr_num/$file" || true
-              done
-            } || true
+          # Seed PR directories from open PRs only
+          gh pr list --state open --json number --jq '.[].number' | while read pr_num; do
+            mkdir -p "site/$pr_num"
+            for file in $FILES; do
+              curl -sfL "$BASE_URL/$pr_num/$file" -o "site/$pr_num/$file" || true
+            done
           done
 
       - name: Setup Pages
