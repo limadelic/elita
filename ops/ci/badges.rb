@@ -5,35 +5,42 @@ require 'fileutils'
 
 module Badges
   def self.run
-    branch = ENV['BRANCH'].sub(%r{/merge$}, '')
-    FileUtils.mkdir_p("site/#{branch}")
-    lint_badges(branch)
-    cukes_badges(branch)
+    prefix = compute_prefix
+    FileUtils.mkdir_p("site/#{prefix}")
+    lint_badges(prefix)
+    cukes_badges(prefix)
   end
 
-  def self.lint_badges(branch)
+  def self.compute_prefix
+    pr_num = ENV['PR_NUMBER']
+    return pr_num if pr_num && pr_num.match?(/^\d+$/)
+
+    ENV['BRANCH'].sub(%r{/merge$}, '')
+  end
+
+  def self.lint_badges(prefix)
     return unless File.exist?('/tmp/credo.json')
 
     credo = JSON.parse(File.read('/tmp/credo.json'))
     issue_count = credo['issues'].length
     color, message = lint_color_message(issue_count)
     json = JSON.generate(badge('credo', message, color))
-    File.write("site/#{branch}/lint.json", json)
+    File.write("site/#{prefix}/lint.json", json)
   end
 
-  def self.cukes_badges(branch)
+  def self.cukes_badges(prefix)
     return unless File.exist?('reports/cucumber.json')
 
     data = JSON.parse(File.read('reports/cucumber.json'))
     scenarios = data.flat_map { |f| f['elements'] || [] }
-    write_cukes_files(branch, scenarios)
+    write_cukes_files(prefix, scenarios)
   end
 
-  def self.write_cukes_files(branch, scenarios)
+  def self.write_cukes_files(prefix, scenarios)
     passed = count_passed(scenarios)
     message, color = cukes_color_message(passed, scenarios.length)
-    File.write("site/#{branch}/cukes.json", JSON.generate(badge('cukes', message, color, 'cucumber')))
-    File.write("site/#{branch}/cukes_badge.txt", "cukes: #{message}")
+    File.write("site/#{prefix}/cukes.json", JSON.generate(badge('cukes', message, color, 'cucumber')))
+    File.write("site/#{prefix}/cukes_badge.txt", "cukes: #{message}")
   end
 
   def self.count_passed(scenarios)

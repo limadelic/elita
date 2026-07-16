@@ -76,6 +76,7 @@ jobs:
       - run: ops/ci/badges.rb
         env:
           BRANCH: ${{ github.ref_name }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         if: always()
 
       - run: ops/ci/report.rb

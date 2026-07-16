@@ -19,15 +19,22 @@ module UpdatePrBadge
     system("gh pr edit #{ENV['PR_NUMBER']} --body-file /tmp/pr_body.txt")
   end
 
-  def self.branch_health_ok?(branch)
-    url = credo_url(branch)
+  def self.branch_health_ok?(_branch)
+    url = pr_credo_url
     status = `curl -s -o /dev/null -w "%{http_code}" '#{url}'`
-    status.strip != '200'
+    status.strip == '200'
   end
 
   def self.credo_url(branch)
     prefix = site_prefix(branch)
     "https://limadelic.github.io/elita/#{prefix}lint.json"
+  end
+
+  def self.pr_credo_url
+    pr_num = ENV['PR_NUMBER']
+    return "https://limadelic.github.io/elita/#{pr_num}/lint.json" if pr_num && pr_num.match?(/^\d+$/)
+
+    ''
   end
 
   def self.build_badges(branch)
