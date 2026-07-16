@@ -215,9 +215,7 @@
         },
         "id": "toolu_01MbeGgTCnLK7kNmJ8Kbb5Qd",
         "input": {
-          "configs": [
-            "actor"
-          ],
+          "configs": ["actor"],
           "name": "actor_v1"
         },
         "name": "spawn",
@@ -515,9 +513,7 @@
         },
         "id": "toolu_018gYQsFGrY8eVXtRqcfRV93",
         "input": {
-          "configs": [
-            "actor"
-          ],
+          "configs": ["actor"],
           "name": "actor_v2"
         },
         "name": "spawn",

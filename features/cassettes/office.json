@@ -7,9 +7,7 @@
         },
         "id": "toolu_017Xa4ce6DegkPpmoW8fc4dr",
         "input": {
-          "configs": [
-            "boss"
-          ],
+          "configs": ["boss"],
           "name": "michael"
         },
         "name": "spawn",
@@ -21,9 +19,7 @@
         },
         "id": "toolu_019mwUbh4dAoXhhmgo7Evtnc",
         "input": {
-          "configs": [
-            "boss"
-          ],
+          "configs": ["boss"],
           "name": "dwight"
         },
         "name": "spawn",
@@ -139,9 +135,7 @@
         },
         "id": "toolu_01TUv1uV862a1wXMaLGxDtxq",
         "input": {
-          "configs": [
-            "worker"
-          ],
+          "configs": ["worker"],
           "name": "pam"
         },
         "name": "spawn",
@@ -153,9 +147,7 @@
         },
         "id": "toolu_0168uz7PtU7jy3k1ceNYSRJ6",
         "input": {
-          "configs": [
-            "worker"
-          ],
+          "configs": ["worker"],
           "name": "jim"
         },
         "name": "spawn",
@@ -641,9 +633,7 @@
         },
         "id": "toolu_01MSccZELc19Z4m3xW2Jfae8",
         "input": {
-          "configs": [
-            "boss"
-          ],
+          "configs": ["boss"],
           "name": "michael"
         },
         "name": "spawn",
@@ -655,9 +645,7 @@
         },
         "id": "toolu_015ztB2kxUbJbMqCNy83YSDT",
         "input": {
-          "configs": [
-            "boss"
-          ],
+          "configs": ["boss"],
           "name": "dwight"
         },
         "name": "spawn",
@@ -755,9 +743,7 @@
         },
         "id": "toolu_01WNs9Y6h9vr4PoZhXoKckEJ",
         "input": {
-          "configs": [
-            "worker"
-          ],
+          "configs": ["worker"],
           "name": "pam"
         },
         "name": "spawn",
@@ -769,9 +755,7 @@
         },
         "id": "toolu_01775ZCr8Sw5Y2QbmyK5tHGE",
         "input": {
-          "configs": [
-            "worker"
-          ],
+          "configs": ["worker"],
           "name": "jim"
         },
         "name": "spawn",
@@ -1105,9 +1089,7 @@
         },
         "id": "toolu_01WXnEfbv5h3c8pULcqnwzV1",
         "input": {
-          "configs": [
-            "boss"
-          ],
+          "configs": ["boss"],
           "name": "michael"
         },
         "name": "spawn",
@@ -1119,9 +1101,7 @@
         },
         "id": "toolu_01H3CyAWCsTacngo4Cy3kc8M",
         "input": {
-          "configs": [
-            "boss"
-          ],
+          "configs": ["boss"],
           "name": "dwight"
         },
         "name": "spawn",
@@ -1219,9 +1199,7 @@
         },
         "id": "toolu_01VWgs4WL8qWTsg8YABoXEE8",
         "input": {
-          "configs": [
-            "worker"
-          ],
+          "configs": ["worker"],
           "name": "pam"
         },
         "name": "spawn",
@@ -1233,9 +1211,7 @@
         },
         "id": "toolu_01XfjYfAqicLjafvqrCft4jy",
         "input": {
-          "configs": [
-            "worker"
-          ],
+          "configs": ["worker"],
           "name": "jim"
         },
         "name": "spawn",
@@ -1515,9 +1491,7 @@
         },
         "id": "toolu_01BEFoHMKY7FbbLcP53WbASf",
         "input": {
-          "configs": [
-            "boss"
-          ],
+          "configs": ["boss"],
           "name": "michael"
         },
         "name": "spawn",
@@ -1529,9 +1503,7 @@
         },
         "id": "toolu_01B6LR3h1ayrSsV7BBg7ayWp",
         "input": {
-          "configs": [
-            "boss"
-          ],
+          "configs": ["boss"],
           "name": "dwight"
         },
         "name": "spawn",
@@ -1629,9 +1601,7 @@
         },
         "id": "toolu_01MfQ9rCL9ZCeN46Y2GPrqMb",
         "input": {
-          "configs": [
-            "worker"
-          ],
+          "configs": ["worker"],
           "name": "pam"
         },
         "name": "spawn",
@@ -1643,9 +1613,7 @@
         },
         "id": "toolu_013yEcgSB1u8d2XCcgdEZBA5",
         "input": {
-          "configs": [
-            "worker"
-          ],
+          "configs": ["worker"],
           "name": "jim"
         },
         "name": "spawn",

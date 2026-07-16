@@ -7,9 +7,7 @@
         },
         "id": "toolu_018Yr291yugmXsJYFyX4j6NY",
         "input": {
-          "configs": [
-            "speck"
-          ],
+          "configs": ["speck"],
           "name": "speck"
         },
         "name": "spawn",
@@ -305,9 +303,7 @@
         },
         "id": "toolu_01SJRr7hhFpMWpoAE24XQ92Y",
         "input": {
-          "configs": [
-            "todo"
-          ],
+          "configs": ["todo"],
           "name": "todo_v1"
         },
         "name": "spawn",
@@ -1025,9 +1021,7 @@
         },
         "id": "toolu_01CYhMPDc84PSyhMYV3FG96s",
         "input": {
-          "configs": [
-            "todo"
-          ],
+          "configs": ["todo"],
           "name": "todo_v2"
         },
         "name": "spawn",

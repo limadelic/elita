@@ -7,9 +7,7 @@
         },
         "id": "toolu_01U6HGSiuiLPwduUMWH8gd3N",
         "input": {
-          "configs": [
-            "coordinator"
-          ],
+          "configs": ["coordinator"],
           "name": "coordinator"
         },
         "name": "spawn",
@@ -89,9 +87,7 @@
         },
         "id": "toolu_01EHCQ3MxrgwFhFoD4AEqrBd",
         "input": {
-          "configs": [
-            "assessor"
-          ],
+          "configs": ["assessor"],
           "name": "assessor_acme"
         },
         "name": "spawn",
@@ -103,9 +99,7 @@
         },
         "id": "toolu_016t9qR4Qtb5rojBUq4p1tLM",
         "input": {
-          "configs": [
-            "assessor"
-          ],
+          "configs": ["assessor"],
           "name": "assessor_globex"
         },
         "name": "spawn",
@@ -117,9 +111,7 @@
         },
         "id": "toolu_014E3aWY9gd2Jw5ifGsspZrZ",
         "input": {
-          "configs": [
-            "assessor"
-          ],
+          "configs": ["assessor"],
           "name": "assessor_initech"
         },
         "name": "spawn",
@@ -311,9 +303,7 @@
         },
         "id": "toolu_01D7giDqYbngvqnZCGCtpjmZ",
         "input": {
-          "configs": [
-            "assessor"
-          ],
+          "configs": ["assessor"],
           "name": "assessor_acme"
         },
         "name": "spawn",
@@ -325,9 +315,7 @@
         },
         "id": "toolu_013pQ6k74sXtesvqF7peQNDe",
         "input": {
-          "configs": [
-            "assessor"
-          ],
+          "configs": ["assessor"],
           "name": "assessor_globex"
         },
         "name": "spawn",
@@ -339,9 +327,7 @@
         },
         "id": "toolu_01Hu4H2vB5ez8raGDhaXM7kw",
         "input": {
-          "configs": [
-            "assessor"
-          ],
+          "configs": ["assessor"],
           "name": "assessor_initech"
         },
         "name": "spawn",
@@ -509,9 +495,7 @@
         },
         "id": "toolu_01RyH7hLgF94PhGtfsCuZxvZ",
         "input": {
-          "configs": [
-            "assessor"
-          ],
+          "configs": ["assessor"],
           "name": "assessor_acme"
         },
         "name": "spawn",
@@ -523,9 +507,7 @@
         },
         "id": "toolu_015RH8Pf1R2XZQrMetffNJBJ",
         "input": {
-          "configs": [
-            "assessor"
-          ],
+          "configs": ["assessor"],
           "name": "assessor_globex"
         },
         "name": "spawn",
@@ -537,9 +519,7 @@
         },
         "id": "toolu_01UfyMi9uVs4QYscBte14uv6",
         "input": {
-          "configs": [
-            "assessor"
-          ],
+          "configs": ["assessor"],
           "name": "assessor_initech"
         },
         "name": "spawn",
@@ -707,9 +687,7 @@
         },
         "id": "toolu_01A5e4z8FHL9bBQ3QR1XdhbM",
         "input": {
-          "configs": [
-            "assessor"
-          ],
+          "configs": ["assessor"],
           "name": "assessor_acme"
         },
         "name": "spawn",
@@ -721,9 +699,7 @@
         },
         "id": "toolu_01RrSJSu1F6U6VtKeEgHDtm5",
         "input": {
-          "configs": [
-            "assessor"
-          ],
+          "configs": ["assessor"],
           "name": "assessor_globex"
         },
         "name": "spawn",
@@ -735,9 +711,7 @@
         },
         "id": "toolu_01XypEYBWrDipQvF9UHKGd4b",
         "input": {
-          "configs": [
-            "assessor"
-          ],
+          "configs": ["assessor"],
           "name": "assessor_initech"
         },
         "name": "spawn",

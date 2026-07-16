@@ -7,9 +7,7 @@
         },
         "id": "toolu_01VQnk2BKLUMcujhD5H56DAu",
         "input": {
-          "configs": [
-            "research"
-          ],
+          "configs": ["research"],
           "name": "research"
         },
         "name": "spawn",
@@ -89,9 +87,7 @@
         },
         "id": "toolu_01VhpwvcSspqQ3KXB5YVAfc1",
         "input": {
-          "configs": [
-            "researcher"
-          ],
+          "configs": ["researcher"],
           "name": "researcher_1"
         },
         "name": "spawn",
@@ -103,9 +99,7 @@
         },
         "id": "toolu_01CPoDbBVExqmCBrSUvsQJFr",
         "input": {
-          "configs": [
-            "researcher"
-          ],
+          "configs": ["researcher"],
           "name": "researcher_2"
         },
         "name": "spawn",
@@ -117,9 +111,7 @@
         },
         "id": "toolu_01DvsXnxkzYKn1QKVyKYrSWu",
         "input": {
-          "configs": [
-            "researcher"
-          ],
+          "configs": ["researcher"],
           "name": "researcher_3"
         },
         "name": "spawn",
