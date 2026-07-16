@@ -4,4 +4,4 @@ Feature: Clock
     * > el clock
 
     * clock> what time is it
-      | ✨ clock | current time is |
+      | ✨ clock | 2025-07-07 10:00 |

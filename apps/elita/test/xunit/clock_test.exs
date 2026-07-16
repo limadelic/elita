@@ -5,6 +5,6 @@ defmodule ClockTest do
   test "clock tells the time" do
     spawn(:clock)
 
-    verify("23:52:03", ask(:clock, "what time is it"))
+    verify("2025-07-07 10:00", ask(:clock, "what time is it"))
   end
 end

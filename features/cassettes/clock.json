@@ -3,7 +3,7 @@
     "q": { "messages": [{ "content": "what time is it" }] },
     "a": [
       {
-        "text": "The current time is **23:52:03** (11:52:03 PM) on **July 15, 2026**.",
+        "text": "The current time is 2025-07-07 10:00:00.",
         "type": "text"
       }
     ]
