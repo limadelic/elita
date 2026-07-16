@@ -26,17 +26,25 @@ module UpdatePrBadge
   end
 
   def self.credo_url(branch)
-    prefix = branch == 'main' ? '' : "#{branch}/"
+    prefix = site_prefix(branch)
     "https://limadelic.github.io/elita/#{prefix}lint.json"
   end
 
   def self.build_badges(branch)
-    prefix = branch == 'main' ? '' : "#{branch}/"
+    prefix = site_prefix(branch)
     url = "https://limadelic.github.io/elita"
     report = "#{url}/#{prefix}report.html"
     credo_badge = build_badge(url, prefix, 'lint.json', 'credo', report)
     cukes_badge = build_badge(url, prefix, 'cukes.json', 'cukes', report)
     "#{credo_badge} #{cukes_badge}"
+  end
+
+  def self.site_prefix(branch)
+    pr_num = ENV['PR_NUMBER']
+    return "#{pr_num}/" if pr_num && pr_num.match?(/^\d+$/)
+    return '' if branch == 'main'
+
+    "#{branch}/"
   end
 
   def self.build_badge(url, prefix, json, name, report)

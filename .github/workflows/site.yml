@@ -14,13 +14,35 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve PR number
+        id: pr
+        run: |
+          BRANCH="${{ github.ref_name }}"
+          PR_NUM=""
+          if [ "$BRANCH" != "main" ] && [ "$BRANCH" != "test" ]; then
+            PR_NUM=$(gh pr list --head "$BRANCH" --json number --jq '.[0].number' 2>/dev/null || true)
+          fi
+          echo "number=$PR_NUM" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Compute deployment prefix
         id: prefix
         run: |
           BRANCH="${{ github.ref_name }}"
+          PR_NUM="${{ steps.pr.outputs.number }}"
           PREFIX=""
-          [ "$BRANCH" != "main" ] && PREFIX="$BRANCH/"
+          if [ -n "$PR_NUM" ]; then
+            PREFIX="$PR_NUM/"
+          elif [ "$BRANCH" != "main" ]; then
+            PREFIX="$BRANCH/"
+          fi
           echo "prefix=$PREFIX" >> "$GITHUB_OUTPUT"
+          echo "target=$PREFIX" >> "$GITHUB_OUTPUT"
 
       - name: Sanitize branch name for artifact
         id: branch_slug
@@ -80,7 +102,6 @@ jobs:
         run: |
           mkdir -p site
           BASE_URL="https://limadelic.github.io/elita"
-          BRANCHES="test greet"
           FILES="report.html cukes.html cukes.json lint.json credo.html index.html"
 
           # Seed root files
@@ -88,12 +109,25 @@ jobs:
             curl -sfL "$BASE_URL/$file" -o "site/$file" || true
           done
 
+          # Get branch names from git remote branches
+          BRANCHES=$(git branch -r | sed 's/^[[:space:]]*origin\///' | grep -v '^HEAD' | sort -u)
+
           # Seed each branch directory
           for branch in $BRANCHES; do
             mkdir -p "site/$branch"
             for file in $FILES; do
               curl -sfL "$BASE_URL/$branch/$file" -o "site/$branch/$file" || true
             done
+          done
+
+          # Seed numeric PR directories (discover from live site)
+          for pr_num in $(seq 1 100); do
+            curl -sfL "$BASE_URL/$pr_num/report.html" -o /dev/null 2>/dev/null && {
+              mkdir -p "site/$pr_num"
+              for file in $FILES; do
+                curl -sfL "$BASE_URL/$pr_num/$file" -o "site/$pr_num/$file" || true
+              done
+            } || true
           done
 
       - name: Setup Pages
