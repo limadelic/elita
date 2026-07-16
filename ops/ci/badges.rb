@@ -62,7 +62,8 @@ module Badges
     }
     badge[:namedLogo] = named_logo if named_logo
     badge[:logoColor] = 'white' if named_logo
-    badge.compact
+    badge.compact!
+    badge
   end
 
   def self.lint_color_message(issue_count)
