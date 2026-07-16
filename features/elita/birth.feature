@@ -8,8 +8,8 @@ Feature: Birth
       | ✨ mother | baby    |
 
     * el> baby spank
-      | ✨ el | cry  |
-      | ✨ el | wail |
+      | ✨ baby | cry  |
+      | ✨ baby | wail |
 
     * el> baby log
       | 🚀 baby | spawn    |

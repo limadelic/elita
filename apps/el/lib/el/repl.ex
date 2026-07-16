@@ -78,16 +78,15 @@ defmodule El.REPL do
   defp handle(agent, :undefined, input), do: dispatch(agent, input, :ask) |> puts()
   defp route([name, "log"], _a, _p, _i), do: name |> log() |> puts()
 
-  defp route(_x, _agent, puppet, input) do
-    {response, target} = input |> split(" ", parts: 2) |> via(puppet, input)
+  defp route(_x, agent, puppet, input) do
+    words = input |> split(" ", parts: 2)
+    {response, target} = via(words, puppet, input, agent)
     handle(response, target)
   end
 
-  defp via([_w], p, i), do: {ask(p, i), from(p)}
-  defp via([w, _], p, i), do: {ask(choose(wait(w), p), i), w}
-  defp via(_, p, i), do: {ask(p, i), from(p)}
-  defp from(pid) when is_pid(pid), do: "el"
-  defp from(_), do: "el"
+  defp via([_w], p, i, agent), do: {ask(p, i), agent}
+  defp via([w, _], p, i, _agent), do: {ask(choose(wait(w), p), i), w}
+  defp via(_, p, i, agent), do: {ask(p, i), agent}
   defp choose(nil, default), do: default
   defp choose(t, _), do: t
 end
