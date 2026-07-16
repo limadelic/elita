@@ -16,7 +16,8 @@ module Badges
     return '' if branch == 'main' || branch == 'test'
 
     repo = ENV['GITHUB_REPOSITORY']
-    pr_num = `gh api repos/#{repo}/pulls -q ".[] | select(.head.ref==\\"#{branch}\\") | .number" | head -1`.strip
+    cmd = %Q{gh api repos/#{repo}/pulls -q '.[] | select(.head.ref=="#{branch}") | .number' | head -1}
+    pr_num = `#{cmd}`.strip
     return "#{pr_num}/" unless pr_num.empty?
 
     "#{branch}/"
