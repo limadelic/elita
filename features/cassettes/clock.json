@@ -1,18 +1,11 @@
 [
   {
+    "q": { "messages": [{ "content": "what time is it" }] },
     "a": [
       {
-        "text": "1:28 and 42 seconds in the morning on july 8th, 2026",
+        "text": "The current time is **23:52:03** (11:52:03 PM) on **July 15, 2026**.",
         "type": "text"
       }
-    ],
-    "q": {
-      "messages": [
-        {
-          "content": "ask the clock what time it is",
-          "role": "user"
-        }
-      ]
-    }
+    ]
   }
 ]
