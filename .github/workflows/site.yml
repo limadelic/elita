@@ -1,0 +1,163 @@
+name: Site
+
+on: workflow_call
+
+permissions:
+  pages: write
+  id-token: write
+
+jobs:
+  site:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Compute deployment prefix
+        id: prefix
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="${{ github.ref_name }}"
+          PREFIX=""
+
+          if [ "$BRANCH" != "main" ] && [ "$BRANCH" != "test" ]; then
+            PR_NUM=$(gh api repos/${{ github.repository }}/pulls -q ".[] | select(.head.ref==\"$BRANCH\") | .number" | head -1 || echo "")
+            if [ -n "$PR_NUM" ]; then
+              PREFIX="$PR_NUM/"
+            else
+              PREFIX="$BRANCH/"
+            fi
+          fi
+
+          echo "prefix=$PREFIX" >> "$GITHUB_OUTPUT"
+          echo "target=$PREFIX" >> "$GITHUB_OUTPUT"
+
+      - name: Sanitize branch name for artifact
+        id: branch_slug
+        run: |
+          branch="${{ github.ref_name }}"
+          slug="${branch//\//-}"
+          echo "slug=$slug" >> "$GITHUB_OUTPUT"
+
+      - name: Create site directory
+        run: |
+          PREFIX="${{ steps.prefix.outputs.prefix }}"
+          if [ -n "$PREFIX" ]; then
+            mkdir -p "site/$PREFIX"
+          else
+            mkdir -p site
+          fi
+
+      - name: Seed site from live Pages
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p site
+          BASE_URL="https://limadelic.github.io/elita"
+          FILES="report.html cukes.html cukes.json lint.json credo.html index.html"
+
+          # Seed root files
+          for file in $FILES; do
+            curl -sfL "$BASE_URL/$file" -o "site/$file" || true
+          done
+
+          # Get branch names from git remote branches
+          BRANCHES=$(git branch -r | sed 's/^[[:space:]]*origin\///' | grep -v '^HEAD' | sort -u)
+
+          # Seed each branch directory
+          for branch in $BRANCHES; do
+            mkdir -p "site/$branch"
+            for file in $FILES; do
+              curl -sfL "$BASE_URL/$branch/$file" -o "site/$branch/$file" || true
+            done
+          done
+
+          # Seed PR directories from open PRs only
+          gh pr list --state open --json number --jq '.[].number' | while read pr_num; do
+            mkdir -p "site/$pr_num"
+            for file in $FILES; do
+              curl -sfL "$BASE_URL/$pr_num/$file" -o "site/$pr_num/$file" || true
+            done
+          done
+
+      - name: Merge previous github-pages artifact as base
+        run: |
+          set +e
+          ARTIFACT_ID=$(gh api repos/${{ github.repository }}/actions/artifacts \
+            --paginate --jq '.artifacts[] | select(.name == "github-pages") | .id' | head -1)
+
+          if [ -z "$ARTIFACT_ID" ]; then
+            echo "No previous github-pages artifact found, starting empty"
+            exit 0
+          fi
+
+          echo "Found artifact $ARTIFACT_ID, downloading..."
+          TEMP_DIR=$(mktemp -d)
+          cd "$TEMP_DIR"
+          gh api repos/${{ github.repository }}/actions/artifacts/$ARTIFACT_ID/zip -H "Accept: application/zip" > artifact.zip
+          unzip -q artifact.zip
+
+          if [ -f artifact.tar ]; then
+            tar xf artifact.tar -C /tmp
+            if [ -d /tmp/artifact ]; then
+              cp -r /tmp/artifact/* "$GITHUB_WORKSPACE/site/" 2>/dev/null || true
+              echo "Base merged from previous deploy"
+            fi
+          fi
+
+          rm -rf "$TEMP_DIR"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+      - name: Download lint badge artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: lint-badge
+          path: /tmp/lint-art
+        continue-on-error: true
+
+      - name: Download cukes HTML artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: cukes-html-${{ steps.branch_slug.outputs.slug }}
+          path: /tmp/cukes-art
+        continue-on-error: true
+
+      - name: Copy lint files flat into prefix
+        run: |
+          PREFIX="${{ steps.prefix.outputs.prefix }}"
+          if [ -d "/tmp/lint-art" ] && [ -n "$PREFIX" ]; then
+            mkdir -p "site/$PREFIX"
+            find /tmp/lint-art -type f -exec cp {} site/$PREFIX/ \;
+            rm -rf /tmp/lint-art
+          fi
+        continue-on-error: true
+
+      - name: Copy cukes files flat into prefix
+        run: |
+          PREFIX="${{ steps.prefix.outputs.prefix }}"
+          if [ -d "/tmp/cukes-art" ] && [ -n "$PREFIX" ]; then
+            mkdir -p "site/$PREFIX"
+            find /tmp/cukes-art -type f -exec cp {} site/$PREFIX/ \;
+            rm -rf /tmp/cukes-art
+          fi
+        continue-on-error: true
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload to Pages
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+
+      - name: Deploy to Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

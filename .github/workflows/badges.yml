@@ -1,0 +1,25 @@
+name: Badges
+
+on:
+  pull_request:
+    types: [opened]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  badges:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Add badge block to PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          LINT_URL="https%3A%2F%2Flimadelic.github.io%2Felita%2F$PR_NUMBER%2Flint.json"
+          CUKES_URL="https%3A%2F%2Flimadelic.github.io%2Felita%2F$PR_NUMBER%2Fcukes.json"
+          BADGE_BLOCK="[![lint](https://img.shields.io/endpoint?url=$LINT_URL)](https://limadelic.github.io/elita/$PR_NUMBER/report.html) [![cukes](https://img.shields.io/endpoint?url=$CUKES_URL)](https://limadelic.github.io/elita/$PR_NUMBER/report.html)"
+          gh pr edit $PR_NUMBER --body-append "$BADGE_BLOCK"
