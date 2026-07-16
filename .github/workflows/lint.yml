@@ -81,6 +81,7 @@ jobs:
         env:
           BRANCH: ${{ github.ref_name }}
           GITHUB_REPOSITORY: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
         if: always()
 
       - run: ops/ci/report.rb
