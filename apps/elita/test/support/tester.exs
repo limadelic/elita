@@ -84,4 +84,23 @@ defmodule Tester do
     assert result =~ pattern,
            "Expected substring '#{expectation}' in result: #{result}"
   end
+
+  def await(fun) do
+    await_loop(fun, 120_000, 500)
+  end
+
+  defp await_loop(_fun, remaining, _interval) when remaining <= 0 do
+    {:error, "timeout"}
+  end
+
+  defp await_loop(fun, remaining, interval) do
+    case fun.() do
+      true ->
+        :ok
+
+      false ->
+        Process.sleep(interval)
+        await_loop(fun, remaining - interval, interval)
+    end
+  end
 end

@@ -22,22 +22,12 @@ defmodule BossTest do
     tell(:michael, "you manage dwight the assistant regional manager")
     tell(:dwight, "you manage pam the receptionist and jim the salesman")
     verify("done", ask(:michael, "we need 50 copies of the quarterly sales report"))
-    poll_pam_task(120_000, 500)
+    await(fn -> pam_received_task?() end)
     verify("no", ask(:jim, "did you receive a task?"))
   end
 
-  defp poll_pam_task(remaining, _interval) when remaining <= 0 do
-    {:error, "timeout waiting for pam to receive task"}
-  end
-
-  defp poll_pam_task(remaining, interval) do
+  defp pam_received_task? do
     result = ask(:pam, "did you receive a task to make copies?")
-
-    if String.downcase(result) =~ ~r/\byes\b/ do
-      :ok
-    else
-      Process.sleep(interval)
-      poll_pam_task(remaining - interval, interval)
-    end
+    String.downcase(result) =~ ~r/\byes\b/
   end
 end
