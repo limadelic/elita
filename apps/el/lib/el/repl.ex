@@ -12,6 +12,7 @@ defmodule El.REPL do
   import Path, only: [expand: 1, join: 2]
   import Enum, only: [filter: 2, sort: 1]
   import List, only: [last: 1]
+
   def run(agent) do
     ensure_all_started(:elita)
     loop(agent, init(agent))
