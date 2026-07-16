@@ -81,14 +81,6 @@ jobs:
           path: site/
           retention-days: 1
 
-      - run: ops/ci/update_pr_badge.rb
-        if: github.event_name == 'pull_request' && always()
-        env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          BRANCH: ${{ github.ref_name }}
-          HEAD_REF: ${{ github.event.pull_request.head.ref }}
-          GH_TOKEN: ${{ github.token }}
-
       - name: Fail if tests failed
         if: steps.cukes.outcome == 'failure'
         run: exit 1

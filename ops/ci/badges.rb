@@ -12,10 +12,14 @@ module Badges
   end
 
   def self.compute_prefix
-    pr_num = ENV['PR_NUMBER']
-    return pr_num if pr_num && pr_num.match?(/^\d+$/)
+    branch = ENV['BRANCH'].sub(%r{/merge$}, '')
+    return '' if branch == 'main' || branch == 'test'
 
-    ENV['BRANCH'].sub(%r{/merge$}, '')
+    repo = ENV['GITHUB_REPOSITORY']
+    pr_num = `gh api repos/#{repo}/pulls -q ".[] | select(.head.ref==\\"#{branch}\\") | .number" | head -1`.strip
+    return "#{pr_num}/" unless pr_num.empty?
+
+    "#{branch}/"
   end
 
   def self.lint_badges(prefix)
