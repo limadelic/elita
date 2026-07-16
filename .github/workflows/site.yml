@@ -88,14 +88,26 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: lint-badge
-          path: site
+          path: site/${{ steps.prefix.outputs.prefix }}
         continue-on-error: true
 
       - name: Download cukes HTML artifact
         uses: actions/download-artifact@v4
         with:
           name: cukes-html-${{ steps.branch_slug.outputs.slug }}
-          path: site/
+          path: site/${{ steps.prefix.outputs.prefix }}
+        continue-on-error: true
+
+      - name: Place report in prefix directory
+        run: |
+          PREFIX="${{ steps.prefix.outputs.prefix }}"
+          if [ -n "$PREFIX" ]; then
+            mkdir -p "site/$PREFIX"
+            # Move any root level report files to the prefix directory if they exist
+            for file in report.html cukes.html cukes.json lint.json credo.html; do
+              [ -f "site/$file" ] && mv "site/$file" "site/$PREFIX$file" 2>/dev/null || true
+            done
+          fi
         continue-on-error: true
 
       - name: Seed site from live Pages
