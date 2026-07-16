@@ -78,23 +78,15 @@ jobs:
 
       - name: Seed site from live Pages
         run: |
+          PREFIX="${{ steps.prefix.outputs.prefix }}"
           mkdir -p site
-          BASE_URL="https://limadelic.github.io/elita"
-          BRANCHES="test greet"
-          FILES="report.html cukes.html cukes.json lint.json credo.html index.html"
-
-          # Seed root files
-          for file in $FILES; do
-            curl -sfL "$BASE_URL/$file" -o "site/$file" || true
-          done
-
-          # Seed each branch directory
-          for branch in $BRANCHES; do
-            mkdir -p "site/$branch"
-            for file in $FILES; do
-              curl -sfL "$BASE_URL/$branch/$file" -o "site/$branch/$file" || true
-            done
-          done
+          if [ -n "$PREFIX" ]; then
+            curl -sfL https://limadelic.github.io/elita/index.html -o site/index.html || true
+            curl -sfL https://limadelic.github.io/elita/cukes.json -o site/cukes.json || true
+            curl -sfL https://limadelic.github.io/elita/cukes.html -o site/cukes.html || true
+            curl -sfL https://limadelic.github.io/elita/lint.json -o site/lint.json || true
+            curl -sfL https://limadelic.github.io/elita/credo.html -o site/credo.html || true
+          fi
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
