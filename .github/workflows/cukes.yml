@@ -59,16 +59,6 @@ jobs:
           ruby ops/ci/inject_legend.rb reports/cucumber.html
         if: always()
 
-      - run: ops/ci/badges.rb
-        env:
-          BRANCH: ${{ github.ref_name }}
-        if: always()
-
-      - run: ops/ci/report.rb
-        env:
-          BRANCH: ${{ github.ref_name }}
-        if: always()
-
       - name: Upload Cucumber report artifact
         uses: actions/upload-artifact@v4
         if: always()
