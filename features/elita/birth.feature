@@ -3,15 +3,10 @@ Feature: Birth
   Scenario: Mother gives birth to a baby
     * > el
 
-    * el> mother it's time to give birth
-      | ✨ mother | gasping |
-      | ✨ mother | baby    |
+    * el> it's time to give birth
+      | ✨ el | gasping |
+      | ✨ el | baby    |
 
-    * el> baby spank
-      | ✨ baby | cry  |
-      | ✨ baby | wail |
-
-    * el> baby log
-      | 🚀 baby | spawn    |
-      | 📢 baby | received |
-      | ✨ baby  | cry      |
+    * el> spank
+      | ✨ el | cry  |
+      | ✨ el | wail |
