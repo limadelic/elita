@@ -34,6 +34,7 @@ defmodule El.REPL do
   end
 
   defp pick(nil, agent), do: native(agent)
+  defp pick(:undefined, agent), do: native(agent)
   defp pick(pid, _agent), do: pid
 
   defp native(agent) do

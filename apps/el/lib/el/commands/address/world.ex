@@ -3,8 +3,7 @@ defmodule El.Commands.Address.World do
   import El.Standpoint, only: [get: 0]
   import Enum, only: [map: 2, flat_map: 2, uniq_by: 2, filter: 2]
   import File, only: [exists?: 1, ls!: 1]
-  import Path, only: [expand: 1, join: 2]
-  import String, only: [ends_with?: 2, trim_trailing: 2]
+  import Path, only: [expand: 1, join: 2, extname: 1, basename: 2]
   import Node, only: [list: 0]
 
   def build(nodes \\ &peers/0) do
@@ -46,9 +45,11 @@ defmodule El.Commands.Address.World do
     _ -> []
   end
 
-  defp agent?(<< _::binary, ".exs" >>), do: true
-  defp agent?(<< _::binary, ".md" >>), do: true
-  defp agent?(_), do: false
+  defp agent?(file), do: agent(extname(file))
+
+  defp agent(".exs"), do: true
+  defp agent(".md"), do: true
+  defp agent(_), do: false
 
   defp file(folder, filename) do
     n = name(filename)
@@ -56,8 +57,9 @@ defmodule El.Commands.Address.World do
     %{name: n, path: folder, file_path: path, kind: :file}
   end
 
-  defp name(<< text::binary, ".md" >>), do: text
-  defp name(<< text::binary, ".exs" >>), do: text
+  defp name(file) do
+    basename(file, extname(file))
+  end
 
   defp peers do
     [node() | list()]
