@@ -15,14 +15,12 @@
       }
     ],
     "q": {
-      "agent": "el",
       "messages": [
         {
           "content": "ask the clock what time it is",
           "role": "user"
         }
-      ],
-      "n": 1
+      ]
     }
   },
   {
@@ -47,7 +45,6 @@
       }
     ],
     "q": {
-      "agent": "el",
       "messages": [
         {
           "content": [
@@ -59,8 +56,7 @@
           ],
           "role": "user"
         }
-      ],
-      "n": 3
+      ]
     }
   },
   {
@@ -91,7 +87,6 @@
       }
     ],
     "q": {
-      "agent": "el",
       "messages": [
         {
           "content": [
@@ -103,8 +98,7 @@
           ],
           "role": "user"
         }
-      ],
-      "n": 5
+      ]
     }
   },
   {
@@ -115,14 +109,12 @@
       }
     ],
     "q": {
-      "agent": "clock",
       "messages": [
         {
           "content": "[from el] You are clock, a timekeeper. Stay in character.",
           "role": "user"
         }
-      ],
-      "n": 1
+      ]
     }
   },
   {
@@ -133,14 +125,12 @@
       }
     ],
     "q": {
-      "agent": "clock",
       "messages": [
         {
           "content": "what time is it",
           "role": "user"
         }
-      ],
-      "n": 3
+      ]
     }
   },
   {
@@ -151,7 +141,6 @@
       }
     ],
     "q": {
-      "agent": "el",
       "messages": [
         {
           "content": [
@@ -163,8 +152,7 @@
           ],
           "role": "user"
         }
-      ],
-      "n": 8
+      ]
     }
   },
   {
@@ -183,14 +171,12 @@
       }
     ],
     "q": {
-      "agent": "el",
       "messages": [
         {
           "content": "ask the clock what time it is",
           "role": "user"
         }
-      ],
-      "n": 10
+      ]
     }
   },
   {
@@ -201,14 +187,12 @@
       }
     ],
     "q": {
-      "agent": "clock",
       "messages": [
         {
           "content": "what time is it",
           "role": "user"
         }
-      ],
-      "n": 5
+      ]
     }
   },
   {
@@ -219,7 +203,6 @@
       }
     ],
     "q": {
-      "agent": "el",
       "messages": [
         {
           "content": [
@@ -231,8 +214,7 @@
           ],
           "role": "user"
         }
-      ],
-      "n": 12
+      ]
     }
   },
   {
@@ -251,14 +233,12 @@
       }
     ],
     "q": {
-      "agent": "el",
       "messages": [
         {
           "content": "ask the clock what time it is",
           "role": "user"
         }
-      ],
-      "n": 14
+      ]
     }
   },
   {
@@ -269,14 +249,12 @@
       }
     ],
     "q": {
-      "agent": "clock",
       "messages": [
         {
           "content": "what time is it",
           "role": "user"
         }
-      ],
-      "n": 7
+      ]
     }
   },
   {
@@ -287,7 +265,6 @@
       }
     ],
     "q": {
-      "agent": "el",
       "messages": [
         {
           "content": [
@@ -299,8 +276,7 @@
           ],
           "role": "user"
         }
-      ],
-      "n": 16
+      ]
     }
   },
   {
@@ -319,14 +295,12 @@
       }
     ],
     "q": {
-      "agent": "el",
       "messages": [
         {
           "content": "ask the clock what time it is",
           "role": "user"
         }
-      ],
-      "n": 18
+      ]
     }
   },
   {
@@ -337,14 +311,12 @@
       }
     ],
     "q": {
-      "agent": "clock",
       "messages": [
         {
           "content": "what time is it",
           "role": "user"
         }
-      ],
-      "n": 9
+      ]
     }
   },
   {
@@ -355,7 +327,6 @@
       }
     ],
     "q": {
-      "agent": "el",
       "messages": [
         {
           "content": [
@@ -367,8 +338,7 @@
           ],
           "role": "user"
         }
-      ],
-      "n": 20
+      ]
     }
   },
   {
@@ -387,14 +357,12 @@
       }
     ],
     "q": {
-      "agent": "el",
       "messages": [
         {
           "content": "ask the clock what time it is",
           "role": "user"
         }
-      ],
-      "n": 22
+      ]
     }
   },
   {
@@ -405,14 +373,12 @@
       }
     ],
     "q": {
-      "agent": "clock",
       "messages": [
         {
           "content": "what time is it",
           "role": "user"
         }
-      ],
-      "n": 11
+      ]
     }
   },
   {
@@ -423,7 +389,6 @@
       }
     ],
     "q": {
-      "agent": "el",
       "messages": [
         {
           "content": [
@@ -435,8 +400,7 @@
           ],
           "role": "user"
         }
-      ],
-      "n": 24
+      ]
     }
   },
   {
@@ -455,14 +419,12 @@
       }
     ],
     "q": {
-      "agent": "el",
       "messages": [
         {
           "content": "ask the clock what time it is",
           "role": "user"
         }
-      ],
-      "n": 1
+      ]
     }
   },
   {
@@ -487,7 +449,6 @@
       }
     ],
     "q": {
-      "agent": "el",
       "messages": [
         {
           "content": [
@@ -499,8 +460,7 @@
           ],
           "role": "user"
         }
-      ],
-      "n": 3
+      ]
     }
   },
   {
@@ -531,7 +491,6 @@
       }
     ],
     "q": {
-      "agent": "el",
       "messages": [
         {
           "content": [
@@ -543,8 +502,7 @@
           ],
           "role": "user"
         }
-      ],
-      "n": 5
+      ]
     }
   },
   {
@@ -555,14 +513,12 @@
       }
     ],
     "q": {
-      "agent": "clock",
       "messages": [
         {
           "content": "[from el] You are clock, a clock. Stay in character.",
           "role": "user"
         }
-      ],
-      "n": 1
+      ]
     }
   },
   {
@@ -573,14 +529,12 @@
       }
     ],
     "q": {
-      "agent": "clock",
       "messages": [
         {
           "content": "what time is it",
           "role": "user"
         }
-      ],
-      "n": 3
+      ]
     }
   },
   {
@@ -591,7 +545,6 @@
       }
     ],
     "q": {
-      "agent": "el",
       "messages": [
         {
           "content": [
@@ -603,8 +556,7 @@
           ],
           "role": "user"
         }
-      ],
-      "n": 8
+      ]
     }
   }
 ]
