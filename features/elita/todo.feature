@@ -1,20 +1,19 @@
-@wip
 Feature: Todo
 
+  @tape:todomark
   Scenario: Todo marks tasks complete
     * > el todo
 
     * todo> Add call dentist to my list
-      | 👀 todo | (empty) |
-      | ✨ todo  | added   |
+      | added |
 
     * todo> Mark call dentist as done
-      | 👀 todo | call dentist |
-      | ✨ todo  | marked       |
+      | marked |
 
     * todo> What do I need to do?
-      | ✨ todo | no tasks |
+      | no |
 
+  @tape:todoremember
   Scenario: Todo remembers tasks
     * > el todo
 
@@ -24,6 +23,7 @@ Feature: Todo
     * todo> What do I need to do?
       | groceries |
 
+  @tape:todomultiple
   Scenario: Todo handles multiple tasks
     * > el todo
 
