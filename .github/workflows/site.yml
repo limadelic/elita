@@ -20,17 +20,15 @@ jobs:
 
       - name: Resolve PR number
         id: pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           BRANCH="${{ github.ref_name }}"
-          REPO="${{ github.repository }}"
           PR_NUM=""
           if [ "$BRANCH" != "main" ] && [ "$BRANCH" != "test" ]; then
-            RESP=$(curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/repos/$REPO/pulls?head=$BRANCH&state=open")
-            PR_NUM=$(echo "$RESP" | jq -r '.[0].number // ""' 2>/dev/null || true)
+            PR_NUM=$(gh api repos/${{ github.repository }}/pulls -q ".[] | select(.head.ref==\"$BRANCH\") | .number" | head -1 || echo "")
           fi
           echo "number=$PR_NUM" >> "$GITHUB_OUTPUT"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Compute deployment prefix
         id: prefix
