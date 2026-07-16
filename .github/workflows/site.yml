@@ -24,11 +24,13 @@ jobs:
           BRANCH="${{ github.ref_name }}"
           PR_NUM=""
           if [ "$BRANCH" != "main" ] && [ "$BRANCH" != "test" ]; then
-            PR_NUM=$(gh pr list --head "$BRANCH" --json number --jq '.[0].number' 2>/dev/null || true)
+            PR_NUM=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+              "https://api.github.com/repos/${{ github.repository }}/pulls?head=$BRANCH&state=open" | \
+              jq -r '.[0].number // ""' 2>/dev/null || true)
           fi
           echo "number=$PR_NUM" >> "$GITHUB_OUTPUT"
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Compute deployment prefix
         id: prefix
