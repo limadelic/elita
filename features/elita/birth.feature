@@ -4,7 +4,15 @@ Feature: Birth
     * > el
 
     * el> mother it's time to give birth
-      | beautiful baby |
+      | ✨ el | beautiful baby  |
+      | ✨ el | contractions    |
+      | ✨ el | pain is intense |
+      | ✨ el | it's happening  |
+      | ✨ el | bring my baby   |
 
     * el> baby spank
-      | CRY |
+      | ✨ el | waaahhhhh     |
+      | ✨ el | screaming cry |
+      | ✨ el | baby cry      |
+      | ✨ el | hurt          |
+      | ✨ el | wailing       |
