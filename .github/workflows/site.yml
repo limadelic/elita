@@ -54,6 +54,38 @@ jobs:
             mkdir -p site
           fi
 
+      - name: Seed site from live Pages
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p site
+          BASE_URL="https://limadelic.github.io/elita"
+          FILES="report.html cukes.html cukes.json lint.json credo.html index.html"
+
+          # Seed root files
+          for file in $FILES; do
+            curl -sfL "$BASE_URL/$file" -o "site/$file" || true
+          done
+
+          # Get branch names from git remote branches
+          BRANCHES=$(git branch -r | sed 's/^[[:space:]]*origin\///' | grep -v '^HEAD' | sort -u)
+
+          # Seed each branch directory
+          for branch in $BRANCHES; do
+            mkdir -p "site/$branch"
+            for file in $FILES; do
+              curl -sfL "$BASE_URL/$branch/$file" -o "site/$branch/$file" || true
+            done
+          done
+
+          # Seed PR directories from open PRs only
+          gh pr list --state open --json number --jq '.[].number' | while read pr_num; do
+            mkdir -p "site/$pr_num"
+            for file in $FILES; do
+              curl -sfL "$BASE_URL/$pr_num/$file" -o "site/$pr_num/$file" || true
+            done
+          done
+
       - name: Merge previous github-pages artifact as base
         run: |
           set +e
@@ -117,38 +149,6 @@ jobs:
             rm -rf /tmp/cukes-art
           fi
         continue-on-error: true
-
-      - name: Seed site from live Pages
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          mkdir -p site
-          BASE_URL="https://limadelic.github.io/elita"
-          FILES="report.html cukes.html cukes.json lint.json credo.html index.html"
-
-          # Seed root files
-          for file in $FILES; do
-            curl -sfL "$BASE_URL/$file" -o "site/$file" || true
-          done
-
-          # Get branch names from git remote branches
-          BRANCHES=$(git branch -r | sed 's/^[[:space:]]*origin\///' | grep -v '^HEAD' | sort -u)
-
-          # Seed each branch directory
-          for branch in $BRANCHES; do
-            mkdir -p "site/$branch"
-            for file in $FILES; do
-              curl -sfL "$BASE_URL/$branch/$file" -o "site/$branch/$file" || true
-            done
-          done
-
-          # Seed PR directories from open PRs only
-          gh pr list --state open --json number --jq '.[].number' | while read pr_num; do
-            mkdir -p "site/$pr_num"
-            for file in $FILES; do
-              curl -sfL "$BASE_URL/$pr_num/$file" -o "site/$pr_num/$file" || true
-            done
-          done
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
