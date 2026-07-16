@@ -7,5 +7,5 @@ Feature: Doctor
       | sharp pain |
 
     * el> doctor diagnose patient
-      | ACUTE APPENDICITIS |
+      | ACUTE APPENDICITIS    |
       | You will need surgery |
