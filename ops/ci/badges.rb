@@ -60,9 +60,9 @@ module Badges
       color: color,
       labelColor: '173647'
     }
-    badge[:namedLogo] = named_logo
+    badge[:namedLogo] = named_logo if named_logo
     badge[:logoColor] = 'white' if named_logo
-    badge
+    badge.compact
   end
 
   def self.lint_color_message(issue_count)

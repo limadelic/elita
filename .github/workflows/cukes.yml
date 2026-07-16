@@ -54,9 +54,10 @@ jobs:
         env:
           MIX_ENV: test
 
-      - name: Inject legend into report
+      - name: Copy cucumber report to site
         run: |
-          ruby ops/ci/inject_legend.rb reports/cucumber.html
+          mkdir -p site
+          cp reports/cucumber.html site/report.html
         if: always()
 
       - name: Upload Cucumber report artifact
