@@ -201,5 +201,19 @@
       ],
       "n": 3
     }
+  },
+  {
+    "a": [
+      {
+        "text": "🚀 baby | spawn\n📢 baby | received\n✨ baby | cry"
+      }
+    ],
+    "q": {
+      "messages": [
+        {
+          "content": "baby log"
+        }
+      ]
+    }
   }
 ]

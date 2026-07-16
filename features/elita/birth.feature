@@ -10,3 +10,8 @@ Feature: Birth
     * el> baby spank
       | ✨ el | cry  |
       | ✨ el | wail |
+
+    * el> baby log
+      | 🚀 baby | spawn    |
+      | 📢 baby | received |
+      | ✨ baby  | cry      |
