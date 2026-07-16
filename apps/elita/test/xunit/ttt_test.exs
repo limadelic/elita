@@ -10,10 +10,12 @@ defmodule TttTest do
     kill(:bob)
     spawn(:alice, :ttt)
     spawn(:bob, :ttt)
+
     on_exit(fn ->
       kill(:alice)
       kill(:bob)
     end)
+
     :ok
   end
 
@@ -39,7 +41,7 @@ defmodule TttTest do
     tell(:bob, "alice is gonna be your opponent, wait for her move")
     tell(:alice, "start a game with bob, you are X, play first")
 
-    _completed = poll_until_complete(:alice, 120000, 500)
+    _completed = poll_until_complete(:alice, 120_000, 500)
 
     result = ask(:alice, "tell me: did the game finish and was it a win or tie?")
     verify_completion(result)
@@ -53,6 +55,7 @@ defmodule TttTest do
     case is_game_complete?(agent) do
       true ->
         :ok
+
       false ->
         Process.sleep(interval)
         poll_until_complete(agent, remaining - interval, interval)
