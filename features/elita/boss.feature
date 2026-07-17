@@ -23,22 +23,30 @@ Feature: Boss
     * > el qa did you receive a task from boss?
       | yes |
 
-  @tape:office
+  @tape:boss2
   Scenario: Office boss
     * > el
 
-    * el> have michael the boss manage dwight the assistant regional manager
+    * > el boss as michael
 
-    * el> have dwight the boss manage pam the receptionist and jim the salesman
+    * > el boss as dwight
 
-    * el> tell michael we need 50 copies of the quarterly sales report
-      | 📢 michael → Dwight | get it done |
+    * > el worker as pam
 
-    * el> ask pam do you have a task
-      | 📢 dwight → Pam | get this done immediately |
-      | ✨ pam | get these done right away |
-      | ✨ dwight | pam will have those copies ready |
-      | ✨ pam | not at the moment |
+    * > el worker as jim
 
-    * el> ask jim do you have a task
-      | ✨ jim | minimal effort |
+    * michael> you manage dwight the assistant regional manager
+
+    * dwight> you manage pam the receptionist and jim the salesman
+
+    * michael> we need 50 copies of the quarterly sales report
+      | done |
+
+    * > el pam did you receive a task to make copies?
+      | no |
+
+    * > el pam did you receive a task to make copies?
+      | yes |
+
+    * > el jim did you receive a task?
+      | no |
