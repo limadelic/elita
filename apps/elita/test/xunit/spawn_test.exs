@@ -12,4 +12,12 @@ defmodule SpawnTest do
     verify("no", ask(:dev, "did you receive a task from boss?"))
     verify("yes", ask(:qa, "did you receive a task from boss?"))
   end
+
+  @tag cassette: "boss"
+  test "routing multi-word msg to named agent hits agent" do
+    spawn(:boss)
+    spawn(:dev, :worker)
+    msg = "did you receive a task from boss?"
+    verify("no", ask(:dev, msg))
+  end
 end
