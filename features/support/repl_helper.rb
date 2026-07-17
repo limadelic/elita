@@ -90,25 +90,25 @@ module ReplHelper
 
   def write_input(input, prompt)
     @sessions ||= {}
-    if @sessions.key?(prompt)
-      activate(prompt)
-    else
-      message = "#{prompt} #{input}"
-      @writer.write("#{message}\n")
-      @writer.flush
-      return
-    end
+    activate(prompt) if @sessions.key?(prompt)
     raise "PTY not initialized" unless @writer
 
-    @writer.write("#{input}\n")
+    line = @sessions.key?(prompt) ? input : "#{prompt} #{input}"
+    @writer.write("#{line}\n")
     @writer.flush
   end
 
   def await_result(prompt, input)
     return verify_closed if input == "/exit"
 
-    actual_prompt = @sessions[prompt]&.dig(:prompt) || prompt
+    actual_prompt = resolve_await_prompt(prompt)
     wait(actual_prompt) || ""
+  end
+
+  def resolve_await_prompt(prompt)
+    return @sessions[prompt][:prompt] if @sessions.key?(prompt)
+
+    @sessions[@current]&.dig(:prompt) || prompt
   end
 
   def activate(name)

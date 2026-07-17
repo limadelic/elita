@@ -60,7 +60,6 @@ defmodule El.REPL do
 
   defp proceed(:stop, _agent, _puppet), do: :ok
   defp proceed(:ok, agent, puppet), do: loop(agent, puppet)
-  defp proceed({:ok, target, pid}, _agent, _puppet), do: loop(target, pid)
   defp handle(_agent, _puppet, ""), do: :ok
   defp handle(_agent, _puppet, "/exit"), do: :stop
   defp handle(agent, puppet, input) when is_pid(puppet) do
@@ -79,8 +78,7 @@ defmodule El.REPL do
     result(target, agent, pid)
   end
 
-  defp result(agent, agent, _pid), do: :ok
-  defp result(target, _agent, pid), do: {:ok, target, pid}
+  defp result(_target, _agent, _pid), do: :ok
   defp via([_w], p, i, agent), do: {ask(p, i), agent, p}
   defp via([w, msg], p, _i, agent), do: send(w, msg, p, agent, w in agents())
   defp via(_, p, i, agent), do: {ask(p, i), agent, p}

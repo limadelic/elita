@@ -54,9 +54,7 @@
         },
         "id": "toolu_01XUYWLQpauyHVY4eBWPo8is",
         "input": {
-          "configs": [
-            "baby"
-          ],
+          "configs": ["baby"],
           "name": "baby"
         },
         "name": "spawn",
