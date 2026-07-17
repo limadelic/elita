@@ -189,14 +189,14 @@
       "agent": "mother",
       "messages": [
         {
+          "role": "user",
           "content": [
             {
+              "type": "tool_result",
               "content": "spawned",
-              "tool_use_id": "toolu_01XqBCBDmXdcSGMg9qup2ei9",
-              "type": "tool_result"
+              "tool_use_id": "toolu_01XqBCBDmXdcSGMg9qup2ei9"
             }
-          ],
-          "role": "user"
+          ]
         }
       ],
       "n": 3
