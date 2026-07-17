@@ -1,12 +1,10 @@
 Feature: Birth
 
   Scenario: Mother gives birth to a baby
-    * > el
+    * > el mother
 
-    * el> mother it's time to give birth
-      | gasping      |
-      | baby is here |
+    * mother> it's time to give birth
+      | arrived | spawned |
 
-    * el> baby log
-      | spawn    |
-      | received |
+    * mother> log
+      | 🚀 baby | spawn |

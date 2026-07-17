@@ -4,7 +4,13 @@ defmodule BirthTest do
 
   test "mother births a baby" do
     spawn(:mother)
-    response = ask(:mother, "[from el] You are mother. It's time to give birth. Stay in character.")
-    verify("gasping", response)
+    response = ask(:mother, "it's time to give birth")
+    verify("arrived", response)
+  end
+
+  test "baby cries when spanked" do
+    spawn(:baby)
+    response = ask(:baby, "spank")
+    verify("cry", response)
   end
 end
