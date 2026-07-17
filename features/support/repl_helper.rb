@@ -92,6 +92,11 @@ module ReplHelper
     @sessions ||= {}
     if @sessions.key?(prompt)
       activate(prompt)
+    else
+      message = "#{prompt} #{input}"
+      @writer.write("#{message}\n")
+      @writer.flush
+      return
     end
     raise "PTY not initialized" unless @writer
 
