@@ -1,7 +1,7 @@
 Feature: Boss
 
   @tape:boss
-  Scenario: Software manager
+  Scenario: Engineer manager
     * > el boss
 
     * > el worker as dev
@@ -15,7 +15,7 @@ Feature: Boss
       | done |
 
     * boss> log
-      | 📢 boss → qa |
+      | 📢 boss → qa | more tests |
 
     * > el dev did you receive a task from boss?
       | no |
