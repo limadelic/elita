@@ -4,7 +4,8 @@ Feature: Birth
     * > el mother
 
     * mother> it's time to give birth
-      | arrived |
+      | my beautiful baby |
+      | almost here       |
 
     * mother> log
       | 🚀 baby | spawn |
