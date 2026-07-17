@@ -1,4 +1,10 @@
 module Drain
+  def fix_encoding(chunk)
+    chunk.chars.map(&:ord).pack("C*").force_encoding("UTF-8").scrub("")
+  rescue
+    chunk.to_s
+  end
+
   def absorb(pty)
     output = ""
     safe { read(pty, output) }
@@ -106,17 +112,19 @@ module Drain
   end
 
   def log_with_mutex(chunk)
+    fixed_chunk = fix_encoding(chunk)
     @mutex.synchronize do
       @transcript << chunk if @transcript
-      @screen.feed(chunk) if @screen
+      @screen.feed(fixed_chunk) if @screen
       stripped = encode(strip(chunk))
       @transcript_stripped << stripped if @transcript_stripped
     end
   end
 
   def log_without_mutex(chunk)
+    fixed_chunk = fix_encoding(chunk)
     @transcript << chunk if @transcript
-    @screen.feed(chunk) if @screen
+    @screen.feed(fixed_chunk) if @screen
     stripped = encode(strip(chunk))
     @transcript_stripped << stripped if @transcript_stripped
   end

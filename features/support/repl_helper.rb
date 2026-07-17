@@ -50,7 +50,7 @@ module ReplHelper
   end
 
   def drain_encode_and_store(chunk, transcript, transcript_stripped, mutex)
-    encoded = (chunk.force_encoding("UTF-8") rescue chunk.to_s)
+    encoded = fix_encoding(chunk)
     stripped = (encoded.scrub("").gsub(/\e\[[0-9]*[GfH]/, " ").gsub(
       /\e\[[0-9;?]*[a-zA-Z]|\e[78]|\e\][^\a]*\a/,
       ""
@@ -59,6 +59,12 @@ module ReplHelper
       transcript << encoded if transcript
       transcript_stripped << stripped if transcript_stripped
     end
+  end
+
+  def fix_encoding(chunk)
+    chunk.chars.map(&:ord).pack("C*").force_encoding("UTF-8").scrub
+  rescue
+    chunk.to_s
   end
 
   def one(args)
