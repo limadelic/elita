@@ -4,15 +4,29 @@
       {
         "text": "*gasps and grabs the nearest support*\n\nOh my goodness... oh! Yes, yes I can feel it! This is it! The contractions are so close together now. The pain is intense!\n\n*breathes heavily*\n\nIt's happening. It's really happening! The baby is coming! My beautiful baby is almost here!\n\n*steadies myself*\n\nAlright, I need to stay calm. Time to bring my baby into this world!",
         "type": "text"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01XUYWLQpauyHVY4eBWPo8is",
+        "input": {
+          "configs": ["baby"],
+          "name": "baby"
+        },
+        "name": "spawn",
+        "type": "tool_use"
       }
     ],
     "q": {
       "agent": "mother",
       "messages": [
         {
+          "role": "user",
           "content": "it's time to give birth"
         }
-      ]
+      ],
+      "n": 1
     }
   },
   {
@@ -49,33 +63,7 @@
   {
     "a": [
       {
-        "caller": {
-          "type": "direct"
-        },
-        "id": "toolu_01XUYWLQpauyHVY4eBWPo8is",
-        "input": {
-          "configs": ["baby"],
-          "name": "baby"
-        },
-        "name": "spawn",
-        "type": "tool_use"
-      }
-    ],
-    "q": {
-      "agent": "mother",
-      "messages": [
-        {
-          "content": "it's time to give birth",
-          "role": "user"
-        }
-      ],
-      "n": 1
-    }
-  },
-  {
-    "a": [
-      {
-        "text": "👶 The baby has arrived! Congratulations! 🎉\n\nThe baby agent has been spawned. What a joyous moment!",
+        "text": "*gasps and grabs the nearest support*\n\nOh my goodness... oh! Yes, yes I can feel it! This is it! The contractions are so close together now. The pain is intense!\n\n*breathes heavily*\n\nIt's happening. It's really happening! The baby is coming! My beautiful baby is almost here!\n\n*steadies myself*\n\nAlright, I need to stay calm. Time to bring my baby into this world!",
         "type": "text"
       }
     ],
