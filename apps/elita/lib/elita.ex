@@ -12,27 +12,29 @@ defmodule Elita do
   import System, only: [get_env: 1]
   import Tools
 
-  def spawn(name, configs) do
-    {:ok, pid} = started(__MODULE__, {name, configs}, via(name))
+  def spawn(name, configs, opts \\ []) do
+    opts = norm(opts, name)
+    {:ok, pid} = started(__MODULE__, {name, configs, opts}, via(name))
     publish(name, pid)
     {:ok, pid}
   end
 
-  defp started(m, a, k), do: start_link(m, a, name: k) |> accept()
+  defp norm([], name), do: [sender: name]
+  defp norm(opts, _), do: opts
 
-  defp accept({:ok, p}), do: {:ok, p}
-  defp accept({:error, {:already_started, p}}), do: {:ok, p}
+  defp started(m, a, k) do
+    start_link(m, a, name: k) |> join()
+  end
+
+  defp join({:ok, p}), do: {:ok, p}
+  defp join({:error, {:already_started, p}}), do: {:ok, p}
 
   defp publish(name, pid) do
-    publish(name, pid, :global.whereis_name({name, :puppet}))
+    :global.whereis_name({name, :puppet}) |> reg(name, pid)
   end
 
-  defp publish(name, pid, :undefined) do
-    :global.register_name({name, :puppet}, pid)
-  end
-
-  defp publish(_name, _pid, _registered), do: :ok
-
+  defp reg(:undefined, name, pid), do: :global.register_name({name, :puppet}, pid)
+  defp reg(_, _, _), do: :ok
   def dispatch(name, msg) do
     cast(via(name), {:act, msg})
   end
@@ -45,20 +47,25 @@ defmodule Elita do
     normalized = name |> to_string() |> downcase()
     {:via, Registry, {ElitaRegistry, normalized, %{kind: :native, folder: nil}}}
   end
+  def init({name, configs}), do: init({name, configs, [sender: name]})
 
-  def init({name, configs}) do
+  def init({name, configs, opts}) do
     create()
     seed()
-    {:ok, %{name: name, config: load(configs), history: [], configs: configs}}
+    {:ok, state(name, configs, opts)}
+  end
+
+  defp state(name, configs, opts) do
+    %{name: name, config: load(configs), history: [], configs: configs,
+      sender: Keyword.get(opts, :sender, name)}
   end
 
   defp seed do
-    get_env("TAPE")
-    |> prime()
+    get_env("TAPE") |> tape()
   end
 
-  defp prime(nil), do: :ok
-  defp prime(_), do: :rand.seed(:exsss, {1, 2, 3})
+  defp tape(nil), do: :ok
+  defp tape(_), do: :rand.seed(:exsss, {1, 2, 3})
 
   def handle_call({:ask, msg}, from, state) do
     handle_call({:act, msg}, from, state)
@@ -74,28 +81,20 @@ defmodule Elita do
   end
 
   defp act(msg, %{configs: configs, history: history} = state) do
-    history = branch(judge?(configs), history, user(msg))
+    history = branch("judge" in configs, history, user(msg))
     act(%{state | history: history})
   end
 
   defp branch(true, _, msg), do: [msg]
   defp branch(false, history, msg), do: history ++ [msg]
-
-  defp judge?(configs) do
-    "judge" in configs
-  end
-
   defp act(state) do
     state |> llm() |> exec() |> record() |> done()
   end
 
-  defp done({:act, state}) do
-    act(state)
-  end
+  defp done({:act, state}), do: act(state)
 
   defp done({:reply, txt, %{name: name} = state}) do
-    txt = trim(txt)
-    deliver(name, txt)
-    {:reply, txt, state}
+    deliver(name, trim(txt))
+    {:reply, trim(txt), state}
   end
 end
