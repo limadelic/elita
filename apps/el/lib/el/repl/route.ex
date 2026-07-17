@@ -10,19 +10,29 @@ defmodule El.Repl.Route do
   def route([name, "log"], _a, _p, _i), do: name |> log() |> puts()
 
   def route(_x, agent, puppet, input) do
-    words = input |> split(" ", parts: 3)
-    {response, target, pid} = via(words, puppet, input, agent)
+    {response, target, pid} = dispatch(input, puppet, agent)
     puts(response)
     result(target, agent, pid)
   end
 
+  defp dispatch(input, puppet, agent) do
+    words = input |> split(" ", parts: 3)
+    attempt(words, puppet, input, agent)
+  end
+
   def result(_target, _agent, _pid), do: :ok
 
-  def via([config, "as", name], _p, _i, _agent) do
+  defp attempt([config, "as", name], _p, _i, _agent) do
     {:ok, pid} = spawn(name, [config])
     {name <> " spawned", name, pid}
   end
 
+  defp attempt(_words, puppet, input, agent) do
+    words = input |> split(" ", parts: 2)
+    via(words, puppet, input, agent)
+  end
+
+  def via(["log"], _p, _i, agent), do: {agent |> log(), agent, nil}
   def via([_w], p, i, agent), do: {ask(p, i), agent, p}
   def via([w, msg], p, _i, agent), do: send(w, msg, p, agent, w in agents())
   def via(_, p, i, agent), do: {ask(p, i), agent, p}
