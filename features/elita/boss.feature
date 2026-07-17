@@ -15,7 +15,7 @@ Feature: Boss
       | done |
 
     * boss> log
-      | boss qa |
+      | 📢 boss → qa |
 
     * > el dev did you receive a task from boss?
       | no |
