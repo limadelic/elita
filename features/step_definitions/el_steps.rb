@@ -17,6 +17,10 @@ When(/^> el (.+)$/) do |args, *rest|
   if args.start_with?("@")
     output = one(args)
     track(output, output.gsub(/\e\[[0-9;]*m/, ''))
+  elsif args.include?(" ") && @current
+    write_input(args, @current)
+    output = retrying(15) { await_result(@current, args) }
+    track(output, output.gsub(/\e\[[0-9;]*m/, ''))
   else
     boot(args)
     drain
