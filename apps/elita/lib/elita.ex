@@ -12,15 +12,17 @@ defmodule Elita do
   import System, only: [get_env: 1]
   import Tools
 
-  def spawn(name, configs, opts \\ []) do
-    opts = norm(opts, name)
+  def spawn(name, configs, opts \\ [])
+  def spawn(name, configs, []), do: boot(name, configs, [sender: name])
+  def spawn(name, configs, opts), do: boot(name, configs, opts)
+
+  def prime, do: __MODULE__.spawn("el", ["el"], [skip_logs: true])
+
+  defp boot(name, configs, opts) do
     {:ok, pid} = started(__MODULE__, {name, configs, opts}, via(name))
-    publish(name, pid)
+    :global.whereis_name({name, :puppet}) |> reg(name, pid)
     {:ok, pid}
   end
-
-  defp norm([], name), do: [sender: name]
-  defp norm(opts, _), do: opts
 
   defp started(m, a, k) do
     start_link(m, a, name: k) |> join()
@@ -28,10 +30,6 @@ defmodule Elita do
 
   defp join({:ok, p}), do: {:ok, p}
   defp join({:error, {:already_started, p}}), do: {:ok, p}
-
-  defp publish(name, pid) do
-    :global.whereis_name({name, :puppet}) |> reg(name, pid)
-  end
 
   defp reg(:undefined, name, pid), do: :global.register_name({name, :puppet}, pid)
   defp reg(_, _, _), do: :ok
@@ -47,8 +45,8 @@ defmodule Elita do
     normalized = name |> to_string() |> downcase()
     {:via, Registry, {ElitaRegistry, normalized, %{kind: :native, folder: nil}}}
   end
-  def init({name, configs}), do: init({name, configs, [sender: name]})
 
+  def init({name, configs}), do: init({name, configs, [sender: name]})
   def init({name, configs, opts}) do
     create()
     seed()

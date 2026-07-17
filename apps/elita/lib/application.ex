@@ -2,6 +2,7 @@ defmodule Elita.Application do
   use Application
 
   import Agent.Manager, only: [launch: 0]
+  import Elita, only: [prime: 0]
   import Mem, only: [setup: 0]
   import Registry, only: [child_spec: 1]
   import Supervisor, only: [start_link: 2]
@@ -14,7 +15,7 @@ defmodule Elita.Application do
   defp boot do
     {:ok, _} = run()
     launch()
-    {:ok, _} = Elita.spawn("el", ["el"], skip_logs: true)
+    {:ok, _} = prime()
     {:ok, self()}
   end
 
