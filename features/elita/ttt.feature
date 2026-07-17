@@ -4,16 +4,16 @@ Feature: Ttt
   Scenario: Alice and Bob play to completion
     * > el
 
-    * el> ttt as alice
+    * > el ttt as alice
 
-    * el> ttt as bob
+    * > el ttt as bob
 
-    * el> alice start a game with bob, you are X, play first
-      | started the game |
+    * > el alice start a game with bob, you are X, play first
+      | I've started the game |
 
-    * el> bob alice is gonna be your opponent, wait for her move
-      | waiting for alice |
+    * > el bob alice is gonna be your opponent, wait for her move
+      | I'm ready to play |
 
-    * el> alice tell me: did the game finish and was it a win or tie?
+    * > el alice tell me: did the game finish and was it a win or tie?
       | game finished |
       | diagonal |
