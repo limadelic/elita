@@ -2,50 +2,20 @@ defmodule Elita do
   use GenServer
 
   import Cfgs, only: [load: 1]
-  import GenServer, only: [call: 3, cast: 2, start_link: 3]
   import History, only: [record: 1]
   import Llm, only: [llm: 1]
   import Mem, only: [create: 0]
   import Msg, only: [user: 1]
   import Reply, only: [deliver: 2]
-  import String, only: [downcase: 1, trim: 1]
+  import String, only: [trim: 1]
   import System, only: [get_env: 1]
   import Tools
 
-  def spawn(name, configs, opts \\ [])
-  def spawn(name, configs, []), do: boot(name, configs, sender: name)
-  def spawn(name, configs, opts), do: boot(name, configs, opts)
-
-  def prime, do: __MODULE__.spawn("el", ["el"], skip_logs: true)
-
-  defp boot(name, configs, opts) do
-    {:ok, pid} = started(__MODULE__, {name, configs, opts}, via(name))
-    :global.whereis_name({name, :puppet}) |> reg(name, pid)
-    {:ok, pid}
-  end
-
-  defp started(m, a, k) do
-    start_link(m, a, name: k) |> join()
-  end
-
-  defp join({:ok, p}), do: {:ok, p}
-  defp join({:error, {:already_started, p}}), do: {:ok, p}
-
-  defp reg(:undefined, name, pid), do: :global.register_name({name, :puppet}, pid)
-  defp reg(_, _, _), do: :ok
-
-  def dispatch(name, msg) do
-    cast(via(name), {:act, msg})
-  end
-
-  def request(name, msg) do
-    call(via(name), {:act, msg}, :infinity)
-  end
-
-  defp via(name) do
-    normalized = name |> to_string() |> downcase()
-    {:via, Registry, {ElitaRegistry, normalized, %{kind: :native, folder: nil}}}
-  end
+  defdelegate spawn(name, configs), to: Elita.Boot
+  defdelegate spawn(name, configs, opts), to: Elita.Boot
+  defdelegate prime(), to: Elita.Boot
+  defdelegate dispatch(name, msg), to: Elita.Boot
+  defdelegate request(name, msg), to: Elita.Boot
 
   def init({name, configs}), do: init({name, configs, [sender: name]})
 
@@ -56,15 +26,12 @@ defmodule Elita do
   end
 
   defp state(name, configs, opts) do
-    %{
-      name: name,
-      config: load(configs),
-      history: [],
-      configs: configs,
-      sender: Keyword.get(opts, :sender, name),
-      skip_logs: Keyword.get(opts, :skip_logs, false)
-    }
+    %{name: name, config: load(configs), history: [], configs: configs,
+      sender: sender(opts, name), skip_logs: skip(opts)}
   end
+
+  defp sender(opts, name), do: Keyword.get(opts, :sender, name)
+  defp skip(opts), do: Keyword.get(opts, :skip_logs, false)
 
   defp seed do
     get_env("TAPE") |> tape()
