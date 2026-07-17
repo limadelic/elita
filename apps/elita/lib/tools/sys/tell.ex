@@ -25,7 +25,7 @@ end
 
 defmodule Tools.Sys.Tell do
   import Agent.Harness, only: [dispatch: 3]
-  import Log, only: [log: 5]
+  import Log, only: [log: 5, agent: 5]
 
   @icon "📢"
 
@@ -34,13 +34,17 @@ defmodule Tools.Sys.Tell do
   def icon, do: @icon
 
   def exec(_, %{"recipient" => recipient, "message" => message}, %{name: sender} = state) do
-    msg = "[from #{sender}] #{message}"
-    log(@icon, "#{sender} → #{recipient}", ": ", message, :yellow)
-    dispatch(recipient, msg, :tell)
+    note(@icon, sender, recipient, message)
+    dispatch(recipient, "[from #{sender}] #{message}", :tell)
     {"sent", state}
   end
 
   def exec(_, _args, state) do
     {"tell needs recipient and message", state}
+  end
+
+  defp note(icon, sender, recipient, message) do
+    log(icon, "#{sender} → #{recipient}", ": ", message, :yellow)
+    agent(icon, "#{sender} → #{recipient}", ": ", message, %{name: sender})
   end
 end
