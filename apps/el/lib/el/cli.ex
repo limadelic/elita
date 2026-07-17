@@ -9,7 +9,7 @@ defmodule El.CLI do
   import El.Commands.Cd, only: [cd: 1]
   import El.Distribution, only: [daemon: 0]
   import El.Command.Ls, only: [list: 1]
-  import El.REPL, only: [run: 1]
+  import El.REPL, only: [run: 1, run: 2]
   import El.Log, only: [setup: 2]
   import Enum, only: [join: 2]
   import El.Ask, only: [invoke: 2]
@@ -70,9 +70,7 @@ defmodule El.CLI do
   defp parse(["cd", path]), do: {:cd, path}
   defp parse(["daemon"]), do: :daemon
   defp parse([]), do: {:repl, "el"}
-  defp parse([agent | rest]) when length(rest) > 0 do
-    {:repl, agent}
-  end
+  defp parse([agent | rest]) when length(rest) > 0, do: {:repl_input, agent, join(rest, " ")}
   defp parse([agent]), do: {:repl, agent}
   defp parse(_), do: :usage
 
@@ -88,6 +86,7 @@ defmodule El.CLI do
   end
 
   defp exec({:repl, agent}), do: run(agent)
+  defp exec({:repl_input, agent, input}), do: run(agent, input)
   defp exec({:ask, tool, agent, msg}), do: ask(agent, msg, tool)
   defp exec({:tell, tool, agent, msg}), do: send(agent, msg, tool)
   defp exec({:spawn, name, agent}), do: spawn(name, agent)
