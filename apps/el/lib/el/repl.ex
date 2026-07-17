@@ -13,6 +13,13 @@ defmodule El.REPL do
     loop(agent, init(agent))
   end
 
+  def run(agent, input) do
+    ensure_all_started(:elita)
+    puppet = init(agent)
+    write("#{agent}> ")
+    handle(agent, puppet, input)
+  end
+
   defp init(agent) do
     reg() |> settle()
     tape() |> settle()
