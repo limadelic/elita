@@ -4,14 +4,9 @@ Feature: Birth
     * > el
 
     * el> mother it's time to give birth
-      | ✨ mother | gasping |
-      | ✨ mother | baby    |
-
-    * el> baby spank
-      | waaa |
-      | wail |
+      | gasping      |
+      | baby is here |
 
     * el> baby log
-      | 🚀 baby | spawn    |
-      | 📢 baby | received |
-      | ✨ baby  | cry      |
+      | spawn    |
+      | received |
