@@ -1,7 +1,7 @@
 defmodule Tools.Sys.Spawn do
   import Elita, only: [spawn: 2]
   import Enum, only: [join: 2]
-  import Log, only: [log: 5]
+  import Log, only: [agent: 5]
   import Map, only: [get: 2, get: 3]
   import Utils.World, only: [agents: 0]
 
@@ -66,19 +66,19 @@ defmodule Tools.Sys.Spawn do
     [name]
   end
 
-  defp run(name, configs, state) do
-    log(name, configs)
+  defp run(name, configs, %{name: spawner} = state) do
+    log(name, configs, spawner)
     started(spawn(name, configs), name)
     {"spawned", state}
   end
 
   defp started({:ok, _pid}, _name), do: :ok
 
-  defp log(name, [name]) do
-    log(@icon, name, "", "", :green)
+  defp log(name, [name], spawner) do
+    agent(@icon, name, "", "", %{name: spawner})
   end
 
-  defp log(name, config) do
-    log(@icon, name, " as ", join(config, ", "), :green)
+  defp log(name, config, spawner) do
+    agent(@icon, name, " as ", join(config, ", "), %{name: spawner})
   end
 end
