@@ -4,6 +4,10 @@ Feature: Ttt
   Scenario: Alice and Bob play to completion
     * > el
 
+    * el> ttt as alice
+
+    * el> ttt as bob
+
     * el> alice start a game with bob, you are X, play first
       | started the game |
 
