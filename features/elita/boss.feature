@@ -4,11 +4,21 @@ Feature: Boss
   Scenario: Software manager
     * > el boss
 
+    * > el worker as dev
+
+    * > el worker as qa
+
     * boss> you manage a software development team with a dev and a qa
-      | I'm ready to manage the team |
+      | ready |
 
     * boss> we need more test created
-      | Done |
+      | done |
+
+    * > el dev did you receive a task from boss?
+      | no |
+
+    * > el qa did you receive a task from boss?
+      | yes |
 
   @tape:office
   Scenario: Office boss
