@@ -18,9 +18,7 @@ defmodule El.Repl.Route do
   def result(_target, _agent, _pid), do: :ok
 
   def via([_w], p, i, agent), do: {ask(p, i), agent, p}
-
   def via([w, msg], p, _i, agent), do: send(w, msg, p, agent, w in agents())
-
   def via(_, p, i, agent), do: {ask(p, i), agent, p}
 
   def send(w, msg, p, _agent, true) do
@@ -33,8 +31,6 @@ defmodule El.Repl.Route do
   end
 
   def choose(nil, default), do: default
-
   def choose(:undefined, default), do: default
-
   def choose(t, _), do: t
 end

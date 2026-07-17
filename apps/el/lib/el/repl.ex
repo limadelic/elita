@@ -37,9 +37,7 @@ defmodule El.REPL do
   end
 
   defp pick(nil, agent), do: native(agent)
-
   defp pick(:undefined, agent), do: native(agent)
-
   defp pick(pid, _agent), do: pid
 
   defp native(agent) do
@@ -50,9 +48,7 @@ defmodule El.REPL do
   end
 
   defp settle({:ok, _pid}), do: :ok
-
   defp settle({:error, {:already_started, _pid}}), do: :ok
-
   defp settle({:error, _}), do: :ok
 
   defp loop(agent, puppet) do
@@ -67,11 +63,9 @@ defmodule El.REPL do
   end
 
   defp proceed(:stop, _agent, _puppet), do: :ok
-
   defp proceed(:ok, agent, puppet), do: loop(agent, puppet)
 
   defp handle(_agent, _puppet, ""), do: :ok
-
   defp handle(_agent, _puppet, "/exit"), do: :stop
 
   defp handle(agent, puppet, input) when is_pid(puppet) do
@@ -79,11 +73,7 @@ defmodule El.REPL do
   end
 
   defp handle(agent, nil, "log"), do: agent |> log() |> puts()
-
   defp handle(agent, nil, input), do: dispatch(agent, input, :ask) |> puts()
-
   defp handle(agent, :undefined, "log"), do: agent |> log() |> puts()
-
   defp handle(agent, :undefined, input), do: dispatch(agent, input, :ask) |> puts()
-
 end
