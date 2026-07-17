@@ -11,19 +11,34 @@ module Assert
     tbl.raw.all? { |row| row.size == 1 }
   end
 
-  # rubocop:disable Metrics/CyclomaticComplexity, Metrics/MethodLength
   def snap(tbl)
-    screen_render = @screen ? @screen.to_s : ""
-    snap_lines = screen_render.split("\n")
-    snap_lines.shift while snap_lines.first&.empty?
-    snap_lines.pop while snap_lines.last&.empty?
+    timeout = deadline()
+    snap_lines = wait_for_screen_settle(timeout)
     golden_lines = tbl.raw.map { |row| row[0].rstrip }
     unless block_found?(golden_lines, snap_lines)
-      msg = "Expected snap block:\n#{golden_lines.join("\n")}\n\nIn:\n#{snap_lines.join("\n")}"
-      raise msg
+      snap_detail = snap_lines.each_with_index.map { |l, i| "  [#{i}] len=#{l.length}" }.join("\n")
+      raise "Expected snap block (#{golden_lines.length} lines):\nActual snap (#{snap_lines.length} lines):\n#{snap_detail}"
     end
   end
-  # rubocop:enable Metrics/CyclomaticComplexity, Metrics/MethodLength
+
+  def screen_lines
+    screen_render = @screen ? @screen.to_s : ""
+    lines = screen_render.split("\n")
+    lines.shift while lines.first&.empty?
+    lines.pop while lines.last&.empty?
+    lines
+  end
+
+  def wait_for_screen_settle(deadline)
+    loop do
+      current = screen_lines
+      sleep 0.5
+      next_frame = screen_lines
+
+      return current if current == next_frame
+      raise "Timeout waiting for screen settle" if Time.now > deadline
+    end
+  end
 
   # rubocop:disable Metrics/CyclomaticComplexity, Metrics/MethodLength
   def block_found?(golden_lines, snap_lines)
