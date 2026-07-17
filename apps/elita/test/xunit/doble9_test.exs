@@ -13,6 +13,8 @@ defmodule Doble9Test do
 
   test "dominoes on start" do
     ask(:doble9, "start a new game with players: top, left, bottom, right")
-    verify("9", ask(:doble9, "i need 10 dominoes"))
+    response = ask(:doble9, "i need 10 dominoes")
+    verify("[1,4]", response)
+    verify("[9,9]", response)
   end
 end
