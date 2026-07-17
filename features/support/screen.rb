@@ -160,7 +160,6 @@ class Screen
   end
 
   def write_char(char)
-    char = @sgr.fill_char if char == ' ' && @sgr.active?
     set_cell(@cursor_x, @cursor_y, char)
     @cursor_x += 1
     @cursor_x = @width - 1 if @cursor_x >= @width
