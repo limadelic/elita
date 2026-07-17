@@ -1,7 +1,7 @@
 defmodule Elita.Boot do
   import GenServer, only: [call: 3, cast: 2, start_link: 3]
-  import String, only: [downcase: 1]
   import Kernel, except: [spawn: 3]
+  import String, only: [downcase: 1]
 
   def spawn(name, configs, opts \\ [])
   def spawn(name, configs, []), do: boot(name, configs, sender: name)
