@@ -1,7 +1,6 @@
 Feature: Clock
 
   Scenario: Clock tells the time
-    * > el clock
-
-    * clock> what time is it
+    * > el
+    * > el clock what time is it
       | 2025-07-07 10:00 |
