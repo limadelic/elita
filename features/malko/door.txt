@@ -3,7 +3,7 @@
 │                 Welcome back mike!                 │ started                 │
 │                                                    │ Run /init to create a … │
 │                      ▗ ▗   ▖ ▖                     │ ─────────────────────── │
-│                                                    │ What's new              │
+│                       ███████                      │ What's new              │
 │                        ▘▘ ▝▝                       │ Added screen reader mo… │
 │    Haiku 4.5 · Claude Max · mikemps@gmail.com's    │ Added `vimInsertModeRe… │
 │    Organization                                    │ Added `CLAUDE_CODE_PRO… │

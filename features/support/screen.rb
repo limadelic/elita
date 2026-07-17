@@ -1,10 +1,10 @@
 class Screen
   WIDTH = 80
   HEIGHT = 24
-
   def initialize(width = WIDTH, height = HEIGHT)
     @width = width
     @height = height
+    @sgr = Sgr.new
     clear
   end
 
@@ -29,6 +29,7 @@ class Screen
     @cursor_x = 0
     @cursor_y = 0
     @escape_buffer = nil
+    @sgr.reset
   end
 
   def process_char(char)
@@ -124,46 +125,42 @@ class Screen
     case seq
     when /\e\[2J/ then clear
     when /\e\[K/ then clear_eol
+    when /\e\[.*m$/ then @sgr.parse(seq)
     end
   end
 
   def cursor_up(n)
-    n = n > 0 ? n : 1
-    @cursor_y = [@cursor_y - n, 0].max
+    @cursor_y = [[@cursor_y - (n > 0 ? n : 1), 0].max, @height - 1].min
   end
 
   def cursor_down(n)
-    n = n > 0 ? n : 1
-    @cursor_y = [@cursor_y + n, @height - 1].min
+    @cursor_y = [[@cursor_y + (n > 0 ? n : 1), @height - 1].min, 0].max
   end
 
   def cursor_right(n)
-    n = n > 0 ? n : 1
-    @cursor_x = [@cursor_x + n, @width - 1].min
+    @cursor_x = [[@cursor_x + (n > 0 ? n : 1), @width - 1].min, 0].max
   end
 
   def cursor_left(n)
-    n = n > 0 ? n : 1
-    @cursor_x = [@cursor_x - n, 0].max
+    @cursor_x = [[@cursor_x - (n > 0 ? n : 1), 0].max, @width - 1].min
   end
 
   def cursor_to_col(col)
-    col = col > 0 ? col : 1
-    @cursor_x = [col - 1, @width - 1].min
+    @cursor_x = [col > 0 ? col - 1 : 0, @width - 1].min
   end
 
   def cursor_pos(row, col)
-    row = row > 0 ? row : 1
-    col = col > 0 ? col : 1
-    @cursor_y = [row - 1, @height - 1].min
-    @cursor_x = [col - 1, @width - 1].min
+    @cursor_y = [row > 0 ? row - 1 : 0, @height - 1].min
+    @cursor_x = [col > 0 ? col - 1 : 0, @width - 1].min
   end
 
   def clear_eol
-    (@width - 1).downto(@cursor_x) { |x| set_cell(x, @cursor_y, ' ') }
+    char = @sgr.fill_char
+    (@width - 1).downto(@cursor_x) { |x| set_cell(x, @cursor_y, char) }
   end
 
   def write_char(char)
+    char = @sgr.fill_char if char == ' ' && @sgr.active?
     set_cell(@cursor_x, @cursor_y, char)
     @cursor_x += 1
     @cursor_x = @width - 1 if @cursor_x >= @width
