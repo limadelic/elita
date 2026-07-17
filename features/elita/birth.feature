@@ -4,7 +4,7 @@ Feature: Birth
     * > el mother
 
     * mother> it's time to give birth
-      | arrived | spawned |
+      | arrived |
 
     * mother> log
       | 🚀 baby | spawn |
