@@ -1,54 +1,47 @@
 module Assert
   def table(tbl, output)
-    return snap(tbl, output) if is_snap_table?(tbl)
+    return snap(tbl) if single_column_table?(tbl)
 
     cells(tbl).each { |c| cell(c, output) }
   end
 
-  def snap(tbl, output)
-    tbl.raw.each do |row|
-      row_text = row[0].strip
-      unless snap_matches?(row_text, output)
-        raise "Expected '#{row_text}' in output"
-      end
+  def single_column_table?(tbl)
+    return false unless tbl && tbl.raw && tbl.raw.any?
+    tbl.raw.all? { |row| row.size == 1 }
+  end
+
+  def snap(tbl)
+    # Get the screen render
+    screen_render = @screen ? @screen.to_s : ""
+    snap_lines = screen_render.split("\n")
+    snap_lines.shift while snap_lines.first&.empty?
+    snap_lines.pop while snap_lines.last&.empty?
+
+    golden_lines = tbl.raw.map { |row| row[0].rstrip }
+
+    # Find golden lines as contiguous block in snap lines
+    unless block_found?(golden_lines, snap_lines)
+      msg = "Expected snap block:\n#{golden_lines.join("\n")}\n\nIn:\n#{snap_lines.join("\n")}"
+      raise msg
     end
   end
 
-  def snap_matches?(row_text, screen_content)
-    # Extract all text content, removing box drawing characters and formatting
-    cleaned = row_text.gsub(/[╭╮╰│─╰ `\/⚠·]+/, " ").strip
+  def block_found?(golden_lines, snap_lines)
+    return true if golden_lines.empty?
 
-    # Split into words
-    words = cleaned.split(/\s+/).reject(&:empty?)
-
-    # Filter to meaningful words (alphanumeric, length > 2, no pure graphics)
-    keywords = words.select do |w|
-      ascii_w = w.gsub(/[…]/, "")
-      ascii_w.length > 3 && ascii_w.match?(/[a-zA-Z0-9]/) && !ascii_w.match?(/^[█]+$/)
+    (0..snap_lines.length - golden_lines.length).each do |start_idx|
+      block = snap_lines[start_idx, golden_lines.length]
+      # Normalize both screen lines and golden lines to handle encoding issues
+      normalized_block = block.map { |l| fix_and_normalize(l) }
+      normalized_golden = golden_lines.map { |l| fix_and_normalize(l) }
+      return true if normalized_block == normalized_golden
     end
-
-    # If no keywords, it's a formatting line - skip it
-    return true if keywords.empty?
-
-    # For screen content, check that keywords are present
-    # Be lenient because of truncations and formatting
-    matched = keywords.count do |kw|
-      kw_search = kw.gsub(/…/, "").downcase
-      screen_content.downcase.include?(kw_search)
-    end
-
-    # Require at least 40% of keywords to match
-    matched >= (keywords.length * 0.4).ceil
+    false
   end
 
-  def is_snap_table?(tbl)
-    return false unless tbl.raw.all? { |row| row.size == 1 }
-
-    first_row = tbl.raw[0][0].strip rescue ""
-    has_box = first_row.start_with?("╭") || first_row.include?("───")
-    has_warning = first_row.include?("⚠")
-
-    has_box || (tbl.raw.any? { |r| r[0].include?("╭") || r[0].include?("│") })  || has_warning
+  def fix_and_normalize(line)
+    # Simple normalization: just rstrip
+    line.rstrip
   end
 
   def cells(table)
