@@ -10,4 +10,5 @@ Feature: Birth
       | 🚀 baby | spawn |
 
     * baby> spank
-      | cry |
+      | WAAAAAHHHHHHH |
+      | wailing       |

@@ -4,7 +4,7 @@ defmodule BirthTest do
 
   test "mother births a baby" do
     spawn(:mother)
-    ask(:mother, "it's time to give birth")
-    verify("cry", ask(:baby, "spank"))
+    verify("arrived", ask(:mother, "it's time to give birth"))
+    verify("wailing", ask(:baby, "spank"))
   end
 end
