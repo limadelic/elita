@@ -4,11 +4,17 @@ Feature: Door
 
   Scenario: First trip into Malkovich
     * > el claude malko
-      | Claude Code v2.1.208 |
-      | Tips for getting |
-      | Welcome back mike! |
-      | Run /init to create |
-      | ▗ ▗   ▖ ▖ |
+      | ╭─── Claude Code v2.1.208 ─────────────────────────────────────────────────────╮ |
+      | │                                                    │ Tips for getting        │ |
+      | │                 Welcome back mike!                 │ started                 │ |
+      | │                                                    │ Run /init to create a … │ |
+      | │                      ▗ ▗   ▖ ▖                     │ ─────────────────────── │ |
+      | │                       ███████                      │ What's new              │ |
+      | │                        ▘▘ ▝▝                       │ Added screen reader mo… │ |
+      | │    Haiku 4.5 · Claude Max · mikemps@gmail.com's    │ Added `vimInsertModeRe… │ |
+      | │    Organization                                    │ ─────────────────────── │ |
+      | │   ~/dev/self/elita/walter/apps/elita/agents/elita  │ /release-notes for more │ |
+      | ╰──────────────────────────────────────────────────────────────────────────────╯ |
     * malko> /exit
 
   @wip

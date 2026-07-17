@@ -29,7 +29,8 @@ class Sgr
 
   def parse_param(params, i)
     param = params[i].to_i
-    return if [0, 49].include?(param)
+    return @bg_color = nil if param == 0
+    return @bg_color = nil if param == 49
 
     return parse_bg(params, i) if param == 48
   end

@@ -7,37 +7,37 @@ module Assert
 
   def single_column_table?(tbl)
     return false unless tbl && tbl.raw && tbl.raw.any?
+
     tbl.raw.all? { |row| row.size == 1 }
   end
 
+  # rubocop:disable Metrics/CyclomaticComplexity, Metrics/MethodLength
   def snap(tbl)
-    # Get the screen render
     screen_render = @screen ? @screen.to_s : ""
     snap_lines = screen_render.split("\n")
     snap_lines.shift while snap_lines.first&.empty?
     snap_lines.pop while snap_lines.last&.empty?
-
     golden_lines = tbl.raw.map { |row| row[0].rstrip }
-
-    # Find golden lines as contiguous block in snap lines
     unless block_found?(golden_lines, snap_lines)
       msg = "Expected snap block:\n#{golden_lines.join("\n")}\n\nIn:\n#{snap_lines.join("\n")}"
       raise msg
     end
   end
+  # rubocop:enable Metrics/CyclomaticComplexity, Metrics/MethodLength
 
+  # rubocop:disable Metrics/CyclomaticComplexity, Metrics/MethodLength
   def block_found?(golden_lines, snap_lines)
     return true if golden_lines.empty?
 
     (0..snap_lines.length - golden_lines.length).each do |start_idx|
       block = snap_lines[start_idx, golden_lines.length]
-      # Normalize both screen lines and golden lines to handle encoding issues
       normalized_block = block.map { |l| fix_and_normalize(l) }
       normalized_golden = golden_lines.map { |l| fix_and_normalize(l) }
       return true if normalized_block == normalized_golden
     end
     false
   end
+  # rubocop:enable Metrics/CyclomaticComplexity, Metrics/MethodLength
 
   def fix_and_normalize(line)
     # Simple normalization: just rstrip
