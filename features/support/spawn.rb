@@ -102,12 +102,12 @@ module Spawn
     return "claude" if args.include?("claude")
 
     words = args.split
-    words.empty? ? "el" : words.last
+    words.empty? ? "el" : words.first
   end
 
   def session_name(args)
     words = args.split
-    words.empty? ? "el" : words.last
+    words.empty? ? "el" : words.first
   end
 
   def encode(value)

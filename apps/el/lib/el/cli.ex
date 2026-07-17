@@ -52,6 +52,7 @@ defmodule El.CLI do
   defp name(["ls" | _]), do: "default"
   defp name(["cd" | _]), do: "default"
   defp name(["daemon"]), do: "default"
+  defp name([agent | rest]) when length(rest) > 0, do: agent
   defp name([agent]), do: agent
   defp name([]), do: "el"
 
@@ -69,6 +70,9 @@ defmodule El.CLI do
   defp parse(["cd", path]), do: {:cd, path}
   defp parse(["daemon"]), do: :daemon
   defp parse([]), do: {:repl, "el"}
+  defp parse([agent | rest]) when length(rest) > 0 do
+    {:ask, nil, agent, rest |> join(" ")}
+  end
   defp parse([agent]), do: {:repl, agent}
   defp parse(_), do: :usage
 
