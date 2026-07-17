@@ -43,6 +43,10 @@ defmodule Tools.Sys.Tell do
     {"tell needs recipient and message", state}
   end
 
+  defp note(_icon, "el", _recipient, _message) do
+    :ok
+  end
+
   defp note(icon, sender, recipient, message) do
     log(icon, "#{sender} → #{recipient}", ": ", message, :yellow)
     agent(icon, "#{sender} → #{recipient}", ": ", message, %{name: sender})

@@ -74,6 +74,10 @@ defmodule Tools.Sys.Spawn do
 
   defp started({:ok, _pid}, _name), do: :ok
 
+  defp log(_name, _config, "el") do
+    :ok
+  end
+
   defp log(name, [name], spawner) do
     agent(@icon, name, " | ", "spawn", %{name: spawner})
   end

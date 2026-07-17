@@ -46,6 +46,10 @@ defmodule Tools.Sys.Ask do
     {"ask needs recipient and question", state}
   end
 
+  def query("el", _recipient, _question) do
+    :ok
+  end
+
   def query(sender, recipient, question) do
     msg = "#{@icon} #{sender} → #{recipient} | #{question}\n"
     write(msg)
@@ -57,12 +61,6 @@ defmodule Tools.Sys.Ask do
   end
 
   def answer(_agent, _text), do: :ok
-
-  defp emit("el", text) do
-    msg = "#{trim(text)}\n"
-    write(msg)
-    el(msg)
-  end
 
   defp emit(agent, text) do
     msg = "#{@reply} #{agent} | #{trim(text)}\n"
