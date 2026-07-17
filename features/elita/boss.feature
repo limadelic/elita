@@ -42,11 +42,14 @@ Feature: Boss
     * michael> we need 50 copies of the quarterly sales report
       | done |
 
-    * > el pam did you receive a task to make copies?
+    * > el jim did you receive a task?
       | no |
 
     * > el pam did you receive a task to make copies?
       | yes |
 
-    * > el jim did you receive a task?
-      | no |
+    * michael> log
+      | 📢 michael → dwight | 50 copies |
+
+    * dwight> log
+      | 📢 dwight → pam | 50 copies |

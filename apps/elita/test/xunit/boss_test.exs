@@ -22,12 +22,7 @@ defmodule BossTest do
     tell(:michael, "you manage dwight the assistant regional manager")
     tell(:dwight, "you manage pam the receptionist and jim the salesman")
     verify("done", ask(:michael, "we need 50 copies of the quarterly sales report"))
-    await(fn -> pam_received_task?() end)
     verify("no", ask(:jim, "did you receive a task?"))
-  end
-
-  defp pam_received_task? do
-    result = ask(:pam, "did you receive a task to make copies?")
-    String.downcase(result) =~ ~r/\byes\b/
+    verify("yes", ask(:pam, "did you receive a task to make copies?"))
   end
 end

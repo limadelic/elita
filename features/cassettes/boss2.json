@@ -114,6 +114,24 @@
   {
     "a": [
       {
+        "text": "Yes, I did. Dwight just told me that Michael needs 50 copies of the quarterly sales report made right away. I'm supposed to get on it immediately.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "pam",
+      "messages": [
+        {
+          "content": "did you receive a task to make copies?",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
         "text": "No, I didn't receive a task to make copies. We haven't discussed anything about copying work yet in our conversation.",
         "type": "text"
       }
@@ -169,24 +187,6 @@
         }
       ],
       "n": 3
-    }
-  },
-  {
-    "a": [
-      {
-        "text": "Yes, I did. Dwight just told me that Michael needs 50 copies of the quarterly sales report made right away. I'm supposed to get on it immediately.",
-        "type": "text"
-      }
-    ],
-    "q": {
-      "agent": "pam",
-      "messages": [
-        {
-          "content": "did you receive a task to make copies?",
-          "role": "user"
-        }
-      ],
-      "n": 5
     }
   },
   {
