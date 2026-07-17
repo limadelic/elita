@@ -1,7 +1,7 @@
 Feature: Boss
 
   @tape:boss
-  Scenario: Boss manages and delegates
+  Scenario: Software manager
     * > el boss
 
     * boss> you manage a software development team with a dev and a qa
@@ -11,7 +11,7 @@ Feature: Boss
       | Done |
 
   @tape:office
-  Scenario: Boss delegates down the chain
+  Scenario: Office boss
     * > el
 
     * el> have michael the boss manage dwight the assistant regional manager
