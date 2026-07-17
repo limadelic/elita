@@ -5,17 +5,23 @@ defmodule El.Repl.Route do
   import String, only: [split: 3]
   import Utils.World, only: [agents: 0]
   import El.Distribution, only: [wait: 1]
+  import Elita, only: [spawn: 2]
 
   def route([name, "log"], _a, _p, _i), do: name |> log() |> puts()
 
   def route(_x, agent, puppet, input) do
-    words = input |> split(" ", parts: 2)
+    words = input |> split(" ", parts: 3)
     {response, target, pid} = via(words, puppet, input, agent)
     puts(response)
     result(target, agent, pid)
   end
 
   def result(_target, _agent, _pid), do: :ok
+
+  def via([config, "as", name], _p, _i, _agent) do
+    {:ok, pid} = spawn(name, [config])
+    {name <> " spawned", name, pid}
+  end
 
   def via([_w], p, i, agent), do: {ask(p, i), agent, p}
   def via([w, msg], p, _i, agent), do: send(w, msg, p, agent, w in agents())
