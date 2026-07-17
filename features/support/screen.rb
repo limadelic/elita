@@ -65,22 +65,22 @@ class Screen
   end
 
   def escape_complete?
-    return false unless @escape_buffer
-    return false if @escape_buffer.length < 2
+    return false unless @escape_buffer && @escape_buffer.length >= 2
 
-    csi_escape? ? csi_complete? : two_char?
+    check_complete
   end
 
-  def csi_escape?
-    @escape_buffer[1] == '['
+  def check_complete
+    case @escape_buffer[1]
+    when '[' then @escape_buffer[-1].match?(/[A-Za-z]/)
+    when ']' then osc_end?
+    when /[(*+)]/ then @escape_buffer.length >= 3
+    else @escape_buffer.length == 2
+    end
   end
 
-  def csi_complete?
-    @escape_buffer[-1].match?(/[A-Za-z]/)
-  end
-
-  def two_char?
-    @escape_buffer.length == 2
+  def osc_end?
+    @escape_buffer.include?("\x07") || @escape_buffer.end_with?("\e\\")
   end
 
   def process_escape
@@ -96,15 +96,24 @@ class Screen
   end
 
   def cursor_seq(seq)
-    return cursor_up($1.to_i) if seq =~ /\e\[([0-9]*)A/
-    return cursor_down($1.to_i) if seq =~ /\e\[([0-9]*)B/
-    return cursor_right($1.to_i) if seq =~ /\e\[([0-9]*)C/
-    return cursor_left($1.to_i) if seq =~ /\e\[([0-9]*)D/
+    return handle_arrow_keys(seq) || handle_cursor_pos(seq)
+  end
 
-    handle_cursor_pos(seq)
+  def handle_arrow_keys(seq)
+    keys = {
+      'A' => :cursor_up, 'B' => :cursor_down,
+      'C' => :cursor_right, 'D' => :cursor_left, 'G' => :cursor_to_col
+    }
+    return false unless seq =~ /\e\[([0-9]*)([A-DG])/
+
+    count = $1.to_i
+    key = $2
+    send(keys[key], count)
   end
 
   def handle_cursor_pos(seq)
+    return cursor_pos(1, 1) if seq =~ /\e\[H/
+    return cursor_pos(1, 1) if seq =~ /\e\[f/
     return cursor_pos($1.to_i, $2.to_i) if seq =~ /\e\[([0-9]*);([0-9]*)H/
     return cursor_pos($1.to_i, $2.to_i) if seq =~ /\e\[([0-9]*);([0-9]*)f/
 
@@ -138,6 +147,11 @@ class Screen
     @cursor_x = [@cursor_x - n, 0].max
   end
 
+  def cursor_to_col(col)
+    col = col > 0 ? col : 1
+    @cursor_x = [col - 1, @width - 1].min
+  end
+
   def cursor_pos(row, col)
     row = row > 0 ? row : 1
     col = col > 0 ? col : 1
@@ -152,7 +166,7 @@ class Screen
   def write_char(char)
     set_cell(@cursor_x, @cursor_y, char)
     @cursor_x += 1
-    wrap_line if @cursor_x >= @width
+    @cursor_x = @width - 1 if @cursor_x >= @width
   end
 
   def wrap_line
@@ -176,6 +190,13 @@ module ScreenModule
   def screen
     @screen ||= Screen.new
     @screen.to_s
+  end
+
+  def snap
+    lines = @screen.to_s.split("\n")
+    lines.shift while lines.first&.empty?
+    lines.pop while lines.last&.empty?
+    lines.join("\n")
   end
 end
 
