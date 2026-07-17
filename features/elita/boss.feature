@@ -14,6 +14,9 @@ Feature: Boss
     * boss> we need more test created
       | done |
 
+    * boss> log
+      | boss qa |
+
     * > el dev did you receive a task from boss?
       | no |
 
