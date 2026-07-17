@@ -5,7 +5,7 @@ Feature: Birth
 
     * mother> it's time to give birth
       | the baby has arrived |
-      | congratulations       |
+      | congratulations      |
 
     * mother> log
       | 🚀 baby | spawn |

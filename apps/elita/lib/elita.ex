@@ -57,7 +57,8 @@ defmodule Elita do
 
   defp state(name, configs, opts) do
     %{name: name, config: load(configs), history: [], configs: configs,
-      sender: Keyword.get(opts, :sender, name)}
+      sender: Keyword.get(opts, :sender, name),
+      skip_logs: Keyword.get(opts, :skip_logs, false)}
   end
 
   defp seed do

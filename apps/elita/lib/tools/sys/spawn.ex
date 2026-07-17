@@ -66,23 +66,27 @@ defmodule Tools.Sys.Spawn do
     [name]
   end
 
-  defp run(name, configs, %{name: spawner} = state) do
-    log(name, configs, spawner)
+  defp run(name, configs, %{name: spawner, skip_logs: silent} = state) do
+    log(name, configs, spawner, silent)
     started(spawn(name, configs), name)
     {"spawned", state}
   end
 
   defp started({:ok, _pid}, _name), do: :ok
 
-  defp log(_name, _config, "el") do
+  defp log(_name, _config, _spawner, true) do
     :ok
   end
 
-  defp log(name, [name], spawner) do
+  defp log(_name, _config, "el", _) do
+    :ok
+  end
+
+  defp log(name, [name], spawner, false) do
     agent(@icon, name, " | ", "spawn", %{name: spawner})
   end
 
-  defp log(name, config, spawner) do
+  defp log(name, config, spawner, false) do
     agent(@icon, name, " as ", join(config, ", "), %{name: spawner})
   end
 end

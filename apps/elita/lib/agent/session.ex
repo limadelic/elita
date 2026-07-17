@@ -38,6 +38,7 @@ defmodule Agent.Session do
     %{name: fetch!(opts, :name), folder: fetch!(opts, :folder)}
     |> put(:self, get(opts, :self, nil))
     |> put(:runner, get(opts, :runner, &run/2))
+    |> put(:skip_logs, get(opts, :skip_logs, false))
   end
 
   @impl true

@@ -16,4 +16,4 @@ Feature: Ttt
 
     * > el alice tell me: did the game finish and was it a win or tie?
       | game finished |
-      | diagonal |
+      | diagonal      |
