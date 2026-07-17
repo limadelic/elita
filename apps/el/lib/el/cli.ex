@@ -71,7 +71,7 @@ defmodule El.CLI do
   defp parse(["daemon"]), do: :daemon
   defp parse([]), do: {:repl, "el"}
   defp parse([agent | rest]) when length(rest) > 0 do
-    {:ask, nil, agent, rest |> join(" ")}
+    {:repl, agent}
   end
   defp parse([agent]), do: {:repl, agent}
   defp parse(_), do: :usage
