@@ -35,7 +35,11 @@ defmodule Tools.Sys.Ask do
 
   def icon, do: @icon
 
-  def exec(_, %{"recipient" => recipient, "question" => question}, %{name: sender, skip_logs: silent} = state) do
+  def exec(
+        _,
+        %{"recipient" => recipient, "question" => question},
+        %{name: sender, skip_logs: silent} = state
+      ) do
     query(sender, recipient, question, silent)
     result = dispatch(recipient, question, :ask)
     reply(sender, result, silent)

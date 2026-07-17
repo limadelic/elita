@@ -33,7 +33,11 @@ defmodule Tools.Sys.Tell do
 
   def icon, do: @icon
 
-  def exec(_, %{"recipient" => recipient, "message" => message}, %{name: sender, skip_logs: silent} = state) do
+  def exec(
+        _,
+        %{"recipient" => recipient, "message" => message},
+        %{name: sender, skip_logs: silent} = state
+      ) do
     note(@icon, sender, recipient, message, silent)
     dispatch(recipient, "[from #{sender}] #{message}", :tell)
     {"sent", state}

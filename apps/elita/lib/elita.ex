@@ -13,10 +13,10 @@ defmodule Elita do
   import Tools
 
   def spawn(name, configs, opts \\ [])
-  def spawn(name, configs, []), do: boot(name, configs, [sender: name])
+  def spawn(name, configs, []), do: boot(name, configs, sender: name)
   def spawn(name, configs, opts), do: boot(name, configs, opts)
 
-  def prime, do: __MODULE__.spawn("el", ["el"], [skip_logs: true])
+  def prime, do: __MODULE__.spawn("el", ["el"], skip_logs: true)
 
   defp boot(name, configs, opts) do
     {:ok, pid} = started(__MODULE__, {name, configs, opts}, via(name))
@@ -33,6 +33,7 @@ defmodule Elita do
 
   defp reg(:undefined, name, pid), do: :global.register_name({name, :puppet}, pid)
   defp reg(_, _, _), do: :ok
+
   def dispatch(name, msg) do
     cast(via(name), {:act, msg})
   end
@@ -47,6 +48,7 @@ defmodule Elita do
   end
 
   def init({name, configs}), do: init({name, configs, [sender: name]})
+
   def init({name, configs, opts}) do
     create()
     seed()
@@ -54,9 +56,14 @@ defmodule Elita do
   end
 
   defp state(name, configs, opts) do
-    %{name: name, config: load(configs), history: [], configs: configs,
+    %{
+      name: name,
+      config: load(configs),
+      history: [],
+      configs: configs,
       sender: Keyword.get(opts, :sender, name),
-      skip_logs: Keyword.get(opts, :skip_logs, false)}
+      skip_logs: Keyword.get(opts, :skip_logs, false)
+    }
   end
 
   defp seed do
@@ -86,6 +93,7 @@ defmodule Elita do
 
   defp branch(true, _, msg), do: [msg]
   defp branch(false, history, msg), do: history ++ [msg]
+
   defp act(state) do
     state |> llm() |> exec() |> record() |> done()
   end
