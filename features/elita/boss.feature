@@ -35,10 +35,10 @@ Feature: Boss
       | 📢 michael → Dwight | get it done |
 
     * el> ask pam do you have a task
-      | 📢 dwight → Pam | 50 copies of the quarterly sales report |
-      | ✨ pam           | I'll get these done right away          |
-      | ✨ dwight        | Pam will have those copies ready        |
-      | ✨ pam           | not at the moment                       |
+      | 📢 dwight → Pam | get this done immediately |
+      | ✨ pam | get these done right away |
+      | ✨ dwight | pam will have those copies ready |
+      | ✨ pam | not at the moment |
 
     * el> ask jim do you have a task
-      | ✨ jim | no, i don't have a task |
+      | ✨ jim | minimal effort |
