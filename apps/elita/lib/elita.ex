@@ -4,6 +4,7 @@ defmodule Elita do
   import Cfgs, only: [load: 1]
   import History, only: [record: 1]
   import Llm, only: [llm: 1]
+  import Map, only: [merge: 2]
   import Mem, only: [create: 0]
   import Msg, only: [user: 1]
   import Reply, only: [deliver: 2]
@@ -26,8 +27,8 @@ defmodule Elita do
   end
 
   defp state(name, configs, opts) do
-    %{name: name, config: load(configs), history: [], configs: configs,
-      sender: sender(opts, name), skip_logs: skip(opts)}
+    base = %{name: name, config: load(configs), history: [], configs: configs}
+    merge(base, %{sender: sender(opts, name), skip_logs: skip(opts)})
   end
 
   defp sender(opts, name), do: Keyword.get(opts, :sender, name)
