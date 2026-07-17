@@ -14,7 +14,7 @@ defmodule Elita do
 
   def spawn(name, configs) do
     {:ok, pid} = started(__MODULE__, {name, configs}, via(name))
-    publish(name)
+    publish(name, pid)
     {:ok, pid}
   end
 
@@ -23,15 +23,15 @@ defmodule Elita do
   defp accept({:ok, p}), do: {:ok, p}
   defp accept({:error, {:already_started, p}}), do: {:ok, p}
 
-  defp publish(name) do
-    publish(name, :global.whereis_name({name, :puppet}))
+  defp publish(name, pid) do
+    publish(name, pid, :global.whereis_name({name, :puppet}))
   end
 
-  defp publish(name, :undefined) do
-    :global.register_name({name, :puppet}, self())
+  defp publish(name, pid, :undefined) do
+    :global.register_name({name, :puppet}, pid)
   end
 
-  defp publish(_name, _pid), do: :ok
+  defp publish(_name, _pid, _registered), do: :ok
 
   def dispatch(name, msg) do
     cast(via(name), {:act, msg})
@@ -59,6 +59,10 @@ defmodule Elita do
 
   defp prime(nil), do: :ok
   defp prime(_), do: :rand.seed(:exsss, {1, 2, 3})
+
+  def handle_call({:ask, msg}, from, state) do
+    handle_call({:act, msg}, from, state)
+  end
 
   def handle_call({:act, msg}, _, state) do
     act(msg, state)

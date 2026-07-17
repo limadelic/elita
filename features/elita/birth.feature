@@ -8,3 +8,6 @@ Feature: Birth
 
     * mother> log
       | 🚀 baby | spawn |
+
+    * baby> spank
+      | cry |
