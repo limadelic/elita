@@ -12,18 +12,21 @@ module Assert
   end
 
   def snap(tbl)
-    timeout = deadline()
-    snap_lines = wait_for_screen_settle(timeout)
+    snap_lines = wait_for_screen_settle(deadline())
     golden_lines = tbl.raw.map { |row| row[0].rstrip }
-    unless block_found?(golden_lines, snap_lines)
-      snap_detail = snap_lines.each_with_index.map { |l, i| "  [#{i}] len=#{l.length}" }.join("\n")
-      raise "Expected snap block (#{golden_lines.length} lines):\nActual snap (#{snap_lines.length} lines):\n#{snap_detail}"
-    end
+    return if block_found?(golden_lines, snap_lines)
+
+    detail = snap_lines.each_with_index.map { |l, i| "  [#{i}] len=#{l.length}" }.join("\n")
+    raise "Expected snap block (#{golden_lines.length} lines):\n" \
+          "Actual snap (#{snap_lines.length} lines):\n#{detail}"
   end
 
   def screen_lines
-    screen_render = @screen ? @screen.to_s : ""
-    lines = screen_render.split("\n")
+    lines = (@screen ? @screen.to_s : "").split("\n")
+    strip_empty_lines(lines)
+  end
+
+  def strip_empty_lines(lines)
     lines.shift while lines.first&.empty?
     lines.pop while lines.last&.empty?
     lines

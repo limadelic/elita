@@ -14,7 +14,7 @@ module ReplHelper
     name = session_name(args)
     prompt = session_name(args)
     mutex = Mutex.new
-    drain_thread = start_background_drain(@reader, @transcript, @transcript_stripped, mutex)
+    drain_thread = start_background_drain(@reader, @transcript, @transcript_stripped, @screen, mutex)
     @sessions[name] = {
       reader: @reader,
       writer: @writer,
@@ -30,26 +30,26 @@ module ReplHelper
     @current = name
   end
 
-  def start_background_drain(reader, transcript, transcript_stripped, mutex)
+  def start_background_drain(reader, transcript, transcript_stripped, screen, mutex)
     return nil unless reader
 
-    Thread.new { drain_thread_loop(reader, transcript, transcript_stripped, mutex) }
+    Thread.new { drain_thread_loop(reader, transcript, transcript_stripped, screen, mutex) }
   end
 
-  def drain_thread_loop(reader, transcript, transcript_stripped, mutex)
-    loop { drain_process_chunk(reader, transcript, transcript_stripped, mutex) }
+  def drain_thread_loop(reader, transcript, transcript_stripped, screen, mutex)
+    loop { drain_process_chunk(reader, transcript, transcript_stripped, screen, mutex) }
   rescue StandardError
   end
 
-  def drain_process_chunk(reader, transcript, transcript_stripped, mutex)
+  def drain_process_chunk(reader, transcript, transcript_stripped, screen, mutex)
     ready = IO.select([reader], nil, nil, 0.05)
     return unless ready
 
     chunk = reader.readpartial(4096)
-    drain_encode_and_store(chunk, transcript, transcript_stripped, mutex)
+    drain_encode_and_store(chunk, transcript, transcript_stripped, screen, mutex)
   end
 
-  def drain_encode_and_store(chunk, transcript, transcript_stripped, mutex)
+  def drain_encode_and_store(chunk, transcript, transcript_stripped, screen, mutex)
     encoded = fix_encoding(chunk)
     stripped = (encoded.scrub("").gsub(/\e\[[0-9]*[GfH]/, " ").gsub(
       /\e\[[0-9;?]*[a-zA-Z]|\e[78]|\e\][^\a]*\a/,
@@ -57,6 +57,7 @@ module ReplHelper
     ) rescue "")
     mutex.synchronize do
       transcript << encoded if transcript
+      screen.feed(encoded) if screen
       transcript_stripped << stripped if transcript_stripped
     end
   end
