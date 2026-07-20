@@ -70,7 +70,7 @@ defmodule El.CLI do
   defp parse(["cd", path]), do: {:cd, path}
   defp parse(["daemon"]), do: :daemon
   defp parse([]), do: {:repl, "el"}
-  defp parse([agent | rest]) when length(rest) > 0, do: {:repl_input, agent, join(rest, " ")}
+  defp parse([agent | rest]) when length(rest) > 0, do: {:repl_input, agent, join([agent | rest], " ")}
   defp parse([agent]), do: {:repl, agent}
   defp parse(_), do: :usage
 

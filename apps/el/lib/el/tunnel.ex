@@ -2,6 +2,8 @@ defmodule El.Tunnel do
   import Enum, only: [find_value: 3]
   import Node, only: [connect: 1]
   import System, only: [pid: 0]
+  import El.Run, only: [suffix: 0]
+  import El.Distribution, only: [start: 1]
 
   defp safely(fun, default) do
     fun.()
@@ -9,19 +11,29 @@ defmodule El.Tunnel do
     _ -> default
   end
 
-  def boot(_agent) do
-    ensure_epmd()
-    spawn()
-    peer()
+  def boot(agent) do
+    agent |> present() |> dispatch(agent)
   end
 
-  defp ensure_epmd do
-    safely(fn -> :os.cmd(~c"epmd -daemon") end, :ok)
+  defp dispatch(true, agent) do
+    spawn()
+    peer(agent)
+  end
+
+  defp dispatch(false, agent), do: start(agent)
+
+  defp present(agent), do: safely(fn -> :net_adm.names(~c"127.0.0.1") |> exist(agent) end, false)
+
+  defp exist({:error, _}, _), do: false
+  defp exist({:ok, list}, agent), do: find_value(list, false, &match(&1, agent))
+
+  defp match({node, _}, agent) do
+    safely(fn -> :erlang.list_to_binary(node) |> check(agent) != nil end, false)
   end
 
   defp spawn do
     node = :"tunnel_#{pid()}@127.0.0.1"
-    opts = %{name_domain: :longnames}
+    opts = %{name_domain: :longnames, hidden: true, dist_listen: false}
     safely(fn -> :net_kernel.start(node, opts) |> result() end, :ok)
   end
 
@@ -29,21 +41,35 @@ defmodule El.Tunnel do
   defp result({:error, {:already_started, _}}), do: :ok
   defp result({:error, _}), do: :ok
 
-  defp peer do
-    safely(fn -> :net_adm.names(~c"127.0.0.1") |> connect_any() end, :ok)
+  defp peer(agent), do: safely(fn -> connect(:"#{agent}#{suffix()}@127.0.0.1") end, :ok)
+
+  def reach(agent),
+    do: safely(fn -> :net_adm.names(~c"127.0.0.1") |> node(agent) |> fetch(agent) end, nil)
+
+  defp node({:error, _}, _), do: nil
+  defp node({:ok, list}, agent), do: find_value(list, nil, &fits(&1, agent))
+
+  defp fits({name, _}, agent) do
+    binary = :erlang.list_to_binary(name)
+    binary |> check(agent)
   end
 
-  defp connect_any({:error, _}), do: :ok
-  defp connect_any({:ok, nodes}) do
-    find_value(nodes, :ok, &connect_node/1) || :ok
+  defp check(name, agent) do
+    prefix(name, agent) |> pick(name)
   end
 
-  defp connect_node({name, _}) do
-    node = :"#{:erlang.list_to_binary(name)}@127.0.0.1"
-    safely(fn -> connect(node) end, nil)
+  defp prefix(node, agent) do
+    len = min(byte_size(agent) + 1, byte_size(node))
+    safely(fn -> binary_part(node, 0, len) == <<agent::binary, "-">> end, false)
   end
 
-  def reach(agent) do
-    safely(fn -> :global.whereis_name({agent, :puppet}) end, nil)
+  defp pick(true, name), do: name
+  defp pick(false, _), do: nil
+
+  defp fetch(nil, _), do: nil
+
+  defp fetch(node, agent) do
+    full = :"#{node}@127.0.0.1"
+    safely(fn -> :erpc.call(full, :global, :whereis_name, [{agent, :puppet}]) end, nil)
   end
 end
