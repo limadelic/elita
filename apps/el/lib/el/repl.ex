@@ -48,11 +48,14 @@ defmodule El.REPL do
   defp pick(pid, _agent), do: pid
 
   defp native(agent) do
-    import Elita, only: [spawn: 2]
-    {:ok, pid} = spawn(agent, [agent])
-    settle({:ok, pid})
-    pid
+    result = spawn(agent, [agent])
+    settle(result)
+    extract(result)
   end
+
+  defp extract({:ok, pid}), do: pid
+  defp extract({:error, {:already_started, pid}}), do: pid
+  defp extract({:error, _}), do: nil
 
   defp settle({:ok, _pid}), do: :ok
   defp settle({:error, {:already_started, _pid}}), do: :ok

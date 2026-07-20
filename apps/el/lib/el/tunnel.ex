@@ -10,8 +10,13 @@ defmodule El.Tunnel do
   end
 
   def boot(_agent) do
+    ensure_epmd()
     spawn()
     peer()
+  end
+
+  defp ensure_epmd do
+    safely(fn -> :os.cmd(~c"epmd -daemon") end, :ok)
   end
 
   defp spawn do
