@@ -5,7 +5,6 @@ defmodule El.Repl.Route do
   import String, only: [split: 3]
   import Utils.World, only: [agents: 0]
   import El.Distribution, only: [wait: 1]
-  import El.Distribution.Helpers, only: [find: 1]
   import Elita, only: [spawn: 2]
 
   def route([name, "log"], _a, _p, _i), do: name |> log() |> puts()
@@ -41,10 +40,9 @@ defmodule El.Repl.Route do
   defp known?(w), do: w |> file?() |> settle(w)
 
   defp settle(true, _w), do: true
-  defp settle(false, w), do: reg?(w)
+  defp settle(false, w), do: :global.whereis_name({w, :puppet}) != :undefined
 
   defp file?(w), do: w in agents()
-  defp reg?(w), do: find(w) != nil
 
   def send(w, msg, p, _agent, true) do
     pid = choose(wait(w), p)
