@@ -56,7 +56,8 @@ module Spawn
       "LIVE" => ENV["LIVE"] || "",
       "CASSETTE" => @cassette,
       "CASSETTE_DIR" => dir,
-      "MIX_ENV" => "test"
+      "MIX_ENV" => "test",
+      "ELITA_RUN" => ENV["ELITA_RUN"] || ""
     }
   end
 

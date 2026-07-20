@@ -20,7 +20,14 @@ defmodule Elita.Application do
   end
 
   defp run do
-    start_link([child_spec(keys: :unique, name: ElitaRegistry)], opts())
+    start_link(specs(), opts())
+  end
+
+  defp specs do
+    [
+      child_spec(keys: :unique, name: ElitaRegistry),
+      {DynamicSupervisor, name: Elita.Spawner, strategy: :one_for_one}
+    ]
   end
 
   defp opts do
