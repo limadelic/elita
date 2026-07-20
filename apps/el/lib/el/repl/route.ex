@@ -5,6 +5,7 @@ defmodule El.Repl.Route do
   import String, only: [split: 3]
   import Utils.World, only: [agents: 0]
   import El.Distribution, only: [wait: 1]
+  import El.Distribution.Helpers, only: [find: 1]
   import Elita, only: [spawn: 2]
 
   def route([name, "log"], _a, _p, _i), do: name |> log() |> puts()
@@ -34,8 +35,16 @@ defmodule El.Repl.Route do
 
   def via(["log"], _p, _i, agent), do: {agent |> log(), agent, nil}
   def via([_w], p, i, agent), do: {ask(p, i), agent, p}
-  def via([w, msg], p, _i, agent), do: send(w, msg, p, agent, w in agents())
+  def via([w, msg], p, _i, agent), do: send(w, msg, p, agent, known?(w))
   def via(_, p, i, agent), do: {ask(p, i), agent, p}
+
+  defp known?(w), do: w |> file?() |> settle(w)
+
+  defp settle(true, _w), do: true
+  defp settle(false, w), do: reg?(w)
+
+  defp file?(w), do: w in agents()
+  defp reg?(w), do: find(w) != nil
 
   def send(w, msg, p, _agent, true) do
     pid = choose(wait(w), p)
