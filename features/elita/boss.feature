@@ -35,11 +35,11 @@ Feature: Boss
 
     * > el worker as jim
 
-    * michael> you manage dwight the assistant regional manager
+    * el> michael you manage dwight the assistant regional manager
 
-    * dwight> you manage pam the receptionist and jim the salesman
+    * el> dwight you manage pam the receptionist and jim the salesman
 
-    * michael> we need 50 copies of the quarterly sales report
+    * el> michael we need 50 copies of the quarterly sales report
       | done |
 
     * > el jim did you receive a task?
@@ -48,8 +48,8 @@ Feature: Boss
     * > el pam did you receive a task to make copies?
       | yes |
 
-    * michael> log
+    * el> michael log
       | 📢 michael → dwight | 50 copies |
 
-    * dwight> log
+    * el> dwight log
       | 📢 dwight → pam | 50 copies |
