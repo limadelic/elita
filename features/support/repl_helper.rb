@@ -188,7 +188,7 @@ module ReplHelper
 
     @reader.readpartial(1)
     false
-  rescue EOFError
+  rescue EOFError, Errno::EIO
     true
   end
 
