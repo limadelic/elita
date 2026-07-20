@@ -10,6 +10,6 @@ Feature: Birth
     * mother> log
       | 🚀 baby | spawn |
 
-    * baby> spank
+    * mother> baby spank
       | WAAAAAHHHHHHH |
       | wailing       |
