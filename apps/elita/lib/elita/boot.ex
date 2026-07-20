@@ -36,9 +36,22 @@ defmodule Elita.Boot do
 
   defp fetch(addr, name, configs, opts) do
     spec = {Elita, {name, configs, opts}, [name: via(name)]}
-    :erpc.call(addr, DynamicSupervisor, :start_child, [Elita.Spawner, spec], 5000)
+    addr |> start(spec) |> enroll(name, addr)
   rescue
     _ -> local(name, configs, opts)
+  end
+
+  defp start(addr, spec) do
+    :erpc.call(addr, DynamicSupervisor, :start_child, [Elita.Spawner, spec], 5000)
+  end
+
+  defp enroll({:ok, pid}, name, addr), do: enlist(pid, name, addr)
+  defp enroll({:error, {:already_started, pid}}, _name, _addr), do: {:ok, pid}
+  defp enroll(other, _name, _addr), do: other
+
+  defp enlist(pid, name, addr) do
+    :erpc.call(addr, :global, :register_name, [{name, :puppet}, pid], 5000)
+    {:ok, pid}
   end
 
   defp addr do

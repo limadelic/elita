@@ -38,6 +38,7 @@ module Spawn
     env = build_launch_env(puppet_name)
     @reader, @writer, @pid = PTY.spawn(env, "/bin/sh", "-c", cmd)
     track_pid(@pid)
+    @mutex = nil
     wait(prompt)
   end
 
