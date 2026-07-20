@@ -2,7 +2,6 @@ defmodule El.Tunnel do
   import Enum, only: [find_value: 3]
   import Node, only: [connect: 1]
   import System, only: [pid: 0]
-  import String, only: [to_atom: 1]
   import El.Run, only: [suffix: 0]
   import El.Distribution, only: [start: 1]
 
@@ -71,6 +70,6 @@ defmodule El.Tunnel do
 
   defp fetch(node, agent) do
     full = :"#{node}@127.0.0.1"
-    safely(fn -> :erpc.call(full, :global, :whereis_name, [{to_atom(agent), :puppet}]) end, nil)
+    safely(fn -> :erpc.call(full, :global, :whereis_name, [{agent, :puppet}]) end, nil)
   end
 end
