@@ -17,10 +17,14 @@ Feature: Boss
     * boss> log
       | 📢 boss → qa | more tests |
 
-    * > el dev did you receive a task from boss?
+    * > el dev
+
+    * > el qa
+
+    * dev> did you receive a task from boss?
       | no |
 
-    * > el qa did you receive a task from boss?
+    * qa> did you receive a task from boss?
       | yes |
 
   @tape:boss2
