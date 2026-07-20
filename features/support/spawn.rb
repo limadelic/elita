@@ -107,7 +107,10 @@ module Spawn
 
   def session_name(args)
     words = args.split
-    words.empty? ? "el" : words.first
+    return "el" if words.empty?
+
+    as_index = words.index("as")
+    as_index ? words[as_index + 1] : words.first
   end
 
   def encode(value)

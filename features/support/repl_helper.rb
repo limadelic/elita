@@ -90,11 +90,12 @@ module ReplHelper
 
   def write_input(input, prompt)
     @sessions ||= {}
-    activate(prompt) if @sessions.key?(prompt)
+    raise "Unknown session: #{prompt}" unless @sessions.key?(prompt)
+
+    activate(prompt)
     raise "PTY not initialized" unless @writer
 
-    line = @sessions.key?(prompt) ? input : "#{prompt} #{input}"
-    @writer.write("#{line}\n")
+    @writer.write("#{input}\n")
     @writer.flush
   end
 
