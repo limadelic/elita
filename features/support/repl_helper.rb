@@ -4,18 +4,31 @@ module ReplHelper
   end
 
   def boot(args)
-    @cassette = @cassette || "greet"
-    @sessions ||= {}
+    cassette
+    sessions
     reset(args)
-    store_session(args)
+    cache(args)
   end
 
-  def store_session(args)
+  def cassette
+    @cassette ||= "greet"
+  end
+
+  def sessions
+    @sessions ||= {}
+  end
+
+  def cache(args)
     name = session_name(args)
     prompt = session_name(args)
     mutex = Mutex.new
-    drain_thread = start_background_drain(@reader, @transcript, @transcript_stripped, mutex)
-    @sessions[name] = {
+    drain_thread = hatch(@reader, @transcript, @transcript_stripped, mutex)
+    @sessions[name] = forge(drain_thread, prompt, mutex)
+    @current = name
+  end
+
+  def forge(drain_thread, prompt, mutex)
+    {
       reader: @reader,
       writer: @writer,
       pid: @pid,
@@ -27,38 +40,47 @@ module ReplHelper
       drain_thread: drain_thread,
       buffer_pos: 0
     }
-    @current = name
   end
 
-  def start_background_drain(reader, transcript, transcript_stripped, mutex)
+  def hatch(reader, transcript, transcript_stripped, mutex)
     return nil unless reader
 
-    Thread.new { drain_thread_loop(reader, transcript, transcript_stripped, mutex) }
+    Thread.new { spin(reader, transcript, transcript_stripped, mutex) }
   end
 
-  def drain_thread_loop(reader, transcript, transcript_stripped, mutex)
-    loop { drain_process_chunk(reader, transcript, transcript_stripped, mutex) }
+  def spin(reader, transcript, transcript_stripped, mutex)
+    loop { intake(reader, transcript, transcript_stripped, mutex) }
   rescue StandardError
   end
 
-  def drain_process_chunk(reader, transcript, transcript_stripped, mutex)
+  def intake(reader, transcript, transcript_stripped, mutex)
     ready = IO.select([reader], nil, nil, 0.05)
     return unless ready
 
     chunk = reader.readpartial(4096)
-    drain_encode_and_store(chunk, transcript, transcript_stripped, mutex)
+    flow(chunk, transcript, transcript_stripped, mutex)
   end
 
-  def drain_encode_and_store(chunk, transcript, transcript_stripped, mutex)
-    encoded = (chunk.force_encoding("UTF-8") rescue chunk.to_s)
-    stripped = (encoded.scrub("").gsub(/\e\[[0-9]*[GfH]/, " ").gsub(
-      /\e\[[0-9;?]*[a-zA-Z]|\e[78]|\e\][^\a]*\a/,
-      ""
-    ) rescue "")
-    mutex.synchronize do
-      transcript << encoded if transcript
-      transcript_stripped << stripped if transcript_stripped
-    end
+  def flow(chunk, transcript, transcript_stripped, mutex)
+    encoded = encode(chunk)
+    stripped = scrub(encoded)
+    sync(encoded, stripped, transcript, transcript_stripped, mutex)
+  end
+
+  def encode(chunk)
+    chunk.force_encoding("UTF-8")
+  rescue StandardError
+    chunk.to_s
+  end
+
+  def scrub(encoded)
+    encoded.scrub("").gsub(/\e\[[0-9]*[GfH]/, " ").gsub(/\e\[[0-9;?]*[a-zA-Z]|\e[78]|\e\][^\a]*\a/, "")
+  rescue StandardError
+    ""
+  end
+
+  def sync(encoded, stripped, transcript, transcript_stripped, mutex)
+    mutex.synchronize { ingest(encoded, stripped, transcript, transcript_stripped) }
   end
 
   def one(args)
@@ -68,155 +90,96 @@ module ReplHelper
   end
 
   def send(input, prompt)
-    @sessions ||= {}
+    switch(prompt)
+    push(input)
+    dispatch(input, prompt)
+  end
+
+  def switch(prompt)
     activate(prompt) if @sessions.key?(prompt)
+  end
+
+  def push(input)
     raise "PTY not initialized" unless @writer
 
     @writer.write("#{input}\n")
     @writer.flush
-    send_handle_result(input, prompt)
   end
 
-  def send_handle_result(input, prompt)
-    return verify_closed if input == "/exit"
+  def dispatch(input, prompt)
+    input == "/exit" ? assure : pursue(prompt)
+  end
 
-    actual_prompt = @sessions[prompt]&.dig(:prompt) || prompt
+  def pursue(prompt)
+    actual_prompt = which(prompt)
     wait(actual_prompt)
   end
 
-  def verify_closed
+  def assure
     raise "Session still alive" unless closed?
   end
 
-  def write_input(input, prompt)
-    @sessions ||= {}
-    raise "Unknown session: #{prompt}" unless @sessions.key?(prompt)
-
+  def emit(input, prompt)
+    sessions
+    verify(prompt)
     activate(prompt)
-    raise "PTY not initialized" unless @writer
-
-    @writer.write("#{input}\n")
-    @writer.flush
+    push(input)
   end
 
-  def await_result(prompt, input)
-    return verify_closed if input == "/exit"
+  def verify(prompt)
+    raise "Unknown session: #{prompt}" unless @sessions.key?(prompt)
+  end
 
-    actual_prompt = resolve_await_prompt(prompt)
+  def collect(prompt, input)
+    input == "/exit" ? assure : hold(prompt)
+  end
+
+  def hold(prompt)
+    actual_prompt = which(prompt)
     wait(actual_prompt) || ""
   end
 
-  def resolve_await_prompt(prompt)
-    return @sessions[prompt][:prompt] if @sessions.key?(prompt)
+  def which(prompt)
+    return prize(prompt) if @sessions.key?(prompt)
 
-    @sessions[@current]&.dig(:prompt) || prompt
+    alt(prompt)
+  end
+
+  def prize(prompt)
+    @sessions[prompt][:prompt]
+  end
+
+  def alt(prompt)
+    mine || prompt
+  end
+
+  def mine
+    @sessions[@current]&.dig(:prompt)
   end
 
   def activate(name)
     return unless (session = @sessions[name])
 
     @current = name
-    assign_session_attrs(session)
+    unpack(session)
   end
 
-  def assign_session_attrs(session)
+  def unpack(session)
     %i[reader writer pid screen transcript transcript_stripped mutex buffer_pos drain_thread].each do |key|
       instance_variable_set("@#{key}", session[key])
     end
   end
 
-  def transcript
-    @transcript_stripped || ""
-  end
-
-  def drain
-    return unless @reader
-    return if @mutex
-
-    chunk = absorb(@reader)
-    append(chunk, strip(chunk))
-  end
-
-  def append(chunk, stripped)
-    chunk = encode(chunk)
-    @mutex ? append_with_mutex(chunk, stripped) : append_without_mutex(chunk, stripped)
-  end
-
-  def append_with_mutex(chunk, stripped)
-    @mutex.synchronize do
-      @transcript << chunk if @transcript
-      stripped = encode(stripped)
-      @transcript_stripped << stripped if @transcript_stripped
-    end
-  end
-
-  def append_without_mutex(chunk, stripped)
-    @transcript << chunk if @transcript
-    stripped = encode(stripped)
-    @transcript_stripped << stripped if @transcript_stripped
-  end
-
-  def closed?
-    timeout = Time.now + 2
-    close_loop(timeout)
-  end
-
-  def close_loop(timeout)
-    loop do
-      break if reader_eof?
-      break if process_exited?
-      return false if Time.now > timeout
-
-      sleep 0.05
-    end
-    true
-  end
-
   private
 
-  def reader_eof?
-    return false unless @reader
-
-    @drain_thread ? drain_thread_eof? : reader_io_eof?
-  end
-
-  def drain_thread_eof?
-    !@drain_thread.alive?
-  end
-
-  def reader_io_eof?
-    ready = IO.select([@reader], nil, nil, 0.1)
-    return false unless ready
-
-    @reader.readpartial(1)
-    false
-  rescue EOFError, Errno::EIO
-    true
-  end
-
-  def process_exited?
-    return false unless @pid
-
-    Process.wait(@pid, Process::WNOHANG)
-    true
-  rescue Errno::ECHILD
-    true
-  end
-
   def wait(prompt_word)
-    output = ""
     pattern = prompt_word == "claude" ? "Claude Code" : "#{prompt_word}>"
-    timeout = deadline
-    attempt(output, pattern, timeout) || timeout_error(pattern, output)
+    attempt("", pattern, deadline)
   end
 
   def deadline
     duration = ENV["TAPE"] == "rec" ? 300 : 60
     Time.now + duration
-  end
-
-  def timeout_error(pattern, output)
-    raise "Timeout waiting for '#{pattern}' in:\n#{output}"
   end
 end
 
@@ -225,5 +188,7 @@ require_relative "drain"
 require_relative "search"
 require_relative "assert"
 require_relative "session_logs"
+require_relative "status"
+require_relative "record"
 
-World(ReplHelper, Spawn, Drain, Search, Assert, SessionLogs)
+World(ReplHelper, Spawn, Drain, Search, Assert, SessionLogs, Status, Record)

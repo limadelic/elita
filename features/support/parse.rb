@@ -1,27 +1,33 @@
 module Parse
+  PATTERNS = [
+    /^[\p{So}🀀-🿿][\s]*[a-zA-Z🀀-🿿]/,
+    /^✏️\s+\w+.*=/,
+    /^\w+>\s+[\p{So}🀀-🿿]/,
+    /^\w+>$/
+  ].freeze
   def normalize(transcript)
-    tx = dupe(transcript)
-    tx = scrub(tx)
-    tx = clean(tx)
-    lines = rows(tx)
+    tx = encode(transcript)
+    tx = ansi(tx)
+    tx = polish(tx)
+    lines = lines(tx)
     fold(lines)
   end
 
-  def dupe(transcript)
-    transcript.dup.force_encoding("UTF-8") rescue transcript
+  def encode(text)
+    text.dup.force_encoding("UTF-8") rescue text
   end
 
-  def scrub(tx)
-    tx.gsub(/\e\[[0-9;]*[a-zA-Z]/, "")
+  def ansi(text)
+    text.gsub(/\e\[[0-9;]*[a-zA-Z]/, "")
   end
 
-  def rows(tx)
-    encoded = tx.split("\n").map { |l| encode(l.strip) }
-    filter(encoded)
+  def lines(text)
+    lines = text.split("\n").map { |l| encode(l.strip) }
+    empty(lines)
   end
 
-  def filter(encoded)
-    encoded.reject(&:empty?)
+  def empty(lines)
+    lines.reject(&:empty?)
   end
 
   def fold(lines)
@@ -31,5 +37,29 @@ module Parse
   def crease(line, result)
     is_log = log?(line)
     splice(line, result, is_log)
+  end
+
+  def log?(line)
+    PATTERNS.any? { |p| matching?(line, p) }
+  end
+
+  def matching?(line, pattern)
+    line.match?(pattern) rescue false
+  end
+
+  def splice(line, result, is_log)
+    is_log ? fresh(line, result) : append(line, result)
+  end
+
+  def fresh(line, result)
+    result << line
+  end
+
+  def append(line, result)
+    result[-1] << " " << line unless result.empty?
+  end
+
+  def polish(text)
+    text.gsub("\u{FE0F}", "")
   end
 end

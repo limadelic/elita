@@ -1,73 +1,66 @@
 module Status
   def closed?
     timeout = Time.now + 2
-    settle(timeout)
+    linger(timeout)
   end
 
-  def settle(timeout)
-    orbit(timeout)
-    gone?
-  end
+  def linger(timeout)
+    loop do
+      return true if ready?(timeout)
 
-  def orbit(timeout)
-    until halt?(timeout)
       sleep 0.05
     end
   end
 
-  def halt?(timeout)
-    ready? || expired?(timeout)
+  def ready?(timeout)
+    spied? || failed?(timeout)
   end
 
-  def ready?
-    spent? || dead?
+  def failed?(timeout)
+    fled? || past?(timeout)
   end
 
-  def expired?(timeout)
+  def past?(timeout)
     Time.now > timeout
-  end
-
-  def gone?
-    spent? || dead?
   end
 
   private
 
-  def spent?
+  def spied?
     return false unless @reader
 
-    probe
+    audit
   end
 
-  def probe
-    @drain_thread ? hung? : bare?
+  def audit
+    @drain_thread ? stalled? : drained?
   end
 
-  def hung?
+  def stalled?
     !@drain_thread.alive?
   end
 
-  def bare?
+  def drained?
     ready = IO.select([@reader], nil, nil, 0.1)
     return false unless ready
 
-    sniff
+    peek
   end
 
-  def sniff
+  def peek
     @reader.readpartial(1)
     false
   rescue EOFError, Errno::EIO
     true
   end
 
-  def dead?
+  def fled?
     return false unless @pid
 
-    wait
+    dead?
   end
 
-  def wait
+  def dead?
     Process.wait(@pid, Process::WNOHANG)
     true
   rescue Errno::ECHILD

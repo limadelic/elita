@@ -1,46 +1,75 @@
 module Escape
+  def spark
+    @escape_buffer = "\e"
+  end
+
   def buffer(char)
     @escape_buffer << char
     run if ready?
   end
 
+  private
+
   def ready?
-    @escape_buffer && @escape_buffer.length >= 2
+    exist? && valid?
   end
 
-  def done?
-    csi? ? closed? : pair?
+  def valid?
+    sufficient? && closed?
+  end
+
+  def exist?
+    !@escape_buffer.nil?
+  end
+
+  def sufficient?
+    @escape_buffer.length >= 2
+  end
+
+  def closed?
+    csi? ? letter? : two?
   end
 
   def csi?
     @escape_buffer[1] == '['
   end
 
-  def closed?
+  def letter?
     @escape_buffer[-1].match?(/[A-Za-z]/)
   end
 
-  def pair?
+  def two?
     @escape_buffer.length == 2
   end
 
   def run
-    s = @escape_buffer
+    seq = @escape_buffer
     @escape_buffer = nil
-    return unless s
-
-    route(s)
+    dispatch(seq) if seq
   end
 
-  def route(s)
-    seq(s) || edit(s)
+  def dispatch(seq)
+    arrow(seq) || fallback(seq)
   end
 
-  def edit(s)
-    exec(s) if s =~ /\e\[(2J|K)/
+  def fallback(seq)
+    place(seq) || wipe(seq)
   end
 
-  def exec(s)
-    s =~ /2J/ ? clear : erase
+  def wipe(seq)
+    edit?(seq) ? exec(seq) : false
+  end
+
+  def exec(seq)
+    cleared?(seq) ? clear : sweep
+    true
+  end
+
+  def edit?(seq)
+    seq =~ /\e\[(2J|K)/
+  end
+
+  def cleared?(seq)
+    seq =~ /2J/
   end
 end
