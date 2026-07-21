@@ -36,7 +36,7 @@ module Spawn
   def launch(cmd, prompt, puppet_name = nil)
     config = env(puppet_name)
     @reader, @writer, @pid = PTY.spawn(config, "/bin/sh", "-c", cmd)
-    track_pid(@pid)
+    watch(@pid)
     @mutex = nil
     wait(prompt)
   end
@@ -91,14 +91,14 @@ module Spawn
 
   def run(cmd)
     output = ""
-    reader, writer, pid = forge(cmd)
-    track_pid(pid)
+    reader, writer, pid = mint(cmd)
+    watch(pid)
     extract(reader, Time.now + 30, output)
     kill(writer, pid)
     output
   end
 
-  def forge(cmd)
+  def mint(cmd)
     cmd_env = cmd.include?("@") ? cloak(cmd) : cmd
     PTY.spawn("/bin/sh", "-c", cmd_env)
   end
@@ -147,22 +147,22 @@ module Spawn
     words = args.split
     return "el" if words.empty?
 
-    pick(words)
+    dub(words)
   end
 
   def tag(args)
     words = args.split
     return "el" if words.empty?
 
-    pick(words)
+    dub(words)
   end
 
-  def pick(words)
+  def dub(words)
     as_index = words.index("as")
     as_index ? words[as_index + 1] : words.first
   end
 
-  def encode(value)
+  def brand(value)
     value.force_encoding("UTF-8") rescue value.to_s
   end
 

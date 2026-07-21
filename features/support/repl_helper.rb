@@ -19,12 +19,13 @@ module ReplHelper
   end
 
   def cache(args)
-    name = session_name(args)
-    prompt = session_name(args)
+    name = tag(args)
+    prompt = query(args)
     mutex = Mutex.new
     drain_thread = hatch(@reader, @transcript, @transcript_stripped, mutex)
     @sessions[name] = forge(drain_thread, prompt, mutex)
     @current = name
+    @drain_thread = drain_thread
   end
 
   def forge(drain_thread, prompt, mutex)
@@ -62,12 +63,12 @@ module ReplHelper
   end
 
   def flow(chunk, transcript, transcript_stripped, mutex)
-    encoded = encode(chunk)
+    encoded = brand(chunk)
     stripped = scrub(encoded)
     sync(encoded, stripped, transcript, transcript_stripped, mutex)
   end
 
-  def encode(chunk)
+  def brand(chunk)
     chunk.force_encoding("UTF-8")
   rescue StandardError
     chunk.to_s
@@ -89,7 +90,7 @@ module ReplHelper
     run(cmd)
   end
 
-  def send(input, prompt)
+  def post(input, prompt)
     switch(prompt)
     push(input)
     dispatch(input, prompt)
@@ -121,12 +122,12 @@ module ReplHelper
 
   def emit(input, prompt)
     sessions
-    verify(prompt)
+    vet(prompt)
     activate(prompt)
     push(input)
   end
 
-  def verify(prompt)
+  def vet(prompt)
     raise "Unknown session: #{prompt}" unless @sessions.key?(prompt)
   end
 

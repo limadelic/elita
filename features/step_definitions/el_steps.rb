@@ -127,7 +127,7 @@ def trace(lines)
 end
 
 def source
-  @current ? read_session_log(@current, @pid) : ""
+  @current ? pull(@current, @pid) : ""
 end
 
 def persist(times, &block)
@@ -145,7 +145,7 @@ end
 
 def iterate(transcript, lines)
   cursor = 0
-  lines.each { |line| cursor = locate(line, transcript, cursor) }
+  lines.each { |line| cursor = sight(line, transcript, cursor) }
 end
 
 def route(args)
@@ -155,7 +155,11 @@ def route(args)
 end
 
 def delegate(args)
-  aimed?(args) ? inject(args) : start(args)
+  injectable?(args) ? inject(args) : start(args)
+end
+
+def injectable?(args)
+  aimed?(args) && !alias?(args)
 end
 
 def at?(args)
@@ -194,7 +198,7 @@ def pause
   ENV['TAPE'] == 'rec' ? 1 : 0.5
 end
 
-def locate(line, transcript, cursor)
+def sight(line, transcript, cursor)
   transcript_str = transcript.force_encoding('UTF-8').downcase
   line_lower = line.downcase
   idx = transcript_str.index(line_lower, cursor)

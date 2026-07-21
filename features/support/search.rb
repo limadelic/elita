@@ -1,5 +1,11 @@
+require_relative "parse"
+
 module Search
   include Parse
+
+  def init
+    @scenario_cursors = {}
+  end
 
   def verify(rows)
     @scenario_cursors ||= {}
@@ -29,7 +35,7 @@ module Search
   end
 
   def wait?(last_sent)
-    ENV["TAPE"] == "rec" || Time.now - last_sent < 1.0
+    ENV['TAPE'] == 'rec' || Time.now - last_sent < 1.0
   end
 
   def search(rows, folded_lines, deadline)
@@ -64,12 +70,12 @@ module Search
   end
 
   def prefix(raw)
-    prefix = safe_encode(raw.strip)
+    prefix = encode(raw.strip)
     strip_variation_selectors(prefix)
   end
 
   def text(raw)
-    text = safe_encode(raw.strip.downcase)
+    text = encode(raw.strip.downcase)
     strip_variation_selectors(text)
   end
 
@@ -106,7 +112,7 @@ module Search
   end
 
   def seps(line)
-    [[line.index(" | "), 3], [line.index(": "), 2], [line.index(" = "), 3]]
+    [[line.index(' | '), 3], [line.index(': '), 2], [line.index(' = '), 3]]
   end
 
   def pick(seps)
@@ -119,7 +125,7 @@ module Search
 
   def slice(line, sep)
     first_idx, skip_len = sep
-    [line[0...first_idx], line[first_idx + skip_len..-1]]
+    [line[0...first_idx], line[first_idx + skip_len..]]
   end
 
   def match?(folded_line, want_prefix, want_text)
@@ -130,7 +136,7 @@ module Search
   end
 
   def parts(folded_line)
-    line = folded_line.sub(/\A(?:\s*\w+>\s*)+/, "")
+    line = folded_line.sub(/\A(?:\s*\w+>\s*)+/, '')
     split(line)
   end
 
@@ -150,8 +156,8 @@ module Search
     return true if want.empty?
 
     normalized = text.downcase
-    compact = normalized.gsub(/\s+/, "")
-    want_compact = want.gsub(/\s+/, "")
+    compact = normalized.gsub(/\s+/, '')
+    want_compact = want.gsub(/\s+/, '')
     exact?(normalized, want, compact, want_compact)
   end
 
@@ -167,16 +173,24 @@ module Search
 
   private
 
+  def encode(value)
+    value.force_encoding('UTF-8') rescue value
+  end
+
+  def strip_variation_selectors(text)
+    text.gsub("\u{FE0F}", '')
+  end
+
   def timeout
     recording? ? 300 : leash
   end
 
   def recording?
-    ENV["TAPE"] == "rec"
+    ENV['TAPE'] == 'rec'
   end
 
   def leash
-    ENV["GITHUB_ACTIONS"] == "true" ? 60 : 3
+    ENV['GITHUB_ACTIONS'] == 'true' ? 60 : 3
   end
 
   def nudge

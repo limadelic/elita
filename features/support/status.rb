@@ -6,13 +6,13 @@ module Status
 
   def linger(timeout)
     loop do
-      return true if ready?(timeout)
+      return true if primed?(timeout)
 
       sleep 0.05
     end
   end
 
-  def ready?(timeout)
+  def primed?(timeout)
     spied? || failed?(timeout)
   end
 

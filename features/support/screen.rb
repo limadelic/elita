@@ -1,3 +1,6 @@
+require_relative "cursor"
+require_relative "escape"
+
 class Screen
   include Cursor
   include Escape
@@ -12,7 +15,7 @@ class Screen
   end
 
   def absorb(bytes)
-    return unless has_content?(bytes)
+    return unless content?(bytes)
 
     bytes.each_char { |char| process(char) }
   end

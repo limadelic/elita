@@ -24,12 +24,12 @@ module Drain
   end
 
   def slurp(pty)
-    load(pty)
+    gulp(pty)
   rescue EOFError
     ""
   end
 
-  def load(pty)
+  def gulp(pty)
     return "" unless ready?(pty)
 
     encode(pty.readpartial(4096))

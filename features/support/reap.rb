@@ -1,43 +1,80 @@
 module Reap
-  def reap_without_orphans
+  def bundle
     @sessions ||= {}
-    reap_sessions
-    close_main_pty
+    reap
+    shut
+    purge_threads
     @sessions.clear
   end
 
-  def reap_all_sessions
+  def purge_threads
+    @sessions.each { |_name, session| slain(session) }
+    slain_current
+  end
+
+  def slain(session)
+    thread = session&.[](:drain_thread)
+    kill_thread(thread)
+  end
+
+  def slain_current
+    zap(@drain_thread)
+  end
+
+  def zap(thread)
+    thread.kill
+  rescue StandardError
+    nil
+  end
+
+  def kill_thread(thread)
+    zap(thread)
+  end
+
+  def harvest
     @sessions ||= {}
-    killed_any = reap_sessions
-    kill_after_reap(killed_any)
-    close_main_pty
+    killed_any = reap
+    cleanse(killed_any)
+    shut
+    purge_threads
     @sessions.clear
   end
 
-  def reap_sessions
+  def reap
     killed = false
-    @sessions.each do |_name, session|
-      killed = true if close_session(session)
-    end
+    @sessions.each { |_name, session| killed = tally(killed, session) }
     killed
   end
 
-  def close_session(session)
-    return false unless session&.[](:pid)
+  def tally(killed, session)
+    killed || snap(session)
+  end
 
-    kill_process(session[:pid])
-    session[:reader]&.close
-    session[:writer]&.close
+  def snap(session)
+    return false if bare?(session)
+
+    slay(session[:pid])
+    cork(session[:reader])
+    cork(session[:writer])
     true
   end
 
-  def close_main_pty
-    safe_close(@reader)
-    safe_close(@writer)
+  def bare?(session)
+    !session&.[](:pid)
   end
 
-  def safe_close(io)
+  def shut
+    cork(@reader)
+    cork(@writer)
+  end
+
+  def cork(io)
     return unless io
+
+    shutter(io)
+  end
+
+  def shutter(io)
     return if io.closed?
 
     io.close

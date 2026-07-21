@@ -48,14 +48,14 @@ module Parse
   end
 
   def splice(line, result, is_log)
-    is_log ? fresh(line, result) : append(line, result)
+    is_log ? fresh(line, result) : fuse(line, result)
   end
 
   def fresh(line, result)
     result << line
   end
 
-  def append(line, result)
+  def fuse(line, result)
     result[-1] << " " << line unless result.empty?
   end
 
