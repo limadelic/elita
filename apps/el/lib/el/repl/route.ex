@@ -5,7 +5,9 @@ defmodule El.Repl.Route do
   import String, only: [split: 3]
   import Utils.World, only: [agents: 0]
   import El.Distribution, only: [wait: 1]
-  import Elita, only: [spawn: 2]
+  import Elita, only: [spawn: 3]
+  import System, only: [get_env: 1]
+  import Keyword, only: [put: 3]
 
   def route([name, "log"], _a, _p, _i), do: name |> log() |> puts()
 
@@ -23,9 +25,19 @@ defmodule El.Repl.Route do
   def result(_target, _agent, _pid), do: :ok
 
   defp attempt([config, "as", name], _p, _i, _agent) do
-    {:ok, pid} = spawn(name, [config])
+    {:ok, pid} = spawn(name, [config], opts())
     {name <> " spawned", name, pid}
   end
+
+  defp opts, do: [tape_env: build()]
+
+  defp build,
+    do: %{
+      tape: get_env("TAPE"),
+      live: get_env("LIVE"),
+      cassette: get_env("CASSETTE"),
+      cassette_dir: get_env("CASSETTE_DIR")
+    }
 
   defp attempt(_words, puppet, input, agent) do
     words = input |> split(" ", parts: 2)
