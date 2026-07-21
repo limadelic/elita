@@ -20,6 +20,18 @@ defmodule El.REPL do
     handle(agent, puppet, input)
   end
 
+  def attach(config, name) do
+    ensure_all_started(:elita)
+    loop(name, spawned(config, name))
+  end
+
+  defp spawned(config, name) do
+    reg() |> settle()
+    tape() |> settle()
+    boot(name)
+    spawn(name, [config]) |> extract()
+  end
+
   defp init(agent) do
     reg() |> settle()
     tape() |> settle()

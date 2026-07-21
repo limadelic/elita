@@ -35,10 +35,18 @@ defmodule Elita.Boot do
   end
 
   defp fetch(addr, name, configs, opts) do
-    spec = {Elita, {name, configs, opts}, [name: via(name)]}
-    addr |> start(spec) |> enroll(name, addr)
-  rescue
-    _ -> local(name, configs, opts)
+    addr |> start(spec(name, configs, opts)) |> enroll(name, addr)
+  catch
+    _, _ -> local(name, configs, opts)
+  end
+
+  defp spec(name, configs, opts) do
+    %{id: name, start: launch(name, configs, opts), restart: :temporary}
+  end
+
+  defp launch(name, configs, opts) do
+    args = [Elita, {name, configs, opts}, [name: via(name)]]
+    {GenServer, :start_link, args}
   end
 
   defp start(addr, spec) do

@@ -17,10 +17,6 @@ Feature: Boss
     * boss> log
       | 📢 boss → qa | more tests |
 
-    * > el dev
-
-    * > el qa
-
     * dev> did you receive a task from boss?
       | no |
 
@@ -39,21 +35,21 @@ Feature: Boss
 
     * > el worker as jim
 
-    * el> michael you manage dwight the assistant regional manager
+    * michael> you manage dwight the assistant regional manager
 
-    * el> dwight you manage pam the receptionist and jim the salesman
+    * dwight> you manage pam the receptionist and jim the salesman
 
-    * el> michael we need 50 copies of the quarterly sales report
+    * michael> we need 50 copies of the quarterly sales report
       | done |
 
-    * > el jim did you receive a task?
-      | no |
-
-    * > el pam did you receive a task to make copies?
+    * pam> did you receive a task to make copies?
       | yes |
 
-    * el> michael log
+    * jim> did you receive a task?
+      | no |
+
+    * michael> log
       | 📢 michael → dwight | 50 copies |
 
-    * el> dwight log
+    * dwight> log
       | 📢 dwight → pam | 50 copies |

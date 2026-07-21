@@ -9,7 +9,7 @@ defmodule El.CLI do
   import El.Commands.Cd, only: [cd: 1]
   import El.Distribution, only: [daemon: 0]
   import El.Command.Ls, only: [list: 1]
-  import El.REPL, only: [run: 1, run: 2]
+  import El.REPL, only: [run: 1, run: 2, attach: 2]
   import El.Log, only: [setup: 2]
   import Enum, only: [join: 2]
   import El.Ask, only: [invoke: 2]
@@ -20,8 +20,6 @@ defmodule El.CLI do
     el tell <agent> <message>
     el spawn <name> <agent>
     el stop <agent>
-    el [tool] ask <agent> <message>
-    el [tool] tell <agent> <message>
     el claude [name]
     el ls
     el cd <path>
@@ -52,6 +50,7 @@ defmodule El.CLI do
   defp name(["ls" | _]), do: "default"
   defp name(["cd" | _]), do: "default"
   defp name(["daemon"]), do: "default"
+  defp name([_config, "as", label]), do: label
   defp name([agent | rest]) when length(rest) > 0, do: agent
   defp name([agent]), do: agent
   defp name([]), do: "el"
@@ -70,6 +69,7 @@ defmodule El.CLI do
   defp parse(["cd", path]), do: {:cd, path}
   defp parse(["daemon"]), do: :daemon
   defp parse([]), do: {:repl, "el"}
+  defp parse([config, "as", name]), do: {:as, config, name}
   defp parse([agent | rest]) when length(rest) > 0, do: {:repl_input, agent, join([agent | rest], " ")}
   defp parse([agent]), do: {:repl, agent}
   defp parse(_), do: :usage
@@ -86,6 +86,7 @@ defmodule El.CLI do
   end
 
   defp exec({:repl, agent}), do: run(agent)
+  defp exec({:as, config, name}), do: attach(config, name)
   defp exec({:repl_input, agent, input}), do: run(agent, input)
   defp exec({:ask, tool, agent, msg}), do: ask(agent, msg, tool)
   defp exec({:tell, tool, agent, msg}), do: send(agent, msg, tool)
