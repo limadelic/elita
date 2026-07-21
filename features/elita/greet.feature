@@ -1,14 +1,13 @@
-@wip
 Feature: Greet
 
   Scenario: Greeeet learns your name
-    * > el
+    * > el greet
 
-    * el> greet hello
+    * greet> hello
       | who am i talking to |
 
-    * el> greet Mike
+    * greet> Mike
       | wonderful to meet you |
 
-    * el> greet how are you?
+    * greet> how are you?
       | i am greeeet |
