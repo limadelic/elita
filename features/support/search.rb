@@ -7,19 +7,21 @@ module Search
   ].freeze
 
   def verify(rows)
-    init unless @scenario_cursor
+    init unless @scenario_cursors
     deadline = deadline()
     cycle(rows, deadline)
+  rescue Timeout::Error, Timeout::ExitException => e
+    raise_with_screen_dump(e)
   end
 
   def init
-    @scenario_cursor = 0
+    @scenario_cursors = {}
     @folded_lines = nil
   end
 
   def cycle(rows, deadline)
     last_sent = Time.now - 2
-    while !search(rows, normalize(transcript), deadline, transcript)
+    while !search(rows, normalize(transcript), deadline)
       last_sent = tick(last_sent)
       sleep 0.05
     end
@@ -31,42 +33,48 @@ module Search
     drain; nudge; Time.now
   end
 
-  def search(rows, folded_lines, deadline, tx)
-    found_indices = hit(rows, folded_lines, deadline, tx)
+  def search(rows, folded_lines, deadline)
+    found_indices = hit(rows, folded_lines, deadline)
     return nil unless found_indices
 
-    @scenario_cursor = found_indices.max if found_indices.any?
+    if found_indices.any?
+      @scenario_cursors[@current] = found_indices.max
+    end
     found_indices
   end
 
-  def hit(rows, folded_lines, deadline, tx)
+  def hit(rows, folded_lines, deadline)
     rows.each_with_object([]) do |row, acc|
-      idx = find(row, folded_lines, deadline, tx)
+      idx = find(row, folded_lines, deadline)
       return nil unless idx
 
       acc << idx
     end
   end
 
-  def find(row, folded_lines, deadline, tx)
+  def find(row, folded_lines, deadline)
     prefix = row[0].strip.force_encoding("UTF-8") rescue row[0].strip
+    prefix = strip_variation_selectors(prefix)
     downtext = row[1].strip.downcase
     text = downtext.force_encoding("UTF-8") rescue downtext
-    scan(folded_lines, prefix, text) || fail(prefix, text, deadline, tx)
+    text = strip_variation_selectors(text)
+    scan(folded_lines, prefix, text) || fail(prefix, text, deadline, folded_lines)
   end
 
   def scan(folded_lines, prefix, text)
-    (@scenario_cursor...folded_lines.size).each do |idx|
+    cursor = @scenario_cursors[@current] ||= 0
+    (cursor...folded_lines.size).each do |idx|
       return idx + 1 if match?(folded_lines[idx], prefix, text)
     end
     nil
   end
 
-  def fail(prefix, text, deadline, tx)
+  def fail(prefix, text, deadline, folded_lines)
     return nil if Time.now < deadline
 
     msg = "No match for prefix='#{prefix}' text='#{text}'"
-    raise msg << "\n\nTranscript:\n#{tx}"
+    screen_dump = folded_lines.last(40).join("\n")
+    raise msg << "\n\nScreen:\n#{screen_dump}"
   end
 
   def split(line)
@@ -99,6 +107,8 @@ module Search
 
   def normalize(transcript)
     tx = (transcript.dup.force_encoding("UTF-8") rescue transcript)
+    tx = tx.gsub(/\e\[[0-9;]*[a-zA-Z]/, "")
+    tx = strip_variation_selectors(tx)
     lines = tx.split("\n").map { |l|
       l.strip.force_encoding("UTF-8") rescue l.strip
     }.reject(&:empty?)
@@ -131,5 +141,16 @@ module Search
     @writer.write("\n")
     @writer.flush
   rescue IOError
+  end
+
+  def strip_variation_selectors(text)
+    text.gsub("\u{FE0F}", "")
+  end
+
+  def raise_with_screen_dump(e)
+    folded = normalize(transcript)
+    screen_dump = folded.last(40).join("\n")
+    error_msg = "#{e.message}\n\nScreen:\n#{screen_dump}"
+    raise RuntimeError, error_msg
   end
 end

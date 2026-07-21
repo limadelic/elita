@@ -34,9 +34,7 @@
         },
         "id": "toolu_012u9rS3UUShcVpwfvdyyJ15",
         "input": {
-          "configs": [
-            "napo"
-          ],
+          "configs": ["napo"],
           "name": "napo"
         },
         "name": "spawn",
@@ -176,9 +174,7 @@
         },
         "id": "toolu_01D4a41esm6snsC37hRjgFnF",
         "input": {
-          "configs": [
-            "judge"
-          ],
+          "configs": ["judge"],
           "name": "judge"
         },
         "name": "spawn",
@@ -357,9 +353,7 @@
         },
         "id": "toolu_01SJ5rLtfrs7kbg9QWGwLWFZ",
         "input": {
-          "configs": [
-            "napo"
-          ],
+          "configs": ["napo"],
           "name": "grocery"
         },
         "name": "spawn",
@@ -371,9 +365,7 @@
         },
         "id": "toolu_018cijfWrYg1shWq9WLeQMrF",
         "input": {
-          "configs": [
-            "napo"
-          ],
+          "configs": ["napo"],
           "name": "stream"
         },
         "name": "spawn",
@@ -385,9 +377,7 @@
         },
         "id": "toolu_015gi7otmJJwTEMcm3APfxQC",
         "input": {
-          "configs": [
-            "napo"
-          ],
+          "configs": ["napo"],
           "name": "logistics"
         },
         "name": "spawn",
@@ -559,9 +549,7 @@
         },
         "id": "toolu_019wN2MEoa71xkEkWqMu35pZ",
         "input": {
-          "configs": [
-            "judge"
-          ],
+          "configs": ["judge"],
           "name": "judge"
         },
         "name": "spawn",
@@ -626,9 +614,7 @@
         },
         "id": "toolu_01P8UKekFyJ1kpLvxYdiGQUE",
         "input": {
-          "configs": [
-            "judge"
-          ],
+          "configs": ["judge"],
           "name": "grocery"
         },
         "name": "spawn",
@@ -670,9 +656,7 @@
         },
         "id": "toolu_019bLjkYix9JDpf5msraq4bh",
         "input": {
-          "configs": [
-            "judge"
-          ],
+          "configs": ["judge"],
           "name": "judge"
         },
         "name": "spawn",
@@ -869,9 +853,7 @@
         },
         "id": "toolu_013V2iUutN33EKvnJhR7KzQ2",
         "input": {
-          "configs": [
-            "napo"
-          ],
+          "configs": ["napo"],
           "name": "napo"
         },
         "name": "spawn",
@@ -951,9 +933,7 @@
         },
         "id": "toolu_01X1CLKQd2c8oorRmfL5yLyu",
         "input": {
-          "configs": [
-            "napo"
-          ],
+          "configs": ["napo"],
           "name": "napo"
         },
         "name": "spawn",
@@ -977,9 +957,7 @@
         },
         "id": "toolu_01KJhsLstH2SndYAjByZbBXD",
         "input": {
-          "configs": [
-            "judge"
-          ],
+          "configs": ["judge"],
           "name": "judge"
         },
         "name": "spawn",
@@ -1159,9 +1137,7 @@
         },
         "id": "toolu_01MbVN4gXwjVo2oRpM5Weq2x",
         "input": {
-          "configs": [
-            "napo"
-          ],
+          "configs": ["napo"],
           "name": "grocery"
         },
         "name": "spawn",
@@ -1173,9 +1149,7 @@
         },
         "id": "toolu_017BpqShhRgXdi87CrGcf6jg",
         "input": {
-          "configs": [
-            "napo"
-          ],
+          "configs": ["napo"],
           "name": "streaming"
         },
         "name": "spawn",
@@ -1187,9 +1161,7 @@
         },
         "id": "toolu_011bm9GAghdLRWVUU5erbDXP",
         "input": {
-          "configs": [
-            "napo"
-          ],
+          "configs": ["napo"],
           "name": "logistics"
         },
         "name": "spawn",
@@ -1285,9 +1257,7 @@
         },
         "id": "toolu_01EJ2Ab8ytHj3fyqMhoVs4zG",
         "input": {
-          "configs": [
-            "napo"
-          ],
+          "configs": ["napo"],
           "name": "napo"
         },
         "name": "spawn",
@@ -1328,9 +1298,7 @@
         },
         "id": "toolu_01Gyaf9NFbHCoiN54Xfz5Zca",
         "input": {
-          "configs": [
-            "judge"
-          ],
+          "configs": ["judge"],
           "name": "judge"
         },
         "name": "spawn",
@@ -1372,9 +1340,7 @@
         },
         "id": "toolu_01LLLrVnB334P1KvbxLnoL4z",
         "input": {
-          "configs": [
-            "judge"
-          ],
+          "configs": ["judge"],
           "name": "judge"
         },
         "name": "spawn",
@@ -1474,9 +1440,7 @@
         },
         "id": "toolu_01UG1qPNcpFdMKWpUNFuzyJE",
         "input": {
-          "configs": [
-            "judge"
-          ],
+          "configs": ["judge"],
           "name": "judge"
         },
         "name": "spawn",

@@ -7,9 +7,7 @@
         },
         "id": "toolu_01NEDaMuzGEfoyP73Kog6DNf",
         "input": {
-          "configs": [
-            "speck"
-          ],
+          "configs": ["speck"],
           "name": "speck"
         },
         "name": "spawn",
@@ -317,9 +315,7 @@
         },
         "id": "toolu_01BXBc6G2wVuX45mcjYqwHDM",
         "input": {
-          "configs": [
-            "mother"
-          ],
+          "configs": ["mother"],
           "name": "mother_v1"
         },
         "name": "spawn",
@@ -387,9 +383,7 @@
         },
         "id": "toolu_01VTpQtTpNCUPCUYy5V6j3DS",
         "input": {
-          "configs": [
-            "baby"
-          ],
+          "configs": ["baby"],
           "name": "mother_v1"
         },
         "name": "spawn",
@@ -479,9 +473,7 @@
         },
         "id": "toolu_01TaAWuwJdD8khN4WkTU7ZT4",
         "input": {
-          "configs": [
-            "baby"
-          ],
+          "configs": ["baby"],
           "name": "baby_v1"
         },
         "name": "spawn",
@@ -619,9 +611,7 @@
         },
         "id": "toolu_012dGUkKLhDiKVNmMkxKUdgz",
         "input": {
-          "configs": [
-            "baby"
-          ],
+          "configs": ["baby"],
           "name": "baby_v2"
         },
         "name": "spawn",
@@ -633,9 +623,7 @@
         },
         "id": "toolu_01FZCmNvXRwnxJjB91An2wHU",
         "input": {
-          "configs": [
-            "baby"
-          ],
+          "configs": ["baby"],
           "name": "baby_v3"
         },
         "name": "spawn",

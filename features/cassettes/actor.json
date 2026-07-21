@@ -7,9 +7,7 @@
         },
         "id": "toolu_01Px6xSw6Nb8kXsVD3m1vu8v",
         "input": {
-          "configs": [
-            "speck"
-          ],
+          "configs": ["speck"],
           "name": "speck"
         },
         "name": "spawn",
@@ -307,9 +305,7 @@
         },
         "id": "toolu_01TDv4kPatuLoQ6QcGb5UGfH",
         "input": {
-          "configs": [
-            "actor"
-          ],
+          "configs": ["actor"],
           "name": "actor_v1"
         },
         "name": "spawn",
@@ -465,9 +461,7 @@
         },
         "id": "toolu_01FZ4Rf2Mr46vojC6v13rNVk",
         "input": {
-          "configs": [
-            "actor"
-          ],
+          "configs": ["actor"],
           "name": "actor_v2"
         },
         "name": "spawn",
@@ -653,9 +647,7 @@
         },
         "id": "toolu_01EAaMyPtDenkKcxx76dHCR2",
         "input": {
-          "configs": [
-            "actor"
-          ],
+          "configs": ["actor"],
           "name": "actor_v3"
         },
         "name": "spawn",
@@ -841,9 +833,7 @@
         },
         "id": "toolu_01FsKepw8FcQ5XY98RfNJA6W",
         "input": {
-          "configs": [
-            "actor"
-          ],
+          "configs": ["actor"],
           "name": "actor_v4"
         },
         "name": "spawn",
@@ -1029,9 +1019,7 @@
         },
         "id": "toolu_01XL37BcTXhF3N7NzRvXBWat",
         "input": {
-          "configs": [
-            "actor"
-          ],
+          "configs": ["actor"],
           "name": "actor_v5"
         },
         "name": "spawn",

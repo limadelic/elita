@@ -38,13 +38,14 @@ defmodule Agent.Session do
     %{name: fetch!(opts, :name), folder: fetch!(opts, :folder)}
     |> put(:self, get(opts, :self, nil))
     |> put(:runner, get(opts, :runner, &run/2))
+    |> put(:skip_logs, get(opts, :skip_logs, false))
   end
 
   @impl true
   def handle_call({:ask, message}, _from, state) do
     body = %{messages: [%{content: message}]}
-    spawn(fn -> reply(state.name, message, body, state.folder, state.runner) end)
-    {:reply, {:ok, ""}, state}
+    response = reply(state.name, message, body, state.folder, state.runner)
+    {:reply, {:ok, response}, state}
   end
 
   @impl true
@@ -62,7 +63,7 @@ defmodule Agent.Session do
     start(name, message, folder)
     process(name, body, message, folder, runner)
   rescue
-    _ -> :ok
+    _ -> ""
   end
 
   defp process(name, body, message, folder, runner) do
@@ -71,14 +72,18 @@ defmodule Agent.Session do
   end
 
   defp emit([%{"text" => text, "type" => "text"}], name) do
-    answer(name, trim(text))
+    text = trim(text)
+    answer(name, text)
+    text
   end
 
   defp emit([%{"text" => text}], name) do
-    answer(name, trim(text))
+    text = trim(text)
+    answer(name, text)
+    text
   end
 
-  defp emit(_, _), do: :ok
+  defp emit(_, _), do: ""
 
   @impl true
   def handle_cast({:cast, message}, state) do

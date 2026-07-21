@@ -24,6 +24,7 @@ defmodule Elita.Umbrella do
     [
       test: [&run_test/1],
       lint: [&run_lint/1],
+      cukes: [&run_cukes/1],
       build: [&run_build/1],
       ship: "cmd bin/release"
     ]
@@ -38,8 +39,32 @@ defmodule Elita.Umbrella do
 
   defp run_lint(_) do
     check("mix format --check-formatted")
+    check("cd apps/el && mix format --check-formatted")
+    check("cd apps/elita && mix format --check-formatted")
     check("mix credo --strict")
     check("bundle exec rubocop")
+    check("npm run fmt:check")
+  end
+
+  defp run_cukes(args) do
+    extra = args |> Enum.join(" ") |> String.trim()
+    files = untagged_features()
+    files_arg = if Enum.any?(files), do: " #{Enum.join(files, " ")}", else: ""
+    cmd = "bundle exec cucumber --profile default" <> files_arg <> (if extra != "", do: " #{extra}", else: "")
+    check(cmd)
+  end
+
+  defp untagged_features do
+    "features/**/*.feature"
+    |> Path.wildcard()
+    |> Enum.filter(fn f -> !has_tag?(f, "@wip") and !has_tag?(f, "@live") end)
+    |> Enum.sort()
+  end
+
+  defp has_tag?(file, tag) do
+    file
+    |> File.read!()
+    |> String.contains?(tag)
   end
 
   defp run_build(_) do

@@ -38,6 +38,7 @@ module Spawn
     env = build_launch_env(puppet_name)
     @reader, @writer, @pid = PTY.spawn(env, "/bin/sh", "-c", cmd)
     track_pid(@pid)
+    @mutex = nil
     wait(prompt)
   end
 
@@ -56,7 +57,8 @@ module Spawn
       "LIVE" => ENV["LIVE"] || "",
       "CASSETTE" => @cassette,
       "CASSETTE_DIR" => dir,
-      "MIX_ENV" => "test"
+      "MIX_ENV" => "test",
+      "ELITA_RUN" => ENV["ELITA_RUN"] || ""
     }
   end
 
@@ -102,12 +104,18 @@ module Spawn
     return "claude" if args.include?("claude")
 
     words = args.split
-    words.empty? ? "el" : words.last
+    return "el" if words.empty?
+
+    as_index = words.index("as")
+    as_index ? words[as_index + 1] : words.first
   end
 
   def session_name(args)
     words = args.split
-    words.empty? ? "el" : words.last
+    return "el" if words.empty?
+
+    as_index = words.index("as")
+    as_index ? words[as_index + 1] : words.first
   end
 
   def encode(value)

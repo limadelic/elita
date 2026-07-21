@@ -35,36 +35,66 @@ defmodule Tools.Sys.Ask do
 
   def icon, do: @icon
 
-  def exec(_, %{"recipient" => recipient, "question" => question}, %{name: sender} = state) do
-    query(sender, recipient, question)
-    result = dispatch(recipient, question, :ask)
-    reply(sender, result)
+  def exec(_, %{"recipient" => r, "question" => q}, %{name: s, skip_logs: l} = state) do
+    query(s, r, q, l)
+    result = dispatch(r, q, :ask)
+    reply(s, result, l)
     {result, state}
   end
 
-  def exec(_, _args, state) do
+  def exec(_, _, state) do
     {"ask needs recipient and question", state}
   end
 
   def query(sender, recipient, question) do
+    query(sender, recipient, question, false)
+  end
+
+  def query(sender, recipient, question, silent) do
+    record(sender, recipient, question, silent)
+  end
+
+  defp record(_sender, _recipient, _question, true) do
+    :ok
+  end
+
+  defp record("el", _recipient, _question, _) do
+    :ok
+  end
+
+  defp record(sender, recipient, question, _) do
     msg = "#{@icon} #{sender} → #{recipient} | #{question}\n"
     write(msg)
     el(msg)
   end
 
   def answer(agent, text) when is_binary(text) do
+    emit(agent, text)
+  end
+
+  def answer(_agent, _text), do: :ok
+
+  defp emit(agent, text) do
     msg = "#{@reply} #{agent} | #{trim(text)}\n"
     write(msg)
     el(msg)
   end
 
-  def answer(_agent, _text), do: :ok
-
-  defp reply(agent, text) when is_binary(text) do
-    answer(agent, text)
+  defp reply(agent, text, silent) when is_binary(text) do
+    log(agent, text, silent)
   end
 
-  defp reply(_agent, _text), do: :ok
+  defp reply(_agent, _text, _silent), do: :ok
+
+  defp log(_agent, _text, true) do
+    :ok
+  end
+
+  defp log(agent, text, _) do
+    msg = "#{@reply} #{agent} | #{trim(text)}\n"
+    write(msg)
+    el(msg)
+  end
 
   defp el(msg) do
     :erlang.apply(:"Elixir.El.Log", :write, [msg])
