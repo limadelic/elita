@@ -43,8 +43,20 @@ defmodule Tester do
   def spawn(name, configs) do
     kill(name)
     reset_tape_writer()
-    Elita.spawn(to_string(name), to_configs(configs))
+    opts = tape_opts()
+    Elita.spawn(to_string(name), to_configs(configs), opts)
     on_exit(fn -> kill(name) end)
+  end
+
+  defp tape_opts do
+    [
+      tape_env: %{
+        tape: System.get_env("TAPE"),
+        live: System.get_env("LIVE"),
+        cassette: System.get_env("CASSETTE"),
+        cassette_dir: System.get_env("CASSETTE_DIR")
+      }
+    ]
   end
 
   defp to_configs(configs) when is_list(configs) do
