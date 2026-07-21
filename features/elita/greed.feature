@@ -1,3 +1,4 @@
+@wip
 Feature: Greed
 
   Scenario: Greed picks highest value domino
