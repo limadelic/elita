@@ -8,7 +8,7 @@ class Screen
     clear
   end
 
-  def feed(bytes)
+  def absorb(bytes)
     return if bytes.nil? || bytes.empty?
 
     bytes.each_char { |char| process_char(char) }

@@ -20,14 +20,23 @@ module Drain
   end
 
   def fetch(pty)
-    return "" if @mutex
+    @mutex ? "" : slurp(pty)
+  end
 
-    ready = IO.select([pty], nil, nil, 0.1)
-    return "" unless ready
-
-    encode(pty.readpartial(4096))
+  def slurp(pty)
+    load(pty)
   rescue EOFError
     ""
+  end
+
+  def load(pty)
+    return "" unless ready?(pty)
+
+    encode(pty.readpartial(4096))
+  end
+
+  def ready?(pty)
+    IO.select([pty], nil, nil, 0.1)
   end
 
   def extract(reader, timeout, output)
@@ -36,9 +45,13 @@ module Drain
 
   def await(reader, timeout, output)
     while Time.now < timeout
-      ready = IO.select([reader], nil, nil, 0.1)
-      output << reader.readpartial(4096) if ready
+      feed(reader, output)
     end
+  end
+
+  def feed(reader, output)
+    ready = IO.select([reader], nil, nil, 0.1)
+    output << reader.readpartial(4096) if ready
   end
 
   def attempt(output, pattern, timeout)
@@ -49,29 +62,46 @@ module Drain
   end
 
   def poll(output, pattern, timeout)
-    @mutex ? poll_with_mutex(output, pattern, timeout) : poll_without_mutex(output, pattern, timeout)
+    @mutex ? lock(output, pattern, timeout) : wild(output, pattern, timeout)
   end
 
-  def poll_with_mutex(output, pattern, timeout)
+  def lock(output, pattern, timeout)
     stripped = ""
-    last_pos_full = @transcript ? @transcript.length : 0
-    last_pos_stripped = @transcript_stripped ? @transcript_stripped.length : 0
-    poll_loop_with_mutex(output, pattern, timeout, stripped, last_pos_full, last_pos_stripped)
+    last_pos_full = full
+    last_pos_stripped = span
+    cycle(output, pattern, timeout, stripped, last_pos_full, last_pos_stripped)
   end
 
-  def poll_loop_with_mutex(output, pattern, timeout, stripped, last_pos_full, last_pos_stripped)
-    while Time.now < timeout
-      last_pos_full = sync_full(output, last_pos_full)
-      last_pos_stripped = sync_stripped(stripped, last_pos_stripped)
-      return output if stripped.include?(pattern)
+  def full
+    @transcript ? @transcript.length : 0
+  end
 
+  def span
+    @transcript_stripped ? @transcript_stripped.length : 0
+  end
+
+  def cycle(output, pattern, timeout, stripped, last_pos_full, last_pos_stripped)
+    loop do
+      break if done?(timeout, stripped, pattern)
+
+      hoist(output, last_pos_full)
+      glean(stripped, last_pos_stripped)
       sleep 0.01
     end
+    output
   end
 
-  def sync_full(output, last_pos)
+  def done?(timeout, stripped, pattern)
+    Time.now >= timeout || hit?(stripped, pattern)
+  end
+
+  def hit?(stripped, pattern)
+    stripped.include?(pattern)
+  end
+
+  def hoist(output, last_pos)
     @mutex.synchronize do
-      return last_pos unless @transcript && @transcript.length > last_pos
+      return last_pos unless fresh?(last_pos)
 
       chunk = @transcript[last_pos...@transcript.length]
       output << chunk
@@ -79,9 +109,13 @@ module Drain
     end
   end
 
-  def sync_stripped(stripped, last_pos)
+  def fresh?(last_pos)
+    @transcript && @transcript.length > last_pos
+  end
+
+  def glean(stripped, last_pos)
     @mutex.synchronize do
-      return last_pos unless @transcript_stripped && @transcript_stripped.length > last_pos
+      return last_pos unless ripe?(last_pos)
 
       chunk = @transcript_stripped[last_pos...@transcript_stripped.length]
       stripped << chunk
@@ -89,35 +123,62 @@ module Drain
     end
   end
 
-  def poll_without_mutex(output, pattern, timeout)
-    stripped = ""
-    while Time.now < timeout
-      next if (chunk = fetch(@reader)).empty?
+  def ripe?(last_pos)
+    @transcript_stripped && @transcript_stripped.length > last_pos
+  end
 
-      log(chunk, output)
-      stripped << strip(chunk)
-      return output if stripped.include?(pattern)
+  def wild(output, pattern, timeout)
+    stripped = ""
+    loop do
+      break if stop?(timeout, output, pattern, stripped)
+
+      sleep 0.01
     end
+    output
+  end
+
+  def stop?(timeout, output, pattern, stripped)
+    Time.now >= timeout || take(output, pattern, stripped)
+  end
+
+  def take(output, pattern, stripped)
+    chunk = fetch(@reader)
+    return false if chunk.empty?
+
+    log(chunk, output)
+    stripped << strip(chunk)
+    hit?(stripped, pattern)
   end
 
   def log(chunk, output)
     output << chunk
-    @mutex ? log_with_mutex(chunk) : log_without_mutex(chunk)
+    @mutex ? guard(chunk) : plain(chunk)
   end
 
-  def log_with_mutex(chunk)
+  def guard(chunk)
     @mutex.synchronize do
-      @transcript << chunk if @transcript
-      @screen.feed(chunk) if @screen
-      stripped = encode(strip(chunk))
-      @transcript_stripped << stripped if @transcript_stripped
+      record(chunk)
+      paint(chunk)
+      render(chunk)
     end
   end
 
-  def log_without_mutex(chunk)
+  def record(chunk)
     @transcript << chunk if @transcript
-    @screen.feed(chunk) if @screen
+  end
+
+  def paint(chunk)
+    @screen.absorb(chunk) if @screen
+  end
+
+  def render(chunk)
     stripped = encode(strip(chunk))
     @transcript_stripped << stripped if @transcript_stripped
+  end
+
+  def plain(chunk)
+    record(chunk)
+    paint(chunk)
+    render(chunk)
   end
 end

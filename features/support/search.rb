@@ -8,8 +8,8 @@ module Search
 
   def verify(rows)
     init unless @scenario_cursors
-    deadline = deadline()
-    cycle(rows, deadline)
+    deadline = bound()
+    hunt(rows, deadline)
   rescue Timeout::Error, Timeout::ExitException => e
     raise_with_screen_dump(e)
   end
@@ -19,7 +19,7 @@ module Search
     @folded_lines = nil
   end
 
-  def cycle(rows, deadline)
+  def hunt(rows, deadline)
     last_sent = Time.now - 2
     while !search(rows, normalize(transcript), deadline)
       last_sent = tick(last_sent)
@@ -99,7 +99,7 @@ module Search
     ].all?
   end
 
-  def deadline
+  def bound
     timeout = ENV["GITHUB_ACTIONS"] == "true" ? 60 : 3
     timeout = 300 if ENV["TAPE"] == "rec"
     Time.now + timeout
