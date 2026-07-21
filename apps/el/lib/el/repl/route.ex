@@ -1,4 +1,5 @@
 defmodule El.Repl.Route do
+  import Kernel, except: [spawn: 3]
   import El.Puppet, only: [ask: 2]
   import El.Sessions, only: [log: 1]
   import IO, only: [puts: 1]
