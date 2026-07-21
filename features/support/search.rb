@@ -102,6 +102,7 @@ module Search
 
   def normalize(transcript)
     tx = (transcript.dup.force_encoding("UTF-8") rescue transcript)
+    tx = tx.gsub(/\e\[[0-9;]*[a-zA-Z]/, "")
     lines = tx.split("\n").map { |l|
       l.strip.force_encoding("UTF-8") rescue l.strip
     }.reject(&:empty?)
