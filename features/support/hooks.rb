@@ -8,6 +8,12 @@ BeforeAll do
   root = File.expand_path("../../..", __FILE__)
   el_dir = File.join(root, "apps/el")
   system("cd #{el_dir} && mix escript.build") || raise("Failed to build el escript")
+
+  tmp_dir = File.expand_path('../../tmp', __dir__)
+  FileUtils.mkdir_p(tmp_dir)
+  @scratch_home = Dir.mktmpdir('home', tmp_dir)
+  ENV["HOME"] = @scratch_home
+
   setup_daemon
 end
 
@@ -302,8 +308,9 @@ def daemon_command
   tape = ENV["TAPE"] || "replay"
   cassette_dir = File.expand_path("../cassettes", __dir__)
   el_path = "../../../../apps/el/el"
+  home = ENV["HOME"]
   "ELITA_RUN=cukes TAPE=#{tape} CASSETTE_DIR=#{cassette_dir} " \
-  "MIX_ENV=test #{el_path} daemon >>#{@daemon_log} 2>&1 &"
+  "HOME=#{home} MIX_ENV=test #{el_path} daemon >>#{@daemon_log} 2>&1 &"
 end
 
 def wait_daemon_ready
