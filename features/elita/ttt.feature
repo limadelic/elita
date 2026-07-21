@@ -1,7 +1,7 @@
 Feature: Ttt
 
   @tape:ttt
-  Scenario: Alice and Bob play to completion
+  Scenario: Two players play to the end
     * > el ttt as alice
 
     * > el ttt as bob
@@ -13,14 +13,31 @@ Feature: Ttt
       | I've started the game |
 
     * alice> log
-      | 📢 alice → bob | Let's play tic-tac-toe |
-      | 📢 alice → bob | taking the center      |
-      | 📢 alice → bob | win with a diagonal    |
+      | 📢 alice → bob | Let's play tic-tac-toe. I'm X and I'll go first. Here's my opening move: |
+      |                | X \| _ \| _                                                              |
+      |                | _ \| _ \| _                                                              |
+      |                | _ \| _ \| _                                                              |
 
     * bob> log
-      | 📢 bob → alice | center-right position |
-      | 📢 bob → alice | top-right to build    |
+      | 📢 bob → alice | Hi Alice! Great, let's play! Here's my move: |
+      |                | X \| _ \| _                                  |
+      |                | _ \| _ \| O                                  |
+      |                | _ \| _ \| _                                  |
 
-    * alice> tell me: did the game finish and was it a win or tie?
-      | game finished |
-      | diagonal      |
+    * alice> log
+      | 📢 alice → bob | Nice move, Bob! Here's my response: |
+      |                | X \| _ \| _                         |
+      |                | _ \| X \| O                         |
+      |                | _ \| _ \| _                         |
+
+    * bob> log
+      | 📢 bob → alice | I'm taking the top-right to build my defense. |
+      |                | X \| _ \| O                                   |
+      |                | _ \| X \| O                                   |
+      |                | _ \| _ \| _                                   |
+
+    * alice> log
+      | 📢 alice → bob | I'm taking the bottom-right corner and I win with a diagonal! |
+      |                | X \| _ \| O                                                   |
+      |                | _ \| X \| O                                                   |
+      |                | _ \| _ \| X                                                   |
