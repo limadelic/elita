@@ -27,7 +27,7 @@ end
 
 defmodule Tools.Sys.Become do
   import Enum, only: [map: 2]
-  import Log, only: [log: 5]
+  import Log, only: [log: 5, agent: 5]
   import Map, only: [put: 3]
 
   @icon "🎭"
@@ -36,8 +36,9 @@ defmodule Tools.Sys.Become do
 
   def icon, do: @icon
 
-  def exec(_, %{"role" => role}, state) do
-    log(@icon, state.name, " as ", role, :magenta)
+  def exec(_, %{"role" => role}, %{name: name} = state) do
+    log(@icon, name, " as ", role, :magenta)
+    agent(@icon, name, " as ", role, %{name: name})
     {"switched to #{role}", switch(state, role)}
   end
 

@@ -1,5 +1,5 @@
 defmodule Tools.Sys.Set do
-  import Log, only: [log: 5]
+  import Log, only: [log: 5, agent: 5]
   import Map, only: [put: 3]
   import Mem, only: [depth: 0, table: 0]
 
@@ -19,8 +19,9 @@ defmodule Tools.Sys.Set do
 
   def icon, do: @icon
 
-  def exec(_tool, %{"value" => value, "key" => key}, state) do
+  def exec(_tool, %{"value" => value, "key" => key}, %{name: name} = state) do
     log(@icon, key, " = ", value, :blue)
+    agent(@icon, key, " = ", value, %{name: name})
     store(key, value)
     {"stored", state}
   end

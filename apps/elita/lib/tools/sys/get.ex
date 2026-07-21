@@ -1,5 +1,5 @@
 defmodule Tools.Sys.Get do
-  import Log, only: [log: 5]
+  import Log, only: [log: 5, agent: 5]
   import Mem, only: [depth: 0, table: 0]
 
   @icon "👀"
@@ -18,9 +18,10 @@ defmodule Tools.Sys.Get do
 
   def icon, do: @icon
 
-  def exec(_, %{"key" => key}, state) do
+  def exec(_, %{"key" => key}, %{name: name} = state) do
     value = fetch(key)
     log(@icon, key, ": ", value, :blue)
+    agent(@icon, key, ": ", value, %{name: name})
     {value, state}
   end
 
