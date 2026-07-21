@@ -1,10 +1,8 @@
 defmodule El.Tunnel do
   import Enum, only: [find_value: 3]
   import Node, only: [connect: 1]
-  import System, only: [pid: 0]
-  import String, only: [to_atom: 1]
+  import System, only: [pid: 0, get_env: 2]
   import El.Run, only: [suffix: 0]
-  import El.Distribution, only: [start: 1]
 
   defp safely(fun, default) do
     fun.()
@@ -13,15 +11,24 @@ defmodule El.Tunnel do
   end
 
   def boot(agent) do
+    spawn()
     agent |> present() |> dispatch(agent)
   end
 
   defp dispatch(true, agent) do
-    spawn()
     peer(agent)
   end
 
-  defp dispatch(false, agent), do: start(agent)
+  defp dispatch(false, _agent) do
+    attach(get_env("ELITA_RUN", ""))
+  end
+
+  defp attach(""), do: :ok
+
+  defp attach(id) do
+    node = :"elita-#{id}@127.0.0.1"
+    safely(fn -> connect(node) end, :ok)
+  end
 
   defp present(agent), do: safely(fn -> :net_adm.names(~c"127.0.0.1") |> exist(agent) end, false)
 
@@ -71,6 +78,6 @@ defmodule El.Tunnel do
 
   defp fetch(node, agent) do
     full = :"#{node}@127.0.0.1"
-    safely(fn -> :erpc.call(full, :global, :whereis_name, [{to_atom(agent), :puppet}]) end, nil)
+    safely(fn -> :erpc.call(full, :global, :whereis_name, [{agent, :puppet}]) end, nil)
   end
 end

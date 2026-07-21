@@ -14,8 +14,8 @@ jobs:
 
       - uses: erlef/setup-beam@v1
         with:
-          elixir-version: '1.18'
-          otp-version: '28'
+          elixir-version: '1.20.2'
+          otp-version: '29'
 
       - uses: ruby/setup-ruby@v1
         with:
@@ -27,9 +27,9 @@ jobs:
           path: |
             deps
             _build
-          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+          key: ${{ runner.os }}-mix-1.20.2-29-${{ hashFiles('**/mix.lock') }}
           restore-keys: |
-            ${{ runner.os }}-mix-
+            ${{ runner.os }}-mix-1.20.2-29-
 
       - name: Get dependencies
         run: mix deps.get
@@ -39,6 +39,8 @@ jobs:
           node-version: 'lts/*'
           cache: npm
 
+      - run: npm install
+
       - name: Lint
         id: lint
         run: mix lint
@@ -46,11 +48,6 @@ jobs:
       - name: Generate credo JSON
         run: mix credo list --format json > /tmp/credo.json
         if: always()
-
-      - name: Check Gherkin formatting
-        run: |
-          npm install
-          npm run fmt:check
 
       - name: Credo failure detail
         if: steps.lint.outcome == 'failure'

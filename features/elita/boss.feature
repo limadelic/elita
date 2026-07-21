@@ -1,40 +1,55 @@
-@wip
 Feature: Boss
 
-  Scenario: Boss delegates to the right worker
+  @tape:boss
+  Scenario: Engineer manager
+    * > el boss
+
+    * > el worker as dev
+
+    * > el worker as qa
+
+    * boss> you manage a software development team with a dev and a qa
+      | ready |
+
+    * boss> we need more test created
+      | done |
+
+    * boss> log
+      | 📢 boss → qa | more tests |
+
+    * dev> did you receive a task from boss?
+      | no |
+
+    * qa> did you receive a task from boss?
+      | yes |
+
+  @tape:boss2
+  Scenario: Office boss
     * > el
 
-    * el> have a boss manage a dev and a qa
+    * > el boss as michael
 
-    * el> tell the boss we need more tests
-      | 📢 el → boss | we need more tests |
-      | 📢 boss → qa | we need more tests |
+    * > el boss as dwight
 
-    * el> ask the dev do you have a task from boss
-      | ✨ dev | no, i don't have a task from boss |
+    * > el worker as pam
 
-    * el> ask the qa do you have a task from boss
-      | ✨ qa | yes. i have a task from boss |
+    * > el worker as jim
 
-  @tape:office
-  Scenario: Boss delegates down the chain
-    * > el
+    * michael> you manage dwight the assistant regional manager
 
-    * el> have michael the boss manage dwight the assistant regional manager
+    * dwight> you manage pam the receptionist and jim the salesman
 
-    * el> have dwight the boss manage pam the receptionist and jim the salesman
+    * michael> we need 50 copies of the quarterly sales report
+      | done |
 
-    * el> tell michael we need 50 copies of the quarterly sales report
-      | 📢 el → michael     | 50 copies of the quarterly sales report |
-      | 📢 michael → Dwight | get it done                             |
+    * pam> did you receive a task to make copies?
+      | yes |
 
-    * el> ask pam do you have a task
-      | 📢 dwight → Pam | 50 copies of the quarterly sales report |
-      | ✨ pam           | I'll get these done right away          |
-      | ✨ dwight        | Pam will have those copies ready        |
-      | 🤔 el → pam     | do you have a task                      |
-      | ✨ pam           | not at the moment                       |
+    * jim> did you receive a task?
+      | no |
 
-    * el> ask jim do you have a task
-      | 🤔 el → jim | do you have a task      |
-      | ✨ jim       | no, i don't have a task |
+    * michael> log
+      | 📢 michael → dwight | 50 copies |
+
+    * dwight> log
+      | 📢 dwight → pam | 50 copies |

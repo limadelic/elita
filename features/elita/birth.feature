@@ -1,18 +1,15 @@
-@wip
 Feature: Birth
 
-  @wip
   Scenario: Mother gives birth to a baby
-    * > el
+    * > el mother
 
-    * el> get me a mother ready to give birth
-      | 📢 el → mother | ready to give birth |
+    * mother> it's time to give birth
+      | the baby has arrived |
+      | congratulations      |
 
-    * el> tell the mother it's time
-      | 📢 el → mother | It's time                     |
-      | ✨ mother       | my beautiful baby has arrived |
+    * mother> log
+      | 🚀 baby | spawn |
 
-    * el> ask the baby how does it feel to be born
-      | 📢 el → baby | just born        |
-      | 🤔 el → baby | How does it feel |
-      | ✨ baby       | WAAHHHHH         |
+    * mother> baby spank
+      | WAAAAAHHHHHHH |
+      | wailing       |

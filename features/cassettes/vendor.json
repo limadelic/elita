@@ -7,9 +7,7 @@
         },
         "id": "toolu_01B3aUBg4YSa1WRzbRdi3mPp",
         "input": {
-          "configs": [
-            "napo"
-          ],
+          "configs": ["napo"],
           "name": "napo"
         },
         "name": "spawn",
@@ -89,9 +87,7 @@
         },
         "id": "toolu_01L7FECkU2BcoBn6Xt6KVD8v",
         "input": {
-          "configs": [
-            "napo"
-          ],
+          "configs": ["napo"],
           "name": "napo"
         },
         "name": "spawn",

@@ -7,9 +7,7 @@
         },
         "id": "toolu_01T3nKWVUJfTcA9VevCpZ48D",
         "input": {
-          "configs": [
-            "napo"
-          ],
+          "configs": ["napo"],
           "name": "napo"
         },
         "name": "spawn",
@@ -89,9 +87,7 @@
         },
         "id": "toolu_01GbmULHK1eFC2brS1Y7zw6g",
         "input": {
-          "configs": [
-            "napo"
-          ],
+          "configs": ["napo"],
           "name": "contract_lead"
         },
         "name": "spawn",
@@ -157,9 +153,7 @@
         },
         "id": "toolu_01AzJRDWzTc8CnzWRdcWrVwz",
         "input": {
-          "configs": [
-            "judge"
-          ],
+          "configs": ["judge"],
           "name": "contract_lead"
         },
         "name": "spawn",
@@ -296,9 +290,7 @@
         },
         "id": "toolu_01UU5jyKvYft6oitEpZxpXj6",
         "input": {
-          "configs": [
-            "napo"
-          ],
+          "configs": ["napo"],
           "name": "overtime"
         },
         "name": "spawn",
@@ -310,9 +302,7 @@
         },
         "id": "toolu_01MWtc6YM3ZK68ucVssf5K5H",
         "input": {
-          "configs": [
-            "napo"
-          ],
+          "configs": ["napo"],
           "name": "noncompete"
         },
         "name": "spawn",
@@ -324,9 +314,7 @@
         },
         "id": "toolu_01Y5JqsggT2EBx1uA1BuQQzX",
         "input": {
-          "configs": [
-            "napo"
-          ],
+          "configs": ["napo"],
           "name": "ipassign"
         },
         "name": "spawn",
@@ -338,9 +326,7 @@
         },
         "id": "toolu_0139GtJPhHGG2BbqNatNogLF",
         "input": {
-          "configs": [
-            "napo"
-          ],
+          "configs": ["napo"],
           "name": "arbitration"
         },
         "name": "spawn",
@@ -500,9 +486,7 @@
         },
         "id": "toolu_01NA3zbFwp6wHxCR4atqR1zw",
         "input": {
-          "configs": [
-            "napo"
-          ],
+          "configs": ["napo"],
           "name": "arbitration"
         },
         "name": "spawn",
@@ -532,9 +516,7 @@
         },
         "id": "toolu_013cmpb29CCoGqBiiAJ1Md8z",
         "input": {
-          "configs": [
-            "judge"
-          ],
+          "configs": ["judge"],
           "name": "ipassign"
         },
         "name": "spawn",
@@ -599,9 +581,7 @@
         },
         "id": "toolu_01LihJiutuVH14wScopHdUBe",
         "input": {
-          "configs": [
-            "judge"
-          ],
+          "configs": ["judge"],
           "name": "judge"
         },
         "name": "spawn",
@@ -661,9 +641,7 @@
         },
         "id": "toolu_018f8ExYKUZx8DHwGHvKcTH1",
         "input": {
-          "configs": [
-            "judge"
-          ],
+          "configs": ["judge"],
           "name": "overtime"
         },
         "name": "spawn",
@@ -740,9 +718,7 @@
         },
         "id": "toolu_0114u9ibNW1KbRe64FAQQuov",
         "input": {
-          "configs": [
-            "judge"
-          ],
+          "configs": ["judge"],
           "name": "judge"
         },
         "name": "spawn",
@@ -1018,9 +994,7 @@
         },
         "id": "toolu_019zTSLnGAMBfqdo2U92A8L3",
         "input": {
-          "configs": [
-            "napo"
-          ],
+          "configs": ["napo"],
           "name": "napo"
         },
         "name": "spawn",

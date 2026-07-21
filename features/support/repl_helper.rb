@@ -90,9 +90,9 @@ module ReplHelper
 
   def write_input(input, prompt)
     @sessions ||= {}
-    if @sessions.key?(prompt)
-      activate(prompt)
-    end
+    raise "Unknown session: #{prompt}" unless @sessions.key?(prompt)
+
+    activate(prompt)
     raise "PTY not initialized" unless @writer
 
     @writer.write("#{input}\n")
@@ -102,13 +102,20 @@ module ReplHelper
   def await_result(prompt, input)
     return verify_closed if input == "/exit"
 
-    actual_prompt = @sessions[prompt]&.dig(:prompt) || prompt
+    actual_prompt = resolve_await_prompt(prompt)
     wait(actual_prompt) || ""
+  end
+
+  def resolve_await_prompt(prompt)
+    return @sessions[prompt][:prompt] if @sessions.key?(prompt)
+
+    @sessions[@current]&.dig(:prompt) || prompt
   end
 
   def activate(name)
     return unless (session = @sessions[name])
 
+    @current = name
     assign_session_attrs(session)
   end
 
@@ -183,7 +190,7 @@ module ReplHelper
 
     @reader.readpartial(1)
     false
-  rescue EOFError
+  rescue EOFError, Errno::EIO
     true
   end
 

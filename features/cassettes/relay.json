@@ -34,9 +34,7 @@
         },
         "id": "toolu_01KzJdTSXbV35yvud624HsHM",
         "input": {
-          "configs": [
-            "relay"
-          ],
+          "configs": ["relay"],
           "name": "relay"
         },
         "name": "spawn",
@@ -172,9 +170,7 @@
         },
         "id": "toolu_01AojcCcVVkDZtLsJrUvbzha",
         "input": {
-          "configs": [
-            "scout_price"
-          ],
+          "configs": ["scout_price"],
           "name": "scout_price"
         },
         "name": "spawn",
@@ -186,9 +182,7 @@
         },
         "id": "toolu_01GvoCTgadwLSzfEWW9JAKZa",
         "input": {
-          "configs": [
-            "scout_friction"
-          ],
+          "configs": ["scout_friction"],
           "name": "scout_friction"
         },
         "name": "spawn",
@@ -200,9 +194,7 @@
         },
         "id": "toolu_01Dukxnxu44QB5d8xYL9SeMY",
         "input": {
-          "configs": [
-            "scout_desire"
-          ],
+          "configs": ["scout_desire"],
           "name": "scout_desire"
         },
         "name": "spawn",
@@ -346,9 +338,7 @@
         },
         "id": "toolu_01C86H9uMrH6DFZqniGe7S4G",
         "input": {
-          "configs": [
-            "auditor"
-          ],
+          "configs": ["auditor"],
           "name": "auditor"
         },
         "name": "spawn",
@@ -482,9 +472,7 @@
         },
         "id": "toolu_014GBrPthvy8ee71yPSh3jSG",
         "input": {
-          "configs": [
-            "relay"
-          ],
+          "configs": ["relay"],
           "name": "relay"
         },
         "name": "spawn",
@@ -560,9 +548,7 @@
         },
         "id": "toolu_01946d5mxpJXRqNnTaSNenWr",
         "input": {
-          "configs": [
-            "scout_price"
-          ],
+          "configs": ["scout_price"],
           "name": "scout_price"
         },
         "name": "spawn",
@@ -574,9 +560,7 @@
         },
         "id": "toolu_01L24VPLyQCCPynVvNiYV4iz",
         "input": {
-          "configs": [
-            "scout_friction"
-          ],
+          "configs": ["scout_friction"],
           "name": "scout_friction"
         },
         "name": "spawn",
@@ -588,9 +572,7 @@
         },
         "id": "toolu_01CpLQAmh3XkuuxnoufDo8yX",
         "input": {
-          "configs": [
-            "scout_desire"
-          ],
+          "configs": ["scout_desire"],
           "name": "scout_desire"
         },
         "name": "spawn",
@@ -734,9 +716,7 @@
         },
         "id": "toolu_01NL4Lz6akMnqXXrVREaAKxJ",
         "input": {
-          "configs": [
-            "auditor"
-          ],
+          "configs": ["auditor"],
           "name": "auditor"
         },
         "name": "spawn",
@@ -870,9 +850,7 @@
         },
         "id": "toolu_014Sjgk8QgzoJ9oGQim5UQXd",
         "input": {
-          "configs": [
-            "scout_price"
-          ],
+          "configs": ["scout_price"],
           "name": "scout_price"
         },
         "name": "spawn",
@@ -884,9 +862,7 @@
         },
         "id": "toolu_01AMt96NQnjT2EsTyLQSFDhF",
         "input": {
-          "configs": [
-            "scout_friction"
-          ],
+          "configs": ["scout_friction"],
           "name": "scout_friction"
         },
         "name": "spawn",
@@ -898,9 +874,7 @@
         },
         "id": "toolu_01VZFo7PHE119mSL6Yeo5BYU",
         "input": {
-          "configs": [
-            "scout_desire"
-          ],
+          "configs": ["scout_desire"],
           "name": "scout_desire"
         },
         "name": "spawn",
@@ -1044,9 +1018,7 @@
         },
         "id": "toolu_016LADBnwGtnEYNx2pM6ZQYs",
         "input": {
-          "configs": [
-            "auditor"
-          ],
+          "configs": ["auditor"],
           "name": "auditor"
         },
         "name": "spawn",
@@ -1152,9 +1124,7 @@
         },
         "id": "toolu_01FKt7UbcGYd18dWMvMWQ2Yd",
         "input": {
-          "configs": [
-            "scout_price"
-          ],
+          "configs": ["scout_price"],
           "name": "scout_price"
         },
         "name": "spawn",
@@ -1166,9 +1136,7 @@
         },
         "id": "toolu_019ND1V8xfYL9zhQfvUbMK7A",
         "input": {
-          "configs": [
-            "scout_friction"
-          ],
+          "configs": ["scout_friction"],
           "name": "scout_friction"
         },
         "name": "spawn",
@@ -1180,9 +1148,7 @@
         },
         "id": "toolu_01DkR7KiVSbJT5RF1xsJayUX",
         "input": {
-          "configs": [
-            "scout_desire"
-          ],
+          "configs": ["scout_desire"],
           "name": "scout_desire"
         },
         "name": "spawn",
@@ -1326,9 +1292,7 @@
         },
         "id": "toolu_01LLWSuGcZSx75PXcxTYu7Zk",
         "input": {
-          "configs": [
-            "auditor"
-          ],
+          "configs": ["auditor"],
           "name": "auditor"
         },
         "name": "spawn",
@@ -1438,9 +1402,7 @@
         },
         "id": "toolu_018kTSc4sg6ZsxUnYnjd4FD9",
         "input": {
-          "configs": [
-            "scout_price"
-          ],
+          "configs": ["scout_price"],
           "name": "scout_price"
         },
         "name": "spawn",
@@ -1452,9 +1414,7 @@
         },
         "id": "toolu_0181YCynm8XgAi2t1qcjv5RW",
         "input": {
-          "configs": [
-            "scout_friction"
-          ],
+          "configs": ["scout_friction"],
           "name": "scout_friction"
         },
         "name": "spawn",
@@ -1466,9 +1426,7 @@
         },
         "id": "toolu_01MaTXvQzCYVGmdEnjtnYPbY",
         "input": {
-          "configs": [
-            "scout_desire"
-          ],
+          "configs": ["scout_desire"],
           "name": "scout_desire"
         },
         "name": "spawn",
@@ -1612,9 +1570,7 @@
         },
         "id": "toolu_01BM3QbBbjF8ckbGpAPDr64h",
         "input": {
-          "configs": [
-            "auditor"
-          ],
+          "configs": ["auditor"],
           "name": "auditor"
         },
         "name": "spawn",

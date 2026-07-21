@@ -16,8 +16,8 @@ jobs:
 
       - uses: erlef/setup-beam@v1
         with:
-          elixir-version: '1.18'
-          otp-version: '28'
+          elixir-version: '1.20.2'
+          otp-version: '29'
 
       - uses: ruby/setup-ruby@v1
         with:
@@ -29,9 +29,9 @@ jobs:
           path: |
             deps
             _build
-          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+          key: ${{ runner.os }}-mix-1.20.2-29-${{ hashFiles('**/mix.lock') }}
           restore-keys: |
-            ${{ runner.os }}-mix-
+            ${{ runner.os }}-mix-1.20.2-29-
 
       - name: Get dependencies
         run: mix deps.get
@@ -58,6 +58,10 @@ jobs:
         run: |
           mkdir -p site
           cp reports/cucumber.html site/report.html
+        if: always()
+
+      - name: Inject legend into cucumber report
+        run: ops/ci/inject_legend.rb site/report.html
         if: always()
 
       - name: Generate cucumber badge

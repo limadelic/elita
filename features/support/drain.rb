@@ -7,7 +7,7 @@ module Drain
 
   def safe
     yield
-  rescue EOFError
+  rescue EOFError, Errno::EIO
   end
 
   def read(pty, output)
