@@ -19,7 +19,7 @@ module Search
 
   def cycle(rows, deadline)
     last_sent = Time.now - 2
-    while !search(rows, normalize(transcript), deadline, transcript)
+    while !search(rows, normalize(transcript), deadline)
       last_sent = tick(last_sent)
       sleep 0.05
     end
@@ -31,8 +31,8 @@ module Search
     drain; nudge; Time.now
   end
 
-  def search(rows, folded_lines, deadline, tx)
-    found_indices = hit(rows, folded_lines, deadline, tx)
+  def search(rows, folded_lines, deadline)
+    found_indices = hit(rows, folded_lines, deadline)
     return nil unless found_indices
 
     if found_indices.any?
@@ -41,22 +41,22 @@ module Search
     found_indices
   end
 
-  def hit(rows, folded_lines, deadline, tx)
+  def hit(rows, folded_lines, deadline)
     rows.each_with_object([]) do |row, acc|
-      idx = find(row, folded_lines, deadline, tx)
+      idx = find(row, folded_lines, deadline)
       return nil unless idx
 
       acc << idx
     end
   end
 
-  def find(row, folded_lines, deadline, tx)
+  def find(row, folded_lines, deadline)
     prefix = row[0].strip.force_encoding("UTF-8") rescue row[0].strip
     prefix = strip_variation_selectors(prefix)
     downtext = row[1].strip.downcase
     text = downtext.force_encoding("UTF-8") rescue downtext
     text = strip_variation_selectors(text)
-    scan(folded_lines, prefix, text) || fail(prefix, text, deadline, tx)
+    scan(folded_lines, prefix, text) || fail(prefix, text, deadline, folded_lines)
   end
 
   def scan(folded_lines, prefix, text)
@@ -67,11 +67,12 @@ module Search
     nil
   end
 
-  def fail(prefix, text, deadline, tx)
+  def fail(prefix, text, deadline, folded_lines)
     return nil if Time.now < deadline
 
     msg = "No match for prefix='#{prefix}' text='#{text}'"
-    raise msg << "\n\nTranscript:\n#{tx}"
+    screen_dump = folded_lines.last(40).join("\n")
+    raise msg << "\n\nScreen:\n#{screen_dump}"
   end
 
   def split(line)
