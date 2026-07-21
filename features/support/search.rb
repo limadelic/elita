@@ -52,8 +52,10 @@ module Search
 
   def find(row, folded_lines, deadline, tx)
     prefix = row[0].strip.force_encoding("UTF-8") rescue row[0].strip
+    prefix = strip_variation_selectors(prefix)
     downtext = row[1].strip.downcase
     text = downtext.force_encoding("UTF-8") rescue downtext
+    text = strip_variation_selectors(text)
     scan(folded_lines, prefix, text) || fail(prefix, text, deadline, tx)
   end
 
@@ -103,6 +105,7 @@ module Search
   def normalize(transcript)
     tx = (transcript.dup.force_encoding("UTF-8") rescue transcript)
     tx = tx.gsub(/\e\[[0-9;]*[a-zA-Z]/, "")
+    tx = strip_variation_selectors(tx)
     lines = tx.split("\n").map { |l|
       l.strip.force_encoding("UTF-8") rescue l.strip
     }.reject(&:empty?)
@@ -135,5 +138,9 @@ module Search
     @writer.write("\n")
     @writer.flush
   rescue IOError
+  end
+
+  def strip_variation_selectors(text)
+    text.gsub("\u{FE0F}", "")
   end
 end
