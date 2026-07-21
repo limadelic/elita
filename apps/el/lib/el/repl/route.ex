@@ -8,7 +8,6 @@ defmodule El.Repl.Route do
   import El.Distribution, only: [wait: 1]
   import Elita, only: [spawn: 3]
   import System, only: [get_env: 1]
-  import Keyword, only: [put: 3]
 
   def route([name, "log"], _a, _p, _i), do: name |> log() |> puts()
 
@@ -30,6 +29,11 @@ defmodule El.Repl.Route do
     {name <> " spawned", name, pid}
   end
 
+  defp attempt(_words, puppet, input, agent) do
+    words = input |> split(" ", parts: 2)
+    via(words, puppet, input, agent)
+  end
+
   defp opts, do: [tape_env: build()]
 
   defp build,
@@ -39,11 +43,6 @@ defmodule El.Repl.Route do
       cassette: get_env("CASSETTE"),
       cassette_dir: get_env("CASSETTE_DIR")
     }
-
-  defp attempt(_words, puppet, input, agent) do
-    words = input |> split(" ", parts: 2)
-    via(words, puppet, input, agent)
-  end
 
   def via(["log"], _p, _i, agent), do: {agent |> log(), agent, nil}
   def via([_w], p, i, agent), do: {ask(p, i), agent, p}
