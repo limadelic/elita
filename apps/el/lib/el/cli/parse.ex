@@ -34,8 +34,10 @@ defmodule El.Cli.Parse do
   def parse(["daemon"]), do: :daemon
   def parse([]), do: {:repl, "el"}
   def parse([config, "as", name]), do: {:as, config, name}
+
   def parse([agent | rest]) when length(rest) > 0,
     do: {:repl_input, agent, join([agent | rest], " ")}
+
   def parse([agent]), do: {:repl, agent}
   def parse(_), do: :usage
 
