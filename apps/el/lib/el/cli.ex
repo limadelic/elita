@@ -47,9 +47,7 @@ defmodule El.CLI do
   defp name(["@" <> agent | _]), do: agent
   defp name([tool, "ask", agent | _]) when tool in @known_tools, do: agent
   defp name([tool, "tell", agent | _]) when tool in @known_tools, do: agent
-  defp name(["ls" | _]), do: "default"
-  defp name(["cd" | _]), do: "default"
-  defp name(["daemon"]), do: "default"
+  defp name([verb | _]) when verb in ["ls", "cd", "daemon"], do: "default"
   defp name([_config, "as", label]), do: label
   defp name([agent | rest]) when length(rest) > 0, do: agent
   defp name([agent]), do: agent
@@ -70,7 +68,8 @@ defmodule El.CLI do
   defp parse(["daemon"]), do: :daemon
   defp parse([]), do: {:repl, "el"}
   defp parse([config, "as", name]), do: {:as, config, name}
-  defp parse([agent | rest]) when length(rest) > 0, do: {:repl_input, agent, join([agent | rest], " ")}
+  defp parse([agent | rest]) when length(rest) > 0,
+    do: {:repl_input, agent, join([agent | rest], " ")}
   defp parse([agent]), do: {:repl, agent}
   defp parse(_), do: :usage
 
