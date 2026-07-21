@@ -10,6 +10,8 @@ module Search
     init unless @scenario_cursors
     deadline = deadline()
     cycle(rows, deadline)
+  rescue Timeout::Error, Timeout::ExitException => e
+    raise_with_screen_dump(e)
   end
 
   def init
@@ -143,5 +145,12 @@ module Search
 
   def strip_variation_selectors(text)
     text.gsub("\u{FE0F}", "")
+  end
+
+  def raise_with_screen_dump(e)
+    folded = normalize(transcript)
+    screen_dump = folded.last(40).join("\n")
+    error_msg = "#{e.message}\n\nScreen:\n#{screen_dump}"
+    raise RuntimeError, error_msg
   end
 end
