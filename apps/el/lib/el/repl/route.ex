@@ -57,13 +57,21 @@ defmodule El.Repl.Route do
   defp file?(w), do: w in agents()
 
   def send(w, msg, p, _agent, true) do
-    pid = choose(wait(w), p)
+    pid = w |> locate() |> choose(p)
     {ask(pid, msg), w, pid}
   end
 
   def send(w, msg, p, agent, false) do
     {ask(p, w <> " " <> msg), agent, p}
   end
+
+  defp locate(w) do
+    spawn(w, [w], opts()) |> found(w)
+  end
+
+  defp found({:ok, pid}, _w), do: pid
+  defp found({:error, {:already_started, pid}}, _w), do: pid
+  defp found({:error, _}, w), do: wait(w)
 
   def choose(nil, default), do: default
   def choose(:undefined, default), do: default

@@ -12,7 +12,7 @@ defmodule El.CLI do
   import El.REPL, only: [run: 1, run: 2, attach: 2]
   import El.Log, only: [setup: 2]
   import El.Ask, only: [invoke: 2]
-  import El.Cli.Parse, only: [name: 1, parse: 1]
+  import El.Cli.Parse, only: [parse: 1]
 
   @usage """
   Usage:
@@ -32,8 +32,7 @@ defmodule El.CLI do
   end
 
   defp route(argv) do
-    name = name(argv)
-    setup(name, argv)
+    setup("default", argv)
     argv |> parse()
   end
 
