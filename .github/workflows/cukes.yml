@@ -60,6 +60,10 @@ jobs:
           cp reports/cucumber.html site/report.html
         if: always()
 
+      - name: Inject legend into cucumber report
+        run: ops/ci/inject_legend.rb site/report.html
+        if: always()
+
       - name: Generate cucumber badge
         run: ops/ci/badges.rb
         env:
