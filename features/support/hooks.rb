@@ -54,6 +54,7 @@ After do |_scenario|
 end
 
 AfterAll do
+  stop_daemon
   kill_orphaned_scripts_gracefully
 end
 
@@ -266,10 +267,17 @@ end
 
 def check_and_start_daemon
   node_name = "elita-cukes"
-  return if daemon_exists?(node_name)
-
+  if daemon_exists?(node_name)
+    stop_daemon
+    sleep 0.5
+  end
   launch_daemon_detached
   wait_daemon_ready
+end
+
+def stop_daemon
+  stopd_script = File.expand_path("../stopd.exs", __FILE__)
+  system("elixir #{stopd_script} >/dev/null 2>&1")
 end
 
 def daemon_exists?(node_name)
