@@ -27,6 +27,7 @@ end
 Before do |scenario|
   tape_tag = scenario.tags.map(&:name).find { |t| t.start_with?("@tape:") }
   @cassette = tape_tag ? tape_tag.sub("@tape:", "") : File.basename(scenario.location.file, ".feature")
+  push_cassette_to_daemon
   @tracked_pids = []
   init
 end
@@ -289,7 +290,11 @@ def daemon_log_path
 end
 
 def daemon_command
-  "ELITA_RUN=cukes MIX_ENV=test ../../../../apps/el/el daemon >>#{@daemon_log} 2>&1 &"
+  tape = ENV["TAPE"] || "replay"
+  cassette_dir = File.expand_path("../cassettes", __dir__)
+  el_path = "../../../../apps/el/el"
+  "ELITA_RUN=cukes TAPE=#{tape} CASSETTE_DIR=#{cassette_dir} " \
+  "MIX_ENV=test #{el_path} daemon >>#{@daemon_log} 2>&1 &"
 end
 
 def wait_daemon_ready
@@ -306,4 +311,12 @@ end
 def daemon_startup_error
   log_tail = File.exist?(@daemon_log) ? File.readlines(@daemon_log).last(20).join : "no log"
   "Daemon elita-cukes@127.0.0.1 failed to start:\n#{log_tail}"
+end
+
+def push_cassette_to_daemon
+  setenv_script = File.expand_path("../setenv.exs", __FILE__)
+  cassette_dir = File.expand_path("../cassettes", __dir__)
+  system("elixir #{setenv_script} #{@cassette} #{cassette_dir} >/dev/null 2>&1")
+rescue StandardError
+  # tolerate errors - daemon may not be ready yet
 end
