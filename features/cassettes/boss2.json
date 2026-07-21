@@ -132,24 +132,6 @@
   {
     "a": [
       {
-        "text": "No, I didn't receive a task to make copies. We haven't discussed anything about copying work yet in our conversation.",
-        "type": "text"
-      }
-    ],
-    "q": {
-      "agent": "pam",
-      "messages": [
-        {
-          "content": "did you receive a task to make copies?",
-          "role": "user"
-        }
-      ],
-      "n": 1
-    }
-  },
-  {
-    "a": [
-      {
         "text": "done",
         "type": "text"
       }
