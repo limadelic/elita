@@ -50,6 +50,7 @@ Before('@malko') do
 end
 
 After do |_scenario|
+  reset_daemon_agents
   reap_without_orphans
 end
 
@@ -327,4 +328,11 @@ def push_cassette_to_daemon
   system("elixir #{setenv_script} #{@cassette} #{cassette_dir} >/dev/null 2>&1")
 rescue StandardError
   # tolerate errors - daemon may not be ready yet
+end
+
+def reset_daemon_agents
+  reset_script = File.expand_path("../reset.exs", __FILE__)
+  system("elixir #{reset_script} >/dev/null 2>&1")
+rescue StandardError
+  # tolerate errors - daemon may not be running
 end
