@@ -115,6 +115,7 @@ module ReplHelper
   def activate(name)
     return unless (session = @sessions[name])
 
+    @current = name
     assign_session_attrs(session)
   end
 
