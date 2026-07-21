@@ -8,14 +8,14 @@ defmodule TttTest do
     :ok
   end
 
-  test "ttt agents play to finish" do
+  test "ttt plays nine move tie" do
     tell(:bob, "alice is gonna be your opponent, wait for her move")
     tell(:alice, "start a game with bob, you are X, play first")
 
     await(fn -> is_game_complete?(:alice) end)
 
     result = ask(:alice, "tell me: did the game finish and was it a win or tie?")
-    verify_completion(result)
+    verify_tie(result)
   end
 
   defp is_game_complete?(agent) do
@@ -23,7 +23,7 @@ defmodule TttTest do
     String.downcase(result) =~ ~r/\byes\b/
   end
 
-  defp verify_completion(result) do
-    assert result =~ "game finished"
+  defp verify_tie(result) do
+    assert String.downcase(result) =~ "tie"
   end
 end
