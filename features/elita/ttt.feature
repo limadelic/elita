@@ -13,38 +13,56 @@ Feature: Ttt
       | game started |
 
     * alice> log
-      | took the center |
-      | _ \| X \| _     |
+      | 📢 alice → bob | Hey! Let's play tic-tac-toe. I'm X and I'll go first. |
+      |                | _ \| _ \| _                                           |
+      |                | _ \| X \| _                                           |
+      |                | _ \| _ \| _                                           |
 
     * bob> log
-      | corner      |
-      | O \| _ \| _ |
+      | 📢 bob → alice | Nice opening! I'll take a corner (position 1). |
+      |                | O \| _ \| _                                    |
+      |                | _ \| X \| _                                    |
+      |                | _ \| _ \| _                                    |
 
     * alice> log
-      | opposite corner |
-      | _ \| _ \| X     |
+      | 📢 alice → bob | Good move! I'll take the opposite corner (position 9) to balance. |
+      |                | O \| _ \| _                                                       |
+      |                | _ \| X \| _                                                       |
+      |                | _ \| _ \| X                                                       |
 
     * bob> log
-      | position 3  |
-      | O \| _ \| O |
+      | 📢 bob → alice | Smart! I'll take position 3 to block your potential diagonal and keep my options open. |
+      |                | O \| _ \| O                                                                            |
+      |                | _ \| X \| _                                                                            |
+      |                | _ \| _ \| X                                                                            |
 
     * alice> log
-      | position 7  |
-      | X \| _ \| X |
+      | 📢 alice → bob | I'll take position 7 to block your diagonal and create my own threat. |
+      |                | O \| _ \| O                                                           |
+      |                | _ \| X \| _                                                           |
+      |                | X \| _ \| X                                                           |
 
     * bob> log
-      | position 8  |
-      | X \| O \| X |
+      | 📢 bob → alice | Gotta block! You've got X's on 7 and 9, so I'm taking position 8 to stop your bottom row win. |
+      |                | O \| _ \| O                                                                                   |
+      |                | _ \| X \| _                                                                                   |
+      |                | X \| O \| X                                                                                   |
 
     * alice> log
-      | position 4  |
-      | X \| X \| _ |
+      | 📢 alice → bob | I'll take position 4 to block your potential left column (you'd have 1, 3, and threatening more). |
+      |                | O \| _ \| O                                                                                       |
+      |                | X \| X \| _                                                                                       |
+      |                | X \| O \| X                                                                                       |
 
     * bob> log
-      | position 6  |
-      | X \| X \| O |
+      | 📢 bob → alice | I'll take position 6 to block your middle row (you've got X's on positions 4 and 5). |
+      |                | O \| _ \| O                                                                          |
+      |                | X \| X \| O                                                                          |
+      |                | X \| O \| X                                                                          |
 
     * alice> log
-      | position 2  |
-      | O \| X \| O |
-      | tie         |
+      | 📢 alice → bob | I'll take position 2, the last remaining spot. |
+      |                | O \| X \| O                                    |
+      |                | X \| X \| O                                    |
+      |                | X \| O \| X                                    |
+      |                | It's a tie! Good game, Bob!                    |
