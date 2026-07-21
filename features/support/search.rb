@@ -7,13 +7,13 @@ module Search
   ].freeze
 
   def verify(rows)
-    init unless @scenario_cursor
+    init unless @scenario_cursors
     deadline = deadline()
     cycle(rows, deadline)
   end
 
   def init
-    @scenario_cursor = 0
+    @scenario_cursors = {}
     @folded_lines = nil
   end
 
@@ -35,7 +35,9 @@ module Search
     found_indices = hit(rows, folded_lines, deadline, tx)
     return nil unless found_indices
 
-    @scenario_cursor = found_indices.max if found_indices.any?
+    if found_indices.any?
+      @scenario_cursors[@current] = found_indices.max
+    end
     found_indices
   end
 
@@ -56,7 +58,8 @@ module Search
   end
 
   def scan(folded_lines, prefix, text)
-    (@scenario_cursor...folded_lines.size).each do |idx|
+    cursor = @scenario_cursors[@current] ||= 0
+    (cursor...folded_lines.size).each do |idx|
       return idx + 1 if match?(folded_lines[idx], prefix, text)
     end
     nil
