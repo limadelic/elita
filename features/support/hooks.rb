@@ -20,8 +20,12 @@ World(Track)
 World(Guard)
 
 BeforeAll do
-  setup_scratch_home
-  setup_daemon
+  Timeout.timeout(30) do
+    nest
+    summon
+  end
+rescue Timeout::Error
+  raise "BeforeAll setup timed out after 30s"
 end
 
 Around do |scenario, block|
@@ -35,32 +39,65 @@ Around do |scenario, block|
                  end
   Timeout.timeout(timeout_secs) { block.call }
 rescue Timeout::Error
-  raise "Scenario '#{scenario.name}' timed out after #{timeout_secs}s"
+  scram(scenario, timeout_secs)
+end
+
+def scram(scenario, timeout_secs)
+  glimpse
+  slash
+  purge
+  Cucumber.wants_to_quit = true
+  raise "Scenario '#{scenario.name}' timed out after #{timeout_secs}s (hung, killed)"
+end
+
+def glimpse
+  return unless @transcript
+
+  lines = @transcript.split("\n").last(40)
+  STDERR.puts "\n=== Last 40 lines of transcript ===\n#{lines.join("\n")}\n"
+end
+
+def slash
+  snip if @drain_thread
+end
+
+def snip
+  @drain_thread.kill rescue nil
 end
 
 Before do |scenario|
   tape_tag = scenario.tags.map(&:name).find { |t| t.start_with?("@tape:") }
   @cassette = tape_tag ? tape_tag.sub("@tape:", "") : File.basename(scenario.location.file, ".feature")
-  push_cassette_to_daemon
+  deliver
   @tracked_pids = []
   init
 end
 
 Before('@malko') do
-  setup_malko_scratch
-  guard_live_claude
+  burrow
+  enforce
 end
 
 After do |_scenario|
-  reset_daemon_agents
-  reap_without_orphans
+  Timeout.timeout(30) do
+    revoke
+    bundle
+  end
+rescue Timeout::Error
+  STDERR.puts "After hook timed out after 30s"
+  purge
+  slash
 end
 
 AfterAll do
-  stop_daemon
-  kill_orphaned_scripts_gracefully
+  Timeout.timeout(30) do
+    halt
+    expunge
+  end
+rescue Timeout::Error
+  STDERR.puts "AfterAll cleanup timed out after 30s"
 end
 
 After('@malko') do
-  clean_malko_scratch
+  scour
 end

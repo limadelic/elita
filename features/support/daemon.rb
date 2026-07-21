@@ -1,39 +1,46 @@
 module Daemon
-  def setup_daemon
+  def summon
     ENV["ELITA_RUN"] = "cukes"
-    check_and_start_daemon
+    bootstrap
   end
 
-  def check_and_start_daemon
+  def bootstrap
     node_name = "elita-cukes"
-    daemon_exists?(node_name) && stop_daemon && sleep(0.5)
-    launch_daemon_detached
-    wait_daemon_ready
+    retire(node_name)
+    ignite
+    readied
   end
 
-  def stop_daemon
+  def retire(node_name)
+    return unless active?(node_name)
+
+    halt
+    sleep(0.5)
+  end
+
+  def halt
     stopd_script = File.expand_path("../stopd.exs", __FILE__)
     system("elixir #{stopd_script} >/dev/null 2>&1")
   end
 
-  def daemon_exists?(node_name)
+  def active?(node_name)
     `epmd -names 2>/dev/null`.include?(node_name)
   end
 
-  def launch_daemon_detached
-    @daemon_log = daemon_log_path
+  def ignite
+    @daemon_log = logfile
     FileUtils.mkdir_p(File.dirname(@daemon_log))
-    system("cd apps/elita/agents/elita && #{daemon_command}")
+    system("cd apps/elita/agents/elita && #{invoke}")
   end
 
-  def daemon_log_path
+  def logfile
     tmp = Dir.tmpdir
     scratchpad = File.join(tmp, "elita_dude_#{Process.uid}")
     FileUtils.mkdir_p(scratchpad)
     File.join(scratchpad, "daemon_cukes.log")
   end
 
-  def daemon_command
+  def invoke
     tape = ENV["TAPE"] || "replay"
     cassette_dir = File.expand_path("../cassettes", __dir__)
     el_path = "../../../../apps/el/el"
@@ -42,17 +49,21 @@ module Daemon
     "HOME=#{home} MIX_ENV=test #{el_path} daemon >>#{@daemon_log} 2>&1 &"
   end
 
-  def wait_daemon_ready
+  def readied
     deadline = Time.now + 5.0
     loop do
-      return if daemon_exists?("elita-cukes")
-      raise daemon_startup_error if Time.now > deadline
+      return if active?("elita-cukes")
 
+      late?(deadline)
       sleep 0.1
     end
   end
 
-  def daemon_startup_error
+  def late?(deadline)
+    raise fault if Time.now > deadline
+  end
+
+  def fault
     log_tail = File.exist?(@daemon_log) ? File.readlines(@daemon_log).last(20).join : "no log"
     "Daemon elita-cukes@127.0.0.1 failed to start:\n#{log_tail}"
   end

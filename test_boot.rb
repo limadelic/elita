@@ -18,12 +18,17 @@ class TestBoot
   def report
     puts "\n=== TRANSCRIPT ===\n#{@transcript}\n=== END ===\n"
     puts "Shell PID: #{@pid}"
-    show_logs
+    logs
   end
 
-  def show_logs
-    logs = Dir.glob(File.expand_path("~/.elita/sessions/malko_*.log"))
-    logs.sort_by { |f| File.mtime(f) }.last(3).each do |f|
+  def logs
+    file_logs = Dir.glob(File.expand_path("~/.elita/sessions/malko_*.log"))
+    recent = file_logs.sort_by { |f| File.mtime(f) }.last(3)
+    glance(recent)
+  end
+
+  def glance(recent)
+    recent.each do |f|
       puts "Found: #{File.basename(f)}"
       puts "  First line: #{File.read(f).lines.first.strip}"
     end

@@ -1,4 +1,10 @@
+require_relative "cursor"
+require_relative "escape"
+
 class Screen
+  include Cursor
+  include Escape
+
   WIDTH = 80
   HEIGHT = 24
 
@@ -8,10 +14,14 @@ class Screen
     clear
   end
 
-  def feed(bytes)
-    return if bytes.nil? || bytes.empty?
+  def absorb(bytes)
+    return unless content?(bytes)
 
-    bytes.each_char { |char| process_char(char) }
+    bytes.each_char { |char| process(char) }
+  end
+
+  def content?(bytes)
+    bytes.nil? ? false : bytes.length.positive?
   end
 
   def to_s
@@ -31,144 +41,81 @@ class Screen
     @escape_buffer = nil
   end
 
-  def process_char(char)
-    handle_escape(char) || handle_control(char) ||
-      handle_printable(char)
+  def process(char)
+    return spark if char == "\e"
+
+    handle(char)
   end
 
-  def handle_escape(char)
-    char == "\e" ? (@escape_buffer = "\e") : false
+  def handle(char)
+    buffering? ? buffer(char) : direct(char)
   end
 
-  def handle_control(char)
-    return false unless "\r\n\t".include?(char)
-
-    case char
-    when "\r" then @cursor_x = 0
-    when "\n" then advance_line
-    when "\t" then handle_tab
-    end
+  def direct(char)
+    control?(char) ? execute(char) : write(char)
   end
 
-  def handle_printable(char)
-    @escape_buffer ? buffer_char(char) : write_char(char)
+  def buffering?
+    !@escape_buffer.nil?
   end
 
-  def buffer_char(char)
-    @escape_buffer << char
-    process_escape if escape_complete?
+  def control?(char)
+    "\r\n\t".include?(char)
   end
 
-  def handle_tab
-    @cursor_x = ((@cursor_x + 8) / 8) * 8
-    @cursor_x = @width - 1 if @cursor_x >= @width
+  def execute(char)
+    route[char]&.call
   end
 
-  def escape_complete?
-    return false unless @escape_buffer
-    return false if @escape_buffer.length < 2
-
-    csi_escape? ? csi_complete? : two_char?
+  def route
+    {
+      "\r" => -> { @cursor_x = 0 },
+      "\n" => method(:scroll),
+      "\t" => method(:tab)
+    }
   end
 
-  def csi_escape?
-    @escape_buffer[1] == '['
+  def tab
+    tab_stop = ((@cursor_x + 8) / 8) * 8
+    @cursor_x = [tab_stop, @width - 1].min
   end
 
-  def csi_complete?
-    @escape_buffer[-1].match?(/[A-Za-z]/)
-  end
-
-  def two_char?
-    @escape_buffer.length == 2
-  end
-
-  def process_escape
-    seq = @escape_buffer
-    @escape_buffer = nil
-    return unless seq
-
-    route_escape(seq)
-  end
-
-  def route_escape(seq)
-    cursor_seq(seq) || edit_seq(seq)
-  end
-
-  def cursor_seq(seq)
-    return cursor_up($1.to_i) if seq =~ /\e\[([0-9]*)A/
-    return cursor_down($1.to_i) if seq =~ /\e\[([0-9]*)B/
-    return cursor_right($1.to_i) if seq =~ /\e\[([0-9]*)C/
-    return cursor_left($1.to_i) if seq =~ /\e\[([0-9]*)D/
-
-    handle_cursor_pos(seq)
-  end
-
-  def handle_cursor_pos(seq)
-    return cursor_pos($1.to_i, $2.to_i) if seq =~ /\e\[([0-9]*);([0-9]*)H/
-    return cursor_pos($1.to_i, $2.to_i) if seq =~ /\e\[([0-9]*);([0-9]*)f/
-
-    false
-  end
-
-  def edit_seq(seq)
-    case seq
-    when /\e\[2J/ then clear
-    when /\e\[K/ then clear_eol
-    end
-  end
-
-  def cursor_up(n)
-    n = n > 0 ? n : 1
-    @cursor_y = [@cursor_y - n, 0].max
-  end
-
-  def cursor_down(n)
-    n = n > 0 ? n : 1
-    @cursor_y = [@cursor_y + n, @height - 1].min
-  end
-
-  def cursor_right(n)
-    n = n > 0 ? n : 1
-    @cursor_x = [@cursor_x + n, @width - 1].min
-  end
-
-  def cursor_left(n)
-    n = n > 0 ? n : 1
-    @cursor_x = [@cursor_x - n, 0].max
-  end
-
-  def cursor_pos(row, col)
-    row = row > 0 ? row : 1
-    col = col > 0 ? col : 1
-    @cursor_y = [row - 1, @height - 1].min
-    @cursor_x = [col - 1, @width - 1].min
-  end
-
-  def clear_eol
-    (@width - 1).downto(@cursor_x) { |x| set_cell(x, @cursor_y, ' ') }
-  end
-
-  def write_char(char)
-    set_cell(@cursor_x, @cursor_y, char)
+  def write(char)
+    mark(@cursor_x, @cursor_y, char)
     @cursor_x += 1
-    wrap_line if @cursor_x >= @width
+    wrap if @cursor_x >= @width
   end
 
-  def wrap_line
+  def wrap
     @cursor_x = 0
-    advance_line
+    scroll
   end
 
-  def advance_line
+  def scroll
     @cursor_y = (@cursor_y + 1) % @height
     @cursor_x = 0
   end
 
-  def set_cell(x, y, char)
-    return if x < 0 || x >= @width || y < 0 || y >= @height
+  def mark(x, y, char)
+    return if outside?(x, y)
 
     @grid[y][x] = char
+  end
+
+  def outside?(x, y)
+    xbound?(x) || ybound?(y)
+  end
+
+  def xbound?(x)
+    x < 0 || x >= @width
+  end
+
+  def ybound?(y)
+    y < 0 || y >= @height
+  end
+
+  def sweep
+    (@width - 1).downto(@cursor_x) { |x| mark(x, @cursor_y, ' ') }
   end
 end
 

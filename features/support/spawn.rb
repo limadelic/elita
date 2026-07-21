@@ -1,93 +1,130 @@
 module Spawn
-  def work_dir
+  def realm
     @scratch || "apps/elita/agents/elita"
   end
 
-  def el_path
+  def gate
     @scratch ? File.join(@scratch, 'bin', 'el') : "../../../../apps/el/el"
   end
 
   def spawn(args)
     (
-      "cd #{work_dir} && " +
-      "TAPE=#{ENV['TAPE'] || 'replay'} " +
-      "LIVE=#{ENV['LIVE'] || ''} " +
+      "cd #{realm} && " +
+      "TAPE=#{tape} " +
+      "LIVE=#{live} " +
       "CASSETTE=#{@cassette} " +
       "CASSETTE_DIR=#{dir} " +
       "MIX_ENV=test " +
-      "#{el_path} " +
+      "#{gate} " +
       "#{args}"
     ).strip
   end
 
   def command(args)
-    tape = ENV["TAPE"] || "replay"
     (
-      "cd #{work_dir} && " +
+      "cd #{realm} && " +
       "TAPE=#{tape} " +
-      "LIVE=#{ENV['LIVE'] || ''} " +
+      "LIVE=#{live} " +
       "CASSETTE=#{@cassette} " +
       "CASSETTE_DIR=#{dir} " +
       "MIX_ENV=test " +
-      "#{el_path} " +
+      "#{gate} " +
       "#{args}"
     ).strip
   end
 
   def launch(cmd, prompt, puppet_name = nil)
-    env = build_launch_env(puppet_name)
-    @reader, @writer, @pid = PTY.spawn(env, "/bin/sh", "-c", cmd)
-    track_pid(@pid)
+    config = env(puppet_name)
+    @reader, @writer, @pid = PTY.spawn(config, "/bin/sh", "-c", cmd)
+    watch(@pid)
     @mutex = nil
     wait(prompt)
   end
 
-  def build_launch_env(puppet_name)
-    env = base_env
-    env["PATH"] = build_path
-    env["PUPPET_NAME"] = puppet_name if puppet_name
-    env["EL_FROM"] = puppet_name if puppet_name
-    env["EL_SYSTEM_PROMPT"] = ENV["EL_SYSTEM_PROMPT"] if ENV["EL_SYSTEM_PROMPT"]
-    env
+  def env(puppet_name)
+    config = base
+    config["PATH"] = spine
+    puppet(config, puppet_name)
+    prime(config)
+    config
   end
 
-  def base_env
+  def puppet(config, name)
+    return unless name
+
+    config["PUPPET_NAME"] = name
+    config["EL_FROM"] = name
+  end
+
+  def prime(config)
+    return unless ENV["EL_SYSTEM_PROMPT"]
+
+    config["EL_SYSTEM_PROMPT"] = ENV["EL_SYSTEM_PROMPT"]
+  end
+
+  def base
     {
-      "TAPE" => ENV["TAPE"] || "replay",
-      "LIVE" => ENV["LIVE"] || "",
+      "TAPE" => tape,
+      "LIVE" => live,
       "CASSETTE" => @cassette,
       "CASSETTE_DIR" => dir,
       "MIX_ENV" => "test",
-      "ELITA_RUN" => ENV["ELITA_RUN"] || ""
+      "ELITA_RUN" => flux
     }
   end
 
-  def build_path
+  def tape
+    ENV["TAPE"] || "replay"
+  end
+
+  def live
+    ENV["LIVE"] || ""
+  end
+
+  def flux
+    ENV["ELITA_RUN"] || ""
+  end
+
+  def spine
     [(@scratch ? "#{@scratch}/bin" : nil), ENV["PATH"]].compact.join(":")
   end
 
   def run(cmd)
     output = ""
-    reader, writer, pid = spawn_pty(cmd)
-    track_pid(pid)
+    reader, writer, pid = mint(cmd)
+    watch(pid)
     extract(reader, Time.now + 30, output)
     kill(writer, pid)
     output
   end
 
-  def spawn_pty(cmd)
-    cmd_env = cmd.include?("@") ? env_wrap(cmd) : cmd
+  def mint(cmd)
+    cmd_env = cmd.include?("@") ? cloak(cmd) : cmd
     PTY.spawn("/bin/sh", "-c", cmd_env)
   end
 
-  def env_wrap(cmd)
+  def cloak(cmd)
     unique_id = "ask_#{Time.now.to_i}#{rand(1000)}"
     "ELITA_RUN=#{unique_id} #{cmd}"
   end
 
   def kill(writer, pid)
+    snuff(pid)
+    seal(writer)
+  end
+
+  def snuff(pid)
     Process.wait(pid) if pid
-    writer.close if writer && !writer.closed?
+  end
+
+  def seal(writer)
+    return unless open?(writer)
+
+    writer.close
+  end
+
+  def open?(writer)
+    writer && !writer.closed?
   end
 
   def reset(args)
@@ -95,30 +132,37 @@ module Spawn
     @transcript_stripped = ""
     @screen = Screen.new
     cmd = spawn(args)
-    prompt = wait_prompt(args)
-    puppet_name = session_name(args)
+    prompt = query(args)
+    puppet_name = tag(args)
     launch(cmd, prompt, puppet_name)
   end
 
-  def wait_prompt(args)
+  def query(args)
     return "claude" if args.include?("claude")
 
+    unfold(args)
+  end
+
+  def unfold(args)
     words = args.split
     return "el" if words.empty?
 
+    dub(words)
+  end
+
+  def tag(args)
+    words = args.split
+    return "el" if words.empty?
+
+    dub(words)
+  end
+
+  def dub(words)
     as_index = words.index("as")
     as_index ? words[as_index + 1] : words.first
   end
 
-  def session_name(args)
-    words = args.split
-    return "el" if words.empty?
-
-    as_index = words.index("as")
-    as_index ? words[as_index + 1] : words.first
-  end
-
-  def encode(value)
+  def brand(value)
     value.force_encoding("UTF-8") rescue value.to_s
   end
 
