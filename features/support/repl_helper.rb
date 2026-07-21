@@ -4,17 +4,43 @@ module ReplHelper
   end
 
   def boot(args)
-    @cassette = @cassette || "greet"
+    @cassette ||= "greet"
     @sessions ||= {}
-    reset(args)
+    @mutex = Mutex.new
+    reset_pty(args)
+    setup_drain
+    wait_initial_prompt(args)
     store_session(args)
+  end
+
+  def setup_drain
+    @drain_thread = start_background_drain(@reader, @transcript, @transcript_stripped, @screen, @mutex)
+    sleep 0.1
+  end
+
+  def reset_pty(args)
+    @transcript = ""
+    @transcript_stripped = ""
+    @screen = Screen.new
+    cmd = spawn(args)
+    wait_prompt(args)
+    puppet_name = session_name(args)
+    launch_pty(cmd, puppet_name)
+  end
+
+  def launch_pty(cmd, puppet_name = nil)
+    env = build_launch_env(puppet_name)
+    @reader, @writer, @pid = PTY.spawn(env, "/bin/sh", "-c", cmd)
+    track_pid(@pid)
+  end
+
+  def wait_initial_prompt(args)
+    prompt = wait_prompt(args)
+    wait(prompt)
   end
 
   def store_session(args)
     name = session_name(args)
-    prompt = session_name(args)
-    mutex = Mutex.new
-    drain_thread = start_background_drain(@reader, @transcript, @transcript_stripped, mutex)
     @sessions[name] = {
       reader: @reader,
       writer: @writer,
@@ -22,49 +48,18 @@ module ReplHelper
       screen: @screen,
       transcript: @transcript,
       transcript_stripped: @transcript_stripped,
-      prompt: prompt,
-      mutex: mutex,
-      drain_thread: drain_thread,
+      prompt: name,
+      mutex: @mutex,
+      drain_thread: @drain_thread,
       buffer_pos: 0
     }
     @current = name
   end
 
-  def start_background_drain(reader, transcript, transcript_stripped, mutex)
+  def start_background_drain(reader, transcript, transcript_stripped, screen, mutex)
     return nil unless reader
 
-    Thread.new { drain_thread_loop(reader, transcript, transcript_stripped, mutex) }
-  end
-
-  def drain_thread_loop(reader, transcript, transcript_stripped, mutex)
-    loop { drain_process_chunk(reader, transcript, transcript_stripped, mutex) }
-  rescue StandardError
-  end
-
-  def drain_process_chunk(reader, transcript, transcript_stripped, mutex)
-    ready = IO.select([reader], nil, nil, 0.05)
-    return unless ready
-
-    chunk = reader.readpartial(4096)
-    drain_encode_and_store(chunk, transcript, transcript_stripped, mutex)
-  end
-
-  def drain_encode_and_store(chunk, transcript, transcript_stripped, mutex)
-    encoded = fix_encoding(chunk)
-    stripped = (encoded.scrub("").gsub(/\e\[[0-9]*[GfH]/, " ").gsub(
-      /\e\[[0-9;?]*[a-zA-Z]|\e[78]|\e\][^\a]*\a/,
-      ""
-    ) rescue "")
-    mutex.synchronize do
-      transcript << encoded if transcript
-      transcript_stripped << stripped if transcript_stripped
-    end
-  end
-
-  def fix_encoding(chunk)
-    chunk.chars.map(&:ord).pack("C*").force_encoding("UTF-8").scrub
-  rescue
-    chunk.to_s
+    Thread.new { drain_thread_loop(reader, transcript, transcript_stripped, screen, mutex) }
   end
 
   def one(args)
@@ -74,42 +69,51 @@ module ReplHelper
   end
 
   def send(input, prompt)
+    send_setup(input, prompt)
+    send_handle_result(input, prompt)
+  end
+
+  def send_setup(input, prompt)
     @sessions ||= {}
     activate(prompt) if @sessions.key?(prompt)
     raise "PTY not initialized" unless @writer
 
     @writer.write("#{input}\n")
     @writer.flush
-    send_handle_result(input, prompt)
   end
 
   def send_handle_result(input, prompt)
-    return verify_closed if input == "/exit"
+    if input == "/exit"
+      raise "Session still alive" unless closed?
 
+      return
+    end
     actual_prompt = @sessions[prompt]&.dig(:prompt) || prompt
     wait(actual_prompt)
   end
 
-  def verify_closed
-    raise "Session still alive" unless closed?
-  end
-
   def write_input(input, prompt)
-    @sessions ||= {}
-    if @sessions.key?(prompt)
-      activate(prompt)
-    end
-    raise "PTY not initialized" unless @writer
-
-    @writer.write("#{input}\n")
-    @writer.flush
+    send_setup(input, prompt)
   end
 
   def await_result(prompt, input)
-    return verify_closed if input == "/exit"
+    if input == "/exit"
+      raise "Session still alive" unless closed?
 
-    actual_prompt = @sessions[prompt]&.dig(:prompt) || prompt
+      return
+    end
+
+    maybe_activate(prompt)
+    actual_prompt = resolve_prompt(prompt)
     wait(actual_prompt) || ""
+  end
+
+  def maybe_activate(prompt)
+    activate(prompt) if @sessions.key?(prompt)
+  end
+
+  def resolve_prompt(prompt)
+    @sessions[prompt]&.dig(:prompt) || prompt
   end
 
   def activate(name)
@@ -126,33 +130,6 @@ module ReplHelper
 
   def transcript
     @transcript_stripped || ""
-  end
-
-  def drain
-    return unless @reader
-    return if @mutex
-
-    chunk = absorb(@reader)
-    append(chunk, strip(chunk))
-  end
-
-  def append(chunk, stripped)
-    chunk = encode(chunk)
-    @mutex ? append_with_mutex(chunk, stripped) : append_without_mutex(chunk, stripped)
-  end
-
-  def append_with_mutex(chunk, stripped)
-    @mutex.synchronize do
-      @transcript << chunk if @transcript
-      stripped = encode(stripped)
-      @transcript_stripped << stripped if @transcript_stripped
-    end
-  end
-
-  def append_without_mutex(chunk, stripped)
-    @transcript << chunk if @transcript
-    stripped = encode(stripped)
-    @transcript_stripped << stripped if @transcript_stripped
   end
 
   def closed?
@@ -175,15 +152,12 @@ module ReplHelper
 
   def reader_eof?
     return false unless @reader
+    return !@drain_thread.alive? if @drain_thread
 
-    @drain_thread ? drain_thread_eof? : reader_io_eof?
+    probe_eof
   end
 
-  def drain_thread_eof?
-    !@drain_thread.alive?
-  end
-
-  def reader_io_eof?
+  def probe_eof
     ready = IO.select([@reader], nil, nil, 0.1)
     return false unless ready
 
@@ -205,17 +179,9 @@ module ReplHelper
   def wait(prompt_word)
     output = ""
     pattern = prompt_word == "claude" ? "Claude Code" : "#{prompt_word}>"
-    timeout = deadline
-    attempt(output, pattern, timeout) || timeout_error(pattern, output)
-  end
-
-  def deadline
     duration = ENV["TAPE"] == "rec" ? 300 : 60
-    Time.now + duration
-  end
-
-  def timeout_error(pattern, output)
-    raise "Timeout waiting for '#{pattern}' in:\n#{output}"
+    timeout = Time.now + duration
+    attempt(output, pattern, timeout) || (raise "Timeout waiting for '#{pattern}' in:\n#{output}")
   end
 end
 
@@ -224,5 +190,6 @@ require_relative "drain"
 require_relative "search"
 require_relative "assert"
 require_relative "session_logs"
+require_relative "feed"
 
-World(ReplHelper, Spawn, Drain, Search, Assert, SessionLogs)
+World(ReplHelper, Spawn, Drain, Search, Assert, SessionLogs, Feed)

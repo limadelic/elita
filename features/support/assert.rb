@@ -12,18 +12,26 @@ module Assert
   end
 
   def snap(tbl)
-    timeout = deadline()
+    timeout = snap_deadline()
     snap_lines = wait_for_screen_settle(timeout)
     golden_lines = tbl.raw.map { |row| row[0].rstrip }
-    unless block_found?(golden_lines, snap_lines)
-      snap_detail = snap_lines.each_with_index.map { |l, i| "  [#{i}] len=#{l.length}" }.join("\n")
-      raise "Expected snap block (#{golden_lines.length} lines):\nActual snap (#{snap_lines.length} lines):\n#{snap_detail}"
-    end
+    return if block_found?(golden_lines, snap_lines)
+
+    raise snap_error(golden_lines, snap_lines)
+  end
+
+  def snap_error(golden_lines, snap_lines)
+    snap_detail = snap_lines.each_with_index.map { |l, i| "  [#{i}] len=#{l.length}" }.join("\n")
+    "Expected snap block (#{golden_lines.length} lines):\nActual snap (#{snap_lines.length} lines):\n#{snap_detail}"
   end
 
   def screen_lines
     screen_render = @screen ? @screen.to_s : ""
     lines = screen_render.split("\n")
+    trim_edges(lines)
+  end
+
+  def trim_edges(lines)
     lines.shift while lines.first&.empty?
     lines.pop while lines.last&.empty?
     lines
@@ -32,7 +40,7 @@ module Assert
   def wait_for_screen_settle(deadline)
     loop do
       current = screen_lines
-      sleep 0.5
+      sleep 3
       next_frame = screen_lines
 
       return current if current == next_frame
@@ -57,6 +65,10 @@ module Assert
   def fix_and_normalize(line)
     # Simple normalization: just rstrip
     line.rstrip
+  end
+
+  def snap_deadline
+    Time.now + 30
   end
 
   def cells(table)
