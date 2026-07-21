@@ -14,20 +14,7 @@ When(/^> el$/) do |*rest|
 end
 
 When(/^> el (.+)$/) do |args, *rest|
-  if args.start_with?("@")
-    output = one(args)
-    track(output, output.gsub(/\e\[[0-9;]*m/, ''))
-  elsif args.include?(" as ")
-    boot(args)
-    drain
-  elsif args.include?(" ") && @current
-    write_input(args, @current)
-    output = retrying(15) { await_result(@current, args) }
-    track(output, output.gsub(/\e\[[0-9;]*m/, ''))
-  else
-    boot(args)
-    drain
-  end
+  dispatch_el_command(args)
   handle(rest.first, transcript)
 end
 
@@ -49,9 +36,7 @@ Then(/^print transcript$/) do
 end
 
 Then(/^screen shows (.+)$/) do |text|
-  unless screen.include?(text)
-    raise "Screen does not contain '#{text}':\n#{screen}"
-  end
+  assert_screen_includes(text)
 end
 
 When(/^(\w+):$/) do |name, *rest|
@@ -73,6 +58,10 @@ end
 def settle(table, output)
   return unless table
 
+  valid_settle(table, output)
+end
+
+def valid_settle(table, output)
   valid?(table) ? retrying(5) { verify(table.raw) } : retrying(5) { table(table, output) }
 end
 
@@ -102,8 +91,12 @@ def log_response(prompt, text, _output)
 end
 
 def retrying(times, &block)
-  effective_times = ENV["LIVE"] == "1" ? live_retry_count : times
+  effective_times = live_retry_enabled? ? live_retry_count : times
   attempt_with_retries(effective_times, &block)
+end
+
+def live_retry_enabled?
+  ENV["LIVE"] == "1"
 end
 
 def live_retry_count
@@ -131,7 +124,52 @@ def iterate_and_verify_lines(transcript, lines)
   lines.each { |line| cursor = verify_line(line, transcript, cursor) }
 end
 
+def dispatch_el_command(args)
+  return run_at_command(args) if command_at?(args)
+  return boot_and_drain(args) if command_as?(args)
+
+  return run_current_input(args) if command_current?(args)
+
+  boot_and_drain(args)
+end
+
+def command_at?(args)
+  args.start_with?("@")
+end
+
+def command_as?(args)
+  args.include?(" as ")
+end
+
+def command_current?(args)
+  args.include?(" ") && @current
+end
+
+def run_at_command(args)
+  output = one(args)
+  track(output, output.gsub(/\e\[[0-9;]*m/, ''))
+end
+
+def run_current_input(args)
+  write_input(args, @current)
+  output = retrying(15) { await_result(@current, args) }
+  track(output, output.gsub(/\e\[[0-9;]*m/, ''))
+end
+
+def boot_and_drain(args)
+  boot(args)
+  drain
+end
+
+def assert_screen_includes(text)
+  raise "Screen does not contain '#{text}':\n#{screen}" unless screen.include?(text)
+end
+
 def pause_time
+  recording_pause_or_playback_pause
+end
+
+def recording_pause_or_playback_pause
   ENV['TAPE'] == 'rec' ? 1 : 0.5
 end
 
