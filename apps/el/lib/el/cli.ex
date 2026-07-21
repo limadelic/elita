@@ -11,8 +11,8 @@ defmodule El.CLI do
   import El.Command.Ls, only: [list: 1]
   import El.REPL, only: [run: 1, run: 2, attach: 2]
   import El.Log, only: [setup: 2]
-  import Enum, only: [join: 2]
   import El.Ask, only: [invoke: 2]
+  import El.Cli.Parse, only: [name: 1, parse: 1]
 
   @usage """
   Usage:
@@ -26,8 +26,6 @@ defmodule El.CLI do
     el daemon
   """
 
-  @known_tools ["claude", "codex"]
-
   def main(argv) do
     ensure_all_started(:elita)
     argv |> route() |> exec()
@@ -38,43 +36,6 @@ defmodule El.CLI do
     setup(name, argv)
     argv |> parse()
   end
-
-  defp name(["claude", name | _]), do: name
-  defp name(["claude"]), do: "default"
-  defp name(["ask", agent | _]), do: agent
-  defp name(["tell", agent | _]), do: agent
-  defp name(["spawn", _name, agent]), do: agent
-  defp name(["@" <> agent | _]), do: agent
-  defp name([tool, "ask", agent | _]) when tool in @known_tools, do: agent
-  defp name([tool, "tell", agent | _]) when tool in @known_tools, do: agent
-  defp name([verb | _]) when verb in ["ls", "cd", "daemon"], do: "default"
-  defp name([_config, "as", label]), do: label
-  defp name([agent | rest]) when length(rest) > 0, do: agent
-  defp name([agent]), do: agent
-  defp name([]), do: "el"
-
-  defp parse(["ask", agent, msg]), do: {:ask, nil, agent, msg}
-  defp parse(["tell", agent, msg]), do: {:tell, nil, agent, msg}
-  defp parse(["spawn", name, agent]), do: {:spawn, name, agent}
-  defp parse(["stop", agent]), do: {:stop, agent}
-  defp parse(["@" <> agent | rest]), do: {:ask_tool, agent, rest |> join(" ")}
-  defp parse([tool, "ask", agent, msg]), do: check(tool, {:ask, tool, agent, msg})
-  defp parse([tool, "tell", agent, msg]), do: check(tool, {:tell, tool, agent, msg})
-  defp parse(["claude"]), do: {:claude, :default}
-  defp parse(["claude", name]), do: {:claude, name}
-  defp parse(["ls"]), do: {:ls, nil}
-  defp parse(["ls", path]), do: {:ls, path}
-  defp parse(["cd", path]), do: {:cd, path}
-  defp parse(["daemon"]), do: :daemon
-  defp parse([]), do: {:repl, "el"}
-  defp parse([config, "as", name]), do: {:as, config, name}
-  defp parse([agent | rest]) when length(rest) > 0,
-    do: {:repl_input, agent, join([agent | rest], " ")}
-  defp parse([agent]), do: {:repl, agent}
-  defp parse(_), do: :usage
-
-  defp check(tool, cmd) when tool in @known_tools, do: cmd
-  defp check(tool, _cmd), do: {:unknown_tool, tool}
 
   defp exec(:usage) do
     @usage |> puts()
