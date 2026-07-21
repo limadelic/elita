@@ -43,6 +43,7 @@ defmodule Elita.Umbrella do
     check("cd apps/elita && mix format --check-formatted")
     check("mix credo --strict")
     check("bundle exec rubocop")
+    check("npm run fmt:check")
   end
 
   defp run_cukes(args) do
