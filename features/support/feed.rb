@@ -1,27 +1,34 @@
 module Feed
   def drain
-    return unless @reader
-    return if @mutex
+    return unless ready?
 
     chunk = absorb(@reader)
     append(chunk, strip(chunk))
   end
 
+  def ready?
+    @reader && !@mutex
+  end
+
   def drain_thread_loop(reader, transcript, transcript_stripped, screen, mutex)
     loop do
-      ready = IO.select([reader], nil, nil, 0.05)
-      next unless ready
-
-      chunk = reader.readpartial(4096)
-      drain_encode_and_store(chunk, transcript, transcript_stripped, screen, mutex)
+      process_if_ready(reader, transcript, transcript_stripped, screen, mutex)
     end
   rescue StandardError
   end
 
-  def drain_encode_and_store(chunk, transcript, transcript_stripped, screen, mutex)
+  def process_if_ready(reader, transcript, transcript_stripped, screen, mutex)
+    ready = IO.select([reader], nil, nil, 0.05)
+    return unless ready
+
+    chunk = reader.readpartial(4096)
+    feed(chunk, transcript, transcript_stripped, screen, mutex)
+  end
+
+  def feed(chunk, transcript, transcript_stripped, screen, mutex)
     encoded = chunk.chars.map(&:ord).pack("C*").force_encoding("UTF-8").scrub("")
     stripped = strip_ansi(encoded)
-    store_encoded(transcript, transcript_stripped, screen, mutex, encoded, stripped)
+    store(transcript, transcript_stripped, screen, mutex, encoded, stripped)
   end
 
   def strip_ansi(encoded)
@@ -31,30 +38,49 @@ module Feed
     ""
   end
 
-  def store_encoded(transcript, transcript_stripped, screen, mutex, encoded, stripped)
+  def store(transcript, transcript_stripped, screen, mutex, encoded, stripped)
     mutex.synchronize do
-      transcript&.<< encoded
-      screen&.feed(encoded)
-      transcript_stripped&.<< stripped
+      add_to_transcript(transcript, encoded)
+      add_to_screen(screen, encoded)
+      add_to_stripped(transcript_stripped, stripped)
     end
+  end
+
+  def add_to_transcript(transcript, encoded)
+    transcript&.<< encoded
+  end
+
+  def add_to_screen(screen, encoded)
+    screen&.feed(encoded)
+  end
+
+  def add_to_stripped(transcript_stripped, stripped)
+    transcript_stripped&.<< stripped
   end
 
   def append(chunk, stripped)
     chunk = encode(chunk)
-    @mutex ? append_with_mutex(chunk, stripped) : append_without_mutex(chunk, stripped)
+    @mutex ? sync(chunk, stripped) : async(chunk, stripped)
   end
 
-  def append_with_mutex(chunk, stripped)
+  def sync(chunk, stripped)
     @mutex.synchronize do
-      @transcript << chunk if @transcript
-      stripped = encode(stripped)
-      @transcript_stripped << stripped if @transcript_stripped
+      push_chunk(chunk)
+      push_stripped(stripped)
     end
   end
 
-  def append_without_mutex(chunk, stripped)
+  def async(chunk, stripped)
+    push_chunk(chunk)
+    push_stripped(stripped)
+  end
+
+  def push_chunk(chunk)
     @transcript << chunk if @transcript
-    stripped = encode(stripped)
-    @transcript_stripped << stripped if @transcript_stripped
+  end
+
+  def push_stripped(stripped)
+    encoded = encode(stripped)
+    @transcript_stripped << encoded if @transcript_stripped
   end
 end
