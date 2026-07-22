@@ -79,8 +79,14 @@ module Spawn
   end
 
   def clock_env
-    return nil if unfrozen?
+    unfrozen? ? nil : frozen_clock
+  end
 
+  def frozen_clock
+    @clock || default_clock
+  end
+
+  def default_clock
     ENV.fetch("CLOCK", "2025-07-07 10:00:00")
   end
 
@@ -148,13 +154,22 @@ module Spawn
   end
 
   def reset(args)
+    ensure_delivered
+    clear_transcript
+    launch(spawn(args), query(args), tag(args))
+  end
+
+  def clear_transcript
     @transcript = ""
     @transcript_stripped = ""
     @screen = Screen.new
-    cmd = spawn(args)
-    prompt = query(args)
-    puppet_name = tag(args)
-    launch(cmd, prompt, puppet_name)
+  end
+
+  def ensure_delivered
+    return if @delivered
+
+    deliver
+    @delivered = true
   end
 
   def query(args)

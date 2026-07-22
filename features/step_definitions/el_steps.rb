@@ -2,6 +2,14 @@
 
 require 'pty'
 
+When(/^clock (.+)$/) do |time|
+  @clock = time
+end
+
+When(/^cassette (.+)$/) do |name|
+  @cassette = name
+end
+
 When(/^> el tell (.+)$/) do |args, *rest|
   output = one("tell #{args}")
   track(output, output.gsub(/\e\[[0-9;]*m/, ''))
