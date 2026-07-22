@@ -60,7 +60,7 @@ defmodule El.REPL do
   defp pick(pid, _agent), do: pid
 
   defp native(agent) do
-    spawn(agent, [agent]) |> then(&notify/1) |> then(&settle/1) |> extract()
+    spawn(agent, [agent]) |> tap(&notify/1) |> extract()
   rescue
     RuntimeError -> nil
   end
@@ -72,8 +72,6 @@ defmodule El.REPL do
   defp extract({:ok, pid}), do: pid
   defp extract({:error, {:already_started, pid}}), do: pid
   defp extract(_), do: nil
-
-  defp settle(_), do: :ok
 
   defp loop(agent, puppet) do
     write("#{agent}> ")
