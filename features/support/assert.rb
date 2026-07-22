@@ -1,24 +1,64 @@
 module Assert
   def table(tbl, output)
-    cells(tbl).each { |c| cell(c, output) }
+    tabulate(tbl, output)
+  end
+
+  def tabulate(tbl, output)
+    snap_or_check(tbl, output)
+  end
+
+  def snap_or_check(tbl, output)
+    return grab(tbl) if snap?(tbl)
+
+    verify_cells(tbl, output)
+  end
+
+  def snap?(tbl)
+    @snap && single_column_table?(tbl)
+  end
+
+  def verify_cells(tbl, output)
+    cells(tbl).each { |c| check(c, output) }
+  end
+
+  def single_column_table?(tbl)
+    table?(tbl) && single_column?(tbl)
+  end
+
+  def table?(tbl)
+    return false unless data?(tbl)
+
+    any_rows?(tbl)
+  end
+
+  def data?(tbl)
+    tbl && tbl.raw
+  end
+
+  def any_rows?(tbl)
+    tbl.raw.any?
+  end
+
+  def single_column?(tbl)
+    tbl.raw.all? { |row| row.size == 1 }
   end
 
   def cells(table)
-    launder(table.raw)
+    clean(table.raw)
   end
 
-  def launder(raw)
+  def clean(raw)
     result = []
-    raw.flatten.each { |item| admit(item, result) }
+    raw.flatten.each { |item| push_clean(item, result) }
     result
   end
 
-  def admit(item, result)
+  def push_clean(item, result)
     stripped = item.strip
     result << stripped unless stripped.empty?
   end
 
-  def cell(cell, output)
+  def check(cell, output)
     n = negated?(cell)
     c = negate(cell, n)
     c = shape(c)
