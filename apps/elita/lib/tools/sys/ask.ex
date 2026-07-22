@@ -95,7 +95,7 @@ defmodule Tools.Sys.Ask do
     msg = "#{@reply} #{replier} → #{asker} | #{trim(text)}\n"
     write(msg)
     el(msg)
-    agent(@reply, "#{replier} → #{asker}", " | ", text, %{name: replier})
+    agent(@reply, "#{replier} → #{asker}", " | ", text, %{name: asker})
   end
 
   defp el(msg) do
