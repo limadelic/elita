@@ -12,3 +12,8 @@ Feature: Doctor
     * doctor> diagnose patient
       | Acute Appendicitis |
       | appendectomy       |
+
+    * doctor> log
+      | what is your main complaint       |
+      | have you experienced any changes  |
+      | have you had any recent illnesses |
