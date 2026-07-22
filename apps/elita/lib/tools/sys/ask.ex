@@ -25,7 +25,7 @@ end
 
 defmodule Tools.Sys.Ask do
   import Agent.Harness, only: [dispatch: 3]
-  import Log, only: [write: 1]
+  import Log, only: [write: 1, agent: 5]
   import String, only: [trim: 1]
 
   @icon "🤔"
@@ -66,6 +66,7 @@ defmodule Tools.Sys.Ask do
     msg = "#{@icon} #{sender} → #{recipient} | #{question}\n"
     write(msg)
     el(msg)
+    agent(@icon, "#{sender} → #{recipient}", " | ", question, %{name: sender})
   end
 
   def answer(agent, text) when is_binary(text) do
