@@ -20,17 +20,11 @@ end
 
 When(/^(\w+)> (.+)$/) do |prompt, input, *rest|
   table = rest.first
-  # Special handling for log verification (emoji check)
-  if input == "log" && table && table.raw.flatten.any? { |cell| cell.include?("🤔") || cell.include?("✨") }
-    verify_log(table)
-  else
-    # Normal command handling
-    note(prompt, input) if table && valid?(table)
-    emit(input, prompt)
-    output = retrying(15) { collect(prompt, input) }
-    reply(prompt, table, output) if table && valid?(table)
-    settle(table, output)
-  end
+  note(prompt, input) if table && valid?(table)
+  emit(input, prompt)
+  output = retrying(15) { collect(prompt, input) }
+  reply(prompt, table, output) if table && valid?(table)
+  settle(table, output)
 end
 
 Then(/^verify$/) do |table|
@@ -212,9 +206,4 @@ def sight(line, transcript, cursor)
 
   msg = "Expected '#{line}' in transcript after #{cursor}:\n#{transcript}"
   raise msg
-end
-
-def verify_log(table) # rubocop:disable Metrics/CyclomaticComplexity
-  lines = table.raw.map { |r| r.map(&:strip).join(" | ") }
-  trace(lines)
 end
