@@ -68,25 +68,28 @@ defmodule Elita.Boot do
   end
 
   defp local(name, configs, opts) do
-    {:ok, pid} = started(Elita, {name, configs, opts}, via(name))
+    start(Elita, {name, configs, opts}, name: via(name)) |> join() |> keep(name)
+  end
+
+  defp keep({:ok, pid}, name) do
     :global.whereis_name({name, :puppet}) |> reg(name, pid)
     {:ok, pid}
   end
+
+  defp keep(err, _), do: err
 
   defp ready? do
     get_env("ELITA_RUN", "") != ""
   end
 
-  defp started(m, a, k) do
-    engine(m, a, k)
-  end
-
-  defp engine(m, a, k) do
-    start(m, a, name: k) |> join()
-  end
-
   defp join({:ok, p}), do: {:ok, p}
   defp join({:error, {:already_started, p}}), do: {:ok, p}
+
+  defp join({:error, {exc, _stack}}) when is_exception(exc) do
+    {:error, {:init_failed, exc.message}}
+  end
+
+  defp join({:error, _}), do: {:error, :init_failed}
 
   defp reg(:undefined, name, pid), do: :global.register_name({name, :puppet}, pid)
   defp reg(_, _, _), do: :ok

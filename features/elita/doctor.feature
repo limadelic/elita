@@ -1,8 +1,12 @@
 @tape:doctor
 Feature: Doctor
 
-  Scenario: Doctor questions the patient and diagnoses appendicitis
+  Scenario: Unknown agent fails with clear error
     * > el patient
+      | unknown agent |
+
+  Scenario: Doctor questions the patient and diagnoses appendicitis
+    * > el actor as patient
 
     * > el doctor
 
