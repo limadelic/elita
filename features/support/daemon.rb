@@ -46,7 +46,7 @@ module Daemon
     el_path = "../../../../apps/el/el"
     home = ENV["HOME"]
     "ELITA_RUN=cukes TAPE=#{tape} CASSETTE_DIR=#{cassette_dir} " \
-    "HOME=#{home} MIX_ENV=test #{el_path} daemon >>#{@daemon_log} 2>&1 &"
+    "HOME=#{home} MIX_ENV=test #{clock_prefix}#{el_path} daemon >>#{@daemon_log} 2>&1 &"
   end
 
   def readied
