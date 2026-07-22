@@ -6,12 +6,12 @@ Feature: Clockwatcher
     * > el clockwatcher as <name>
 
     * <name>> can you handle this task?
-      | <reply1> |
-      | <reply2> |
-      | <reply3> |
+      | <time>    |
+      | <verdict> |
+      | <rule>    |
 
     Examples:
-      | name    | clock               | cassette | reply1            | reply2                       | reply3           |
+      | name    | clock               | cassette | time              | verdict                      | rule             |
       | early   | 2025-07-07 06:00:00 | early    | 6:00 AM on Monday | No, I don't start until 9 AM | 9 AM to 5 PM     |
       | work    | 2025-07-07 10:00:00 | work     | 10 AM on a Monday | Yes, I can help              | 9 AM to 5 PM     |
       | lunch   | 2025-07-07 12:30:00 | lunch    | 12:30 PM          | no, it's lunch time          | 12 PM to 1 PM    |
