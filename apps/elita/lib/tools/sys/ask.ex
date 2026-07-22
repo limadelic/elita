@@ -38,7 +38,7 @@ defmodule Tools.Sys.Ask do
   def exec(_, %{"recipient" => r, "question" => q}, %{name: s, skip_logs: l} = state) do
     query(s, r, q, l)
     result = dispatch(r, q, :ask)
-    reply(s, result, l)
+    reply(r, s, result, l)
     {result, state}
   end
 
@@ -81,20 +81,21 @@ defmodule Tools.Sys.Ask do
     el(msg)
   end
 
-  defp reply(agent, text, silent) when is_binary(text) do
-    log(agent, text, silent)
+  defp reply(replier, asker, text, silent) when is_binary(text) do
+    log(replier, asker, text, silent)
   end
 
-  defp reply(_agent, _text, _silent), do: :ok
+  defp reply(_replier, _asker, _text, _silent), do: :ok
 
-  defp log(_agent, _text, true) do
+  defp log(_replier, _asker, _text, true) do
     :ok
   end
 
-  defp log(agent, text, _) do
-    msg = "#{@reply} #{agent} | #{trim(text)}\n"
+  defp log(replier, asker, text, _) do
+    msg = "#{@reply} #{replier} → #{asker} | #{trim(text)}\n"
     write(msg)
     el(msg)
+    agent(@reply, "#{replier} → #{asker}", " | ", text, %{name: replier})
   end
 
   defp el(msg) do
