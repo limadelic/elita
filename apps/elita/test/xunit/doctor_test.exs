@@ -6,7 +6,6 @@ defmodule DoctorTest do
   setup do
     spawn(:doctor)
     spawn(:patient, :actor)
-    spawn(:judge)
     :ok
   end
 
