@@ -8,9 +8,13 @@ module Assert
   end
 
   def snap_or_check(tbl, output)
-    return snap(tbl) if single_column_table?(tbl)
+    return grab(tbl) if snap?(tbl)
 
     verify_cells(tbl, output)
+  end
+
+  def snap?(tbl)
+    @snap && single_column_table?(tbl)
   end
 
   def verify_cells(tbl, output)

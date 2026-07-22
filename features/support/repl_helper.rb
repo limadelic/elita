@@ -187,9 +187,10 @@ end
 require_relative "spawn"
 require_relative "drain"
 require_relative "search"
+require_relative "snap"
 require_relative "assert"
 require_relative "session_logs"
 require_relative "status"
 require_relative "record"
 
-World(ReplHelper, Spawn, Drain, Search, Assert, SessionLogs, Status, Record)
+World(ReplHelper, Spawn, Drain, Search, Snap, Assert, SessionLogs, Status, Record)
