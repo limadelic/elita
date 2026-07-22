@@ -1,0 +1,60 @@
+name: Badges
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: 'PR number'
+        required: true
+        type: number
+
+permissions:
+  pull-requests: write
+
+jobs:
+  badges:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve PR number
+        id: pr
+        env:
+          PR_FROM_EVENT: ${{ github.event.pull_request.number }}
+          PR_FROM_INPUT: ${{ inputs.pr }}
+        run: |
+          if [ -n "$PR_FROM_EVENT" ]; then
+            PR_NUMBER=$PR_FROM_EVENT
+          else
+            PR_NUMBER=$PR_FROM_INPUT
+          fi
+          echo "number=$PR_NUMBER" >> $GITHUB_OUTPUT
+
+      - name: Add badge block to PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+        run: |
+          LINT_URL="https%3A%2F%2Flimadelic.github.io%2Felita%2F$PR_NUMBER%2Flint.json"
+          CUKES_URL="https%3A%2F%2Flimadelic.github.io%2Felita%2F$PR_NUMBER%2Fcukes.json"
+
+          # Get current PR body
+          gh pr view $PR_NUMBER --json body -q .body > /tmp/body.md
+
+          # Check if badge block already exists (idempotency)
+          if grep -q "limadelic.github.io/elita/$PR_NUMBER" /tmp/body.md; then
+            echo "Badge block already present, skipping update"
+            exit 0
+          fi
+
+          # Append badge block to existing body
+          {
+            cat /tmp/body.md
+            echo ""
+            echo "[![lint](https://img.shields.io/endpoint?url=$LINT_URL)](https://limadelic.github.io/elita/$PR_NUMBER/report.html)"
+            echo "[![cukes](https://img.shields.io/endpoint?url=$CUKES_URL)](https://limadelic.github.io/elita/$PR_NUMBER/report.html)"
+          } > /tmp/body_new.md
+          gh pr edit $PR_NUMBER --body-file /tmp/body_new.md

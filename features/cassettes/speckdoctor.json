@@ -7,9 +7,7 @@
         },
         "id": "toolu_01GG1hTibVxCxhRhJkTBcaUU",
         "input": {
-          "configs": [
-            "speck"
-          ],
+          "configs": ["speck"],
           "name": "speck"
         },
         "name": "spawn",
@@ -348,9 +346,7 @@
         },
         "id": "toolu_01WYjC8PxaTvCgBZX1agYrWu",
         "input": {
-          "configs": [
-            "doctor"
-          ],
+          "configs": ["doctor"],
           "name": "doctor_v1"
         },
         "name": "spawn",
@@ -362,9 +358,7 @@
         },
         "id": "toolu_011k9R82KpJJ6YE2qFRp9XzJ",
         "input": {
-          "configs": [
-            "baby"
-          ],
+          "configs": ["baby"],
           "name": "patient_v1"
         },
         "name": "spawn",

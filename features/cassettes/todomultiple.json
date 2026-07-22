@@ -1,0 +1,211 @@
+[
+  {
+    "a": [
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01VzcNHVFybJTA3RpFSxV5JM",
+        "input": {
+          "key": "todo"
+        },
+        "name": "get",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "todo",
+      "messages": [
+        {
+          "role": "user",
+          "content": "Add buy milk to my list"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Now I'll add \"buy milk\" to your list:",
+        "type": "text"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01SQX832sqptiW4TqMq88ehZ",
+        "input": {
+          "key": "todo",
+          "value": "buy milk"
+        },
+        "name": "set",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "todo",
+      "messages": [
+        {
+          "role": "user",
+          "content": [
+            {
+              "content": "(empty)"
+            }
+          ]
+        }
+      ],
+      "n": 3
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Done! I've added \"buy milk\" to your todo list.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "todo",
+      "messages": [
+        {
+          "role": "user",
+          "content": [
+            {
+              "content": "stored"
+            }
+          ]
+        }
+      ],
+      "n": 5
+    }
+  },
+  {
+    "a": [
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_015PtE97n97MCef1ZZ7ijhMx",
+        "input": {
+          "key": "todo"
+        },
+        "name": "get",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "todo",
+      "messages": [
+        {
+          "role": "user",
+          "content": "Add walk dog to my list"
+        }
+      ],
+      "n": 7
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Now I'll add \"walk dog\" to your list:",
+        "type": "text"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01SCG4UCjDd5aQ4RJGdfcgF6",
+        "input": {
+          "key": "todo",
+          "value": "buy milk\nwalk dog"
+        },
+        "name": "set",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "todo",
+      "messages": [
+        {
+          "role": "user",
+          "content": [
+            {
+              "content": "buy milk"
+            }
+          ]
+        }
+      ],
+      "n": 9
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Done! I've added \"walk dog\" to your todo list.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "todo",
+      "messages": [
+        {
+          "role": "user",
+          "content": [
+            {
+              "content": "stored"
+            }
+          ]
+        }
+      ],
+      "n": 11
+    }
+  },
+  {
+    "a": [
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01QdPsJqCqzLs6bnWt8CgpYu",
+        "input": {
+          "key": "todo"
+        },
+        "name": "get",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "todo",
+      "messages": [
+        {
+          "role": "user",
+          "content": "What do I need to do?"
+        }
+      ],
+      "n": 13
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Here are your tasks:\n1. buy milk\n2. walk dog",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "todo",
+      "messages": [
+        {
+          "role": "user",
+          "content": [
+            {
+              "content": "buy milk\nwalk dog"
+            }
+          ]
+        }
+      ],
+      "n": 15
+    }
+  }
+]

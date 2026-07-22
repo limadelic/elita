@@ -1,0 +1,130 @@
+[
+  {
+    "a": [
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01KkMMUgGysTB7KGD9NHcMLt",
+        "input": {
+          "key": "todo"
+        },
+        "name": "get",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "todo",
+      "messages": [
+        {
+          "role": "user",
+          "content": "Add buy groceries to my list"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Now I'll add the task to your list:",
+        "type": "text"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_014pqou9J8YYpBLAQKNfvcs8",
+        "input": {
+          "key": "todo",
+          "value": "buy groceries"
+        },
+        "name": "set",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "todo",
+      "messages": [
+        {
+          "role": "user",
+          "content": [
+            {
+              "content": "(empty)"
+            }
+          ]
+        }
+      ],
+      "n": 3
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Done! I've added \"buy groceries\" to your task list.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "todo",
+      "messages": [
+        {
+          "role": "user",
+          "content": [
+            {
+              "content": "stored"
+            }
+          ]
+        }
+      ],
+      "n": 5
+    }
+  },
+  {
+    "a": [
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_012PGCvm5MXFPVJomGQJQS1C",
+        "input": {
+          "key": "todo"
+        },
+        "name": "get",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "todo",
+      "messages": [
+        {
+          "role": "user",
+          "content": "What do I need to do?"
+        }
+      ],
+      "n": 7
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "You have 1 task on your list:\n- buy groceries",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "todo",
+      "messages": [
+        {
+          "role": "user",
+          "content": [
+            {
+              "content": "buy groceries"
+            }
+          ]
+        }
+      ],
+      "n": 9
+    }
+  }
+]

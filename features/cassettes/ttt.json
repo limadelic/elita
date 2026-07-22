@@ -2,139 +2,7 @@
   {
     "a": [
       {
-        "caller": {
-          "type": "direct"
-        },
-        "id": "toolu_bf0c5c5fd36d01efd5773543",
-        "input": {
-          "configs": [
-            "ttt"
-          ],
-          "name": "alice"
-        },
-        "name": "spawn",
-        "type": "tool_use"
-      },
-      {
-        "caller": {
-          "type": "direct"
-        },
-        "id": "toolu_4745364ca8b78ea6ae2ae32d",
-        "input": {
-          "configs": [
-            "ttt"
-          ],
-          "name": "bob"
-        },
-        "name": "spawn",
-        "type": "tool_use"
-      }
-    ],
-    "q": {
-      "agent": "el",
-      "messages": [
-        {
-          "content": "get me two ttt players named alice and bob",
-          "role": "user"
-        }
-      ],
-      "n": 1
-    }
-  },
-  {
-    "a": [
-      {
-        "text": "Now telling them their roles:",
-        "type": "text"
-      },
-      {
-        "caller": {
-          "type": "direct"
-        },
-        "id": "toolu_7167300346c8ae8063592fcc",
-        "input": {
-          "message": "You are Alice, a ttt player. Stay in character.",
-          "recipient": "alice"
-        },
-        "name": "tell",
-        "type": "tool_use"
-      },
-      {
-        "caller": {
-          "type": "direct"
-        },
-        "id": "toolu_57788c78f12f935a984fa952",
-        "input": {
-          "message": "You are Bob, a ttt player. Stay in character.",
-          "recipient": "bob"
-        },
-        "name": "tell",
-        "type": "tool_use"
-      }
-    ],
-    "q": {
-      "agent": "el",
-      "messages": [
-        {
-          "content": [
-            {
-              "content": "spawned",
-              "tool_use_id": "toolu_4745364ca8b78ea6ae2ae32d",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        }
-      ],
-      "n": 4
-    }
-  },
-  {
-    "a": [
-      {
-        "text": "Done.",
-        "type": "text"
-      }
-    ],
-    "q": {
-      "agent": "el",
-      "messages": [
-        {
-          "content": [
-            {
-              "content": "sent",
-              "tool_use_id": "toolu_57788c78f12f935a984fa952",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        }
-      ],
-      "n": 7
-    }
-  },
-  {
-    "a": [
-      {
-        "text": "Ready to play tic-tac-toe!",
-        "type": "text"
-      }
-    ],
-    "q": {
-      "agent": "alice",
-      "messages": [
-        {
-          "content": "[from el] You are Alice, a ttt player. Stay in character.",
-          "role": "user"
-        }
-      ],
-      "n": 1
-    }
-  },
-  {
-    "a": [
-      {
-        "text": "Ready to play tic-tac-toe!",
+        "text": "Got it! I'm ready to play tic-tac-toe against alice. Waiting for her first move. 🎮",
         "type": "text"
       }
     ],
@@ -142,7 +10,7 @@
       "agent": "bob",
       "messages": [
         {
-          "content": "[from el] You are Bob, a ttt player. Stay in character.",
+          "content": "alice is gonna be your opponent, wait for her move",
           "role": "user"
         }
       ],
@@ -155,59 +23,9 @@
         "caller": {
           "type": "direct"
         },
-        "id": "toolu_a0fdd56714961b17cb8b4115",
+        "id": "toolu_019Dvw79Fr4kPcwjWxydyBi7",
         "input": {
-          "message": "Start a game with Bob, you are X, play first",
-          "recipient": "alice"
-        },
-        "name": "tell",
-        "type": "tool_use"
-      }
-    ],
-    "q": {
-      "agent": "el",
-      "messages": [
-        {
-          "content": "tell alice start a game with bob, you are X, play first",
-          "role": "user"
-        }
-      ],
-      "n": 9
-    }
-  },
-  {
-    "a": [
-      {
-        "text": "Done.",
-        "type": "text"
-      }
-    ],
-    "q": {
-      "agent": "el",
-      "messages": [
-        {
-          "content": [
-            {
-              "content": "sent",
-              "tool_use_id": "toolu_a0fdd56714961b17cb8b4115",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        }
-      ],
-      "n": 11
-    }
-  },
-  {
-    "a": [
-      {
-        "caller": {
-          "type": "direct"
-        },
-        "id": "toolu_5412d3f8d2a5a8ec1949ca59",
-        "input": {
-          "message": "I'll take the center!\n\n_ | _ | _\n_ | X | _\n_ | _ | _\n\nYour turn!",
+          "message": "Hey! Let's play tic-tac-toe. I'm X and I'll go first.\n\n_ | _ | _\n_ | X | _\n_ | _ | _\n\nI took the center (position 5). Your move!",
           "recipient": "bob"
         },
         "name": "tell",
@@ -218,7 +36,31 @@
       "agent": "alice",
       "messages": [
         {
-          "content": "[from el] Start a game with Bob, you are X, play first",
+          "content": "start a game with bob, you are X, play first",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Game started! I'm taking the center position (5) as my opening move—a strong defensive position. Waiting for Bob's response!",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "alice",
+      "messages": [
+        {
+          "content": [
+            {
+              "content": "sent",
+              "tool_use_id": "toolu_019Dvw79Fr4kPcwjWxydyBi7",
+              "type": "tool_result"
+            }
+          ],
           "role": "user"
         }
       ],
@@ -228,7 +70,33 @@
   {
     "a": [
       {
-        "text": "Done.",
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01EEEioFdaL94fR47zZ8JkHc",
+        "input": {
+          "message": "Nice opening! I'll take a corner (position 1).\n\nO | _ | _\n_ | X | _\n_ | _ | _\n\nYour turn!",
+          "recipient": "alice"
+        },
+        "name": "tell",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "bob",
+      "messages": [
+        {
+          "content": "[from alice] Hey! Let's play tic-tac-toe. I'm X and I'll go first.\n\n_ | _ | _\n_ | X | _\n_ | _ | _\n\nI took the center (position 5). Your move!",
+          "role": "user"
+        }
+      ],
+      "n": 3
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "no",
         "type": "text"
       }
     ],
@@ -236,10 +104,23 @@
       "agent": "alice",
       "messages": [
         {
+          "content": "is the game over? answer only: yes or no",
+          "role": "user"
+        }
+      ],
+      "n": 5
+    }
+  },
+  {
+    "a": [],
+    "q": {
+      "agent": "bob",
+      "messages": [
+        {
           "content": [
             {
               "content": "sent",
-              "tool_use_id": "toolu_5412d3f8d2a5a8ec1949ca59",
+              "tool_use_id": "toolu_01EEEioFdaL94fR47zZ8JkHc",
               "type": "tool_result"
             }
           ],
@@ -255,59 +136,9 @@
         "caller": {
           "type": "direct"
         },
-        "id": "toolu_222893d9022f5d580d92e463",
+        "id": "toolu_01C4Jw647g3DY9gxkce4KwWB",
         "input": {
-          "message": "I'll take the top-left!\n\nO | _ | _\n_ | X | _\n_ | _ | _\n\nYour turn!",
-          "recipient": "alice"
-        },
-        "name": "tell",
-        "type": "tool_use"
-      }
-    ],
-    "q": {
-      "agent": "bob",
-      "messages": [
-        {
-          "content": "[from alice] I'll take the center!\n\n_ | _ | _\n_ | X | _\n_ | _ | _\n\nYour turn!",
-          "role": "user"
-        }
-      ],
-      "n": 3
-    }
-  },
-  {
-    "a": [
-      {
-        "text": "Done.",
-        "type": "text"
-      }
-    ],
-    "q": {
-      "agent": "bob",
-      "messages": [
-        {
-          "content": [
-            {
-              "content": "sent",
-              "tool_use_id": "toolu_222893d9022f5d580d92e463",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        }
-      ],
-      "n": 5
-    }
-  },
-  {
-    "a": [
-      {
-        "caller": {
-          "type": "direct"
-        },
-        "id": "toolu_4027485d113446f79d910751",
-        "input": {
-          "message": "I'll take the bottom-right!\n\nO | _ | _\n_ | X | _\n_ | _ | X\n\nYour turn!",
+          "message": "Good move! I'll take the opposite corner (position 9) to balance.\n\nO | _ | _\n_ | X | _\n_ | _ | X\n\nYour turn!",
           "recipient": "bob"
         },
         "name": "tell",
@@ -318,7 +149,7 @@
       "agent": "alice",
       "messages": [
         {
-          "content": "[from bob] I'll take the top-left!\n\nO | _ | _\n_ | X | _\n_ | _ | _\n\nYour turn!",
+          "content": "[from bob] Nice opening! I'll take a corner (position 1).\n\nO | _ | _\n_ | X | _\n_ | _ | _\n\nYour turn!",
           "role": "user"
         }
       ],
@@ -326,12 +157,7 @@
     }
   },
   {
-    "a": [
-      {
-        "text": "Done.",
-        "type": "text"
-      }
-    ],
+    "a": [],
     "q": {
       "agent": "alice",
       "messages": [
@@ -339,7 +165,7 @@
           "content": [
             {
               "content": "sent",
-              "tool_use_id": "toolu_4027485d113446f79d910751",
+              "tool_use_id": "toolu_01C4Jw647g3DY9gxkce4KwWB",
               "type": "tool_result"
             }
           ],
@@ -355,9 +181,9 @@
         "caller": {
           "type": "direct"
         },
-        "id": "toolu_439fb8fa26ecc4057de79df4",
+        "id": "toolu_01TXzwrrbanZhUAPcSL6RGKW",
         "input": {
-          "message": "I'll take the top-right!\n\nO | _ | O\n_ | X | _\n_ | _ | X\n\nYour turn!",
+          "message": "Smart! I'll take position 3 to block your potential diagonal and keep my options open.\n\nO | _ | O\n_ | X | _\n_ | _ | X\n\nYour turn!",
           "recipient": "alice"
         },
         "name": "tell",
@@ -368,20 +194,33 @@
       "agent": "bob",
       "messages": [
         {
-          "content": "[from alice] I'll take the bottom-right!\n\nO | _ | _\n_ | X | _\n_ | _ | X\n\nYour turn!",
+          "content": "[from alice] Good move! I'll take the opposite corner (position 9) to balance.\n\nO | _ | _\n_ | X | _\n_ | _ | X\n\nYour turn!",
           "role": "user"
         }
       ],
-      "n": 7
+      "n": 6
     }
   },
   {
     "a": [
       {
-        "text": "Done.",
+        "text": "no",
         "type": "text"
       }
     ],
+    "q": {
+      "agent": "alice",
+      "messages": [
+        {
+          "content": "is the game over? answer only: yes or no",
+          "role": "user"
+        }
+      ],
+      "n": 10
+    }
+  },
+  {
+    "a": [],
     "q": {
       "agent": "bob",
       "messages": [
@@ -389,10 +228,81 @@
           "content": [
             {
               "content": "sent",
-              "tool_use_id": "toolu_439fb8fa26ecc4057de79df4",
+              "tool_use_id": "toolu_01TXzwrrbanZhUAPcSL6RGKW",
               "type": "tool_result"
             }
           ],
+          "role": "user"
+        }
+      ],
+      "n": 8
+    }
+  },
+  {
+    "a": [
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01H2C6woxgTzMTQfhLdgpc1o",
+        "input": {
+          "message": "I'll take position 7 to block your diagonal and create my own threat.\n\nO | _ | O\n_ | X | _\nX | _ | X\n\nYour turn!",
+          "recipient": "bob"
+        },
+        "name": "tell",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "alice",
+      "messages": [
+        {
+          "content": "[from bob] Smart! I'll take position 3 to block your potential diagonal and keep my options open.\n\nO | _ | O\n_ | X | _\n_ | _ | X\n\nYour turn!",
+          "role": "user"
+        }
+      ],
+      "n": 12
+    }
+  },
+  {
+    "a": [],
+    "q": {
+      "agent": "alice",
+      "messages": [
+        {
+          "content": [
+            {
+              "content": "sent",
+              "tool_use_id": "toolu_01H2C6woxgTzMTQfhLdgpc1o",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "n": 14
+    }
+  },
+  {
+    "a": [
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_018iazYizyEoYmtYq2V3f3bB",
+        "input": {
+          "message": "Gotta block! You've got X's on 7 and 9, so I'm taking position 8 to stop your bottom row win.\n\nO | _ | O\n_ | X | _\nX | O | X\n\nYour turn!",
+          "recipient": "alice"
+        },
+        "name": "tell",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "bob",
+      "messages": [
+        {
+          "content": "[from alice] I'll take position 7 to block your diagonal and create my own threat.\n\nO | _ | O\n_ | X | _\nX | _ | X\n\nYour turn!",
           "role": "user"
         }
       ],
@@ -400,25 +310,18 @@
     }
   },
   {
-    "a": [
-      {
-        "caller": {
-          "type": "direct"
-        },
-        "id": "toolu_d75b9825621d12202178e308",
-        "input": {
-          "message": "I'll take the top-middle!\n\nO | X | O\n_ | X | _\n_ | _ | X\n\nYour turn!",
-          "recipient": "bob"
-        },
-        "name": "tell",
-        "type": "tool_use"
-      }
-    ],
+    "a": [],
     "q": {
-      "agent": "alice",
+      "agent": "bob",
       "messages": [
         {
-          "content": "[from bob] I'll take the top-right!\n\nO | _ | O\n_ | X | _\n_ | _ | X\n\nYour turn!",
+          "content": [
+            {
+              "content": "sent",
+              "tool_use_id": "toolu_018iazYizyEoYmtYq2V3f3bB",
+              "type": "tool_result"
+            }
+          ],
           "role": "user"
         }
       ],
@@ -428,7 +331,7 @@
   {
     "a": [
       {
-        "text": "Done.",
+        "text": "no",
         "type": "text"
       }
     ],
@@ -436,17 +339,11 @@
       "agent": "alice",
       "messages": [
         {
-          "content": [
-            {
-              "content": "sent",
-              "tool_use_id": "toolu_d75b9825621d12202178e308",
-              "type": "tool_result"
-            }
-          ],
+          "content": "is the game over? answer only: yes or no",
           "role": "user"
         }
       ],
-      "n": 13
+      "n": 15
     }
   },
   {
@@ -455,59 +352,9 @@
         "caller": {
           "type": "direct"
         },
-        "id": "toolu_736799b5992cff4b3ebc32a6",
+        "id": "toolu_013fS9GANXN9AnzEZZr277nF",
         "input": {
-          "message": "I'll block the bottom!\n\nO | X | O\n_ | X | _\n_ | O | X\n\nYour turn!",
-          "recipient": "alice"
-        },
-        "name": "tell",
-        "type": "tool_use"
-      }
-    ],
-    "q": {
-      "agent": "bob",
-      "messages": [
-        {
-          "content": "[from alice] I'll take the top-middle!\n\nO | X | O\n_ | X | _\n_ | _ | X\n\nYour turn!",
-          "role": "user"
-        }
-      ],
-      "n": 11
-    }
-  },
-  {
-    "a": [
-      {
-        "text": "Done.",
-        "type": "text"
-      }
-    ],
-    "q": {
-      "agent": "bob",
-      "messages": [
-        {
-          "content": [
-            {
-              "content": "sent",
-              "tool_use_id": "toolu_736799b5992cff4b3ebc32a6",
-              "type": "tool_result"
-            }
-          ],
-          "role": "user"
-        }
-      ],
-      "n": 13
-    }
-  },
-  {
-    "a": [
-      {
-        "caller": {
-          "type": "direct"
-        },
-        "id": "toolu_f41cacdf45720ee3d5dd3614",
-        "input": {
-          "message": "I'll take the middle-left!\n\nO | X | O\nX | X | _\n_ | O | X\n\nYour turn!",
+          "message": "I'll take position 4 to block your potential left column (you'd have 1, 3, and threatening more).\n\nO | _ | O\nX | X | _\nX | O | X\n\nYour turn!",
           "recipient": "bob"
         },
         "name": "tell",
@@ -518,31 +365,7 @@
       "agent": "alice",
       "messages": [
         {
-          "content": "[from bob] I'll block the bottom!\n\nO | X | O\n_ | X | _\n_ | O | X\n\nYour turn!",
-          "role": "user"
-        }
-      ],
-      "n": 15
-    }
-  },
-  {
-    "a": [
-      {
-        "text": "Done.",
-        "type": "text"
-      }
-    ],
-    "q": {
-      "agent": "alice",
-      "messages": [
-        {
-          "content": [
-            {
-              "content": "sent",
-              "tool_use_id": "toolu_f41cacdf45720ee3d5dd3614",
-              "type": "tool_result"
-            }
-          ],
+          "content": "[from bob] Gotta block! You've got X's on 7 and 9, so I'm taking position 8 to stop your bottom row win.\n\nO | _ | O\n_ | X | _\nX | O | X\n\nYour turn!",
           "role": "user"
         }
       ],
@@ -550,75 +373,18 @@
     }
   },
   {
-    "a": [
-      {
-        "caller": {
-          "type": "direct"
-        },
-        "id": "toolu_3378552688c75160fe6794a6",
-        "input": {
-          "message": "I'll take the middle-right!\n\nO | X | O\nX | X | O\n_ | O | X\n\nYour turn!",
-          "recipient": "alice"
-        },
-        "name": "tell",
-        "type": "tool_use"
-      }
-    ],
+    "a": [],
     "q": {
-      "agent": "bob",
-      "messages": [
-        {
-          "content": "[from alice] I'll take the middle-left!\n\nO | X | O\nX | X | _\n_ | O | X\n\nYour turn!",
-          "role": "user"
-        }
-      ],
-      "n": 15
-    }
-  },
-  {
-    "a": [
-      {
-        "text": "Done.",
-        "type": "text"
-      }
-    ],
-    "q": {
-      "agent": "bob",
+      "agent": "alice",
       "messages": [
         {
           "content": [
             {
               "content": "sent",
-              "tool_use_id": "toolu_3378552688c75160fe6794a6",
+              "tool_use_id": "toolu_013fS9GANXN9AnzEZZr277nF",
               "type": "tool_result"
             }
           ],
-          "role": "user"
-        }
-      ],
-      "n": 17
-    }
-  },
-  {
-    "a": [
-      {
-        "caller": {
-          "type": "direct"
-        },
-        "id": "toolu_8e05ac8d943e162f21607f60",
-        "input": {
-          "message": "I'll take the bottom-left!\n\nO | X | O\nX | X | O\nX | O | X\n\nYour turn!",
-          "recipient": "bob"
-        },
-        "name": "tell",
-        "type": "tool_use"
-      }
-    ],
-    "q": {
-      "agent": "alice",
-      "messages": [
-        {
-          "content": "[from bob] I'll take the middle-right!\n\nO | X | O\nX | X | O\n_ | O | X\n\nYour turn!",
           "role": "user"
         }
       ],
@@ -628,7 +394,52 @@
   {
     "a": [
       {
-        "text": "Done.",
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01A8TnFkVMB4Sj1zmQKkt6Go",
+        "input": {
+          "message": "I'll take position 6 to block your middle row (you've got X's on positions 4 and 5).\n\nO | _ | O\nX | X | O\nX | O | X\n\nYour turn!",
+          "recipient": "alice"
+        },
+        "name": "tell",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "bob",
+      "messages": [
+        {
+          "content": "[from alice] I'll take position 4 to block your potential left column (you'd have 1, 3, and threatening more).\n\nO | _ | O\nX | X | _\nX | O | X\n\nYour turn!",
+          "role": "user"
+        }
+      ],
+      "n": 12
+    }
+  },
+  {
+    "a": [],
+    "q": {
+      "agent": "bob",
+      "messages": [
+        {
+          "content": [
+            {
+              "content": "sent",
+              "tool_use_id": "toolu_01A8TnFkVMB4Sj1zmQKkt6Go",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "n": 14
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "no",
         "type": "text"
       }
     ],
@@ -636,17 +447,11 @@
       "agent": "alice",
       "messages": [
         {
-          "content": [
-            {
-              "content": "sent",
-              "tool_use_id": "toolu_8e05ac8d943e162f21607f60",
-              "type": "tool_result"
-            }
-          ],
+          "content": "is the game over? answer only: yes or no",
           "role": "user"
         }
       ],
-      "n": 21
+      "n": 20
     }
   },
   {
@@ -655,30 +460,49 @@
         "caller": {
           "type": "direct"
         },
-        "id": "toolu_8a21e0cb3523b0f698f04b3d",
+        "id": "toolu_01VjudETE6p9b6Ly5suUhP6s",
         "input": {
-          "question": "Did the game finish and was it a win or a tie?",
-          "recipient": "alice"
+          "message": "I'll take position 2, the last remaining spot.\n\nO | X | O\nX | X | O\nX | O | X\n\nIt's a tie! Good game, Bob!",
+          "recipient": "bob"
         },
-        "name": "ask",
+        "name": "tell",
         "type": "tool_use"
       }
     ],
     "q": {
-      "agent": "el",
+      "agent": "alice",
       "messages": [
         {
-          "content": "ask alice did the game finish and was it a win or a tie",
+          "content": "[from bob] I'll take position 6 to block your middle row (you've got X's on positions 4 and 5).\n\nO | _ | O\nX | X | O\nX | O | X\n\nYour turn!",
           "role": "user"
         }
       ],
-      "n": 13
+      "n": 22
+    }
+  },
+  {
+    "a": [],
+    "q": {
+      "agent": "alice",
+      "messages": [
+        {
+          "content": [
+            {
+              "content": "sent",
+              "tool_use_id": "toolu_01VjudETE6p9b6Ly5suUhP6s",
+              "type": "tool_result"
+            }
+          ],
+          "role": "user"
+        }
+      ],
+      "n": 24
     }
   },
   {
     "a": [
       {
-        "text": "Game Over - Tie!",
+        "text": "yes",
         "type": "text"
       }
     ],
@@ -686,35 +510,47 @@
       "agent": "alice",
       "messages": [
         {
-          "content": "Did the game finish and was it a win or a tie?",
+          "content": "is the game over? answer only: yes or no",
           "role": "user"
         }
       ],
-      "n": 23
+      "n": 25
     }
   },
   {
     "a": [
       {
-        "text": "Game Over - Tie!",
+        "text": "Great game, alice! That was a solid back-and-forth. We both played defensively and blocked each other's threats perfectly. A well-earned tie! 🤝",
         "type": "text"
       }
     ],
     "q": {
-      "agent": "el",
+      "agent": "bob",
       "messages": [
         {
-          "content": [
-            {
-              "content": "Game Over - Tie!",
-              "tool_use_id": "toolu_8a21e0cb3523b0f698f04b3d",
-              "type": "tool_result"
-            }
-          ],
+          "content": "[from alice] I'll take position 2, the last remaining spot.\n\nO | X | O\nX | X | O\nX | O | X\n\nIt's a tie! Good game, Bob!",
           "role": "user"
         }
       ],
       "n": 15
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "The game finished and it was a tie.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "alice",
+      "messages": [
+        {
+          "role": "user",
+          "content": "tell me: did the game finish and was it a win or tie?"
+        }
+      ],
+      "n": 27
     }
   }
 ]

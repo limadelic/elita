@@ -50,6 +50,7 @@ defmodule El.Distribution do
   end
 
   defp boot(addr) do
+    :os.cmd(~c"epmd -daemon")
     start(addr, :longnames)
   end
 end

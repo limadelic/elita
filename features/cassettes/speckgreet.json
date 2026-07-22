@@ -253,9 +253,7 @@
         },
         "id": "toolu_011jfVVq7667izxm8NSbjvDp",
         "input": {
-          "configs": [
-            "greet"
-          ],
+          "configs": ["greet"],
           "name": "greet_v1"
         },
         "name": "spawn",
@@ -1002,9 +1000,7 @@
         },
         "id": "toolu_01Vy55bP1Nrcv4NUgFR1iPSr",
         "input": {
-          "configs": [
-            "greet"
-          ],
+          "configs": ["greet"],
           "name": "greet_v1"
         },
         "name": "spawn",
@@ -1094,9 +1090,7 @@
         },
         "id": "toolu_01SRZL2LvZm5HfQvTBEmrYZS",
         "input": {
-          "configs": [
-            "greet"
-          ],
+          "configs": ["greet"],
           "name": "greet_v2"
         },
         "name": "spawn",
@@ -1843,9 +1837,7 @@
         },
         "id": "toolu_016aQ9h3GAjUiXxPMHqFiy5t",
         "input": {
-          "configs": [
-            "greet"
-          ],
+          "configs": ["greet"],
           "name": "greet_test_v1"
         },
         "name": "spawn",
@@ -2596,9 +2588,7 @@
         },
         "id": "toolu_017NyaYWq4BbGStniprjU7ai",
         "input": {
-          "configs": [
-            "greet"
-          ],
+          "configs": ["greet"],
           "name": "greet_fresh_v1"
         },
         "name": "spawn",
@@ -3349,9 +3339,7 @@
         },
         "id": "toolu_01Nmxfgg34wqppEB31R3FcDz",
         "input": {
-          "configs": [
-            "greet"
-          ],
+          "configs": ["greet"],
           "name": "greet_exec_v1"
         },
         "name": "spawn",
@@ -3915,9 +3903,7 @@
         },
         "id": "toolu_017g6Ect49hpV8AtPy8KM3e5",
         "input": {
-          "configs": [
-            "greet"
-          ],
+          "configs": ["greet"],
           "name": "greet_v2"
         },
         "name": "spawn",
@@ -4103,9 +4089,7 @@
         },
         "id": "toolu_01SGLG93ZDHLdnHMMYapFP4R",
         "input": {
-          "configs": [
-            "greet"
-          ],
+          "configs": ["greet"],
           "name": "greet_v3"
         },
         "name": "spawn",

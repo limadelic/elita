@@ -7,9 +7,7 @@
         },
         "id": "toolu_01Wio1w1TwXri5nZjUX7srfr",
         "input": {
-          "configs": [
-            "speck"
-          ],
+          "configs": ["speck"],
           "name": "speck"
         },
         "name": "spawn",
@@ -292,9 +290,7 @@
         },
         "id": "toolu_01696X89i7ZWW1ZXNTtuTgs4",
         "input": {
-          "configs": [
-            "boss"
-          ],
+          "configs": ["boss"],
           "name": "boss_v1"
         },
         "name": "spawn",
@@ -306,9 +302,7 @@
         },
         "id": "toolu_01BzTTuJoQrWb1yCSQ6pqjEe",
         "input": {
-          "configs": [
-            "worker"
-          ],
+          "configs": ["worker"],
           "name": "worker_v1"
         },
         "name": "spawn",
@@ -502,9 +496,7 @@
         },
         "id": "toolu_013jZnaZSB6pRjaYixfbut7E",
         "input": {
-          "configs": [
-            "boss"
-          ],
+          "configs": ["boss"],
           "name": "boss_v2"
         },
         "name": "spawn",
@@ -516,9 +508,7 @@
         },
         "id": "toolu_01HZkZN4cizDipBVt6Ahjmk3",
         "input": {
-          "configs": [
-            "worker"
-          ],
+          "configs": ["worker"],
           "name": "dev_worker_v2"
         },
         "name": "spawn",
@@ -530,9 +520,7 @@
         },
         "id": "toolu_01VRxGysUxdgGqJFjpERduoc",
         "input": {
-          "configs": [
-            "worker"
-          ],
+          "configs": ["worker"],
           "name": "qa_worker_v2"
         },
         "name": "spawn",
@@ -840,9 +828,7 @@
         },
         "id": "toolu_01KjnVLnzYNjLWKevmu5Pez8",
         "input": {
-          "configs": [
-            "boss"
-          ],
+          "configs": ["boss"],
           "name": "senior_boss_v3"
         },
         "name": "spawn",
@@ -854,9 +840,7 @@
         },
         "id": "toolu_01AYsPbBVfZQmuxwvJBfP9zX",
         "input": {
-          "configs": [
-            "boss"
-          ],
+          "configs": ["boss"],
           "name": "mid_boss_v3"
         },
         "name": "spawn",
@@ -868,9 +852,7 @@
         },
         "id": "toolu_011DDSdj9Y7VaYjt2ZRxLBLo",
         "input": {
-          "configs": [
-            "worker"
-          ],
+          "configs": ["worker"],
           "name": "specialist_worker_v3"
         },
         "name": "spawn",
@@ -1338,9 +1320,7 @@
         },
         "id": "toolu_01Ub3zKVohA3w4gDk7A6hbbp",
         "input": {
-          "configs": [
-            "boss"
-          ],
+          "configs": ["boss"],
           "name": "boss_v4"
         },
         "name": "spawn",
@@ -1352,9 +1332,7 @@
         },
         "id": "toolu_01SDnBaisSqmyZbjaMjZQTWL",
         "input": {
-          "configs": [
-            "worker"
-          ],
+          "configs": ["worker"],
           "name": "backend_worker_v4"
         },
         "name": "spawn",
@@ -1366,9 +1344,7 @@
         },
         "id": "toolu_017CfgXf8y6zn7x7dxPdRMYp",
         "input": {
-          "configs": [
-            "worker"
-          ],
+          "configs": ["worker"],
           "name": "frontend_worker_v4"
         },
         "name": "spawn",
@@ -1380,9 +1356,7 @@
         },
         "id": "toolu_01TN7aNjavfaoLP4eBwGhAHB",
         "input": {
-          "configs": [
-            "worker"
-          ],
+          "configs": ["worker"],
           "name": "devops_worker_v4"
         },
         "name": "spawn",
@@ -1810,9 +1784,7 @@
         },
         "id": "toolu_01Lvdb2DNTYf2FwDQhXj7etA",
         "input": {
-          "configs": [
-            "boss"
-          ],
+          "configs": ["boss"],
           "name": "boss_v5"
         },
         "name": "spawn",
@@ -1824,9 +1796,7 @@
         },
         "id": "toolu_013SKz7pkvgXfsmo8LR49F6d",
         "input": {
-          "configs": [
-            "worker"
-          ],
+          "configs": ["worker"],
           "name": "worker_v5"
         },
         "name": "spawn",
@@ -2020,9 +1990,7 @@
         },
         "id": "toolu_01XPtn9AtHGeBfSRoypENBe2",
         "input": {
-          "configs": [
-            "boss"
-          ],
+          "configs": ["boss"],
           "name": "boss_v6"
         },
         "name": "spawn",
@@ -2034,9 +2002,7 @@
         },
         "id": "toolu_014zp1g9FMfyVMV88YNiGMpL",
         "input": {
-          "configs": [
-            "worker"
-          ],
+          "configs": ["worker"],
           "name": "worker_v6"
         },
         "name": "spawn",
@@ -2590,9 +2556,7 @@
         },
         "id": "toolu_01LyjHACKWUKzpusGqXnD81p",
         "input": {
-          "configs": [
-            "boss"
-          ],
+          "configs": ["boss"],
           "name": "boss_v1"
         },
         "name": "spawn",
@@ -2604,9 +2568,7 @@
         },
         "id": "toolu_01Ttt8rpXdftJfxdBrUAEukT",
         "input": {
-          "configs": [
-            "worker"
-          ],
+          "configs": ["worker"],
           "name": "worker_v1"
         },
         "name": "spawn",
@@ -2840,9 +2802,7 @@
         },
         "id": "toolu_01XhwxCrkuzrdh7qxUUuH9yh",
         "input": {
-          "configs": [
-            "worker"
-          ],
+          "configs": ["worker"],
           "name": "dev_worker_v2"
         },
         "name": "spawn",
@@ -2854,9 +2814,7 @@
         },
         "id": "toolu_011uj6qTve9FjfpbDiJXzVkj",
         "input": {
-          "configs": [
-            "worker"
-          ],
+          "configs": ["worker"],
           "name": "qa_worker_v2"
         },
         "name": "spawn",
@@ -2868,9 +2826,7 @@
         },
         "id": "toolu_01CHDYzjuGm9wUHTUfgtKAtC",
         "input": {
-          "configs": [
-            "boss"
-          ],
+          "configs": ["boss"],
           "name": "boss_v2"
         },
         "name": "spawn",
@@ -3194,9 +3150,7 @@
         },
         "id": "toolu_01T7M6mbQxvuYXSmctRBhwyg",
         "input": {
-          "configs": [
-            "worker"
-          ],
+          "configs": ["worker"],
           "name": "dev_worker_v3"
         },
         "name": "spawn",
@@ -3208,9 +3162,7 @@
         },
         "id": "toolu_01DXHkqTkckUvHW6twHu3Amc",
         "input": {
-          "configs": [
-            "worker"
-          ],
+          "configs": ["worker"],
           "name": "qa_worker_v3"
         },
         "name": "spawn",
@@ -3222,9 +3174,7 @@
         },
         "id": "toolu_01KMeJL88hxgsRiV7xwigDWV",
         "input": {
-          "configs": [
-            "boss"
-          ],
+          "configs": ["boss"],
           "name": "boss_v3"
         },
         "name": "spawn",
@@ -3536,9 +3486,7 @@
         },
         "id": "toolu_01BNxbK662N2iYP7jctrd9X1",
         "input": {
-          "configs": [
-            "boss"
-          ],
+          "configs": ["boss"],
           "name": "senior_boss_v4"
         },
         "name": "spawn",
@@ -3550,9 +3498,7 @@
         },
         "id": "toolu_019Pkq4Wr2h986ACPP9ShLcP",
         "input": {
-          "configs": [
-            "boss"
-          ],
+          "configs": ["boss"],
           "name": "mid_boss_v4"
         },
         "name": "spawn",
@@ -3564,9 +3510,7 @@
         },
         "id": "toolu_01UmA55s13aqiW7vW3U8Xz4b",
         "input": {
-          "configs": [
-            "worker"
-          ],
+          "configs": ["worker"],
           "name": "specialist_worker_v4"
         },
         "name": "spawn",
@@ -3960,9 +3904,7 @@
         },
         "id": "toolu_01MAt929GFBH2TVCpRX7ZAiL",
         "input": {
-          "configs": [
-            "boss"
-          ],
+          "configs": ["boss"],
           "name": "boss_v5"
         },
         "name": "spawn",
@@ -3974,9 +3916,7 @@
         },
         "id": "toolu_01LU4NqE9QYo41L62FgNDbcX",
         "input": {
-          "configs": [
-            "worker"
-          ],
+          "configs": ["worker"],
           "name": "worker_v5"
         },
         "name": "spawn",
@@ -4152,9 +4092,7 @@
         },
         "id": "toolu_01YEzXbU348zbRNij9V7QkXf",
         "input": {
-          "configs": [
-            "boss"
-          ],
+          "configs": ["boss"],
           "name": "boss_v6"
         },
         "name": "spawn",
@@ -4166,9 +4104,7 @@
         },
         "id": "toolu_016skirzsUtoNFAMQ4Qgw8eK",
         "input": {
-          "configs": [
-            "worker"
-          ],
+          "configs": ["worker"],
           "name": "frontend_worker_v6"
         },
         "name": "spawn",
@@ -4180,9 +4116,7 @@
         },
         "id": "toolu_01DLY6QJikwVfXpZk8zuXsgx",
         "input": {
-          "configs": [
-            "worker"
-          ],
+          "configs": ["worker"],
           "name": "backend_worker_v6"
         },
         "name": "spawn",
@@ -4194,9 +4128,7 @@
         },
         "id": "toolu_017PPCA4D6uhXC8tHgnBnWtz",
         "input": {
-          "configs": [
-            "worker"
-          ],
+          "configs": ["worker"],
           "name": "qa_worker_v6"
         },
         "name": "spawn",

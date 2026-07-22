@@ -1,135 +1,214 @@
-module Search
-  PATTERNS = [
-    /^[\p{So}🀀-🿿][\s]*[a-zA-Z🀀-🿿]/,
-    /^✏️\s+\w+.*=/,
-    /^\w+>\s+[\p{So}🀀-🿿]/,
-    /^\w+>$/
-  ].freeze
+require_relative "parse"
 
-  def verify(rows)
-    init unless @scenario_cursor
-    deadline = deadline()
-    cycle(rows, deadline)
-  end
+module Search
+  include Parse
 
   def init
-    @scenario_cursor = 0
-    @folded_lines = nil
+    @scenario_cursors = {}
   end
 
-  def cycle(rows, deadline)
+  def verify(rows)
+    @scenario_cursors ||= {}
+    shield(rows)
+  end
+
+  def shield(rows)
+    hunt(rows, bound())
+  rescue Timeout::Error, Timeout::ExitException => e
+    dump(e)
+  end
+
+  def hunt(rows, deadline)
     last_sent = Time.now - 2
-    while !search(rows, normalize(transcript), deadline, transcript)
+    while !search(rows, normalize(transcript), deadline)
       last_sent = tick(last_sent)
       sleep 0.05
     end
   end
 
   def tick(last_sent)
-    return last_sent if ENV["TAPE"] == "rec" || Time.now - last_sent < 1.0
+    return last_sent if wait?(last_sent)
 
-    drain; nudge; Time.now
+    drain
+    nudge
+    Time.now
   end
 
-  def search(rows, folded_lines, deadline, tx)
-    found_indices = hit(rows, folded_lines, deadline, tx)
+  def wait?(last_sent)
+    ENV['TAPE'] == 'rec' || Time.now - last_sent < 1.0
+  end
+
+  def search(rows, folded_lines, deadline)
+    found_indices = hit(rows, folded_lines, deadline)
     return nil unless found_indices
 
-    @scenario_cursor = found_indices.max if found_indices.any?
+    bank(found_indices)
+  end
+
+  def bank(found_indices)
+    @scenario_cursors[@current] = found_indices.max if found_indices.any?
     found_indices
   end
 
-  def hit(rows, folded_lines, deadline, tx)
-    rows.each_with_object([]) do |row, acc|
-      idx = find(row, folded_lines, deadline, tx)
-      return nil unless idx
-
-      acc << idx
-    end
+  def hit(rows, folded_lines, deadline)
+    indices = gather(rows, folded_lines, deadline)
+    complete?(indices) ? indices : nil
   end
 
-  def find(row, folded_lines, deadline, tx)
-    prefix = row[0].strip.force_encoding("UTF-8") rescue row[0].strip
-    downtext = row[1].strip.downcase
-    text = downtext.force_encoding("UTF-8") rescue downtext
-    scan(folded_lines, prefix, text) || fail(prefix, text, deadline, tx)
+  def gather(rows, folded_lines, deadline)
+    rows.map { |row| find(row, folded_lines, deadline) }
+  end
+
+  def complete?(indices)
+    indices.count == indices.compact.count
+  end
+
+  def find(row, folded_lines, deadline)
+    prefix = prefix(row[0])
+    text = text(row[1])
+    scan(folded_lines, prefix, text) || fail(prefix, text, deadline, folded_lines)
+  end
+
+  def prefix(raw)
+    prefix = encode(raw.strip)
+    strip_variation_selectors(prefix)
+  end
+
+  def text(raw)
+    text = encode(raw.strip.downcase)
+    strip_variation_selectors(text)
   end
 
   def scan(folded_lines, prefix, text)
-    (@scenario_cursor...folded_lines.size).each do |idx|
-      return idx + 1 if match?(folded_lines[idx], prefix, text)
-    end
-    nil
+    cursor = @scenario_cursors[@current] ||= 0
+    probe(folded_lines, prefix, text, cursor)
   end
 
-  def fail(prefix, text, deadline, tx)
+  def probe(folded_lines, prefix, text, cursor)
+    idx = locate(folded_lines, prefix, text, cursor)
+    idx ? idx + 1 : nil
+  end
+
+  def locate(folded_lines, prefix, text, cursor)
+    (cursor...folded_lines.size).find { |idx| match?(folded_lines[idx], prefix, text) }
+  end
+
+  def fail(prefix, text, deadline, folded_lines)
     return nil if Time.now < deadline
 
     msg = "No match for prefix='#{prefix}' text='#{text}'"
-    raise msg << "\n\nTranscript:\n#{tx}"
+    screen_dump = folded_lines.last(40).join("\n")
+    raise msg << "\n\nScreen:\n#{screen_dump}"
   end
 
   def split(line)
-    seps = [[line.index(" | "), 3], [line.index(": "), 2], [line.index(" = "), 3]]
-    valid_seps = seps.select { |idx, _| idx }.min_by { |idx, _| idx }
-    return [line, line] unless valid_seps
+    sep = sep(line)
+    sep ? slice(line, sep) : [line, line]
+  end
 
-    first_idx, skip_len = valid_seps
-    [line[0...first_idx], line[first_idx + skip_len..-1]]
+  def sep(line)
+    seps = seps(line)
+    pick(seps)
+  end
+
+  def seps(line)
+    [[line.index(' | '), 3], [line.index(': '), 2], [line.index(' = '), 3]]
+  end
+
+  def pick(seps)
+    prune(seps).min_by { |idx, _| idx }
+  end
+
+  def prune(seps)
+    seps.select { |idx, _| idx }
+  end
+
+  def slice(line, sep)
+    first_idx, skip_len = sep
+    [line[0...first_idx], line[first_idx + skip_len..]]
   end
 
   def match?(folded_line, want_prefix, want_text)
-    line = folded_line.sub(/\A(?:\s*\w+>\s*)+/, "")
-    prefix, text = split(line)
-    return false unless prefix && text
+    prefix, text = parts(folded_line)
+    return false unless both?(prefix, text)
 
-    [
-      prefix.include?(want_prefix),
-      want_text.empty? ||
-        text.downcase.include?(want_text) ||
-        text.downcase.gsub(/\s+/, "").include?(want_text.gsub(/\s+/, ""))
-    ].all?
+    ok?(prefix, want_prefix, text, want_text)
   end
 
-  def deadline
-    timeout = ENV["GITHUB_ACTIONS"] == "true" ? 60 : 3
-    timeout = 300 if ENV["TAPE"] == "rec"
+  def parts(folded_line)
+    line = folded_line.sub(/\A(?:\s*\w+>\s*)+/, '')
+    split(line)
+  end
+
+  def both?(prefix, text)
+    prefix && text
+  end
+
+  def ok?(prefix, want_prefix, text, want_text)
+    fit?(prefix, want_prefix) ? texts?(text, want_text) : false
+  end
+
+  def fit?(prefix, want)
+    prefix.include?(want)
+  end
+
+  def texts?(text, want)
+    return true if want.empty?
+
+    normalized = text.downcase
+    compact = normalized.gsub(/\s+/, '')
+    want_compact = want.gsub(/\s+/, '')
+    exact?(normalized, want, compact, want_compact)
+  end
+
+  def exact?(normalized, want, compact, want_compact)
+    return true if normalized.include?(want)
+
+    compact.include?(want_compact)
+  end
+
+  def bound
     Time.now + timeout
   end
 
-  def normalize(transcript)
-    tx = (transcript.dup.force_encoding("UTF-8") rescue transcript)
-    lines = tx.split("\n").map { |l|
-      l.strip.force_encoding("UTF-8") rescue l.strip
-    }.reject(&:empty?)
-    fold(lines)
+  private
+
+  def encode(value)
+    value.force_encoding('UTF-8') rescue value
   end
 
-  def fold(lines)
-    lines.each_with_object([]) { |line, result| fold_line(line, result) }
+  def strip_variation_selectors(text)
+    text.gsub("\u{FE0F}", '')
   end
 
-  def fold_line(line, result)
-    is_log = check_log_pattern(line)
-    add_or_append(line, result, is_log)
+  def timeout
+    recording? ? 300 : leash
   end
 
-  def check_log_pattern(line)
-    PATTERNS.any? { |p| (line.match?(p) rescue false) }
+  def recording?
+    ENV['TAPE'] == 'rec'
   end
 
-  def add_or_append(line, result, is_log)
-    return result << line if is_log
-    return if result.empty?
-
-    result[-1] << " " << line
+  def leash
+    ENV['GITHUB_ACTIONS'] == 'true' ? 60 : 3
   end
 
   def nudge
     return unless @writer
 
+    flush
+  end
+
+  def flush
     @writer.write("\n")
     @writer.flush
   rescue IOError
+  end
+
+  def dump(e)
+    folded = normalize(transcript)
+    screen = folded.last(40).join("\n")
+    error_msg = "#{e.message}\n\nScreen:\n#{screen}"
+    raise RuntimeError, error_msg
   end
 end

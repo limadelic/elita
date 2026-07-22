@@ -26,8 +26,21 @@ defmodule Log do
     dir() |> mkdir_p!() |> append("#{emoji} #{msg}")
   end
 
+  defp emit(emoji, msg, color, agent) do
+    puts("\e[38;5;#{@colors[color]}m#{emoji} #{msg}\e[0m")
+    dir() |> mkdir_p!()
+    write(path(agent), "#{emoji} #{msg}\n", [:append])
+  end
+
   defp message(head, neck, body) do
     "#{head}#{neck <> eol(body)}#{body}"
+  end
+
+  def agent(emoji, head, neck, body, config) when is_map(config) do
+    msg = message(head, neck, yaml(body))
+    emit(emoji, msg, Map.get(config, :color, :green), Map.get(config, :name))
+  rescue
+    _ in [File.Error, ErlangError] -> :ok
   end
 
   def write(message) do

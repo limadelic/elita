@@ -7,9 +7,7 @@
         },
         "id": "toolu_01TQkeyrqoqmTTLHhP2xsrv1",
         "input": {
-          "configs": [
-            "triage"
-          ],
+          "configs": ["triage"],
           "name": "triage"
         },
         "name": "spawn",
@@ -143,9 +141,7 @@
         },
         "id": "toolu_01R5EqGN7xjW6tXJiesk3rD1",
         "input": {
-          "configs": [
-            "classifier"
-          ],
+          "configs": ["classifier"],
           "name": "classifier_1"
         },
         "name": "spawn",
@@ -157,9 +153,7 @@
         },
         "id": "toolu_01V2Qn7oqBb93K2LDYgMikQb",
         "input": {
-          "configs": [
-            "classifier"
-          ],
+          "configs": ["classifier"],
           "name": "classifier_2"
         },
         "name": "spawn",
@@ -171,9 +165,7 @@
         },
         "id": "toolu_01KCTJQTzSPPSbzLyPYfrNXu",
         "input": {
-          "configs": [
-            "classifier"
-          ],
+          "configs": ["classifier"],
           "name": "classifier_3"
         },
         "name": "spawn",

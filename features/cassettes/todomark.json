@@ -1,0 +1,211 @@
+[
+  {
+    "a": [
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01TnG95N1QMKMgCZU3WnGRs3",
+        "input": {
+          "key": "todo"
+        },
+        "name": "get",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "todo",
+      "messages": [
+        {
+          "role": "user",
+          "content": "Add call dentist to my list"
+        }
+      ],
+      "n": 1
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Now I'll add \"call dentist\" to your task list:",
+        "type": "text"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_018iNzyXY8GjV9QZLGyW78ST",
+        "input": {
+          "key": "todo",
+          "value": "call dentist"
+        },
+        "name": "set",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "todo",
+      "messages": [
+        {
+          "role": "user",
+          "content": [
+            {
+              "content": "(empty)"
+            }
+          ]
+        }
+      ],
+      "n": 3
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Done! I've added \"call dentist\" to your task list.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "todo",
+      "messages": [
+        {
+          "role": "user",
+          "content": [
+            {
+              "content": "stored"
+            }
+          ]
+        }
+      ],
+      "n": 5
+    }
+  },
+  {
+    "a": [
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_015WFJFBBcghxPym2BCKmf2c",
+        "input": {
+          "key": "todo"
+        },
+        "name": "get",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "todo",
+      "messages": [
+        {
+          "role": "user",
+          "content": "Mark call dentist as done"
+        }
+      ],
+      "n": 7
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Now I'll remove it from your list:",
+        "type": "text"
+      },
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01TTqn13TJn6vy9H4XMrdZaj",
+        "input": {
+          "key": "todo",
+          "value": "(empty)"
+        },
+        "name": "set",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "todo",
+      "messages": [
+        {
+          "role": "user",
+          "content": [
+            {
+              "content": "call dentist"
+            }
+          ]
+        }
+      ],
+      "n": 9
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "Done! I've marked \"call dentist\" as complete and removed it from your list.",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "todo",
+      "messages": [
+        {
+          "role": "user",
+          "content": [
+            {
+              "content": "stored"
+            }
+          ]
+        }
+      ],
+      "n": 11
+    }
+  },
+  {
+    "a": [
+      {
+        "caller": {
+          "type": "direct"
+        },
+        "id": "toolu_01Crs5NDUMMxZZ5SsMN8mpRi",
+        "input": {
+          "key": "todo"
+        },
+        "name": "get",
+        "type": "tool_use"
+      }
+    ],
+    "q": {
+      "agent": "todo",
+      "messages": [
+        {
+          "role": "user",
+          "content": "What do I need to do?"
+        }
+      ],
+      "n": 13
+    }
+  },
+  {
+    "a": [
+      {
+        "text": "You have no tasks on your list! You're all caught up. 🎉",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "todo",
+      "messages": [
+        {
+          "role": "user",
+          "content": [
+            {
+              "content": "(empty)"
+            }
+          ]
+        }
+      ],
+      "n": 15
+    }
+  }
+]
