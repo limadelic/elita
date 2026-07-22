@@ -2,12 +2,12 @@
   {
     "a": [
       {
-        "text": "Let me check the current time first.\n\nThe current time is **2025-07-07 06:00:00** (6:00 AM on Monday, July 7, 2025).\n\nSince it's 6:00 AM, which is before my work hours begin at 9 AM:\n\n**No, I don't start until 9.**\n\nPlease come back after 9 AM and I'll be happy to help with your task!",
+        "text": "I'm checking the current time: **2025-07-07 06:00:00** (6:00 AM on Monday, July 7th, 2025)\n\nSince it's 6:00 AM, which is **before 9 AM**, I cannot help with this task.\n\n**No, I don't start until 9 AM.**\n\nPlease come back during my work hours (9 AM to 5 PM, Monday to Friday).",
         "type": "text"
       }
     ],
     "q": {
-      "agent": "clockwatcher",
+      "agent": "early",
       "messages": [
         {
           "role": "user",

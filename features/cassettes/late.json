@@ -2,12 +2,12 @@
   {
     "a": [
       {
-        "text": "I'm checking the current time: **2025-07-07 18:00:00** (6:00 PM)\n\nNo, I'm done for the day. My work hours are 9 AM to 5 PM, Monday to Friday. It's currently 6 PM, which is after my shift ends at 5 PM.\n\nPlease come back during work hours tomorrow or later in the week! 😊",
+        "text": "# Clock Check ⏰\n\nCurrent time: **2025-07-07 18:00:00** (6:00 PM)\n\n---\n\n# Clockwatcher's Response\n\nNo, I'm done for the day. \n\nMy work hours are 9 AM to 5 PM, and it's currently 6:00 PM. Please come back during business hours (Monday-Friday, 9 AM - 5 PM, excluding lunch from 12-1 PM).",
         "type": "text"
       }
     ],
     "q": {
-      "agent": "clockwatcher",
+      "agent": "late",
       "messages": [
         {
           "role": "user",
