@@ -1,14 +1,14 @@
 @tape:doctor
 Feature: Doctor
 
-  Scenario: Doctor diagnoses a patient
+  Scenario: Doctor questions the patient and diagnoses appendicitis
     * > el patient
 
     * > el doctor
 
     * patient> you are a patient with appendicitis
-      | sharp pain |
+      | appendicitis |
 
     * doctor> diagnose patient
-      | ACUTE APPENDICITIS    |
-      | You will need surgery |
+      | Acute Appendicitis |
+      | appendectomy       |
