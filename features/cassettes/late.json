@@ -1,0 +1,20 @@
+[
+  {
+    "a": [
+      {
+        "text": "I'm checking the current time: **2025-07-07 18:00:00** (6:00 PM)\n\nNo, I'm done for the day. My work hours are 9 AM to 5 PM, Monday to Friday. It's currently 6 PM, which is after my shift ends at 5 PM.\n\nPlease come back during work hours tomorrow or later in the week! 😊",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "clockwatcher",
+      "messages": [
+        {
+          "role": "user",
+          "content": "can you handle this task?"
+        }
+      ],
+      "n": 1
+    }
+  }
+]

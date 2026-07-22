@@ -1,0 +1,20 @@
+[
+  {
+    "a": [
+      {
+        "text": "Let me check the current time: **10:00 AM on Saturday, July 12, 2025**\n\nI'm sorry, but I can't help with that task right now. It's Saturday, which is outside my work schedule. \n\nI'm available **Monday through Friday, 9 AM to 5 PM** (excluding my lunch break from 12 PM to 1 PM). Please come back on Monday!",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "clockwatcher",
+      "messages": [
+        {
+          "role": "user",
+          "content": "can you handle this task?"
+        }
+      ],
+      "n": 1
+    }
+  }
+]

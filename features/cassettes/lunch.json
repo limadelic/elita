@@ -1,0 +1,20 @@
+[
+  {
+    "a": [
+      {
+        "text": "No, it's lunch time.\n\nThe current time is 12:30 PM, and my lunch break runs from 12 PM to 1 PM. I'll be back and ready to help after 1 PM!",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "clockwatcher",
+      "messages": [
+        {
+          "role": "user",
+          "content": "can you handle this task?"
+        }
+      ],
+      "n": 1
+    }
+  }
+]
