@@ -2,7 +2,7 @@ defmodule El.Sessions do
   import File, only: [ls: 1, read!: 1, stat!: 1]
   import Path, only: [expand: 1, join: 2]
   import String, only: [starts_with?: 2, ends_with?: 2, split: 2, replace: 3]
-  import Enum, only: [filter: 2, sort_by: 2, at: 2, map: 2, sort: 1]
+  import Enum, only: [filter: 2, sort_by: 2, at: 2, map: 2, sort: 1, reduce: 3]
   import List, only: [last: 1]
 
   def log(""), do: ""
@@ -32,16 +32,9 @@ defmodule El.Sessions do
   end
 
   defp gather(_, _, nil), do: ""
+  defp gather(dir, files, pid), do: files |> filter(&match(pid, &1)) |> sort() |> map(&load(&1, dir)) |> concat()
 
-  defp gather(dir, files, pid) do
-    files
-    |> filter(&match(pid, &1))
-    |> sort()
-    |> map(&load(&1, dir))
-    |> merge()
-  end
-
-  defp merge(logs), do: Enum.join(logs, "")
+  defp concat(logs), do: reduce(logs, "", fn log, acc -> acc <> log end)
 
   defp match(pid, file), do: ends_with?(file, "_#{pid}.log")
 
