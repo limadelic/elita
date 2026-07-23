@@ -13,6 +13,7 @@ defmodule El.CLI do
   import Matrix.Log, only: [setup: 2]
   import El.Ask, only: [invoke: 2]
   import El.Cli.Parse, only: [parse: 1]
+  import El.Bin, only: [locate: 0]
 
   @usage """
   Usage:
@@ -31,10 +32,17 @@ defmodule El.CLI do
     argv |> route() |> exec()
   end
 
+  defp route(["claude" | rest] = argv) do
+    setup("default", [bin() | rest])
+    argv |> parse()
+  end
+
   defp route(argv) do
     setup("default", argv)
     argv |> parse()
   end
+
+  defp bin, do: locate() || "claude"
 
   defp exec(:usage) do
     @usage |> puts()

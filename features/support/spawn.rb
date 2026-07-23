@@ -57,7 +57,7 @@ module Spawn
     config["EL_FROM"] = name
   end
 
-  def claude(config) # rubocop:disable Metrics/CyclomaticComplexity
+  def claude(config)
     return unless @scratch
 
     stub = File.join(@scratch, 'bin', 'claude')
