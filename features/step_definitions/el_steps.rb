@@ -124,7 +124,21 @@ def trace(lines)
 end
 
 def source
+  return recording if replay?
+
+  session
+end
+
+def recording
+  @transcript_stripped || ""
+end
+
+def session
   @current ? pull(@current, @pid) : ""
+end
+
+def replay?
+  ENV["TAPE"] != "rec"
 end
 
 def persist(times, &block)
