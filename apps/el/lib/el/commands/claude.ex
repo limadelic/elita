@@ -3,7 +3,8 @@ defmodule El.Commands.Claude do
   import :os, only: [cmd: 1]
   import Matrix.Pty, only: [launch: 2]
   import String, only: [to_atom: 1, replace: 3]
-  import System, only: [get_env: 2, find_executable: 1]
+  import System, only: [get_env: 2]
+  import El.Bin, only: [locate: 0]
   import El.Commands.Size, only: [size: 0]
   import El.Commands.Reset, only: [cleanup: 0]
   import File, only: [cwd!: 0]
@@ -93,7 +94,8 @@ defmodule El.Commands.Claude do
   defp tape, do: mode(get_env("TAPE", nil))
   defp mode("rec"), do: start(fn -> %{} end, name: Tape.Writer)
   defp mode(_), do: :ok
-  defp finalize(cmd), do: find_executable("claude") |> done(cmd)
-  defp done(nil, cmd), do: cmd
-  defp done(path, cmd), do: replace(cmd, ~r/^claude\b/, path)
+
+  defp finalize(cmd), do: swap(cmd, locate())
+  defp swap(cmd, nil), do: cmd
+  defp swap(cmd, path), do: replace(cmd, ~r/^claude\b/, path)
 end

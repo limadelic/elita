@@ -46,6 +46,7 @@ module Spawn
     config["PATH"] = spine
     puppet(config, puppet_name)
     prime(config)
+    claude(config)
     config
   end
 
@@ -54,6 +55,13 @@ module Spawn
 
     config["PUPPET_NAME"] = name
     config["EL_FROM"] = name
+  end
+
+  def claude(config) # rubocop:disable Metrics/CyclomaticComplexity
+    return unless @scratch
+
+    stub = File.join(@scratch, 'bin', 'claude')
+    config["CLAUDE"] = stub if File.exist?(stub)
   end
 
   def prime(config)
