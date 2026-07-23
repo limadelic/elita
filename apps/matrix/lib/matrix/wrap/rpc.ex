@@ -1,7 +1,6 @@
 defmodule Matrix.Wrap.Rpc do
   import Matrix.Log, only: [write: 1]
   import Process, only: [monitor: 1]
-  import String, only: [to_atom: 1]
 
   def call(pid, msg, opts \\ [])
 
@@ -15,29 +14,25 @@ defmodule Matrix.Wrap.Rpc do
     guard(pid, msg, opts)
   end
 
-  defp guard(pid, msg, _opts) do
+  defp guard(pid, msg, opts) do
     spawn(fn -> track(self()) end)
-    attempt(pid, msg)
+    attempt(pid, msg, opts)
   rescue
     _ -> :error
   end
 
-  defp attempt(pid, msg) do
+  defp attempt(pid, msg, opts) do
     remote = node(pid)
-    rpc(remote, pid, msg)
+    rpc(remote, pid, msg, opts)
   rescue
     _ -> :error
   end
 
-  defp rpc(node, pid, msg) do
-    :erpc.call(node, puppet(), :ask, [pid, msg], 90_000)
-    |> tap(fn _ -> write("ask ok\n") end)
-  end
+  defp rpc(node, pid, msg, opts) do
+    far = opts[:far]
 
-  defp puppet do
-    a = "El"
-    b = "Puppet"
-    to_atom("Elixir." <> a <> "." <> b)
+    far.(node, pid, msg)
+    |> tap(fn _ -> write("ask ok\n") end)
   end
 
   defp track(pid) do

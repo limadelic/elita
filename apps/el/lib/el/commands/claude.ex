@@ -78,8 +78,12 @@ defmodule El.Commands.Claude do
 
   defp invert do
     w = [wait: &El.Distribution.wait/1, target: &target/1]
-    r = [ask: &ask/2, put: &put/2, collect: &collect/1]
+    r = [ask: &ask/2, far: &far/3, put: &put/2, collect: &collect/1]
     w ++ r
+  end
+
+  defp far(node, pid, msg) do
+    :erpc.call(node, El.Puppet, :ask, [pid, msg], 90_000)
   end
 
   defp install(name) do
