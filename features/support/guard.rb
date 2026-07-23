@@ -32,7 +32,7 @@ module Guard
   end
 
   def stub_script
-    %{#!/usr/bin/env ruby
+    %q{#!/usr/bin/env ruby
 require 'json'
 
 def find_answer(tape, agent, query)
@@ -57,11 +57,12 @@ agent = ENV['PUPPET_NAME']
 
 exit 1 if cassette.nil? || cassette_dir.nil? || agent.nil?
 
-cassette_file = File.join(cassette_dir, "#{cassette}.json")
+cassette_file = File.join(cassette_dir, cassette + '.json')
 exit 1 unless File.exist?(cassette_file)
 
 data = JSON.parse(File.read(cassette_file))
-screen = data.dig('screens', agent)
+screens = data['screens']
+screen = screens[agent] if screens.is_a?(Hash)
 puts screen if screen
 
 tape = data.fetch('tape', [])
@@ -73,7 +74,7 @@ while line = $stdin.gets
   puts line
   answer = find_answer(tape, agent, line)
   puts answer if answer
-  puts "#{agent}>"
+  puts agent + '>'
 end
     }.freeze
   end

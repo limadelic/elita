@@ -4,10 +4,9 @@ defmodule Matrix.Wrap.Reply do
   import IO, only: [write: 1]
 
   def handle(:forward, _), do: :forward
-  def handle(:forward, _, _opts), do: :forward
-
   def handle(output, sender), do: handle(output, sender, [])
 
+  def handle(:forward, _, _opts), do: :forward
   def handle(output, sender, opts) do
     extracted = extract(output)
     agent = fix(sender, sender)
