@@ -1,4 +1,4 @@
-defmodule El.Pty.State do
+defmodule Matrix.Pty.State do
   @moduledoc false
   import Map, only: [merge: 2]
 

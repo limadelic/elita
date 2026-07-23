@@ -1,13 +1,10 @@
 defmodule Matrix.Wrap.Remote do
   @moduledoc false
-  import El.Distribution, only: [wait: 1]
-  import El.Puppet, only: [put: 2]
-  import El.Log, only: [write: 1]
+  import Matrix.Log, only: [write: 1]
   import Matrix.Pty, only: [watch: 2, unwatch: 2]
-  import El.Puppet.Collect, only: [collect: 1]
   import System, only: [monotonic_time: 1]
-  import El.Wrap.Reply, only: [handle: 2, fix: 2, prepare: 2, inject: 4]
-  import El.Wrap.Guard, only: [await: 1]
+  import Matrix.Wrap.Reply, only: [handle: 2, fix: 2, prepare: 2, inject: 4]
+  import Matrix.Wrap.Guard, only: [await: 1]
   import Map, only: [merge: 2]
   import Task, only: [async: 1]
 
@@ -18,7 +15,7 @@ defmodule Matrix.Wrap.Remote do
   end
 
   defp invoke(name, message, sender) do
-    target = prepare(name, sender) |> wait()
+    target = prepare(name, sender) |> El.Distribution.wait()
     query(target, name, message, sender)
   end
 
@@ -36,7 +33,7 @@ defmodule Matrix.Wrap.Remote do
 
   defp gather(pid, msg, sender, _target) do
     text = "[ask #{sender |> fix(sender) |> to_string()}]\n#{msg}"
-    put(pid, text)
+    El.Puppet.put(pid, text)
     listen(sender, sender)
   end
 
@@ -46,7 +43,7 @@ defmodule Matrix.Wrap.Remote do
   end
 
   defp spawn(pty, sender) do
-    async(fn -> collect(build(pty, sender, monotonic_time(:millisecond))) end)
+    async(fn -> El.Puppet.Collect.collect(build(pty, sender, monotonic_time(:millisecond))) end)
   end
 
   defp reap(task, pty) do
@@ -72,7 +69,7 @@ defmodule Matrix.Wrap.Remote do
   end
 
   defp dispatch(name, message, sender) do
-    target = prepare(name, sender) |> wait()
+    target = prepare(name, sender) |> El.Distribution.wait()
     inject(target, name, message, sender)
   end
 end

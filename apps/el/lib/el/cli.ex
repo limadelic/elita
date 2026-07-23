@@ -10,7 +10,7 @@ defmodule El.CLI do
   import El.Distribution, only: [daemon: 0]
   import El.Command.Ls, only: [list: 1]
   import El.REPL, only: [run: 1, run: 2, attach: 2]
-  import El.Log, only: [setup: 2]
+  import Matrix.Log, only: [setup: 2]
   import El.Ask, only: [invoke: 2]
   import El.Cli.Parse, only: [parse: 1]
 

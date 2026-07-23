@@ -1,7 +1,7 @@
 defmodule Matrix.Wrap.Route do
   @moduledoc false
   import String, only: [split: 3, trim: 1]
-  import El.Wrap.Remote, only: [deliver: 3, tell: 3]
+  import Matrix.Wrap.Remote, only: [deliver: 3, tell: 3]
 
   def check(line, parent, agent),
     do: line |> to_string() |> trim() |> dispatch(parent, agent)

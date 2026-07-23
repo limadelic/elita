@@ -5,9 +5,9 @@ defmodule Matrix.Pty do
   import Keyword, only: [get: 2, get: 3]
   import Process, except: [alias: 1, info: 2, get: 2, get: 3]
 
-  import El.Pty.Init, only: [call: 1]
-  import El.Pty.Config, only: [build: 2, finalize: 2]
-  import El.Pty.Dispatch, only: [info: 2]
+  import Matrix.Pty.Init, only: [call: 1]
+  import Matrix.Pty.Config, only: [build: 2, finalize: 2]
+  import Matrix.Pty.Dispatch, only: [info: 2]
   import GenServer, only: [start_link: 3, call: 2, cast: 2]
 
   def boot(name, cmd, opts \\ []) do

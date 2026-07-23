@@ -1,10 +1,10 @@
-defmodule El.Pty.Init do
+defmodule Matrix.Pty.Init do
   @moduledoc false
-  import El.Reader
-  import El.Trace
-  import El.Pty.State, only: [initial: 4, config: 2]
-  import El.Pty.Boot, only: [launch: 3]
-  import El.Pty.Watch, only: [start: 1]
+  import Matrix.Reader
+  import Matrix.Trace
+  import Matrix.Pty.State, only: [initial: 4, config: 2]
+  import Matrix.Pty.Boot, only: [launch: 3]
+  import Matrix.Pty.Watch, only: [start: 1]
   import Process, only: [flag: 2]
 
   def call(cfg) do

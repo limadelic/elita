@@ -1,4 +1,4 @@
-defmodule El.Pty.Watch do
+defmodule Matrix.Pty.Watch do
   @moduledoc false
   import Process, except: [alias: 1, info: 1]
   import Port, only: [info: 1]

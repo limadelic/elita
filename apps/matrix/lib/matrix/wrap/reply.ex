@@ -1,8 +1,6 @@
 defmodule Matrix.Wrap.Reply do
   @moduledoc false
-  import El.Distribution, only: [target: 1]
   import String, only: [to_atom: 1, trim: 1, trim_trailing: 2, split: 3]
-  import El.Puppet, only: [put: 2]
   import IO, only: [write: 1]
 
   def handle(:forward, _), do: :forward
@@ -10,7 +8,7 @@ defmodule Matrix.Wrap.Reply do
   def handle(output, sender) do
     extracted = extract(output)
     agent = fix(sender, sender)
-    route(target(agent), extracted, agent)
+    route(El.Distribution.target(agent), extracted, agent)
     {:handled}
   end
 
@@ -39,7 +37,7 @@ defmodule Matrix.Wrap.Reply do
 
   def inject(pid, _target, message, sender) do
     text = "[from #{sender |> fix(sender) |> to_string()}]\n#{message}"
-    put(pid, text)
+    El.Puppet.put(pid, text)
   end
 
   defp route(nil, _, _), do: :ok
@@ -54,7 +52,7 @@ defmodule Matrix.Wrap.Reply do
   defp route(_, _, _), do: :ok
 
   def known?(name) do
-    name |> trim() |> to_atom() |> target() |> is_pid()
+    name |> trim() |> to_atom() |> El.Distribution.target() |> is_pid()
   rescue
     _ -> false
   end

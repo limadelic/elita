@@ -1,4 +1,4 @@
-defmodule El.Pty.Tail do
+defmodule Matrix.Pty.Tail do
   @moduledoc false
   import String, only: [slice: 2]
 

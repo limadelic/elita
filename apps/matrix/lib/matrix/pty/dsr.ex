@@ -1,4 +1,4 @@
-defmodule El.Pty.Dsr do
+defmodule Matrix.Pty.Dsr do
   @moduledoc false
 
   import String

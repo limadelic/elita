@@ -1,6 +1,6 @@
-defmodule El.Reader do
+defmodule Matrix.Reader do
   @moduledoc false
-  import El.Trace
+  import Matrix.Trace
 
   def start(file, parent) do
     open?(file, parent)

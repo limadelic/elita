@@ -1,6 +1,6 @@
-defmodule El.Pty.Boot do
+defmodule Matrix.Pty.Boot do
   @moduledoc false
-  import El.Pty.Env
+  import Matrix.Pty.Env
 
   def launch(port, cmd, size) do
     argv = args(size, cmd)

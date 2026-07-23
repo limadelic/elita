@@ -1,7 +1,7 @@
-defmodule El.Pty.Config do
+defmodule Matrix.Pty.Config do
   @moduledoc false
   import Keyword, only: [get: 3, drop: 2]
-  import El.Pty.Size, only: [default: 0]
+  import Matrix.Pty.Size, only: [default: 0]
 
   def build(cmd, opts) do
     [file: file(opts), port: port(opts), cmd: cmd] ++

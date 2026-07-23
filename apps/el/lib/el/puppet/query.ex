@@ -1,6 +1,6 @@
 defmodule El.Puppet.Query do
   import Matrix.Pty, only: [watch: 2, inject: 2]
-  import El.Log, only: [write: 1]
+  import Matrix.Log, only: [write: 1]
   import Exception, only: [message: 1]
 
   def call(pty, message), do: safe(pty, message)

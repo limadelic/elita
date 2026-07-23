@@ -1,8 +1,8 @@
-defmodule El.Trace.Log do
+defmodule Matrix.Trace.Log do
   @moduledoc false
   import System
   import File
-  import El.Trace.Format
+  import Matrix.Trace.Format
 
   def chunk(data), do: jot(get_env("EL_TRACE"), trace(data))
 

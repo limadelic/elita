@@ -1,6 +1,5 @@
 defmodule Matrix.Wrap.Resize do
   @moduledoc false
-  import El.Commands.Size, only: [size: 0]
   import Process, only: [sleep: 1]
 
   def watch(pid) do
@@ -9,7 +8,7 @@ defmodule Matrix.Wrap.Resize do
 
   defp poll(pid) do
     sleep(500)
-    size = size()
+    size = El.Commands.Size.size()
     notify(pid, size)
     poll(pid)
   end

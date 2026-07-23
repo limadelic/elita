@@ -4,7 +4,7 @@ defmodule El.Puppet do
   import Registry, only: [start_link: 1]
   import Matrix.Pty, only: [inject: 2]
   import Keyword, only: [fetch!: 2]
-  import El.Log, only: [write: 1]
+  import Matrix.Log, only: [write: 1]
   import El.Puppet.Invoke, only: [invoke: 2]
   import El.Puppet.Answer, only: [reply: 3]
   import El.Puppet.Parse, only: [envelope: 1]

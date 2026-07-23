@@ -1,11 +1,11 @@
-defmodule El.Pty.Buffer do
+defmodule Matrix.Pty.Buffer do
   @moduledoc false
   import Enum, only: [each: 2]
   import String, only: [contains?: 2, slice: 2]
-  import El.Trace, only: [record: 1]
-  import El.Log, only: [write: 1]
-  import El.Pty.Gate, only: [emit: 3, log: 1, peek: 1]
-  import El.Pty.Tail, only: [grow: 2]
+  import Matrix.Trace, only: [record: 1]
+  import Matrix.Log, only: [write: 1]
+  import Matrix.Pty.Gate, only: [emit: 3, log: 1, peek: 1]
+  import Matrix.Pty.Tail, only: [grow: 2]
 
   def prime(%{idle: true, pending_msg: nil, buffer: []} = s, d) do
     write("PTY DATA #{byte_size(d)}b: #{peek(d)}\n")

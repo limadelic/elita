@@ -1,6 +1,6 @@
-defmodule El.Trace do
+defmodule Matrix.Trace do
   @moduledoc false
-  import El.Trace.Log
+  import Matrix.Trace.Log
 
   def record(data), do: chunk(data)
   def mark(size, source), do: header(size, source)

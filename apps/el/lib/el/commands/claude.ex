@@ -10,7 +10,7 @@ defmodule El.Commands.Claude do
   import Path, only: [basename: 1]
   import Matrix.Wrap.Resize, only: [watch: 1]
   import Matrix.Wrap.Input, only: [open: 2, encode: 2]
-  import El.Log, only: [write: 1]
+  import Matrix.Log, only: [write: 1]
   import El.Distribution, only: [bind: 1, start: 1]
   import El.Puppet, only: [open: 1]
   import Agent, only: [start: 2]

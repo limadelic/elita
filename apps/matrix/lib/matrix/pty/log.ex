@@ -1,4 +1,4 @@
-defmodule El.Pty.Log do
+defmodule Matrix.Pty.Log do
   @moduledoc false
   import IO, only: [binwrite: 2]
 

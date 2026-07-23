@@ -1,5 +1,5 @@
 defmodule El.Puppet.Collect do
-  import El.Log, only: [write: 1]
+  import Matrix.Log, only: [write: 1]
   import El.Puppet.Settle, only: [hard: 2, peak: 3, solo: 3, ready: 2]
   import El.Puppet.Burst, only: [grow: 2]
   import System, only: [monotonic_time: 1]

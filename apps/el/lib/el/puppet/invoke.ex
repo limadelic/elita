@@ -1,5 +1,5 @@
 defmodule El.Puppet.Invoke do
-  import El.Log, only: [write: 1]
+  import Matrix.Log, only: [write: 1]
   import Tape.Store, only: [add: 2]
   import El.Puppet.Query, only: [call: 2]
   import String, only: [slice: 2]

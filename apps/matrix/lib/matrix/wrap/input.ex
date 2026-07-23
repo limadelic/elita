@@ -2,8 +2,8 @@ defmodule Matrix.Wrap.Input do
   @moduledoc false
   import Agent
   import Enum, only: [drop: 2]
-  import El.Log, only: [write: 1]
-  import El.Wrap.Route, only: [check: 3]
+  import Matrix.Log, only: [write: 1]
+  import Matrix.Wrap.Route, only: [check: 3]
 
   def open(parent, agent \\ nil) do
     {:ok, pid} = start_link(fn -> {[], parent, agent} end)

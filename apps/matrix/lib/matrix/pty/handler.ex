@@ -1,7 +1,7 @@
-defmodule El.Pty.Handler do
+defmodule Matrix.Pty.Handler do
   @moduledoc false
-  import El.Pty.Dsr
-  import El.Pty.Size
+  import Matrix.Pty.Dsr
+  import Matrix.Pty.Size
 
   def write(_port, _pty, :drop), do: :ok
   def write(port, pty, transformed), do: port.command(pty, transformed)

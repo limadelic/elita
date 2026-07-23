@@ -1,7 +1,7 @@
-defmodule El.Pty.Gate do
+defmodule Matrix.Pty.Gate do
   @moduledoc false
-  import El.Trace, only: [record: 1]
-  import El.Log, only: [write: 1]
+  import Matrix.Trace, only: [record: 1]
+  import Matrix.Log, only: [write: 1]
 
   def emit(msg, pty, port) do
     write("SEND #{byte_size(msg)}b\n")

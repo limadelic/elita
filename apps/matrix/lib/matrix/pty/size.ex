@@ -1,4 +1,4 @@
-defmodule El.Pty.Size do
+defmodule Matrix.Pty.Size do
   @moduledoc false
 
   import System

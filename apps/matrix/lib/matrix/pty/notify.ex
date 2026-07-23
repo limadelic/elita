@@ -1,7 +1,7 @@
-defmodule El.Pty.Notify do
+defmodule Matrix.Pty.Notify do
   @moduledoc false
   import Enum, only: [each: 2]
-  import El.Log, only: [write: 1]
+  import Matrix.Log, only: [write: 1]
 
   def notify(taps, data) do
     each(taps, fn pid ->

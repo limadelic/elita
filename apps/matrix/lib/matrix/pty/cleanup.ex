@@ -1,4 +1,4 @@
-defmodule El.Pty.Cleanup do
+defmodule Matrix.Pty.Cleanup do
   @moduledoc false
 
   import Process, only: [sleep: 1]

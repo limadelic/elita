@@ -1,9 +1,8 @@
 defmodule Matrix.Wrap.Rpc do
-  import El.Log, only: [write: 1]
-  import El.Puppet, only: [ask: 2]
+  import Matrix.Log, only: [write: 1]
   import Process, only: [monitor: 1]
 
-  def call(pid, msg) when node(pid) == node(), do: ask(pid, msg)
+  def call(pid, msg) when node(pid) == node(), do: El.Puppet.ask(pid, msg)
 
   def call(pid, msg) do
     write("ask to #{node(pid)} from #{inspect(self())}\n")

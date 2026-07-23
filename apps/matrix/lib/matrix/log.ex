@@ -1,4 +1,4 @@
-defmodule El.Log do
+defmodule Matrix.Log do
   use GenServer
   import File, only: [mkdir_p!: 1, open: 2, cwd!: 0]
   import Path, only: [join: 2]

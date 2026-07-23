@@ -1,4 +1,4 @@
-defmodule El.Trace.Format do
+defmodule Matrix.Trace.Format do
   @moduledoc false
 
   import System

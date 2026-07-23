@@ -1,4 +1,4 @@
-defmodule El.Pty.Env do
+defmodule Matrix.Pty.Env do
   @moduledoc false
   def unset,
     do: [

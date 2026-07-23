@@ -36,11 +36,34 @@ El.Commands.Tell → El.Matrix.Wrap.Remote (tell)
 4. Add matrix to umbrella config, matrix to el deps
 5. Verify all tests green, lint clean
 
+## Circular Dependency Fix (37 El.* refs in matrix)
+
+**Diagnosis**: matrix imports El.Puppet, El.Distribution, El.Commands.Size, El.Log, El.Trace, El.Reader. Cannot add el→matrix dependency (el already depends on matrix). Must invert/move to break cycle.
+
+### Prescription (per module)
+
+| Module | Verdict | Fix |
+|--------|---------|-----|
+| El.Log | MOVE | Become Matrix.Log; matrix owns logging infra |
+| El.Trace | MOVE | Become Matrix.Trace; matrix owns event tracing |
+| El.Reader | MOVE | Become Matrix.Reader; matrix owns stdin I/O |
+| El.Distribution.wait | INVERT | Pass wait fn in options; wrap/remote receives `{wait: &wait/1}` |
+| El.Distribution.target | INVERT | Pass target fn in options; wrap/reply receives `{target: &target/1}` |
+| El.Puppet.ask | INVERT | Pass ask fn in options; wrap/rpc, wrap receives `{ask: &ask/2}` |
+| El.Puppet.put | INVERT | Pass put fn in options; remote/reply receive `{put: &put/2}` |
+| El.Puppet.Collect.collect | DEFER | Pass collect fn as callback arg; leave in el |
+| El.Commands.Size | INVERT | Pass size fn in options; wrap/resize receives `{get_size: &size/0}` |
+
+### Implementation Order
+1. Move Log, Trace, Reader into matrix lib (mirror structure from el)
+2. Update all imports in matrix to reference Matrix.* instead of El.*
+3. Identify callback injection points in wrap/* (remote, reply, rpc, resize)
+4. Update Commands.Claude to wire callbacks when launching matrix functions
+5. Verify gate green after each micro-step
+
 ## Open Questions
-- Does matrix need its own supervision tree or just lib functions?
-- Should El.Log stay in el, or move to shared infra?
-- Tape integration: should matrix depend on tape, or stay agnostic?
-- CLI: any wrap-level commands that need facades in el?
+- Matrix.Log: init at matrix app startup or via callback from el?
+- Tape integration: should Matrix.Trace emit to Tape, or pass recorder as callback?
 
 ## Naming
 Provisional: "matrix" = pty + wrap substrate (emulator + routing).

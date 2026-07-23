@@ -1,14 +1,14 @@
-defmodule El.Pty.Dispatch do
+defmodule Matrix.Pty.Dispatch do
   @moduledoc false
-  import El.Trace
-  import El.Pty.Handler
-  import El.Pty.Cleanup
-  import El.Pty.Buffer, only: [prime: 2, gate: 2]
-  import El.Pty.Notify, only: [notify: 2]
-  import El.Pty.Log, only: [dump: 2]
+  import Matrix.Trace
+  import Matrix.Pty.Handler
+  import Matrix.Pty.Cleanup
+  import Matrix.Pty.Buffer, only: [prime: 2, gate: 2]
+  import Matrix.Pty.Notify, only: [notify: 2]
+  import Matrix.Pty.Log, only: [dump: 2]
   import List, only: [delete: 2]
   import :os, only: [cmd: 1]
-  import El.Log, only: [write: 1]
+  import Matrix.Log, only: [write: 1]
   import IO, only: [binwrite: 2]
 
   def info({pty, {:data, data}}, state) do
