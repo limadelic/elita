@@ -124,9 +124,11 @@ def trace(lines)
 end
 
 def source
-  return recording if replay?
+  branch? ? recording : session
+end
 
-  session
+def branch?
+  replay? && stub?
 end
 
 def recording
