@@ -21,4 +21,5 @@ Be systematic about the way you execute each scenario
 
 ## Reporting
 
-When reporting results, state each verified behavior in the spec's own example words, one per line, then the verdict.
+When reporting results, state each verified behavior in the spec's own example words, one per line. 
+End with exactly: "Verdict: PASSED" or "Verdict: FAILED" (based on whether all scenarios passed).
