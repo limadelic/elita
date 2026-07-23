@@ -3,10 +3,6 @@ require 'fileutils'
 module Guard
   def enforce
     spurn
-    handle
-  end
-
-  def handle
     record? ? reject : stub
   end
 
