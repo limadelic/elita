@@ -81,7 +81,8 @@ module Spawn
       "CASSETTE" => @cassette,
       "CASSETTE_DIR" => dir,
       "MIX_ENV" => "test",
-      "ELITA_RUN" => flux
+      "ELITA_RUN" => flux,
+      "HOME" => ENV["HOME"]
     }
   end
 
