@@ -47,10 +47,10 @@ module Reap
   end
 
   def tally(killed, session)
-    killed || snap(session)
+    killed || reave(session)
   end
 
-  def snap(session)
+  def reave(session)
     return false if bare?(session)
 
     slay(session[:pid])

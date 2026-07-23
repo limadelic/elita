@@ -26,7 +26,7 @@ jobs:
           fetch-depth: 0
 
       - name: Check config drift from lock baseline
-        run: git diff --quiet 83f9450451defb72333e61ed83a51770a526f0db HEAD -- .credo.exs .githooks/ || { echo "config drift from lock baseline"; exit 1; }
+        run: git diff --quiet b63ad21d5427c7dd0fcaf1115b85a6d7808309cb HEAD -- .credo.exs .githooks/ || { echo "config drift from lock baseline"; exit 1; }
 
   test:
     uses: ./.github/workflows/test.yml

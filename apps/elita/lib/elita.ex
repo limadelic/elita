@@ -5,7 +5,7 @@ defmodule Elita do
   import History, only: [record: 1]
   import Llm, only: [llm: 1]
   import Map, only: [merge: 2]
-  import Mem, only: [create: 0]
+  import Mem, only: [create: 1]
   import Msg, only: [user: 1]
   import Reply, only: [deliver: 2]
   import String, only: [trim: 1]
@@ -24,7 +24,7 @@ defmodule Elita do
 
   def init({name, configs, opts}) do
     inject(opts)
-    create()
+    create(name)
     seed()
     {:ok, state(name, configs, opts)}
   end

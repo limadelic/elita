@@ -8,6 +8,30 @@ module ReplHelper
     sessions
     reset(args)
     cache(args)
+    snap(args)
+  end
+
+  def snap(args)
+    return unless recording?
+
+    save_screen(args)
+  end
+
+  def recording?
+    ENV["TAPE"] == "rec"
+  end
+
+  def save_screen(args)
+    name = tag(args)
+    capture(name) if valid?(name)
+  end
+
+  def valid?(name)
+    @screen && name
+  end
+
+  def capture(name)
+    @screens_captured[name] = @screen.to_s
   end
 
   def cassette
@@ -20,9 +44,14 @@ module ReplHelper
 
   def cache(args)
     name = tag(args)
+    mark(args, name)
     prompt = query(args)
     mutex = Mutex.new
     drain_thread = hatch(@reader, @transcript, @transcript_stripped, mutex)
+    stake(name, drain_thread, prompt, mutex)
+  end
+
+  def stake(name, drain_thread, prompt, mutex)
     @sessions[name] = forge(drain_thread, prompt, mutex)
     @current = name
     @drain_thread = drain_thread
@@ -156,6 +185,22 @@ module ReplHelper
 
   def mine
     @sessions[@current]&.dig(:prompt)
+  end
+
+  def mark(args, name)
+    register(name) if listed?(args)
+  end
+
+  def register(name)
+    (@claudes ||= []) << name
+  end
+
+  def listed?(args)
+    args =~ /\bclaude\b/
+  end
+
+  def stub?
+    (@claudes ||= []).include?(@current)
   end
 
   def activate(name)

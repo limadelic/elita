@@ -1,6 +1,6 @@
 defmodule El.Puppet.Filter do
   import String, only: [replace: 3, trim: 1, split: 2, contains?: 2]
-  import El.Log, only: [write: 1]
+  import Matrix.Log, only: [write: 1]
   import Enum, only: [find: 3, reverse: 1]
   import List, only: [last: 1]
   import El.Puppet.Polish, only: [polish: 1, final: 1, noclutter: 1]

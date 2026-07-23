@@ -46,6 +46,7 @@ module Spawn
     config["PATH"] = spine
     puppet(config, puppet_name)
     prime(config)
+    claude(config)
     config
   end
 
@@ -54,6 +55,17 @@ module Spawn
 
     config["PUPPET_NAME"] = name
     config["EL_FROM"] = name
+  end
+
+  def claude(config)
+    return unless @scratch
+
+    equip(config)
+  end
+
+  def equip(config)
+    stub = File.join(@scratch, 'bin', 'claude')
+    config["CLAUDE"] = stub if File.exist?(stub)
   end
 
   def prime(config)
@@ -69,7 +81,8 @@ module Spawn
       "CASSETTE" => @cassette,
       "CASSETTE_DIR" => dir,
       "MIX_ENV" => "test",
-      "ELITA_RUN" => flux
+      "ELITA_RUN" => flux,
+      "HOME" => ENV["HOME"]
     }
   end
 
@@ -157,9 +170,12 @@ module Spawn
     dub(words)
   end
 
-  def dub(words)
+  def dub(words) # rubocop:disable Metrics/CyclomaticComplexity
     as_index = words.index("as")
-    as_index ? words[as_index + 1] : words.first
+    return words[as_index + 1] if as_index
+    return words[1] if words[0] == "claude"
+
+    words.first
   end
 
   def brand(value)

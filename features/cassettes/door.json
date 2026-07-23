@@ -1,22 +1,42 @@
-[
-  {
-    "screen": "✳\n▗ ▗   ▖\n▘▘ ▝▝\nClaude Code\nHaiku\nmalko> "
+{
+  "screens": {
+    "malko": "▗ ▗   ▖\n▘▘ ▝▝\nClaude Code\nHaiku",
+    "keeper": "▗ ▗   ▖\n▘▘ ▝▝\nClaude Code\nHaiku"
   },
-  {
-    "a": [
-      {
-        "text": "sesame is a magic word",
-        "type": "text"
-      }
-    ],
-    "q": {
-      "agent": "keeper",
-      "messages": [
+  "tape": [
+    {
+      "a": [
         {
-          "content": "what is sesame?"
+          "text": "sesame is a magic word",
+          "type": "text"
         }
       ],
-      "n": 1
+      "q": {
+        "agent": "keeper",
+        "messages": [
+          {
+            "content": "what is sesame?"
+          }
+        ],
+        "n": 1
+      }
+    },
+    {
+      "a": [
+        {
+          "text": "2",
+          "type": "text"
+        }
+      ],
+      "q": {
+        "agent": "malko",
+        "messages": [
+          {
+            "content": "1 + 1"
+          }
+        ],
+        "n": 1
+      }
     }
-  }
-]
+  ]
+}

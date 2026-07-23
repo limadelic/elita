@@ -75,7 +75,7 @@ defmodule Agent.Jsonl.Legacy do
   end
 
   defp log(msg) do
-    :erlang.apply(:"Elixir.El.Log", :write, [msg])
+    :erlang.apply(:"Elixir.Matrix.Log", :write, [msg])
   rescue
     _ -> :ok
   end
