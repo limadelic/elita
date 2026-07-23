@@ -120,10 +120,15 @@ def quota
 end
 
 def trace(lines)
-  log = source
+  log = source_or_transcript
   raise "No session log for #{@current}_#{@pid}" if log.empty?
 
   iterate(log.downcase, lines)
+end
+
+def source_or_transcript
+  source_log = source
+  source_log.empty? ? @transcript.to_s : source_log
 end
 
 def source
