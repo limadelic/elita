@@ -35,28 +35,48 @@ module Guard
     File.chmod(0755, stub_path)
   end
 
-  STUB_SCRIPT = %{#!/bin/bash
-# Stub claude for replay mode
-cassette="$CASSETTE"
-cassette_dir="$CASSETTE_DIR"
-agent="$PUPPET_NAME"
-
-[ -z "$cassette" ] && exit 1
-[ -z "$cassette_dir" ] && exit 1
-[ -z "$agent" ] && exit 1
-
-cassette_file="$cassette_dir/$cassette.json"
-[ ! -f "$cassette_file" ] && exit 1
-
-screen=$(jq -r ".screens[\\"$agent\\"] // \\"\\"" "$cassette_file" 2>/dev/null)
-[ -n "$screen" ] && echo "$screen"
-
-while IFS= read -r line; do
-  [ "$line" = "/exit" ] && break
-done
-}.freeze
-
   def stub_script
-    STUB_SCRIPT
+    %{#!/usr/bin/env ruby
+require 'json'
+
+def find_answer(tape, agent, query)
+  tape.each do |entry|
+    q = entry['q']
+    next unless q['agent'] == agent
+
+    messages = q.fetch('messages', [])
+    messages.each do |msg|
+      if msg['content'].strip == query
+        a = entry.fetch('a', [])
+        return a.first['text'] if a.first
+      end
+    end
+  end
+  nil
+end
+
+cassette = ENV['CASSETTE']
+cassette_dir = ENV['CASSETTE_DIR']
+agent = ENV['PUPPET_NAME']
+
+exit 1 if cassette.nil? || cassette_dir.nil? || agent.nil?
+
+cassette_file = File.join(cassette_dir, "#{cassette}.json")
+exit 1 unless File.exist?(cassette_file)
+
+data = JSON.parse(File.read(cassette_file))
+screen = data.dig('screens', agent)
+puts screen if screen
+
+tape = data.fetch('tape', [])
+
+while line = $stdin.gets
+  line.strip!
+  break if line == '/exit'
+
+  answer = find_answer(tape, agent, line)
+  puts answer if answer
+end
+    }.freeze
   end
 end
