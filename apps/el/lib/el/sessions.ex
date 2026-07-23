@@ -32,7 +32,11 @@ defmodule El.Sessions do
   end
 
   defp gather(_, _, nil), do: ""
-  defp gather(dir, files, pid), do: files |> filter(&match(pid, &1)) |> sort() |> map(&load(&1, dir)) |> concat()
+
+  defp gather(dir, files, pid) do
+    matched = files |> filter(&match(pid, &1)) |> sort()
+    matched |> map(&load(&1, dir)) |> concat()
+  end
 
   defp concat(logs), do: reduce(logs, "", fn log, acc -> acc <> log end)
 
