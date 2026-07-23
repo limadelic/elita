@@ -1,4 +1,4 @@
-defmodule El.Wrap.Resize do
+defmodule Matrix.Wrap.Resize do
   @moduledoc false
   import El.Commands.Size, only: [size: 0]
   import Process, only: [sleep: 1]

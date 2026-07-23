@@ -1,4 +1,4 @@
-defmodule El.Wrap.Rpc do
+defmodule Matrix.Wrap.Rpc do
   import El.Log, only: [write: 1]
   import El.Puppet, only: [ask: 2]
   import Process, only: [monitor: 1]

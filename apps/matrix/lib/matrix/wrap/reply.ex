@@ -1,4 +1,4 @@
-defmodule El.Wrap.Reply do
+defmodule Matrix.Wrap.Reply do
   @moduledoc false
   import El.Distribution, only: [target: 1]
   import String, only: [to_atom: 1, trim: 1, trim_trailing: 2, split: 3]

@@ -1,4 +1,4 @@
-defmodule El.Wrap.Guard do
+defmodule Matrix.Wrap.Guard do
   @moduledoc false
   import Task, only: [shutdown: 2, await: 2]
 

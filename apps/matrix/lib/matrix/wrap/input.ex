@@ -1,4 +1,4 @@
-defmodule El.Wrap.Input do
+defmodule Matrix.Wrap.Input do
   @moduledoc false
   import Agent
   import Enum, only: [drop: 2]

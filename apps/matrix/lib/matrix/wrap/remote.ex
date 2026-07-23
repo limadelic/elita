@@ -1,4 +1,4 @@
-defmodule El.Wrap.Remote do
+defmodule Matrix.Wrap.Remote do
   @moduledoc false
   import El.Distribution, only: [wait: 1]
   import El.Puppet, only: [put: 2]
