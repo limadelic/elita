@@ -60,10 +60,10 @@ module Spawn
   def claude(config)
     return unless @scratch
 
-    add_claude_to_config(config)
+    equip(config)
   end
 
-  def add_claude_to_config(config)
+  def equip(config)
     stub = File.join(@scratch, 'bin', 'claude')
     config["CLAUDE"] = stub if File.exist?(stub)
   end

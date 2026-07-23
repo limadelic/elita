@@ -79,11 +79,9 @@ def track(chunk, stripped)
 end
 
 def note(prompt, input)
-  # Do NOT fabricate emoji lines - they come from real Elixir output
 end
 
 def reply(prompt, table, output)
-  # Do NOT fabricate emoji lines - they come from real Elixir output via session log
 end
 
 def sound?(table)
@@ -103,7 +101,6 @@ rescue StandardError
 end
 
 def silence(prompt, text, _output)
-  # Do NOT fabricate emoji lines - they come from real Elixir output via session log
 end
 
 def retrying(times, &block)
@@ -120,13 +117,13 @@ def quota
 end
 
 def trace(lines)
-  log = source_or_transcript
+  log = derive
   raise "No session log for #{@current}_#{@pid}" if log.empty?
 
   iterate(log.downcase, lines)
 end
 
-def source_or_transcript
+def derive
   source_log = source
   source_log.empty? ? @transcript.to_s : source_log
 end
