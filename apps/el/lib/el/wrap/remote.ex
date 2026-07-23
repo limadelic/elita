@@ -3,7 +3,7 @@ defmodule El.Wrap.Remote do
   import El.Distribution, only: [wait: 1]
   import El.Puppet, only: [put: 2]
   import El.Log, only: [write: 1]
-  import El.Pty, only: [watch: 2, unwatch: 2]
+  import Matrix.Pty, only: [watch: 2, unwatch: 2]
   import El.Puppet.Collect, only: [collect: 1]
   import System, only: [monotonic_time: 1]
   import El.Wrap.Reply, only: [handle: 2, fix: 2, prepare: 2, inject: 4]

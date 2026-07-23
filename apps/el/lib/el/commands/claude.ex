@@ -1,7 +1,7 @@
 defmodule El.Commands.Claude do
   @moduledoc false
   import :os, only: [cmd: 1]
-  import El.Pty, only: [launch: 2, wait: 1]
+  import Matrix.Pty, only: [launch: 2, wait: 1]
   import String, only: [to_atom: 1]
   import System, only: [get_env: 2]
   import El.Commands.Size, only: [size: 0]

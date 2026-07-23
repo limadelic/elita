@@ -1,4 +1,4 @@
-defmodule El.Pty do
+defmodule Matrix.Pty do
   @moduledoc false
   use GenServer
 
