@@ -1,23 +1,27 @@
-@wip
-@tape:speckdoctor
+@tape:doctor
 Feature: Doctor
 
-  @wip
   Scenario: speck reads, writes, and runs doctor scenarios
     * > el speck
+
     * speck> exec doctor
-      | 🧪 doctor_spec | ask tool |
-      | 🤖 doctor      | ask tool |
-    * verify
-      | 🎭 speck as tplan |                                    |
-      | ✏️ scenario_1     | Doctor asks one question and waits |
-      | ✏️ scenario_2     | Doctor makes diagnosis             |
-      | ✏️ scenario_3     | Synchronous communication          |
-    * verify
-      | 🎭 speck as texec         |                 |
-      | 🚀 doctor_v1              | as doctor       |
-      | 🚀 patient_v1             | as baby         |
-      | 🤔 doctor_v1 → patient_v1 | main complaint  |
-      | ✨ patient_v1              | WAH WAH         |
-      | ✨ doctor_v1               | Infantile Colic |
-      | ✨ speck                   | PASSED          |
+
+    * speck> log
+      | 🧪 doctor_spec                           | Ask Tool                                                                                |
+      | 🤖 doctor                                | Medical doctor who diagnoses patients through questioning                               |
+      | 🎭 speck as tplan                        |                                                                                         |
+      | ✏️ doctor_asks_and_receives_answer       | Doctor asks a patient one question using ask tool and receives an answer before proceed |
+      | ✏️ doctor_makes_diagnosis_after_response | After receiving patient's answer, doctor produces a diagnosis based on the answer       |
+      | ✏️ synchronous_blocking_behavior         | Doctor's execution blocks waiting for patient response before making diagnosis          |
+      | ✏️ single_question_flow                  | Complete diagnostic flow: doctor asks one question, gets answer, produces diagnosis     |
+      | 🎭 speck as texec                        |                                                                                         |
+      | 🚀 doctor_v1                             | as doctor                                                                               |
+      | 🚀 actor_v1                              | as actor                                                                                |
+      | 🤔 speck → doctor_v1                     | diagnose actor                                                                          |
+      | 🤔 doctor_v1 → actor_v1                  | What are your main symptoms or complaints today?                                        |
+      | ✨ actor_v1 → doctor_v1                   | sharp pain in my lower right belly                                                      |
+      | ✏️ doctor_asks_and_receives_answer       | Doctor asks a patient one question using ask tool and receives an answer before proceed |
+      | ✏️ doctor_makes_diagnosis_after_response | After receiving patient's answer, doctor produces a diagnosis based on the answer       |
+      | ✏️ synchronous_blocking_behavior         | Doctor's execution blocks waiting for patient response before making diagnosis          |
+      | ✏️ single_question_flow                  | Complete diagnostic flow: doctor asks one question, gets answer, produces diagnosis     |
+      | ✨ speck                                  | PASSED                                                                                  |

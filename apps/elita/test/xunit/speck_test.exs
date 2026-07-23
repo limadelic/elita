@@ -7,4 +7,10 @@ defmodule SpeckTest do
     spawn(:speck)
     verify("PASSED", ask(:speck, "exec mother"))
   end
+
+  @tag cassette: "doctor"
+  test "speck runs doctor spec" do
+    spawn(:speck)
+    verify("PASSED", ask(:speck, "exec doctor"))
+  end
 end
