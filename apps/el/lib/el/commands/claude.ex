@@ -2,8 +2,8 @@ defmodule El.Commands.Claude do
   @moduledoc false
   import :os, only: [cmd: 1]
   import Matrix.Pty, only: [launch: 2]
-  import String, only: [to_atom: 1]
-  import System, only: [get_env: 2]
+  import String, only: [to_atom: 1, replace: 3]
+  import System, only: [get_env: 2, find_executable: 1]
   import El.Commands.Size, only: [size: 0]
   import El.Commands.Reset, only: [cleanup: 0]
   import File, only: [cwd!: 0]
@@ -57,7 +57,7 @@ defmodule El.Commands.Claude do
   end
 
   defp execute(name, deps, buf) do
-    cmd = build()
+    cmd = finalize(build())
     pid = Keyword.get(deps, :launch).(name, opts(buf, cmd))
     install(name)
     hold(pid)
@@ -72,9 +72,7 @@ defmodule El.Commands.Claude do
     base ++ [size: &size/0] ++ invert()
   end
 
-  defp resize(pid) do
-    watch(pid, size: &size/0)
-  end
+  defp resize(pid), do: watch(pid, size: &size/0)
 
   defp invert do
     [wait: &wait/1, target: &target/1] ++
@@ -92,8 +90,10 @@ defmodule El.Commands.Claude do
 
   defp resolve(:default), do: cwd!() |> basename()
   defp resolve(name) when is_binary(name), do: name
-
   defp tape, do: mode(get_env("TAPE", nil))
   defp mode("rec"), do: start(fn -> %{} end, name: Tape.Writer)
   defp mode(_), do: :ok
+  defp finalize(cmd), do: find_executable("claude") |> done(cmd)
+  defp done(nil, cmd), do: cmd
+  defp done(path, cmd), do: replace(cmd, ~r/^claude\b/, path)
 end
