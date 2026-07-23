@@ -1,3 +1,5 @@
+require 'fileutils'
+
 module Guard
   def enforce
     spurn
@@ -26,33 +28,35 @@ module Guard
 
   def stub
     bin_dir = File.join(@scratch, 'bin')
+    FileUtils.mkdir_p(bin_dir)
     stub_path = File.join(bin_dir, 'claude')
-    script = render
+    script = stub_script
     File.write(stub_path, script)
     File.chmod(0755, stub_path)
   end
 
-  def render
-    <<~SCRIPT
-      #!/bin/bash
-      # Stub claude for replay mode
-      cassette="$CASSETTE"
-      cassette_dir="$CASSETTE_DIR"
-      agent="$PUPPET_NAME"
+  STUB_SCRIPT = %{#!/bin/bash
+# Stub claude for replay mode
+cassette="$CASSETTE"
+cassette_dir="$CASSETTE_DIR"
+agent="$PUPPET_NAME"
 
-      [ -z "$cassette" ] && exit 1
-      [ -z "$cassette_dir" ] && exit 1
-      [ -z "$agent" ] && exit 1
+[ -z "$cassette" ] && exit 1
+[ -z "$cassette_dir" ] && exit 1
+[ -z "$agent" ] && exit 1
 
-      cassette_file="$cassette_dir/$cassette.json"
-      [ ! -f "$cassette_file" ] && exit 1
+cassette_file="$cassette_dir/$cassette.json"
+[ ! -f "$cassette_file" ] && exit 1
 
-      screen=$(jq -r ".screens[\"$agent\"] // \"\"" "$cassette_file" 2>/dev/null)
-      [ -n "$screen" ] && echo "$screen"
+screen=$(jq -r ".screens[\\"$agent\\"] // \\"\\"" "$cassette_file" 2>/dev/null)
+[ -n "$screen" ] && echo "$screen"
 
-      while IFS= read -r line; do
-        [ "$line" = "/exit" ] && break
-      done
-    SCRIPT
+while IFS= read -r line; do
+  [ "$line" = "/exit" ] && break
+done
+}.freeze
+
+  def stub_script
+    STUB_SCRIPT
   end
 end
