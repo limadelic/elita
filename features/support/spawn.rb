@@ -70,7 +70,6 @@ module Spawn
       "LIVE" => live,
       "CASSETTE" => @cassette,
       "CASSETTE_DIR" => dir,
-      "HOME" => ENV["HOME"],
       "MIX_ENV" => "test",
       "ELITA_RUN" => flux
     }
