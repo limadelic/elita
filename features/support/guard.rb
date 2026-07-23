@@ -57,7 +57,7 @@ cassette_file = #{path}
 agent = ENV['PUPPET_NAME'] || ARGV[-1]
 
 unless agent
-  puts "ERROR: agent name required (via PUPPET_NAME or last argument)"
+  puts "ERROR: agent name required (via PUPPET_NAME or ARGV)"
   exit 1
 end
 

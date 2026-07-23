@@ -169,13 +169,12 @@ module Spawn
     dub(words)
   end
 
-  def dub(words)
-    as_pos = words.index("as")
-    as_pos ? words[as_pos + 1] : pick(words)
-  end
+  def dub(words) # rubocop:disable Metrics/CyclomaticComplexity
+    as_index = words.index("as")
+    return words[as_index + 1] if as_index
+    return words[1] if words[0] == "claude"
 
-  def pick(words) # rubocop:disable Metrics/CyclomaticComplexity
-    words.first == "claude" && words.length > 1 ? words[1] : words.first
+    words.first
   end
 
   def brand(value)
