@@ -71,6 +71,7 @@ defmodule Tools.Sys.Ask do
 
   def answer(agent, text) when is_binary(text) do
     emit(agent, text)
+    log(agent, text)
   end
 
   def answer(_agent, _text), do: :ok
@@ -79,6 +80,12 @@ defmodule Tools.Sys.Ask do
     msg = "#{@reply} #{agent} | #{trim(text)}\n"
     write(msg)
     el(msg)
+  end
+
+  defp log(agent, text) do
+    agent(@reply, agent, " | ", text, %{name: agent})
+  rescue
+    _ -> :ok
   end
 
   defp reply(replier, asker, text, silent) when is_binary(text) do

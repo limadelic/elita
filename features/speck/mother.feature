@@ -19,3 +19,4 @@ Feature: Mother
       | 🚀 mother_v1       | as mother                                     |
       | 🚀 baby_v1         | as baby                                       |
       | ✨ baby_v1          | cry                                           |
+      | ✨ speck            | PASSED                                        |
