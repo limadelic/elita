@@ -5,18 +5,18 @@ Feature: Mother
     * > el speck
 
     * speck> exec mother
-      | 🧪 mother_spec | spawn |
-      | 🤖 mother      | spawn |
 
-    * verify
+    * speck> log
+      | 🧪 mother_spec     | Spawn Tool                                    |
+      | 🤖 mother          | ready to give birth                           |
+      | 🤖 baby            | newborn                                       |
       | 🎭 speck as tplan  |                                               |
       | ✏️ test_scenario_1 | Mother successfully spawns baby agent         |
       | ✏️ test_scenario_2 | Spawned baby agent exhibits expected behavior |
       | ✏️ test_scenario_3 | Baby agent is independently functional        |
       | ✏️ test_scenario_4 | Mother initiates birth event                  |
-
-    * verify
-      | 🎭 speck as texec |           |
-      | 🚀 mother_v1      | as mother |
-      | 🚀 baby_v1        | as baby   |
-      | ✨ baby_v1         | cry       |
+      | 🎭 speck as texec  |                                               |
+      | 🚀 mother_v1       | as mother                                     |
+      | 🚀 baby_v1         | as baby                                       |
+      | ✨ baby_v1          | cry                                           |
+      | ✨ speck            | PASSED                                        |

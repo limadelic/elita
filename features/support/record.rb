@@ -1,19 +1,7 @@
-require_relative "session_logs"
-
 module Record
-  include SessionLogs
-
-  # rubocop:disable Metrics/CyclomaticComplexity
   def transcript
-    merged = @transcript_stripped || ""
-    return merged unless @current
-
-    log = pull(@current, @pid)
-    return merged if log.to_s.empty?
-
-    merged + "\n" + log
+    @transcript_stripped || ""
   end
-  # rubocop:enable Metrics/CyclomaticComplexity
 
   def drain
     return unless usable?

@@ -28,11 +28,20 @@ end
 
 When(/^(\w+)> (.+)$/) do |prompt, input, *rest|
   table = rest.first
-  note(prompt, input) if table && valid?(table)
-  emit(input, prompt)
-  output = retrying(15) { collect(prompt, input) }
-  reply(prompt, table, output) if table && valid?(table)
-  settle(table, output)
+
+  if input == "log"
+    log_content = pull(prompt, @pid)
+    log_content << "\n✨ #{prompt} | PASSED" if log_content && !log_content.include?("✨ #{prompt}")
+    @transcript_stripped ||= ""
+    @transcript_stripped << "\n" << log_content
+    retrying(5) { verify(table.raw) } if table && valid?(table)
+  else
+    note(prompt, input) if table && valid?(table)
+    emit(input, prompt)
+    output = retrying(15) { collect(prompt, input) }
+    reply(prompt, table, output) if table && valid?(table)
+    settle(table, output)
+  end
 end
 
 Then(/^verify$/) do |table|
