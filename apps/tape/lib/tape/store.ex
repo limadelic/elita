@@ -22,6 +22,7 @@ defmodule Tape.Store do
   defp open({:new_format, e}), do: normalize(e)
 
   defp normalize(list) when is_list(list), do: list
+  defp normalize(map) when is_map(map), do: Map.get(map, "tape", [])
   defp normalize(_), do: []
 
   def add(req, response) do
@@ -29,15 +30,32 @@ defmodule Tape.Store do
   end
 
   defp live(req, response) do
-    entries = load()
+    data = read()
     mkdir_p(base())
     path = file()
-    save(path, entries, req, response)
+    save(path, data, req, response)
   end
 
-  defp save(path, entries, req, response) do
-    entry = [%{"q" => req, "a" => response}]
-    write(path, encode!(entries ++ entry, pretty: true))
+  defp save(path, {:new_format, map}, req, response) when is_map(map) do
+    entry = %{"q" => req, "a" => response}
+    payload = merge(map, entry)
+    write(path, encode!(payload, pretty: true))
+  end
+
+  defp save(path, {:new_format, list}, req, response) when is_list(list) do
+    payload = convert(list, req, response)
+    write(path, encode!(payload, pretty: true))
+  end
+
+  defp merge(map, entry) do
+    tape = Map.get(map, "tape", [])
+    screens = Map.get(map, "screens", %{})
+    %{"screens" => screens, "tape" => tape ++ [entry]}
+  end
+
+  defp convert(list, req, response) do
+    entry = %{"q" => req, "a" => response}
+    %{"screens" => %{}, "tape" => list ++ [entry]}
   end
 
   defp file do

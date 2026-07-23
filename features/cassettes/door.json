@@ -1,36 +1,42 @@
-[
-  {
-    "a": [
-      {
-        "text": "sesame is a magic word",
-        "type": "text"
-      }
-    ],
-    "q": {
-      "agent": "keeper",
-      "messages": [
-        {
-          "content": "what is sesame?"
-        }
-      ],
-      "n": 1
-    }
+{
+  "screens": {
+    "malko": "",
+    "keeper": ""
   },
-  {
-    "a": [
-      {
-        "text": "2",
-        "type": "text"
-      }
-    ],
-    "q": {
-      "agent": "malko",
-      "messages": [
+  "tape": [
+    {
+      "a": [
         {
-          "content": "1 + 1"
+          "text": "sesame is a magic word",
+          "type": "text"
         }
       ],
-      "n": 1
+      "q": {
+        "agent": "keeper",
+        "messages": [
+          {
+            "content": "what is sesame?"
+          }
+        ],
+        "n": 1
+      }
+    },
+    {
+      "a": [
+        {
+          "text": "2",
+          "type": "text"
+        }
+      ],
+      "q": {
+        "agent": "malko",
+        "messages": [
+          {
+            "content": "1 + 1"
+          }
+        ],
+        "n": 1
+      }
     }
-  }
-]
+  ]
+}
