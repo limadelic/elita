@@ -33,7 +33,7 @@ defmodule El.CLI do
   end
 
   defp route(["claude" | rest] = argv) do
-    setup("default", [bin() | rest])
+    setup("default", [locate() | rest])
     argv |> parse()
   end
 
@@ -41,8 +41,6 @@ defmodule El.CLI do
     setup("default", argv)
     argv |> parse()
   end
-
-  defp bin, do: locate() || "claude"
 
   defp exec(:usage) do
     @usage |> puts()

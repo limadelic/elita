@@ -96,6 +96,6 @@ defmodule El.Commands.Claude do
   defp mode(_), do: :ok
 
   defp finalize(cmd), do: swap(cmd, locate())
-  defp swap(cmd, nil), do: cmd
+
   defp swap(cmd, path), do: replace(cmd, ~r/^claude\b/, path)
 end
