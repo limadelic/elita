@@ -51,3 +51,15 @@ Feature: Door
       | sesame is a magic word |
     * malko> /exit
     * keeper> /exit
+
+  Scenario: Arithmetic through the door
+    * > el claude malko
+      | ▗ ▗   ▖     |
+      | ▘▘ ▝▝       |
+      | Claude Code |
+      | Haiku       |
+    * malko> 1 + 1
+      | 2 |
+    * malko:
+      | 2 |
+    * malko> /exit
