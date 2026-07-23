@@ -20,6 +20,16 @@ defmodule Matrix.Pty.State do
   end
 
   defp attrs(cfg) do
-    %{file: cfg[:file], port: cfg[:port], input: cfg[:input], taps: cfg[:taps]}
+    %{
+      file: cfg[:file],
+      port: cfg[:port],
+      input: cfg[:input],
+      taps: cfg[:taps],
+      wait: cfg[:wait],
+      target: cfg[:target],
+      ask: cfg[:ask],
+      put: cfg[:put],
+      collect: cfg[:collect]
+    }
   end
 end

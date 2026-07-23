@@ -68,7 +68,19 @@ defmodule El.Commands.Claude do
 
   defp opts(buf, cmd) do
     input = fn chunk -> encode(buf, chunk) end
-    [cmd: cmd, get_size: &size/0, input: input, resize: &watch/1]
+
+    [
+      cmd: cmd,
+      get_size: &size/0,
+      input: input,
+      resize: &watch/1,
+      wait: &El.Distribution.wait/1,
+      target: &El.Distribution.target/1,
+      ask: &El.Puppet.ask/2,
+      put: &El.Puppet.put/2,
+      collect: &El.Puppet.Collect.collect/1,
+      size: &size/0
+    ]
   end
 
   defp install(name) do

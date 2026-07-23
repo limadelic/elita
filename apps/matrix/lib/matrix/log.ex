@@ -8,7 +8,7 @@ defmodule Matrix.Log do
   import Map, only: [new: 1]
 
   @name :session_logger
-  @cfg [type: :file, modes: [:write, :append], formatter: {El.Log.Format, %{}}]
+  @cfg [type: :file, modes: [:write, :append], formatter: {Matrix.Log.Format, %{}}]
 
   def setup(name, argv) do
     p = path(name)

@@ -4,11 +4,15 @@ defmodule Matrix.Wrap.Reply do
   import IO, only: [write: 1]
 
   def handle(:forward, _), do: :forward
+  def handle(:forward, _, _opts), do: :forward
 
-  def handle(output, sender) do
+  def handle(output, sender), do: handle(output, sender, [])
+
+  def handle(output, sender, opts) do
     extracted = extract(output)
     agent = fix(sender, sender)
-    route(El.Distribution.target(agent), extracted, agent)
+    target_fn = opts[:target]
+    route(target_fn.(agent), extracted, agent)
     {:handled}
   end
 
@@ -34,10 +38,15 @@ defmodule Matrix.Wrap.Reply do
 
   def inject(nil, _target, _message, _sender), do: :forward
   def inject(_pid, _target, _message, nil), do: :forward
+  def inject(pid, target, message, sender), do: inject(pid, target, message, sender, [])
 
-  def inject(pid, _target, message, sender) do
+  def inject(nil, _target, _message, _sender, _opts), do: :forward
+  def inject(_pid, _target, _message, nil, _opts), do: :forward
+
+  def inject(pid, _target, message, sender, opts) do
+    put_fn = opts[:put]
     text = "[from #{sender |> fix(sender) |> to_string()}]\n#{message}"
-    El.Puppet.put(pid, text)
+    put_fn.(pid, text)
   end
 
   defp route(nil, _, _), do: :ok
@@ -51,8 +60,9 @@ defmodule Matrix.Wrap.Reply do
 
   defp route(_, _, _), do: :ok
 
-  def known?(name) do
-    name |> trim() |> to_atom() |> El.Distribution.target() |> is_pid()
+  def known?(name, opts \\ []) do
+    target_fn = opts[:target]
+    name |> trim() |> to_atom() |> target_fn.() |> is_pid()
   rescue
     _ -> false
   end

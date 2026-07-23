@@ -2,15 +2,16 @@ defmodule Matrix.Wrap.Resize do
   @moduledoc false
   import Process, only: [sleep: 1]
 
-  def watch(pid) do
-    spawn(fn -> poll(pid) end)
+  def watch(pid, opts \\ []) do
+    spawn(fn -> poll(pid, opts) end)
   end
 
-  defp poll(pid) do
+  defp poll(pid, opts) do
     sleep(500)
-    size = El.Commands.Size.size()
+    size_fn = opts[:size]
+    size = size_fn.()
     notify(pid, size)
-    poll(pid)
+    poll(pid, opts)
   end
 
   defp notify(pid, {rows, cols}) do

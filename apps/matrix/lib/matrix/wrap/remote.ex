@@ -8,42 +8,45 @@ defmodule Matrix.Wrap.Remote do
   import Map, only: [merge: 2]
   import Task, only: [async: 1]
 
-  def deliver(name, message, sender) do
-    invoke(name, message, sender)
+  def deliver(name, message, sender, opts \\ []) do
+    invoke(name, message, sender, opts)
   catch
     :exit, _ -> trap("deliver exit\n")
   end
 
-  defp invoke(name, message, sender) do
-    target = prepare(name, sender) |> El.Distribution.wait()
-    query(target, name, message, sender)
+  defp invoke(name, message, sender, opts) do
+    wait_fn = opts[:wait]
+    target = prepare(name, sender) |> wait_fn.()
+    query(target, name, message, sender, opts)
   end
 
-  defp query(nil, _, _, _), do: :forward
+  defp query(nil, _, _, _, _opts), do: :forward
 
-  defp query(target, name, message, sender) do
-    fetch(target, name, message, sender)
+  defp query(target, name, message, sender, opts) do
+    fetch(target, name, message, sender, opts)
   catch
     :exit, _ -> trap("query exit\n")
   end
 
-  defp fetch(target, name, message, sender) do
-    handle(gather(target, message, sender, name), sender)
+  defp fetch(target, name, message, sender, opts) do
+    handle(gather(target, message, sender, name, opts), sender)
   end
 
-  defp gather(pid, msg, sender, _target) do
+  defp gather(pid, msg, sender, _target, opts) do
+    put_fn = opts[:put]
     text = "[ask #{sender |> fix(sender) |> to_string()}]\n#{msg}"
-    El.Puppet.put(pid, text)
-    listen(sender, sender)
+    put_fn.(pid, text)
+    listen(sender, sender, opts)
   end
 
-  defp listen(pty, sender) do
+  defp listen(pty, sender, opts) do
     watch(pty, self())
-    spawn(pty, sender) |> reap(pty)
+    task(pty, sender, opts) |> reap(pty)
   end
 
-  defp spawn(pty, sender) do
-    async(fn -> El.Puppet.Collect.collect(build(pty, sender, monotonic_time(:millisecond))) end)
+  defp task(pty, sender, opts) do
+    collect_fn = opts[:collect]
+    async(fn -> collect_fn.(build(pty, sender, monotonic_time(:millisecond))) end)
   end
 
   defp reap(task, pty) do
@@ -62,14 +65,15 @@ defmodule Matrix.Wrap.Remote do
     :forward
   end
 
-  def tell(name, message, sender) do
-    dispatch(name, message, sender)
+  def tell(name, message, sender, opts \\ []) do
+    dispatch(name, message, sender, opts)
   catch
     :exit, reason -> trap("tell exit: #{inspect(reason)}\n")
   end
 
-  defp dispatch(name, message, sender) do
-    target = prepare(name, sender) |> El.Distribution.wait()
+  defp dispatch(name, message, sender, opts) do
+    wait_fn = opts[:wait]
+    target = prepare(name, sender) |> wait_fn.()
     inject(target, name, message, sender)
   end
 end
