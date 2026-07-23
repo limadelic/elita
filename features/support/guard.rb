@@ -70,8 +70,10 @@ while line = $stdin.gets
   line.strip!
   break if line == '/exit'
 
+  puts line
   answer = find_answer(tape, agent, line)
   puts answer if answer
+  puts "#{agent}>"
 end
     }.freeze
   end

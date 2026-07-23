@@ -12,11 +12,11 @@ defmodule Matrix.Wrap.Resize do
     size.() |> notify(pid) |> then(fn _ -> poll(pid, opts) end)
   end
 
-  defp notify(pid, {rows, cols}) do
+  defp notify({rows, cols}, pid) do
     send(pid, {:resize, {rows, cols}})
   end
 
-  defp notify(_pid, nil) do
+  defp notify(nil, _pid) do
     :ok
   end
 end
