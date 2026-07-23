@@ -8,6 +8,30 @@ module ReplHelper
     sessions
     reset(args)
     cache(args)
+    snap(args)
+  end
+
+  def snap(args)
+    return unless recording?
+
+    save_screen(args)
+  end
+
+  def recording?
+    ENV["TAPE"] == "rec"
+  end
+
+  def save_screen(args)
+    name = tag(args)
+    capture(name) if valid?(name)
+  end
+
+  def valid?(name)
+    @screen && name
+  end
+
+  def capture(name)
+    @screens_captured[name] = @screen.to_s
   end
 
   def cassette
