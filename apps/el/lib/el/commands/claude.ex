@@ -11,8 +11,9 @@ defmodule El.Commands.Claude do
   import Matrix.Wrap.Resize, only: [watch: 1]
   import Matrix.Wrap.Input, only: [open: 2, encode: 2]
   import Matrix.Log, only: [write: 1]
-  import El.Distribution, only: [bind: 1, start: 1]
-  import El.Puppet, only: [open: 1]
+  import El.Distribution, only: [bind: 1, start: 1, target: 1]
+  import El.Puppet, only: [open: 1, ask: 2, put: 2]
+  import El.Puppet.Collect, only: [collect: 1]
   import Agent, only: [start: 2]
   import El.Cmd, only: [build: 0]
 
@@ -68,19 +69,17 @@ defmodule El.Commands.Claude do
 
   defp opts(buf, cmd) do
     input = fn chunk -> encode(buf, chunk) end
+    [cmd: cmd] ++ base(input) ++ invert()
+  end
 
-    [
-      cmd: cmd,
-      get_size: &size/0,
-      input: input,
-      resize: &watch/1,
-      wait: &El.Distribution.wait/1,
-      target: &El.Distribution.target/1,
-      ask: &El.Puppet.ask/2,
-      put: &El.Puppet.put/2,
-      collect: &El.Puppet.Collect.collect/1,
-      size: &size/0
-    ]
+  defp base(input) do
+    [get_size: &size/0, input: input, resize: &watch/1, size: &size/0]
+  end
+
+  defp invert do
+    w = [wait: &El.Distribution.wait/1, target: &target/1]
+    r = [ask: &ask/2, put: &put/2, collect: &collect/1]
+    w ++ r
   end
 
   defp install(name) do

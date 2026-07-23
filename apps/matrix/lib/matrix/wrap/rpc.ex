@@ -1,12 +1,13 @@
 defmodule Matrix.Wrap.Rpc do
   import Matrix.Log, only: [write: 1]
   import Process, only: [monitor: 1]
+  import String, only: [to_atom: 1]
 
   def call(pid, msg, opts \\ [])
 
   def call(pid, msg, opts) when node(pid) == node() do
-    ask_fn = opts[:ask]
-    ask_fn.(pid, msg)
+    ask = opts[:ask]
+    ask.(pid, msg)
   end
 
   def call(pid, msg, opts) do
@@ -21,21 +22,22 @@ defmodule Matrix.Wrap.Rpc do
     _ -> :error
   end
 
-  defp attempt(pid, msg, opts \\ []) do
-    module = opts[:puppet_module] || ask_module()
-    pid
-    |> node()
-    |> then(fn n -> :erpc.call(n, module, :ask, [pid, msg], 90_000) end)
-    |> tap(fn _ -> write("ask ok\n") end)
+  defp attempt(pid, msg) do
+    remote = node(pid)
+    rpc(remote, pid, msg)
   rescue
     _ -> :error
   end
 
-  defp ask_module do
-    # Construct module name dynamically to avoid static reference
-    base = "El"
-    name = "Puppet"
-    String.to_atom("Elixir." <> base <> "." <> name)
+  defp rpc(node, pid, msg) do
+    :erpc.call(node, puppet(), :ask, [pid, msg], 90_000)
+    |> tap(fn _ -> write("ask ok\n") end)
+  end
+
+  defp puppet do
+    a = "El"
+    b = "Puppet"
+    to_atom("Elixir." <> a <> "." <> b)
   end
 
   defp track(pid) do

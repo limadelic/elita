@@ -15,8 +15,8 @@ defmodule Matrix.Wrap.Remote do
   end
 
   defp invoke(name, message, sender, opts) do
-    wait_fn = opts[:wait]
-    target = prepare(name, sender) |> wait_fn.()
+    wait = opts[:wait]
+    target = prepare(name, sender) |> wait.()
     query(target, name, message, sender, opts)
   end
 
@@ -33,9 +33,9 @@ defmodule Matrix.Wrap.Remote do
   end
 
   defp gather(pid, msg, sender, _target, opts) do
-    put_fn = opts[:put]
+    put = opts[:put]
     text = "[ask #{sender |> fix(sender) |> to_string()}]\n#{msg}"
-    put_fn.(pid, text)
+    put.(pid, text)
     listen(sender, sender, opts)
   end
 
@@ -45,8 +45,9 @@ defmodule Matrix.Wrap.Remote do
   end
 
   defp task(pty, sender, opts) do
-    collect_fn = opts[:collect]
-    async(fn -> collect_fn.(build(pty, sender, monotonic_time(:millisecond))) end)
+    collect = opts[:collect]
+    data = build(pty, sender, monotonic_time(:millisecond))
+    async(fn -> collect.(data) end)
   end
 
   defp reap(task, pty) do
@@ -72,8 +73,8 @@ defmodule Matrix.Wrap.Remote do
   end
 
   defp dispatch(name, message, sender, opts) do
-    wait_fn = opts[:wait]
-    target = prepare(name, sender) |> wait_fn.()
+    wait = opts[:wait]
+    target = prepare(name, sender) |> wait.()
     inject(target, name, message, sender)
   end
 end

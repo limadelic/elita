@@ -20,16 +20,15 @@ defmodule Matrix.Pty.State do
   end
 
   defp attrs(cfg) do
-    %{
-      file: cfg[:file],
-      port: cfg[:port],
-      input: cfg[:input],
-      taps: cfg[:taps],
-      wait: cfg[:wait],
-      target: cfg[:target],
-      ask: cfg[:ask],
-      put: cfg[:put],
-      collect: cfg[:collect]
-    }
+    merge(pty(cfg), inject(cfg))
+  end
+
+  defp pty(cfg) do
+    %{file: cfg[:file], port: cfg[:port], input: cfg[:input], taps: cfg[:taps]}
+  end
+
+  defp inject(cfg) do
+    %{wait: cfg[:wait], target: cfg[:target], ask: cfg[:ask]}
+    |> merge(%{put: cfg[:put], collect: cfg[:collect]})
   end
 end

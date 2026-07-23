@@ -8,10 +8,8 @@ defmodule Matrix.Wrap.Resize do
 
   defp poll(pid, opts) do
     sleep(500)
-    size_fn = opts[:size]
-    size = size_fn.()
-    notify(pid, size)
-    poll(pid, opts)
+    size = opts[:size]
+    size.() |> notify(pid) |> then(fn _ -> poll(pid, opts) end)
   end
 
   defp notify(pid, {rows, cols}) do

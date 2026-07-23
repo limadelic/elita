@@ -11,8 +11,7 @@ defmodule Matrix.Wrap.Reply do
   def handle(output, sender, opts) do
     extracted = extract(output)
     agent = fix(sender, sender)
-    target_fn = opts[:target]
-    route(target_fn.(agent), extracted, agent)
+    opts[:target].(agent) |> route(extracted, agent)
     {:handled}
   end
 
@@ -44,9 +43,9 @@ defmodule Matrix.Wrap.Reply do
   def inject(_pid, _target, _message, nil, _opts), do: :forward
 
   def inject(pid, _target, message, sender, opts) do
-    put_fn = opts[:put]
+    put = opts[:put]
     text = "[from #{sender |> fix(sender) |> to_string()}]\n#{message}"
-    put_fn.(pid, text)
+    put.(pid, text)
   end
 
   defp route(nil, _, _), do: :ok
@@ -61,8 +60,8 @@ defmodule Matrix.Wrap.Reply do
   defp route(_, _, _), do: :ok
 
   def known?(name, opts \\ []) do
-    target_fn = opts[:target]
-    name |> trim() |> to_atom() |> target_fn.() |> is_pid()
+    target = opts[:target]
+    name |> trim() |> to_atom() |> target.() |> is_pid()
   rescue
     _ -> false
   end
