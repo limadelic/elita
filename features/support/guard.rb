@@ -1,7 +1,15 @@
 module Guard
   def enforce
     spurn
-    reject
+    handle
+  end
+
+  def handle
+    record? ? reject : stub
+  end
+
+  def record?
+    ENV["TAPE"] == "rec"
   end
 
   def spurn
