@@ -33,7 +33,7 @@ defmodule El.CLI do
   end
 
   defp route(["claude" | rest] = argv) do
-    setup("default", [locate() | rest])
+    setup(name(argv), [locate() | rest])
     argv |> parse()
   end
 
