@@ -25,7 +25,7 @@ end
 
 defmodule Tools.Sys.Ask do
   import Agent.Harness, only: [dispatch: 3]
-  import Log, only: [write: 1]
+  import Log, only: [write: 1, agent: 5]
   import String, only: [trim: 1]
 
   @icon "🤔"
@@ -38,7 +38,7 @@ defmodule Tools.Sys.Ask do
   def exec(_, %{"recipient" => r, "question" => q}, %{name: s, skip_logs: l} = state) do
     query(s, r, q, l)
     result = dispatch(r, q, :ask)
-    reply(s, result, l)
+    reply(r, s, result, l)
     {result, state}
   end
 
@@ -66,10 +66,12 @@ defmodule Tools.Sys.Ask do
     msg = "#{@icon} #{sender} → #{recipient} | #{question}\n"
     write(msg)
     el(msg)
+    agent(@icon, "#{sender} → #{recipient}", " | ", question, %{name: sender})
   end
 
   def answer(agent, text) when is_binary(text) do
     emit(agent, text)
+    log(agent, text)
   end
 
   def answer(_agent, _text), do: :ok
@@ -80,20 +82,27 @@ defmodule Tools.Sys.Ask do
     el(msg)
   end
 
-  defp reply(agent, text, silent) when is_binary(text) do
-    log(agent, text, silent)
+  defp log(agent, text) do
+    agent(@reply, agent, " | ", text, %{name: agent})
+  rescue
+    _ -> :ok
   end
 
-  defp reply(_agent, _text, _silent), do: :ok
+  defp reply(replier, asker, text, silent) when is_binary(text) do
+    log(replier, asker, text, silent)
+  end
 
-  defp log(_agent, _text, true) do
+  defp reply(_replier, _asker, _text, _silent), do: :ok
+
+  defp log(_replier, _asker, _text, true) do
     :ok
   end
 
-  defp log(agent, text, _) do
-    msg = "#{@reply} #{agent} | #{trim(text)}\n"
+  defp log(replier, asker, text, _) do
+    msg = "#{@reply} #{replier} → #{asker} | #{trim(text)}\n"
     write(msg)
     el(msg)
+    agent(@reply, "#{replier} → #{asker}", " | ", text, %{name: asker})
   end
 
   defp el(msg) do

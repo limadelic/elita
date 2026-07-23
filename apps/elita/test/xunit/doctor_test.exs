@@ -1,17 +1,22 @@
 defmodule DoctorTest do
   use Tester
+
   @moduletag :xunit
 
-  test "doctor diagnoses appendicitis" do
+  setup do
     spawn(:doctor)
     spawn(:patient, :actor)
+    :ok
+  end
 
+  test "doctor diagnoses appendicitis" do
     ask(:patient, """
     you are a patient with appendicitis
     - sharp right abdominal pain, nausea, fever.
     Improvise realistic details.
     """)
 
-    verify("appendicitis", ask(:doctor, "diagnose patient"))
+    diagnosis = ask(:doctor, "diagnose patient")
+    verify("appendicitis", diagnosis)
   end
 end

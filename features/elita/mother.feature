@@ -1,4 +1,4 @@
-Feature: Birth
+Feature: Mother
 
   Scenario: Mother gives birth to a baby
     * > el mother

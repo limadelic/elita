@@ -26,15 +26,15 @@ defmodule El.REPL do
   end
 
   defp spawned(config, name) do
-    reg() |> settle()
-    tape() |> settle()
+    reg()
+    tape()
     boot(name)
     spawn(name, [config]) |> extract()
   end
 
   defp init(agent) do
-    reg() |> settle()
-    tape() |> settle()
+    reg()
+    tape()
     boot(agent)
     find(agent)
   end
@@ -60,18 +60,18 @@ defmodule El.REPL do
   defp pick(pid, _agent), do: pid
 
   defp native(agent) do
-    result = spawn(agent, [agent])
-    settle(result)
-    extract(result)
+    spawn(agent, [agent]) |> tap(&notify/1) |> extract()
+  rescue
+    RuntimeError -> nil
   end
+
+  defp notify({:error, {:init_failed, msg}}), do: puts(msg)
+  defp notify({:error, {exc, _stack}}) when is_exception(exc), do: puts(exc.message)
+  defp notify(_), do: :ok
 
   defp extract({:ok, pid}), do: pid
   defp extract({:error, {:already_started, pid}}), do: pid
-  defp extract({:error, _}), do: nil
-
-  defp settle({:ok, _pid}), do: :ok
-  defp settle({:error, {:already_started, _pid}}), do: :ok
-  defp settle({:error, _}), do: :ok
+  defp extract(_), do: nil
 
   defp loop(agent, puppet) do
     write("#{agent}> ")
@@ -96,6 +96,6 @@ defmodule El.REPL do
 
   defp handle(agent, nil, "log"), do: agent |> log() |> puts()
   defp handle(agent, nil, input), do: dispatch(agent, input, :ask) |> puts()
-  defp handle(agent, :undefined, "log"), do: agent |> log() |> puts()
-  defp handle(agent, :undefined, input), do: dispatch(agent, input, :ask) |> puts()
+  defp handle(agent, :undefined, "log"), do: handle(agent, nil, "log")
+  defp handle(agent, :undefined, input), do: handle(agent, nil, input)
 end

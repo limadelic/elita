@@ -1,0 +1,20 @@
+[
+  {
+    "a": [
+      {
+        "text": "I appreciate you testing this scenario! Let me check the current time and apply the schedule rules.\n\n**Current time:** 2025-07-12 10:00:00 (Saturday, July 12, 2025 at 10:00 AM)\n\n**My response:** No, come back Monday\n\nIt's Saturday, which is a weekend day. According to my schedule rules, I only work Monday to Friday, 9 AM to 5 PM. Even though 10:00 AM would normally be during work hours, the weekend exemption takes precedence.\n\nPlease come back with your task on a weekday during my work hours! 📅",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "weekend",
+      "messages": [
+        {
+          "role": "user",
+          "content": "can you handle this task?"
+        }
+      ],
+      "n": 1
+    }
+  }
+]

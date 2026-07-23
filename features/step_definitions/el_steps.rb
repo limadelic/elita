@@ -2,6 +2,14 @@
 
 require 'pty'
 
+When(/^clock (.+)$/) do |time|
+  @clock = time
+end
+
+When(/^cassette (.+)$/) do |name|
+  @cassette = name
+end
+
 When(/^> el tell (.+)$/) do |args, *rest|
   output = one("tell #{args}")
   track(output, output.gsub(/\e\[[0-9;]*m/, ''))
@@ -20,6 +28,7 @@ end
 
 When(/^(\w+)> (.+)$/) do |prompt, input, *rest|
   table = rest.first
+
   note(prompt, input) if table && valid?(table)
   emit(input, prompt)
   output = retrying(15) { collect(prompt, input) }

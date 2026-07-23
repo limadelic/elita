@@ -2,12 +2,12 @@ defmodule Agent.Session do
   use GenServer
 
   import Agent.Spawn, only: [run: 2]
-  import Agent.Watch, only: [start: 3]
+  import Agent.Ask, only: [reply: 5]
+  import Agent.Log, only: [reply: 1]
   import GenServer, only: [start_link: 3, call: 3, cast: 2]
   import Keyword, only: [fetch!: 2, get: 3]
   import Map, only: [put: 3]
-  import String, only: [downcase: 1, trim: 1]
-  import Tape, only: [handle: 3]
+  import String, only: [downcase: 1]
 
   def start_link(opts) do
     folder = fetch!(opts, :folder)
@@ -44,7 +44,7 @@ defmodule Agent.Session do
   @impl true
   def handle_call({:ask, message}, _from, state) do
     body = %{messages: [%{content: message}]}
-    response = reply(state.name, message, body, state.folder, state.runner)
+    response = process(message, state, body)
     {:reply, {:ok, response}, state}
   end
 
@@ -59,41 +59,17 @@ defmodule Agent.Session do
     {:reply, state, state}
   end
 
-  defp reply(name, message, body, folder, runner) do
-    start(name, message, folder)
-    process(name, body, message, folder, runner)
-  rescue
-    _ -> ""
+  defp process("log", state, _body) do
+    reply(state.name)
   end
 
-  defp process(name, body, message, folder, runner) do
-    response = handle(body, name, fn -> runner.(message, folder) end)
-    emit(response, name)
+  defp process(message, state, body) do
+    reply(state.name, message, body, state.folder, state.runner)
   end
-
-  defp emit([%{"text" => text, "type" => "text"}], name) do
-    text = trim(text)
-    answer(name, text)
-    text
-  end
-
-  defp emit([%{"text" => text}], name) do
-    text = trim(text)
-    answer(name, text)
-    text
-  end
-
-  defp emit(_, _), do: ""
 
   @impl true
   def handle_cast({:cast, message}, state) do
     state.runner.(message, state.folder)
     {:noreply, state}
-  end
-
-  defp answer(agent, text) do
-    :erlang.apply(:"Elixir.Tools.Sys.Ask", :answer, [agent, text])
-  rescue
-    _ -> :ok
   end
 end

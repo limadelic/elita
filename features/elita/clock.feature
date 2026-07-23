@@ -1,4 +1,3 @@
-@wip
 Feature: Clock
 
   Scenario: Clock tells the time
