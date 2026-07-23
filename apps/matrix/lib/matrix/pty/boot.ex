@@ -1,6 +1,7 @@
 defmodule Matrix.Pty.Boot do
   @moduledoc false
   import Matrix.Pty.Env
+  import System, only: [get_env: 2]
 
   def launch(port, cmd, size) do
     argv = args(size, cmd)
@@ -8,7 +9,12 @@ defmodule Matrix.Pty.Boot do
   end
 
   defp opts(argv) do
-    [:binary, :stream, :exit_status, {:args, argv}, {:env, unset()}]
+    [:binary, :stream, :exit_status, {:args, argv}, {:env, env()}]
+  end
+
+  defp env do
+    path = get_env("PATH", "")
+    unset() ++ [{~c"PATH", to_charlist(path)}]
   end
 
   defp args({rows, cols}, cmd) do
