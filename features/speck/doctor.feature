@@ -1,4 +1,4 @@
-@tape:doctor
+@tape:diagnose
 Feature: Doctor
 
   Scenario: speck reads, writes, and runs doctor scenarios
