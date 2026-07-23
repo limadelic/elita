@@ -8,7 +8,7 @@ defmodule El.Commands.Claude do
   import El.Commands.Reset, only: [cleanup: 0]
   import File, only: [cwd!: 0]
   import Path, only: [basename: 1]
-  import Matrix.Wrap.Resize, only: [watch: 1]
+  import Matrix.Wrap.Resize, only: [watch: 2]
   import Matrix.Wrap.Input, only: [open: 2, encode: 2]
   import Matrix.Log, only: [write: 1]
   import El.Distribution, only: [bind: 1, start: 1, target: 1, wait: 1]
@@ -68,17 +68,17 @@ defmodule El.Commands.Claude do
 
   defp opts(buf, cmd) do
     input = fn chunk -> encode(buf, chunk) end
-    [cmd: cmd] ++ base(input) ++ invert()
+    base = [cmd: cmd, get_size: &size/0, input: input, resize: &resize/1]
+    base ++ [size: &size/0] ++ invert()
   end
 
-  defp base(input) do
-    [get_size: &size/0, input: input, resize: &watch/1, size: &size/0]
+  defp resize(pid) do
+    watch(pid, size: &size/0)
   end
 
   defp invert do
-    w = [wait: &wait/1, target: &target/1]
-    r = [ask: &ask/2, far: &far/3, put: &put/2, collect: &collect/1]
-    w ++ r
+    [wait: &wait/1, target: &target/1] ++
+      [ask: &ask/2, far: &far/3, put: &put/2, collect: &collect/1]
   end
 
   defp far(node, pid, msg) do
