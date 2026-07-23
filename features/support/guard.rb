@@ -26,13 +26,15 @@ module Guard
     bin_dir = File.join(@scratch, 'bin')
     FileUtils.mkdir_p(bin_dir)
     stub_path = File.join(bin_dir, 'claude')
-    script = stub_script
+    cassette_file = File.join(dir, "#{@cassette}.json")
+    script = stub_script(cassette_file)
     File.write(stub_path, script)
     File.chmod(0755, stub_path)
   end
 
-  def stub_script
-    %q{#!/usr/bin/env ruby
+  def stub_script(cassette_file)
+    path = cassette_file.inspect
+    %Q{#!/usr/bin/env ruby
 require 'json'
 
 def find_answer(tape, agent, query)
@@ -51,19 +53,29 @@ def find_answer(tape, agent, query)
   nil
 end
 
-cassette = ENV['CASSETTE']
-cassette_dir = ENV['CASSETTE_DIR']
-agent = ENV['PUPPET_NAME']
+cassette_file = #{path}
+agent = ENV['PUPPET_NAME'] || ARGV[-1]
 
-exit 1 if cassette.nil? || cassette_dir.nil? || agent.nil?
+unless agent
+  puts "ERROR: agent name required (via PUPPET_NAME or last argument)"
+  exit 1
+end
 
-cassette_file = File.join(cassette_dir, cassette + '.json')
-exit 1 unless File.exist?(cassette_file)
+unless File.exist?(cassette_file)
+  puts "ERROR: cassette file not found: " + cassette_file
+  exit 1
+end
 
 data = JSON.parse(File.read(cassette_file))
 screens = data['screens']
 screen = screens[agent] if screens.is_a?(Hash)
-puts screen if screen
+
+unless screen
+  puts "ERROR: no screen data for agent: " + agent
+  exit 1
+end
+
+puts screen
 
 tape = data.fetch('tape', [])
 
