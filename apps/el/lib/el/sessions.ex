@@ -17,7 +17,7 @@ defmodule El.Sessions do
     dir = expand("~/.elita/sessions")
     file = files |> filter(&starts_with?(&1, "#{agent}_")) |> latest(dir)
     pid = parse(file)
-    gather(dir, files, pid)
+    gather(agent, dir, files, pid)
   end
 
   defp merged({:error, _}, _agent), do: ""
@@ -31,12 +31,19 @@ defmodule El.Sessions do
     |> at(-1)
   end
 
-  defp gather(_, _, nil), do: ""
-  defp gather(dir, files, pid), do: files |> filter(&match(pid, &1)) |> sort() |> map(&load(&1, dir)) |> concat()
+  defp gather(_, _, _, nil), do: ""
+
+  defp gather(agent, dir, files, pid),
+    do: files |> select(agent, pid) |> map(&load(&1, dir)) |> concat()
+
+  defp select(files, agent, pid) do
+    files
+    |> filter(&starts_with?(&1, "#{agent}_"))
+    |> filter(&ends_with?(&1, "_#{pid}.log"))
+    |> sort()
+  end
 
   defp concat(logs), do: reduce(logs, "", fn log, acc -> acc <> log end)
-
-  defp match(pid, file), do: ends_with?(file, "_#{pid}.log")
 
   defp latest(files, dir) do
     files |> sort_by(&time(dir, &1)) |> last()
