@@ -117,15 +117,10 @@ def quota
 end
 
 def trace(lines)
-  log = derive
+  log = source
   raise "No session log for #{@current}_#{@pid}" if log.empty?
 
   iterate(log.downcase, lines)
-end
-
-def derive
-  source_log = source
-  source_log.empty? ? @transcript.to_s : source_log
 end
 
 def source
