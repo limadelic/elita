@@ -1,6 +1,5 @@
 defmodule Matrix.Pty.Dispatch do
   @moduledoc false
-  import Matrix.Trace
   import Matrix.Pty.Handler
   import Matrix.Pty.Cleanup
   import Matrix.Pty.Buffer, only: [prime: 2, gate: 2]
@@ -8,19 +7,15 @@ defmodule Matrix.Pty.Dispatch do
   import Matrix.Pty.Log, only: [dump: 2]
   import List, only: [delete: 2]
   import :os, only: [cmd: 1]
-  import Matrix.Log, only: [write: 1]
   import IO, only: [binwrite: 2]
 
   def info({pty, {:data, data}}, state) do
-    write("PTY CHUNK #{byte_size(data)}b idle=#{state.idle}\n")
     updated = prime(state, data)
     process(pty, data, updated)
     {:noreply, updated}
   end
 
-  def info({:stdin, data}, %{pty: pty, port: port, input: input} = state) do
-    record(data)
-    write(port, pty, input.(data))
+  def info({:stdin, _data}, state) do
     {:noreply, state}
   end
 
@@ -72,12 +67,10 @@ defmodule Matrix.Pty.Dispatch do
   end
 
   def cast({:inject, msg, _reply}, state) do
-    write("INJECT CAST RECEIVED reply #{byte_size(msg)}b\n")
     {:noreply, gate(msg, state)}
   end
 
   def cast({:inject, msg}, state) do
-    write("INJECT CAST RECEIVED plain #{byte_size(msg)}b\n")
     {:noreply, gate(msg, state)}
   end
 

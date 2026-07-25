@@ -1,6 +1,5 @@
 defmodule Matrix.Wrap.Remote do
   @moduledoc false
-  import Matrix.Log, only: [write: 1]
   import Matrix.Pty, only: [watch: 2, unwatch: 2]
   import System, only: [monotonic_time: 1]
   import Matrix.Wrap.Reply, only: [handle: 2, fix: 2, prepare: 2, inject: 4]
@@ -61,15 +60,14 @@ defmodule Matrix.Wrap.Remote do
     |> merge(%{last: now, start: now})
   end
 
-  defp trap(msg) do
-    write(msg)
+  defp trap(_msg) do
     :forward
   end
 
   def tell(name, message, sender, opts \\ []) do
     dispatch(name, message, sender, opts)
   catch
-    :exit, reason -> trap("tell exit: #{inspect(reason)}\n")
+    :exit, _reason -> trap("")
   end
 
   defp dispatch(name, message, sender, opts) do

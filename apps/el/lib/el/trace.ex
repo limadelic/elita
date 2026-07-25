@@ -1,4 +1,4 @@
-defmodule Matrix.Log do
+defmodule El.Trace do
   use GenServer
   import File, only: [mkdir_p!: 1, open: 2, cwd!: 0]
   import Path, only: [join: 2]
@@ -10,8 +10,7 @@ defmodule Matrix.Log do
   @name :session_logger
   @cfg [
     type: :file,
-    modes: [:write, :append],
-    formatter: {Matrix.Log.Format, %{}}
+    modes: [:write, :append]
   ]
 
   def setup(name, argv) do
