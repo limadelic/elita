@@ -24,7 +24,6 @@ Feature: Boss
       | yes |
 
   @tape:boss2
-  @wip
   Scenario: Office boss
     * > el
 
