@@ -69,7 +69,7 @@ defmodule Matrix.Log do
   end
 
   defp path(name) do
-    join(dir(name), "#{name}_#{pid()}.log")
+    join(dir(name), "#{name}_#{pid()}.trace")
   end
 
   defp dir(_name) do
