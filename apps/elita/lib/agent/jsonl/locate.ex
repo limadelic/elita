@@ -5,11 +5,12 @@ defmodule Agent.Jsonl.Locate do
   import String, only: [replace: 3, ends_with?: 2]
   import Enum, only: [filter: 2, at: 2]
   import Agent.Jsonl.Legacy, only: [find: 0]
+  import Log, only: [trace: 1]
 
   def find(folder) when is_binary(folder) do
     encoded = encode(folder)
-    log("watcher:folder=#{folder}\n")
-    log("watcher:encoded=#{encoded}\n")
+    trace("watcher:folder=#{folder}\n")
+    trace("watcher:encoded=#{encoded}\n")
     direct(encoded)
   end
 
@@ -25,24 +26,24 @@ defmodule Agent.Jsonl.Locate do
   end
 
   defp direct(encoded) do
-    log("watcher:target=#{encoded}\n")
+    trace("watcher:target=#{encoded}\n")
     accept(encoded, report(dir?(encoded)))
   rescue
     _ -> nil
   end
 
   defp report(exists) do
-    log("watcher:exists=#{exists}\n")
+    trace("watcher:exists=#{exists}\n")
     exists
   end
 
   defp accept(dir, true) do
-    log("watcher:scanning=#{dir}\n")
+    trace("watcher:scanning=#{dir}\n")
     ls!(dir) |> filter(&ends_with?(&1, ".jsonl")) |> pick(dir)
   end
 
   defp accept(_, false) do
-    log("watcher:wait for dir\n")
+    trace("watcher:wait for dir\n")
     nil
   end
 
@@ -50,13 +51,7 @@ defmodule Agent.Jsonl.Locate do
 
   defp pick(files, dir) do
     path = join(dir, at(files, 0))
-    log("watcher:using #{path}\n")
+    trace("watcher:using #{path}\n")
     path
-  end
-
-  defp log(msg) do
-    :erlang.apply(:"Elixir.Matrix.Log", :write, [msg])
-  rescue
-    _ -> :ok
   end
 end
