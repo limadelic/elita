@@ -1,6 +1,6 @@
 defmodule Tape.Matcher do
   import Enum, only: [all?: 2, any?: 2]
-  import String, only: [contains?: 2, ends_with?: 2, slice: 3]
+  import String, only: [contains?: 2, ends_with?: 2, replace: 3, slice: 3]
   import Map, only: [fetch: 2]
   import Regex, only: [compile!: 1]
 
@@ -56,8 +56,10 @@ defmodule Tape.Matcher do
     binary(a, b, is_binary(a), is_binary(b))
   end
 
+  defp normalize(s) when is_binary(s), do: replace(s, ~r/\s+/, " ")
+
   defp binary(a, b, true, true) do
-    contains?(b, a)
+    contains?(normalize(b), normalize(a))
   end
 
   defp binary(a, b, false, false) do

@@ -16,5 +16,5 @@ Create test scenarios as simple structured data with:
 - **behavior**: what should happen 
 - **status**: pending
 
-Use the set tool to store the scenarios.  
+Use the set tool to store EACH scenario individually with key `test_scenario_N` (where N increments: 1, 2, 3...). Value must be JSON with name, behavior, and status fields.
 Then become to texec to execute them.  

@@ -13,7 +13,7 @@ defmodule Tools.Sys.Spec.Schema do
 end
 
 defmodule Tools.Sys.Spec do
-  import Log, only: [log: 5]
+  import Log, only: [log: 5, agent: 5]
   import Cfg, only: [config: 1]
 
   @icon "🧪"
@@ -22,10 +22,15 @@ defmodule Tools.Sys.Spec do
 
   def icon, do: @icon
 
-  def exec(_, %{"name" => name}, %{config: config} = state) do
-    name = "#{name}_spec"
-    spec = config(name)
-    log(@icon, name, ":", "\n#{spec.content}\n", :white)
+  def exec(_, %{"name" => name}, %{config: config, name: agent} = state) do
+    spec = config("#{name}_spec")
+    audit(spec, name, agent, config, state)
+  end
+
+  defp audit(spec, name, agent, config, state) do
+    key = "#{name}_spec"
+    log(@icon, key, ":", "\n#{spec.content}\n", :white)
+    agent(@icon, key, ":", "\n#{spec.content}\n", %{name: agent})
     {spec.content, %{state | config: config ++ [spec]}}
   end
 end
