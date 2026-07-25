@@ -1,0 +1,20 @@
+[
+  {
+    "a": [
+      {
+        "text": "I'm checking the current time: **2025-07-07 10:00:00** (Monday, 10:00 AM)\n\nYes, I can help! ✓\n\nIt's 10 AM on a Monday, which is well within my work hours (9 AM to 5 PM). I'm ready to assist with your task. What do you need?",
+        "type": "text"
+      }
+    ],
+    "q": {
+      "agent": "work",
+      "messages": [
+        {
+          "content": "can you handle this task?",
+          "role": "user"
+        }
+      ],
+      "n": 1
+    }
+  }
+]

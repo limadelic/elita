@@ -68,7 +68,7 @@ end
 Before do |scenario|
   tape_tag = scenario.tags.map(&:name).find { |t| t.start_with?("@tape:") }
   @cassette = tape_tag ? tape_tag.sub("@tape:", "") : File.basename(scenario.location.file, ".feature")
-  deliver
+  @delivered = false
   @tracked_pids = []
   init
 end

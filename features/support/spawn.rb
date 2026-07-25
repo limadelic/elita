@@ -14,6 +14,7 @@ module Spawn
       "LIVE=#{live} " +
       "CASSETTE=#{@cassette} " +
       "CASSETTE_DIR=#{dir} " +
+      clock_prefix +
       "MIX_ENV=test " +
       "#{gate} " +
       "#{args}"
@@ -27,6 +28,7 @@ module Spawn
       "LIVE=#{live} " +
       "CASSETTE=#{@cassette} " +
       "CASSETTE_DIR=#{dir} " +
+      clock_prefix +
       "MIX_ENV=test " +
       "#{gate} " +
       "#{args}"
@@ -63,7 +65,7 @@ module Spawn
   end
 
   def base
-    {
+    config = {
       "TAPE" => tape,
       "LIVE" => live,
       "CASSETTE" => @cassette,
@@ -71,6 +73,30 @@ module Spawn
       "MIX_ENV" => "test",
       "ELITA_RUN" => flux
     }
+    clock = clock_env
+    config["CLOCK"] = clock if clock
+    config
+  end
+
+  def clock_env
+    unfrozen? ? nil : frozen_clock
+  end
+
+  def frozen_clock
+    @clock || default_clock
+  end
+
+  def default_clock
+    ENV.fetch("CLOCK", "2025-07-07 10:00:00")
+  end
+
+  def unfrozen?
+    ENV["TAPE"] == "rec" || ENV["LIVE"] == "1"
+  end
+
+  def clock_prefix
+    c = clock_env
+    c ? "CLOCK='#{c}' " : ""
   end
 
   def tape
@@ -128,13 +154,22 @@ module Spawn
   end
 
   def reset(args)
+    ensure_delivered
+    clear_transcript
+    launch(spawn(args), query(args), tag(args))
+  end
+
+  def clear_transcript
     @transcript = ""
     @transcript_stripped = ""
     @screen = Screen.new
-    cmd = spawn(args)
-    prompt = query(args)
-    puppet_name = tag(args)
-    launch(cmd, prompt, puppet_name)
+  end
+
+  def ensure_delivered
+    return if @delivered
+
+    deliver
+    @delivered = true
   end
 
   def query(args)
