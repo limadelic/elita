@@ -38,7 +38,7 @@ defmodule Matrix.Wrap.Rpc do
 
   defp await do
     receive do
-      {:DOWN, _, _, _, _r} -> nil
+      {:DOWN, _, _, _, _r} -> :ok
     end
   end
 end

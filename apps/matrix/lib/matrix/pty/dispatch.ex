@@ -1,5 +1,6 @@
 defmodule Matrix.Pty.Dispatch do
   @moduledoc false
+  import Matrix.Trace, only: [record: 1]
   import Matrix.Pty.Handler
   import Matrix.Pty.Cleanup
   import Matrix.Pty.Buffer, only: [prime: 2, gate: 2]
@@ -15,7 +16,9 @@ defmodule Matrix.Pty.Dispatch do
     {:noreply, updated}
   end
 
-  def info({:stdin, _data}, state) do
+  def info({:stdin, data}, %{pty: pty, port: port, input: input} = state) do
+    record(data)
+    write(port, pty, input.(data))
     {:noreply, state}
   end
 
