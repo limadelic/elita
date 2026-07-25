@@ -1,7 +1,7 @@
 defmodule Tools.Sys.Set do
   import Log, only: [log: 5, agent: 5]
   import Map, only: [put: 3]
-  import Mem, only: [depth: 0, table: 0]
+  import Mem, only: [depth: 0, table: 1]
 
   @icon "✏️"
 
@@ -22,7 +22,7 @@ defmodule Tools.Sys.Set do
   def exec(_tool, %{"value" => value, "key" => key}, %{name: name} = state) do
     log(@icon, key, " = ", value, :blue)
     agent(@icon, key, " = ", value, %{name: name})
-    store(key, value)
+    store(name, key, value)
     {"stored", state}
   end
 
@@ -45,11 +45,11 @@ defmodule Tools.Sys.Set do
     }
   end
 
-  defp store(key, value) do
-    key |> pick() |> :ets.insert({key, value})
+  defp store(name, key, value) do
+    key |> pick(name) |> :ets.insert({key, value})
   end
 
-  defp pick("depth_" <> _), do: depth()
-  defp pick("tree_" <> _), do: depth()
-  defp pick(_), do: table()
+  defp pick("depth_" <> _, _name), do: depth()
+  defp pick("tree_" <> _, _name), do: depth()
+  defp pick(_key, name), do: table(name)
 end

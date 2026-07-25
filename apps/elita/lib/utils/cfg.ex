@@ -6,9 +6,15 @@ defmodule Cfg do
   import YamlElixir, only: [read_from_string: 1]
 
   def config(name) do
-    md = file("#{name}.md")
-    md |> parse() |> tools() |> includes() |> default(name: name)
+    file("#{name}.md")
+    |> valid(name)
+    |> finalize(name)
   end
+
+  defp finalize(md, name), do: md |> parse() |> tools() |> includes() |> default(name: name)
+
+  defp valid("file not found: " <> _, name), do: raise(RuntimeError, "unknown agent: #{name}")
+  defp valid(md, _), do: md
 
   defp tools(%{tools: raw} = config) when is_binary(raw) do
     list = split(raw, ",") |> map(&trim/1) |> reject(&empty/1)

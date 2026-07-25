@@ -1,23 +1,29 @@
-@wip
 @tape:mother
 Feature: Mother
 
-  @wip
   Scenario: speck reads, writes, and runs mother scenarios
     * > el speck
+
     * speck> exec mother
-      | 🧪 mother_spec | spawn |
-      | 🤖 mother      | spawn |
-    * verify
-      | 🎭 speck as tplan |                                 |
-      | ✏️ scenario_1     | Mother Spawns Baby Successfully |
-      | ✏️ scenario_2     | Spawned Baby Is Functional      |
-      | ✏️ scenario_3     | Multiple Births Are Possible    |
-      | ✏️ scenario_4     | Baby Agent Name Is Unique       |
-    * verify
-      | 🎭 speck as texec |             |
-      | 🚀 mother_v1      | as mother   |
-      | 🚀 baby_v1        | as baby     |
-      | ✨ baby_v1         | WAAAAAHHHHH |
-      | 🚀 baby_v2        | as baby     |
-      | ✨ speck           | PASSED      |
+
+    * speck> log
+      | 🧪 mother_spec       | Spawn Tool                                    |
+      | 🤖 mother            | ready to give birth                           |
+      | 🤖 baby              | newborn                                       |
+      | 🎭 speck as tplan    |                                               |
+      | ✏️ test_scenario_1   | Mother successfully spawns baby agent         |
+      | ✏️ test_scenario_2   | Spawned baby agent exhibits expected behavior |
+      | ✏️ test_scenario_3   | Baby agent is independently functional        |
+      | ✏️ test_scenario_4   | Mother initiates birth event                  |
+      | 🎭 speck as texec    |                                               |
+      | 🚀 mother_v1         | as mother                                     |
+      | 🤔 speck → mother_v1 | It is time to give birth                      |
+      | ✨ mother_v1 → speck  | Congratulations                               |
+      | ✏️ test_scenario_1   | Mother successfully spawns baby agent         |
+      | 🚀 baby_v1           | as baby                                       |
+      | 🤔 speck → baby_v1   | What do you do                                |
+      | ✨ baby_v1 → speck    | cry                                           |
+      | ✏️ test_scenario_2   | Spawned baby agent exhibits expected behavior |
+      | ✏️ test_scenario_3   | Baby agent is independently functional        |
+      | ✏️ test_scenario_4   | Mother initiates birth event                  |
+      | ✨ speck              | PASSED                                        |

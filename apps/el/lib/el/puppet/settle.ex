@@ -1,6 +1,6 @@
 defmodule El.Puppet.Settle do
-  import El.Log, only: [write: 1]
-  import El.Pty, only: [unwatch: 2]
+  import Matrix.Log, only: [write: 1]
+  import Matrix.Pty, only: [unwatch: 2]
   import El.Puppet.Filter, only: [answer?: 2, mark: 1]
   import String, only: [contains?: 2]
 

@@ -2,7 +2,7 @@ defmodule El.Distribution.Helpers do
   import Node, only: [connect: 1]
   import Enum, only: [each: 2]
   import El.Peers, only: [load: 0]
-  import El.Log, only: [write: 1]
+  import Matrix.Log, only: [write: 1]
   import Registry, only: [lookup: 2]
   import El.Run, only: [suffix: 0]
 

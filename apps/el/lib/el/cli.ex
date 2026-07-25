@@ -10,9 +10,10 @@ defmodule El.CLI do
   import El.Distribution, only: [daemon: 0]
   import El.Command.Ls, only: [list: 1]
   import El.REPL, only: [run: 1, run: 2, attach: 2]
-  import El.Log, only: [setup: 2]
+  import Matrix.Log, only: [setup: 2]
   import El.Ask, only: [invoke: 2]
-  import El.Cli.Parse, only: [parse: 1]
+  import El.Cli.Parse, only: [parse: 1, name: 1]
+  import El.Bin, only: [locate: 0]
 
   @usage """
   Usage:
@@ -31,8 +32,13 @@ defmodule El.CLI do
     argv |> route() |> exec()
   end
 
+  defp route(["claude" | rest] = argv) do
+    setup(name(argv), [locate() | rest])
+    argv |> parse()
+  end
+
   defp route(argv) do
-    setup("default", argv)
+    setup(name(argv), argv)
     argv |> parse()
   end
 

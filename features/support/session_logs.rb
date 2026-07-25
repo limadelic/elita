@@ -16,9 +16,7 @@ module SessionLogs
   end
 
   def pluck(logs)
-    return "" if logs.empty?
-
-    File.read(logs.last)
+    logs.map { |log| File.read(log) }.join("")
   end
 
   def attest(rows, name, pid)

@@ -1,5 +1,42 @@
-[
-  {
-    "screen": "╭─── Claude Code v2.1.208 ─────────────────────────────────────────────────────╮\n│                                                    │ Tips for getting        │\n│                 Welcome back mike!                 │ started                 │\n│                                                    │ Run /init to create a … │\n│                      ▗ ▗   ▖ ▖                     │ ─────────────────────── │\n│                       ███████                      │ What's new              │\n│                        ▘▘ ▝▝                       │ Added screen reader mo… │\n│    Haiku 4.5 · Claude Max · mikemps@gmail.com's    │ Added `vimInsertModeRe… │\n│    Organization                                    │ Added `CLAUDE_CODE_PRO… │\n│   ~/dev/self/elita/walter/apps/elita/agents/elita  │ /release-notes for more │\n╰──────────────────────────────────────────────────────────────────────────────╯\n\nmalko> "
-  }
-]
+{
+  "screens": {
+    "malko": "▗ ▗   ▖\n▘▘ ▝▝\nClaude Code\nHaiku",
+    "keeper": "▗ ▗   ▖\n▘▘ ▝▝\nClaude Code\nHaiku"
+  },
+  "tape": [
+    {
+      "a": [
+        {
+          "text": "sesame is a magic word",
+          "type": "text"
+        }
+      ],
+      "q": {
+        "agent": "keeper",
+        "messages": [
+          {
+            "content": "what is sesame?"
+          }
+        ],
+        "n": 1
+      }
+    },
+    {
+      "a": [
+        {
+          "text": "2",
+          "type": "text"
+        }
+      ],
+      "q": {
+        "agent": "malko",
+        "messages": [
+          {
+            "content": "1 + 1"
+          }
+        ],
+        "n": 1
+      }
+    }
+  ]
+}

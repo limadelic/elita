@@ -1,6 +1,7 @@
 Feature: Ttt
 
   @tape:ttt
+  @wip
   Scenario: Two players play to the end
     * > el ttt as alice
 

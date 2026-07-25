@@ -38,7 +38,8 @@ defmodule El.MixProject do
 
   defp deps do
     [
-      {:elita, in_umbrella: true}
+      {:elita, in_umbrella: true},
+      {:matrix, in_umbrella: true}
     ]
   end
 end

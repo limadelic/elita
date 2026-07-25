@@ -1,5 +1,6 @@
 require 'timeout'
 require 'fileutils'
+require 'json'
 require_relative 'daemon'
 require_relative 'home'
 require_relative 'cassette'
@@ -69,8 +70,9 @@ Before do |scenario|
   tape_tag = scenario.tags.map(&:name).find { |t| t.start_with?("@tape:") }
   @cassette = tape_tag ? tape_tag.sub("@tape:", "") : File.basename(scenario.location.file, ".feature")
   @snap = scenario.location.file.include?("malko")
-  deliver
+  @delivered = false
   @tracked_pids = []
+  @screens_captured = {}
   init
 end
 
@@ -81,6 +83,7 @@ end
 
 After do |_scenario|
   Timeout.timeout(30) do
+    merge_screens if ENV["TAPE"] == "rec"
     revoke
     bundle
   end
@@ -88,6 +91,45 @@ rescue Timeout::Error
   STDERR.puts "After hook timed out after 30s"
   purge
   slash
+end
+
+def merge_screens
+  return unless valid_capture?
+
+  path = cassette_path
+  data = read_cassette(path)
+  write_cassette(path, data)
+end
+
+def valid_capture?
+  screens? && file?
+end
+
+def screens?
+  @screens_captured&.any?
+end
+
+def file?
+  File.exist?(cassette_path)
+end
+
+def cassette_path
+  File.join(dir, "#{@cassette}.json")
+end
+
+def read_cassette(path)
+  JSON.parse(File.read(path))
+end
+
+def write_cassette(path, data)
+  screens = data["screens"] || {}
+  screens.merge!(@screens_captured)
+  data["screens"] = screens
+  File.write(path, JSON.pretty_generate(data))
+end
+
+def dir
+  File.expand_path("../cassettes", __FILE__)
 end
 
 AfterAll do

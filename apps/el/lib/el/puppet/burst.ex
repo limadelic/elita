@@ -1,5 +1,5 @@
 defmodule El.Puppet.Burst do
-  import El.Log, only: [write: 1]
+  import Matrix.Log, only: [write: 1]
   import System, only: [monotonic_time: 1]
 
   def grow(state, data) do

@@ -2,6 +2,14 @@
 
 require 'pty'
 
+When(/^clock (.+)$/) do |time|
+  @clock = time
+end
+
+When(/^cassette (.+)$/) do |name|
+  @cassette = name
+end
+
 When(/^> el tell (.+)$/) do |args, *rest|
   output = one("tell #{args}")
   track(output, output.gsub(/\e\[[0-9;]*m/, ''))
@@ -20,6 +28,7 @@ end
 
 When(/^(\w+)> (.+)$/) do |prompt, input, *rest|
   table = rest.first
+
   note(prompt, input) if table && valid?(table)
   emit(input, prompt)
   output = retrying(15) { collect(prompt, input) }
@@ -79,11 +88,9 @@ def track(chunk, stripped)
 end
 
 def note(prompt, input)
-  # Do NOT fabricate emoji lines - they come from real Elixir output
 end
 
 def reply(prompt, table, output)
-  # Do NOT fabricate emoji lines - they come from real Elixir output via session log
 end
 
 def sound?(table)
@@ -103,7 +110,6 @@ rescue StandardError
 end
 
 def silence(prompt, text, _output)
-  # Do NOT fabricate emoji lines - they come from real Elixir output via session log
 end
 
 def retrying(times, &block)
@@ -127,7 +133,23 @@ def trace(lines)
 end
 
 def source
+  branch? ? recording : session
+end
+
+def branch?
+  replay? && stub?
+end
+
+def recording
+  @transcript_stripped || ""
+end
+
+def session
   @current ? pull(@current, @pid) : ""
+end
+
+def replay?
+  ENV["TAPE"] != "rec"
 end
 
 def persist(times, &block)

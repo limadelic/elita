@@ -2,7 +2,7 @@ defmodule El.Commands.Reset do
   @moduledoc false
   import :os, only: [cmd: 1]
   import File, only: [write!: 2]
-  import El.Log, only: [write: 1]
+  import Matrix.Log, only: [write: 1]
 
   def cleanup do
     write("shutdown\n")

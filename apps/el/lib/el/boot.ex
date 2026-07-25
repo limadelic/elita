@@ -7,7 +7,7 @@ defmodule El.Boot do
   import Path, only: [basename: 1]
   import El.Host, only: [host: 0]
   import String, only: [contains?: 2]
-  import El.Log, only: [write: 1]
+  import Matrix.Log, only: [write: 1]
   import El.Run, only: [suffix: 0]
 
   def go(name \\ :default, opts \\ []) do
