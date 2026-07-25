@@ -22,11 +22,28 @@ World(Guard)
 
 BeforeAll do
   Timeout.timeout(30) do
+    scavenge
     nest
     summon
   end
 rescue Timeout::Error
   raise "BeforeAll setup timed out after 30s"
+end
+
+def scavenge
+  homes = stale
+  archive(homes) unless homes.empty?
+end
+
+def stale
+  tmp_dir = File.expand_path('../../tmp', __dir__)
+  Dir.glob(File.join(tmp_dir, 'home*')).select { |f| File.directory?(f) }
+end
+
+def archive(homes)
+  trash = File.join('/tmp', "elita_homes_#{Time.now.to_i}")
+  FileUtils.mkdir_p(trash)
+  homes.each { |path| FileUtils.mv(path, File.join(trash, File.basename(path))) }
 end
 
 Around do |scenario, block|
