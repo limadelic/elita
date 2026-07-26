@@ -23,10 +23,10 @@ module ReplHelper
 
   def save_screen(args)
     name = tag(args)
-    capture(name) if valid?(name)
+    capture(name) if named?(name)
   end
 
-  def valid?(name)
+  def named?(name)
     @screen && name
   end
 
