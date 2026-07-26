@@ -44,7 +44,7 @@ module ReplHelper
 
   def cache(args)
     name = tag(args)
-    mark(args, name)
+    enroll(args, name)
     prompt = query(args)
     mutex = Mutex.new
     drain_thread = hatch(@reader, @transcript, @transcript_stripped, mutex)
@@ -94,7 +94,7 @@ module ReplHelper
   def flow(chunk, transcript, transcript_stripped, mutex)
     encoded = brand(chunk)
     stripped = scrub(encoded)
-    sync(encoded, stripped, transcript, transcript_stripped, mutex)
+    enqueue(encoded, stripped, transcript, transcript_stripped, mutex)
   end
 
   def brand(chunk)
@@ -187,7 +187,7 @@ module ReplHelper
     @sessions[@current]&.dig(:prompt)
   end
 
-  def mark(args, name)
+  def enroll(args, name)
     register(name) if listed?(args)
   end
 

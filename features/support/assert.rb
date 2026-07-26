@@ -84,10 +84,10 @@ module Assert
   def assert(expected, output)
     return if sprite?(expected, output)
 
-    sweep(expected, output)
+    verify_words(expected, output)
   end
 
-  def sweep(expected, output)
+  def verify_words(expected, output)
     expected.split.each { |w| trial(w, output) }
   end
 

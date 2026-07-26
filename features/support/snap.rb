@@ -19,7 +19,7 @@ module Snap
     "Expected snap block (#{golden_lines.length} lines):\nActual snap (#{snap_lines.length} lines):\n#{snap_detail}"
   end
 
-  def capture
+  def seize
     screen_render = @screen ? @screen.to_s : ""
     lines = screen_render.split("\n")
     crop(lines)
@@ -56,9 +56,9 @@ module Snap
   end
 
   def snooze(timeout)
-    current = capture
+    current = seize
     sleep 3
-    next_frame = capture
+    next_frame = seize
 
     return current if current == next_frame
 
