@@ -22,6 +22,9 @@ World(Guard)
 
 BeforeAll do
   Timeout.timeout(30) do
+    if ENV["TAPE"] == "rec"
+      raise "record mode needs a single feature file" unless ARGV.grep(/\.feature$/).one?
+    end
     scavenge
     nest
     summon
