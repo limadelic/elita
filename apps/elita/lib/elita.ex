@@ -9,9 +9,7 @@ defmodule Elita do
   import Msg, only: [user: 1]
   import Reply, only: [deliver: 2]
   import String, only: [trim: 1]
-  import System, only: [get_env: 1, put_env: 2]
   import Keyword, only: [get: 3]
-  import Enum, only: [each: 2]
   import Tools
 
   defdelegate spawn(name, configs), to: Elita.Boot
@@ -23,37 +21,23 @@ defmodule Elita do
   def init({name, configs}), do: init({name, configs, [sender: name]})
 
   def init({name, configs, opts}) do
-    inject(opts)
+    settings = get(opts, :settings, %{})
     create(name)
-    seed()
-    {:ok, state(name, configs, opts)}
+    seed(settings)
+    {:ok, state(name, configs, opts, settings)}
   end
 
-  defp inject(opts) do
-    each(get(opts, :tape_env, %{}), &set/1)
-  end
-
-  defp set({:tape, v}), do: assign(:tape, v)
-  defp set({:live, v}), do: assign(:live, v)
-  defp set({:cassette, v}), do: assign(:cassette, v)
-  defp set({:cassette_dir, v}), do: assign(:cassette_dir, v)
-
-  defp assign(_, nil), do: :ok
-  defp assign(:tape, v), do: put_env("TAPE", v)
-  defp assign(:live, v), do: put_env("LIVE", v)
-  defp assign(:cassette, v), do: put_env("CASSETTE", v)
-  defp assign(:cassette_dir, v), do: put_env("CASSETTE_DIR", v)
-
-  defp state(name, configs, opts) do
+  defp state(name, configs, opts, settings) do
     base = %{name: name, config: load(configs), history: [], configs: configs}
+    base = merge(base, settings)
     merge(base, %{sender: sender(opts, name), skip_logs: skip(opts)})
   end
 
   defp sender(opts, name), do: get(opts, :sender, name)
   defp skip(opts), do: get(opts, :skip_logs, false)
 
-  defp seed do
-    get_env("TAPE") |> tape()
+  defp seed(settings) do
+    tape(Map.get(settings, :tape))
   end
 
   defp tape(nil), do: :ok
