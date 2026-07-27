@@ -1,18 +1,18 @@
 defmodule Agent.Ask do
   import String, only: [trim: 1]
-  import Tape, only: [handle: 3]
+  import Tape, only: [handle: 4]
   import Agent.Watch, only: [start: 3]
 
-  def reply(name, message, body, folder, runner) do
-    start(name, message, folder)
-    process(name, body, message, folder, runner)
+  def reply(message, body, state) do
+    process(message, body, state)
   rescue
     _ -> ""
   end
 
-  defp process(name, body, message, folder, runner) do
-    response = handle(body, name, fn -> runner.(message, folder) end)
-    emit(response, name)
+  defp process(message, body, %{name: n, tape: t, live: l, runner: r, folder: f}) do
+    start(n, message, f)
+    opts = [tape: t, live: l]
+    emit(handle(body, n, fn -> r.(message, f) end, opts), n)
   end
 
   defp emit([%{"text" => text, "type" => "text"}], name) do

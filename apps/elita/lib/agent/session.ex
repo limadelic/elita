@@ -2,12 +2,13 @@ defmodule Agent.Session do
   use GenServer
 
   import Agent.Spawn, only: [run: 2]
-  import Agent.Ask, only: [reply: 5]
+  import Agent.Ask, only: [reply: 3]
   import Agent.Log, only: [reply: 1]
   import GenServer, only: [start_link: 3, call: 3, cast: 2]
   import Keyword, only: [fetch!: 2, get: 3]
   import Map, only: [put: 3]
   import String, only: [downcase: 1]
+  import System, only: [get_env: 1]
 
   def start_link(opts) do
     folder = fetch!(opts, :folder)
@@ -35,11 +36,22 @@ defmodule Agent.Session do
   end
 
   defp state(opts) do
-    %{name: fetch!(opts, :name), folder: fetch!(opts, :folder)}
+    base(opts) |> setup() |> merge(opts)
+  end
+
+  defp base(opts), do: %{name: fetch!(opts, :name), folder: fetch!(opts, :folder)}
+
+  defp setup(state), do: state |> put(:tape, tape()) |> put(:live, live())
+
+  defp merge(state, opts) do
+    state
     |> put(:self, get(opts, :self, nil))
     |> put(:runner, get(opts, :runner, &run/2))
     |> put(:skip_logs, get(opts, :skip_logs, false))
   end
+
+  defp tape, do: get_env("TAPE")
+  defp live, do: get_env("LIVE")
 
   @impl true
   def handle_call({:ask, message}, _from, state) do
@@ -64,7 +76,7 @@ defmodule Agent.Session do
   end
 
   defp process(message, state, body) do
-    reply(state.name, message, body, state.folder, state.runner)
+    reply(message, body, state)
   end
 
   @impl true
