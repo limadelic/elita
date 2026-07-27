@@ -57,7 +57,7 @@ defmodule El.Puppet.Invoke do
   end
 
   defp persist(request, response) do
-    add(get_env("CASSETTE"), get_env("CASSETTE_DIR"), request, response)
+    add(c = get_env("CASSETTE"), d = get_env("CASSETTE_DIR"), request, response)
   catch
     _, _ -> fail()
   end
