@@ -39,11 +39,9 @@ defmodule Tape.Play.Pick do
   defp extract(nil, matches), do: last(matches)["a"]
 
   defp slot?(ctx, {e, idx}) do
-    bind(key(ctx.cassette), ctx.name, idx, times(e))
+    bind(ctx.cassette, ctx.name, idx, times(e))
   end
 
   defp times(%{"times" => times}), do: times
   defp times(_), do: 1
-
-  defp key(cassette), do: cassette
 end
