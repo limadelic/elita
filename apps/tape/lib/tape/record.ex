@@ -6,7 +6,7 @@ defmodule Tape.Record do
 
   def record(body, name, fun) do
     response = fun.()
-    add(get_env("CASSETTE"), get_env("CASSETTE_DIR"), sparse(body, name), response)
+    add(c = get_env("CASSETTE"), d = get_env("CASSETTE_DIR"), sparse(body, name), response)
     response
   end
 
