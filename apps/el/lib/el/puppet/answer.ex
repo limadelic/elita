@@ -1,5 +1,5 @@
 defmodule El.Puppet.Answer do
-  import El.Pty, only: [inject: 2, watch: 2, unwatch: 2]
+  import Matrix.Pty, only: [inject: 2, watch: 2, unwatch: 2]
   import El.Puppet.Collect, only: [collect: 1]
   import GenServer, only: [cast: 2]
   import System, only: [monotonic_time: 1]

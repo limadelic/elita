@@ -38,9 +38,15 @@ module Badges
   end
 
   def self.quality(pref)
-    return unless File.exist?('/tmp/credo.json')
+    data = credo
+    mark(pref, data) if data
+  end
 
-    credo = JSON.parse(File.read('/tmp/credo.json'))
+  def self.credo
+    fetch('/tmp/credo.json')
+  end
+
+  def self.mark(pref, credo)
     color, message = lint(credo['issues'].length)
     json = JSON.generate(badge('credo', message, color))
     File.write("site/#{pref}/lint.json", json)
@@ -52,10 +58,14 @@ module Badges
   end
 
   def self.scenarios
-    return nil unless File.exist?('reports/cucumber.json')
+    data = fetch('reports/cucumber.json')
+    elements(data) if data
+  end
 
-    data = JSON.parse(File.read('reports/cucumber.json'))
-    elements(data)
+  def self.fetch(path)
+    JSON.parse(File.read(path))
+  rescue JSON::ParserError, Errno::ENOENT
+    nil
   end
 
   def self.elements(data)

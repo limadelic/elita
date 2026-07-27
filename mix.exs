@@ -25,6 +25,7 @@ defmodule Elita.Umbrella do
       test: [&run_test/1],
       lint: [&run_lint/1],
       cukes: [&run_cukes/1],
+      cuke: [&run_cuke/1],
       build: [&run_build/1],
       ship: "cmd bin/release"
     ]
@@ -34,6 +35,7 @@ defmodule Elita.Umbrella do
     unless Mix.Task.recursing?() do
       check("cd apps/elita && mix test")
       check("cd apps/el && mix test")
+      check("cd apps/matrix && mix test")
     end
   end
 
@@ -41,6 +43,7 @@ defmodule Elita.Umbrella do
     check("mix format --check-formatted")
     check("cd apps/el && mix format --check-formatted")
     check("cd apps/elita && mix format --check-formatted")
+    check("cd apps/matrix && mix format --check-formatted")
     check("mix credo --strict")
     check("bundle exec rubocop")
     check("npm run fmt:check")
@@ -52,6 +55,19 @@ defmodule Elita.Umbrella do
     files_arg = if Enum.any?(files), do: " #{Enum.join(files, " ")}", else: ""
     cmd = "bundle exec cucumber --profile default" <> files_arg <> (if extra != "", do: " #{extra}", else: "")
     check(cmd)
+  end
+
+  defp run_cuke(argv) do
+    case argv do
+      [] ->
+        raise Mix.Error, message: "Usage: mix cuke <profile> [args...]"
+
+      [profile | rest] ->
+        tape = System.get_env("TAPE", "replay")
+        args = rest |> Enum.join(" ") |> String.trim()
+        cmd = "TAPE=#{tape} bundle exec cucumber --profile #{profile}" <> (if args != "", do: " #{args}", else: "")
+        check(cmd)
+    end
   end
 
   defp untagged_features do

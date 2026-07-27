@@ -8,6 +8,30 @@ module ReplHelper
     sessions
     reset(args)
     cache(args)
+    snap(args)
+  end
+
+  def snap(args)
+    return unless recording?
+
+    save_screen(args)
+  end
+
+  def recording?
+    ENV["TAPE"] == "rec"
+  end
+
+  def save_screen(args)
+    name = tag(args)
+    capture(name) if named?(name)
+  end
+
+  def named?(name)
+    @screen && name
+  end
+
+  def capture(name)
+    @screens_captured[name] = @screen.to_s
   end
 
   def cassette
@@ -20,9 +44,14 @@ module ReplHelper
 
   def cache(args)
     name = tag(args)
+    enroll(args, name)
     prompt = query(args)
     mutex = Mutex.new
     drain_thread = hatch(@reader, @transcript, @transcript_stripped, mutex)
+    stake(name, drain_thread, prompt, mutex)
+  end
+
+  def stake(name, drain_thread, prompt, mutex)
     @sessions[name] = forge(drain_thread, prompt, mutex)
     @current = name
     @drain_thread = drain_thread
@@ -65,7 +94,7 @@ module ReplHelper
   def flow(chunk, transcript, transcript_stripped, mutex)
     encoded = brand(chunk)
     stripped = scrub(encoded)
-    sync(encoded, stripped, transcript, transcript_stripped, mutex)
+    enqueue(encoded, stripped, transcript, transcript_stripped, mutex)
   end
 
   def brand(chunk)
@@ -158,6 +187,22 @@ module ReplHelper
     @sessions[@current]&.dig(:prompt)
   end
 
+  def enroll(args, name)
+    register(name) if listed?(args)
+  end
+
+  def register(name)
+    (@claudes ||= []) << name
+  end
+
+  def listed?(args)
+    args =~ /\bclaude\b/
+  end
+
+  def stub?
+    (@claudes ||= []).include?(@current)
+  end
+
   def activate(name)
     return unless (session = @sessions[name])
 
@@ -187,9 +232,10 @@ end
 require_relative "spawn"
 require_relative "drain"
 require_relative "search"
+require_relative "snap"
 require_relative "assert"
 require_relative "session_logs"
 require_relative "status"
 require_relative "record"
 
-World(ReplHelper, Spawn, Drain, Search, Assert, SessionLogs, Status, Record)
+World(ReplHelper, Spawn, Drain, Search, Snap, Assert, SessionLogs, Status, Record)

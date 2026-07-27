@@ -1,48 +1,54 @@
-[
-  {
-    "a": [
-      {
-        "text": "1 + 1 = **2**",
-        "type": "text"
-      }
-    ],
-    "q": {
-      "agent": "malko",
-      "messages": [
-        {
-          "content": "1+1"
-        }
-      ],
-      "n": 1
-    }
+{
+  "screens": {
+    "malko": "▗ ▗   ▖\n▘▘ ▝▝\nClaude Code\nHaiku",
+    "malkovich": "▗ ▗   ▖\n▘▘ ▝▝\nClaude Code\nHaiku"
   },
-  {
-    "a": [
-      {
-        "text": "a portal is a gateway",
-        "type": "text"
+  "tape": [
+    {
+      "a": [
+        {
+          "text": "1 + 1 = **2**",
+          "type": "text"
+        }
+      ],
+      "q": {
+        "agent": "malko",
+        "messages": [
+          {
+            "content": "1+1"
+          }
+        ],
+        "n": 1
       }
-    ],
-    "q": {
-      "agent": "malkovich",
-      "messages": [
+    },
+    {
+      "a": [
         {
-          "content": "what is a portal?"
+          "text": "a portal is a gateway",
+          "type": "text"
         }
       ],
-      "n": 1
+      "q": {
+        "agent": "malkovich",
+        "messages": [
+          {
+            "content": "what is a portal?"
+          }
+        ],
+        "n": 1
+      }
+    },
+    {
+      "a": [],
+      "q": {
+        "agent": "malko",
+        "messages": [
+          {
+            "content": "1+1"
+          }
+        ],
+        "n": 1
+      }
     }
-  },
-  {
-    "a": [],
-    "q": {
-      "agent": "malko",
-      "messages": [
-        {
-          "content": "1+1"
-        }
-      ],
-      "n": 1
-    }
-  }
-]
+  ]
+}

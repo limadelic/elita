@@ -16,19 +16,19 @@ module Record
 
   def append(chunk, stripped)
     chunk = encode(chunk)
-    @mutex ? atom(chunk, stripped) : bare(chunk, stripped)
+    @mutex ? atom(chunk, stripped) : tuck(chunk, stripped)
   end
 
   def atom(chunk, stripped)
     @mutex.synchronize { ingest(chunk, encode(stripped), @transcript, @transcript_stripped) }
   end
 
-  def bare(chunk, stripped)
+  def tuck(chunk, stripped)
     store(chunk, @transcript)
     store(encode(stripped), @transcript_stripped)
   end
 
-  def sync(encoded, stripped, transcript, transcript_stripped, mutex)
+  def enqueue(encoded, stripped, transcript, transcript_stripped, mutex)
     mutex.synchronize { ingest(encoded, stripped, transcript, transcript_stripped) }
   end
 

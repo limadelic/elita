@@ -1,0 +1,23 @@
+╭─── Claude Code v2.1.208 ─────────────────────────────────────────────────────╮
+│                                                    │ Tips for getting        │
+│                 Welcome back mike!                 │ started                 │
+│                                                    │ Run /init to create a … │
+│                      ▗ ▗   ▖ ▖                     │ ─────────────────────── │
+│                                                    │ What's new              │
+│                        ▘▘ ▝▝                       │ Added screen reader mo… │
+│    Haiku 4.5 · Claude Max · mikemps@gmail.com's    │ Added `vimInsertModeRe… │
+│    Organization                                    │ Added `CLAUDE_CODE_PRO… │
+│   ~/dev/self/elita/walter/apps/elita/agents/elita  │ /release-notes for more │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+ ⚠ 3 MCP servers need authentication · run /mcp
+
+
+
+                                                          ctrl+g to edit in Vim
+────────────────────────────────────────────────────────────────────────────────
+❯ /exit
+
+───────────────────────────────────────────────────────────────────────────────
+  🧠 ░░░░░░░░░  ☀️ ░░░░░░░░░ 🌙 ░░░░░░░░░ 🐸
+  ⏵⏵ bypass permissions on (shift+tab to cycle)

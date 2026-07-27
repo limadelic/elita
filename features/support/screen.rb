@@ -14,7 +14,7 @@ class Screen
     clear
   end
 
-  def absorb(bytes)
+  def ingest(bytes)
     return unless content?(bytes)
 
     bytes.each_char { |char| process(char) }
