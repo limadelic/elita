@@ -15,8 +15,9 @@ defmodule Tape.Play do
   end
 
   defp context(entries, body, name, fun, miss) do
+    cassette = get_env("CASSETTE")
     %{entries: entries, normalized: norm(body, name), body: body,
-      name: name, fun: fun, on_miss: miss}
+      name: name, fun: fun, on_miss: miss, cassette: cassette}
   end
 
   defp norm(body, name) do
