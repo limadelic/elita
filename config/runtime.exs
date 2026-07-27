@@ -1,3 +1,3 @@
 import Config
 
-config :matrix, :trace_log, System.get_env("EL_TRACE")
+config :matrix, :trace, System.get_env("EL_TRACE")
