@@ -36,8 +36,6 @@ defmodule Matrix.MixProject do
   end
 
   defp deps do
-    [
-      {:elita, in_umbrella: true}
-    ]
+    []
   end
 end

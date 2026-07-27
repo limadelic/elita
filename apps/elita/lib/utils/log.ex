@@ -49,6 +49,13 @@ defmodule Log do
     _ in [File.Error, ErlangError] -> :ok
   end
 
+  def trace(message) do
+    dir() |> mkdir_p!()
+    write(target(), message <> "\n", [:append])
+  rescue
+    _ in [File.Error, ErlangError] -> :ok
+  end
+
   defp ensure(_dir, message) do
     write(path("elita"), message, [:append])
     puts(message)
@@ -71,6 +78,10 @@ defmodule Log do
 
   defp path(name) do
     join(dir(), "#{name}_#{pid()}.log")
+  end
+
+  defp target do
+    join(dir(), "elita_#{pid()}.trace")
   end
 
   defp dir do

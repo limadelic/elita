@@ -4,6 +4,7 @@ defmodule Agent.Watch do
   import Agent.Jsonl, only: [find: 3]
   import Agent.Puppet, only: [cwd: 0]
   import Process, only: [sleep: 1]
+  import Log, only: [trace: 1]
 
   def start(agent, question, folder \\ nil) do
     spawn(fn -> init(agent, question, folder) end)
@@ -19,15 +20,9 @@ defmodule Agent.Watch do
   defp resolve(folder), do: folder
 
   defp boot(agent, question, folder) do
-    log("WATCHER START #{agent} #{question}\n")
-    log("watcher:folder=#{inspect(folder)}\n")
+    trace("WATCHER START #{agent} #{question}\n")
+    trace("watcher:folder=#{inspect(folder)}\n")
     {agent, question, folder, monotonic_time(:millisecond), 0} |> loop()
-  end
-
-  defp log(msg) do
-    :erlang.apply(:"Elixir.Matrix.Log", :write, [msg])
-  rescue
-    _ -> :ok
   end
 
   defp loop({_, _, _, start, _pos} = state) do
@@ -74,12 +69,12 @@ defmodule Agent.Watch do
   end
 
   defp oops(:exit, e) do
-    log("WATCHER CATCH EXIT #{inspect(e)}\n")
+    trace("WATCHER CATCH EXIT #{inspect(e)}\n")
     :wait
   end
 
   defp oops(k, r) do
-    log("WATCHER CATCH #{k} #{inspect(r)}\n")
+    trace("WATCHER CATCH #{k} #{inspect(r)}\n")
     :wait
   end
 

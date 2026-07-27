@@ -33,12 +33,12 @@ defmodule Matrix.Pty do
     pid
   end
 
-  def wait(pid) do
+  def join(pid) do
     await(pid)
   end
 
   def run(name, opts \\ []) do
-    launch(name, opts) |> wait()
+    launch(name, opts) |> join()
   end
 
   defp invoke(nil, _pid), do: :ok

@@ -213,7 +213,7 @@ module Spawn
     words.first
   end
 
-  def brand(value)
+  def recode(value)
     value.force_encoding("UTF-8") rescue value.to_s
   end
 

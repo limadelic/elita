@@ -25,7 +25,7 @@ end
 
 defmodule Tools.Sys.Ask do
   import Agent.Harness, only: [dispatch: 3]
-  import Log, only: [write: 1, agent: 5]
+  import Log, only: [write: 1, agent: 5, trace: 1]
   import String, only: [trim: 1]
 
   @icon "🤔"
@@ -65,7 +65,7 @@ defmodule Tools.Sys.Ask do
   defp record(sender, recipient, question, _) do
     msg = "#{@icon} #{sender} → #{recipient} | #{question}\n"
     write(msg)
-    el(msg)
+    trace(msg)
     agent(@icon, "#{sender} → #{recipient}", " | ", question, %{name: sender})
   end
 
@@ -79,7 +79,7 @@ defmodule Tools.Sys.Ask do
   defp emit(agent, text) do
     msg = "#{@reply} #{agent} | #{trim(text)}\n"
     write(msg)
-    el(msg)
+    trace(msg)
   end
 
   defp log(agent, text) do
@@ -101,13 +101,7 @@ defmodule Tools.Sys.Ask do
   defp log(replier, asker, text, _) do
     msg = "#{@reply} #{replier} → #{asker} | #{trim(text)}\n"
     write(msg)
-    el(msg)
+    trace(msg)
     agent(@reply, "#{replier} → #{asker}", " | ", text, %{name: asker})
-  end
-
-  defp el(msg) do
-    :erlang.apply(:"Elixir.Matrix.Log", :write, [msg])
-  rescue
-    _ -> :ok
   end
 end

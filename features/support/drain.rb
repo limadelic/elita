@@ -168,7 +168,7 @@ module Drain
   end
 
   def paint(chunk)
-    @screen.absorb(chunk) if @screen
+    @screen.ingest(chunk) if @screen
   end
 
   def render(chunk)

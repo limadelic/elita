@@ -182,10 +182,10 @@ module Search
   end
 
   def timeout
-    recording? ? 300 : leash
+    taping? ? 300 : leash
   end
 
-  def recording?
+  def taping?
     ENV['TAPE'] == 'rec'
   end
 
