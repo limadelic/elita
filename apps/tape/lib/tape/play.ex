@@ -11,7 +11,7 @@ defmodule Tape.Play do
 
   def play(body, name, fun, on_miss \\ :raise) do
     e = load(c = get_env("CASSETTE"), get_env("CASSETTE_DIR"))
-    seed(e)
+    seed(e, c)
     %{entries: e, normalized: norm(body, name), body: body,
       name: name, fun: fun, on_miss: on_miss, cassette: c} |> answer()
   end
@@ -28,8 +28,8 @@ defmodule Tape.Play do
   defp recent([]), do: []
   defp recent(messages), do: [last(messages)]
 
-  defp seed([]), do: guard(get_env("CASSETTE"))
-  defp seed(_), do: :ok
+  defp seed([], cassette), do: guard(cassette)
+  defp seed(_, _), do: :ok
 
   defp guard(nil), do: :ok
   defp guard(cassette), do: raise("no cassette: #{cassette}")
@@ -65,7 +65,7 @@ defmodule Tape.Play do
   defp scan(_entry, ctx, idx, _agent), do: untagged(ctx, idx + 1)
 
   defp hit(true, entry, ctx, idx) do
-    claim(tape(), idx, ticks(entry))
+    claim(ctx.cassette, idx, ticks(entry))
     |> keep(entry, ctx, idx)
   end
 
@@ -77,6 +77,5 @@ defmodule Tape.Play do
   defp ticks(%{"times" => times}), do: times
   defp ticks(_), do: 1
 
-  defp tape, do: get_env("CASSETTE")
   defp normalize(req), do: req |> encode!() |> decode!()
 end
