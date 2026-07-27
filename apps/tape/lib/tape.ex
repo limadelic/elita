@@ -1,12 +1,11 @@
 defmodule Tape do
-  import System, only: [get_env: 1]
-  import Keyword, only: [get: 3]
+  import Keyword, only: [get: 2, get: 3]
   import Tape.Play, only: [play: 4]
   import Tape.Record, only: [record: 3]
 
   def handle(body, name, fun, opts \\ []) do
     %{body: body, name: name, fun: fun, on_miss: get(opts, :on_miss, :raise),
-      tape: get_env("TAPE"), live: get_env("LIVE")}
+      tape: get(opts, :tape), live: get(opts, :live)}
     |> route()
   end
 

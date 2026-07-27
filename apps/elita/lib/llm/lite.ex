@@ -13,20 +13,14 @@ defmodule Lite do
   def llm(%{config: config, history: history, name: agent_name} = state) do
     composed = compose(config)
     body = build(composed, history, state)
-    result = tape(body, agent_name)
+    result = tape(body, agent_name, state)
     {parts(result), state}
   end
 
-  def llm(text) when is_binary(text) do
-    tape(request(text), "direct") |> text
+  defp tape(body, name, state) do
+    payload = [tape: state[:tape], live: state[:live]] ++ opts(get_env("TAPE_ON_MISS"))
+    handle(body, name, fn -> req(body) |> resp end, payload)
   end
-
-  defp tape(body, name) do
-    handle(body, name, fn -> req(body) |> resp end, opts(get_env("TAPE_ON_MISS")))
-  end
-
-  defp text([%{"type" => "text", "text" => t} | _]), do: t
-  defp text(other), do: other
 
   defp req(body), do: post(url(), payload(body))
 
@@ -77,10 +71,6 @@ defmodule Lite do
     do: %{"tool_use" => %{"id" => id, "name" => name, "input" => input}}
 
   defp part(other), do: other
-
-  defp request(text) do
-    %{model: model(), max_tokens: 4096, messages: [%{role: "user", content: text}]}
-  end
 
   defp url, do: "#{get_env("ANTHROPIC_BASE_URL", "https://api.anthropic.com")}/v1/messages"
   defp model, do: "claude-haiku-4-5"
