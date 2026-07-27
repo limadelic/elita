@@ -4,7 +4,7 @@ defmodule Elita do
   import Cfgs, only: [load: 1]
   import History, only: [record: 1]
   import Llm, only: [llm: 1]
-  import Map, only: [merge: 2]
+  import Map, only: [merge: 2, get: 2]
   import Mem, only: [create: 1]
   import Msg, only: [user: 1]
   import Reply, only: [deliver: 2]
@@ -21,23 +21,23 @@ defmodule Elita do
   def init({name, configs}), do: init({name, configs, [sender: name]})
 
   def init({name, configs, opts}) do
-    settings = get(opts, :settings, %{})
+    settings = get(opts, :tape_env, %{})
     create(name)
     seed(settings)
     {:ok, state(name, configs, opts, settings)}
   end
 
   defp state(name, configs, opts, settings) do
-    base = %{name: name, config: load(configs), history: [], configs: configs}
-    base = merge(base, settings)
-    merge(base, %{sender: sender(opts, name), skip_logs: skip(opts)})
+    %{name: name, config: load(configs), history: [], configs: configs}
+    |> merge(settings)
+    |> merge(%{sender: sender(opts, name), skip_logs: skip(opts)})
   end
 
   defp sender(opts, name), do: get(opts, :sender, name)
   defp skip(opts), do: get(opts, :skip_logs, false)
 
   defp seed(settings) do
-    tape(Map.get(settings, :tape))
+    tape(get(settings, :tape))
   end
 
   defp tape(nil), do: :ok
