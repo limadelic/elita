@@ -1,6 +1,6 @@
 defmodule Tape.Play do
   import Tape.Matcher, only: [contains: 2]
-  import Tape.Store, only: [load: 0]
+  import Tape.Store, only: [load: 2]
   import Tape.Writer, only: [claim: 3]
   import Tape.Play.Pick, only: [agent: 1]
   import System, only: [get_env: 1]
@@ -10,14 +10,10 @@ defmodule Tape.Play do
   import Jason, only: [decode!: 1, encode!: 1]
 
   def play(body, name, fun, on_miss \\ :raise) do
-    seed(load())
-    context(load(), body, name, fun, on_miss) |> answer()
-  end
-
-  defp context(entries, body, name, fun, miss) do
-    cassette = get_env("CASSETTE")
-    %{entries: entries, normalized: norm(body, name), body: body,
-      name: name, fun: fun, on_miss: miss, cassette: cassette}
+    e = load(c = get_env("CASSETTE"), get_env("CASSETTE_DIR"))
+    seed(e)
+    %{entries: e, normalized: norm(body, name), body: body,
+      name: name, fun: fun, on_miss: on_miss, cassette: c} |> answer()
   end
 
   defp norm(body, name) do
