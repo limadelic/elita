@@ -52,8 +52,6 @@ defmodule El.Puppet.Answer do
 
   defp target(name) when is_atom(name) do
     lookup(name)
-  catch
-    _, _ -> nil
   end
 
   defp lookup(name) do
