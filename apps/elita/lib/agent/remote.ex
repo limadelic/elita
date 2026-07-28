@@ -4,8 +4,8 @@ defmodule Agent.Remote do
 
   def find(agent) do
     :net_adm.names(~c"127.0.0.1") |> list() |> search(agent)
-  rescue
-    _ -> :undefined
+  catch
+    _, _ -> :undefined
   end
 
   defp list({:ok, n}), do: n
