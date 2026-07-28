@@ -26,7 +26,7 @@ defmodule Elita.Application do
 
   defp specs,
     do:
-      [child_spec(keys: :unique, name: ElitaRegistry), spawner()] ++
+      [child_spec(keys: :unique, name: ElitaRegistry), spawner(), tasks()] ++
         tapes()
 
   defp tapes,
@@ -40,6 +40,9 @@ defmodule Elita.Application do
 
   defp spawner,
     do: {DynamicSupervisor, name: Elita.Spawner, strategy: :one_for_one}
+
+  defp tasks,
+    do: {Task.Supervisor, name: Elita.Tasks}
 
   defp opts,
     do: [strategy: :one_for_one, name: Elita.Supervisor]
