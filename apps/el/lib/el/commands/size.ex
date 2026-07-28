@@ -1,8 +1,9 @@
 defmodule El.Commands.Size do
   @moduledoc false
 
-  import System
+  import Application
   import String
+  import System, except: [get_env: 2]
 
   def size, do: fallback([env(), stty(), {24, 80}])
 
@@ -10,7 +11,7 @@ defmodule El.Commands.Size do
   defp fallback([size | _]), do: size
 
   defp env do
-    {int(get_env("EL_ROWS")), int(get_env("EL_COLS"))}
+    {int(get_env(:el, :rows)), int(get_env(:el, :cols))}
     |> validate()
   end
 
