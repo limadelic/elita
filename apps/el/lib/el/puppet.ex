@@ -83,8 +83,6 @@ defmodule El.Puppet do
 
   defp setup do
     start_link(keys: :unique, name: ElitaRegistry)
-  rescue
-    _ -> :ok
   end
 
   defp normalize(name) do
