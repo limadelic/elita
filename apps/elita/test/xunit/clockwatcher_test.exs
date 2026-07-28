@@ -13,7 +13,7 @@ defmodule ClockwatcherTest do
   for {name, clock, cassette, fragment} <- @cases do
     @tag cassette: cassette
     test "#{name}" do
-      System.put_env("CLOCK", unquote(clock))
+      Application.put_env(:elita, :clock_override, unquote(clock))
       spawn(unquote(name), :clockwatcher)
       result = ask(unquote(name), "can you handle this task?")
       verify(unquote(fragment), result)

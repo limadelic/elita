@@ -3,6 +3,7 @@ defmodule Elita.Boot do
   import Kernel, except: [spawn: 3]
   import String, only: [downcase: 1]
   import System, only: [get_env: 2]
+  import Application, only: [get_env: 3]
 
   def spawn(name, configs, opts \\ [])
   def spawn(name, configs, []), do: boot(name, configs, sender: name)
@@ -23,7 +24,7 @@ defmodule Elita.Boot do
   end
 
   defp boot(name, configs, opts, true) do
-    there(name, configs, opts, get_env("CLOCK", nil))
+    there(name, configs, opts, get_env(:elita, :clock_override, nil))
   end
 
   defp boot(name, configs, opts, false) do
@@ -42,7 +43,7 @@ defmodule Elita.Boot do
   end
 
   defp push(addr, val) do
-    :erpc.call(addr, System, :put_env, ["CLOCK", val], 5000)
+    :erpc.call(addr, Application, :put_env, [:elita, :clock_override, val], 5000)
   catch
     _, _ -> :ok
   end

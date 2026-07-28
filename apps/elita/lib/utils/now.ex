@@ -1,11 +1,10 @@
 defmodule Now do
   import :calendar, only: [local_time: 0]
-  import Application, only: [get_env: 3]
-  import System, only: [get_env: 1]
+  import Application, only: [get_env: 2, get_env: 3]
   import NaiveDateTime, only: [from_erl!: 1, from_iso8601!: 1, to_erl: 1]
 
   def time do
-    get_env("CLOCK") |> clock()
+    get_env(:elita, :clock_override) |> clock()
   end
 
   def text do

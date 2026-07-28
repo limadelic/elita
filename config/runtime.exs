@@ -10,6 +10,7 @@ config :elita, :base_url, System.get_env("ANTHROPIC_BASE_URL", "https://api.anth
 config :elita, :auth_token, System.get_env("ANTHROPIC_AUTH_TOKEN") || System.get_env("ANTHROPIC_API_KEY")
 config :elita, :ca_certs, System.get_env("NODE_EXTRA_CA_CERTS")
 config :elita, :tape_on_miss, System.get_env("TAPE_ON_MISS")
+config :elita, :clock_override, System.get_env("CLOCK")
 config :el, :claude, System.get_env("CLAUDE")
 config :el, :system_prompt, System.get_env("EL_SYSTEM_PROMPT")
 config :el, :claude_model, System.get_env("CLAUDE_MODEL", "haiku")
