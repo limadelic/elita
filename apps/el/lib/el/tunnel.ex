@@ -3,6 +3,7 @@ defmodule El.Tunnel do
   import Node, only: [connect: 1]
   import System, only: [pid: 0, get_env: 2]
   import El.Run, only: [suffix: 0]
+  import El.Trace, only: [write: 1]
 
   defp safely(fun, default) do
     fun.()
@@ -47,7 +48,11 @@ defmodule El.Tunnel do
 
   defp result({:ok, _}), do: :ok
   defp result({:error, {:already_started, _}}), do: :ok
-  defp result({:error, _}), do: :ok
+
+  defp result({:error, reason}) do
+    write("tunnel spawn failed reason=#{inspect(reason)}\n")
+    :ok
+  end
 
   defp peer(agent), do: safely(fn -> connect(:"#{agent}#{suffix()}@127.0.0.1") end, :ok)
 
