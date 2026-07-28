@@ -33,7 +33,7 @@ defmodule El.Ask do
   end
 
   defp rpc(node, agent, msg) do
-    :erpc.call(node, Agent.Portal, :response, [agent, msg])
+    :erpc.call(node, Agent.Portal, :response, [agent, msg], 5000)
   end
 
   defp miss(agent), do: "unknown: el.#{agent}"

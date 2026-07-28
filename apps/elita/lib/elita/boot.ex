@@ -42,7 +42,7 @@ defmodule Elita.Boot do
   end
 
   defp push(addr, val) do
-    :erpc.call(addr, System, :put_env, ["CLOCK", val])
+    :erpc.call(addr, System, :put_env, ["CLOCK", val], 5000)
   catch
     _, _ -> :ok
   end

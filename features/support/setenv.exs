@@ -13,8 +13,8 @@ unless Node.alive?() do
 end
 
 if Node.connect(target_node) do
-  if cassette, do: :erpc.call(target_node, System, :put_env, ["CASSETTE", cassette])
-  if cassette_dir, do: :erpc.call(target_node, System, :put_env, ["CASSETTE_DIR", cassette_dir])
+  if cassette, do: :erpc.call(target_node, System, :put_env, ["CASSETTE", cassette], 5000)
+  if cassette_dir, do: :erpc.call(target_node, System, :put_env, ["CASSETTE_DIR", cassette_dir], 5000)
 end
 
 System.halt(0)

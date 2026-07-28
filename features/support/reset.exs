@@ -13,9 +13,9 @@ end
 if Node.connect(node_name) do
   # Terminate all spawned agents via DynamicSupervisor
   try do
-    children = :erpc.call(node_name, DynamicSupervisor, :which_children, [Elita.Spawner])
+    children = :erpc.call(node_name, DynamicSupervisor, :which_children, [Elita.Spawner], 5000)
     Enum.each(children, fn {_id, pid, _type, _modules} ->
-      :erpc.call(node_name, DynamicSupervisor, :terminate_child, [Elita.Spawner, pid])
+      :erpc.call(node_name, DynamicSupervisor, :terminate_child, [Elita.Spawner, pid], 5000)
     end)
   rescue _ -> nil
   end
@@ -24,9 +24,9 @@ if Node.connect(node_name) do
 
   # Restart Tape.Writer to reset counter
   try do
-    :erpc.call(node_name, Supervisor, :terminate_child, [Tape.Supervisor, Tape.Writer])
+    :erpc.call(node_name, Supervisor, :terminate_child, [Tape.Supervisor, Tape.Writer], 5000)
     Process.sleep(50)
-    :erpc.call(node_name, Supervisor, :restart_child, [Tape.Supervisor, Tape.Writer])
+    :erpc.call(node_name, Supervisor, :restart_child, [Tape.Supervisor, Tape.Writer], 5000)
   rescue _ -> nil
   end
 
