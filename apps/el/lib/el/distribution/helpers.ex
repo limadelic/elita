@@ -27,7 +27,7 @@ defmodule El.Distribution.Helpers do
     a = :"#{name}#{suffix()}@127.0.0.1"
     write("connect #{a}: #{inspect(connect(a))}\n")
     :global.sync()
-    :global.whereis_name({name, :puppet}) |> reply(name)
+    :global.whereis_name({to_string(name), :puppet}) |> reply(name)
   end
 
   def find(name) do

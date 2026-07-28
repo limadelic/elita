@@ -83,6 +83,6 @@ defmodule El.Tunnel do
 
   defp fetch(node, agent) do
     full = :"#{node}@127.0.0.1"
-    safely(fn -> :erpc.call(full, :global, :whereis_name, [{agent, :puppet}]) end, nil)
+    safely(fn -> :erpc.call(full, :global, :whereis_name, [{to_string(agent), :puppet}]) end, nil)
   end
 end
