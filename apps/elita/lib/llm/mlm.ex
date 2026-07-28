@@ -1,14 +1,12 @@
 defmodule Mlm do
+  import Application, only: [get_env: 2]
   import Compose, only: [compose: 1]
   import Map, only: [put: 3]
   import Req, only: [post: 2]
-  import System, only: [get_env: 2]
   import Tools, only: [tools: 2]
 
   import Adapt, only: [resp: 1, text: 1, parts: 1]
   import Shape, only: [messages: 2, equip: 2]
-
-  @url "http://#{get_env("MLM_HOST", "localhost")}:11434/api/chat"
 
   def llm(text) when is_binary(text) do
     body(text) |> req() |> resp() |> text()
@@ -35,11 +33,16 @@ defmodule Mlm do
     %{model: m, messages: msgs, stream: false}
   end
 
+  defp url do
+    host = get_env(:elita, :mlm_host)
+    "http://#{host}:11434/api/chat"
+  end
+
   defp req(body) do
-    post(@url, json: put(body, :think, false), receive_timeout: 120_000)
+    post(url(), json: put(body, :think, false), receive_timeout: 120_000)
   end
 
   defp model do
-    get_env("MLM_MODEL", "qwen3-fast")
+    get_env(:elita, :mlm_model)
   end
 end
