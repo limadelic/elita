@@ -31,6 +31,7 @@ defmodule Matrix.MixProject do
 
   def application do
     [
+      mod: {Matrix.Application, []},
       extra_applications: [:logger]
     ]
   end
