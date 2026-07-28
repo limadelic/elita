@@ -11,7 +11,6 @@ defmodule El.Boot do
   import El.Run, only: [suffix: 0]
 
   def go(name \\ :default, opts \\ []) do
-    :os.cmd(~c"epmd -daemon")
     boot(node(name, opts), mode(opts))
   end
 

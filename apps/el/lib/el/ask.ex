@@ -39,7 +39,6 @@ defmodule El.Ask do
   defp miss(agent), do: "unknown: el.#{agent}"
 
   defp prime do
-    :os.cmd(~c"epmd -daemon")
     self() |> boot()
     ensure_all_started(:elita)
   end
