@@ -29,7 +29,5 @@ defmodule Agent.Ask do
 
   defp answer(agent, text) do
     :erlang.apply(:"Elixir.Tools.Sys.Ask", :answer, [agent, text])
-  rescue
-    _ -> :ok
   end
 end
