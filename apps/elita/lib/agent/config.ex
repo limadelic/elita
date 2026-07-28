@@ -1,10 +1,10 @@
 defmodule Agent.Config do
   import Enum, only: [map: 2, reject: 2]
   import String, only: [to_atom: 1, split: 3, trim: 1]
-  import System, only: [get_env: 1]
+  import Application, only: [get_env: 2]
 
   def load do
-    get_env("AGENT_REGISTRATIONS")
+    get_env(:elita, :registrations)
     |> fetch()
   end
 
