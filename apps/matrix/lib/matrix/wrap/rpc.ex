@@ -14,10 +14,14 @@ defmodule Matrix.Wrap.Rpc do
   end
 
   defp guard(pid, msg, opts) do
-    start_child(Matrix.Tasks, fn -> track(self()) end)
+    watch(self())
     attempt(pid, msg, opts)
   rescue
     _ -> :error
+  end
+
+  defp watch(caller) do
+    start_child(Matrix.Tasks, fn -> track(caller) end)
   end
 
   defp attempt(pid, msg, opts) do
