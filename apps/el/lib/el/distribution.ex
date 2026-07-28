@@ -42,7 +42,7 @@ defmodule El.Distribution do
 
   defp go(_name, _tries, _pid, _), do: nil
 
-  def daemon do
+  def launch do
     boot(address())
     ensure_all_started(:elita)
     dial()

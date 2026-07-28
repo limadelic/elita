@@ -18,7 +18,7 @@ defmodule El.Command.Ls do
   defp reach(:error, path), do: hatch(path)
 
   defp hatch(path) do
-    get_env("EL_DAEMON_SPAWN") |> gate(path)
+    get_env("EL_NODE_SPAWN") |> gate(path)
   end
 
   defp gate("1", path) do

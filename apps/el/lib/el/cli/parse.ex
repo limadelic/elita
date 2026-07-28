@@ -13,7 +13,7 @@ defmodule El.Cli.Parse do
   def name([tool, "tell", agent | _]) when tool in @known_tools, do: agent
   def name(["ls" | _]), do: "default"
   def name(["cd" | _]), do: "default"
-  def name(["daemon"]), do: "default"
+  def name(["node"]), do: "default"
   def name([_config, "as", label]), do: label
   def name([agent | rest]) when length(rest) > 0, do: agent
   def name([agent]), do: agent
@@ -31,7 +31,7 @@ defmodule El.Cli.Parse do
   def parse(["ls"]), do: {:ls, nil}
   def parse(["ls", path]), do: {:ls, path}
   def parse(["cd", path]), do: {:cd, path}
-  def parse(["daemon"]), do: :daemon
+  def parse(["node"]), do: :node
   def parse([]), do: {:repl, "el"}
   def parse([config, "as", name]), do: {:as, config, name}
 

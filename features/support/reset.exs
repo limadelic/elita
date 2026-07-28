@@ -1,5 +1,5 @@
 #!/usr/bin/env elixir
-# Reset daemon agents and tape state between scenarios
+# Reset node agents and tape state between scenarios
 
 node_name = :"elita-cukes@127.0.0.1"
 
