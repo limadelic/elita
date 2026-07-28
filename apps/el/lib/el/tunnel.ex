@@ -8,8 +8,8 @@ defmodule El.Tunnel do
 
   defp safely(fun, default) do
     fun.()
-  rescue
-    _ -> default
+  catch
+    _, _ -> default
   end
 
   def boot(agent) do
