@@ -21,18 +21,29 @@ defmodule El.Distribution do
   end
 
   def wait(name) do
-    norm = normalize(name)
+    norm = name |> to_string() |> downcase()
+    flush()
     attach(name)
-    register(norm)
-    ready(norm)
+    open(norm)
   end
 
-  defp normalize(name) do
-    name |> to_string() |> downcase()
+  defp flush do
+    receive do
+      {:puppet_ready, _, _} -> flush()
+    after
+      0 -> :ok
+    end
   end
 
-  defp register(norm) do
-    :global.register_name({:waiter, norm}, self())
+  defp open(norm) do
+    branch(:global.register_name({:waiter, norm}, self()), norm)
+  end
+
+  defp branch(:yes, norm), do: ready(norm)
+
+  defp branch(:no, norm) do
+    flush()
+    :global.whereis_name({norm, :puppet})
   end
 
   defp ready(norm) do
@@ -49,7 +60,7 @@ defmodule El.Distribution do
 
   defp await(norm) do
     receive do
-      {:puppet_ready, pid} ->
+      {:puppet_ready, ^norm, pid} ->
         done(norm, pid)
     after
       5_000 ->
@@ -58,12 +69,9 @@ defmodule El.Distribution do
   end
 
   defp done(norm, value) do
-    unregister(norm)
-    value
-  end
-
-  defp unregister(norm) do
+    flush()
     :global.unregister_name({:waiter, norm})
+    value
   end
 
   def launch do
