@@ -3,7 +3,6 @@ defmodule Agent.Watch do
   import System, only: [monotonic_time: 1]
   import Agent.Jsonl, only: [find: 3]
   import Agent.Puppet, only: [cwd: 0]
-  import Process, only: [sleep: 1]
   import Log, only: [trace: 1]
   import Task.Supervisor, only: [start_child: 2]
 
@@ -54,8 +53,10 @@ defmodule Agent.Watch do
   end
 
   defp wait(agent, question, folder, start, pos) do
-    sleep(100)
-    loop({agent, question, folder, start, pos})
+    receive do
+    after
+      100 -> loop({agent, question, folder, start, pos})
+    end
   end
 
   defp scan(question, folder, pos) do
