@@ -16,8 +16,8 @@ defmodule Matrix.Wrap.Rpc do
   defp guard(pid, msg, opts) do
     watch(self())
     attempt(pid, msg, opts)
-  rescue
-    _ -> :error
+  catch
+    :exit, _ -> :error
   end
 
   defp watch(caller) do
@@ -27,8 +27,8 @@ defmodule Matrix.Wrap.Rpc do
   defp attempt(pid, msg, opts) do
     remote = node(pid)
     rpc(remote, pid, msg, opts)
-  rescue
-    _ -> :error
+  catch
+    :exit, _ -> :error
   end
 
   defp rpc(node, pid, msg, opts) do
