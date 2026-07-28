@@ -16,8 +16,6 @@ defmodule El.Distribution do
 
   def target(name) do
     connect(:"#{name}#{suffix()}@127.0.0.1") |> route(name)
-  catch
-    _, _ -> find(name)
   end
 
   def wait(name) do
