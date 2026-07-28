@@ -61,8 +61,8 @@ defmodule Agent.Puppet do
 
   defp rpc(node) do
     :erpc.call(node, System, :cwd, [], 5000)
-  rescue
-    e -> error(e)
+  catch
+    _, e -> error(e)
   end
 
   defp error(e) do

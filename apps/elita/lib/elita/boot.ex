@@ -56,7 +56,7 @@ defmodule Elita.Boot do
   end
 
   defp start(addr, spec),
-    do: :erpc.call(addr, DynamicSupervisor, :start_child, [Elita.Spawner, spec], 5000)
+    do: :erpc.call(addr, DynamicSupervisor, :start_child, [Elita.Spawner, spec], 90_000)
 
   defp enroll({:ok, pid}, name, addr) do
     :erpc.call(addr, :global, :register_name, [{name, :puppet}, pid], 5000)
