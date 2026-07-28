@@ -1,11 +1,12 @@
 defmodule El.Distribution do
   import Application, only: [ensure_all_started: 1]
   import Process, only: [sleep: 1]
-  import Node, only: [connect: 1, alive?: 0, start: 2]
+  import Node, only: [connect: 1, start: 2]
   import El.Boot, only: [go: 2]
   import El.Distribution.Helpers
   import El.Run, only: [address: 0, suffix: 0]
   import El.Trace, only: [write: 1]
+  import String, only: [downcase: 1]
 
   def start(name \\ :default), do: run(name, [])
 
@@ -20,26 +21,50 @@ defmodule El.Distribution do
   end
 
   def wait(name) do
-    loop(name, 50)
-  end
-
-  defp loop(name, tries) when tries > 0 do
+    norm = normalize(name)
     attach(name)
-    go(name, tries, locate(name), alive?())
+    register(norm)
+    ready(norm)
   end
 
-  defp loop(_name, 0), do: nil
-
-  defp go(_name, _tries, pid, true) when is_pid(pid) do
-    pid
+  defp normalize(name) do
+    name |> to_string() |> downcase()
   end
 
-  defp go(name, tries, _pid, _) when tries > 1 do
-    sleep(100)
-    loop(name, tries - 1)
+  defp register(norm) do
+    :global.register_name({:waiter, norm}, self())
   end
 
-  defp go(_name, _tries, _pid, _), do: nil
+  defp ready(norm) do
+    check(norm, :global.whereis_name({norm, :puppet}))
+  end
+
+  defp check(norm, pid) when is_pid(pid) do
+    done(norm, pid)
+  end
+
+  defp check(norm, :undefined) do
+    await(norm)
+  end
+
+  defp await(norm) do
+    receive do
+      {:puppet_ready, pid} ->
+        done(norm, pid)
+    after
+      5_000 ->
+        done(norm, nil)
+    end
+  end
+
+  defp done(norm, value) do
+    unregister(norm)
+    value
+  end
+
+  defp unregister(norm) do
+    :global.unregister_name({:waiter, norm})
+  end
 
   def launch do
     boot(address())
