@@ -58,8 +58,6 @@ defmodule El.Puppet.Invoke do
 
   defp persist(request, response) do
     add(get_env("CASSETTE"), get_env("CASSETTE_DIR"), request, response)
-  catch
-    _, _ -> fail()
   end
 
   defp build(message) do
@@ -72,8 +70,4 @@ defmodule El.Puppet.Invoke do
 
   defp pick(nil), do: "puppet"
   defp pick(name), do: name
-
-  defp fail do
-    write("record fail\n")
-  end
 end
