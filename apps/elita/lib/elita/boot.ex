@@ -59,7 +59,7 @@ defmodule Elita.Boot do
     do: :erpc.call(addr, DynamicSupervisor, :start_child, [Elita.Spawner, spec], 90_000)
 
   defp enroll({:ok, pid}, name, addr) do
-    :erpc.call(addr, :global, :register_name, [{name |> downcase(), :puppet}, pid], 5000)
+    :erpc.call(addr, :global, :register_name, [{norm(name), :puppet}, pid], 5000)
     {:ok, pid}
   end
 
@@ -90,11 +90,11 @@ defmodule Elita.Boot do
 
   defp join({:error, _}), do: {:error, :init_failed}
 
-  defp reg(:undefined, name, pid), do: :global.register_name({name |> downcase(), :puppet}, pid)
+  defp norm(name), do: name |> to_string() |> downcase()
+  defp reg(:undefined, name, pid), do: :global.register_name({norm(name), :puppet}, pid)
   defp reg(_, _, _), do: :ok
 
   defp via(name) do
-    normalized = name |> to_string() |> downcase()
-    {:via, Registry, {ElitaRegistry, normalized, %{kind: :native, folder: nil}}}
+    {:via, Registry, {ElitaRegistry, norm(name), %{kind: :native, folder: nil}}}
   end
 end
