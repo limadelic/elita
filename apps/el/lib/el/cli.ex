@@ -29,6 +29,7 @@ defmodule El.CLI do
 
   def main(argv) do
     ensure_all_started(:elita)
+    ensure_all_started(:matrix)
     argv |> route() |> exec()
   end
 
