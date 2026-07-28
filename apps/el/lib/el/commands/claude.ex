@@ -35,8 +35,6 @@ defmodule El.Commands.Claude do
   defp go(name, deps) do
     start_child(Matrix.Tasks, fn -> distribute(name, deps) end)
     boot(to_atom(name), deps)
-  rescue
-    e -> write("boot error during claude setup: #{inspect(e)}\n")
   end
 
   defp distribute(name, deps) do
