@@ -59,24 +59,7 @@ defmodule Agent.Watch do
   end
 
   defp scan(question, folder, pos) do
-    guard(find(question, folder, pos))
-  end
-
-  defp guard(result) do
-    result
-  catch
-    :exit, e -> oops(:exit, e)
-    k, r -> oops(k, r)
-  end
-
-  defp oops(:exit, e) do
-    trace("WATCHER CATCH EXIT #{inspect(e)}\n")
-    :wait
-  end
-
-  defp oops(k, r) do
-    trace("WATCHER CATCH #{k} #{inspect(r)}\n")
-    :wait
+    find(question, folder, pos)
   end
 
   defp answer(agent, text) do
