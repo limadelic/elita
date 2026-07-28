@@ -29,7 +29,7 @@ defmodule El.Commands.Spawn do
   end
 
   defp boot(entry, session) do
-    key = downcase(session)
+    key = normalize(session)
     check(lookup(ElitaRegistry, key), entry, session)
   end
 
@@ -76,5 +76,9 @@ defmodule El.Commands.Spawn do
 
   defp wire(opts, rune) do
     put(opts, :runner, fn m, f -> apply(rune, :run, [m, f]) end)
+  end
+
+  defp normalize(name) do
+    name |> to_string() |> downcase()
   end
 end
