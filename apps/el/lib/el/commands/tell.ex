@@ -1,7 +1,8 @@
 defmodule El.Commands.Tell do
   @moduledoc false
+  import Application, only: [get_env: 2]
   import El.Distribution, only: [start: 0]
-  import System, only: [get_env: 2, halt: 1]
+  import System, only: [halt: 1]
   import Node, only: [start: 2, self: 0]
   import Kernel, except: [self: 0]
   import Keyword, only: [get: 3]
@@ -11,9 +12,16 @@ defmodule El.Commands.Tell do
   def send(agent, msg, _tool \\ nil, _opts \\ []) do
     prime()
     start()
-    sender = get_env("EL_FROM", node() |> to_string())
-    tell(agent, msg, sender) |> code()
+    tell(agent, msg, from()) |> code()
   end
+
+  defp from do
+    get_env(:el, :from)
+    |> default(node() |> to_string())
+  end
+
+  defp default(nil, value), do: value
+  defp default(value, _), do: value
 
   defp code(:forward), do: halt(1)
   defp code(_), do: :ok
