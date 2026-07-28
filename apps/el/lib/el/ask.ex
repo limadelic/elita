@@ -1,11 +1,12 @@
 defmodule El.Ask do
   import IO, only: [puts: 1]
-  import Node, only: [start: 2, connect: 1, self: 0]
+  import Node, only: [connect: 1, self: 0]
   import Kernel, except: [self: 0]
   import Application, only: [ensure_all_started: 1]
   import System, only: [pid: 0]
   import Enum, only: [find_value: 3]
   import Tools.Sys.Ask, only: [query: 3]
+  import El.Distribution, only: [start: 1]
 
   defp safely(fun, default) do
     fun.()
@@ -44,7 +45,7 @@ defmodule El.Ask do
   end
 
   defp boot(:nonode@nohost) do
-    start(:"ask_#{pid()}@127.0.0.1", :longnames)
+    start("ask_#{pid()}")
   end
 
   defp boot(_), do: :ok
