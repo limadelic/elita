@@ -1,9 +1,10 @@
 defmodule Matrix.Wrap.Resize do
   @moduledoc false
   import Process, only: [sleep: 1]
+  import Task.Supervisor, only: [start_child: 2]
 
   def watch(pid, opts \\ []) do
-    spawn(fn -> poll(pid, opts) end)
+    start_child(Matrix.Tasks, fn -> poll(pid, opts) end)
   end
 
   defp poll(pid, opts) do

@@ -2,9 +2,10 @@ defmodule Matrix.Pty.Watch do
   @moduledoc false
   import Process, except: [alias: 1, info: 1]
   import Port, only: [info: 1]
+  import Task.Supervisor, only: [start_child: 2]
 
   def start(pty) do
-    spawn(fn -> probe(self(), pty) end, [])
+    start_child(Matrix.Tasks, fn -> probe(self(), pty) end)
   end
 
   defp probe(parent, pty) do

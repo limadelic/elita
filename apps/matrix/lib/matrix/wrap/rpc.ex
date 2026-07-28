@@ -1,5 +1,6 @@
 defmodule Matrix.Wrap.Rpc do
   import Process, only: [monitor: 1]
+  import Task.Supervisor, only: [start_child: 2]
 
   def call(pid, msg, opts \\ [])
 
@@ -13,7 +14,7 @@ defmodule Matrix.Wrap.Rpc do
   end
 
   defp guard(pid, msg, opts) do
-    spawn(fn -> track(self()) end)
+    start_child(Matrix.Tasks, fn -> track(self()) end)
     attempt(pid, msg, opts)
   rescue
     _ -> :error
