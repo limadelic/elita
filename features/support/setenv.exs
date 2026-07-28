@@ -12,9 +12,7 @@ unless Node.alive?() do
   end
 end
 
-if Node.connect(target_node) || (
-  Node.connect(target_node)
-) do
+if Node.connect(target_node) do
   if cassette, do: :erpc.call(target_node, System, :put_env, ["CASSETTE", cassette])
   if cassette_dir, do: :erpc.call(target_node, System, :put_env, ["CASSETTE_DIR", cassette_dir])
 end
