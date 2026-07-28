@@ -73,7 +73,7 @@ defmodule Elita.Boot do
   end
 
   defp keep({:ok, pid}, name) do
-    :global.whereis_name({name, :puppet}) |> reg(name, pid)
+    :global.whereis_name({norm(name), :puppet}) |> reg(name, pid)
     {:ok, pid}
   end
 

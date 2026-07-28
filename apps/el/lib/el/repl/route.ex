@@ -52,7 +52,9 @@ defmodule El.Repl.Route do
   defp known?(w), do: w |> file?() |> settle(w)
 
   defp settle(true, _w), do: true
-  defp settle(false, w), do: :global.whereis_name({downcase(w), :puppet}) != :undefined
+  defp settle(false, w), do: w |> to_string() |> downcase() |> registered?()
+
+  defp registered?(key), do: :global.whereis_name({key, :puppet}) != :undefined
 
   defp file?(w), do: w in agents()
 
