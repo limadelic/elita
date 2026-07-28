@@ -1,14 +1,14 @@
 defmodule El.Cmd do
   @moduledoc false
-  import System, only: [get_env: 2]
+  import Application, only: [get_env: 2]
   import String, only: [replace: 3]
 
   def build do
-    base() <> prompt(get_env("EL_SYSTEM_PROMPT", nil))
+    base() <> prompt(get_env(:el, :system_prompt))
   end
 
   defp base do
-    "claude --dangerously-skip-permissions --model #{get_env("CLAUDE_MODEL", "haiku")}"
+    "claude --dangerously-skip-permissions --model #{get_env(:el, :claude_model)}"
   end
 
   defp prompt(p) when is_binary(p) do
