@@ -5,7 +5,8 @@ defmodule Matrix.Pty.Watch do
   import Task.Supervisor, only: [start_child: 2]
 
   def start(pty) do
-    start_child(Matrix.Tasks, fn -> probe(self(), pty) end)
+    caller = self()
+    start_child(Matrix.Tasks, fn -> probe(caller, pty) end)
   end
 
   defp probe(parent, pty) do
