@@ -30,8 +30,6 @@ defmodule El.Trace do
 
   def write(message) do
     cast(@name, {:write, message})
-  rescue
-    _ -> :ok
   end
 
   def start(path) do
@@ -57,8 +55,6 @@ defmodule El.Trace do
 
   defp attach(path) do
     :logger.add_handler(:session_handler, :logger_std_h, opts(path))
-  rescue
-    _ -> :ok
   end
 
   defp opts(path) do
