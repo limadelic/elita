@@ -5,8 +5,6 @@ defmodule Agent.Ask do
 
   def reply(message, body, state) do
     process(message, body, state)
-  rescue
-    _ -> ""
   end
 
   defp process(message, body, %{name: n, tape: t, live: l, runner: r, folder: f}) do
