@@ -3,14 +3,18 @@ defmodule Elita.Umbrella do
 
   def project do
     [
-      app: :elita_umbrella,
       version: "0.0.2",
       elixir: "~> 1.18",
       apps_path: "apps",
       config_path: "config/config.exs",
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      releases: [
+        elita: [
+          applications: [el: :permanent, elita: :permanent, matrix: :permanent, tape: :permanent]
+        ]
+      ]
     ]
   end
 
