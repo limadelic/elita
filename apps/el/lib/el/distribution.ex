@@ -5,6 +5,7 @@ defmodule El.Distribution do
   import El.Boot, only: [go: 2]
   import El.Distribution.Helpers
   import El.Run, only: [address: 0, suffix: 0]
+  import El.Trace, only: [write: 1]
 
   def start(name \\ :default), do: run(name, [])
 
@@ -48,5 +49,20 @@ defmodule El.Distribution do
 
   defp boot(addr) do
     start(addr, :longnames)
+  end
+
+  def hidden(name) do
+    node = :"#{name}@127.0.0.1"
+    opts = %{name_domain: :longnames, hidden: true, dist_listen: false}
+    :net_kernel.start(node, opts) |> outcome()
+  end
+
+  defp outcome({:ok, _}), do: :ok
+
+  defp outcome({:error, {:already_started, _}}), do: :ok
+
+  defp outcome({:error, reason}) do
+    write("tunnel spawn failed reason=#{inspect(reason)}\n")
+    :ok
   end
 end
