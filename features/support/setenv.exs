@@ -13,7 +13,6 @@ unless Node.alive?() do
 end
 
 if Node.connect(target_node) || (
-  :erlang.set_cookie(target_node, String.to_atom("CJVFTZXWKXEWGUZCOGHS"))
   Node.connect(target_node)
 ) do
   if cassette, do: :erpc.call(target_node, System, :put_env, ["CASSETTE", cassette])
