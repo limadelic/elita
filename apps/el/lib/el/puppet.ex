@@ -10,6 +10,7 @@ defmodule El.Puppet do
   import El.Puppet.Parse, only: [envelope: 1]
   import GenServer, only: [call: 3, cast: 2, start_link: 3]
   import Process, only: [register: 2]
+  import Task.Supervisor, only: [start_child: 2]
 
   def ask(pid, message) do
     call(pid, {:ask, message}, :infinity)
@@ -43,7 +44,7 @@ defmodule El.Puppet do
 
   def handle_call({:ask, message}, _from, %{pty: pty} = state) do
     write("ask received: #{inspect(message)}\n")
-    spawn(fn -> fire(pty, message) end)
+    start_child(Matrix.Tasks, fn -> fire(pty, message) end)
     {:reply, [], state}
   end
 
@@ -60,7 +61,7 @@ defmodule El.Puppet do
   end
 
   defp route({:ask, sender, message}, pty, _output, state) do
-    spawn(fn -> reply(pty, sender, message) end)
+    start_child(Matrix.Tasks, fn -> reply(pty, sender, message) end)
     {:noreply, state}
   end
 
