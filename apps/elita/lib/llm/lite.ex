@@ -1,9 +1,9 @@
 defmodule Lite do
+  import Application, only: [get_env: 2]
   import Compose, only: [compose: 1]
   import Snippet, only: [snip: 2]
   import Tools, only: [tools: 2]
-  import Enum, only: [map: 2, find_value: 2]
-  import System, only: [get_env: 1, get_env: 2]
+  import Enum, only: [map: 2]
   import Map, only: [put: 3, delete: 2]
   import List, only: [pop_at: 2]
   import Req, only: [post: 2]
@@ -18,7 +18,8 @@ defmodule Lite do
   end
 
   defp tape(body, name, state) do
-    payload = [tape: state[:tape], live: state[:live]] ++ opts(get_env("TAPE_ON_MISS"))
+    cfg = opts(get_env(:elita, :tape_on_miss))
+    payload = [tape: state[:tape], live: state[:live]] ++ cfg
     handle(body, name, fn -> req(body) |> resp end, payload)
   end
 
@@ -72,16 +73,16 @@ defmodule Lite do
 
   defp part(other), do: other
 
-  defp url, do: "#{get_env("ANTHROPIC_BASE_URL", "https://api.anthropic.com")}/v1/messages"
+  defp url, do: "#{get_env(:elita, :base_url)}/v1/messages"
   defp model, do: "claude-haiku-4-5"
 
   defp headers, do: [{"x-api-key", token()}, {"anthropic-version", "2023-06-01"}]
 
-  defp connect, do: ssl(get_env("NODE_EXTRA_CA_CERTS"))
+  defp connect, do: ssl(get_env(:elita, :ca_certs))
   defp ssl(nil), do: []
   defp ssl(path), do: [transport_opts: [cacertfile: path]]
 
-  defp token, do: ["ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_API_KEY"] |> find_value(&get_env/1)
+  defp token, do: get_env(:elita, :auth_token)
 
   defp resp({:ok, %{status: 200, body: %{"content" => content}}}), do: content
   defp resp({:ok, %{status: code, body: body}}), do: {:error, "HTTP #{code}: #{inspect(body)}"}
