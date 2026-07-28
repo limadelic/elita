@@ -51,8 +51,6 @@ defmodule El.REPL do
 
   defp find(agent) do
     agent |> reach() |> pick(agent)
-  catch
-    _, _ -> native(agent)
   end
 
   defp pick(val, agent) when val in [nil, :undefined], do: native(agent)
