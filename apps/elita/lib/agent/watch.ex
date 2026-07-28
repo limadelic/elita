@@ -5,10 +5,9 @@ defmodule Agent.Watch do
   import Agent.Puppet, only: [cwd: 0]
   import Process, only: [sleep: 1]
   import Log, only: [trace: 1]
-  import Task.Supervisor, only: [start_child: 2]
 
   def start(agent, question, folder \\ nil) do
-    start_child(Matrix.Tasks, fn -> init(agent, question, folder) end)
+    spawn(fn -> init(agent, question, folder) end)
   end
 
   defp init(agent, question, folder) do
