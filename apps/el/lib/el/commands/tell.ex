@@ -1,9 +1,9 @@
 defmodule El.Commands.Tell do
   @moduledoc false
   import Application, only: [get_env: 2]
-  import El.Distribution, only: [start: 0]
+  import El.Distribution, only: [start: 0, start: 1]
   import System, only: [halt: 1]
-  import Node, only: [start: 2, self: 0]
+  import Node, only: [self: 0]
   import Kernel, except: [self: 0]
   import Keyword, only: [get: 3]
   import IO, only: [write: 2]
@@ -41,7 +41,7 @@ defmodule El.Commands.Tell do
   defp prime, do: prime(self())
 
   defp prime(:nonode@nohost) do
-    start(:"tell_#{:erlang.system_time(:millisecond)}@127.0.0.1", :longnames)
+    start("tell_#{:erlang.system_time(:millisecond)}")
   end
 
   defp prime(_), do: :ok
