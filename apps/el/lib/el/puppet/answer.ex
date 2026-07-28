@@ -57,7 +57,7 @@ defmodule El.Puppet.Answer do
   end
 
   defp lookup(name) do
-    whereis_name({name, :puppet}) |> fetch()
+    whereis_name({to_string(name), :puppet}) |> fetch()
   end
 
   defp fetch(:undefined), do: nil
