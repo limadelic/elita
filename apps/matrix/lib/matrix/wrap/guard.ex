@@ -10,9 +10,6 @@ defmodule Matrix.Wrap.Guard do
 
   defp guard(task) do
     await(task, 90_000)
-  rescue
-    _ ->
-      timed(task)
   end
 
   defp fault({:timeout, _}, task), do: timed(task)
