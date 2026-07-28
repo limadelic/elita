@@ -4,6 +4,7 @@ defmodule El.Tunnel do
   import System, only: [pid: 0, get_env: 2]
   import El.Run, only: [suffix: 0]
   import El.Trace, only: [write: 1]
+  import String, only: [downcase: 1]
 
   defp safely(fun, default) do
     fun.()
@@ -87,6 +88,10 @@ defmodule El.Tunnel do
   end
 
   defp locate(full, agent) do
-    :erpc.call(full, :global, :whereis_name, [{to_string(agent), :puppet}], 5000)
+    :erpc.call(full, :global, :whereis_name, [{normalize(agent), :puppet}], 5000)
+  end
+
+  defp normalize(name) do
+    name |> to_string() |> downcase()
   end
 end

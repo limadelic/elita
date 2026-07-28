@@ -3,7 +3,7 @@ defmodule El.Puppet.Answer do
   import El.Puppet.Collect, only: [collect: 1]
   import GenServer, only: [cast: 2]
   import System, only: [monotonic_time: 1]
-  import String, only: [trim: 1]
+  import String, only: [trim: 1, downcase: 1]
   import Map, only: [merge: 2]
   import :global, only: [whereis_name: 1]
 
@@ -57,7 +57,11 @@ defmodule El.Puppet.Answer do
   end
 
   defp lookup(name) do
-    whereis_name({to_string(name), :puppet}) |> fetch()
+    whereis_name({normalize(name), :puppet}) |> fetch()
+  end
+
+  defp normalize(name) do
+    name |> to_string() |> downcase()
   end
 
   defp fetch(:undefined), do: nil

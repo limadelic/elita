@@ -3,7 +3,7 @@ defmodule El.Repl.Route do
   import El.Puppet, only: [ask: 2]
   import El.Sessions, only: [log: 1]
   import IO, only: [puts: 1]
-  import String, only: [split: 3]
+  import String, only: [split: 3, downcase: 1]
   import Utils.World, only: [agents: 0]
   import El.Distribution, only: [wait: 1]
   import Elita, only: [spawn: 3]
@@ -52,7 +52,7 @@ defmodule El.Repl.Route do
   defp known?(w), do: w |> file?() |> settle(w)
 
   defp settle(true, _w), do: true
-  defp settle(false, w), do: :global.whereis_name({w, :puppet}) != :undefined
+  defp settle(false, w), do: :global.whereis_name({downcase(w), :puppet}) != :undefined
 
   defp file?(w), do: w in agents()
 
