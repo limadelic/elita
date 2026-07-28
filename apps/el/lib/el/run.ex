@@ -1,6 +1,5 @@
 defmodule El.Run do
   import System, only: [get_env: 2]
-  import Path, only: [join: 1]
 
   def suffix do
     expand("-")
@@ -19,10 +18,5 @@ defmodule El.Run do
 
   def address do
     :"elita#{suffix()}@127.0.0.1"
-  end
-
-  def file do
-    home = get_env("HOME", get_env("USERPROFILE", "."))
-    join([home, ".elita", "peers#{suffix()}"])
   end
 end

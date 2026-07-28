@@ -45,7 +45,6 @@ defmodule El.Distribution do
   def launch do
     boot(address())
     ensure_all_started(:elita)
-    dial()
     sleep(:infinity)
   end
 

@@ -2,7 +2,6 @@ defmodule Elita.Application do
   use Application
 
   import Agent.Manager, only: [launch: 0]
-  import Application, only: [get_env: 2]
   import Elita, only: [prime: 0]
   import Mem, only: [setup: 0]
   import Registry, only: [child_spec: 1]
@@ -28,7 +27,7 @@ defmodule Elita.Application do
   defp specs,
     do:
       [child_spec(keys: :unique, name: ElitaRegistry), spawner(), tasks()] ++
-        tapes() ++ mesh()
+        tapes()
 
   defp tapes, do: t(get_env("TAPE"))
   defp t(nil), do: []
@@ -36,13 +35,6 @@ defmodule Elita.Application do
 
   defp tape,
     do: %{id: Tape.Writer, start: {Tape.Writer, :start_link, [nil]}}
-
-  defp mesh, do: m(get_env(:elita, :join_mesh))
-  defp m(true), do: [s()]
-  defp m(_), do: []
-
-  defp s,
-    do: %{id: Elita.Mesh, start: {Elita.Mesh, :start_link, [nil]}}
 
   defp spawner,
     do: {DynamicSupervisor, name: Elita.Spawner, strategy: :one_for_one}

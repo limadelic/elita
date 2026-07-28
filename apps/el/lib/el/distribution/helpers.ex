@@ -1,7 +1,5 @@
 defmodule El.Distribution.Helpers do
   import Node, only: [connect: 1]
-  import Enum, only: [each: 2]
-  import El.Peers, only: [load: 0]
   import El.Trace, only: [write: 1]
   import Registry, only: [lookup: 2]
   import El.Run, only: [suffix: 0]
@@ -12,12 +10,6 @@ defmodule El.Distribution.Helpers do
 
   def route(result, name) when result in [true, :ignored], do: locate(name)
   def route(false, name), do: find(name)
-
-  def dial do
-    load() |> each(&connect/1)
-  rescue
-    _ -> :ok
-  end
 
   def attach(name) do
     connect(:"#{name}#{suffix()}@127.0.0.1")
