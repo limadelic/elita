@@ -3,7 +3,7 @@ defmodule Elita.Boot do
   import Kernel, except: [spawn: 3]
   import String, only: [downcase: 1]
   import Application, only: [get_env: 3]
-
+  import Elita.Boot.Announce, only: [notify: 2]
   def spawn(name, configs, opts \\ [])
   def spawn(name, configs, []), do: boot(name, configs, sender: name)
   def spawn(name, configs, opts), do: boot(name, configs, opts)
@@ -66,13 +66,6 @@ defmodule Elita.Boot do
 
   defp enroll({:error, {:already_started, pid}}, _name, _addr), do: {:ok, pid}
   defp enroll(other, _name, _addr), do: other
-
-  defp notify(name, pid) do
-    :global.whereis_name({:waiter, norm(name)}) |> tell(pid)
-  end
-
-  defp tell(:undefined, _), do: :ok
-  defp tell(waiter, pid), do: send(waiter, {:puppet_ready, pid})
 
   defp addr, do: :"elita-#{get_env(:elita, :run, "")}@127.0.0.1"
 
