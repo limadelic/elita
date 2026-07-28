@@ -14,10 +14,10 @@ defmodule Elita.Application do
   end
 
   defp boot do
-    {:ok, _} = run()
+    {:ok, supervisor} = run()
     launch()
     {:ok, _} = prime()
-    {:ok, self()}
+    {:ok, supervisor}
   end
 
   defp run do
