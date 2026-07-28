@@ -1,7 +1,7 @@
 defmodule El.Distribution do
   import Application, only: [ensure_all_started: 1]
   import Process, only: [sleep: 1]
-  import Node, only: [connect: 1, start: 2]
+  import Node, only: [connect: 1, alive?: 0, start: 2]
   import El.Boot, only: [go: 2]
   import El.Distribution.Helpers
   import El.Run, only: [address: 0, suffix: 0]
@@ -21,37 +21,26 @@ defmodule El.Distribution do
   end
 
   def wait(name) do
-    :net_kernel.monitor_nodes(true)
-    name |> node() |> retry(name, 50)
-  after
-    :net_kernel.monitor_nodes(false)
+    loop(name, 50)
   end
 
-  defp node(name) do
-    :"#{name}#{suffix()}@127.0.0.1"
-  end
-
-  defp retry(target, name, tries) when tries > 0 do
+  defp loop(name, tries) when tries > 0 do
     attach(name)
-    result(locate(name), name, target, tries)
+    go(name, tries, locate(name), alive?())
   end
 
-  defp retry(_target, _name, _tries), do: nil
+  defp loop(_name, 0), do: nil
 
-  defp result(pid, _name, _target, _tries) when is_pid(pid) do
+  defp go(_name, _tries, pid, true) when is_pid(pid) do
     pid
   end
 
-  defp result(_pid, name, target, tries) do
-    receive do
-      {:nodeup, ^target} ->
-        :global.sync()
-        retry(target, name, tries - 1)
-    after
-      100 ->
-        retry(target, name, tries - 1)
-    end
+  defp go(name, tries, _pid, _) when tries > 1 do
+    sleep(100)
+    loop(name, tries - 1)
   end
+
+  defp go(_name, _tries, _pid, _), do: nil
 
   def daemon do
     boot(address())
