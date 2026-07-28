@@ -8,8 +8,8 @@ defmodule Matrix.Application do
   end
 
   defp boot do
-    {:ok, _} = run()
-    {:ok, self()}
+    {:ok, supervisor} = run()
+    {:ok, supervisor}
   end
 
   defp run do
