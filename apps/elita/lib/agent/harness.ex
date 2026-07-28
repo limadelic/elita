@@ -39,10 +39,9 @@ defmodule Agent.Harness do
   defp search(nodes, atom), do: find_value(nodes, :undefined, &fetch(&1, atom)) |> wrap()
 
   defp fetch(node, atom) do
-    :erpc.call(node, :global, :whereis_name, [{atom, :puppet}])
-  rescue
-    _ ->
-      nil
+    :erpc.call(node, :global, :whereis_name, [{atom, :puppet}], 5000)
+  catch
+    _, _ -> nil
   end
 
   defp fallback([], recipient), do: bare(recipient) |> find() |> wrap()
