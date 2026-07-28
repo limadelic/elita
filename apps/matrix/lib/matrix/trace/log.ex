@@ -1,7 +1,7 @@
 defmodule Matrix.Trace.Log do
   @moduledoc false
-  import Application
-  import System
+  import Application, only: [get_env: 2]
+  import System, only: [monotonic_time: 1]
   import File
   import Matrix.Trace.Format
 
