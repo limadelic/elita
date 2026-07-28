@@ -60,11 +60,19 @@ defmodule Elita.Boot do
 
   defp enroll({:ok, pid}, name, addr) do
     :erpc.call(addr, :global, :register_name, [{norm(name), :puppet}, pid], 5000)
+    notify(name, pid)
     {:ok, pid}
   end
 
   defp enroll({:error, {:already_started, pid}}, _name, _addr), do: {:ok, pid}
   defp enroll(other, _name, _addr), do: other
+
+  defp notify(name, pid) do
+    :global.whereis_name({:waiter, norm(name)}) |> tell(pid)
+  end
+
+  defp tell(:undefined, _), do: :ok
+  defp tell(waiter, pid), do: send(waiter, {:puppet_ready, pid})
 
   defp addr, do: :"elita-#{get_env(:elita, :run, "")}@127.0.0.1"
 
