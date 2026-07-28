@@ -10,7 +10,9 @@ defmodule El.Trace do
   @name :session_logger
   @cfg [
     type: :file,
-    modes: [:write, :append]
+    modes: [:write, :append],
+    max_no_bytes: 10_485_760,
+    max_no_files: 5
   ]
 
   def setup(name, argv) do
