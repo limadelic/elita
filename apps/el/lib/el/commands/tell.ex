@@ -2,7 +2,7 @@ defmodule El.Commands.Tell do
   @moduledoc false
   import El.Distribution, only: [start: 0]
   import System, only: [get_env: 2, halt: 1]
-  import Node, only: [start: 2, set_cookie: 1, self: 0]
+  import Node, only: [start: 2, self: 0]
   import Kernel, except: [self: 0]
   import Keyword, only: [get: 3]
   import IO, only: [write: 2]
@@ -34,8 +34,7 @@ defmodule El.Commands.Tell do
 
   defp prime(:nonode@nohost) do
     start(:"tell_#{:erlang.system_time(:millisecond)}@127.0.0.1", :longnames)
-    set_cookie(:elita)
   end
 
-  defp prime(_), do: set_cookie(:elita)
+  defp prime(_), do: :ok
 end

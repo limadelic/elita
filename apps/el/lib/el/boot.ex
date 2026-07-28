@@ -1,7 +1,7 @@
 defmodule El.Boot do
   @moduledoc false
   import Process, only: [sleep: 1]
-  import Node, only: [set_cookie: 1, start: 2]
+  import Node, only: [start: 2]
   import Keyword, only: [get: 3]
   import File, only: [cwd!: 0]
   import Path, only: [basename: 1]
@@ -61,7 +61,6 @@ defmodule El.Boot do
   end
 
   defp cookie(val) do
-    set_cookie(:elita)
     val
   end
 end
