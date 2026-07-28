@@ -6,10 +6,12 @@ defmodule Elita.Application do
   import Mem, only: [setup: 0]
   import Registry, only: [child_spec: 1]
   import Supervisor, only: [start_link: 2]
+  import Sweep, only: [sweep: 0]
   import System, only: [get_env: 1]
 
   def start(_type, _args) do
     setup()
+    sweep()
     boot()
   end
 
