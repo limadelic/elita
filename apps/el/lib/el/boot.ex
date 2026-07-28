@@ -47,20 +47,16 @@ defmodule El.Boot do
 
   defp act({:ok, _}, name, _) do
     write("boot distribution=#{name} actual_node=#{node()}\n")
-    cookie(:ok)
+    :ok
   end
 
   defp act({:error, {:already_started, _}}, name, _) do
     write("boot distribution=#{name} status=already_started actual_node=#{node()}\n")
-    cookie(:taken)
+    :taken
   end
 
   defp act({:error, reason}, _, _) do
     write("boot error: #{inspect(reason)}\n")
     :ok
-  end
-
-  defp cookie(val) do
-    val
   end
 end
