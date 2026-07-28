@@ -30,7 +30,9 @@ module Daemon
   def ignite
     @daemon_log = logfile
     FileUtils.mkdir_p(File.dirname(@daemon_log))
-    system("cd apps/elita/agents/elita && #{invoke}")
+    pid = spawn_daemon
+    Process.detach(pid)
+    watch(pid)
   end
 
   def logfile
@@ -40,13 +42,44 @@ module Daemon
     File.join(scratchpad, "daemon_cukes.log")
   end
 
-  def invoke
-    tape = ENV["TAPE"] || "replay"
-    cassette_dir = File.expand_path("../cassettes", __dir__)
+  def spawn_daemon
+    env = daemon_env
     el_path = "../../../../apps/el/el"
-    home = ENV["HOME"]
-    "ELITA_RUN=cukes TAPE=#{tape} CASSETTE_DIR=#{cassette_dir} " \
-    "HOME=#{home} MIX_ENV=test #{clock_prefix}#{el_path} node >>#{@daemon_log} 2>&1 &"
+    Process.spawn(
+      env,
+      "#{el_path} node",
+      chdir: "apps/elita/agents/elita",
+      [:out, :err] => [@daemon_log, "a"]
+    )
+  end
+
+  def daemon_env
+    base_env.tap do |env|
+      clock = daemon_clock
+      env["CLOCK"] = clock if clock
+    end
+  end
+
+  def base_env
+    {
+      "ELITA_RUN" => "cukes",
+      "TAPE" => ENV["TAPE"] || "replay",
+      "CASSETTE_DIR" => File.expand_path("../cassettes", __dir__),
+      "HOME" => ENV["HOME"],
+      "MIX_ENV" => "test"
+    }
+  end
+
+  def daemon_clock
+    unfrozen? ? nil : frozen_clock
+  end
+
+  def unfrozen?
+    ENV["TAPE"] == "rec" || ENV["LIVE"] == "1"
+  end
+
+  def frozen_clock
+    @clock || ENV.fetch("CLOCK", "2025-07-07 10:00:00")
   end
 
   def readied
