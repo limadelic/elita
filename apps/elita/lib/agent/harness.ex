@@ -26,7 +26,7 @@ defmodule Agent.Harness do
 
   defp global(name) do
     atom = to_atom(name)
-    result = whereis_name({atom, :puppet})
+    result = whereis_name({atom |> to_string(), :puppet})
     result |> local() |> remote(atom, result)
   end
 
@@ -39,7 +39,7 @@ defmodule Agent.Harness do
   defp search(nodes, atom), do: find_value(nodes, :undefined, &fetch(&1, atom)) |> wrap()
 
   defp fetch(node, atom) do
-    :erpc.call(node, :global, :whereis_name, [{atom, :puppet}], 5000)
+    :erpc.call(node, :global, :whereis_name, [{atom |> to_string(), :puppet}], 5000)
   catch
     _, _ -> nil
   end

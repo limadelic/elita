@@ -48,7 +48,7 @@ defmodule Agent.Remote do
 
   defp fetch(norm, node) do
     addr = "#{node}@127.0.0.1" |> to_atom()
-    :erpc.call(addr, :global, :whereis_name, [{norm, :puppet}], 5000)
+    :erpc.call(addr, :global, :whereis_name, [{norm |> to_string(), :puppet}], 5000)
   catch
     _, _ -> nil
   end
