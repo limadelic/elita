@@ -2,6 +2,7 @@ import Config
 
 config :matrix, :trace, System.get_env("EL_TRACE")
 config :elita, :registrations, System.get_env("AGENT_REGISTRATIONS")
+config :elita, :run, System.get_env("ELITA_RUN", "")
 config :elita, :mlm_host, System.get_env("MLM_HOST", "localhost")
 config :elita, :mlm_model, System.get_env("MLM_MODEL", "qwen3-fast")
 config :elita, :llm, System.get_env("LLM", "lite")

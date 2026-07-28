@@ -2,7 +2,6 @@ defmodule Elita.Boot do
   import GenServer, only: [call: 3, cast: 2, start: 3]
   import Kernel, except: [spawn: 3]
   import String, only: [downcase: 1]
-  import System, only: [get_env: 2]
   import Application, only: [get_env: 3]
 
   def spawn(name, configs, opts \\ [])
@@ -67,7 +66,7 @@ defmodule Elita.Boot do
   defp enroll({:error, {:already_started, pid}}, _name, _addr), do: {:ok, pid}
   defp enroll(other, _name, _addr), do: other
 
-  defp addr, do: :"elita-#{get_env("ELITA_RUN", "")}@127.0.0.1"
+  defp addr, do: :"elita-#{get_env(:elita, :run, "")}@127.0.0.1"
 
   defp local(name, configs, opts) do
     start(Elita, {name, configs, opts}, name: via(name)) |> join() |> keep(name)
@@ -80,7 +79,7 @@ defmodule Elita.Boot do
 
   defp keep(err, _), do: err
 
-  defp ready?, do: get_env("ELITA_RUN", "") != ""
+  defp ready?, do: get_env(:elita, :run, "") != ""
 
   defp join({:ok, p}), do: {:ok, p}
   defp join({:error, {:already_started, p}}), do: {:ok, p}

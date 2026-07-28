@@ -1,7 +1,8 @@
 defmodule El.Tunnel do
+  import Application, only: [get_env: 3]
   import Enum, only: [find_value: 3]
   import Node, only: [connect: 1]
-  import System, only: [pid: 0, get_env: 2]
+  import System, only: [pid: 0]
   import El.Run, only: [suffix: 0]
   import El.Trace, only: [write: 1]
   import String, only: [downcase: 1]
@@ -22,7 +23,7 @@ defmodule El.Tunnel do
   end
 
   defp dispatch(false, _agent) do
-    attach(get_env("ELITA_RUN", ""))
+    attach(get_env(:elita, :run, ""))
   end
 
   defp attach(""), do: :ok

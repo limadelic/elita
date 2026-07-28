@@ -1,5 +1,5 @@
 defmodule El.Run do
-  import System, only: [get_env: 2]
+  import Application, only: [get_env: 3]
 
   def suffix do
     expand("-")
@@ -13,7 +13,7 @@ defmodule El.Run do
   defp build(run, prefix), do: "#{prefix}#{run}"
 
   def id do
-    get_env("ELITA_RUN", "")
+    get_env(:elita, :run, "")
   end
 
   def address do
