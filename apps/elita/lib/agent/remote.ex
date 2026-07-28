@@ -18,8 +18,8 @@ defmodule Agent.Remote do
   defp match({name, _}, agent) do
     node = :erlang.list_to_binary(name)
     run(node, agent, agent)
-  rescue
-    _ -> nil
+  catch
+    _, _ -> nil
   end
 
   defp run(node, agent, name) do

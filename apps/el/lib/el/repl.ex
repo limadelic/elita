@@ -51,8 +51,8 @@ defmodule El.REPL do
 
   defp find(agent) do
     agent |> reach() |> pick(agent)
-  rescue
-    _ -> native(agent)
+  catch
+    _, _ -> native(agent)
   end
 
   defp pick(nil, agent), do: native(agent)
@@ -61,8 +61,8 @@ defmodule El.REPL do
 
   defp native(agent) do
     spawn(agent, [agent]) |> tap(&notify/1) |> extract()
-  rescue
-    RuntimeError -> nil
+  catch
+    _, _ -> nil
   end
 
   defp notify({:error, {:init_failed, msg}}), do: puts(msg)

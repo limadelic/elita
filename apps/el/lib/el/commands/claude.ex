@@ -41,8 +41,8 @@ defmodule El.Commands.Claude do
 
   defp distribute(name, deps) do
     Keyword.get(deps, :distribution_start).(name)
-  rescue
-    e -> write("distribution error: #{inspect(e)}\n")
+  catch
+    _, e -> write("distribution error: #{inspect(e)}\n")
   end
 
   defp boot(name, deps) do
