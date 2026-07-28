@@ -7,7 +7,7 @@ defmodule El.Commands.Spawn do
   import El.Distribution, only: [start: 0]
   import IO, only: [puts: 1]
   import Registry, only: [lookup: 2]
-  import System, only: [get_env: 1]
+  import Application
   import Code, only: [ensure_loaded?: 1]
   import Keyword, only: [put: 3]
 
@@ -57,7 +57,7 @@ defmodule El.Commands.Spawn do
   defp rouse(_entry, _session), do: :ok
 
   defp stir(session, folder, self) do
-    rune = get_env("TEST_AGENT_RUNNER") |> pick()
+    rune = get_env(:el, :runner) |> pick()
     opts = [name: session, folder: folder, self: self]
     start_link(wire(opts, rune))
   end
