@@ -13,6 +13,7 @@ defmodule Elita do
   import Utils.Normalize, only: [name: 1]
   import Process, only: [flag: 2]
   import Elita.Enlist, only: [handle: 4, cleanup: 1]
+  import Elita.Vault, only: [restore: 1]
   import Tools
 
   defdelegate spawn(name, configs), to: Elita.Boot
@@ -52,7 +53,8 @@ defmodule Elita do
   end
 
   defp base(name, configs) do
-    %{name: name, config: load(configs), history: [], configs: configs}
+    history = restore(name)
+    %{name: name, config: load(configs), history: history, configs: configs}
   end
 
   defp seed(nil), do: :ok

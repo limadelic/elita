@@ -9,6 +9,10 @@ defmodule Elita.Vault do
     wrap(read(name))
   end
 
+  def restore(name) do
+    load(name)
+  end
+
   defp bump(name) do
     add(settle(check(name)))
   end
