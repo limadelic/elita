@@ -22,9 +22,9 @@ defmodule Matrix.Pty.Dispatch do
     {:noreply, state}
   end
 
-  def info(:exit_wrap, %{port: port, child: child} = state) do
+  def info(:exit_wrap, %{pty: pty, port: port, child: child} = state) do
     port.close(port)
-    slay(child)
+    slay(pty, child)
     {:stop, :normal, state}
   end
 
@@ -38,8 +38,8 @@ defmodule Matrix.Pty.Dispatch do
     {:noreply, state}
   end
 
-  def info({pty, {:exit_status, _}}, %{pty: pty} = state) do
-    slay(state.child)
+  def info({pty, {:exit_status, _}}, %{pty: pty, child: child} = state) do
+    slay(pty, child)
     {:stop, :normal, state}
   end
 
@@ -47,13 +47,13 @@ defmodule Matrix.Pty.Dispatch do
     {:noreply, state}
   end
 
-  def info({:EXIT, _pid, reason}, %{child: child} = state) do
-    slay(child)
+  def info({:EXIT, _pid, reason}, %{pty: pty, child: child} = state) do
+    slay(pty, child)
     {:stop, reason, state}
   end
 
   def info({pty, :closed}, %{pty: pty, child: child} = state) do
-    slay(child)
+    slay(pty, child)
     {:stop, :normal, state}
   end
 
