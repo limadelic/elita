@@ -13,20 +13,20 @@ defmodule El.Distribution.Helpers do
 
   def attach(name) do
     connect(:"#{name}#{suffix()}@127.0.0.1")
-    :global.sync()
+    :ok = :global.sync()
   end
 
   def locate(name) do
     a = :"#{name}#{suffix()}@127.0.0.1"
     write("connect #{a}: #{inspect(connect(a))}\n")
-    :global.sync()
+    :ok = :global.sync()
     :global.whereis_name({normalize(name), :puppet}) |> reply(name)
   end
 
   def find(name) do
     lookup(ElitaRegistry, normalize(name)) |> extract()
   rescue
-    _ -> nil
+    ArgumentError -> nil
   end
 
   defp reply(:undefined, name) do
