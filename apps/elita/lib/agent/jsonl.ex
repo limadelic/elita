@@ -19,8 +19,6 @@ defmodule Agent.Jsonl do
 
   defp source(folder) do
     find(folder)
-  catch
-    _, _ -> nil
   end
 
   defp load(nil, _, _), do: :wait
@@ -28,7 +26,6 @@ defmodule Agent.Jsonl do
   defp load(p, q, pos) do
     ok(exists?(p), p, q, pos)
   catch
-    :exit, _ -> :wait
     _, _ -> :wait
   end
 
@@ -47,8 +44,6 @@ defmodule Agent.Jsonl do
 
   defp row({line, _}, _) do
     line |> decode() |> type()
-  rescue
-    _ -> nil
   end
 
   defp type({:ok, %{"type" => "assistant", "message" => %{"content" => c}}}),
