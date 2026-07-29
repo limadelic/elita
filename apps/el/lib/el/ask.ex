@@ -8,12 +8,6 @@ defmodule El.Ask do
   import Tools.Sys.Ask, only: [query: 3]
   import El.Distribution, only: [start: 1]
 
-  defp safely(fun, default) do
-    fun.()
-  rescue
-    _ -> default
-  end
-
   def invoke(agent, msg) do
     prime()
     query("user", "el.#{agent}", msg)
@@ -88,6 +82,6 @@ defmodule El.Ask do
 
   defp part(node, agent) do
     len = min(byte_size(agent) + 1, byte_size(node))
-    safely(fn -> binary_part(node, 0, len) == <<agent::binary, "-">> end, false)
+    binary_part(node, 0, len) == <<agent::binary, "-">>
   end
 end
