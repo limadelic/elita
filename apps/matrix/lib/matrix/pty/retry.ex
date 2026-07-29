@@ -31,10 +31,18 @@ defmodule Matrix.Pty.Retry do
     state[:total] >= @budget_ms
   end
 
-  def schedule(pid, state) do
+  def next(state) do
     {delay_ms, new_state} = calculate(state)
-    send_after(pid, :retry_pty, delay_ms)
-    new_state
+    merge(new_state, %{current_delay: delay_ms})
+  end
+
+  def fire(pid, state) do
+    send_after(pid, :retry_pty, state[:current_delay])
+    state
+  end
+
+  def schedule(pid, state) do
+    fire(pid, next(state))
   end
 
   defp delay(0), do: @start_ms
