@@ -4,10 +4,8 @@ defmodule Elita.Application do
   import Agent.Manager, only: [launch: 0]
   import Elita, only: [prime: 0]
   import Mem, only: [setup: 0]
-  import Registry, only: [child_spec: 1]
   import Supervisor, only: [start_link: 2]
   import Sweep, only: [sweep: 0]
-  import System, only: [get_env: 1]
 
   def start(_type, _args) do
     setup()
@@ -27,30 +25,11 @@ defmodule Elita.Application do
   end
 
   defp specs,
-    do:
-      [child_spec(keys: :unique, name: ElitaRegistry), spawner(), tasks()] ++
-        tapes()
-
-  defp tapes, do: t(get_env("TAPE"))
-  defp t(nil), do: []
-  defp t(_), do: [tape()]
-
-  defp tape,
-    do: %{id: Tape.Writer, start: {Tape.Writer, :start_link, [nil]}}
-
-  defp spawner,
-    do: {DynamicSupervisor, spec()}
-
-  defp spec,
     do: [
-      name: Elita.Spawner,
-      strategy: :one_for_one,
-      max_restarts: 3,
-      max_seconds: 30
+      {Elita.Kernel, nil},
+      {Elita.Infra, nil},
+      {Task.Supervisor, name: Elita.Tasks}
     ]
-
-  defp tasks,
-    do: {Task.Supervisor, name: Elita.Tasks}
 
   defp opts,
     do: [
