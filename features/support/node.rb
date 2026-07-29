@@ -1,4 +1,4 @@
-module Daemon
+module Node
   def summon
     ENV["ELITA_RUN"] = "cukes"
     bootstrap
@@ -28,9 +28,9 @@ module Daemon
   end
 
   def ignite
-    @daemon_log = logfile
-    FileUtils.mkdir_p(File.dirname(@daemon_log))
-    pid = spawn_daemon
+    @node_log = logfile
+    FileUtils.mkdir_p(File.dirname(@node_log))
+    pid = spawn_node
     Process.detach(pid)
     watch(pid)
   end
@@ -39,23 +39,23 @@ module Daemon
     tmp = Dir.tmpdir
     scratchpad = File.join(tmp, "elita_dude_#{Process.uid}")
     FileUtils.mkdir_p(scratchpad)
-    File.join(scratchpad, "daemon_cukes.log")
+    File.join(scratchpad, "node_cukes.log")
   end
 
-  def spawn_daemon
-    env = daemon_env
+  def spawn_node
+    env = node_env
     el_path = "../../../../apps/el/el"
     Process.spawn(
       env,
       "#{el_path} node",
       chdir: "apps/elita/agents/elita",
-      [:out, :err] => [@daemon_log, "a"]
+      [:out, :err] => [@node_log, "a"]
     )
   end
 
-  def daemon_env
+  def node_env
     base_env.tap do |env|
-      clock = daemon_clock
+      clock = node_clock
       env["CLOCK"] = clock if clock
     end
   end
@@ -70,7 +70,7 @@ module Daemon
     }
   end
 
-  def daemon_clock
+  def node_clock
     unfrozen? ? nil : frozen_clock
   end
 
@@ -97,7 +97,7 @@ module Daemon
   end
 
   def fault
-    log_tail = File.exist?(@daemon_log) ? File.readlines(@daemon_log).last(20).join : "no log"
-    "Daemon elita-cukes@127.0.0.1 failed to start:\n#{log_tail}"
+    log_tail = File.exist?(@node_log) ? File.readlines(@node_log).last(20).join : "no log"
+    "Node elita-cukes@127.0.0.1 failed to start:\n#{log_tail}"
   end
 end
