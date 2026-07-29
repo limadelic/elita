@@ -13,7 +13,7 @@ defmodule Elita do
   import Utils.Normalize, only: [name: 1]
   import Process, only: [flag: 2]
   import Elita.Enlist, only: [handle: 4, cleanup: 1]
-  import Elita.Vault, only: [restore: 1]
+  import Elita.Vault, only: [restore: 1, save: 2]
   import Tools
 
   defdelegate spawn(name, configs), to: Elita.Boot
@@ -83,8 +83,9 @@ defmodule Elita do
 
   defp done({:act, state}), do: act(state)
 
-  defp done({:reply, txt, %{name: name} = state}) do
+  defp done({:reply, txt, %{name: name, history: history} = state}) do
     deliver(name, trim(txt))
+    save(name, history)
     {:reply, trim(txt), state}
   end
 
