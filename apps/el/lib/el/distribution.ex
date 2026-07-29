@@ -1,13 +1,13 @@
 defmodule El.Distribution do
   import Application, only: [ensure_all_started: 1]
   import Process, only: [sleep: 1]
-  import Node, only: [connect: 1, start: 2]
+  import Node, only: [connect: 1]
   import El.Boot, only: [go: 2]
   import El.Distribution.Helpers
   import El.Run, only: [address: 0, suffix: 0]
   import El.Trace, only: [write: 1]
   import Utils.Normalize, only: [name: 1]
-  import System, only: [cmd: 2]
+  import El.Boot.Bind, only: [engage: 1]
 
   def start(name \\ :default), do: go(name, [])
 
@@ -79,10 +79,7 @@ defmodule El.Distribution do
     sleep(:infinity)
   end
 
-  defp boot(addr) do
-    cmd("epmd", ["-daemon"])
-    start(addr, :longnames)
-  end
+  defp boot(addr), do: engage(addr)
 
   def hidden(name) do
     node = :"#{name}@127.0.0.1"

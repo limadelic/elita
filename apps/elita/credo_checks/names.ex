@@ -14,7 +14,7 @@ defmodule Elita.Credo.Names do
   @msg_fun "Function is compound; use single words."
   @allow [
     :param_defaults, :explanations, :init, :terminate, :handle_call,
-    :handle_cast, :handle_info, :start_link, :start, :stop,
+    :handle_cast, :handle_info, :handle_event, :start_link, :start, :stop,
     :child_spec, :format_status, :moduledoc, :doc
   ]
 
