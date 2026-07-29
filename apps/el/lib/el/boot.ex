@@ -1,6 +1,5 @@
 defmodule El.Boot do
   @moduledoc false
-  import Process, only: [sleep: 1]
   import Node, only: [start: 2]
   import Keyword, only: [get: 3]
   import File, only: [cwd!: 0]
@@ -25,7 +24,7 @@ defmodule El.Boot do
 
   defp boot(name, mode) do
     fn -> start(name, mode) end
-    |> then(&attempt(&1.(), &1, 5))
+    |> then(&attempt(&1.(), &1, 1))
     |> act(name, mode)
   end
 
@@ -33,11 +32,6 @@ defmodule El.Boot do
 
   defp attempt({:error, {:already_started, pid}}, _fun, _tries),
     do: {:error, {:already_started, pid}}
-
-  defp attempt({:error, _reason}, fun, tries) when tries > 1 do
-    sleep(200)
-    attempt(fun.(), fun, tries - 1)
-  end
 
   defp attempt({:error, reason}, _fun, _tries) do
     write("boot failed reason=#{inspect(reason)}\n")
