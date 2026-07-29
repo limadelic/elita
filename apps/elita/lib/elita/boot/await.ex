@@ -4,6 +4,7 @@ defmodule Elita.Boot.Await do
 
   def handle({:ok, pid}, n), do: pin(pid, n)
   def handle({:error, {:already_started, pid}}, n), do: pin(pid, n)
+  def handle({:error, {:shutdown, wrapped}}, n), do: unwrap(wrapped, n)
 
   def handle({:error, :duplicate}, n) do
     :global.whereis_name({name(n), :puppet}) |> bond(n)
@@ -22,4 +23,7 @@ defmodule Elita.Boot.Await do
     notify(n, p)
     {:ok, p}
   end
+
+  defp unwrap({:failed_to_start_child, :session, :duplicate}, n),
+    do: handle({:error, :duplicate}, n)
 end
