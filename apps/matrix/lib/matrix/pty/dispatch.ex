@@ -1,24 +1,21 @@
 defmodule Matrix.Pty.Dispatch do
   @moduledoc false
-  import Matrix.Trace, only: [record: 1]
-  import Matrix.Pty.Handler
   import Matrix.Pty.Cleanup
   import Matrix.Pty.Buffer, only: [prime: 2, gate: 2]
-  import Matrix.Pty.Notify, only: [notify: 2]
-  import Matrix.Pty.Log, only: [dump: 2]
   import List, only: [delete: 2]
-  import :os, only: [cmd: 1]
   import IO, only: [binwrite: 2]
+  import Matrix.Pty.Retry
+  import Matrix.Pty.Respawn
+  import Matrix.Pty.Relay
 
   def info({pty, {:data, data}}, state) do
     updated = prime(state, data)
-    process(pty, data, updated)
+    data(pty, data, updated)
     {:noreply, updated}
   end
 
   def info({:stdin, data}, %{pty: pty, port: port, input: input} = state) do
-    record(data)
-    write(port, pty, input.(data))
+    stdin(port, pty, input, data)
     {:noreply, state}
   end
 
@@ -34,28 +31,36 @@ defmodule Matrix.Pty.Dispatch do
   end
 
   def info({:resize, size}, %{port: _port} = state) do
-    resize(size)
+    terminal(size)
     {:noreply, state}
   end
 
-  def info({pty, {:exit_status, _}}, %{pty: pty, child: child} = state) do
+  def info({pty, {:exit_status, _}}, %{pty: pty, child: child, taps: taps} = state) do
     slay(pty, child)
-    {:stop, :normal, state}
+    death(taps, state)
   end
 
   def info({:EXIT, _pid, :normal}, state) do
     {:noreply, state}
   end
 
-  def info({:EXIT, _pid, reason}, %{pty: pty, child: child} = state) do
+  def info({:EXIT, _pid, reason}, %{pty: pty, child: child, taps: taps} = state) do
     slay(pty, child)
-    {:stop, reason, state}
+    exit(taps, state, reason)
   end
 
-  def info({pty, :closed}, %{pty: pty, child: child} = state) do
+  def info({pty, :closed}, %{pty: pty, child: child, taps: taps} = state) do
     slay(pty, child)
-    {:stop, :normal, state}
+    death(taps, state)
   end
+
+  def info(:retry_pty, %{retry_state: retry_state} = state) when retry_state != nil do
+    result = (try do attempt(state) rescue _ -> :error end)
+    handle(result, state)
+  end
+
+  defp handle({:ok, new_state}, _state), do: {:noreply, new_state}
+  defp handle(:error, state), do: requeue(state)
 
   def call({:tap, pid}, %{taps: taps} = state) do
     {:reply, :ok, %{state | taps: [pid | taps]}}
@@ -77,17 +82,14 @@ defmodule Matrix.Pty.Dispatch do
     {:noreply, gate(msg, state)}
   end
 
-  defp process(pty, data, %{port: port, out: out, raw: raw, taps: taps} = state) do
-    binwrite(out, data)
-    dump(raw, data)
-    notify(taps, data)
-    respond(port, pty, data, state)
-  end
+  defp death(taps, state) when taps != [], do: {:noreply, begin(state)}
+  defp death(_taps, state), do: {:stop, :normal, state}
 
-  defp resize({rows, cols}) do
-    "stty rows #{rows} cols #{cols} < /dev/tty" |> to_charlist() |> cmd()
-  rescue
-    _ ->
-      :ok
+  defp exit(taps, state, _reason) when taps != [], do: {:noreply, begin(state)}
+  defp exit(_taps, state, reason), do: {:stop, reason, state}
+
+  defp begin(state) do
+    s = schedule(self(), init())
+    %{state | retry_state: s}
   end
 end

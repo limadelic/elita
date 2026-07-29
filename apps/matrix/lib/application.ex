@@ -2,8 +2,10 @@ defmodule Matrix.Application do
   use Application
 
   import Supervisor, only: [start_link: 2]
+  import Matrix.Pty.Retry, only: [validate: 0]
 
   def start(_type, _args) do
+    validate()
     boot()
   end
 
