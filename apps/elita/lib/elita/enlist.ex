@@ -17,8 +17,13 @@ defmodule Elita.Enlist do
   def cleanup(state) do
     key = {name(state.name), :puppet}
     :global.whereis_name(key) |> sweep(key)
+    forget(state.name)
   end
 
   defp sweep(pid, key) when pid == self(), do: :global.unregister_name(key)
   defp sweep(_pid, _key), do: :ok
+
+  defp forget(name) do
+    :ets.delete(:elita_vault, name)
+  end
 end
