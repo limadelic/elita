@@ -3,9 +3,10 @@ defmodule El.Puppet.Answer do
   import El.Puppet.Collect, only: [collect: 1]
   import GenServer, only: [cast: 2]
   import System, only: [monotonic_time: 1]
-  import String, only: [trim: 1, downcase: 1]
+  import String, only: [trim: 1]
   import Map, only: [merge: 2]
   import :global, only: [whereis_name: 1]
+  import Utils.Normalize, only: [name: 1]
 
   def reply(pty, sender, message) do
     watch(pty, self())
@@ -54,12 +55,8 @@ defmodule El.Puppet.Answer do
     lookup(name)
   end
 
-  defp lookup(name) do
-    whereis_name({normalize(name), :puppet}) |> fetch()
-  end
-
-  defp normalize(name) do
-    name |> to_string() |> downcase()
+  defp lookup(n) do
+    whereis_name({name(n), :puppet}) |> fetch()
   end
 
   defp fetch(:undefined), do: nil

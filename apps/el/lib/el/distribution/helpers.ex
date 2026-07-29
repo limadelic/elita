@@ -3,7 +3,7 @@ defmodule El.Distribution.Helpers do
   import El.Trace, only: [write: 1]
   import Registry, only: [lookup: 2]
   import El.Run, only: [suffix: 0]
-  import String, only: [downcase: 1]
+  import Utils.Normalize, only: [name: 1]
 
   def extract([{pid, %{kind: :puppet}}]), do: pid
   def extract(_), do: nil
@@ -16,30 +16,26 @@ defmodule El.Distribution.Helpers do
     :ok = :global.sync()
   end
 
-  def locate(name) do
-    a = :"#{name}#{suffix()}@127.0.0.1"
+  def locate(n) do
+    a = :"#{n}#{suffix()}@127.0.0.1"
     write("connect #{a}: #{inspect(connect(a))}\n")
     :ok = :global.sync()
-    :global.whereis_name({normalize(name), :puppet}) |> reply(name)
+    :global.whereis_name({name(n), :puppet}) |> reply(n)
   end
 
-  def find(name) do
-    lookup(ElitaRegistry, normalize(name)) |> extract()
+  def find(n) do
+    lookup(ElitaRegistry, name(n)) |> extract()
   rescue
     ArgumentError -> nil
   end
 
-  defp reply(:undefined, name) do
-    write("whereis_name #{name}: :undefined\n")
-    find(name)
+  defp reply(:undefined, n) do
+    write("whereis_name #{n}: :undefined\n")
+    find(n)
   end
 
-  defp reply(pid, name) do
-    write("whereis_name #{name}: #{inspect(pid)}\n")
+  defp reply(pid, n) do
+    write("whereis_name #{n}: #{inspect(pid)}\n")
     pid
-  end
-
-  defp normalize(name) do
-    name |> to_string() |> downcase()
   end
 end

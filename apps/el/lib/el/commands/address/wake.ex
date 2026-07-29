@@ -2,14 +2,15 @@ defmodule El.Commands.Address.Wake do
   import Agent.Session, only: [start_link: 1]
   import Enum, only: [empty?: 1]
   import Map, only: [get: 2]
-  import String, only: [downcase: 1, to_atom: 1]
+  import String, only: [to_atom: 1]
   import Application
   import Code, only: [ensure_loaded?: 1]
   import Keyword, only: [put: 3]
   import Registry, only: [lookup: 2]
+  import Utils.Normalize, only: [name: 1]
 
   def up(%{kind: k, name: n, path: p} = entry) when k in [:file, :folder] do
-    key = n |> to_string() |> downcase()
+    key = name(n)
     sleep = lookup(ElitaRegistry, key) |> empty?()
     go(sleep, n, p, get(entry, :file_path))
   end

@@ -4,10 +4,11 @@ defmodule Agent.Harness do
   import Agent.Remote, only: [find: 1]
   import Elita, only: [request: 2, dispatch: 2]
   import Registry, only: [lookup: 2]
-  import String, only: [to_atom: 1, downcase: 1]
+  import String, only: [to_atom: 1]
   import :global, only: [whereis_name: 1]
   import Enum, only: [find_value: 3]
   import Node, only: [list: 0]
+  import Utils.Normalize, only: [name: 1]
 
   def dispatch(recipient, message, :ask) do
     recipient |> locate() |> ask!(recipient, message)
@@ -24,9 +25,9 @@ defmodule Agent.Harness do
   defp nearby([], recipient), do: global(bare(recipient)) |> fallback(recipient)
   defp nearby(found, _recipient), do: found
 
-  defp global(name) do
-    atom = to_atom(name)
-    result = whereis_name({atom |> to_string() |> downcase(), :puppet})
+  defp global(n) do
+    atom = to_atom(n)
+    result = whereis_name({atom |> to_string() |> name(), :puppet})
     result |> local() |> remote(atom, result)
   end
 
@@ -39,7 +40,7 @@ defmodule Agent.Harness do
   defp search(nodes, atom), do: find_value(nodes, :undefined, &fetch(&1, atom)) |> wrap()
 
   defp fetch(node, atom) do
-    :erpc.call(node, :global, :whereis_name, [{atom |> to_string() |> downcase(), :puppet}], 5000)
+    :erpc.call(node, :global, :whereis_name, [{atom |> to_string() |> name(), :puppet}], 5000)
   catch
     _, _ -> nil
   end
@@ -52,12 +53,12 @@ defmodule Agent.Harness do
 
   defp entry(recipient) do
     clean = bare(recipient)
-    normalized = clean |> to_atom() |> Kernel.to_string() |> downcase()
+    normalized = clean |> to_atom() |> Kernel.to_string() |> name()
     lookup(ElitaRegistry, normalized)
   end
 
-  defp bare("el." <> name), do: name
-  defp bare(name), do: name
+  defp bare("el." <> n), do: n
+  defp bare(n), do: n
 
   defp ask!([{_pid, %{kind: :native}}], recipient, message) do
     request(to_atom(recipient), message)

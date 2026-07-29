@@ -7,18 +7,14 @@ defmodule Agent.Session do
   import GenServer, only: [start_link: 3, call: 3, cast: 2]
   import Keyword, only: [fetch!: 2, get: 3]
   import Map, only: [put: 3]
-  import String, only: [downcase: 1]
+  import Utils.Normalize, only: [name: 1]
   import System, only: [get_env: 1]
 
   def start_link(opts) do
     folder = fetch!(opts, :folder)
-    normalized = normalize(opts)
+    normalized = name(fetch!(opts, :name))
     via = via(normalized, folder)
     start_link(__MODULE__, opts, name: via)
-  end
-
-  defp normalize(opts) do
-    fetch!(opts, :name) |> to_string() |> downcase()
   end
 
   defp via(normalized, folder) do

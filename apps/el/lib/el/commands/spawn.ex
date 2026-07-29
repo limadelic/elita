@@ -3,13 +3,14 @@ defmodule El.Commands.Spawn do
   import Agent.Session, only: [start_link: 1]
   import El.Commands.Address.World, only: [build: 0, cwd: 0]
   import Resolver, only: [resolve: 3]
-  import String, only: [downcase: 1, to_atom: 1]
+  import String, only: [to_atom: 1]
   import El.Distribution, only: [start: 0]
   import IO, only: [puts: 1]
   import Registry, only: [lookup: 2]
   import Application
   import Code, only: [ensure_loaded?: 1]
   import Keyword, only: [put: 3]
+  import Utils.Normalize, only: [name: 1]
 
   def spawn(session, agent) do
     start()
@@ -29,7 +30,7 @@ defmodule El.Commands.Spawn do
   end
 
   defp boot(entry, session) do
-    key = normalize(session)
+    key = name(session)
     check(lookup(ElitaRegistry, key), entry, session)
   end
 
@@ -64,8 +65,8 @@ defmodule El.Commands.Spawn do
 
   defp pick(nil), do: nil
 
-  defp pick(name) do
-    atom = to_atom("Elixir." <> name)
+  defp pick(n) do
+    atom = to_atom("Elixir." <> n)
     exist(ensure_loaded?(atom), atom)
   end
 
@@ -76,9 +77,5 @@ defmodule El.Commands.Spawn do
 
   defp wire(opts, rune) do
     put(opts, :runner, fn m, f -> apply(rune, :run, [m, f]) end)
-  end
-
-  defp normalize(name) do
-    name |> to_string() |> downcase()
   end
 end

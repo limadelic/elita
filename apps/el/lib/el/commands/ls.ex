@@ -8,7 +8,7 @@ defmodule El.Commands.Ls do
   import Registry, only: [lookup: 2, select: 2]
   import Glob, only: [hits?: 2]
   import Resolver, only: [normalize: 2]
-  import String, only: [downcase: 1]
+  import Utils.Normalize, only: [name: 1]
 
   def ls(opts \\ []) do
     path = get(opts, :path)
@@ -60,8 +60,8 @@ defmodule El.Commands.Ls do
     "#{entry.name} #{label(entry.kind)} #{status(entry.name)}"
   end
 
-  defp status(name) do
-    normalized = downcase(to_string(name))
+  defp status(n) do
+    normalized = name(n)
     lookup(ElitaRegistry, normalized) |> flag()
   end
 
@@ -79,9 +79,9 @@ defmodule El.Commands.Ls do
     |> filter(&absent?(names, &1))
   end
 
-  defp absent?(list, name) do
-    !any?(list, fn n ->
-      downcase(to_string(n)) == downcase(to_string(name))
+  defp absent?(list, n) do
+    !any?(list, fn x ->
+      name(x) == name(n)
     end)
   end
 

@@ -6,7 +6,7 @@ defmodule El.Distribution do
   import El.Distribution.Helpers
   import El.Run, only: [address: 0, suffix: 0]
   import El.Trace, only: [write: 1]
-  import String, only: [downcase: 1]
+  import Utils.Normalize, only: [name: 1]
   import System, only: [cmd: 2]
 
   def start(name \\ :default), do: go(name, [])
@@ -19,10 +19,10 @@ defmodule El.Distribution do
     connect(:"#{name}#{suffix()}@127.0.0.1") |> route(name)
   end
 
-  def wait(name) do
-    norm = name |> to_string() |> downcase()
+  def wait(n) do
+    norm = name(n)
     flush()
-    attach(name)
+    attach(n)
     open(norm)
   end
 
