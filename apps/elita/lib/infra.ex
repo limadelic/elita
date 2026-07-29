@@ -2,6 +2,16 @@ defmodule Elita.Infra do
   import Supervisor, only: [start_link: 2]
   import System, only: [get_env: 1]
 
+  @spec_map %{
+    id: __MODULE__,
+    start: {__MODULE__, :start_link, [nil]},
+    type: :supervisor,
+    restart: :permanent,
+    shutdown: :infinity
+  }
+
+  def child_spec(_arg), do: @spec_map
+
   def start_link(_arg) do
     start_link(specs(), opts())
   end

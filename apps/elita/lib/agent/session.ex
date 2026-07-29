@@ -9,6 +9,7 @@ defmodule Agent.Session do
   import Map, only: [put: 3]
   import Utils.Normalize, only: [name: 1]
   import System, only: [get_env: 1]
+  import Process, only: [flag: 2]
 
   def start_link(opts) do
     folder = fetch!(opts, :folder)
@@ -28,6 +29,7 @@ defmodule Agent.Session do
 
   @impl true
   def init(opts) do
+    flag(:trap_exit, true)
     {:ok, state(opts)}
   end
 
@@ -79,5 +81,10 @@ defmodule Agent.Session do
   def handle_cast({:cast, message}, state) do
     state.runner.(message, state.folder)
     {:noreply, state}
+  end
+
+  @impl true
+  def terminate(_reason, state) do
+    :global.unregister_name({name(state.name), :puppet})
   end
 end
