@@ -4,7 +4,10 @@ defmodule Matrix.Pty.Respawn do
   import Matrix.Pty.Watch, only: [start: 1]
   import Matrix.Pty.Retry
 
-  def attempt(state), do: open(state)
+  def attempt(state) do
+    {:ok, s} = open(state)
+    {:noreply, s}
+  end
 
   def requeue(%{retry_state: state} = s) do
     limit(exhausted?(state), s, state)

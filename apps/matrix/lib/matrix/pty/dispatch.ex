@@ -55,12 +55,14 @@ defmodule Matrix.Pty.Dispatch do
   end
 
   def info(:retry_pty, %{retry_state: retry_state} = state) when retry_state != nil do
-    result = (try do attempt(state) rescue _ -> :error end)
-    handle(result, state)
+    revive(state)
   end
 
-  defp handle({:ok, new_state}, _state), do: {:noreply, new_state}
-  defp handle(:error, state), do: requeue(state)
+  defp revive(state) do
+    attempt(state)
+  rescue
+    _ -> requeue(state)
+  end
 
   def call({:tap, pid}, %{taps: taps} = state) do
     {:reply, :ok, %{state | taps: [pid | taps]}}
