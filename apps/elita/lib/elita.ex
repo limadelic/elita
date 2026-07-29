@@ -43,18 +43,22 @@ defmodule Elita do
   end
 
   defp setup(opts, name, configs) do
-    flag(:trap_exit, true)
     settings = get(opts, :tape_env, %{})
+    flag(:trap_exit, true)
     create(name)
     seed(get(settings, :tape))
     {:ok, state(name, configs, opts, settings)}
   end
 
   defp state(name, configs, opts, settings) do
-    merge(merge(%{name: name, config: load(configs), history: [], configs: configs}, settings), %{
-      sender: get(opts, :sender, name),
-      skip_logs: get(opts, :skip_logs, false)
-    })
+    base = base(name, configs)
+    sender = get(opts, :sender, name)
+    skip = get(opts, :skip_logs, false)
+    merge(merge(base, settings), %{sender: sender, skip_logs: skip})
+  end
+
+  defp base(name, configs) do
+    %{name: name, config: load(configs), history: [], configs: configs}
   end
 
   defp seed(nil), do: :ok

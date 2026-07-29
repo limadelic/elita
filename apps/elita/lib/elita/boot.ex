@@ -2,7 +2,7 @@ defmodule Elita.Boot do
   import GenServer, only: [call: 3, cast: 2, start: 3]
   import Kernel, except: [spawn: 3]
   import Application, only: [get_env: 3]
-  import Elita.Boot.Announce, only: [notify: 2]
+  import Elita.Boot.Await, only: [handle: 2]
   import Utils.Normalize, only: [name: 1]
   def spawn(name, configs, opts \\ [])
   def spawn(name, configs, []), do: boot(name, configs, sender: name)
@@ -36,7 +36,7 @@ defmodule Elita.Boot do
     do: addr() |> tap(&push(&1, val)) |> fetch(name, configs, opts)
 
   defp fetch(addr, name, configs, opts) do
-    addr |> start(spec(name, configs, opts)) |> await(name)
+    addr |> start(spec(name, configs, opts)) |> handle(name)
   catch
     _, _ -> local(name, configs, opts)
   end
@@ -57,27 +57,6 @@ defmodule Elita.Boot do
 
   defp start(addr, spec),
     do: :erpc.call(addr, DynamicSupervisor, :start_child, [Elita.Spawner, spec], 90_000)
-
-  defp await({:ok, pid}, n), do: pin(pid, n)
-  defp await({:error, {:already_started, pid}}, n), do: pin(pid, n)
-
-  defp await({:error, :duplicate}, n) do
-    :global.whereis_name({name(n), :puppet}) |> bond(n)
-  end
-
-  defp await(other, _n), do: other
-
-  defp pin(pid, n) do
-    notify(n, pid)
-    {:ok, pid}
-  end
-
-  defp bond(:undefined, _n), do: {:error, :attach_failed}
-
-  defp bond(p, n) do
-    notify(n, p)
-    {:ok, p}
-  end
 
   defp addr, do: :"elita-#{get_env(:elita, :run, "")}@127.0.0.1"
 
