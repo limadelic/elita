@@ -36,7 +36,7 @@ defmodule Elita.Boot do
     do: addr() |> tap(&push(&1, val)) |> fetch(name, configs, opts)
 
   defp fetch(addr, name, configs, opts) do
-    addr |> start(spec(name, configs, opts)) |> handle(name)
+    addr |> post(spec(name, configs, opts), name) |> handle(name)
   catch
     _, _ -> local(name, configs, opts)
   end
@@ -55,8 +55,8 @@ defmodule Elita.Boot do
     {GenServer, :start_link, args}
   end
 
-  defp start(addr, spec),
-    do: :erpc.call(addr, DynamicSupervisor, :start_child, [Elita.Spawner, spec], 90_000)
+  defp post(addr, spec, n),
+    do: :erpc.call(addr, Elita.Place, :put, [spec, n], 90_000)
 
   defp addr, do: :"elita-#{get_env(:elita, :run, "")}@127.0.0.1"
 
