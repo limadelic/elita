@@ -58,20 +58,26 @@ defmodule Elita.Boot do
   defp start(addr, spec),
     do: :erpc.call(addr, DynamicSupervisor, :start_child, [Elita.Spawner, spec], 90_000)
 
-  defp await({:ok, pid}, n) do
-    notify(n, pid) |> ok(pid)
+  defp await({:ok, pid}, n), do: pin(pid, n)
+  defp await({:error, {:already_started, pid}}, n), do: pin(pid, n)
+
+  defp await({:error, :init_failed}, n) do
+    :global.whereis_name({name(n), :puppet}) |> bond(n)
   end
 
-  defp await({:error, {:already_started, pid}}, _n) do
+  defp await(other, _n), do: other
+
+  defp pin(pid, n) do
+    notify(n, pid)
     {:ok, pid}
   end
 
-  defp await(other, _n) do
-    other
-  end
+  defp bond(:undefined, _n), do: {:error, :attach_failed}
 
-  defp ok(:ok, pid), do: {:ok, pid}
-  defp ok(x, _), do: x
+  defp bond(p, n) do
+    notify(n, p)
+    {:ok, p}
+  end
 
   defp addr, do: :"elita-#{get_env(:elita, :run, "")}@127.0.0.1"
 
