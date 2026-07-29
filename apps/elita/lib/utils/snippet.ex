@@ -15,7 +15,7 @@ defmodule Snippet do
     {result, _} = eval_string("#{imports}; #{code}")
     to_string(result)
   rescue
-    _e in [CompileError, SyntaxError, RuntimeError] -> code
+    _ -> code
   end
 
   defp build(imports) do
