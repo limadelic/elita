@@ -39,11 +39,24 @@ defmodule Elita.Application do
     do: %{id: Tape.Writer, start: {Tape.Writer, :start_link, [nil]}}
 
   defp spawner,
-    do: {DynamicSupervisor, name: Elita.Spawner, strategy: :one_for_one}
+    do: {DynamicSupervisor, spec()}
+
+  defp spec,
+    do: [
+      name: Elita.Spawner,
+      strategy: :one_for_one,
+      max_restarts: 3,
+      max_seconds: 30
+    ]
 
   defp tasks,
     do: {Task.Supervisor, name: Elita.Tasks}
 
   defp opts,
-    do: [strategy: :one_for_one, name: Elita.Supervisor]
+    do: [
+      strategy: :one_for_one,
+      name: Elita.Supervisor,
+      max_restarts: 3,
+      max_seconds: 60
+    ]
 end

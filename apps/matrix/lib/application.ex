@@ -24,7 +24,13 @@ defmodule Matrix.Application do
     {Task.Supervisor, name: Matrix.Tasks}
   end
 
-  defp opts do
-    [strategy: :one_for_one, name: Matrix.Supervisor]
-  end
+  defp opts, do: defaults()
+
+  defp defaults,
+    do: [
+      strategy: :one_for_one,
+      name: Matrix.Supervisor,
+      max_restarts: 3,
+      max_seconds: 60
+    ]
 end

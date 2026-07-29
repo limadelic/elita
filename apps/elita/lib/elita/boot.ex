@@ -48,7 +48,7 @@ defmodule Elita.Boot do
   end
 
   defp spec(name, configs, opts),
-    do: %{id: name, start: launch(name, configs, opts), restart: :temporary}
+    do: %{id: name, start: launch(name, configs, opts), restart: :transient}
 
   defp launch(name, configs, opts) do
     args = [Elita, {name, configs, opts}, [name: via(name)]]
