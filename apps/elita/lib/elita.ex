@@ -51,28 +51,18 @@ defmodule Elita do
   end
 
   defp state(name, configs, opts, settings) do
-    %{name: name, config: load(configs), history: [], configs: configs}
-    |> merge(settings)
-    |> merge(build(opts, name))
-  end
-
-  defp build(opts, name) do
-    %{sender: get(opts, :sender, name), skip_logs: get(opts, :skip_logs, false)}
+    merge(merge(%{name: name, config: load(configs), history: [], configs: configs}, settings), %{
+      sender: get(opts, :sender, name),
+      skip_logs: get(opts, :skip_logs, false)
+    })
   end
 
   defp seed(nil), do: :ok
   defp seed(_), do: :rand.seed(:exsss, {1, 2, 3})
-
   @impl true
-  def handle_call({:ask, msg}, from, state) do
-    handle_call({:act, msg}, from, state)
-  end
-
+  def handle_call({:ask, msg}, from, state), do: handle_call({:act, msg}, from, state)
   @impl true
-  def handle_call({:act, msg}, _, state) do
-    act(msg, state)
-  end
-
+  def handle_call({:act, msg}, _, state), do: act(msg, state)
   @impl true
   def handle_cast({:act, msg}, state) do
     {_, _, state} = act(msg, state)

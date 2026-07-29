@@ -61,7 +61,7 @@ defmodule Elita.Boot do
   defp await({:ok, pid}, n), do: pin(pid, n)
   defp await({:error, {:already_started, pid}}, n), do: pin(pid, n)
 
-  defp await({:error, :init_failed}, n) do
+  defp await({:error, :duplicate}, n) do
     :global.whereis_name({name(n), :puppet}) |> bond(n)
   end
 
