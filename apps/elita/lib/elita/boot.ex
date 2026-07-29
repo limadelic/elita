@@ -36,7 +36,7 @@ defmodule Elita.Boot do
     do: addr() |> tap(&push(&1, val)) |> fetch(name, configs, opts)
 
   defp fetch(addr, name, configs, opts) do
-    addr |> start(spec(name, configs, opts)) |> enroll(name, addr)
+    addr |> start(spec(name, configs, opts)) |> await(name)
   catch
     _, _ -> local(name, configs, opts)
   end
@@ -58,27 +58,26 @@ defmodule Elita.Boot do
   defp start(addr, spec),
     do: :erpc.call(addr, DynamicSupervisor, :start_child, [Elita.Spawner, spec], 90_000)
 
-  defp enroll({:ok, pid}, n, addr) do
-    :erpc.call(addr, :global, :register_name, [{name(n), :puppet}, pid], 5000)
-    notify(n, pid)
+  defp await({:ok, pid}, n) do
+    notify(n, pid) |> ok(pid)
+  end
+
+  defp await({:error, {:already_started, pid}}, _n) do
     {:ok, pid}
   end
 
-  defp enroll({:error, {:already_started, pid}}, _n, _addr), do: {:ok, pid}
-  defp enroll(other, _n, _addr), do: other
+  defp await(other, _n) do
+    other
+  end
+
+  defp ok(:ok, pid), do: {:ok, pid}
+  defp ok(x, _), do: x
 
   defp addr, do: :"elita-#{get_env(:elita, :run, "")}@127.0.0.1"
 
   defp local(n, configs, opts) do
-    start(Elita, {n, configs, opts}, name: via(n)) |> join() |> keep(n)
+    start(Elita, {n, configs, opts}, name: via(n)) |> join()
   end
-
-  defp keep({:ok, pid}, n) do
-    :global.whereis_name({name(n), :puppet}) |> reg(n, pid)
-    {:ok, pid}
-  end
-
-  defp keep(err, _), do: err
 
   defp ready?, do: get_env(:elita, :run, "") != ""
 
@@ -90,9 +89,6 @@ defmodule Elita.Boot do
   end
 
   defp join({:error, _}), do: {:error, :init_failed}
-
-  defp reg(:undefined, n, pid), do: :global.register_name({name(n), :puppet}, pid)
-  defp reg(_, _, _), do: :ok
 
   defp via(n) do
     {:via, Registry, {ElitaRegistry, name(n), %{kind: :native, folder: nil}}}

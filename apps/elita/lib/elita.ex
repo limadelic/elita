@@ -10,6 +10,7 @@ defmodule Elita do
   import Reply, only: [deliver: 2]
   import String, only: [trim: 1]
   import Keyword, only: [get: 3]
+  import Utils.Normalize, only: [name: 1]
   import Tools
 
   defdelegate spawn(name, configs), to: Elita.Boot
@@ -21,6 +22,27 @@ defmodule Elita do
   def init({name, configs}), do: init({name, configs, [sender: name]})
 
   def init({name, configs, opts}) do
+    normalized = name(name)
+    register({normalized, :puppet}, opts, name, configs)
+  end
+
+  defp register(key, opts, name, configs) do
+    key
+    |> enlist()
+    |> proceed(key, opts, name, configs)
+  end
+
+  defp enlist(key), do: :global.register_name(key, self())
+
+  defp proceed(:yes, _key, opts, name, configs) do
+    setup(opts, name, configs)
+  end
+
+  defp proceed(:no, _key, _opts, _name, _configs) do
+    {:stop, :duplicate}
+  end
+
+  defp setup(opts, name, configs) do
     settings = get(opts, :tape_env, %{})
     create(name)
     seed(settings)
