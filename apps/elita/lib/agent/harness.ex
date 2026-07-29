@@ -1,8 +1,6 @@
 defmodule Agent.Harness do
   @moduledoc "Routes ask/tell messages to agents based on registration kind."
-  import Agent.Session, only: [ask: 2, forward: 2]
   import Agent.Remote, only: [find: 1]
-  import Elita, only: [request: 2, dispatch: 2]
   import Registry, only: [lookup: 2]
   import String, only: [to_atom: 1]
   import :global, only: [whereis_name: 1]
@@ -60,25 +58,18 @@ defmodule Agent.Harness do
   defp bare("el." <> n), do: n
   defp bare(n), do: n
 
-  defp ask!([{_pid, %{kind: :native}}], recipient, message) do
-    request(to_atom(recipient), message)
-  end
+  defp impl(:native), do: Agent.Kind.Native
+  defp impl(:headless), do: Agent.Kind.Puppet
+  defp impl(:puppet), do: Agent.Kind.Puppet
 
-  defp ask!([{pid, %{kind: kind}}], _recipient, message)
-       when kind in [:headless, :puppet] do
-    {:ok, response} = ask(pid, message)
-    response
+  defp ask!([{_pid, %{kind: kind}}] = entry, recipient, message) do
+    impl(kind).ask(entry, recipient, message)
   end
 
   defp ask!([], recipient, _message), do: "unknown: #{recipient}"
 
-  defp tell!([{_pid, %{kind: :native}}], recipient, message) do
-    dispatch(to_atom(recipient), message)
-  end
-
-  defp tell!([{pid, %{kind: kind}}], _recipient, message)
-       when kind in [:headless, :puppet] do
-    forward(pid, message)
+  defp tell!([{_pid, %{kind: kind}}] = entry, recipient, message) do
+    impl(kind).forward(entry, recipient, message)
   end
 
   defp tell!([], recipient, _message), do: "unknown: #{recipient}"
