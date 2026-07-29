@@ -11,14 +11,16 @@ defmodule El.Commands.Ls do
   import Utils.Normalize, only: [name: 1]
 
   def ls(opts \\ []) do
-    path = get(opts, :path)
-    render(path) |> puts()
+    remote(opts) |> puts()
   end
 
   def remote(opts \\ []) do
     path = get(opts, :path)
-    render(path)
+    respond(ready?(), path)
   end
+
+  defp respond(false, _path), do: "booting"
+  defp respond(true, path), do: render(path)
 
   defp render("//") do
     build()
@@ -93,4 +95,7 @@ defmodule El.Commands.Ls do
   defp label(:folder), do: "folder"
   defp label(:session), do: "session"
   defp label(:node), do: "node"
+  defp ready?, do: check(:ets.whereis(:elita_vault))
+  defp check(:undefined), do: false
+  defp check(_), do: :ets.lookup(:elita_vault, :ready) == [ready: true]
 end
