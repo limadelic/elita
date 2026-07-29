@@ -57,11 +57,4 @@ defmodule Matrix.Wrap.Reply do
   end
 
   defp route(_, _, _), do: :ok
-
-  def known?(name, opts \\ []) do
-    target = opts[:target]
-    name |> trim() |> to_atom() |> target.() |> is_pid()
-  rescue
-    _ -> false
-  end
 end
