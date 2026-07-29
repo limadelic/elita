@@ -12,7 +12,7 @@ defmodule Elita do
   import Keyword, only: [get: 3]
   import Utils.Normalize, only: [name: 1]
   import Process, only: [flag: 2]
-  import Elita.Enlist, only: [handle: 4, cleanup: 1]
+  import Elita.Enlist, only: [handle: 4, cleanup: 1, release: 1]
   import Elita.Vault, only: [restore: 1, save: 2]
   import Tools
 
@@ -90,7 +90,8 @@ defmodule Elita do
   end
 
   @impl true
-  def terminate(_reason, state) do
-    cleanup(state)
-  end
+  def terminate(:normal, state), do: cleanup(state)
+  def terminate(:shutdown, state), do: cleanup(state)
+  def terminate({:shutdown, _}, state), do: cleanup(state)
+  def terminate(_reason, state), do: release(state)
 end

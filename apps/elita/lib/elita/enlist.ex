@@ -20,6 +20,11 @@ defmodule Elita.Enlist do
     forget(state.name)
   end
 
+  def release(state) do
+    key = {name(state.name), :puppet}
+    :global.whereis_name(key) |> sweep(key)
+  end
+
   defp sweep(pid, key) when pid == self(), do: :global.unregister_name(key)
   defp sweep(_pid, _key), do: :ok
 
