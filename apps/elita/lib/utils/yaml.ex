@@ -65,7 +65,7 @@ defmodule Utils.Yaml do
   defp atomize(map) when is_map(map) do
     new(map, fn {k, v} -> {to_atom(k), atomize(v)} end)
   rescue
-    _ -> map
+    ArgumentError -> map
   end
 
   defp atomize(list) when is_list(list) do
