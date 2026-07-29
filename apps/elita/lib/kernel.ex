@@ -20,6 +20,7 @@ defmodule Elita.Kernel do
   defp specs,
     do: [
       registry(),
+      Elita.Bank,
       {DynamicSupervisor, spec()}
     ]
 
