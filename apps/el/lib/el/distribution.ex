@@ -7,10 +7,9 @@ defmodule El.Distribution do
   import El.Run, only: [address: 0, suffix: 0]
   import El.Trace, only: [write: 1]
   import String, only: [downcase: 1]
+  import System, only: [cmd: 2]
 
-  def start(name \\ :default), do: run(name, [])
-
-  defp run(name, opts), do: go(name, opts)
+  def start(name \\ :default), do: go(name, [])
 
   def bind(_name) do
     :ok
@@ -81,6 +80,7 @@ defmodule El.Distribution do
   end
 
   defp boot(addr) do
+    cmd("epmd", ["-daemon"])
     start(addr, :longnames)
   end
 
@@ -91,7 +91,6 @@ defmodule El.Distribution do
   end
 
   defp outcome({:ok, _}), do: :ok
-
   defp outcome({:error, {:already_started, _}}), do: :ok
 
   defp outcome({:error, reason}) do
