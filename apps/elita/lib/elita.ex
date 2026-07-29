@@ -12,6 +12,7 @@ defmodule Elita do
   import Keyword, only: [get: 3]
   import Utils.Normalize, only: [name: 1]
   import Process, only: [flag: 2]
+  import Elita.Enlist, only: [handle: 4, cleanup: 1]
   import Tools
 
   defdelegate spawn(name, configs), to: Elita.Boot
@@ -25,26 +26,19 @@ defmodule Elita do
 
   @impl true
   def init({name, configs, opts}) do
-    normalized = name(name)
-    register({normalized, :puppet}, opts, name, configs)
+    with {:ok, opts, name, configs} <-
+           handle({name(name), :puppet}, opts, name, configs) do
+      prepare(opts, name, configs)
+    end
   end
 
-  defp register(key, opts, name, configs) do
-    :global.register_name(key, self())
-    |> proceed(opts, name, configs)
-  end
-
-  defp proceed(:yes, opts, name, configs) do
+  defp prepare(opts, name, configs) do
+    flag(:trap_exit, true)
     setup(opts, name, configs)
-  end
-
-  defp proceed(:no, _opts, _name, _configs) do
-    {:stop, :duplicate}
   end
 
   defp setup(opts, name, configs) do
     settings = get(opts, :tape_env, %{})
-    flag(:trap_exit, true)
     create(name)
     seed(get(settings, :tape))
     {:ok, state(name, configs, opts, settings)}
@@ -94,10 +88,6 @@ defmodule Elita do
 
   @impl true
   def terminate(_reason, state) do
-    key = {name(state.name), :puppet}
-    :global.whereis_name(key) |> sweep(key)
+    cleanup(state)
   end
-
-  defp sweep(pid, key) when pid == self(), do: :global.unregister_name(key)
-  defp sweep(_pid, _key), do: :ok
 end
