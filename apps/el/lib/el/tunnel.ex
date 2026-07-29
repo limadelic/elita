@@ -65,7 +65,7 @@ defmodule El.Tunnel do
 
   defp prefix(node, agent) do
     len = min(byte_size(agent) + 1, byte_size(node))
-    safely(fn -> binary_part(node, 0, len) == <<agent::binary, "-">> end, false)
+    binary_part(node, 0, len) == <<agent::binary, "-">>
   end
 
   defp pick(true, name), do: name
