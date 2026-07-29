@@ -9,7 +9,8 @@ defmodule Agent.Tree do
     do: %{
       id: :session,
       start: launch(name, configs, opts, via),
-      restart: :transient
+      restart: :transient,
+      significant: true
     }
 
   defp launch(name, configs, opts, via),
@@ -19,6 +20,7 @@ defmodule Agent.Tree do
     do: [
       strategy: :rest_for_one,
       max_restarts: 3,
-      max_seconds: 30
+      max_seconds: 30,
+      auto_shutdown: :any_significant
     ]
 end
