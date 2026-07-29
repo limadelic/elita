@@ -26,4 +26,6 @@ defmodule Elita.Boot.Await do
 
   defp unwrap({:failed_to_start_child, :session, :duplicate}, n),
     do: handle({:error, :duplicate}, n)
+
+  defp unwrap(other, _n), do: {:error, {:shutdown, other}}
 end
