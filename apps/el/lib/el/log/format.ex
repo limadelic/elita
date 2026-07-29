@@ -15,7 +15,7 @@ defmodule El.Log.Format do
   defp text({fmt, args}) do
     render(fmt, args) |> iodata_to_binary()
   rescue
-    _ -> inspect({fmt, args})
+    _e in ArgumentError -> inspect({fmt, args})
   end
 
   defp text(msg), do: inspect(msg)
