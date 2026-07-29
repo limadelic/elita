@@ -22,8 +22,6 @@ defmodule Agent.Log do
 
   def reply(agent) do
     expand("~/.elita/sessions") |> ls() |> open(agent)
-  rescue
-    _ -> ""
   end
 
   defp open({:ok, all}, agent) do
@@ -85,12 +83,12 @@ defmodule Agent.Log do
   defp mtime(dir, file) do
     dir |> join(file) |> stat!() |> Map.get(:mtime)
   rescue
-    _ -> 0
+    File.Error -> 0
   end
 
   defp fetch(dir, file) do
     dir |> join(file) |> read!()
   rescue
-    _ -> ""
+    File.Error -> ""
   end
 end
