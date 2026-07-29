@@ -3,6 +3,7 @@ defmodule Elita.Application do
 
   import Agent.Manager, only: [launch: 0]
   import Elita, only: [prime: 0]
+  import Elita.Ready, only: [up: 0]
   import Mem, only: [setup: 0]
   import Supervisor, only: [start_link: 2]
   import Sweep, only: [sweep: 0]
@@ -16,8 +17,13 @@ defmodule Elita.Application do
   defp boot do
     {:ok, supervisor} = run()
     launch()
-    {:ok, _} = prime()
+    finish()
     {:ok, supervisor}
+  end
+
+  defp finish do
+    {:ok, _} = prime()
+    up()
   end
 
   defp run do
