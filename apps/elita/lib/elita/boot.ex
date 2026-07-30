@@ -48,12 +48,15 @@ defmodule Elita.Boot do
   end
 
   defp spec(name, configs, opts),
-    do: %{id: name, start: launch(name, configs, opts), restart: :transient}
+    do: %{
+      id: name,
+      start: launch(name, configs, opts),
+      restart: :transient,
+      type: :supervisor
+    }
 
-  defp launch(name, configs, opts) do
-    args = [Elita, {name, configs, opts}, [name: via(name)]]
-    {GenServer, :start_link, args}
-  end
+  defp launch(name, configs, opts),
+    do: {Agent.Tree, :start_link, [{name, configs, opts, via(name)}]}
 
   defp post(addr, spec, n),
     do: :erpc.call(addr, Elita.Place, :put, [spec, n], 90_000)
