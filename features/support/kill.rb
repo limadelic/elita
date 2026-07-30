@@ -1,74 +1,90 @@
 module Kill
-  def kill_process(pid)
+  def slay(pid)
     return unless pid
 
-    kill_process_graceful(pid)
+    grace(pid)
   end
 
-  def kill_process_graceful(pid)
+  def grace(pid)
     pgid = Process.getpgid(pid)
     Process.kill("TERM", -pgid)
-    wait_for_graceful_exit(pgid)
-    Process.kill("KILL", -pgid) if still_alive?(pgid)
+    dwell(pgid)
+    force(pgid)
   rescue Errno::ESRCH, Errno::EPERM
     nil
   end
 
-  def wait_for_graceful_exit(pgid)
+  def force(pgid)
+    Process.kill("KILL", -pgid) if alive?(pgid)
+  end
+
+  def dwell(pgid)
     10.times do
-      return true unless still_alive?(pgid)
+      return true unless alive?(pgid)
 
       sleep 0.2
     end
     false
   end
 
-  def still_alive?(pgid)
+  def alive?(pgid)
     Process.kill(0, -pgid)
     true
   rescue Errno::ESRCH, Errno::EPERM
     false
   end
 
-  def wait_process_end(pid)
+  def recede(pid)
     Process.wait(pid, Process::WNOHANG)
   rescue Errno::ESRCH
     nil
   end
 
-  def kill_after_reap(killed_any)
-    killed_any ? kill_orphaned_scripts : try_kill_main_pid
+  def cleanse(killed_any)
+    killed_any ? scavenge : purge
   end
 
-  def try_kill_main_pid
-    kill_process(@pid) if @pid
-    kill_orphaned_scripts
+  def purge
+    slay(@pid) if @pid
+    scavenge
   end
 
-  def kill_orphaned_scripts_gracefully
-    orphans = find_script_orphans
-    terminate_gracefully(orphans, 2)
+  def expunge
+    os = orphans
+    soften(os, 2)
   end
 
-  def kill_orphaned_scripts
-    orphans = find_script_orphans
-    terminate_pids(orphans, "TERM")
+  def scavenge
+    os = orphans
+    cull(os, "TERM")
     sleep 0.1
-    terminate_pids(orphans, "KILL")
+    cull(os, "KILL")
   end
 
-  def terminate_gracefully(pids, timeout_secs)
-    pids.each { |p| Process.kill("TERM", p.to_i) rescue Errno::ESRCH }
+  def soften(pids, timeout_secs)
+    alert(pids)
+    bide(timeout_secs)
+    cull(pids, "KILL")
+  end
+
+  def alert(pids)
+    pids.each { |p| signal(p, "TERM") }
+  end
+
+  def signal(pid_str, sig)
+    Process.kill(sig, pid_str.to_i) rescue Errno::ESRCH
+  end
+
+  def bide(timeout_secs)
     timeout_secs.times do
-      remaining = find_script_orphans
+      remaining = orphans
       return if remaining.empty?
 
       sleep 1
     end
-    terminate_pids(pids, "KILL")
   end
 
-  def find_script_orphans
+  def orphans
     run_id = ENV["ELITA_RUN"]
     return [] unless run_id
 
@@ -76,12 +92,22 @@ module Kill
     `#{cmd}`.strip.split("\n").compact
   end
 
-  def terminate_pids(pids, signal)
-    pids.each do |pid_str|
-      pid = pid_str.to_i
-      next if pid.zero?
+  def cull(pids, sig)
+    pids.each { |p| term(p, sig) }
+  end
 
-      Process.kill(signal, pid) rescue Errno::ESRCH
-    end
+  def term(str, sig)
+    pid = str.to_i
+    smite(pid, sig)
+  end
+
+  def smite(pid, sig)
+    return if pid.zero?
+
+    flare(pid, sig)
+  end
+
+  def flare(pid, sig)
+    Process.kill(sig, pid) rescue Errno::ESRCH
   end
 end

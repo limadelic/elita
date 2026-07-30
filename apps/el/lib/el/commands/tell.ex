@@ -6,7 +6,7 @@ defmodule El.Commands.Tell do
   import Kernel, except: [self: 0]
   import Keyword, only: [get: 3]
   import IO, only: [write: 2]
-  import El.Wrap.Remote, only: [tell: 3]
+  import Matrix.Wrap.Remote, only: [tell: 3]
 
   def send(agent, msg, _tool \\ nil, _opts \\ []) do
     prime()

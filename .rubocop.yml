@@ -22,7 +22,7 @@ Metrics/BlockNesting:
   Max: 1
 
 Metrics/CyclomaticComplexity:
-  Max: 5
+  Max: 2
 
 Metrics/PerceivedComplexity:
   Max: 20
@@ -42,9 +42,12 @@ Metrics/BlockLength:
 Metrics/ParameterLists:
   Enabled: false
 
-# Style cops: disable noise (docs, frozen string literals, quote preference)
+# Style cops: enable GuardClause only
 Style:
   Enabled: false
+
+Style/GuardClause:
+  Enabled: true
 
 # Layout: relax noise, keep basics enabled
 Layout:
@@ -112,6 +115,9 @@ Naming/FileName:
     - 'bin/**/*'
     - 'features/step_definitions/**/*'
     - 'tmp/**/*'
+
+Naming/MethodName:
+  EnforcedStyle: snake_case
 
 Lint/SuppressedException:
   Enabled: false

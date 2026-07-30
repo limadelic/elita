@@ -17,7 +17,7 @@ defmodule Tools.Sys.Agent.Schema do
 end
 
 defmodule Tools.Sys.Agent do
-  import Log, only: [log: 5]
+  import Log, only: [log: 5, agent: 5]
   import Utils.File, only: [file: 1]
 
   @icon "🤖"
@@ -26,9 +26,14 @@ defmodule Tools.Sys.Agent do
 
   def icon, do: @icon
 
-  def exec(_, %{"name" => name}, state) do
-    agent = file("#{name}.md")
-    log(@icon, name, ":", "\n#{agent}\n", :white)
-    {agent, state}
+  def exec(_, %{"name" => name}, %{name: agent} = state) do
+    content = file("#{name}.md")
+    notify(content, name, agent)
+    {content, state}
+  end
+
+  defp notify(content, name, agent) do
+    log(@icon, name, ":", "\n#{content}\n", :white)
+    agent(@icon, name, ":", "\n#{content}\n", %{name: agent})
   end
 end

@@ -1,35 +1,51 @@
 module Track
-  def track_pid(pid)
+  def watch(pid)
     @tracked_pids ||= []
-    @tracked_pids << pid if pid && pid > 0
+    enlist(pid)
   end
 
-  def kill_tracked_pids
-    return if @tracked_pids.nil? || @tracked_pids.empty?
+  def enlist(pid)
+    return unless positive?(pid)
 
-    send_term_signals
-    wait_graceful
-    send_kill_signals
+    @tracked_pids << pid
+  end
+
+  def positive?(pid)
+    pid&.positive?
+  end
+
+  def terminate
+    return if none?
+
+    cease
+    breathe
+    finish
     @tracked_pids.clear
   end
 
-  def send_term_signals
-    @tracked_pids.each { |pid| signal_pid(pid, "TERM") }
+  def none?
+    @tracked_pids.nil? || @tracked_pids.empty?
   end
 
-  def send_kill_signals
-    @tracked_pids.each { |pid| signal_pid(pid, "KILL") }
+  def cease
+    @tracked_pids.each { |pid| notify(pid, "TERM") }
   end
 
-  def signal_pid(pid, sig)
-    return unless pid_alive?(pid)
+  def finish
+    @tracked_pids.each { |pid| notify(pid, "KILL") }
+  end
 
+  def notify(pid, sig)
+    transmit(pid, sig) if vital?(pid)
+  end
+
+  def transmit(pid, sig)
     Process.kill(sig, pid)
   rescue Errno::ESRCH, Errno::EPERM
     nil
   end
 
-  def pid_alive?(pid)
+  def vital?(pid)
     Process.kill(0, pid)
     true
   rescue Errno::ESRCH
@@ -38,17 +54,18 @@ module Track
     true
   end
 
-  def living_pids
-    @tracked_pids.select { |pid| pid_alive?(pid) }
+  def roster
+    @tracked_pids.select { |pid| vital?(pid) }
   end
 
-  def wait_graceful
+  def breathe
     deadline = Time.now + 2.0
-    loop do
-      remaining = living_pids
-      break if remaining.empty? || Time.now > deadline
-
+    until over?(deadline)
       sleep 0.05
     end
+  end
+
+  def over?(deadline)
+    roster.empty? || Time.now > deadline
   end
 end

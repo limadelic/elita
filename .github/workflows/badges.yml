@@ -2,7 +2,13 @@ name: Badges
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, reopened, synchronize]
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: 'PR number'
+        required: true
+        type: number
 
 permissions:
   pull-requests: write
@@ -15,24 +21,48 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Resolve PR number
+        id: pr
+        env:
+          PR_FROM_EVENT: ${{ github.event.pull_request.number }}
+          PR_FROM_INPUT: ${{ inputs.pr }}
+        run: |
+          if [ -n "$PR_FROM_EVENT" ]; then
+            PR_NUMBER=$PR_FROM_EVENT
+          else
+            PR_NUMBER=$PR_FROM_INPUT
+          fi
+          echo "number=$PR_NUMBER" >> $GITHUB_OUTPUT
+
       - name: Add badge block to PR
         env:
           GH_TOKEN: ${{ github.token }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
         run: |
           LINT_URL="https%3A%2F%2Flimadelic.github.io%2Felita%2F$PR_NUMBER%2Flint.json"
           CUKES_URL="https%3A%2F%2Flimadelic.github.io%2Felita%2F$PR_NUMBER%2Fcukes.json"
           COVER_URL="https%3A%2F%2Flimadelic.github.io%2Felita%2F$PR_NUMBER%2Fcover.json"
-          cat > /tmp/badges.md << 'BADGEEOF'
-          <!-- badges-start -->
-          [![lint](https://img.shields.io/endpoint?url=$LINT_URL)](https://limadelic.github.io/elita/$PR_NUMBER/report.html)
-          [![cukes](https://img.shields.io/endpoint?url=$CUKES_URL)](https://limadelic.github.io/elita/$PR_NUMBER/report.html)
-          [![cover](https://img.shields.io/endpoint?url=$COVER_URL)](https://limadelic.github.io/elita/$PR_NUMBER/cover.json)
-          <!-- badges-end -->
-          BADGEEOF
-          sed -i 's|\$LINT_URL|'"$LINT_URL"'|g; s|\$CUKES_URL|'"$CUKES_URL"'|g; s|\$COVER_URL|'"$COVER_URL"'|g; s|\$PR_NUMBER|'"$PR_NUMBER"'|g' /tmp/badges.md
+
+          # Get current PR body
           gh pr view $PR_NUMBER --json body -q .body > /tmp/body.md
-          sed -i '' '/<!-- badges-start -->/,/<!-- badges-end -->/d; /^\[\!/d' /tmp/body.md
-          echo "" >> /tmp/body.md
-          cat /tmp/badges.md >> /tmp/body.md
-          gh pr edit $PR_NUMBER --body-file /tmp/body.md
+
+          # Check if badge block already exists (idempotency)
+          if grep -q "limadelic.github.io/elita/$PR_NUMBER" /tmp/body.md; then
+            echo "Badge block already present, skipping update"
+            exit 0
+          fi
+
+          # Remove any prior badge block with delimiters
+          sed -i '' '/<!-- badges-start -->/,/<!-- badges-end -->/d' /tmp/body.md
+
+          # Append badge block to existing body
+          {
+            cat /tmp/body.md
+            echo ""
+            echo "<!-- badges-start -->"
+            echo "[![lint](https://img.shields.io/endpoint?url=$LINT_URL)](https://limadelic.github.io/elita/$PR_NUMBER/report.html)"
+            echo "[![cukes](https://img.shields.io/endpoint?url=$CUKES_URL)](https://limadelic.github.io/elita/$PR_NUMBER/report.html)"
+            echo "[![cover](https://img.shields.io/endpoint?url=$COVER_URL)](https://limadelic.github.io/elita/$PR_NUMBER/report.html)"
+            echo "<!-- badges-end -->"
+          } > /tmp/body_new.md
+          gh pr edit $PR_NUMBER --body-file /tmp/body_new.md

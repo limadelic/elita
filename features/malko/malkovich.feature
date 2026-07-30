@@ -1,4 +1,3 @@
-@wip
 @malko
 @live
 Feature: Malkovich Malkovich
