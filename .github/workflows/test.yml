@@ -60,6 +60,34 @@ jobs:
         if: always()
         continue-on-error: true
 
+      - name: Post coverage to PR
+        run: |
+          PR_NUMBER=$(gh pr list --head "$GITHUB_REF_NAME" --json number --jq '.[] | .number' 2>/dev/null || echo "")
+          if [ -z "$PR_NUMBER" ]; then
+            echo "No PR for branch, skipping comment"
+            exit 0
+          fi
+          COVERAGE="${{ steps.coverage.outputs.coverage }}"
+          MARKER="<!-- elita-coverage-report -->"
+          BODY=$(cat <<EOF
+          $MARKER
+
+          ## Coverage: $COVERAGE%
+          EOF
+          )
+          REPO="${{ github.repository }}"
+          COMMENT_ID=$(gh api repos/$REPO/issues/$PR_NUMBER/comments \
+            --jq ".[] | select(.body | contains(\"$MARKER\")) | .id" 2>/dev/null | head -1 || echo "")
+          if [ -n "$COMMENT_ID" ]; then
+            gh api repos/$REPO/issues/$PR_NUMBER/comments/$COMMENT_ID -X PATCH -f body="$BODY"
+          else
+            gh pr comment $PR_NUMBER --body "$BODY"
+          fi
+        if: always()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+
       - name: Generate coverage badge
         run: ops/ci/badges.rb
         env:
