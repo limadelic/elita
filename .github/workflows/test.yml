@@ -176,10 +176,23 @@ jobs:
                   module_name = html_file.replace("Elixir.", "").replace(".html", "")
                   modules.append((module_name, 0.0))
 
+          # Build set of modules with published HTML pages
+          available_pages = set()
+          if cover_dir.exists():
+              for f in cover_dir.glob("*.html"):
+                  if f.name.startswith("Elixir.") and f.name.endswith(".html"):
+                      module_name = f.name.replace("Elixir.", "").replace(".html", "")
+                      available_pages.add(module_name)
+
+          # Filter modules to only those with published pages
+          original_count = len(modules)
+          modules = [m for m in modules if m[0] in available_pages]
+          dropped_count = original_count - len(modules)
+
           # Sort by percentage (worst first)
           modules.sort(key=lambda x: x[1])
 
-          # Count 0% modules
+          # Count 0% modules (from filtered list)
           zero_count = sum(1 for _, pct in modules if pct == 0.0)
 
           # Generate HTML
@@ -318,12 +331,16 @@ jobs:
                               <div class="summary-value" style="background-color: """ + get_color(total_pct) + """;">""" + f"{total_pct:.2f}%" + """</div>
                           </div>
                           <div class="summary-item">
-                              <div class="summary-label">Modules</div>
+                              <div class="summary-label">Modules (with pages)</div>
                               <div style="font-size: 32px; font-weight: 700;">""" + str(len(modules)) + """</div>
                           </div>
                           <div class="summary-item">
                               <div class="summary-label">No Coverage</div>
                               <div style="font-size: 32px; font-weight: 700; color: #e05d44;">""" + str(zero_count) + """</div>
+                          </div>
+                          <div class="summary-item">
+                              <div class="summary-label">Dropped (no pages)</div>
+                              <div style="font-size: 32px; font-weight: 700; color: #999;">""" + str(dropped_count) + """</div>
                           </div>
                       </div>
                   </div>
