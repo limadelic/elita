@@ -55,8 +55,8 @@ jobs:
           # Remove prior badge block (delimited)
           content = re.sub(r'<!-- badges-start -->.*?<!-- badges-end -->\n', '', content, flags=re.DOTALL)
 
-          # Remove bare shield badge lines
-          content = re.sub(r'.*img\.shields\.io.*limadelic\.github\.io/elita.*\n', '', content)
+          # Remove bare shield badge lines (handles URL encoding)
+          content = re.sub(r'.*img\.shields\.io.*limadelic.*elita.*\n', '', content)
 
           # Strip trailing blank lines, preserve one final newline
           content = content.rstrip('\n') + '\n' if content.strip() else ''
