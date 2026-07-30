@@ -133,9 +133,14 @@ jobs:
       - name: Copy lint files flat into prefix
         run: |
           PREFIX="${{ steps.prefix.outputs.prefix }}"
-          if [ -d "/tmp/lint-art" ] && [ -n "$PREFIX" ]; then
-            mkdir -p "site/$PREFIX"
-            find /tmp/lint-art -type f -exec cp {} site/$PREFIX/ \;
+          if [ -d "/tmp/lint-art" ]; then
+            if [ -n "$PREFIX" ]; then
+              mkdir -p "site/$PREFIX"
+              DEST="site/$PREFIX"
+            else
+              DEST="site"
+            fi
+            find /tmp/lint-art -type f -exec cp {} "$DEST"/ \;
             rm -rf /tmp/lint-art
           fi
         continue-on-error: true
@@ -143,9 +148,14 @@ jobs:
       - name: Copy cukes files flat into prefix
         run: |
           PREFIX="${{ steps.prefix.outputs.prefix }}"
-          if [ -d "/tmp/cukes-art" ] && [ -n "$PREFIX" ]; then
-            mkdir -p "site/$PREFIX"
-            find /tmp/cukes-art -type f -exec cp {} site/$PREFIX/ \;
+          if [ -d "/tmp/cukes-art" ]; then
+            if [ -n "$PREFIX" ]; then
+              mkdir -p "site/$PREFIX"
+              DEST="site/$PREFIX"
+            else
+              DEST="site"
+            fi
+            find /tmp/cukes-art -type f -exec cp {} "$DEST"/ \;
             rm -rf /tmp/cukes-art
           fi
         continue-on-error: true
