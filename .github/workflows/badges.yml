@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   badges:
-    if: github.event.pull_request
+    if: github.event.pull_request || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
 
     steps:
@@ -46,19 +46,24 @@ jobs:
           # Get current PR body
           gh pr view $PR_NUMBER --json body -q .body > /tmp/body.md
 
-          # Check if badge block already exists (idempotency)
-          if grep -q "limadelic.github.io/elita/$PR_NUMBER" /tmp/body.md; then
-            echo "Badge block already present, skipping update"
-            exit 0
-          fi
-
           # Remove any prior badge block with delimiters
           sed -i '' '/<!-- badges-start -->/,/<!-- badges-end -->/d' /tmp/body.md
+
+          # Remove any bare badge lines
+          sed -i '' '/img.shields.io.*limadelic.github.io\/elita/d' /tmp/body.md
+
+          # Remove all trailing blank lines
+          python3 << 'PYTHON'
+          with open('/tmp/body.md', 'r') as f:
+              content = f.read()
+          content = content.rstrip('\n') + '\n' if content.strip() else ''
+          with open('/tmp/body.md', 'w') as f:
+              f.write(content)
+          PYTHON
 
           # Append badge block to existing body
           {
             cat /tmp/body.md
-            echo ""
             echo "<!-- badges-start -->"
             echo "[![lint](https://img.shields.io/endpoint?url=$LINT_URL)](https://limadelic.github.io/elita/$PR_NUMBER/report.html)"
             echo "[![cukes](https://img.shields.io/endpoint?url=$CUKES_URL)](https://limadelic.github.io/elita/$PR_NUMBER/report.html)"
