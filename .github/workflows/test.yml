@@ -29,6 +29,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-mix-1.20.2-29-
 
+      - name: Sanitize branch name for artifact
+        id: branch_slug
+        run: |
+          branch="${{ github.ref_name }}"
+          slug="${branch//\//-}"
+          echo "slug=$slug" >> "$GITHUB_OUTPUT"
+
       - name: Get dependencies
         run: mix deps.get
 
@@ -68,5 +75,5 @@ jobs:
         if: always()
         continue-on-error: true
         with:
-          name: coverage-badge
+          name: coverage-badge-${{ steps.branch_slug.outputs.slug }}
           path: site/
