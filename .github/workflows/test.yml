@@ -36,3 +36,19 @@ jobs:
         run: mix test
         env:
           MIX_ENV: test
+
+      - name: Run coverage
+        run: mix cover 2>&1 | tee /tmp/cover_output.txt
+        continue-on-error: true
+        env:
+          MIX_ENV: test
+
+      - name: Extract and report coverage
+        run: |
+          COVERAGE=$(grep "| Total" /tmp/cover_output.txt | grep -oE '[0-9]+\.[0-9]+' | tail -1)
+          echo "coverage=$COVERAGE" >> $GITHUB_OUTPUT
+          echo "## Coverage Report" >> $GITHUB_STEP_SUMMARY
+          echo "Total coverage: **$COVERAGE%**" >> $GITHUB_STEP_SUMMARY
+        id: coverage
+        if: always()
+        continue-on-error: true
