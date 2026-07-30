@@ -36,6 +36,25 @@ jobs:
           slug="${branch//\//-}"
           echo "slug=$slug" >> "$GITHUB_OUTPUT"
 
+      - name: Compute deployment prefix
+        id: prefix
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="${{ github.ref_name }}"
+          PREFIX=""
+
+          if [ "$BRANCH" != "main" ] && [ "$BRANCH" != "test" ]; then
+            PR_NUM=$(gh api repos/${{ github.repository }}/pulls -q ".[] | select(.head.ref==\"$BRANCH\") | .number" | head -1 || echo "")
+            if [ -n "$PR_NUM" ]; then
+              PREFIX="$PR_NUM/"
+            else
+              PREFIX="$BRANCH/"
+            fi
+          fi
+
+          echo "prefix=$PREFIX" >> "$GITHUB_OUTPUT"
+
       - name: Get dependencies
         run: mix deps.get
 
@@ -98,19 +117,22 @@ jobs:
       - name: Copy coverage HTML files
         run: |
           if [ -d "apps/elita/cover" ]; then
-            mkdir -p site/cover
-            find apps/elita/cover -maxdepth 1 -name "*.html" -exec cp {} site/cover/ \;
+            PREFIX="${{ steps.prefix.outputs.prefix }}"
+            mkdir -p "site/${PREFIX}cover"
+            find apps/elita/cover -maxdepth 1 -name "*.html" -exec cp {} "site/${PREFIX}cover/" \;
           fi
         if: always()
 
       - name: Generate coverage index
         run: |
-          mkdir -p site/cover
+          PREFIX="${{ steps.prefix.outputs.prefix }}"
+          mkdir -p "site/${PREFIX}cover"
           python3 << 'PYTHON'
           import os
           import json
           from pathlib import Path
 
+          prefix = os.environ.get("PREFIX", "")
           cover_dir = Path("apps/elita/cover")
           if not cover_dir.exists():
               exit(0)
@@ -203,9 +225,12 @@ jobs:
           </html>
           """
 
-          with open("site/cover/index.html", "w") as f:
+          index_path = f"site/{prefix}cover/index.html"
+          with open(index_path, "w") as f:
               f.write(html_content)
           PYTHON
+        env:
+          PREFIX: ${{ steps.prefix.outputs.prefix }}
         if: always()
 
       - name: Upload coverage badge artifact
