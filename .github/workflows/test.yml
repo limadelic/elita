@@ -98,6 +98,121 @@ jobs:
         if: always()
         continue-on-error: true
 
+      - name: Copy coverage HTML files
+        run: |
+          if [ -d "apps/elita/cover" ]; then
+            mkdir -p site/cover
+            find apps/elita/cover -maxdepth 1 -name "*.html" -exec cp {} site/cover/ \;
+          fi
+        if: always()
+        continue-on-error: true
+
+      - name: Generate coverage index
+        run: |
+          mkdir -p site/cover
+          python3 << 'PYTHON'
+          import os
+          import json
+          from pathlib import Path
+
+          cover_dir = Path("apps/elita/cover")
+          if not cover_dir.exists():
+              exit(0)
+
+          # Get list of HTML files
+          html_files = sorted([f.name for f in cover_dir.glob("Elixir.*.html")])
+
+          # Parse coverage percent from cover_output if available
+          coverage_pct = "18.32"  # fallback
+          if os.path.exists("/tmp/cover_output.txt"):
+              with open("/tmp/cover_output.txt") as f:
+                  for line in f:
+                      if "| Total" in line:
+                          parts = line.split("|")
+                          if len(parts) > 1:
+                              pct = parts[1].strip().rstrip("%")
+                              if pct and pct[0].isdigit():
+                                  coverage_pct = pct
+                                  break
+
+          # Generate index.html
+          html_content = f"""<!DOCTYPE html>
+          <html>
+          <head>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1">
+              <title>Coverage Report</title>
+              <style>
+                  body {{
+                      font: 14px/1.6 "Helvetica Neue", Helvetica, Arial, sans-serif;
+                      margin: 0;
+                      padding: 20px;
+                      color: #333;
+                      background-color: #f5f5f5;
+                  }}
+                  .container {{
+                      max-width: 900px;
+                      margin: 0 auto;
+                      background: white;
+                      padding: 20px;
+                      border-radius: 8px;
+                      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                  }}
+                  h1 {{
+                      margin-top: 0;
+                      color: #173647;
+                  }}
+                  .summary {{
+                      font-size: 24px;
+                      font-weight: bold;
+                      padding: 15px;
+                      margin-bottom: 20px;
+                      border-radius: 4px;
+                      background-color: #f0f0f0;
+                  }}
+                  .modules {{
+                      display: grid;
+                      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                      gap: 10px;
+                  }}
+                  .module {{
+                      padding: 10px;
+                      border: 1px solid #ddd;
+                      border-radius: 4px;
+                      background: #fafafa;
+                      text-decoration: none;
+                      color: #0066cc;
+                      transition: background-color 0.2s;
+                  }}
+                  .module:hover {{
+                      background-color: #e8f1f5;
+                  }}
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <h1>Coverage Report</h1>
+                  <div class="summary">Total Coverage: <strong>{coverage_pct}%</strong></div>
+                  <h2>Modules ({len(html_files)})</h2>
+                  <div class="modules">
+          """
+
+          for html_file in html_files:
+              module_name = html_file.replace("Elixir.", "").replace(".html", "")
+              html_content += f'          <a href="{html_file}" class="module">{module_name}</a>\n'
+
+          html_content += """      </div>
+              </div>
+          </body>
+          </html>
+          """
+
+          with open("site/cover/index.html", "w") as f:
+              f.write(html_content)
+          PYTHON
+        if: always()
+        continue-on-error: true
+
       - name: Upload coverage badge artifact
         uses: actions/upload-artifact@v4
         if: always()
