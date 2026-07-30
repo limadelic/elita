@@ -45,8 +45,33 @@ defmodule Elita.Umbrella do
     unless Mix.Task.recursing?() do
       check("cd apps/elita && mix test --cover")
       check("cd apps/el && mix test --cover")
-      check("mix test.coverage")
+      _ = Mix.shell().cmd("mix test.coverage")
+      copy_elita_html()
     end
+  end
+
+  defp copy_elita_html do
+    elita_modules = elita_modules()
+    File.mkdir_p!("apps/elita/cover")
+
+    elita_modules
+    |> Enum.each(fn module ->
+      html_file = "#{module}.html"
+      src = Path.join("cover", html_file)
+      dst = Path.join("apps/elita/cover", html_file)
+      if File.exists?(src) do
+        File.cp!(src, dst)
+      end
+    end)
+  end
+
+  defp elita_modules do
+    "_build/test/lib/elita/ebin"
+    |> Path.expand()
+    |> File.ls!()
+    |> Enum.filter(&String.ends_with?(&1, ".beam"))
+    |> Enum.map(&String.slice(&1, 0..-6//1))
+    |> Enum.sort()
   end
 
   defp run_lint(_) do
