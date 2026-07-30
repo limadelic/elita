@@ -52,3 +52,21 @@ jobs:
         id: coverage
         if: always()
         continue-on-error: true
+
+      - name: Generate coverage badge
+        run: ops/ci/badges.rb
+        env:
+          BRANCH: ${{ github.ref_name }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          COVERAGE_PERCENT: ${{ steps.coverage.outputs.coverage }}
+          GH_TOKEN: ${{ github.token }}
+        if: always()
+        continue-on-error: true
+
+      - name: Upload coverage badge artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        continue-on-error: true
+        with:
+          name: coverage-badge
+          path: site/

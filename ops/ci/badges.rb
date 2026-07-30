@@ -9,6 +9,7 @@ module Badges
     FileUtils.mkdir_p("site/#{prefix}")
     lint_badges(prefix)
     cukes_badges(prefix)
+    cover_badges(prefix)
   end
 
   def self.compute_prefix
@@ -48,6 +49,16 @@ module Badges
     File.write("site/#{prefix}/cukes_badge.txt", "cukes: #{message}")
   end
 
+  def self.cover_badges(prefix)
+    percent = ENV['COVERAGE_PERCENT']
+    return if percent.nil? || percent.empty?
+
+    percent_f = percent.to_f
+    color, message = cover_color_message(percent_f)
+    json = JSON.generate(badge('cover', message, color))
+    File.write("site/#{prefix}/cover.json", json)
+  end
+
   def self.count_passed(scenarios)
     scenarios.count { |sc| (sc['steps'] || []).all? { |s| s.dig('result', 'status') == 'passed' } }
   end
@@ -75,6 +86,16 @@ module Badges
   def self.cukes_color_message(passed, total)
     color = (passed == total && total > 0) ? '23D96C' : 'e05d44'
     ["#{passed}/#{total}", color]
+  end
+
+  def self.cover_color_message(percent)
+    if percent >= 80.0
+      ['23D96C', "#{format('%.1f', percent)}%"]
+    elsif percent >= 50.0
+      ['dfb317', "#{format('%.1f', percent)}%"]
+    else
+      ['e05d44', "#{format('%.1f', percent)}%"]
+    end
   end
 end
 
