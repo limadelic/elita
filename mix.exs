@@ -26,6 +26,7 @@ defmodule Elita.Umbrella do
       lint: [&run_lint/1],
       cukes: [&run_cukes/1],
       build: [&run_build/1],
+      cover: [&run_cover/1],
       ship: "cmd bin/release"
     ]
   end
@@ -34,6 +35,14 @@ defmodule Elita.Umbrella do
     unless Mix.Task.recursing?() do
       check("cd apps/elita && mix test")
       check("cd apps/el && mix test")
+    end
+  end
+
+  defp run_cover(_) do
+    unless Mix.Task.recursing?() do
+      check("cd apps/elita && mix test --cover")
+      check("cd apps/el && mix test --cover")
+      check("mix test.coverage")
     end
   end
 

@@ -17,7 +17,7 @@ defmodule El.MixProject do
       lockfile: "../../mix.lock",
       compilers: [:yecc, :leex, :erlang, :elixir, :app],
       elixirc_options: [warnings_as_errors: true],
-      test_coverage: [output: "cover"]
+      test_coverage: [output: "cover", export: "el"]
     ]
   end
 
