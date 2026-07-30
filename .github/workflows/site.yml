@@ -167,17 +167,17 @@ jobs:
           fi
         continue-on-error: true
 
-      - name: Copy coverage files preserving cover directory
+      - name: Copy coverage files preserving structure
         run: |
           PREFIX="${{ steps.prefix.outputs.prefix }}"
-          if [ -d "/tmp/cover-art/cover" ]; then
+          if [ -d "/tmp/cover-art" ]; then
             if [ -n "$PREFIX" ]; then
               mkdir -p "site/$PREFIX"
-              cp -r /tmp/cover-art/cover "site/$PREFIX/"
+              cp -r /tmp/cover-art/* "site/$PREFIX/"
             else
-              cp -r /tmp/cover-art/cover site/
+              cp -r /tmp/cover-art/* site/
             fi
-            rm -rf /tmp/cover-art
+            mv /tmp/cover-art /tmp/cover-art-done
           fi
         continue-on-error: true
 
