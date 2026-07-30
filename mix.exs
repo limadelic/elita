@@ -10,7 +10,8 @@ defmodule Elita.Umbrella do
       config_path: "config/config.exs",
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      test_coverage: [ignore_modules: [~r/^Tape($|\.)/]]
     ]
   end
 
