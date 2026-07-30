@@ -1,6 +1,7 @@
 .idea/
 /_build/
 /cover/
+apps/*/cover/
 /deps/
 /doc/
 erl_crash.dump
