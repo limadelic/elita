@@ -32,12 +32,6 @@ module Cover
   end
 
   def self.color_for_percent(percent)
-    if percent >= 80.0
-      '23D96C'
-    elsif percent >= 50.0
-      'dfb317'
-    else
-      'e05d44'
-    end
+    [[80.0, '23D96C'], [50.0, 'dfb317'], [0.0, 'e05d44']].find { |threshold, _| percent >= threshold }[1]
   end
 end
