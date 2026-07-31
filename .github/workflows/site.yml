@@ -77,7 +77,6 @@ jobs:
         with:
           name: coverage-badge-${{ steps.branch_slug.outputs.slug }}
           path: /tmp/cover-art
-        continue-on-error: true
 
       - name: Copy lint files flat into prefix
         run: |
