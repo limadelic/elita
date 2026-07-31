@@ -22,19 +22,10 @@ jobs:
         id: prefix
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: ${{ github.ref_name }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
-          BRANCH="${{ github.ref_name }}"
-          PREFIX=""
-
-          if [ "$BRANCH" != "main" ] && [ "$BRANCH" != "test" ]; then
-            PR_NUM=$(gh api repos/${{ github.repository }}/pulls -q ".[] | select(.head.ref==\"$BRANCH\") | .number" | head -1 || echo "")
-            if [ -n "$PR_NUM" ]; then
-              PREFIX="$PR_NUM/"
-            else
-              PREFIX="$BRANCH/"
-            fi
-          fi
-
+          PREFIX=$(ops/ci/prefix.rb)
           echo "prefix=$PREFIX" >> "$GITHUB_OUTPUT"
           echo "target=$PREFIX" >> "$GITHUB_OUTPUT"
 
@@ -57,63 +48,14 @@ jobs:
       - name: Seed site from live Pages
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          mkdir -p site
-          BASE_URL="https://limadelic.github.io/elita"
-          FILES="report.html cukes.html cukes.json lint.json credo.html index.html"
-
-          # Seed root files
-          for file in $FILES; do
-            curl -sfL "$BASE_URL/$file" -o "site/$file" || true
-          done
-
-          # Get branch names from git remote branches
-          BRANCHES=$(git branch -r | sed 's/^[[:space:]]*origin\///' | grep -v '^HEAD' | sort -u)
-
-          # Seed each branch directory
-          for branch in $BRANCHES; do
-            mkdir -p "site/$branch"
-            for file in $FILES; do
-              curl -sfL "$BASE_URL/$branch/$file" -o "site/$branch/$file" || true
-            done
-          done
-
-          # Seed PR directories from open PRs only
-          gh pr list --state open --json number --jq '.[].number' | while read pr_num; do
-            mkdir -p "site/$pr_num"
-            for file in $FILES; do
-              curl -sfL "$BASE_URL/$pr_num/$file" -o "site/$pr_num/$file" || true
-            done
-          done
+        run: ops/ci/seed.rb
 
       - name: Merge previous github-pages artifact as base
-        run: |
-          set +e
-          ARTIFACT_ID=$(gh api repos/${{ github.repository }}/actions/artifacts \
-            --paginate --jq '.artifacts[] | select(.name == "github-pages") | .id' | head -1)
-
-          if [ -z "$ARTIFACT_ID" ]; then
-            echo "No previous github-pages artifact found, starting empty"
-            exit 0
-          fi
-
-          echo "Found artifact $ARTIFACT_ID, downloading..."
-          TEMP_DIR=$(mktemp -d)
-          cd "$TEMP_DIR"
-          gh api repos/${{ github.repository }}/actions/artifacts/$ARTIFACT_ID/zip -H "Accept: application/zip" > artifact.zip
-          unzip -q artifact.zip
-
-          if [ -f artifact.tar ]; then
-            tar xf artifact.tar -C /tmp
-            if [ -d /tmp/artifact ]; then
-              cp -r /tmp/artifact/* "$GITHUB_WORKSPACE/site/" 2>/dev/null || true
-              echo "Base merged from previous deploy"
-            fi
-          fi
-
-          rm -rf "$TEMP_DIR"
+        run: ops/ci/merge.rb
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_WORKSPACE: ${{ github.workspace }}
         continue-on-error: true
 
       - name: Download lint badge artifact

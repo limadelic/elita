@@ -40,20 +40,9 @@ jobs:
         id: prefix
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          BRANCH="${{ github.ref_name }}"
-          PREFIX=""
-
-          if [ "$BRANCH" != "main" ] && [ "$BRANCH" != "test" ]; then
-            PR_NUM=$(gh api repos/${{ github.repository }}/pulls -q ".[] | select(.head.ref==\"$BRANCH\") | .number" | head -1 || echo "")
-            if [ -n "$PR_NUM" ]; then
-              PREFIX="$PR_NUM/"
-            else
-              PREFIX="$BRANCH/"
-            fi
-          fi
-
-          echo "prefix=$PREFIX" >> "$GITHUB_OUTPUT"
+          BRANCH: ${{ github.ref_name }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: echo "prefix=$(ops/ci/prefix.rb)" >> "$GITHUB_OUTPUT"
 
       - name: Get dependencies
         run: mix deps.get
@@ -78,32 +67,14 @@ jobs:
         if: always()
 
       - name: Post coverage to PR
-        run: |
-          PR_NUMBER=$(gh pr list --head "$GITHUB_REF_NAME" --json number --jq '.[] | .number' 2>/dev/null || echo "")
-          if [ -z "$PR_NUMBER" ]; then
-            echo "No PR for branch, skipping comment"
-            exit 0
-          fi
-          COVERAGE="${{ steps.coverage.outputs.coverage }}"
-          MARKER="<!-- elita-coverage-report -->"
-          BODY=$(cat <<EOF
-          $MARKER
-
-          ## Coverage: $COVERAGE%
-          EOF
-          )
-          REPO="${{ github.repository }}"
-          COMMENT_ID=$(gh api repos/$REPO/issues/$PR_NUMBER/comments \
-            --jq ".[] | select(.body | contains(\"$MARKER\")) | .id" 2>/dev/null | head -1 || echo "")
-          if [ -n "$COMMENT_ID" ]; then
-            gh api repos/$REPO/issues/$PR_NUMBER/comments/$COMMENT_ID -X PATCH -f body="$BODY"
-          else
-            gh pr comment $PR_NUMBER --body "$BODY"
-          fi
+        run: ops/ci/comment.rb
         if: always()
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          COVERAGE_PERCENT: ${{ steps.coverage.outputs.coverage }}
 
       - name: Generate coverage badge
         run: ops/ci/badges.rb
