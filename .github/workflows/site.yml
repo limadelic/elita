@@ -109,13 +109,8 @@ jobs:
           fi
         continue-on-error: true
 
-      - name: Copy coverage files preserving structure
-        run: |
-          if [ -d "/tmp/cover-art" ]; then
-            cp -r /tmp/cover-art/* site/
-            mv /tmp/cover-art /tmp/cover-art-done
-          fi
-        continue-on-error: true
+      - name: Copy and validate coverage files
+        run: ops/ci/site/cover.rb
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
