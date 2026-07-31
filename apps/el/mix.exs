@@ -26,7 +26,19 @@ defmodule El.MixProject do
 
   defp aliases do
     [
-      test: fn _ -> :ok end,
+      test: fn _ ->
+        if Mix.Task.recursing?() do
+          :ok
+        else
+          # Run real tests - ExUnit only if test files exist
+          if Enum.empty?(Path.wildcard("test/**/*_test.exs")) do
+            :ok
+          else
+            Mix.Task.reenable("test")
+            Mix.Task.run("test")
+          end
+        end
+      end,
       lint: ["format --check-formatted", "credo --strict"]
     ]
   end
