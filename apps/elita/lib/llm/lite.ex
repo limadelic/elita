@@ -1,9 +1,9 @@
 defmodule Lite do
+  import Application, only: [get_env: 2]
   import Compose, only: [compose: 1]
   import Snippet, only: [snip: 2]
   import Tools, only: [tools: 2]
-  import Enum, only: [map: 2, find_value: 2]
-  import System, only: [get_env: 1, get_env: 2]
+  import Enum, only: [map: 2]
   import Map, only: [put: 3, delete: 2]
   import List, only: [pop_at: 2]
   import Req, only: [post: 2]
@@ -13,20 +13,15 @@ defmodule Lite do
   def llm(%{config: config, history: history, name: agent_name} = state) do
     composed = compose(config)
     body = build(composed, history, state)
-    result = tape(body, agent_name)
+    result = tape(body, agent_name, state)
     {parts(result), state}
   end
 
-  def llm(text) when is_binary(text) do
-    tape(request(text), "direct") |> text
+  defp tape(body, name, state) do
+    cfg = opts(get_env(:elita, :tape_on_miss))
+    payload = [tape: state[:tape], live: state[:live]] ++ cfg
+    handle(body, name, fn -> req(body) |> resp end, payload)
   end
-
-  defp tape(body, name) do
-    handle(body, name, fn -> req(body) |> resp end, opts(get_env("TAPE_ON_MISS")))
-  end
-
-  defp text([%{"type" => "text", "text" => t} | _]), do: t
-  defp text(other), do: other
 
   defp req(body), do: post(url(), payload(body))
 
@@ -78,20 +73,16 @@ defmodule Lite do
 
   defp part(other), do: other
 
-  defp request(text) do
-    %{model: model(), max_tokens: 4096, messages: [%{role: "user", content: text}]}
-  end
-
-  defp url, do: "#{get_env("ANTHROPIC_BASE_URL", "https://api.anthropic.com")}/v1/messages"
+  defp url, do: "#{get_env(:elita, :base_url)}/v1/messages"
   defp model, do: "claude-haiku-4-5"
 
   defp headers, do: [{"x-api-key", token()}, {"anthropic-version", "2023-06-01"}]
 
-  defp connect, do: ssl(get_env("NODE_EXTRA_CA_CERTS"))
+  defp connect, do: ssl(get_env(:elita, :ca_certs))
   defp ssl(nil), do: []
   defp ssl(path), do: [transport_opts: [cacertfile: path]]
 
-  defp token, do: ["ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_API_KEY"] |> find_value(&get_env/1)
+  defp token, do: get_env(:elita, :auth_token)
 
   defp resp({:ok, %{status: 200, body: %{"content" => content}}}), do: content
   defp resp({:ok, %{status: code, body: body}}), do: {:error, "HTTP #{code}: #{inspect(body)}"}

@@ -9,7 +9,7 @@ defmodule Agent.Jsonl.Legacy do
   def find do
     get_env("HOME", "~") |> setup()
   rescue
-    _ -> nil
+    File.Error -> nil
   end
 
   defp setup(home) do

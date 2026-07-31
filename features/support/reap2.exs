@@ -1,5 +1,5 @@
 #!/usr/bin/env elixir
-# Clean room: stop daemon and reap orphaned processes
+# Clean room: stop node and reap orphaned processes
 
 node_name = :"elita-cukes@127.0.0.1"
 

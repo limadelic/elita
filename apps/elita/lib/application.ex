@@ -3,21 +3,27 @@ defmodule Elita.Application do
 
   import Agent.Manager, only: [launch: 0]
   import Elita, only: [prime: 0]
+  import Elita.Ready, only: [up: 0]
   import Mem, only: [setup: 0]
-  import Registry, only: [child_spec: 1]
   import Supervisor, only: [start_link: 2]
-  import System, only: [get_env: 1]
+  import Sweep, only: [sweep: 0]
 
   def start(_type, _args) do
     setup()
+    sweep()
     boot()
   end
 
   defp boot do
-    {:ok, _} = run()
+    {:ok, supervisor} = run()
     launch()
+    finish()
+    {:ok, supervisor}
+  end
+
+  defp finish do
     {:ok, _} = prime()
-    {:ok, self()}
+    up()
   end
 
   defp run do
@@ -25,22 +31,17 @@ defmodule Elita.Application do
   end
 
   defp specs,
-    do:
-      [child_spec(keys: :unique, name: ElitaRegistry), spawner()] ++
-        tapes()
-
-  defp tapes,
-    do: wrap(get_env("TAPE"))
-
-  defp wrap(nil), do: []
-  defp wrap(_), do: [tape()]
-
-  defp tape,
-    do: %{id: Tape.Writer, start: {Tape.Writer, :start_link, [nil]}}
-
-  defp spawner,
-    do: {DynamicSupervisor, name: Elita.Spawner, strategy: :one_for_one}
+    do: [
+      {Elita.Kernel, nil},
+      {Elita.Infra, nil},
+      {Task.Supervisor, name: Elita.Tasks}
+    ]
 
   defp opts,
-    do: [strategy: :one_for_one, name: Elita.Supervisor]
+    do: [
+      strategy: :one_for_one,
+      name: Elita.Supervisor,
+      max_restarts: 3,
+      max_seconds: 60
+    ]
 end

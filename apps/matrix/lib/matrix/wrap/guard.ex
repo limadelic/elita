@@ -5,24 +5,14 @@ defmodule Matrix.Wrap.Guard do
   def await(task) do
     guard(task)
   catch
-    :exit, error -> fault(error, task)
+    :exit, _ -> cleanup(task)
   end
 
   defp guard(task) do
     await(task, 90_000)
-  rescue
-    _ ->
-      timed(task)
   end
 
-  defp fault({:timeout, _}, task), do: timed(task)
-
-  defp fault(_, task) do
-    shutdown(task, 1)
-    :forward
-  end
-
-  defp timed(task) do
+  defp cleanup(task) do
     shutdown(task, 1)
     :forward
   end

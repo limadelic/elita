@@ -35,13 +35,9 @@ defmodule Agent.Portal do
 
   defp answer(agent, text) do
     :erlang.apply(:"Elixir.Tools.Sys.Ask", :answer, [agent, text])
-  rescue
-    _ -> :ok
   end
 
   defp query(role, context, question) do
     :erlang.apply(:"Elixir.Tools.Sys.Ask", :query, [role, context, question])
-  rescue
-    _ -> :ok
   end
 end

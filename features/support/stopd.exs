@@ -1,5 +1,5 @@
 #!/usr/bin/env elixir
-# Stop the elita-cukes daemon node gracefully via Erlang RPC
+# Stop the elita-cukes node gracefully via Erlang RPC
 
 node_name = :"elita-cukes@127.0.0.1"
 

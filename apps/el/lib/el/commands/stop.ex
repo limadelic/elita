@@ -23,7 +23,13 @@ defmodule El.Commands.Stop do
   end
 
   defp signal(node, agent) do
-    :rpc.call(node, :init, :stop, [0]) |> handle(node, agent)
+    call(node) |> handle(node, agent)
+  end
+
+  defp call(node) do
+    :erpc.call(node, :init, :stop, [0], 5_000)
+  catch
+    _, _ -> :error
   end
 
   defp handle(:ok, node, agent), do: wait(node, agent)

@@ -10,6 +10,8 @@ defmodule El.Puppet do
   import El.Puppet.Parse, only: [envelope: 1]
   import GenServer, only: [call: 3, cast: 2, start_link: 3]
   import Process, only: [register: 2]
+  import Task.Supervisor, only: [start_child: 2]
+  import Utils.Normalize, only: [name: 1]
 
   def ask(pid, message) do
     call(pid, {:ask, message}, :infinity)
@@ -26,14 +28,14 @@ defmodule El.Puppet do
     enlist(name, pty)
   end
 
-  defp enlist(name, pty) do
-    via = {:via, Registry, {ElitaRegistry, name, %{kind: :puppet}}}
+  defp enlist(n, pty) do
+    via = {:via, Registry, {ElitaRegistry, name(n), %{kind: :puppet}}}
     {:ok, pid} = start_link(__MODULE__, pty, name: via)
-    notify(name, pid)
+    notify(n, pid)
     {:ok, pid}
   end
 
-  defp notify(_name, pid) do
+  defp notify(_n, pid) do
     register(pid, :puppet)
   end
 
@@ -43,7 +45,7 @@ defmodule El.Puppet do
 
   def handle_call({:ask, message}, _from, %{pty: pty} = state) do
     write("ask received: #{inspect(message)}\n")
-    spawn(fn -> fire(pty, message) end)
+    start_child(Matrix.Tasks, fn -> fire(pty, message) end)
     {:reply, [], state}
   end
 
@@ -60,7 +62,7 @@ defmodule El.Puppet do
   end
 
   defp route({:ask, sender, message}, pty, _output, state) do
-    spawn(fn -> reply(pty, sender, message) end)
+    start_child(Matrix.Tasks, fn -> reply(pty, sender, message) end)
     {:noreply, state}
   end
 
@@ -81,7 +83,5 @@ defmodule El.Puppet do
 
   defp setup do
     start_link(keys: :unique, name: ElitaRegistry)
-  rescue
-    _ -> :ok
   end
 end

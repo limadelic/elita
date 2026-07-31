@@ -3,13 +3,14 @@ defmodule El.Commands.Spawn do
   import Agent.Session, only: [start_link: 1]
   import El.Commands.Address.World, only: [build: 0, cwd: 0]
   import Resolver, only: [resolve: 3]
-  import String, only: [downcase: 1, to_atom: 1]
+  import String, only: [to_atom: 1]
   import El.Distribution, only: [start: 0]
   import IO, only: [puts: 1]
   import Registry, only: [lookup: 2]
-  import System, only: [get_env: 1]
+  import Application
   import Code, only: [ensure_loaded?: 1]
   import Keyword, only: [put: 3]
+  import Utils.Normalize, only: [name: 1]
 
   def spawn(session, agent) do
     start()
@@ -29,7 +30,7 @@ defmodule El.Commands.Spawn do
   end
 
   defp boot(entry, session) do
-    key = downcase(session)
+    key = name(session)
     check(lookup(ElitaRegistry, key), entry, session)
   end
 
@@ -57,15 +58,15 @@ defmodule El.Commands.Spawn do
   defp rouse(_entry, _session), do: :ok
 
   defp stir(session, folder, self) do
-    rune = get_env("TEST_AGENT_RUNNER") |> pick()
+    rune = get_env(:el, :runner) |> pick()
     opts = [name: session, folder: folder, self: self]
     start_link(wire(opts, rune))
   end
 
   defp pick(nil), do: nil
 
-  defp pick(name) do
-    atom = to_atom("Elixir." <> name)
+  defp pick(n) do
+    atom = to_atom("Elixir." <> n)
     exist(ensure_loaded?(atom), atom)
   end
 

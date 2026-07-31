@@ -10,7 +10,9 @@ defmodule El.Trace do
   @name :session_logger
   @cfg [
     type: :file,
-    modes: [:write, :append]
+    modes: [:write, :append],
+    max_no_bytes: 10_485_760,
+    max_no_files: 5
   ]
 
   def setup(name, argv) do
@@ -28,8 +30,6 @@ defmodule El.Trace do
 
   def write(message) do
     cast(@name, {:write, message})
-  rescue
-    _ -> :ok
   end
 
   def start(path) do
@@ -55,8 +55,6 @@ defmodule El.Trace do
 
   defp attach(path) do
     :logger.add_handler(:session_handler, :logger_std_h, opts(path))
-  rescue
-    _ -> :ok
   end
 
   defp opts(path) do

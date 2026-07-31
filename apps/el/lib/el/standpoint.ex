@@ -14,7 +14,7 @@ defmodule El.Standpoint do
     ensure()
     get(:standpoint, & &1)
   rescue
-    _ -> birth()
+    ArgumentError -> birth()
   end
 
   def birth do

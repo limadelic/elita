@@ -23,6 +23,6 @@ defmodule El.Command.Ls.Boot do
   end
 
   defp opts(exe) do
-    [{:args, ["-c", "#{exe} daemon &"]}, :exit_status]
+    [{:args, ["-c", "#{exe} node &"]}, :exit_status]
   end
 end

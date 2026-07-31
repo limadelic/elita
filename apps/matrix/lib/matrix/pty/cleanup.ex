@@ -1,26 +1,40 @@
 defmodule Matrix.Pty.Cleanup do
   @moduledoc false
 
-  import Process, only: [sleep: 1]
   import System, only: [cmd: 2]
 
-  def slay(nil), do: :ok
+  def slay(nil, _), do: :ok
+  def slay(pty, nil), do: await(pty)
 
-  def slay(pid) do
-    strike(pid)
+  def slay(pty, child) do
+    strike(pty, child)
   rescue
     _ -> :ok
   end
 
-  defp strike(pid) do
-    signal(pid, "-TERM")
-    sleep(100)
-    signal(pid, "-9")
-    :ok
+  defp strike(pty, child) do
+    signal(child, "-TERM")
+    await(pty)
+    signal(child, "-9")
   end
 
-  defp signal(pid, sig) do
-    cmd("kill", [sig, "-#{pid}"])
+  defp await(pty) do
+    ref = :erlang.monitor(:port, pty)
+    grace(ref, pty)
+  rescue
+    _ -> :ok
+  end
+
+  defp grace(ref, pty) do
+    receive do
+      {:DOWN, ^ref, :port, ^pty, _} -> :ok
+    after
+      8_000 -> :ok
+    end
+  end
+
+  defp signal(child, sig) do
+    cmd("kill", [sig, "-#{child}"])
   rescue
     _ -> :ok
   end

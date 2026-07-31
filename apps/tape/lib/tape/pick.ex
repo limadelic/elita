@@ -1,7 +1,6 @@
 defmodule Tape.Play.Pick do
   import Tape.Matcher, only: [contains: 2]
   import Tape.Writer, only: [bind: 4]
-  import System, only: [get_env: 1]
   import Enum, only: [filter: 2, map: 2, find: 2, find_index: 2, split_with: 2]
   import Map, only: [drop: 2, get: 2, get: 3]
   import List, only: [last: 1]
@@ -40,11 +39,9 @@ defmodule Tape.Play.Pick do
   defp extract(nil, matches), do: last(matches)["a"]
 
   defp slot?(ctx, {e, idx}) do
-    bind(key(), ctx.name, idx, times(e))
+    bind(ctx.cassette, ctx.name, idx, times(e))
   end
 
   defp times(%{"times" => times}), do: times
   defp times(_), do: 1
-
-  defp key, do: get_env("CASSETTE")
 end

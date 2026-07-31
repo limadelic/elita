@@ -1,7 +1,7 @@
 require 'timeout'
 require 'fileutils'
 require 'json'
-require_relative 'daemon'
+require_relative 'node'
 require_relative 'home'
 require_relative 'cassette'
 require_relative 'reap'
@@ -12,7 +12,7 @@ require_relative 'guard'
 module Hooks
 end
 
-World(Daemon)
+World(Node)
 World(Home)
 World(Cassette)
 World(Reap)

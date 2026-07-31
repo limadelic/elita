@@ -84,8 +84,6 @@ defmodule Tools.Sys.Ask do
 
   defp log(agent, text) do
     agent(@reply, agent, " | ", text, %{name: agent})
-  rescue
-    _ -> :ok
   end
 
   defp reply(replier, asker, text, silent) when is_binary(text) do

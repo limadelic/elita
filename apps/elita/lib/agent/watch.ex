@@ -5,9 +5,10 @@ defmodule Agent.Watch do
   import Agent.Puppet, only: [cwd: 0]
   import Process, only: [sleep: 1]
   import Log, only: [trace: 1]
+  import Task.Supervisor, only: [start_child: 2]
 
   def start(agent, question, folder \\ nil) do
-    spawn(fn -> init(agent, question, folder) end)
+    start_child(Elita.Tasks, fn -> init(agent, question, folder) end)
   end
 
   defp init(agent, question, folder) do
@@ -58,29 +59,10 @@ defmodule Agent.Watch do
   end
 
   defp scan(question, folder, pos) do
-    guard(find(question, folder, pos))
-  end
-
-  defp guard(result) do
-    result
-  catch
-    :exit, e -> oops(:exit, e)
-    k, r -> oops(k, r)
-  end
-
-  defp oops(:exit, e) do
-    trace("WATCHER CATCH EXIT #{inspect(e)}\n")
-    :wait
-  end
-
-  defp oops(k, r) do
-    trace("WATCHER CATCH #{k} #{inspect(r)}\n")
-    :wait
+    find(question, folder, pos)
   end
 
   defp answer(agent, text) do
     :erlang.apply(:"Elixir.Tools.Sys.Ask", :answer, [agent, text])
-  rescue
-    _ -> :ok
   end
 end

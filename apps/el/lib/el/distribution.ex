@@ -1,14 +1,15 @@
 defmodule El.Distribution do
   import Application, only: [ensure_all_started: 1]
   import Process, only: [sleep: 1]
-  import Node, only: [connect: 1, alive?: 0, start: 2]
+  import Node, only: [connect: 1]
   import El.Boot, only: [go: 2]
   import El.Distribution.Helpers
   import El.Run, only: [address: 0, suffix: 0]
+  import El.Trace, only: [write: 1]
+  import Utils.Normalize, only: [name: 1]
+  import El.Boot.Bind, only: [engage: 1]
 
-  def start(name \\ :default), do: run(name, [])
-
-  defp run(name, opts), do: go(name, opts)
+  def start(name \\ :default), do: go(name, [])
 
   def bind(_name) do
     :ok
@@ -16,41 +17,81 @@ defmodule El.Distribution do
 
   def target(name) do
     connect(:"#{name}#{suffix()}@127.0.0.1") |> route(name)
-  rescue
-    _ -> find(name)
   end
 
-  def wait(name) do
-    loop(name, 50)
+  def wait(n) do
+    norm = name(n)
+    flush()
+    attach(n)
+    open(norm)
   end
 
-  defp loop(name, tries) when tries > 0 do
-    attach(name)
-    go(name, tries, locate(name), alive?())
+  defp flush do
+    receive do
+      {:puppet_ready, _, _} -> flush()
+    after
+      0 -> :ok
+    end
   end
 
-  defp loop(_name, 0), do: nil
-
-  defp go(_name, _tries, pid, true) when is_pid(pid) do
-    pid
+  defp open(norm) do
+    branch(:global.register_name({:waiter, norm}, self()), norm)
   end
 
-  defp go(name, tries, _pid, _) when tries > 1 do
-    sleep(100)
-    loop(name, tries - 1)
+  defp branch(:yes, norm), do: ready(norm)
+
+  defp branch(:no, norm) do
+    flush()
+    :global.whereis_name({norm, :puppet})
   end
 
-  defp go(_name, _tries, _pid, _), do: nil
+  defp ready(norm) do
+    check(norm, :global.whereis_name({norm, :puppet}))
+  end
 
-  def daemon do
+  defp check(norm, pid) when is_pid(pid) do
+    done(norm, pid)
+  end
+
+  defp check(norm, :undefined) do
+    await(norm)
+  end
+
+  defp await(norm) do
+    receive do
+      {:puppet_ready, ^norm, pid} ->
+        done(norm, pid)
+    after
+      5_000 ->
+        done(norm, nil)
+    end
+  end
+
+  defp done(norm, value) do
+    flush()
+    :global.unregister_name({:waiter, norm})
+    value
+  end
+
+  def launch do
     boot(address())
     ensure_all_started(:elita)
-    dial()
     sleep(:infinity)
   end
 
-  defp boot(addr) do
-    :os.cmd(~c"epmd -daemon")
-    start(addr, :longnames)
+  defp boot(addr), do: engage(addr)
+
+  def hidden(name) do
+    node = :"#{name}@127.0.0.1"
+    opts = %{name_domain: :longnames, hidden: true, dist_listen: false}
+    :net_kernel.start(node, opts) |> outcome()
+  end
+
+  defp outcome({:ok, _}), do: :ok
+  defp outcome({:error, {:already_started, _}}), do: :ok
+
+  defp outcome({:error, reason}) do
+    write("tunnel spawn failed reason=#{inspect(reason)}\n")
+    :ok
   end
 end
