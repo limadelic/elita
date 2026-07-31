@@ -51,30 +51,13 @@ jobs:
 
       - name: Credo failure detail
         if: steps.lint.outcome == 'failure'
-        run: |
-          mix credo list --format json > /tmp/credo.json
-          echo "## Lint Violations" >> $GITHUB_STEP_SUMMARY
-          ISSUE_COUNT=$(jq '.issues | length' /tmp/credo.json)
-          echo "Found $ISSUE_COUNT issues" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          if [ "$ISSUE_COUNT" -gt 0 ]; then
-            echo "| File | Line | Check | Message |" >> $GITHUB_STEP_SUMMARY
-            echo "|------|------|-------|---------|" >> $GITHUB_STEP_SUMMARY
-            jq -r '.issues[] | [.filename, .line_no, .check, .message] | @csv' /tmp/credo.json | while IFS=',' read -r file line check message; do
-              file=$(echo "$file" | tr -d '"')
-              check=$(echo "$check" | tr -d '"')
-              message=$(echo "$message" | tr -d '"')
-              echo "::error file=$file,line=$line,title=$check::$message"
-              file_short=$(basename "$file")
-              echo "| $file_short | $line | $check | $message |" >> $GITHUB_STEP_SUMMARY
-            done
-          fi
+        run: ops/ci/lint/credo.rb
 
       - name: Fail if credo had issues
         if: steps.lint.outcome == 'failure'
         run: exit 1
 
-      - run: ops/ci/badges.rb
+      - run: ops/ci/badges/badges.rb
         env:
           BRANCH: ${{ github.ref_name }}
           GITHUB_REPOSITORY: ${{ github.repository }}
