@@ -31,7 +31,9 @@ defmodule El.MixProject do
           :ok
         else
           # Run real tests - ExUnit only if test files exist
-          if Enum.empty?(Path.wildcard("test/**/*_test.exs")) do
+          test_dir = Path.join(__DIR__, "test/**/*_test.exs")
+
+          if Enum.empty?(Path.wildcard(test_dir)) do
             :ok
           else
             Mix.Task.reenable("test")
