@@ -2,6 +2,7 @@ defmodule Matrix.Wrap.Route do
   @moduledoc false
   import String, only: [split: 3, trim: 1]
   import Matrix.Wrap.Remote, only: [deliver: 3, tell: 3]
+  import Task.Supervisor, only: [start_child: 2]
 
   def check(line, parent, agent),
     do: line |> to_string() |> trim() |> dispatch(parent, agent)
@@ -24,7 +25,7 @@ defmodule Matrix.Wrap.Route do
   def dispatch(_input, _parent, _agent), do: :forward
 
   defp remote([name, message], agent) do
-    spawn(fn -> deliver(name, message, agent) end)
+    start_child(Matrix.Tasks, fn -> deliver(name, message, agent) end)
     {:handled}
   end
 
@@ -35,14 +36,14 @@ defmodule Matrix.Wrap.Route do
   end
 
   defp implicit([word, rest], agent) do
-    spawn(fn -> deliver(word, rest, agent) end)
+    start_child(Matrix.Tasks, fn -> deliver(word, rest, agent) end)
     {:handled}
   end
 
   defp implicit(_, _agent), do: :forward
 
   defp sender([name, message], agent) do
-    spawn(fn -> tell(name, message, agent) end)
+    start_child(Matrix.Tasks, fn -> tell(name, message, agent) end)
     {:handled}
   end
 

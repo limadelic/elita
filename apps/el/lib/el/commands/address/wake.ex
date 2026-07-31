@@ -2,14 +2,15 @@ defmodule El.Commands.Address.Wake do
   import Agent.Session, only: [start_link: 1]
   import Enum, only: [empty?: 1]
   import Map, only: [get: 2]
-  import String, only: [downcase: 1, to_atom: 1]
-  import System, only: [get_env: 1]
+  import String, only: [to_atom: 1]
+  import Application
   import Code, only: [ensure_loaded?: 1]
   import Keyword, only: [put: 3]
   import Registry, only: [lookup: 2]
+  import Utils.Normalize, only: [name: 1]
 
   def up(%{kind: k, name: n, path: p} = entry) when k in [:file, :folder] do
-    key = n |> to_string() |> downcase()
+    key = name(n)
     sleep = lookup(ElitaRegistry, key) |> empty?()
     go(sleep, n, p, get(entry, :file_path))
   end
@@ -19,7 +20,7 @@ defmodule El.Commands.Address.Wake do
   defp go(false, _name, _folder, _self), do: :ok
 
   defp go(true, name, folder, self) do
-    rune = get_env("TEST_AGENT_RUNNER") |> runner()
+    rune = get_env(:el, :runner) |> runner()
     start_link(config([name: name, folder: folder, self: self], rune))
   end
 

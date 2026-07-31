@@ -1,13 +1,16 @@
 defmodule El.Tunnel do
+  import Application, only: [get_env: 3]
   import Enum, only: [find_value: 3]
   import Node, only: [connect: 1]
-  import System, only: [pid: 0, get_env: 2]
+  import System, only: [pid: 0]
   import El.Run, only: [suffix: 0]
+  import Utils.Normalize, only: [name: 1]
+  import El.Distribution, only: [hidden: 1]
 
   defp safely(fun, default) do
     fun.()
-  rescue
-    _ -> default
+  catch
+    _, _ -> default
   end
 
   def boot(agent) do
@@ -20,7 +23,7 @@ defmodule El.Tunnel do
   end
 
   defp dispatch(false, _agent) do
-    attach(get_env("ELITA_RUN", ""))
+    attach(get_env(:elita, :run, ""))
   end
 
   defp attach(""), do: :ok
@@ -40,14 +43,8 @@ defmodule El.Tunnel do
   end
 
   defp spawn do
-    node = :"tunnel_#{pid()}@127.0.0.1"
-    opts = %{name_domain: :longnames, hidden: true, dist_listen: false}
-    safely(fn -> :net_kernel.start(node, opts) |> result() end, :ok)
+    hidden("tunnel_#{pid()}")
   end
-
-  defp result({:ok, _}), do: :ok
-  defp result({:error, {:already_started, _}}), do: :ok
-  defp result({:error, _}), do: :ok
 
   defp peer(agent), do: safely(fn -> connect(:"#{agent}#{suffix()}@127.0.0.1") end, :ok)
 
@@ -68,7 +65,7 @@ defmodule El.Tunnel do
 
   defp prefix(node, agent) do
     len = min(byte_size(agent) + 1, byte_size(node))
-    safely(fn -> binary_part(node, 0, len) == <<agent::binary, "-">> end, false)
+    binary_part(node, 0, len) == <<agent::binary, "-">>
   end
 
   defp pick(true, name), do: name
@@ -78,6 +75,10 @@ defmodule El.Tunnel do
 
   defp fetch(node, agent) do
     full = :"#{node}@127.0.0.1"
-    safely(fn -> :erpc.call(full, :global, :whereis_name, [{agent, :puppet}]) end, nil)
+    safely(fn -> locate(full, agent) end, nil)
+  end
+
+  defp locate(full, agent) do
+    :erpc.call(full, :global, :whereis_name, [{name(agent), :puppet}], 5000)
   end
 end

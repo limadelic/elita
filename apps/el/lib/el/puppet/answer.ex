@@ -5,7 +5,8 @@ defmodule El.Puppet.Answer do
   import System, only: [monotonic_time: 1]
   import String, only: [trim: 1]
   import Map, only: [merge: 2]
-  import Process, only: [whereis: 1]
+  import :global, only: [whereis_name: 1]
+  import Utils.Normalize, only: [name: 1]
 
   def reply(pty, sender, message) do
     watch(pty, self())
@@ -52,11 +53,14 @@ defmodule El.Puppet.Answer do
 
   defp target(name) when is_atom(name) do
     lookup(name)
-  rescue
-    _ -> nil
   end
 
-  defp lookup(_name), do: whereis(:puppet)
+  defp lookup(n) do
+    whereis_name({name(n), :puppet}) |> fetch()
+  end
+
+  defp fetch(:undefined), do: nil
+  defp fetch(pid), do: pid
 
   defp build(pty, message, now) do
     base(pty, message) |> timing(now)

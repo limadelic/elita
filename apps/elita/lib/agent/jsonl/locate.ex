@@ -29,7 +29,7 @@ defmodule Agent.Jsonl.Locate do
     trace("watcher:target=#{encoded}\n")
     accept(encoded, report(dir?(encoded)))
   rescue
-    _ -> nil
+    File.Error -> nil
   end
 
   defp report(exists) do

@@ -17,6 +17,7 @@ defmodule El.Commands.Claude do
   import El.Puppet.Collect, only: [collect: 1]
   import Agent, only: [start: 2]
   import El.Cmd, only: [build: 0]
+  import Task.Supervisor, only: [start_child: 2]
 
   def claude(name \\ :default) do
     claude(name, deps())
@@ -32,16 +33,12 @@ defmodule El.Commands.Claude do
   end
 
   defp go(name, deps) do
-    spawn(fn -> distribute(name, deps) end)
+    start_child(Matrix.Tasks, fn -> distribute(name, deps) end)
     boot(to_atom(name), deps)
-  rescue
-    e -> write("boot error during claude setup: #{inspect(e)}\n")
   end
 
   defp distribute(name, deps) do
     Keyword.get(deps, :distribution_start).(name)
-  rescue
-    e -> write("distribution error: #{inspect(e)}\n")
   end
 
   defp boot(name, deps) do
@@ -77,11 +74,7 @@ defmodule El.Commands.Claude do
 
   defp invert do
     [wait: &wait/1, target: &target/1] ++
-      [ask: &ask/2, far: &far/3, put: &put/2, collect: &collect/1]
-  end
-
-  defp far(node, pid, msg) do
-    :erpc.call(node, El.Puppet, :ask, [pid, msg], 90_000)
+      [ask: &ask/2, put: &put/2, collect: &collect/1]
   end
 
   defp install(name) do
@@ -95,7 +88,5 @@ defmodule El.Commands.Claude do
   defp mode("rec"), do: start(fn -> %{} end, name: Tape.Writer)
   defp mode(_), do: :ok
 
-  defp finalize(cmd), do: swap(cmd, locate())
-
-  defp swap(cmd, path), do: replace(cmd, ~r/^claude\b/, path)
+  defp finalize(cmd), do: replace(cmd, ~r/^claude\b/, locate())
 end

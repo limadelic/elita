@@ -8,17 +8,19 @@ defmodule El.Commands.Ls do
   import Registry, only: [lookup: 2, select: 2]
   import Glob, only: [hits?: 2]
   import Resolver, only: [normalize: 2]
-  import String, only: [downcase: 1]
+  import Utils.Normalize, only: [name: 1]
 
   def ls(opts \\ []) do
-    path = get(opts, :path)
-    render(path) |> puts()
+    remote(opts) |> puts()
   end
 
   def remote(opts \\ []) do
     path = get(opts, :path)
-    render(path)
+    respond(ready?(), path)
   end
+
+  defp respond(false, _path), do: "booting"
+  defp respond(true, path), do: render(path)
 
   defp render("//") do
     build()
@@ -60,8 +62,8 @@ defmodule El.Commands.Ls do
     "#{entry.name} #{label(entry.kind)} #{status(entry.name)}"
   end
 
-  defp status(name) do
-    normalized = downcase(to_string(name))
+  defp status(n) do
+    normalized = name(n)
     lookup(ElitaRegistry, normalized) |> flag()
   end
 
@@ -79,9 +81,9 @@ defmodule El.Commands.Ls do
     |> filter(&absent?(names, &1))
   end
 
-  defp absent?(list, name) do
-    !any?(list, fn n ->
-      downcase(to_string(n)) == downcase(to_string(name))
+  defp absent?(list, n) do
+    !any?(list, fn x ->
+      name(x) == name(n)
     end)
   end
 
@@ -93,4 +95,7 @@ defmodule El.Commands.Ls do
   defp label(:folder), do: "folder"
   defp label(:session), do: "session"
   defp label(:node), do: "node"
+  defp ready?, do: check(:ets.whereis(:elita_vault))
+  defp check(:undefined), do: false
+  defp check(_), do: :ets.lookup(:elita_vault, :ready) == [ready: true]
 end

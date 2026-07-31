@@ -2,7 +2,7 @@ defmodule El.Command.Ls do
   @moduledoc false
 
   import IO, only: [puts: 1]
-  import System, only: [get_env: 1]
+  import Application, only: [get_env: 2]
   import Process, only: [sleep: 1]
   import El.Distribution, only: [start: 0]
   import El.Command.Ls.Query, only: [fetch: 1]
@@ -18,7 +18,7 @@ defmodule El.Command.Ls do
   defp reach(:error, path), do: hatch(path)
 
   defp hatch(path) do
-    get_env("EL_DAEMON_SPAWN") |> gate(path)
+    get_env(:el, :node_spawn) |> gate(path)
   end
 
   defp gate("1", path) do

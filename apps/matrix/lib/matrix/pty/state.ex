@@ -8,7 +8,8 @@ defmodule Matrix.Pty.State do
     tail: "",
     pending_msg: nil,
     idle: false,
-    idle_count: 0
+    idle_count: 0,
+    retry_state: nil
   }
 
   def initial(pty, out, raw, child) do
@@ -30,5 +31,6 @@ defmodule Matrix.Pty.State do
   defp inject(cfg) do
     %{wait: cfg[:wait], target: cfg[:target], ask: cfg[:ask]}
     |> merge(%{put: cfg[:put], collect: cfg[:collect]})
+    |> merge(%{get_size: cfg[:get_size], cmd: cfg[:cmd]})
   end
 end

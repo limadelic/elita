@@ -1,21 +1,22 @@
 defmodule Matrix.Trace.Log do
   @moduledoc false
-  import System
+  import Application, only: [get_env: 2]
+  import System, only: [monotonic_time: 1]
   import File
   import Matrix.Trace.Format
 
-  def chunk(data), do: jot(get_env("EL_TRACE"), trace(data))
+  def chunk(data), do: jot(get_env(:matrix, :trace), trace(data))
 
   def header({rows, cols}, source) do
-    jot(get_env("EL_TRACE"), caption(rows, cols, source))
+    jot(get_env(:matrix, :trace), caption(rows, cols, source))
   end
 
   def event(msg) do
-    jot(get_env("EL_TRACE"), stamp(msg))
+    jot(get_env(:matrix, :trace), stamp(msg))
   end
 
   def event(msg, reason) do
-    jot(get_env("EL_TRACE"), remark(msg, reason))
+    jot(get_env(:matrix, :trace), remark(msg, reason))
   end
 
   defp caption(rows, cols, source) do

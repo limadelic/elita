@@ -1,8 +1,9 @@
 defmodule El.Puppet.Invoke do
   import El.Trace, only: [write: 1]
-  import Tape.Store, only: [add: 2]
+  import Tape.Store, only: [add: 4]
   import El.Puppet.Query, only: [call: 2]
   import String, only: [slice: 2]
+  import Application, only: [get_env: 2]
   import System, only: [get_env: 1]
 
   def invoke(pty, message) do
@@ -57,9 +58,7 @@ defmodule El.Puppet.Invoke do
   end
 
   defp persist(request, response) do
-    add(request, response)
-  catch
-    _, _ -> fail()
+    add(get_env("CASSETTE"), get_env("CASSETTE_DIR"), request, response)
   end
 
   defp build(message) do
@@ -67,13 +66,9 @@ defmodule El.Puppet.Invoke do
   end
 
   defp agent do
-    pick(get_env("PUPPET_NAME"))
+    pick(get_env(:el, :puppet))
   end
 
   defp pick(nil), do: "puppet"
   defp pick(name), do: name
-
-  defp fail do
-    write("record fail\n")
-  end
 end

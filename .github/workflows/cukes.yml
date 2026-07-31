@@ -95,5 +95,5 @@ jobs:
           retention-days: 1
 
       - name: Fail if tests failed
-        if: steps.cukes.outcome == 'failure'
+        if: failure()
         run: exit 1

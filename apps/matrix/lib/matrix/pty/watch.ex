@@ -1,17 +1,20 @@
 defmodule Matrix.Pty.Watch do
   @moduledoc false
-  import Process, except: [alias: 1, info: 1]
-  import Port, only: [info: 1]
+  import Task.Supervisor, only: [start_child: 2]
 
   def start(pty) do
-    spawn(fn -> probe(self(), pty) end, [])
+    caller = self()
+    start_child(Matrix.Tasks, fn -> probe(caller, pty) end)
   end
 
   defp probe(parent, pty) do
-    sleep(500)
-    react(info(pty), parent, pty)
+    :erlang.monitor(:port, pty)
+    wait(parent, pty)
   end
 
-  defp react(nil, parent, pty), do: send(parent, {pty, :closed})
-  defp react(_, _, _), do: :ok
+  defp wait(parent, pty) do
+    receive do
+      {:DOWN, _ref, :port, ^pty, _reason} -> send(parent, {pty, :closed})
+    end
+  end
 end

@@ -7,8 +7,8 @@ defmodule El.Command.Ls.Query do
 
   def fetch(path) do
     connect(address()) |> dial(path)
-  rescue
-    _ -> :error
+  catch
+    _, _ -> :error
   end
 
   defp dial(true, path) do

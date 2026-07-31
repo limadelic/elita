@@ -1,7 +1,7 @@
-defmodule Chat do
+defmodule El.Commands.Chat do
   import Elita, only: [spawn: 2, request: 2]
   import IO, only: [gets: 1, puts: 1]
-  import Node, only: [start: 1]
+  import El.Distribution, only: [start: 1]
   import String, only: [trim: 1, to_atom: 1]
 
   def main([name]) do
@@ -13,7 +13,7 @@ defmodule Chat do
   end
 
   defp chat(agent, name) do
-    start(:"#{name}@127.0.0.1")
+    start(to_string(name))
     {:ok, _pid} = spawn(agent, name)
     repl(name)
   end

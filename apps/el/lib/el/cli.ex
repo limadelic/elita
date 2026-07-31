@@ -7,7 +7,7 @@ defmodule El.CLI do
   import El.Commands.Stop, only: [stop: 1]
   import El.Commands.Claude, only: [claude: 1]
   import El.Commands.Cd, only: [cd: 1]
-  import El.Distribution, only: [daemon: 0]
+  import El.Distribution, only: [launch: 0]
   import El.Command.Ls, only: [list: 1]
   import El.REPL, only: [run: 1, run: 2, attach: 2]
   import El.Trace, only: [setup: 2]
@@ -24,11 +24,12 @@ defmodule El.CLI do
     el claude [name]
     el ls
     el cd <path>
-    el daemon
+    el node
   """
 
   def main(argv) do
     ensure_all_started(:elita)
+    ensure_all_started(:matrix)
     argv |> route() |> exec()
   end
 
@@ -61,6 +62,6 @@ defmodule El.CLI do
   defp exec({:claude, name}), do: claude(name)
   defp exec({:ls, path}), do: list(path)
   defp exec({:cd, path}), do: cd(path)
-  defp exec(:daemon), do: daemon()
+  defp exec(:node), do: launch()
   defp exec(_), do: :usage
 end

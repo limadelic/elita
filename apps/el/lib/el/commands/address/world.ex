@@ -42,7 +42,7 @@ defmodule El.Commands.Address.World do
   defp read(folder) do
     ls!(folder)
   rescue
-    _ -> []
+    File.Error -> []
   end
 
   defp agent?(file), do: agent(extname(file))

@@ -1,7 +1,7 @@
 defmodule El.Boot do
   @moduledoc false
   import Process, only: [sleep: 1]
-  import Node, only: [set_cookie: 1, start: 2]
+  import Node, only: [start: 2]
   import Keyword, only: [get: 3]
   import File, only: [cwd!: 0]
   import Path, only: [basename: 1]
@@ -11,7 +11,6 @@ defmodule El.Boot do
   import El.Run, only: [suffix: 0]
 
   def go(name \\ :default, opts \\ []) do
-    :os.cmd(~c"epmd -daemon")
     boot(node(name, opts), mode(opts))
   end
 
@@ -47,21 +46,16 @@ defmodule El.Boot do
 
   defp act({:ok, _}, name, _) do
     write("boot distribution=#{name} actual_node=#{node()}\n")
-    cookie(:ok)
+    :ok
   end
 
   defp act({:error, {:already_started, _}}, name, _) do
     write("boot distribution=#{name} status=already_started actual_node=#{node()}\n")
-    cookie(:taken)
+    :taken
   end
 
   defp act({:error, reason}, _, _) do
     write("boot error: #{inspect(reason)}\n")
     :ok
-  end
-
-  defp cookie(val) do
-    set_cookie(:elita)
-    val
   end
 end

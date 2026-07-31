@@ -3,7 +3,6 @@ defmodule Elita.Umbrella do
 
   def project do
     [
-      app: :elita_umbrella,
       version: "0.0.2",
       elixir: "~> 1.18",
       apps_path: "apps",
@@ -11,6 +10,11 @@ defmodule Elita.Umbrella do
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
+      releases: [
+        elita: [
+          applications: [el: :permanent, elita: :permanent, matrix: :permanent, tape: :permanent]
+        ]
+      ],
       test_coverage: [ignore_modules: [~r/^Tape($|\.)/]]
     ]
   end
@@ -35,6 +39,7 @@ defmodule Elita.Umbrella do
 
   defp run_test(_) do
     unless Mix.Task.recursing?() do
+      check("mix compile --force")
       check("cd apps/elita && mix test")
       check("cd apps/el && mix test")
       check("cd apps/matrix && mix test")
