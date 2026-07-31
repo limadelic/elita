@@ -21,7 +21,7 @@ module Body
   end
 
   def self.normalize_trailing(content)
-    stripped = content.rstrip("\n")
+    stripped = content.sub(/\n+\z/, '')
     stripped.empty? ? '' : stripped + "\n"
   end
 end
