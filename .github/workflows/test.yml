@@ -53,7 +53,7 @@ jobs:
           MIX_ENV: test
 
       - name: Run coverage
-        run: mix cover 2>&1 | tee /tmp/cover_output.txt
+        run: bash -o pipefail -c 'mix cover 2>&1 | tee /tmp/cover_output.txt'
         env:
           MIX_ENV: test
 

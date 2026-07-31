@@ -48,7 +48,7 @@ defmodule Elita.Umbrella do
 
   defp run_cover(_) do
     unless Mix.Task.recursing?() do
-      check("ruby ops/ci/run.rb")
+      check("ruby ops/ci/cover/run.rb")
     end
   end
 
