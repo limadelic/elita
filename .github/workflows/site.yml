@@ -25,7 +25,7 @@ jobs:
           BRANCH: ${{ github.ref_name }}
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
-          PREFIX=$(ops/ci/prefix.rb)
+          PREFIX=$(ops/ci/site/prefix.rb)
           echo "prefix=$PREFIX" >> "$GITHUB_OUTPUT"
           echo "target=$PREFIX" >> "$GITHUB_OUTPUT"
 
@@ -48,10 +48,10 @@ jobs:
       - name: Seed site from live Pages
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ops/ci/seed.rb
+        run: ops/ci/site/seed.rb
 
       - name: Merge previous github-pages artifact as base
-        run: ops/ci/merge.rb
+        run: ops/ci/site/merge.rb
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}

@@ -42,7 +42,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: ${{ github.ref_name }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-        run: echo "prefix=$(ops/ci/prefix.rb)" >> "$GITHUB_OUTPUT"
+        run: echo "prefix=$(ops/ci/site/prefix.rb)" >> "$GITHUB_OUTPUT"
 
       - name: Get dependencies
         run: mix deps.get
@@ -67,7 +67,7 @@ jobs:
         if: always()
 
       - name: Post coverage to PR
-        run: ops/ci/comment.rb
+        run: ops/ci/cover/comment.rb
         if: always()
         continue-on-error: true
         env:
@@ -77,7 +77,7 @@ jobs:
           COVERAGE_PERCENT: ${{ steps.coverage.outputs.coverage }}
 
       - name: Generate coverage badge
-        run: ops/ci/badges.rb
+        run: ops/ci/badges/badges.rb
         env:
           BRANCH: ${{ github.ref_name }}
           GITHUB_REPOSITORY: ${{ github.repository }}
@@ -97,7 +97,7 @@ jobs:
       - name: Generate coverage index
         run: |
           mkdir -p "site/${{ steps.prefix.outputs.prefix }}cover"
-          ops/ci/report.rb
+          ops/ci/cover/report.rb
         env:
           PREFIX: ${{ steps.prefix.outputs.prefix }}
         if: always()

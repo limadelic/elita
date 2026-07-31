@@ -43,5 +43,5 @@ jobs:
           COVER_URL: "https%3A%2F%2Flimadelic.github.io%2Felita%2F${{ steps.pr.outputs.number }}%2Fcover.json"
         run: |
           gh pr view $PR_NUMBER --json body -q .body > /tmp/body.md
-          ruby ops/ci/body.rb
+          ruby ops/ci/badges/body.rb
           gh pr edit $PR_NUMBER --body-file /tmp/body.md
