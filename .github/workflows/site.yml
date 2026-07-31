@@ -110,6 +110,8 @@ jobs:
 
       - name: Copy and validate coverage files
         run: ops/ci/site/cover.rb
+        env:
+          PREFIX: ${{ steps.prefix.outputs.prefix }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

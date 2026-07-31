@@ -29,7 +29,10 @@ module Cover
   end
 
   def self.published?
-    File.exist?('site/cover.json') || File.directory?('site/cover')
+    prefix = ENV.fetch('PREFIX', '')
+    json = File.exist?("site/#{prefix}cover.json")
+    html = File.directory?("site/#{prefix}cover")
+    json || html
   end
 
   def self.fail(msg)
