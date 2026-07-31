@@ -9,6 +9,7 @@ module Node
     retire(node_name)
     ignite
     readied
+    start_cover
   end
 
   def retire(node_name)
@@ -99,5 +100,10 @@ module Node
   def fault
     log_tail = File.exist?(@node_log) ? File.readlines(@node_log).last(20).join : "no log"
     "Node elita-cukes@127.0.0.1 failed to start:\n#{log_tail}"
+  end
+
+  def start_cover
+    cover_script = File.expand_path("../cover_start.exs", __FILE__)
+    system("elixir #{cover_script} >/dev/null 2>&1")
   end
 end
