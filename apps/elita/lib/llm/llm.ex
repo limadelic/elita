@@ -10,6 +10,5 @@ defmodule Llm do
     |> apply(:llm, [arg])
   end
 
-  defp backend("mlm"), do: Mlm
   defp backend(_), do: Lite
 end
