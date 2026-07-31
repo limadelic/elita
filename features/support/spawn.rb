@@ -48,7 +48,7 @@ module Spawn
     config["PATH"] = spine
     puppet(config, puppet_name)
     prime(config)
-    claude(config)
+    equip(config) if @scratch
     config
   end
 
@@ -57,12 +57,6 @@ module Spawn
 
     config["PUPPET_NAME"] = name
     config["EL_FROM"] = name
-  end
-
-  def claude(config)
-    return unless @scratch
-
-    equip(config)
   end
 
   def equip(config)
@@ -205,9 +199,14 @@ module Spawn
     dub(words)
   end
 
-  def dub(words) # rubocop:disable Metrics/CyclomaticComplexity
+  def dub(words)
     as_index = words.index("as")
     return words[as_index + 1] if as_index
+
+    pick(words)
+  end
+
+  def pick(words)
     return words[1] if words[0] == "claude"
 
     words.first
