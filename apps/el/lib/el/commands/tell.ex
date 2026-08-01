@@ -1,8 +1,6 @@
 defmodule El.Commands.Tell do
   @moduledoc false
-  import Application, only: [get_env: 2]
   import El.Distribution, only: [start: 0, start: 1]
-  import System, only: [halt: 1]
   import Node, only: [self: 0]
   import Kernel, except: [self: 0]
   import Keyword, only: [get: 3]
@@ -14,22 +12,26 @@ defmodule El.Commands.Tell do
   def send(agent, msg, _tool \\ nil, _opts \\ []) do
     prime()
     start()
-    normalized = agent |> to_string() |> downcase()
-    case find_puppet(normalized) do
-      nil -> write(:stderr, "unknown: #{agent}\n")
-      pid -> put(pid, msg)
-    end
+    dispatch(agent, msg)
   end
 
-  defp find_puppet(normalized) do
+  defp dispatch(agent, msg) do
+    normalized = agent |> to_string() |> downcase()
+    route(locate(normalized), agent, msg)
+  end
+
+  defp route(nil, agent, _msg), do: write(:stderr, "unknown: #{agent}\n")
+  defp route(pid, _agent, msg), do: put(pid, msg)
+
+  defp locate(normalized) do
     lookup(ElitaRegistry, normalized)
-    |> extract_puppet()
+    |> extract()
   rescue
     _ -> nil
   end
 
-  defp extract_puppet([{pid, %{kind: :puppet}}]), do: pid
-  defp extract_puppet(_), do: nil
+  defp extract([{pid, %{kind: :puppet}}]), do: pid
+  defp extract(_), do: nil
 
   def target(agent, opts \\ []) do
     env = get(opts, :env_module, El.Infra.Env)
