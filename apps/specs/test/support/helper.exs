@@ -87,11 +87,6 @@ defmodule SpecHelper do
     clean(output)
   end
 
-  def lookup(name, query) do
-    output = capture(fn -> El.Commands.Lookup.local(to_string(name), query) end)
-    clean(output)
-  end
-
   defp capture(fun) do
     ExUnit.CaptureIO.capture_io(fun)
   end

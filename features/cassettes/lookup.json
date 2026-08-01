@@ -1,6 +1,0 @@
-[
-  {
-    "q": { "messages": [{ "content": "hello" }] },
-    "a": [{ "text": "Who am I talking to?", "type": "text" }]
-  }
-]
