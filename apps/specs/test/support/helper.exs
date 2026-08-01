@@ -87,6 +87,10 @@ defmodule SpecHelper do
     clean(output)
   end
 
+  def tell(name, msg) do
+    El.Commands.Address.Send.tell(to_string(name), msg, nil)
+  end
+
   defp capture(fun) do
     ExUnit.CaptureIO.capture_io(fun)
   end
