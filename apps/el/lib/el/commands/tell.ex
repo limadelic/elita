@@ -7,12 +7,21 @@ defmodule El.Commands.Tell do
   import Kernel, except: [self: 0]
   import Keyword, only: [get: 3]
   import IO, only: [write: 2]
-  import Matrix.Wrap.Remote, only: [tell: 3]
+  import Matrix.Wrap.Remote, only: [tell: 4]
+  import Registry, only: [lookup: 2]
 
   def send(agent, msg, _tool \\ nil, _opts \\ []) do
     prime()
     start()
-    tell(agent, msg, from()) |> code()
+    opts = [wait: &find/1]
+    tell(agent, msg, from(), opts) |> code()
+  end
+
+  defp find(atom) do
+    case lookup(ElitaRegistry, atom) do
+      [] -> nil
+      [{pid, _} | _] -> pid
+    end
   end
 
   defp from do

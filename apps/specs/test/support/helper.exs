@@ -112,7 +112,7 @@ defmodule SpecHelper do
   end
 
   def tell(name, msg) do
-    El.Commands.Address.Send.tell(to_string(name), msg, nil)
+    capture(fn -> El.CLI.main(["tell", to_string(name), msg]) end)
   end
 
   defp capture(fun) do
