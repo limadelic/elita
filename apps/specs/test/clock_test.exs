@@ -1,6 +1,5 @@
 defmodule ClockTest do
-  use Tester
-  @moduletag :xunit
+  use SpecHelper
 
   test "clock tells the time" do
     spawn(:clock)
