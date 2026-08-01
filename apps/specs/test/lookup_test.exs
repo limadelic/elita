@@ -8,4 +8,10 @@ defmodule LookupTest do
 
     verify("who am i talking to", result)
   end
+
+  test "lookup command returns unknown for agent that was never spawned" do
+    result = lookup(:phantom, "hello")
+
+    assert result =~ ~r/unknown/i
+  end
 end
