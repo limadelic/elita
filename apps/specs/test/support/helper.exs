@@ -16,6 +16,9 @@ defmodule SpecHelper do
 
         System.put_env("CASSETTE_DIR", Path.expand("../../../features/cassettes", __DIR__))
 
+        regs = registrations()
+        Application.put_env(:elita, :registrations, regs)
+
         :ok
       end
 
@@ -30,6 +33,18 @@ defmodule SpecHelper do
         end
 
         :ok
+      end
+
+      defp registrations do
+        base = Path.expand("../../elita/agents", __DIR__)
+
+        [
+          "elita:#{Path.join(base, "elita")}",
+          "games:#{Path.join(base, "games")}",
+          "speck:#{Path.join(base, "speck")}",
+          "tools:#{Path.join(base, "tools")}"
+        ]
+        |> Enum.join(",")
       end
 
       defp default_cassette do
@@ -55,6 +70,14 @@ defmodule SpecHelper do
     on_exit(fn -> kill(name) end)
   end
 
+  defp to_configs(configs) when is_list(configs) do
+    configs |> Enum.map(&to_string/1)
+  end
+
+  defp to_configs(config) do
+    [to_string(config)]
+  end
+
   defp tape_opts do
     [
       tape_env: %{
@@ -65,22 +88,12 @@ defmodule SpecHelper do
     ]
   end
 
-  defp to_configs(configs) when is_list(configs) do
-    configs |> Enum.map(&to_string/1)
-  end
-
-  defp to_configs(config) do
-    [to_string(config)]
-  end
-
   defp kill(name) do
     normalized = name |> to_string() |> String.downcase()
 
-    {:via, Registry, {ElitaRegistry, normalized, %{kind: :native, folder: nil}}}
-    |> GenServer.whereis()
-    |> case do
-      nil -> :ok
-      pid -> GenServer.stop(pid)
+    case Registry.lookup(ElitaRegistry, normalized) do
+      [] -> :ok
+      [{pid, _} | _] -> GenServer.stop(pid)
     end
   end
 
