@@ -1,25 +1,30 @@
 defmodule El.Commands.Tell do
   @moduledoc false
-  import El.Distribution, only: [start: 0]
-  import El.Commands.Address, only: [route: 4]
-  import El.Commands.Address.Send, only: [tell: 3]
-  import String, only: [contains?: 2]
+  import Application, only: [get_env: 2]
+  import El.Distribution, only: [start: 0, start: 1]
+  import System, only: [halt: 1]
+  import Node, only: [self: 0]
+  import Kernel, except: [self: 0]
   import Keyword, only: [get: 3]
   import IO, only: [write: 2]
+  import Matrix.Wrap.Remote, only: [tell: 3]
 
-  def send(agent, msg, tool \\ nil, _opts \\ []) do
+  def send(agent, msg, _tool \\ nil, _opts \\ []) do
+    prime()
     start()
-    text = agent |> to_string()
-    dispatch(agent, msg, tool, contains?(text, "@"))
+    tell(agent, msg, from()) |> code()
   end
 
-  defp dispatch(agent, msg, tool, true) do
-    route(to_string(agent), msg, :tell, tool)
+  defp from do
+    get_env(:el, :from)
+    |> default(node() |> to_string())
   end
 
-  defp dispatch(agent, msg, tool, false) do
-    tell(to_string(agent), msg, tool)
-  end
+  defp default(nil, value), do: value
+  defp default(value, _), do: value
+
+  defp code(:forward), do: halt(1)
+  defp code(_), do: :ok
 
   def target(agent, opts \\ []) do
     env = get(opts, :env_module, El.Infra.Env)
@@ -32,4 +37,12 @@ defmodule El.Commands.Tell do
   def unreachable(agent, host) do
     write(:stderr, "session #{agent} unreachable at #{host}\n")
   end
+
+  defp prime, do: prime(self())
+
+  defp prime(:nonode@nohost) do
+    start("tell_#{:erlang.system_time(:millisecond)}")
+  end
+
+  defp prime(_), do: :ok
 end
