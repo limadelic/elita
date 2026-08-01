@@ -58,24 +58,29 @@ defmodule SpecHelper do
   end
 
   def spawn(name) do
-    spawn(name, [name])
+    spawn(name, name)
   end
 
-  def spawn(name, configs) do
+  def spawn(name, config) when not is_list(config) do
+    spawn(name, [config])
+  end
+
+  def spawn(name, [single_config]) do
     kill(name)
     reset()
     El.Distribution.start("specs")
     opts = tape_opts()
-    Elita.spawn(to_string(name), to_configs(configs), opts)
+    Elita.spawn(to_string(name), [to_string(single_config)], opts)
     on_exit(fn -> kill(name) end)
   end
 
-  defp to_configs(configs) when is_list(configs) do
-    configs |> Enum.map(&to_string/1)
-  end
-
-  defp to_configs(config) do
-    [to_string(config)]
+  def spawn(name, configs) when is_list(configs) and length(configs) > 1 do
+    kill(name)
+    reset()
+    El.Distribution.start("specs")
+    opts = tape_opts()
+    Elita.spawn(to_string(name), Enum.map(configs, &to_string/1), opts)
+    on_exit(fn -> kill(name) end)
   end
 
   defp tape_opts do
