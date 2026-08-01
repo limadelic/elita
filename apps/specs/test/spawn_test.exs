@@ -34,6 +34,10 @@ defmodule SpawnTest do
     # Entry point processes: resolve agent, check session, start session
     # With a native agent, rouse/2 returns :ok silently
     assert output == ""
+
+    # Prove the session was created by checking ls output
+    ls_output = El.Commands.Ls.remote()
+    assert ls_output =~ "test_spawn_session session"
   end
 
   test "spawn unknown agent through el" do
