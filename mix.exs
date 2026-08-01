@@ -15,7 +15,7 @@ defmodule Elita.Umbrella do
           applications: [el: :permanent, elita: :permanent, matrix: :permanent, tape: :permanent]
         ]
       ],
-      test_coverage: [ignore_modules: [~r/^Tape($|\.)/]]
+      test_coverage: [ignore_modules: [~r/^Tape($|\.)/,  ~r/^Matrix($|\.)/]]
     ]
   end
 

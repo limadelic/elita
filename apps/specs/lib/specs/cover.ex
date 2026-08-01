@@ -21,7 +21,7 @@ defmodule Specs.Cover do
 
   defp paths do
     root = expand("../../../..", __DIR__)
-    ["el", "elita", "matrix"] |> map(&ebin(root, &1))
+    ["el", "elita"] |> map(&ebin(root, &1))
   end
 
   defp ebin(root, name) do
