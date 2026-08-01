@@ -11,6 +11,7 @@ defmodule El.Commands.Spawn do
   import Code, only: [ensure_loaded?: 1]
   import Keyword, only: [put: 3]
   import Utils.Normalize, only: [name: 1]
+  import System, only: [get_env: 1]
 
   def spawn(session, agent) do
     start()
@@ -59,9 +60,17 @@ defmodule El.Commands.Spawn do
 
   defp stir(session, folder, self) do
     rune = get_env(:el, :runner) |> pick()
-    opts = [name: session, folder: folder, self: self]
+    opts = [name: session, folder: folder, self: self, tape_env: tape()]
     start_link(wire(opts, rune))
   end
+
+  defp tape,
+    do: %{
+      tape: get_env("TAPE"),
+      live: get_env("LIVE"),
+      cassette: get_env("CASSETTE"),
+      cassette_dir: get_env("CASSETTE_DIR")
+    }
 
   defp pick(nil), do: nil
 
