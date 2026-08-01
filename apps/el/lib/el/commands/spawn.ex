@@ -41,11 +41,11 @@ defmodule El.Commands.Spawn do
     do: puts("error: session name already taken: #{session}")
 
   defp rouse(%{kind: :file, native: true}, n) do
-    spawn(n, [n], tape_env: tape())
+    Elita.spawn(n, [n], tape_env: tape())
   end
 
   defp rouse(%{kind: :folder, native: true}, n) do
-    spawn(n, [n], tape_env: tape())
+    Elita.spawn(n, [n], tape_env: tape())
   end
 
   defp rouse(%{kind: :file, path: p, file_path: fp}, n) do
