@@ -36,7 +36,7 @@ defmodule SpecHelper do
       end
 
       defp registrations do
-        base = Path.expand("../../elita/agents", __DIR__)
+        base = Path.expand("../../../agents", __DIR__)
 
         [
           "elita:#{Path.join(base, "elita")}",

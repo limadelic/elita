@@ -3,7 +3,7 @@ defmodule Utils.File do
   import File, only: [read: 1]
   import Path, only: [expand: 2, wildcard: 1, join: 2]
 
-  @app_root expand("../..", __DIR__)
+  @app_root expand("../../../..", __DIR__)
 
   @paths [
     "",

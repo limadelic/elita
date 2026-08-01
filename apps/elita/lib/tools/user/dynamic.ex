@@ -5,7 +5,7 @@ defmodule Tools.User.Load.Schema do
   import Path, only: [expand: 2, join: 2]
   import File, only: [exists?: 1]
 
-  @app_root expand("../../..", __DIR__)
+  @app_root expand("../../../../..", __DIR__)
 
   def get(name, state) do
     name |> path() |> load() |> check() |> spec(state)
