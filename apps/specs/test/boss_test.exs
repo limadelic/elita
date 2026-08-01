@@ -1,6 +1,5 @@
 defmodule BossTest do
-  use Tester
-  @moduletag :xunit
+  use SpecHelper
 
   @tag cassette: "boss"
   test "boss delegates task to worker" do
