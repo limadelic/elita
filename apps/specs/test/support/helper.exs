@@ -89,7 +89,7 @@ defmodule SpecHelper do
   end
 
   def ask(name, query) do
-    output = capture(fn -> El.Commands.Ask.ask(to_string(name), query) end)
+    output = capture(fn -> El.CLI.main(["ask", to_string(name), query]) end)
     clean(output)
   end
 
