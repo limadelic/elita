@@ -7,33 +7,29 @@ defmodule El.Commands.Tell do
   import Kernel, except: [self: 0]
   import Keyword, only: [get: 3]
   import IO, only: [write: 2]
-  import Matrix.Wrap.Remote, only: [tell: 4]
   import Registry, only: [lookup: 2]
+  import String, only: [downcase: 1]
+  import El.Puppet, only: [put: 2]
 
   def send(agent, msg, _tool \\ nil, _opts \\ []) do
     prime()
     start()
-    opts = [wait: &find/1]
-    tell(agent, msg, from(), opts) |> code()
+    normalized = agent |> to_string() |> downcase()
+    case find_puppet(normalized) do
+      nil -> write(:stderr, "unknown: #{agent}\n")
+      pid -> put(pid, msg)
+    end
   end
 
-  defp find(atom) do
-    lookup(ElitaRegistry, atom) |> pid()
+  defp find_puppet(normalized) do
+    lookup(ElitaRegistry, normalized)
+    |> extract_puppet()
+  rescue
+    _ -> nil
   end
 
-  defp pid([]), do: nil
-  defp pid([{pid, _} | _]), do: pid
-
-  defp from do
-    get_env(:el, :from)
-    |> default(node() |> to_string())
-  end
-
-  defp default(nil, value), do: value
-  defp default(value, _), do: value
-
-  defp code(:forward), do: halt(1)
-  defp code(_), do: :ok
+  defp extract_puppet([{pid, %{kind: :puppet}}]), do: pid
+  defp extract_puppet(_), do: nil
 
   def target(agent, opts \\ []) do
     env = get(opts, :env_module, El.Infra.Env)
