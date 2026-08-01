@@ -12,9 +12,7 @@ end
 
 if Node.connect(node_name) do
   # Start coverage
-  IO.puts("Starting coverage on #{node_name}...")
-  start_result = :erpc.call(node_name, :cover, :start, [], 5000)
-  IO.puts("Cover start result: #{inspect(start_result)}")
+  :erpc.call(node_name, :cover, :start, [], 5000)
 
   # Compile beam directories for coverage
   {:ok, build_root} = File.cwd()
@@ -24,14 +22,9 @@ if Node.connect(node_name) do
     Path.join(build_root, "_build/test/lib/matrix/ebin")
   ]
 
-  IO.puts("Compiling beam directories...")
   Enum.each(ebin_dirs, fn dir ->
-    IO.puts("  Compiling #{dir}")
-    compile_result = :erpc.call(node_name, :cover, :compile_beam_directory, [String.to_charlist(dir)], 5000)
-    IO.puts("  Result: #{inspect(compile_result)}")
+    :erpc.call(node_name, :cover, :compile_beam_directory, [String.to_charlist(dir)], 5000)
   end)
-else
-  IO.puts("Failed to connect to #{node_name}")
 end
 
 System.halt(0)

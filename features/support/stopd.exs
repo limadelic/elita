@@ -15,16 +15,11 @@ case Node.connect(node_name) do
     File.mkdir_p(coverage_dir)
     edat_path = Path.join(coverage_dir, "cukes.edat")
 
-    # Debug: write a marker file to prove stopd ran
-    File.write!(Path.join(coverage_dir, "stopd_ran.txt"), "stopd ran at #{DateTime.utc_now()}\n")
-
     export_error = nil
     try do
-      result = :erpc.call(node_name, :cover, :export, [String.to_charlist(edat_path)], 5000)
-      File.write!(Path.join(coverage_dir, "export_result.txt"), "Export succeeded: #{inspect(result)}\n")
+      :erpc.call(node_name, :cover, :export, [String.to_charlist(edat_path)], 5000)
     rescue error ->
       export_error = error
-      File.write!(Path.join(coverage_dir, "export_error.txt"), "Export failed: #{inspect(error)}\n")
     end
 
     :erpc.cast(node_name, :init, :stop, [])
