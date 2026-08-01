@@ -12,6 +12,7 @@ defmodule El.Commands.Spawn do
   import Keyword, only: [put: 3]
   import Utils.Normalize, only: [name: 1]
   import System, only: [get_env: 1]
+  import El.Commands.Rouse, only: [native: 3]
 
   def spawn(session, agent) do
     start()
@@ -40,12 +41,8 @@ defmodule El.Commands.Spawn do
   defp check([_ | _], _entry, session),
     do: puts("error: session name already taken: #{session}")
 
-  defp rouse(%{kind: :file, native: true}, n) do
-    Elita.spawn(n, [n], tape_env: tape())
-  end
-
-  defp rouse(%{kind: :folder, native: true}, n) do
-    Elita.spawn(n, [n], tape_env: tape())
+  defp rouse(%{native: true, name: config}, n) do
+    native(n, config, tape())
   end
 
   defp rouse(%{kind: :file, path: p, file_path: fp}, n) do
