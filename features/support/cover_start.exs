@@ -12,10 +12,13 @@ end
 
 if Node.connect(node_name) do
   # Start coverage
-  :erpc.call(node_name, :cover, :start, [], 5000)
+  start_result = :erpc.call(node_name, :cover, :start, [], 5000)
+  unless start_result == :ok do
+    raise "cover.start failed: #{inspect(start_result)}"
+  end
 
   # Compile beam directories for coverage
-  {:ok, build_root} = File.cwd()
+  build_root = Path.expand("../..", __DIR__)
   ebin_dirs = [
     Path.join(build_root, "_build/test/lib/el/ebin"),
     Path.join(build_root, "_build/test/lib/elita/ebin"),
@@ -23,7 +26,10 @@ if Node.connect(node_name) do
   ]
 
   Enum.each(ebin_dirs, fn dir ->
-    :erpc.call(node_name, :cover, :compile_beam_directory, [String.to_charlist(dir)], 5000)
+    result = :erpc.call(node_name, :cover, :compile_beam_directory, [String.to_charlist(dir)], 5000)
+    unless result == :ok or (is_list(result) and length(result) > 0) do
+      raise "cover.compile_beam_directory failed for #{dir}: #{inspect(result)}"
+    end
   end)
 end
 
