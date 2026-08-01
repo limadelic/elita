@@ -11,10 +11,10 @@ defmodule ClockwatcherTest do
 
   for {name, clock, cassette, fragment} <- @cases do
     @tag cassette: cassette
-    @tag clock_override: unquote(clock)
+    @tag clock_override: clock
     test "#{name}" do
-      spawn(:clockwatcher)
-      result = ask(:clockwatcher, "can you handle this task?")
+      spawn(unquote(name), :clockwatcher)
+      result = ask(unquote(name), "can you handle this task?")
       verify(unquote(fragment), result)
     end
   end
