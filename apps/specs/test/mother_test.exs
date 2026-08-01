@@ -1,7 +1,7 @@
 defmodule MotherTest do
-  use Tester
-  @moduletag :xunit
+  use SpecHelper
 
+  @tag cassette: "mother"
   test "mother births a baby" do
     spawn(:mother)
     verify("has arrived", ask(:mother, "it's time to give birth"))
