@@ -8,30 +8,33 @@ defmodule El.Commands.Tell do
   import Registry, only: [lookup: 2]
   import String, only: [downcase: 1]
   import El.Puppet, only: [put: 2]
+  import Elita, only: [dispatch: 2]
 
   def send(agent, msg, _tool \\ nil, _opts \\ []) do
     prime()
     start()
-    dispatch(agent, msg)
+    deliver(agent, msg)
   end
 
-  defp dispatch(agent, msg) do
+  defp deliver(agent, msg) do
     normalized = agent |> to_string() |> downcase()
     route(locate(normalized), agent, msg)
   end
 
   defp route(nil, agent, _msg), do: write(:stderr, "unknown: #{agent}\n")
-  defp route(pid, _agent, msg), do: put(pid, msg)
+  defp route({:puppet, pid}, _agent, msg), do: put(pid, msg)
+  defp route({:native, name}, _agent, msg), do: dispatch(name, msg)
 
   defp locate(normalized) do
     lookup(ElitaRegistry, normalized)
-    |> extract()
+    |> extract(normalized)
   rescue
     _ -> nil
   end
 
-  defp extract([{pid, %{kind: :puppet}}]), do: pid
-  defp extract(_), do: nil
+  defp extract([{pid, %{kind: :puppet}}], _n), do: {:puppet, pid}
+  defp extract([{_pid, _meta}], n), do: {:native, n}
+  defp extract(_, _n), do: nil
 
   def target(agent, opts \\ []) do
     env = get(opts, :env_module, El.Infra.Env)
