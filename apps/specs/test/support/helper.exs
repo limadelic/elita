@@ -69,8 +69,7 @@ defmodule SpecHelper do
     kill(name)
     reset()
     El.Distribution.start("specs")
-    opts = tape_opts()
-    Elita.spawn(to_string(name), [to_string(single_config)], opts)
+    capture(fn -> El.CLI.main(["spawn", to_string(name), to_string(single_config)]) end)
     on_exit(fn -> kill(name) end)
   end
 

@@ -1,7 +1,7 @@
 defmodule Agent.Session do
   use GenServer
 
-  import Agent.Spawn, only: [run: 2]
+  import Agent.Spawn, only: [run: 3]
   import Agent.Ask, only: [reply: 3]
   import Agent.Log, only: [reply: 1]
   import GenServer, only: [start_link: 3, call: 3, cast: 2]
@@ -42,7 +42,7 @@ defmodule Agent.Session do
   defp merge(state, opts) do
     state
     |> put(:self, get(opts, :self, nil))
-    |> put(:runner, get(opts, :runner, &run/2))
+    |> put(:runner, get(opts, :runner, &run/3))
     |> put(:skip_logs, get(opts, :skip_logs, false))
   end
 
