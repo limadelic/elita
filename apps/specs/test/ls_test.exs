@@ -6,13 +6,18 @@ defmodule LsTest do
 
     output = ExUnit.CaptureIO.capture_io(fn -> El.Commands.Ls.ls() end)
 
-    assert is_binary(output)
-    assert String.length(output) > 0
+    assert output =~ "greet"
+    assert output =~ "session"
+    assert output =~ "active"
+    refute output == "no agents"
   end
 
   test "ls remote with path" do
+    spawn(:greet)
+
     result = El.Commands.Ls.remote(path: "//")
 
-    assert is_binary(result)
+    assert result =~ "node" or result == "no agents"
+    refute result == "booting"
   end
 end
