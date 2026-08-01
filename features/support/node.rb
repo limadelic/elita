@@ -21,7 +21,8 @@ module Node
 
   def halt
     stopd_script = File.expand_path("../stopd.exs", __FILE__)
-    system("elixir #{stopd_script} >/dev/null 2>&1")
+    result = system("elixir #{stopd_script}")
+    raise "Failed to halt node" unless result
   end
 
   def active?(node_name)
@@ -104,6 +105,7 @@ module Node
 
   def start_cover
     cover_script = File.expand_path("../cover_start.exs", __FILE__)
-    system("elixir #{cover_script} >/dev/null 2>&1")
+    result = system("elixir #{cover_script}")
+    raise "Failed to start coverage" unless result
   end
 end

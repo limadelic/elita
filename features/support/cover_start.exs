@@ -12,24 +12,26 @@ end
 
 if Node.connect(node_name) do
   # Start coverage
-  try do
-    :erpc.call(node_name, :cover, :start, [], 5000)
-  rescue _ -> nil
-  end
+  IO.puts("Starting coverage on #{node_name}...")
+  start_result = :erpc.call(node_name, :cover, :start, [], 5000)
+  IO.puts("Cover start result: #{inspect(start_result)}")
 
   # Compile beam directories for coverage
+  {:ok, build_root} = File.cwd()
   ebin_dirs = [
-    "/Users/mike/dev/self/elita/donny/_build/test/lib/el/ebin",
-    "/Users/mike/dev/self/elita/donny/_build/test/lib/elita/ebin",
-    "/Users/mike/dev/self/elita/donny/_build/test/lib/matrix/ebin"
+    Path.join(build_root, "_build/test/lib/el/ebin"),
+    Path.join(build_root, "_build/test/lib/elita/ebin"),
+    Path.join(build_root, "_build/test/lib/matrix/ebin")
   ]
 
+  IO.puts("Compiling beam directories...")
   Enum.each(ebin_dirs, fn dir ->
-    try do
-      :erpc.call(node_name, :cover, :compile_beam_directory, [String.to_charlist(dir)], 5000)
-    rescue _ -> nil
-    end
+    IO.puts("  Compiling #{dir}")
+    compile_result = :erpc.call(node_name, :cover, :compile_beam_directory, [String.to_charlist(dir)], 5000)
+    IO.puts("  Result: #{inspect(compile_result)}")
   end)
+else
+  IO.puts("Failed to connect to #{node_name}")
 end
 
 System.halt(0)
