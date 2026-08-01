@@ -10,17 +10,8 @@ module Run
     run_cmd('cd apps/elita && mix test --cover')
     run_cmd('cd apps/el && mix test --cover')
     run_cmd('cd apps/specs && mix test --cover')
-    place_cuke_coverage
     ignore_fail('mix test.coverage')
     copy_html
-  end
-
-  def self.place_cuke_coverage
-    source = '_build/test/coverage/cukes.edat'
-    return unless File.exist?(source)
-
-    destination = File.join('apps/elita/cover', 'cukes.coverdata')
-    FileUtils.cp(source, destination)
   end
 
   def self.recursing?
