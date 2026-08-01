@@ -23,6 +23,12 @@ defmodule SpecHelper do
         cassette = context[:cassette] || default_cassette()
         System.put_env("CASSETTE", cassette)
         System.put_env("TAPE", "replay")
+
+        if clock_override = context[:clock_override] do
+          Application.put_env(:elita, :clock_override, clock_override)
+          on_exit(fn -> Application.delete_env(:elita, :clock_override) end)
+        end
+
         :ok
       end
 
