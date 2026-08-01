@@ -18,11 +18,11 @@ defmodule El.Commands.Tell do
   end
 
   defp find(atom) do
-    case lookup(ElitaRegistry, atom) do
-      [] -> nil
-      [{pid, _} | _] -> pid
-    end
+    lookup(ElitaRegistry, atom) |> pid()
   end
+
+  defp pid([]), do: nil
+  defp pid([{pid, _} | _]), do: pid
 
   defp from do
     get_env(:el, :from)

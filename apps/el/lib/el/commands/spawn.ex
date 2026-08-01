@@ -40,6 +40,14 @@ defmodule El.Commands.Spawn do
   defp check([_ | _], _entry, session),
     do: puts("error: session name already taken: #{session}")
 
+  defp rouse(%{kind: :file, native: true}, n) do
+    spawn(n, [n], tape_env: tape())
+  end
+
+  defp rouse(%{kind: :folder, native: true}, n) do
+    spawn(n, [n], tape_env: tape())
+  end
+
   defp rouse(%{kind: :file, path: p, file_path: fp}, n) do
     stir(n, p, fp)
   end
