@@ -85,6 +85,6 @@ defmodule El.Commands.Spawn do
   defp wire(opts, nil), do: opts
 
   defp wire(opts, rune) do
-    put(opts, :runner, fn m, f -> apply(rune, :run, [m, f]) end)
+    put(opts, :runner, fn m, f, s -> apply(rune, :run, [m, f, s]) end)
   end
 end

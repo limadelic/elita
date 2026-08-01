@@ -58,7 +58,7 @@ defmodule Agent.Session do
 
   @impl true
   def handle_call({:act, message}, _from, state) do
-    response = state.runner.(message, state.folder)
+    response = state.runner.(message, state.folder, state.self)
     {:reply, response, state}
   end
 
@@ -77,7 +77,7 @@ defmodule Agent.Session do
 
   @impl true
   def handle_cast({:cast, message}, state) do
-    state.runner.(message, state.folder)
+    state.runner.(message, state.folder, state.self)
     {:noreply, state}
   end
 end

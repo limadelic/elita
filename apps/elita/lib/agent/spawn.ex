@@ -4,10 +4,11 @@ defmodule Agent.Spawn do
   import Port, only: [open: 2, close: 1]
   import String, only: [trim: 1]
   import System, only: [cmd: 2, find_executable: 1]
+  import File, only: [read: 1]
 
-  def run(message, folder) do
+  def run(message, folder, self \\ nil) do
     cmd = {:spawn_executable, exe()}
-    open(cmd, setup(message, folder)) |> drain()
+    open(cmd, setup(message, folder, self)) |> drain()
   end
 
   defp exe do
@@ -28,12 +29,18 @@ defmodule Agent.Spawn do
     seal(port)
   end
 
-  defp setup(message, folder) do
+  defp setup(message, folder, self) do
     model = get_env(:elita, :claude_model)
-
-    [{:args, ["-p", message, "--allowedTools", "", "--model", model]}, {:cd, to_charlist(folder)}] ++
-      [:binary, :exit_status, :use_stdio]
+    args = ["-p", message, "--allowedTools", "", "--model", model] ++ prompt(self)
+    base = [{:args, args}, {:cd, to_charlist(folder)}]
+    base ++ [:binary, :exit_status, :use_stdio]
   end
+
+  defp prompt(nil), do: []
+  defp prompt(path), do: inject(read(path), path)
+
+  defp inject({:ok, content}, _path), do: ["--append-system-prompt", content]
+  defp inject({:error, _}, _path), do: []
 
   defp read(port, acc) do
     listen(port, acc)
