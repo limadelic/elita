@@ -3,13 +3,17 @@ defmodule Agent.Spawn do
   import Logger, only: [error: 1, warning: 1]
   import Port, only: [open: 2, close: 1]
   import String, only: [trim: 1]
-  import System, only: [cmd: 2, find_executable: 1]
+  import System, only: [cmd: 2, find_executable: 1, get_env: 1]
   import File, only: [read: 1]
 
   def run(message, folder, self \\ nil) do
+    tape(get_env("TAPE"))
     cmd = {:spawn_executable, exe()}
     open(cmd, setup(message, folder, self)) |> drain()
   end
+
+  defp tape("replay"), do: raise("replay: refusing to launch claude binary")
+  defp tape(_), do: :ok
 
   defp exe do
     find_executable("claude") |> pick()
