@@ -8,7 +8,6 @@ defmodule Lite do
   import List, only: [pop_at: 2]
   import Req, only: [post: 2]
   import Tape, only: [handle: 4]
-  import Miss, only: [opts: 1]
   @cache_key %{type: "ephemeral"}
   def llm(%{config: config, history: history, name: agent_name} = state) do
     composed = compose(config)
@@ -18,8 +17,7 @@ defmodule Lite do
   end
 
   defp tape(body, name, state) do
-    cfg = opts(get_env(:elita, :tape_on_miss))
-    payload = [tape: state[:tape], live: state[:live]] ++ cfg
+    payload = [tape: state[:tape], live: state[:live]]
     handle(body, name, fn -> req(body) |> resp end, payload)
   end
 

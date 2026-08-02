@@ -9,11 +9,11 @@ defmodule Tape.Play do
   import List, only: [last: 1]
   import Jason, only: [decode!: 1, encode!: 1]
 
-  def play(body, name, fun, on_miss \\ :raise) do
+  def play(body, name, fun) do
     e = load(c = get_env("CASSETTE"), get_env("CASSETTE_DIR"))
     seed(e, c)
     %{entries: e, normalized: norm(body, name), body: body,
-      name: name, fun: fun, on_miss: on_miss, cassette: c} |> answer()
+      name: name, fun: fun, cassette: c} |> answer()
   end
 
   defp norm(body, name) do
@@ -41,16 +41,8 @@ defmodule Tape.Play do
   defp process(nil, ctx), do: untagged(ctx, 0)
   defp process(answer, _ctx), do: answer
 
-  defp untagged(%{entries: entries, on_miss: :raise} = ctx, idx) when idx >= length(entries) do
-    raise "tape miss: #{ctx.name} #{inspect(ctx.normalized)}"
-  end
-
-  defp untagged(%{entries: entries, on_miss: :live, fun: fun}, idx) when idx >= length(entries) do
-    fun.()
-  end
-
-  defp untagged(%{entries: entries, on_miss: :swallow}, idx) when idx >= length(entries) do
-    []
+  defp untagged(%{entries: entries, name: name, normalized: normalized}, idx) when idx >= length(entries) do
+    raise "tape miss: #{name} #{inspect(normalized)}"
   end
 
   defp untagged(ctx, idx) do

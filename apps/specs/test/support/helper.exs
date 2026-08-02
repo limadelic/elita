@@ -20,7 +20,6 @@ defmodule SpecHelper do
         Application.put_env(:elita, :registrations, regs)
 
         System.delete_env("LIVE")
-        System.delete_env("TAPE_ON_MISS")
 
         :ok
       end
