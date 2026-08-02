@@ -11,7 +11,6 @@ defmodule Tape do
 
   defp route(%{tape: "rec", body: body, name: name, fun: fun}), do: record(body, name, fun)
   defp route(%{live: "1", fun: fun}), do: fun.()
-  defp route(%{tape: "replay", body: body, name: name, fun: fun}), do: play(body, name, fun, :raise)
 
   defp route(%{body: body, name: name, fun: fun, on_miss: on_miss}),
     do: play(body, name, fun, on_miss)
