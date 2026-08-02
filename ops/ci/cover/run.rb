@@ -35,6 +35,7 @@ module Run
   def self.ensure_dirs
     FileUtils.mkdir_p('apps/el/cover')
     FileUtils.mkdir_p('apps/elita/cover')
+    FileUtils.mkdir_p('site/cover')
   end
 
   def self.copy_modules_for_app(app_name)
@@ -44,7 +45,12 @@ module Run
 
   def self.copy_file(name, app_name)
     src = "cover/#{name}.html"
-    dst = Pathname.new("apps/#{app_name}/cover").join("#{name}.html")
+    copy_to_dir(src, "apps/#{app_name}/cover")
+    copy_to_dir(src, 'site/cover')
+  end
+
+  def self.copy_to_dir(src, dst_dir)
+    dst = Pathname.new(dst_dir).join(File.basename(src))
     FileUtils.cp(src, dst) if File.exist?(src)
   end
 

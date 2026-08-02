@@ -111,7 +111,7 @@ module Client
         return 'e05d44';
       }
 
-      document.addEventListener('DOMContentLoaded', () => app.init());
+      app.init();
     SCRIPT
   end
 end
