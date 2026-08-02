@@ -21,7 +21,6 @@ defmodule SpecHelper do
 
         System.delete_env("LIVE")
         System.delete_env("TAPE_ON_MISS")
-        System.delete_env("ANTHROPIC_API_KEY")
 
         :ok
       end
