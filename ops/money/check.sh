@@ -17,6 +17,8 @@ ips=$(ruby -rresolv -e "hosts='$hosts'; hosts.split.each { |h| Resolv.each_addre
 hits_file="/tmp/elita_api_hits_$$"
 rm -f "$hits_file"
 
+unset ANTHROPIC_API_KEY
+
 if [ $# -eq 0 ]; then
   TAPE=replay mix test &
 else
