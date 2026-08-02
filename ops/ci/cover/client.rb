@@ -8,6 +8,7 @@ module Client
         init() {
           this.tree = JSON.parse(document.getElementById('tree-data').textContent);
           window.addEventListener('hashchange', () => this.navigate());
+          this.setupDelegatedListeners();
           this.navigate();
         },
 
@@ -37,6 +38,27 @@ module Client
           return node;
         },
 
+        setupDelegatedListeners() {
+          const browser = document.getElementById('browser');
+          if (!browser) return;
+
+          browser.addEventListener('click', (e) => {
+            const folderRow = e.target.closest('[data-path]');
+            if (folderRow) {
+              const path = folderRow.dataset.path.split('/');
+              this.navigateTo(path);
+              return;
+            }
+
+            const moduleRow = e.target.closest('[data-module]');
+            if (moduleRow) {
+              const moduleName = moduleRow.dataset.module;
+              window.location = 'Elixir.' + moduleName + '.html';
+              return;
+            }
+          });
+        },
+
         render() {
           const node = this.getCurrentNode();
           if (!node) {
@@ -54,9 +76,17 @@ module Client
           let html = '<span class="breadcrumb-item">Coverage</span>';
           for (let i = 1; i < parts.length; i++) {
             const path = parts.slice(1, i + 1);
-            html += ` / <span class="breadcrumb-item" onclick="app.navigateTo(['${path.map(p => "'" + p + "'").join(', ')}']);">${parts[i]}</span>`;
+            html += ` / <span class="breadcrumb-item" data-breadcrumb="${path.join('/')}">${parts[i]}</span>`;
           }
           document.getElementById('breadcrumb').innerHTML = html;
+
+          document.querySelectorAll('[data-breadcrumb]').forEach(el => {
+            el.style.cursor = 'pointer';
+            el.addEventListener('click', () => {
+              const path = el.dataset.breadcrumb.split('/');
+              this.navigateTo(path);
+            });
+          });
         },
 
         renderContents(node) {
@@ -82,22 +112,35 @@ module Client
             const color = colorFor(row.pct);
             const pctFmt = row.pct.toFixed(2);
             const barText = row.pct === 0 ? '' : pctFmt;
-            const clickHandler = row.type === 'folder' ?
-              `onclick="app.navigateTo(['${row.path.map(p => "'" + p + "'").join(', ')}'])"` :
-              `onclick="window.location='Elixir.${row.name}.html'"`;
 
-            html += `<tr class="browser-row ${row.type}" ${clickHandler}>
-              <td class="row-icon">${row.type === 'folder' ? '📁' : '📄'}</td>
-              <td class="row-name">${row.displayName}</td>
-              <td class="pct-cell" style="background-color: #${color};">${pctFmt}%</td>
-              <td class="bar-cell">
-                <div class="bar-container">
-                  <div class="bar-fill" style="width: ${row.pct}%; background-color: #${color};">
-                    ${barText}
+            if (row.type === 'folder') {
+              const pathStr = row.path.join('/');
+              html += `<tr class="browser-row folder" data-path="${pathStr}" style="cursor: pointer;">
+                <td class="row-icon">📁</td>
+                <td class="row-name">${row.displayName}</td>
+                <td class="pct-cell" style="background-color: #${color};">${pctFmt}%</td>
+                <td class="bar-cell">
+                  <div class="bar-container">
+                    <div class="bar-fill" style="width: ${row.pct}%; background-color: #${color};">
+                      ${barText}
+                    </div>
                   </div>
-                </div>
-              </td>
-            </tr>`;
+                </td>
+              </tr>`;
+            } else {
+              html += `<tr class="browser-row module" data-module="${row.name}" style="cursor: pointer;">
+                <td class="row-icon">📄</td>
+                <td class="row-name">${row.displayName}</td>
+                <td class="pct-cell" style="background-color: #${color};">${pctFmt}%</td>
+                <td class="bar-cell">
+                  <div class="bar-container">
+                    <div class="bar-fill" style="width: ${row.pct}%; background-color: #${color};">
+                      ${barText}
+                    </div>
+                  </div>
+                </td>
+              </tr>`;
+            }
           });
 
           html += '</tbody></table>';
