@@ -1,7 +1,5 @@
 import Config
 
-if System.get_env("TAPE") == "replay", do: System.delete_env("ANTHROPIC_API_KEY")
-
 config :matrix, :trace, System.get_env("EL_TRACE")
 config :elita, :registrations, System.get_env("AGENT_REGISTRATIONS")
 config :elita, :run, System.get_env("ELITA_RUN", "")
