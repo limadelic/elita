@@ -4,6 +4,7 @@ defmodule Utils.File do
   import Path, only: [expand: 2, wildcard: 1, join: 2]
 
   @app_root expand("../..", __DIR__)
+  @repo_root expand("../../../..", __DIR__)
 
   @paths [
     "",
@@ -19,11 +20,16 @@ defmodule Utils.File do
 
   defp paths(name) do
     map(@paths, fn path -> concat("#{@app_root}/#{path}", name) end) ++
-      nested(name)
+      nested(name) ++
+      rooted(name)
   end
 
   defp nested(name) do
     wildcard(join(@app_root, "agents/**/#{name}"))
+  end
+
+  defp rooted(name) do
+    wildcard(join(@repo_root, "agents/**/#{name}"))
   end
 
   defp ensure(nil, name), do: "file not found: #{name}"

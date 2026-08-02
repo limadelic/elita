@@ -1,15 +1,10 @@
 defmodule DoctorTest do
-  use Tester
-
-  @moduletag :xunit
-
-  setup do
-    spawn(:doctor)
-    spawn(:patient, :actor)
-    :ok
-  end
+  use SpecHelper
 
   test "doctor diagnoses appendicitis" do
+    spawn(:doctor)
+    spawn(:patient, :actor)
+
     ask(:patient, """
     you are a patient with appendicitis
     - sharp right abdominal pain, nausea, fever.

@@ -1,17 +1,13 @@
 defmodule Doble9Test do
-  use Tester
-  @moduletag :xunit
+  use SpecHelper
 
-  setup _context do
+  test "dominoes on start" do
     spawn(:doble9)
     spawn(:top, [:player, :greed])
     spawn(:left, [:player, :greed])
     spawn(:bottom, [:player, :greed])
     spawn(:right, [:player, :greed])
-    :ok
-  end
 
-  test "dominoes on start" do
     verify("dar agua", ask(:doble9, "start a new game with players: top, left, bottom, right"))
     response = ask(:doble9, "i need 10 dominoes")
     verify("10 dominoes", response)

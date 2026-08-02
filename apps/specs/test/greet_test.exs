@@ -1,8 +1,7 @@
 defmodule GreetTest do
-  use Tester
-  @moduletag :xunit
+  use SpecHelper
 
-  test "greet conversation flow" do
+  test "greet conversation through el" do
     spawn(:greet)
 
     verify("who am i talking to", ask(:greet, "hello"))

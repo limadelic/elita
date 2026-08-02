@@ -1,6 +1,5 @@
 defmodule SpeckTest do
-  use Tester
-  @moduletag :xunit
+  use SpecHelper
 
   @tag cassette: "mother"
   test "speck runs mother spec" do

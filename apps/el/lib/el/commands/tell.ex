@@ -1,30 +1,40 @@
 defmodule El.Commands.Tell do
   @moduledoc false
-  import Application, only: [get_env: 2]
   import El.Distribution, only: [start: 0, start: 1]
-  import System, only: [halt: 1]
   import Node, only: [self: 0]
   import Kernel, except: [self: 0]
   import Keyword, only: [get: 3]
   import IO, only: [write: 2]
-  import Matrix.Wrap.Remote, only: [tell: 3]
+  import Registry, only: [lookup: 2]
+  import String, only: [downcase: 1]
+  import El.Puppet, only: [put: 2]
+  import Elita, only: [dispatch: 2]
 
   def send(agent, msg, _tool \\ nil, _opts \\ []) do
     prime()
     start()
-    tell(agent, msg, from()) |> code()
+    deliver(agent, msg)
   end
 
-  defp from do
-    get_env(:el, :from)
-    |> default(node() |> to_string())
+  defp deliver(agent, msg) do
+    normalized = agent |> to_string() |> downcase()
+    route(locate(normalized), agent, msg)
   end
 
-  defp default(nil, value), do: value
-  defp default(value, _), do: value
+  defp route(nil, agent, _msg), do: write(:stderr, "unknown: #{agent}\n")
+  defp route({:puppet, pid}, _agent, msg), do: put(pid, msg)
+  defp route({:native, name}, _agent, msg), do: dispatch(name, msg)
 
-  defp code(:forward), do: halt(1)
-  defp code(_), do: :ok
+  defp locate(normalized) do
+    lookup(ElitaRegistry, normalized)
+    |> extract(normalized)
+  rescue
+    _ -> nil
+  end
+
+  defp extract([{pid, %{kind: :puppet}}], _n), do: {:puppet, pid}
+  defp extract([{_pid, _meta}], n), do: {:native, n}
+  defp extract(_, _n), do: nil
 
   def target(agent, opts \\ []) do
     env = get(opts, :env_module, El.Infra.Env)

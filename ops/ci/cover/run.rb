@@ -9,6 +9,7 @@ module Run
 
     run_cmd('cd apps/elita && mix test --cover')
     run_cmd('cd apps/el && mix test --cover')
+    run_cmd('cd apps/specs && mix test --cover')
     ignore_fail('mix test.coverage')
     copy_html
   end
@@ -26,27 +27,35 @@ module Run
   end
 
   def self.copy_html
-    modules = list_modules
-    ensure_dir
-    copy_files(modules)
+    ensure_dirs
+    copy_modules_for_app('el')
+    copy_modules_for_app('elita')
   end
 
-  def self.ensure_dir
+  def self.ensure_dirs
+    FileUtils.mkdir_p('apps/el/cover')
     FileUtils.mkdir_p('apps/elita/cover')
+    FileUtils.mkdir_p('site/cover')
   end
 
-  def self.copy_files(modules)
-    modules.each { |name| copy_file(name) }
+  def self.copy_modules_for_app(app_name)
+    modules = list_modules_for_app(app_name)
+    modules.each { |name| copy_file(name, app_name) }
   end
 
-  def self.copy_file(name)
+  def self.copy_file(name, app_name)
     src = "cover/#{name}.html"
-    dst = Pathname.new('apps/elita/cover').join("#{name}.html")
+    copy_to_dir(src, "apps/#{app_name}/cover")
+    copy_to_dir(src, 'site/cover')
+  end
+
+  def self.copy_to_dir(src, dst_dir)
+    dst = Pathname.new(dst_dir).join(File.basename(src))
     FileUtils.cp(src, dst) if File.exist?(src)
   end
 
-  def self.list_modules
-    path = Pathname.new('_build/test/lib/elita/ebin')
+  def self.list_modules_for_app(app_name)
+    path = Pathname.new("_build/test/lib/#{app_name}/ebin")
     return [] unless path.exist?
 
     extract_names(path.glob('*.beam'))

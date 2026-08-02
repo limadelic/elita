@@ -37,5 +37,5 @@ defmodule El.Commands.Address.Wake do
   defp config(opts, nil), do: opts
 
   defp config(opts, rune),
-    do: put(opts, :runner, fn m, f -> apply(rune, :run, [m, f]) end)
+    do: put(opts, :runner, fn m, f, s -> apply(rune, :run, [m, f, s]) end)
 end

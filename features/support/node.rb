@@ -20,7 +20,8 @@ module Node
 
   def halt
     stopd_script = File.expand_path("../stopd.exs", __FILE__)
-    system("elixir #{stopd_script} >/dev/null 2>&1")
+    result = system("elixir #{stopd_script}")
+    raise "Failed to halt node" unless result
   end
 
   def active?(node_name)
@@ -44,11 +45,11 @@ module Node
 
   def spawn_node
     env = node_env
-    el_path = "../../../../apps/el/el"
+    el_path = "../../apps/el/el"
     Process.spawn(
       env,
       "#{el_path} node",
-      chdir: "apps/elita/agents/elita",
+      chdir: "agents/elita",
       [:out, :err] => [@node_log, "a"]
     )
   end

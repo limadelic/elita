@@ -1,10 +1,10 @@
 module Spawn
   def realm
-    @scratch || "apps/elita/agents/elita"
+    @scratch || "agents/elita"
   end
 
   def gate
-    @scratch ? File.join(@scratch, 'bin', 'el') : "../../../../apps/el/el"
+    @scratch ? File.join(@scratch, 'bin', 'el') : "../../apps/el/el"
   end
 
   def spawn(args)

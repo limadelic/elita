@@ -1,7 +1,7 @@
 defmodule Agent.Session do
   use GenServer
 
-  import Agent.Spawn, only: [run: 2]
+  import Agent.Spawn, only: [run: 3]
   import Agent.Ask, only: [reply: 3]
   import Agent.Log, only: [reply: 1]
   import GenServer, only: [start_link: 3, call: 3, cast: 2]
@@ -37,17 +37,16 @@ defmodule Agent.Session do
 
   defp base(opts), do: %{name: fetch!(opts, :name), folder: fetch!(opts, :folder)}
 
-  defp setup(state), do: state |> put(:tape, tape()) |> put(:live, live())
+  defp setup(state), do: state |> put(:tape, tape())
 
   defp merge(state, opts) do
     state
     |> put(:self, get(opts, :self, nil))
-    |> put(:runner, get(opts, :runner, &run/2))
+    |> put(:runner, get(opts, :runner, &run/3))
     |> put(:skip_logs, get(opts, :skip_logs, false))
   end
 
   defp tape, do: get_env("TAPE")
-  defp live, do: get_env("LIVE")
 
   @impl true
   def handle_call({:ask, message}, _from, state) do
@@ -58,7 +57,7 @@ defmodule Agent.Session do
 
   @impl true
   def handle_call({:act, message}, _from, state) do
-    response = state.runner.(message, state.folder)
+    response = state.runner.(message, state.folder, state.self)
     {:reply, response, state}
   end
 
@@ -77,7 +76,7 @@ defmodule Agent.Session do
 
   @impl true
   def handle_cast({:cast, message}, state) do
-    state.runner.(message, state.folder)
+    state.runner.(message, state.folder, state.self)
     {:noreply, state}
   end
 end

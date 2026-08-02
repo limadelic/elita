@@ -1,6 +1,5 @@
 defmodule SpawnTest do
-  use Tester
-  @moduletag :xunit
+  use SpecHelper
 
   @tag cassette: "boss"
   test "spawn creates agents that route messages" do

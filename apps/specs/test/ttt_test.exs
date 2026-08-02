@@ -1,6 +1,5 @@
 defmodule TttTest do
-  use Tester
-  @moduletag :xunit
+  use SpecHelper
 
   setup _context do
     spawn(:alice, :ttt)

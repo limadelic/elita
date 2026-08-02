@@ -5,6 +5,7 @@ defmodule El.Commands.Address.World do
   import File, only: [exists?: 1, ls!: 1]
   import Path, only: [expand: 1, join: 2, extname: 1, basename: 2]
   import Node, only: [list: 0]
+  import Map, only: [put: 3]
 
   def build(nodes \\ &peers/0) do
     folders = load() |> map(&entry/1)
@@ -24,7 +25,8 @@ defmodule El.Commands.Address.World do
   defp entry({name, folder}) do
     folder = expand(folder)
     self = check(folder)
-    %{name: to_string(name), path: folder, kind: :folder, file_path: self}
+    m = %{name: to_string(name), path: folder, kind: :folder, file_path: self}
+    native(m)
   end
 
   defp check(folder) do
@@ -54,7 +56,7 @@ defmodule El.Commands.Address.World do
   defp file(folder, filename) do
     n = name(filename)
     path = join(folder, filename)
-    %{name: n, path: folder, file_path: path, kind: :file}
+    native(%{name: n, path: folder, file_path: path, kind: :file})
   end
 
   defp name(file) do
@@ -68,4 +70,6 @@ defmodule El.Commands.Address.World do
   defp remote(node) do
     %{name: to_string(node), path: nil, kind: :node, file_path: nil}
   end
+
+  defp native(entry), do: put(entry, :native, true)
 end

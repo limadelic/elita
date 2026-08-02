@@ -40,7 +40,6 @@ defmodule El.Repl.Route do
   defp build,
     do: %{
       tape: get_env("TAPE"),
-      live: get_env("LIVE"),
       cassette: get_env("CASSETTE"),
       cassette_dir: get_env("CASSETTE_DIR")
     }

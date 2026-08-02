@@ -15,7 +15,7 @@ defmodule Elita.Umbrella do
           applications: [el: :permanent, elita: :permanent, matrix: :permanent, tape: :permanent]
         ]
       ],
-      test_coverage: [ignore_modules: [~r/^Tape($|\.)/]]
+      test_coverage: [ignore_modules: [~r/^Tape($|\.)/,  ~r/^Matrix($|\.)/]]
     ]
   end
 
@@ -43,6 +43,7 @@ defmodule Elita.Umbrella do
       check("cd apps/elita && mix test")
       check("cd apps/el && mix test")
       check("cd apps/matrix && mix test")
+      check("cd apps/specs && mix test")
     end
   end
 
@@ -57,6 +58,7 @@ defmodule Elita.Umbrella do
     check("cd apps/el && mix format --check-formatted")
     check("cd apps/elita && mix format --check-formatted")
     check("cd apps/matrix && mix format --check-formatted")
+    check("cd apps/specs && mix format --check-formatted")
     check("mix credo --strict")
     check("bundle exec rubocop")
     check("npm run fmt:check")

@@ -11,6 +11,8 @@ defmodule El.Commands.Spawn do
   import Code, only: [ensure_loaded?: 1]
   import Keyword, only: [put: 3]
   import Utils.Normalize, only: [name: 1]
+  import System, only: [get_env: 1]
+  import El.Commands.Rouse, only: [native: 3]
 
   def spawn(session, agent) do
     start()
@@ -39,6 +41,10 @@ defmodule El.Commands.Spawn do
   defp check([_ | _], _entry, session),
     do: puts("error: session name already taken: #{session}")
 
+  defp rouse(%{native: true, name: config}, n) do
+    native(n, config, tape())
+  end
+
   defp rouse(%{kind: :file, path: p, file_path: fp}, n) do
     stir(n, p, fp)
   end
@@ -59,9 +65,16 @@ defmodule El.Commands.Spawn do
 
   defp stir(session, folder, self) do
     rune = get_env(:el, :runner) |> pick()
-    opts = [name: session, folder: folder, self: self]
+    opts = [name: session, folder: folder, self: self, tape_env: tape()]
     start_link(wire(opts, rune))
   end
+
+  defp tape,
+    do: %{
+      tape: get_env("TAPE"),
+      cassette: get_env("CASSETTE"),
+      cassette_dir: get_env("CASSETTE_DIR")
+    }
 
   defp pick(nil), do: nil
 
@@ -76,6 +89,6 @@ defmodule El.Commands.Spawn do
   defp wire(opts, nil), do: opts
 
   defp wire(opts, rune) do
-    put(opts, :runner, fn m, f -> apply(rune, :run, [m, f]) end)
+    put(opts, :runner, fn m, f, s -> apply(rune, :run, [m, f, s]) end)
   end
 end
