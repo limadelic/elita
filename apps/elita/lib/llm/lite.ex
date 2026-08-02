@@ -4,11 +4,12 @@ defmodule Lite do
   import Snippet, only: [snip: 2]
   import Tools, only: [tools: 2]
   import Enum, only: [map: 2]
-  import Map, only: [put: 3, delete: 2]
+  import Map, only: [put: 3, delete: 2, get: 2]
   import List, only: [pop_at: 2]
   import Req, only: [post: 2]
   import Tape, only: [handle: 4]
   import Miss, only: [opts: 1]
+  import Meter, only: [spend: 2]
   @cache_key %{type: "ephemeral"}
   def llm(%{config: config, history: history, name: agent_name} = state) do
     composed = compose(config)
@@ -84,7 +85,12 @@ defmodule Lite do
 
   defp token, do: get_env(:elita, :auth_token)
 
-  defp resp({:ok, %{status: 200, body: %{"content" => content}}}), do: content
+  defp resp({:ok, %{status: 200, body: body}}), do: respond(body)
   defp resp({:ok, %{status: code, body: body}}), do: {:error, "HTTP #{code}: #{inspect(body)}"}
   defp resp({:error, err}), do: {:error, "request failed: #{inspect(err)}"}
+
+  defp respond(%{"content" => content} = body) do
+    spend(:api, get(body, "usage"))
+    content
+  end
 end
