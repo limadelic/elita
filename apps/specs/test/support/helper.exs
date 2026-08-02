@@ -95,9 +95,18 @@ defmodule SpecHelper do
     normalized = name |> to_string() |> String.downcase()
 
     case Registry.lookup(ElitaRegistry, normalized) do
-      [] -> :ok
-      [{pid, _} | _] -> GenServer.stop(pid)
+      [] ->
+        :ok
+
+      [{pid, _} | _] ->
+        stop(pid)
     end
+  end
+
+  defp stop(pid) do
+    GenServer.stop(pid)
+  catch
+    :exit, _ -> :ok
   end
 
   defp reset do
