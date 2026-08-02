@@ -19,11 +19,18 @@ module Client
         },
 
         root() {
-          window.location.hash = '';
+          this.navigateTo([]);
         },
 
         navigateTo(path) {
-          window.location.hash = path.join('/');
+          const newHash = path.length > 0 ? path.join('/') : '';
+          const currentHash = window.location.hash.slice(1);
+
+          window.location.hash = newHash;
+
+          if (newHash === currentHash) {
+            this.navigate();
+          }
         },
 
         getCurrentNode() {
@@ -40,23 +47,35 @@ module Client
 
         setupDelegatedListeners() {
           const browser = document.getElementById('browser');
-          if (!browser) return;
+          if (browser) {
+            browser.addEventListener('click', (e) => {
+              const folderRow = e.target.closest('[data-path]');
+              if (folderRow) {
+                const path = folderRow.dataset.path.split('/').filter(Boolean);
+                this.navigateTo(path);
+                return;
+              }
 
-          browser.addEventListener('click', (e) => {
-            const folderRow = e.target.closest('[data-path]');
-            if (folderRow) {
-              const path = folderRow.dataset.path.split('/');
-              this.navigateTo(path);
-              return;
-            }
+              const moduleRow = e.target.closest('[data-module]');
+              if (moduleRow) {
+                const moduleName = moduleRow.dataset.module;
+                window.location = 'Elixir.' + moduleName + '.html';
+                return;
+              }
+            });
+          }
 
-            const moduleRow = e.target.closest('[data-module]');
-            if (moduleRow) {
-              const moduleName = moduleRow.dataset.module;
-              window.location = 'Elixir.' + moduleName + '.html';
-              return;
-            }
-          });
+          const breadcrumb = document.getElementById('breadcrumb');
+          if (breadcrumb) {
+            breadcrumb.addEventListener('click', (e) => {
+              const item = e.target.closest('[data-breadcrumb]');
+              if (item) {
+                const pathStr = item.dataset.breadcrumb;
+                const path = pathStr ? pathStr.split('/').filter(Boolean) : [];
+                this.navigateTo(path);
+              }
+            });
+          }
         },
 
         render() {
@@ -73,20 +92,12 @@ module Client
 
         renderBreadcrumb() {
           const parts = ['root', ...this.currentPath];
-          let html = '<span class="breadcrumb-item">Coverage</span>';
+          let html = '<span class="breadcrumb-item" data-breadcrumb="" style="cursor: pointer;">Coverage</span>';
           for (let i = 1; i < parts.length; i++) {
             const path = parts.slice(1, i + 1);
-            html += ` / <span class="breadcrumb-item" data-breadcrumb="${path.join('/')}">${parts[i]}</span>`;
+            html += ` / <span class="breadcrumb-item" data-breadcrumb="${path.join('/')}" style="cursor: pointer;">${parts[i]}</span>`;
           }
           document.getElementById('breadcrumb').innerHTML = html;
-
-          document.querySelectorAll('[data-breadcrumb]').forEach(el => {
-            el.style.cursor = 'pointer';
-            el.addEventListener('click', () => {
-              const path = el.dataset.breadcrumb.split('/');
-              this.navigateTo(path);
-            });
-          });
         },
 
         renderContents(node) {
