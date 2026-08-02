@@ -3,7 +3,7 @@ module Styles
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font: 14px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: #f8f9fa; color: #333; padding: 20px; }
-    .container { max-width: 1000px; margin: 0 auto; background: white; border-radius: 6px;
+    .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 6px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden; }
     .header { padding: 30px; background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
       border-bottom: 1px solid #ddd; }
@@ -16,35 +16,25 @@ module Styles
       display: inline-block; color: white; }
     .summary-count { font-size: 32px; font-weight: 700; }
     .content { padding: 30px; }
+    .breadcrumb { margin-bottom: 16px; font-size: 13px; }
+    .breadcrumb-item { cursor: pointer; color: #0066cc; }
+    .breadcrumb-item:hover { text-decoration: underline; }
     .controls { margin-bottom: 20px; display: flex; gap: 10px; }
     .controls button { padding: 8px 16px; font-size: 13px; font-weight: 600;
       border: 1px solid #ddd; background: white; border-radius: 4px; cursor: pointer;
       color: #333; transition: background 0.2s; }
     .controls button:hover { background: #f0f0f0; }
-    .groups { display: flex; flex-direction: column; gap: 10px; }
-    details { border: 1px solid #eee; border-radius: 4px; background: white; }
-    details[open] { background: white; }
-    summary { padding: 12px; cursor: pointer; display: grid; grid-template-columns: 1fr 100px 200px;
-      gap: 12px; align-items: center; font-weight: 600; color: #333; user-select: none; }
-    summary::-webkit-details-marker { margin-right: 8px; }
-    summary::marker { content: '▶ '; }
-    details[open] summary::marker { content: '▼ '; }
-    summary:hover { background: #f9f9f9; }
-    .group-folder { font-weight: 600; }
-    .group-info { display: grid; grid-template-columns: 1fr 100px 200px; gap: 12px;
-      align-items: center; }
-    table { width: 100%; border-collapse: collapse; }
-    th { text-align: left; padding: 12px; font-weight: 600; font-size: 12px;
-      text-transform: uppercase; color: #666; border-bottom: 1px solid #eee; background: transparent; }
-    td { padding: 12px; border-bottom: 1px solid #eee; }
-    tr:hover { background: #f9f9f9; }
-    .modules-table { margin: 0; border-top: 1px solid #eee; }
-    .modules-table tbody tr:first-child td { border-top: none; }
-    .module-name { font-weight: 500; color: #0066cc; text-decoration: none; }
-    .module-name:hover { text-decoration: underline; }
-    .pct-cell { width: 100px; text-align: right; font-weight: 600; color: white; font-size: 13px; }
-    .bar-cell { width: 200px; }
-    .bar-container { width: 100%; height: 24px; background: #e8e8e8; border-radius: 2px;
+    .browser { }
+    .browser-table { width: 100%; border-collapse: collapse; }
+    .browser-row { cursor: pointer; }
+    .browser-row:hover { background: #f6f8fa; }
+    .row-icon { padding: 12px 16px; width: 40px; text-align: center; }
+    .row-name { padding: 12px 0; font-weight: 500; color: #0066cc; flex: 1; }
+    .browser-row.module .row-name { color: #24292e; }
+    .pct-cell { width: 100px; text-align: center; font-weight: 600; color: white; font-size: 13px;
+      padding: 12px 8px; border-radius: 4px; }
+    .bar-cell { width: 200px; padding: 12px 8px; }
+    .bar-container { width: 100%; height: 20px; background: #e8e8e8; border-radius: 2px;
       overflow: hidden; }
     .bar-fill { height: 100%; display: flex; align-items: center; justify-content: flex-end;
       padding-right: 6px; font-size: 11px; font-weight: 600; color: white; }
@@ -59,17 +49,14 @@ module Styles
       .summary-label { color: #8f8fa3; }
       .summary-count { color: #c9c9d1; }
       .content { background: #282a36; }
+      .breadcrumb { color: #8f8fa3; }
+      .breadcrumb-item { color: #6cb6ff; }
+      .breadcrumb-item:hover { color: #79c0ff; }
       .controls button { background: #3a3d4d; border-color: #4a4d5d; color: #c9c9d1; }
       .controls button:hover { background: #4a4d5d; }
-      details { background: #282a36; border-color: #3a3d4d; }
-      summary { color: #c9c9d1; }
-      summary:hover { background: #323543; }
-      table { background: #282a36; }
-      th { color: #8f8fa3; background: transparent; border-bottom: 1px solid #3a3d4d; }
-      td { border-bottom: 1px solid #3a3d4d; }
-      tr:hover { background: #323543; }
-      .group-folder { color: #c9c9d1; }
-      .module-name { color: #6cb6ff; }
+      .browser-row:hover { background: #323543; }
+      .row-name { color: #6cb6ff; }
+      .browser-row.module .row-name { color: #c9c9d1; }
       .bar-container { background: #3a3d4d; }
       .footer { background: #1d1d26; border-top: 1px solid #3a3d4d; color: #8f8fa3; }
     }

@@ -1,18 +1,20 @@
 require 'pathname'
+require 'json'
 require_relative 'template'
 
 module Index
   def self.generate(prefix)
     data = parse_coverage
     modules = filter_sort(data[:modules], find_pages)
-    grouped = group_by_folder(modules, build_source_map)
-    render_html(grouped, data, modules, prefix)
+    tree = build_tree(modules, build_source_map)
+    tree = collapse_single_children(tree)
+    render_html(tree, data, modules, prefix)
   end
 
-  def self.render_html(grouped, data, modules, prefix)
+  def self.render_html(tree, data, modules, prefix)
     zeros = count_zeros(modules)
     dropped = data[:original_count] - modules.length
-    html = Template.render(grouped, data[:total], modules.length, zeros, dropped)
+    html = Template.render(tree, data[:total], modules.length, zeros, dropped)
     File.write("site/#{prefix}cover/index.html", html)
   end
 
@@ -134,39 +136,66 @@ module Index
     map[match[1]] = folder
   end
 
-  def self.group_by_folder(modules, source_map)
-    groups = partition_by_folder(modules, source_map)
-    sort_groups(groups)
+  def self.build_tree(modules, source_map)
+    root = { name: 'root', type: 'folder', children: {}, modules: [] }
+    modules.each { |m| add_module_to_tree(root, m, source_map) }
+    root
   end
 
-  def self.partition_by_folder(modules, source_map)
-    modules.group_by { |m| resolve_folder(m, source_map) }
+  def self.add_module_to_tree(root, module_data, source_map)
+    folder = resolve_folder(module_data, source_map)
+    target = folder == :unmapped ? root : ensure_folder_path(root, folder)
+    target[:modules] << module_data
+  end
+
+  def self.ensure_folder_path(root, folder_path)
+    parts = folder_path.split('/')
+    node = root
+    parts.each { |part| node = ensure_folder(node, part) }
+    node
+  end
+
+  def self.ensure_folder(node, part)
+    node[:children][part] ||= { name: part, type: 'folder', children: {}, modules: [] }
+    node[:children][part]
   end
 
   def self.resolve_folder(m, source_map)
     source_map[m[:name]] || :unmapped
   end
 
-  def self.sort_groups(groups)
-    mapped = sort_mapped_groups(groups.except(:unmapped))
-    add_unmapped_group(mapped, groups[:unmapped])
+  def self.collapse_single_children(node)
+    collapsed = node.dup
+    collapsed[:children] = node[:children].transform_values { |child| collapse_single_children(child) }
+    collapse_chains(collapsed)
   end
 
-  def self.sort_mapped_groups(groups)
-    sort_folders(groups).map { |folder, mods| [folder, sort_by_pct(mods)] }
+  def self.collapse_chains(collapsed)
+    while should_collapse?(collapsed)
+      merged = merge_single_child(collapsed)
+      collapsed = merged
+    end
+    collapsed
   end
 
-  def self.sort_folders(groups)
-    groups.sort_by { |f, _| f }
+  def self.should_collapse?(node)
+    empty?(node) && one_child?(node)
   end
 
-  def self.add_unmapped_group(mapped, unmapped)
-    return mapped unless unmapped
-
-    mapped + [['(unmapped)', sort_by_pct(unmapped)]]
+  def self.empty?(node)
+    node[:modules].empty?
   end
 
-  def self.sort_by_pct(mods)
-    mods.sort_by { |m| m[:pct] }
+  def self.one_child?(node)
+    node[:children].length == 1 && node[:name] != 'root'
+  end
+
+  def self.merge_single_child(node)
+    only_child_key = node[:children].keys.first
+    only_child = node[:children][only_child_key]
+    node[:name] = "#{node[:name]}/#{only_child[:name]}"
+    node[:children] = only_child[:children]
+    node[:modules] = only_child[:modules]
+    node
   end
 end
