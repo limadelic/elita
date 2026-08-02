@@ -37,7 +37,7 @@ defmodule Agent.Session do
 
   defp base(opts), do: %{name: fetch!(opts, :name), folder: fetch!(opts, :folder)}
 
-  defp setup(state), do: state |> put(:tape, tape()) |> put(:live, live())
+  defp setup(state), do: state |> put(:tape, tape())
 
   defp merge(state, opts) do
     state
@@ -47,7 +47,6 @@ defmodule Agent.Session do
   end
 
   defp tape, do: get_env("TAPE")
-  defp live, do: get_env("LIVE")
 
   @impl true
   def handle_call({:ask, message}, _from, state) do

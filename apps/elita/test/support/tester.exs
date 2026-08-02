@@ -52,7 +52,6 @@ defmodule Tester do
     [
       tape_env: %{
         tape: System.get_env("TAPE"),
-        live: System.get_env("LIVE"),
         cassette: System.get_env("CASSETTE"),
         cassette_dir: System.get_env("CASSETTE_DIR")
       }
