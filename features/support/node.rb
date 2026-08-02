@@ -45,11 +45,11 @@ module Node
 
   def spawn_node
     env = node_env
-    el_path = "../../../../apps/el/el"
+    el_path = "../../apps/el/el"
     Process.spawn(
       env,
       "#{el_path} node",
-      chdir: "apps/elita/agents/elita",
+      chdir: "agents/elita",
       [:out, :err] => [@node_log, "a"]
     )
   end
