@@ -1,5 +1,3 @@
-System.delete_env("LIVE")
-
 ExUnit.start()
 
 Application.stop(:elita)

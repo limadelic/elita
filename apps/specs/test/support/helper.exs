@@ -19,8 +19,6 @@ defmodule SpecHelper do
         regs = registrations()
         Application.put_env(:elita, :registrations, regs)
 
-        System.delete_env("LIVE")
-
         :ok
       end
 

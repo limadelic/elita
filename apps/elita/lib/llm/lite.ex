@@ -17,7 +17,7 @@ defmodule Lite do
   end
 
   defp tape(body, name, state) do
-    payload = [tape: state[:tape], live: state[:live]]
+    payload = [tape: state[:tape]]
     handle(body, name, fn -> req(body) |> resp end, payload)
   end
 
