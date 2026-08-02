@@ -7,9 +7,9 @@ defmodule Agent.Ask do
     process(message, body, state)
   end
 
-  defp process(message, body, %{name: n, tape: t, live: l, runner: r, folder: f}) do
+  defp process(message, body, %{name: n, tape: t, runner: r, folder: f}) do
     start(n, message, f)
-    opts = [tape: t, live: l]
+    opts = [tape: t]
     emit(handle(body, n, fn -> r.(message, f) end, opts), n)
   end
 
