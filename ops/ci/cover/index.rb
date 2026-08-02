@@ -4,11 +4,15 @@ require_relative 'template'
 module Index
   def self.generate(prefix)
     data = parse_coverage
-    available = find_pages
-    modules = filter_sort(data[:modules], available)
-    dropped = data[:original_count] - modules.length
+    modules = filter_sort(data[:modules], find_pages)
+    grouped = group_by_folder(modules, build_source_map)
+    render_html(grouped, data, modules, prefix)
+  end
+
+  def self.render_html(grouped, data, modules, prefix)
     zeros = count_zeros(modules)
-    html = Template.render(modules, data[:total], modules.length, zeros, dropped)
+    dropped = data[:original_count] - modules.length
+    html = Template.render(grouped, data[:total], modules.length, zeros, dropped)
     File.write("site/#{prefix}cover/index.html", html)
   end
 
@@ -96,5 +100,73 @@ module Index
 
   def self.module_name(filename)
     filename.sub(/^Elixir\./, '').sub(/\.html$/, '')
+  end
+
+  def self.build_source_map
+    map = {}
+    scan_source_dir('apps/el/lib', map)
+    scan_source_dir('apps/elita/lib', map)
+    map
+  end
+
+  def self.scan_source_dir(dir, map)
+    Pathname.new(dir).glob('**/*.ex').each do |file|
+      extract_modules_from_file(file, map)
+    end
+  end
+
+  def self.extract_modules_from_file(file, map)
+    folder = File.dirname(file.to_s).sub(/^\.\//, '')
+    content = File.read(file)
+    process_defmodules(content, folder, map)
+  rescue StandardError
+    nil
+  end
+
+  def self.process_defmodules(content, folder, map)
+    content.split("\n").grep(/defmodule /).each { |line| store_module(line, folder, map) }
+  end
+
+  def self.store_module(line, folder, map)
+    match = line.match(/defmodule\s+([\w.]+)\s+do/)
+    return unless match
+
+    map[match[1]] = folder
+  end
+
+  def self.group_by_folder(modules, source_map)
+    groups = partition_by_folder(modules, source_map)
+    sort_groups(groups)
+  end
+
+  def self.partition_by_folder(modules, source_map)
+    modules.group_by { |m| resolve_folder(m, source_map) }
+  end
+
+  def self.resolve_folder(m, source_map)
+    source_map[m[:name]] || :unmapped
+  end
+
+  def self.sort_groups(groups)
+    mapped = sort_mapped_groups(groups.except(:unmapped))
+    add_unmapped_group(mapped, groups[:unmapped])
+  end
+
+  def self.sort_mapped_groups(groups)
+    sort_folders(groups).map { |folder, mods| [folder, sort_by_pct(mods)] }
+  end
+
+  def self.sort_folders(groups)
+    groups.sort_by { |f, _| f }
+  end
+
+  def self.add_unmapped_group(mapped, unmapped)
+    return mapped unless unmapped
+
+    mapped + [['(unmapped)', sort_by_pct(unmapped)]]
+  end
+
+  def self.sort_by_pct(mods)
+    mods.sort_by { |m| m[:pct] }
   end
 end
