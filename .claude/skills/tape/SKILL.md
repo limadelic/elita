@@ -15,11 +15,11 @@ Record once live, replay free forever. The tape IS the spec — edit the cassett
 ## Run
 
 - `mix test` — replay from cassettes, free, seconds
-- `mix tape [file:line]` — record (`ANTHROPIC_API_KEY=$elita TAPE=rec mix test`)
+- `mix tape [file:line]` — record (`TAPE=rec mix test`)
 - `TAPE=replay bundle exec cucumber` — features, replay from cassettes, $0
 - `bundle exec cucumber --dry-run` — list feature scenarios without executing
 - `mix live [file:line]` — real API, no tape (`LIVE=1 mix test`)
-- `:live`-tagged tests only run when `LIVE=1` — so recording needs `ANTHROPIC_API_KEY=$elita TAPE=rec mix test --include live <file>:<line>`
+- `:live`-tagged tests only run when `LIVE=1` — so recording needs `TAPE=rec mix test --include live <file>:<line>`
 - `MATCHER=relaxed` loosens cassette matching
 
 ## Test file
@@ -43,12 +43,12 @@ Record once live, replay free forever. The tape IS the spec — edit the cassett
 ### Tests
 - Clean cassette: `git checkout -- test/cassettes/<name>.json`
 - Never record over dirty cassette — `mv test/cassettes/<name>.json /tmp/<name>-backup.json` first
-- Fire detached: `nohup env ANTHROPIC_API_KEY=$elita TAPE=rec mix test --include live <file>:<line> > <scratch>/<name>.log 2>&1 &`
+- Fire detached: `nohup env TAPE=rec mix test --include live <file>:<line> > <scratch>/<name>.log 2>&1 &`
 - Poll log: `grep -A1 "Finished in" <log>` — output bursts, static log is NORMAL
 
 ### Features
 - Recordings are long and billed — fire nohup detached with log in scratchpad, return immediately
-- `nohup env ANTHROPIC_API_KEY=$elita TAPE=rec bundle exec cucumber features/foo.feature:<line> > <scratch>/<name>.log 2>&1 &`
+- `nohup env TAPE=rec bundle exec cucumber features/foo.feature:<line> > <scratch>/<name>.log 2>&1 &`
 - Replay is $0 and sub-second — always default to replay after recording verified
 
 ## Retaping (Approval Testing)
