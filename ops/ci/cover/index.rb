@@ -74,7 +74,13 @@ module Index
   end
 
   def self.find_pages
-    dir = Pathname.new('apps/elita/cover')
+    pages = Set.new
+    %w[apps/el/cover apps/elita/cover].each { |path| pages.merge(modules_from_dir(path)) }
+    pages
+  end
+
+  def self.modules_from_dir(dir_path)
+    dir = Pathname.new(dir_path)
     dir.exist? ? collect_modules(dir) : Set.new
   end
 
@@ -144,8 +150,14 @@ module Index
 
   def self.add_module_to_tree(root, module_data, source_map)
     folder = resolve_folder(module_data, source_map)
-    target = folder == :unmapped ? root : ensure_folder_path(root, folder)
-    target[:modules] << module_data
+    return if folder == :unmapped
+
+    normalized = normalize_folder_path(folder)
+    ensure_folder_path(root, normalized)[:modules] << module_data
+  end
+
+  def self.normalize_folder_path(folder_path)
+    folder_path.sub(%r{^apps/}, '')
   end
 
   def self.ensure_folder_path(root, folder_path)
@@ -193,9 +205,15 @@ module Index
   def self.merge_single_child(node)
     only_child_key = node[:children].keys.first
     only_child = node[:children][only_child_key]
-    node[:name] = "#{node[:name]}/#{only_child[:name]}"
+    node[:name] = collapse_path(node[:name], only_child[:name])
     node[:children] = only_child[:children]
     node[:modules] = only_child[:modules]
     node
+  end
+
+  def self.collapse_path(parent_name, child_name)
+    return child_name if parent_name == 'root'
+
+    "#{parent_name}/#{child_name}"
   end
 end

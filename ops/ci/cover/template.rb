@@ -10,12 +10,16 @@ module Template
 
   def self.serialize_tree(node)
     {
-      name: node[:name],
+      name: display_name(node[:name]),
       type: node[:type],
       pct: folder_pct(node),
       children: node[:children].transform_values { |child| serialize_tree(child) },
       modules: serialize_modules(node[:modules])
     }
+  end
+
+  def self.display_name(path)
+    path == 'root' ? 'root' : path.split('/').first
   end
 
   def self.folder_pct(node)
