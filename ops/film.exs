@@ -9,24 +9,11 @@ end
 System.put_env("CASSETTE_DIR", Path.expand("../features/cassettes", __DIR__))
 System.put_env("CASSETTE", "claude")
 
-app_dir = Path.expand("..", __DIR__)
-
-# Load apps
-[
-  "apps/matrix/lib",
-  "apps/tape/lib",
-  "apps/elita/lib"
-]
-|> Enum.each(&Code.compile_file("#{app_dir}/#{&1}"))
-
-Code.load_paths([
-  "#{app_dir}/apps/matrix/lib",
-  "#{app_dir}/apps/tape/lib",
-  "#{app_dir}/apps/elita/lib"
-])
-
-# Start minimal supervision tree
-{:ok, _} = Supervisor.start_link([], strategy: :one_for_one)
+# Start tape and matrix apps (elita depends on matrix)
+Application.start(:logger)
+Application.start(:matrix)
+Application.start(:tape)
+Application.start(:elita)
 
 # Boot and run the pty
 try do
