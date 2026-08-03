@@ -1,12 +1,9 @@
 #!/usr/bin/env elixir
 # Film a door session via Matrix.Pty recording
 
-tape_mode = System.get_env("TAPE")
-IO.puts("DEBUG: TAPE=#{inspect(tape_mode)}")
-
-if tape_mode != "rec" do
-  IO.puts("rec mode required, got: #{inspect(tape_mode)}")
-  System.halt(1)
+if System.get_env("TAPE") != "rec" do
+  IO.puts("rec mode required")
+  System.halt(0)
 end
 
 System.put_env("CASSETTE_DIR", Path.expand("../features/cassettes", __DIR__))
