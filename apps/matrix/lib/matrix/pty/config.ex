@@ -1,10 +1,10 @@
 defmodule Matrix.Pty.Config do
   @moduledoc false
-  import Keyword, only: [get: 3, drop: 2]
+  import Keyword, only: [get: 2, get: 3, drop: 2]
   import Matrix.Pty.Size, only: [default: 0]
 
   def build(cmd, opts) do
-    [file: file(opts), port: port(opts), cmd: cmd] ++
+    [file: file(opts), port: port(opts), cmd: cmd, name: get(opts, :name)] ++
       [get_size: size(opts), input: input(opts), taps: taps(opts)]
   end
 

@@ -11,7 +11,7 @@ defmodule Matrix.Pty do
   import GenServer, only: [start_link: 3, call: 2, cast: 2]
 
   def boot(name, cmd, opts \\ []) do
-    start_link(__MODULE__, {cmd, opts}, name: name)
+    start_link(__MODULE__, {name, cmd, opts}, name: name)
   end
 
   def inject(name, message) do
@@ -55,8 +55,8 @@ defmodule Matrix.Pty do
   end
 
   @impl true
-  def init({cmd, opts}) do
-    {:ok, call(build(cmd, opts))}
+  def init({name, cmd, opts}) do
+    {:ok, call(build(cmd, [name: name] ++ opts))}
   end
 
   @impl true

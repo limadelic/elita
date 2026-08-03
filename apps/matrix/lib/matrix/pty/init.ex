@@ -6,6 +6,8 @@ defmodule Matrix.Pty.Init do
   import Matrix.Pty.Boot, only: [launch: 3]
   import Matrix.Pty.Watch, only: [start: 1]
   import Process, only: [flag: 2]
+  import Matrix.Movie.Record, only: [active?: 0]
+  alias Matrix.Movie.Record
 
   def call(cfg) do
     size = cfg[:get_size].()
@@ -21,7 +23,18 @@ defmodule Matrix.Pty.Init do
   defp finish(cfg, pty, size, {out, raw, child}) do
     setup(cfg[:file], pty, size)
     start(pty)
-    initial(pty, out, raw, child) |> config(cfg)
+    state = initial(pty, out, raw, child) |> config(cfg)
+    rec(state, pty, cfg[:name])
+  end
+
+  defp rec(state, pty, name) do
+    recorder =
+      case {active?(), is_pid(pty)} do
+        {true, true} -> Record.start(pty, name)
+        _ -> nil
+      end
+
+    %{state | recorder: recorder}
   end
 
   defp pair(port, cmd, size) do

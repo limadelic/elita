@@ -9,7 +9,8 @@ defmodule Matrix.Pty.State do
     pending_msg: nil,
     idle: false,
     idle_count: 0,
-    retry_state: nil
+    retry_state: nil,
+    recorder: nil
   }
 
   def initial(pty, out, raw, child) do
@@ -25,7 +26,13 @@ defmodule Matrix.Pty.State do
   end
 
   defp pty(cfg) do
-    %{file: cfg[:file], port: cfg[:port], input: cfg[:input], taps: cfg[:taps]}
+    %{
+      file: cfg[:file],
+      port: cfg[:port],
+      input: cfg[:input],
+      taps: cfg[:taps],
+      name: cfg[:name]
+    }
   end
 
   defp inject(cfg) do
