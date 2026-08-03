@@ -4,6 +4,6 @@ defmodule DoorTest do
   test "malko answers arithmetic through el" do
     spawn(:malko)
     result = ask("malko", "1 + 1")
-    assert result =~ "2"
+    assert result == "2"
   end
 end
