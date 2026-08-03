@@ -23,7 +23,7 @@ defmodule Matrix.Pty.Init do
     setup(cfg[:file], pty, size)
     start(pty)
     state = initial(pty, out, raw, child) |> config(cfg)
-    rec(state, pty, cfg[:name], active?(), is_pid(pty))
+    rec(state, pty, cfg[:name], active?(), is_port(pty))
   end
 
   defp rec(state, pty, name, active, ok) do
