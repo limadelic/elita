@@ -1,7 +1,21 @@
 {
+  "movies": {
+    "door_-576460750957": [
+      "bWFsa28+IDEgKyAxCjIKbWFsa28+IC9leGl0Cg=="
+    ],
+    "door_-576460750801": [
+      "bWFsa28+IA=="
+    ],
+    "door_-576460750937": [
+      "bWFsa28+IDEgKyAxCg=="
+    ],
+    "door_-576460750961": [
+      "bWFsa28+IDEgKyAxCg=="
+    ]
+  },
   "screens": {
-    "malko": "▗ ▗   ▖\n▘▘ ▝▝\nClaude Code\nHaiku",
-    "keeper": "▗ ▗   ▖\n▘▘ ▝▝\nClaude Code\nHaiku"
+    "keeper": "▗ ▗   ▖\n▘▘ ▝▝\nClaude Code\nHaiku",
+    "malko": "▗ ▗   ▖\n▘▘ ▝▝\nClaude Code\nHaiku"
   },
   "tape": [
     {

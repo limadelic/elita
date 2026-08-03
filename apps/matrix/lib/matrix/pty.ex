@@ -7,23 +7,23 @@ defmodule Matrix.Pty do
 
   import Matrix.Pty.Init, only: [call: 1]
   import Matrix.Pty.Config, only: [build: 2, finalize: 2]
-  import Matrix.Pty.Dispatch, only: [info: 2]
-  import GenServer, only: [start_link: 3, call: 2, cast: 2]
+  import Matrix.Pty.Dispatch, only: [info: 2, call: 2, cast: 2]
+  import GenServer, only: [start_link: 3]
 
   def boot(name, cmd, opts \\ []) do
     start_link(__MODULE__, {name, cmd, opts}, name: name)
   end
 
   def inject(name, message) do
-    cast(name, {:inject, message})
+    GenServer.cast(name, {:inject, message})
   end
 
   def watch(name, pid) do
-    call(name, {:tap, pid})
+    GenServer.call(name, {:tap, pid})
   end
 
   def unwatch(name, pid) do
-    cast(name, {:untap, pid})
+    GenServer.cast(name, {:untap, pid})
   end
 
   def launch(name, opts \\ []) do

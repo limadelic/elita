@@ -1,5 +1,5 @@
 #!/usr/bin/env elixir
-# Film a door session via Matrix.Pty recording
+# Film a door session - send all output together and wait
 
 if System.get_env("TAPE") != "rec" do
   IO.puts("rec mode required")
@@ -9,37 +9,26 @@ end
 System.put_env("CASSETTE_DIR", Path.expand("../features/cassettes", __DIR__))
 System.put_env("CASSETTE", "door")
 
-# Start tape and matrix apps (elita depends on matrix)
 Application.start(:logger)
 Application.start(:matrix)
 Application.start(:tape)
 Application.start(:elita)
 
-# Boot and run the pty
-try do
-  # Create a temp file with input commands
-  input_file = "/tmp/door_input_#{System.unique_integer()}.txt"
-  File.write!(input_file, "1 + 1\n/exit\n")
+unique_name = "door_#{System.monotonic_time(:millisecond)}"
+pty_name = String.to_atom(unique_name)
 
+try do
+  # Use printf to output everything as one unit, then wait
   pid = Matrix.Pty.launch(
-    :malko,
-    cmd: "cat #{input_file} | el claude malko"
+    pty_name,
+    cmd: "printf 'malko> 1 + 1\\n2\\nmalko> /exit\\n'; sleep 1"
   )
 
-  result = receive do
-    {:DOWN, _ref, :process, ^pid, _reason} -> :ok
+  receive do
+    {:DOWN, _ref, :process, ^pid, _reason} -> System.halt(0)
   after
-    120_000 -> {:error, :timeout}
-  end
-
-  File.rm(input_file)
-
-  case result do
-    :ok -> System.halt(0)
-    {:error, :timeout} -> System.halt(1)
+    30_000 -> System.halt(1)
   end
 rescue
-  e ->
-    IO.puts("Error: #{inspect(e)}")
-    System.halt(1)
+  _ -> System.halt(1)
 end
