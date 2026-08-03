@@ -4,12 +4,14 @@ defmodule Matrix.Pty.Dispatch do
   import Matrix.Pty.Buffer, only: [prime: 2, gate: 2]
   import List, only: [delete: 2]
   import IO, only: [binwrite: 2]
-  import Matrix.Pty.Retry
   import Matrix.Pty.Respawn
   import Matrix.Pty.Relay
+  import Matrix.Movie.Seam, only: [save: 2]
+  import Matrix.Pty.Exit, only: [handle: 2]
 
   def info({pty, {:data, data}}, state) do
     updated = prime(state, data)
+    save(state.recorder, data)
     data(pty, data, updated)
     {:noreply, updated}
   end
@@ -35,23 +37,20 @@ defmodule Matrix.Pty.Dispatch do
     {:noreply, state}
   end
 
-  def info({pty, {:exit_status, _}}, %{pty: pty, child: child, taps: taps} = state) do
-    slay(pty, child)
-    death(taps, state)
+  def info({_pty, {:exit_status, _}} = msg, state) do
+    handle(msg, state)
   end
 
   def info({:EXIT, _pid, :normal}, state) do
     {:noreply, state}
   end
 
-  def info({:EXIT, _pid, reason}, %{pty: pty, child: child, taps: taps} = state) do
-    slay(pty, child)
-    exit(taps, state, reason)
+  def info({:EXIT, _pid, _reason} = msg, state) do
+    handle(msg, state)
   end
 
-  def info({pty, :closed}, %{pty: pty, child: child, taps: taps} = state) do
-    slay(pty, child)
-    death(taps, state)
+  def info({_pty, :closed} = msg, state) do
+    handle(msg, state)
   end
 
   def info(:retry_pty, %{retry_state: retry_state} = state) when retry_state != nil do
@@ -64,34 +63,23 @@ defmodule Matrix.Pty.Dispatch do
     _ -> requeue(state)
   end
 
-  def call({:tap, pid}, %{taps: taps} = state) do
+  def reply({:tap, pid}, %{taps: taps} = state) do
     {:reply, :ok, %{state | taps: [pid | taps]}}
   end
 
-  def call({:untap, pid}, %{taps: taps} = state) do
+  def reply({:untap, pid}, %{taps: taps} = state) do
     {:reply, :ok, %{state | taps: delete(taps, pid)}}
   end
 
-  def cast({:untap, pid}, %{taps: taps} = state) do
+  def relay({:untap, pid}, %{taps: taps} = state) do
     {:noreply, %{state | taps: delete(taps, pid)}}
   end
 
-  def cast({:inject, msg, _reply}, state) do
+  def relay({:inject, msg, _reply}, state) do
     {:noreply, gate(msg, state)}
   end
 
-  def cast({:inject, msg}, state) do
+  def relay({:inject, msg}, state) do
     {:noreply, gate(msg, state)}
-  end
-
-  defp death(taps, state) when taps != [], do: {:noreply, begin(state)}
-  defp death(_taps, state), do: {:stop, :normal, state}
-
-  defp exit(taps, state, _reason) when taps != [], do: {:noreply, begin(state)}
-  defp exit(_taps, state, reason), do: {:stop, reason, state}
-
-  defp begin(state) do
-    s = schedule(self(), init())
-    %{state | retry_state: s}
   end
 end

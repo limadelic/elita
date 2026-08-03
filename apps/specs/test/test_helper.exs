@@ -1,4 +1,4 @@
-ExUnit.start()
+ExUnit.start(exclude: [:wip])
 
 Application.stop(:elita)
 Application.stop(:matrix)

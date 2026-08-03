@@ -3,7 +3,7 @@ defmodule Agent.Spawn do
   import Logger, only: [error: 1, warning: 1]
   import Port, only: [open: 2, close: 1]
   import String, only: [trim: 1]
-  import System, only: [cmd: 2, find_executable: 1]
+  import System, only: [find_executable: 1]
   import File, only: [read: 1]
 
   def run(message, folder, self \\ nil) do
@@ -64,10 +64,23 @@ defmodule Agent.Spawn do
   end
 
   defp slay(port) do
-    {:os_pid, pid} = :erlang.port_info(port, :os_pid)
-    cmd("kill", [pid |> to_string()])
+    ref = :erlang.monitor(:port, port)
+    wait(ref, port)
   rescue
     _ -> :ok
+  end
+
+  defp wait(ref, port) do
+    :erlang.port_close(port)
+    mark(ref, port)
+  end
+
+  defp mark(ref, port) do
+    receive do
+      {:DOWN, ^ref, :port, ^port, _} -> :ok
+    after
+      8_000 -> :ok
+    end
   end
 
   defp seal(port) do
