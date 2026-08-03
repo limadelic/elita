@@ -2,7 +2,7 @@ defmodule Matrix.Movie.Load do
   @moduledoc false
   import System, only: [get_env: 1]
   import File, only: [read: 1]
-  import Map, only: [get: 2, get: 3]
+  import Map, only: [get: 2, get: 3, has_key?: 2]
   import Path, only: [join: 2]
   import Enum, only: [map: 2]
   import Base, only: [decode64: 1]
@@ -10,6 +10,10 @@ defmodule Matrix.Movie.Load do
 
   def run(name) do
     load() |> get("movies", %{}) |> get(name) |> map(&extract/1)
+  end
+
+  def exists?(name) do
+    load() |> get("movies", %{}) |> has_key?(name)
   end
 
   defp load do
