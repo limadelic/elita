@@ -78,4 +78,22 @@ defmodule MovieTest do
     assert is_list(chunks)
     assert Enum.at(chunks, 0) == "action!\n"
   end
+
+  test "play opens movie and sends chunks then closes" do
+    cassette_dir = Path.expand("../../../features/cassettes", __DIR__)
+    System.put_env("CASSETTE", "claude")
+    System.put_env("CASSETTE_DIR", cassette_dir)
+
+    handle = Matrix.Movie.Play.open("film", recipient: self())
+
+    # Receive first chunk
+    assert_receive {^handle, {:data, chunk1}}, 1000
+    assert chunk1 == "action!\n"
+
+    # Receive second chunk
+    assert_receive {^handle, {:data, chunk2}}, 1000
+
+    # Receive close message
+    assert_receive {^handle, :closed}, 1000
+  end
 end
