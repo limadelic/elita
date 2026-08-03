@@ -68,4 +68,14 @@ defmodule MovieTest do
     # Recorder shouldn't be active anyway, but if it were, done should not flush
     # This is just to ensure the replays don't try to write
   end
+
+  test "loaded movie returns decoded chunks" do
+    cassette_dir = Path.expand("../../../features/cassettes", __DIR__)
+    System.put_env("CASSETTE", "claude")
+    System.put_env("CASSETTE_DIR", cassette_dir)
+
+    chunks = Matrix.Movie.Load.run("film")
+    assert is_list(chunks)
+    assert Enum.at(chunks, 0) == "action!\n"
+  end
 end
