@@ -6,5 +6,5 @@ defmodule Matrix.Movie.Seam do
   def save(rec, data), do: record(rec, data)
 
   def done(nil, _name), do: :ok
-  def done(rec, _name), do: Matrix.Movie.Record.done(rec)
+  def done(rec, _name), do: done(rec)
 end

@@ -39,8 +39,11 @@ defmodule Matrix.Movie.Record do
   end
 
   defp save(%{name: name, chunks: chunks}) do
-    active?() && flush(name, chunks)
+    record(active?(), name, chunks)
   end
+
+  defp record(true, name, chunks), do: flush(name, chunks)
+  defp record(false, _, _), do: nil
 
   defp flush(name, chunks) do
     path = file()
@@ -55,7 +58,12 @@ defmodule Matrix.Movie.Record do
     join(dir, "#{cassette}.json")
   end
 
-  defp dir, do: get_env("CASSETTE_DIR") || "test/cassettes"
+  defp dir do
+    get_env("CASSETTE_DIR") |> pick()
+  end
+
+  defp pick(nil), do: "test/cassettes"
+  defp pick(val), do: val
 
   defp peek({:ok, content}) do
     decode!(content)

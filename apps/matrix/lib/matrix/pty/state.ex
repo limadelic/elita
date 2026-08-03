@@ -26,13 +26,8 @@ defmodule Matrix.Pty.State do
   end
 
   defp pty(cfg) do
-    %{
-      file: cfg[:file],
-      port: cfg[:port],
-      input: cfg[:input],
-      taps: cfg[:taps],
-      name: cfg[:name]
-    }
+    %{file: cfg[:file], port: cfg[:port]}
+    |> merge(%{input: cfg[:input], taps: cfg[:taps], name: cfg[:name]})
   end
 
   defp inject(cfg) do
