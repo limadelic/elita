@@ -9,7 +9,7 @@ defmodule PortalTest do
 
     {:ok, session_pid} =
       Agent.Session.start_link(
-        name: "test_puppet",
+        name: "malko",
         folder: "/tmp",
         runner: stub_runner
       )
@@ -24,7 +24,7 @@ defmodule PortalTest do
       end
     end)
 
-    response = Agent.Portal.response("puppet", "hello")
-    verify("response from stub", response)
+    response = Agent.Portal.response("puppet", "1+1")
+    verify("1 + 1 = **2**", response)
   end
 end
