@@ -63,23 +63,23 @@ defmodule Matrix.Pty.Dispatch do
     _ -> requeue(state)
   end
 
-  def call({:tap, pid}, %{taps: taps} = state) do
+  def reply({:tap, pid}, %{taps: taps} = state) do
     {:reply, :ok, %{state | taps: [pid | taps]}}
   end
 
-  def call({:untap, pid}, %{taps: taps} = state) do
+  def reply({:untap, pid}, %{taps: taps} = state) do
     {:reply, :ok, %{state | taps: delete(taps, pid)}}
   end
 
-  def cast({:untap, pid}, %{taps: taps} = state) do
+  def relay({:untap, pid}, %{taps: taps} = state) do
     {:noreply, %{state | taps: delete(taps, pid)}}
   end
 
-  def cast({:inject, msg, _reply}, state) do
+  def relay({:inject, msg, _reply}, state) do
     {:noreply, gate(msg, state)}
   end
 
-  def cast({:inject, msg}, state) do
+  def relay({:inject, msg}, state) do
     {:noreply, gate(msg, state)}
   end
 end

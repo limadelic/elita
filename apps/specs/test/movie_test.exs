@@ -115,4 +115,25 @@ defmodule MovieTest do
 
     GenServer.stop(pid)
   end
+
+  test "inject sends keystroke to pty" do
+    cassette_dir = Path.expand("../../../features/cassettes", __DIR__)
+    System.put_env("CASSETTE", "claude")
+    System.put_env("CASSETTE_DIR", cassette_dir)
+
+    pid =
+      Matrix.Pty.launch(:inject_test,
+        port: Matrix.Movie.Play,
+        taps: [self()],
+        get_size: fn -> {24, 80} end
+      )
+
+    # This should not crash with FunctionClauseError
+    Matrix.Pty.inject(:inject_test, "1 + 1\r")
+
+    # Verify pty is still running and can receive output
+    assert_receive {:output, _chunk}, 1000
+
+    GenServer.stop(pid)
+  end
 end

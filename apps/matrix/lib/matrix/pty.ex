@@ -7,7 +7,7 @@ defmodule Matrix.Pty do
 
   import Matrix.Pty.Init, only: [call: 1]
   import Matrix.Pty.Config, only: [build: 2, finalize: 2]
-  import Matrix.Pty.Dispatch, only: [info: 2]
+  import Matrix.Pty.Dispatch, only: [info: 2, reply: 2, relay: 2]
   import GenServer, only: [start_link: 3, call: 2, cast: 2]
 
   def boot(name, cmd, opts \\ []) do
@@ -66,11 +66,11 @@ defmodule Matrix.Pty do
 
   @impl true
   def handle_call(msg, _from, state) do
-    call(msg, state)
+    reply(msg, state)
   end
 
   @impl true
   def handle_cast(msg, state) do
-    cast(msg, state)
+    relay(msg, state)
   end
 end
