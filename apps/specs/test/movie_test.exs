@@ -91,9 +91,32 @@ defmodule MovieTest do
     assert chunk1 == "action!\n"
 
     # Receive second chunk
-    assert_receive {^handle, {:data, chunk2}}, 1000
+    assert_receive {^handle, {:data, _chunk2}}, 1000
 
     # Receive close message
     assert_receive {^handle, :closed}, 1000
+  end
+
+  test "pty boots with movie port and taps receive film output" do
+    cassette_dir = Path.expand("../../../features/cassettes", __DIR__)
+    System.put_env("CASSETTE", "claude")
+    System.put_env("CASSETTE_DIR", cassette_dir)
+
+    pid =
+      Matrix.Pty.launch(:movie_pty,
+        port: Matrix.Movie.Play,
+        taps: [self()],
+        get_size: fn -> {24, 80} end
+      )
+
+    # Receive first chunk from tap
+    assert_receive {:output, chunk1}, 1000
+    assert chunk1 == "action!\n"
+
+    # Receive second chunk from tap
+    assert_receive {:output, _chunk2}, 1000
+
+    # Clean up
+    GenServer.stop(pid)
   end
 end

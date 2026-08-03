@@ -3,12 +3,14 @@ defmodule Matrix.Movie.Play do
   import Matrix.Movie.Load, only: [run: 1]
   import Enum, only: [each: 2]
 
-  def open(name, opts) do
+  def open(_spec, opts) do
     handle = make_ref()
     recipient = pick(opts)
-    spawn(fn -> deliver(handle, name, recipient) end)
+    spawn(fn -> deliver(handle, movie(opts), recipient) end)
     handle
   end
+
+  defp movie(opts), do: Keyword.get(opts, :movie, "film")
 
   defp pick(opts) when is_list(opts), do: pick(opts[:recipient])
   defp pick(r) when is_pid(r), do: r
@@ -30,10 +32,6 @@ defmodule Matrix.Movie.Play do
 
   def close(_handle) do
     :ok
-  end
-
-  def info(_handle, :os_pid) do
-    {:os_pid, 1}
   end
 
   def info(_handle, _key) do

@@ -1,3 +1,9 @@
+# Forbidden
+
+- NEVER run kill, pkill, killall — no agent, no script, no test
+- `kill -9 -1` from pty cleanup shot the boss machine 4 times on 2026-08-03
+- pty teardown closes the port, it does not signal pids
+
 # Gates
 
 - mix test green + mix lint clean ALWAYS
