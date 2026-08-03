@@ -119,4 +119,25 @@ defmodule MovieTest do
     # Clean up
     GenServer.stop(pid)
   end
+
+  test "pty auto-selects movie in replay when no port given" do
+    cassette_dir = Path.expand("../../../features/cassettes", __DIR__)
+    System.put_env("TAPE", "replay")
+    System.put_env("CASSETTE", "claude")
+    System.put_env("CASSETTE_DIR", cassette_dir)
+
+    pid =
+      Matrix.Pty.launch(:film,
+        name: :film,
+        taps: [self()],
+        get_size: fn -> {24, 80} end
+      )
+
+    # Receive first chunk from tap
+    assert_receive {:output, chunk1}, 1000
+    assert chunk1 == "action!\n"
+
+    # Clean up
+    GenServer.stop(pid)
+  end
 end

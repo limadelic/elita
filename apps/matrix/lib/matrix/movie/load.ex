@@ -9,11 +9,11 @@ defmodule Matrix.Movie.Load do
   import Jason, only: [decode!: 1]
 
   def run(name) do
-    load() |> get("movies", %{}) |> get(name) |> map(&extract/1)
+    load() |> get("movies", %{}) |> get(to_string(name)) |> map(&extract/1)
   end
 
   def exists?(name) do
-    load() |> get("movies", %{}) |> has_key?(name)
+    load() |> get("movies", %{}) |> has_key?(to_string(name))
   end
 
   defp load do

@@ -2,7 +2,7 @@ defmodule Matrix.Pty.Config do
   @moduledoc false
   import Keyword, only: [get: 2, get: 3, drop: 2]
   import Matrix.Pty.Size, only: [default: 0]
-  import Matrix.Movie.Record, only: [active?: 0]
+  import Matrix.Movie.Record, only: [replaying?: 0]
   import Matrix.Movie.Load, only: [exists?: 1]
 
   def build(cmd, opts) do
@@ -27,11 +27,11 @@ defmodule Matrix.Pty.Config do
   defp input(opts), do: get(opts, :input, fn x -> x end)
   defp taps(opts), do: get(opts, :taps, [])
 
-  defp pick(p, _opts) when p != nil, do: p
-
   defp pick(nil, opts) do
-    choose(active?(), exists?(opts[:name]))
+    choose(replaying?(), exists?(opts[:name]))
   end
+
+  defp pick(p, _opts), do: p
 
   defp choose(true, true), do: Matrix.Movie.Play
   defp choose(_, _), do: Port

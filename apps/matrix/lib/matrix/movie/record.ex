@@ -13,6 +13,10 @@ defmodule Matrix.Movie.Record do
     get_env("TAPE") == "rec"
   end
 
+  def replaying? do
+    get_env("TAPE") == "replay"
+  end
+
   def start(_pty_pid, name) do
     init = %{name: name, chunks: [], index: 0}
     {:ok, acc_pid} = start_link(fn -> init end, [])
