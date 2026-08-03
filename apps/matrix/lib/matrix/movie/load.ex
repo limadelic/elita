@@ -17,11 +17,11 @@ defmodule Matrix.Movie.Load do
   end
 
   defp load do
-    file() |> read() |> content()
+    file()
+    |> read()
+    |> then(fn {:ok, content} -> content end)
+    |> decode!()
   end
-
-  defp content({:ok, c}), do: decode!(c)
-  defp content({:error, _}), do: %{}
 
   defp extract(encoded) do
     {:ok, decoded} = decode64(encoded)
