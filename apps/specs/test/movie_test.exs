@@ -136,4 +136,55 @@ defmodule MovieTest do
 
     GenServer.stop(pid)
   end
+
+  test "pending message enables echo detection and carriage return submission" do
+    pid =
+      Matrix.Pty.launch(:echo_test,
+        port: EchoPort,
+        taps: [self()],
+        get_size: fn -> {24, 80} end
+      )
+
+    assert_receive {:output, "bypass permissions\n"}, 1000
+    Matrix.Pty.inject(:echo_test, "x\r")
+
+    assert_receive {:output, "x\r"}, 1000
+    assert_receive {:output, "\r"}, 1000
+
+    GenServer.stop(pid)
+  end
+end
+
+defmodule EchoPort do
+  def open(_spec, _opts) do
+    pty_pid = self()
+    handle = make_ref()
+    forwarder_pid = spawn_link(fn -> forwarder(handle, pty_pid) end)
+    {handle, forwarder_pid}
+  end
+
+  defp forwarder(handle, pty_pid) do
+    send(pty_pid, {handle, {:data, "bypass permissions\n"}})
+
+    receive do
+      {:echo, msg} ->
+        send(pty_pid, {handle, {:data, msg}})
+        forwarder(handle, pty_pid)
+    after
+      30000 -> :ok
+    end
+  end
+
+  def command({_handle, forwarder_pid}, msg) do
+    send(forwarder_pid, {:echo, msg})
+    :ok
+  end
+
+  def close(_handle) do
+    :ok
+  end
+
+  def info(_handle, _key) do
+    nil
+  end
 end
