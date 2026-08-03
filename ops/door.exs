@@ -12,58 +12,72 @@ cassette_file_base = "door"
 System.put_env("CASSETTE_DIR", cassette_dir)
 System.put_env("CASSETTE", cassette_file_base)
 
-# Create empty cassette file if it doesn't exist (for the base "door" cassette)
-cassette_file = Path.join(cassette_dir, "#{cassette_file_base}.json")
-unless File.exists?(cassette_file) do
-  File.write!(cassette_file, ~S({"movies":{}}))
-end
-
 Application.start(:logger)
 Application.start(:matrix)
 Application.start(:tape)
 
-# Use a specific session name like door11, bump per retry
-unique_suffix = System.get_env("DOOR_RETRY", "11")
-unique_name = "door#{unique_suffix}"
-pty_name = String.to_atom(unique_name)
+# Use a fresh agent name that's never appeared in epmd -names
+agent_name = "witness"
+pty_name = String.to_atom(agent_name)
 
 try do
-  # Launch claude as a simple calculator
-  IO.puts("Launching pty: #{pty_name} with simple claude prompt")
-  pid = Matrix.Pty.launch(
+  # Launch el claude with the fresh agent name
+  # Recorder is set up automatically by Matrix.Pty when TAPE=rec
+  cmd = "el claude #{agent_name}"
+  IO.puts("Launching: #{cmd}")
+
+  pty_pid = Matrix.Pty.launch(
     pty_name,
-    cmd: "claude --model haiku --dangerously-skip-permissions"
+    name: pty_name,
+    cmd: cmd,
+    get_size: fn -> {24, 80} end
   )
-  IO.puts("PTY launched, pid: #{inspect(pid)}")
+  IO.puts("PTY launched, pid: #{inspect(pty_pid)}")
 
-  # Give claude time to start and show welcome
-  IO.puts("Waiting for claude to start...")
-  Process.sleep(3000)
+  # Wait for claude to fully load
+  IO.puts("Waiting for permissions bypass banner...")
+  Process.sleep(5000)
 
-  # Inject the math query (NO \r - buffer sends it after echo)
+  # Inject the math query (NO \r - Buffer.submit sends it after echo)
   IO.puts("Injecting: 1 + 1")
   Matrix.Pty.inject(pty_name, "1 + 1")
+
+  # Wait for claude's response
   IO.puts("Waiting for response...")
-  Process.sleep(4000)
+  Process.sleep(6000)
 
-  # Inject Ctrl+D to close the connection
-  IO.puts("Injecting: Ctrl+D")
+  # Send Ctrl+D to close
+  IO.puts("Sending Ctrl+D")
   Matrix.Pty.inject(pty_name, "\x04")
-  IO.puts("Waiting a bit more...")
-  Process.sleep(2000)
+  Process.sleep(1000)
 
-  # Wait for PTY to close with a reasonable timeout
-  IO.puts("Waiting for PTY to close...")
+  # Get the recorder from PTY state and flush it explicitly
+  IO.puts("Flushing reel explicitly...")
+  state = :sys.get_state(pty_pid)
+  recorder_pid = state.recorder
+  if recorder_pid do
+    Matrix.Movie.Record.done(recorder_pid)
+    IO.puts("Reel flushed via Record.done")
+  else
+    IO.puts("No recorder found")
+  end
+
+  # OTP teardown
+  IO.puts("Starting OTP teardown...")
+  port_ref = :erlang.monitor(:port, state.pty)
+  :erlang.port_close(state.pty)
+  IO.puts("Port closed, waiting for down...")
 
   receive do
-    {:DOWN, _ref, :process, ^pid, _reason} ->
-      IO.puts("PTY closed successfully")
-      System.halt(0)
+    {:DOWN, ^port_ref, :port, _port, _reason} ->
+      IO.puts("Port closed successfully")
   after
-    5_000 ->
-      IO.puts("Timeout waiting for PTY to close, but data should be recorded")
-      System.halt(0)
+    8_000 ->
+      IO.puts("Timeout waiting for port close")
   end
+
+  IO.puts("Teardown complete")
+  System.halt(0)
 rescue
   e ->
     IO.puts("Error: #{inspect(e)}")
