@@ -37,6 +37,9 @@ defmodule Matrix.MixProject do
   end
 
   defp deps do
-    [{:jason, "~> 1.4"}]
+    [
+      {:jason, "~> 1.4"},
+      {:elui, github: "douglascorrea/elui"}
+    ]
   end
 end
