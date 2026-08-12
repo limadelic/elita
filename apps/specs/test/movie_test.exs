@@ -153,6 +153,44 @@ defmodule MovieTest do
 
     GenServer.stop(pid)
   end
+
+  test "recording and loading round-trips chunks" do
+    cassette_dir = Path.join("/tmp", "movie_test_#{System.os_time()}")
+    File.mkdir_p!(cassette_dir)
+    cassette_name = "x"
+
+    System.put_env("TAPE", "rec")
+    System.put_env("CASSETTE", cassette_name)
+    System.put_env("CASSETTE_DIR", cassette_dir)
+
+    on_exit(fn ->
+      System.delete_env("TAPE")
+      System.delete_env("CASSETTE")
+      System.delete_env("CASSETTE_DIR")
+      File.rm_rf(cassette_dir)
+    end)
+
+    rec_pid = Matrix.Movie.Record.start(nil, :x)
+
+    Matrix.Movie.Record.record(rec_pid, "chunk1")
+    Matrix.Movie.Record.record(rec_pid, "chunk2")
+
+    Matrix.Movie.Record.done(rec_pid)
+
+    cassette_path = Path.join(cassette_dir, "#{cassette_name}.json")
+    assert File.exists?(cassette_path)
+
+    data = File.read!(cassette_path) |> Jason.decode!()
+
+    assert data["movies"]["x"] == [
+             Base.encode64("chunk1"),
+             Base.encode64("chunk2")
+           ]
+
+    System.put_env("TAPE", "replay")
+    loaded_chunks = Matrix.Movie.Load.run(:x)
+    assert loaded_chunks == ["chunk1", "chunk2"]
+  end
 end
 
 defmodule EchoPort do
