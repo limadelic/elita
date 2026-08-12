@@ -191,6 +191,53 @@ defmodule MovieTest do
     loaded_chunks = Matrix.Movie.Load.run(:x)
     assert loaded_chunks == ["chunk1", "chunk2"]
   end
+
+  test "dispatch routes incoming port data to recorder" do
+    cassette_dir = Path.join("/tmp", "dispatch_test_#{System.os_time()}")
+    File.mkdir_p!(cassette_dir)
+    cassette_name = "dispatch"
+
+    System.put_env("TAPE", "rec")
+    System.put_env("CASSETTE", cassette_name)
+    System.put_env("CASSETTE_DIR", cassette_dir)
+
+    on_exit(fn ->
+      System.delete_env("TAPE")
+      System.delete_env("CASSETTE")
+      System.delete_env("CASSETTE_DIR")
+      File.rm_rf(cassette_dir)
+    end)
+
+    rec_pid = Matrix.Movie.Record.start(nil, :dispatch)
+
+    state = %{
+      pty: :fake_pty,
+      port: :fake_port,
+      out: :stdio,
+      raw: nil,
+      taps: [],
+      buffer: [],
+      tail: "",
+      recorder: rec_pid
+    }
+
+    port_handle = make_ref()
+
+    Matrix.Pty.Dispatch.info({port_handle, {:data, "data1"}}, state)
+    Matrix.Pty.Dispatch.info({port_handle, {:data, "data2"}}, state)
+
+    Matrix.Movie.Record.done(rec_pid)
+
+    cassette_path = Path.join(cassette_dir, "#{cassette_name}.json")
+    assert File.exists?(cassette_path)
+
+    data = File.read!(cassette_path) |> Jason.decode!()
+
+    assert data["movies"]["dispatch"] == [
+             Base.encode64("data1"),
+             Base.encode64("data2")
+           ]
+  end
 end
 
 defmodule EchoPort do
