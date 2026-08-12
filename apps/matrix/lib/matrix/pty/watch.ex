@@ -7,9 +7,13 @@ defmodule Matrix.Pty.Watch do
     start_child(Matrix.Tasks, fn -> probe(caller, pty) end)
   end
 
-  defp probe(parent, pty) do
+  defp probe(parent, pty) when is_port(pty) do
     :erlang.monitor(:port, pty)
     wait(parent, pty)
+  end
+
+  defp probe(_parent, _pty) do
+    :ok
   end
 
   defp wait(parent, pty) do

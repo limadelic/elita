@@ -55,7 +55,7 @@ defmodule Matrix.Pty.Buffer do
   def gate(msg, %{idle: true, pty: pty, port: port} = state) do
     log(msg)
     port.command(pty, msg)
-    state
+    %{state | pending_msg: msg}
   end
 
   def gate(msg, state) do
