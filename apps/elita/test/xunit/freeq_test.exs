@@ -20,6 +20,7 @@ defmodule FreeqTest do
     :gen_tcp.close(observer_socket)
   end
 
+  @tag :integration
   @tag :live
   @tag cassette: "freeq_isabella"
   test "agent answers channel question" do
