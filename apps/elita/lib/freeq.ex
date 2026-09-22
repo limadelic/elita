@@ -1,12 +1,14 @@
 defmodule Elita.Freeq do
   use GenServer
   import Keyword, only: [fetch!: 2, get: 3]
-  import String, only: [contains?: 2, trim_trailing: 2]
+  import String, only: [trim_trailing: 2]
   import GenServer, only: [start_link: 3, call: 2]
   import Elita, only: [request: 2]
-  import Elita.Freeq.Parser, only: [parse: 3]
-  import Elita.Freeq.Writer
-  import Task, only: [start: 1]
+
+  import Elita.Freeq.Writer,
+    only: [nick: 2, user: 2, join: 2, message: 3, pong: 2]
+
+  import Elita.Freeq.Answer, only: [privmsg: 3]
 
   def start_link(opts) do
     agent = fetch!(opts, :agent)
@@ -67,27 +69,4 @@ defmodule Elita.Freeq do
   defp handle(_msg, state) do
     {:noreply, state}
   end
-
-  defp privmsg(msg, state, pid) do
-    privmsg(contains?(msg, "PRIVMSG"), msg, state, pid)
-  end
-
-  defp privmsg(true, msg, %{agent: agent, channel: channel, ask: ask}, pid) do
-    parse(msg, agent, channel) |> reply(agent, ask, pid)
-  end
-
-  defp privmsg(false, _msg, _state, _pid) do
-    :noop
-  end
-
-  defp reply({:ask, sender, text}, agent, ask, pid) do
-    start(fn ->
-      ask.(agent, "[from #{sender}] #{text}") |> relay(pid)
-    end)
-  end
-
-  defp reply(:noop, _agent, _ask, _pid), do: :ok
-
-  defp relay({:error, _}, _pid), do: :noop
-  defp relay(answer, pid), do: send(pid, {:answer, answer})
 end
