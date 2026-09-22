@@ -1,16 +1,18 @@
 defmodule Elita.Freeq do
   use GenServer
 
-  import Keyword, only: [fetch!: 2]
+  import Keyword, only: [fetch!: 2, get: 3]
   import String, only: [contains?: 2, trim_trailing: 2]
   import GenServer, only: [start_link: 3, call: 2]
   import Elita, only: [request: 2]
   import Elita.Freeq.Parser, only: [parse: 3]
+  import Task, only: [start: 1]
 
   def start_link(opts) do
     agent = fetch!(opts, :agent)
     channel = fetch!(opts, :channel)
-    start_link(__MODULE__, {agent, channel}, [])
+    ask = get(opts, :ask, &request/2)
+    start_link(__MODULE__, {agent, channel, ask}, [])
   end
 
   def say(pid, text) do
@@ -18,10 +20,10 @@ defmodule Elita.Freeq do
   end
 
   @impl true
-  def init({agent, channel}) do
+  def init({agent, channel, ask}) do
     {:ok, socket} = :gen_tcp.connect(~c"127.0.0.1", 6667, active: true, packet: :line)
     boot(socket, agent, channel)
-    {:ok, %{socket: socket, agent: agent, channel: channel}}
+    {:ok, %{socket: socket, agent: agent, channel: channel, ask: ask}}
   end
 
   @impl true
@@ -40,6 +42,12 @@ defmodule Elita.Freeq do
     {:stop, :normal, state}
   end
 
+  @impl true
+  def handle_info({:answer, text}, %{socket: socket, channel: channel} = state) do
+    :gen_tcp.send(socket, "PRIVMSG #{channel} :#{text}\r\n")
+    {:noreply, state}
+  end
+
   defp boot(socket, agent, channel) do
     :gen_tcp.send(socket, "NICK #{agent}\r\n")
     :gen_tcp.send(socket, "USER #{agent} 0 * :#{agent}\r\n")
@@ -51,8 +59,8 @@ defmodule Elita.Freeq do
     {:noreply, state}
   end
 
-  defp handle(":" <> msg, %{agent: agent, channel: channel, socket: socket} = state) do
-    privmsg(msg, agent, channel, socket)
+  defp handle(":" <> msg, state) do
+    privmsg(msg, state, self())
     {:noreply, state}
   end
 
@@ -60,29 +68,26 @@ defmodule Elita.Freeq do
     {:noreply, state}
   end
 
-  defp privmsg(msg, agent, channel, socket) do
-    privmsg(contains?(msg, "PRIVMSG"), msg, agent, channel, socket)
+  defp privmsg(msg, state, pid) do
+    privmsg(contains?(msg, "PRIVMSG"), msg, state, pid)
   end
 
-  defp privmsg(true, msg, agent, channel, socket) do
-    parse(msg, agent, channel)
-    |> reply(socket, channel, agent)
+  defp privmsg(true, msg, %{agent: agent, channel: channel, ask: ask}, pid) do
+    parse(msg, agent, channel) |> reply(agent, ask, pid)
   end
 
-  defp privmsg(false, _msg, _agent, _channel, _socket) do
+  defp privmsg(false, _msg, _state, _pid) do
     :noop
   end
 
-  defp reply({:ask, sender, text}, socket, channel, agent) do
-    msg = "[from #{sender}] #{text}"
-    request(agent, msg) |> respond(socket, channel)
+  defp reply({:ask, sender, text}, agent, ask, pid) do
+    start(fn ->
+      ask.(agent, "[from #{sender}] #{text}") |> relay(pid)
+    end)
   end
 
-  defp reply(:noop, _socket, _channel, _agent), do: :ok
+  defp reply(:noop, _agent, _ask, _pid), do: :ok
 
-  defp respond({:error, _}, _socket, _channel), do: :noop
-
-  defp respond(answer, socket, channel) do
-    :gen_tcp.send(socket, "PRIVMSG #{channel} :#{answer}\r\n")
-  end
+  defp relay({:error, _}, _pid), do: :noop
+  defp relay(answer, pid), do: send(pid, {:answer, answer})
 end

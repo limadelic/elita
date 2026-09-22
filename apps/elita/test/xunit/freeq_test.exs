@@ -79,4 +79,29 @@ defmodule FreeqTest do
         flunk("Timeout waiting for message")
     end
   end
+
+  test "answers questions without blocking socket" do
+    stub_asker = fn _agent, _msg ->
+      Process.sleep(300)
+      "delayed answer"
+    end
+
+    {:ok, client_pid} =
+      Elita.Freeq.start_link(agent: "isabella", channel: "#test", ask: stub_asker)
+
+    {:ok, observer_socket} = :gen_tcp.connect(~c"127.0.0.1", 6667, active: true, packet: :line)
+
+    connect_to_irc(observer_socket, "observer", "#test")
+
+    :gen_tcp.send(observer_socket, "PRIVMSG #test :isabella: hello?\r\n")
+
+    Process.sleep(50)
+
+    :gen_tcp.send(observer_socket, ":server PING\r\n")
+
+    assert_message_received(observer_socket, "PONG", 20)
+    assert_message_received(observer_socket, "delayed answer", 20)
+
+    :gen_tcp.close(observer_socket)
+  end
 end
