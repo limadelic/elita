@@ -29,6 +29,43 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-mix-1.20.2-29-
 
+      - name: Cache freeq-server binary
+        id: freeq-cache
+        uses: actions/cache@v4
+        with:
+          path: .freeq-bin/freeq-server
+          key: freeq-bin-2ff392ec
+
+      - name: Build freeq-server
+        if: steps.freeq-cache.outputs.cache-hit != 'true'
+        run: |
+          git clone https://github.com/freeq-irc/freeq /tmp/freeq
+          cd /tmp/freeq && git checkout 2ff392ec2540289eb202e6caebeff8c50ad6a3b0
+          rustup toolchain install stable
+          cargo build --release -p freeq-server
+          mkdir -p .freeq-bin
+          cp target/release/freeq-server ${{ github.workspace }}/.freeq-bin/
+
+      - name: Start freeq server
+        run: |
+          mkdir -p /tmp/freeq-data
+          ${{ github.workspace }}/.freeq-bin/freeq-server \
+            --bind 127.0.0.1:6667 \
+            --db-path /tmp/freeq-data/irc.db \
+            --data-dir /tmp/freeq-data \
+            > /tmp/freeq.log 2>&1 &
+          echo "$!" > /tmp/freeq.pid
+
+      - name: Wait for freeq server
+        run: |
+          for i in {1..60}; do
+            timeout 1 bash -c "echo -n '' > /dev/tcp/127.0.0.1/6667" 2>/dev/null && exit 0
+            sleep 0.5
+          done
+          echo "Timeout waiting for freeq server"
+          cat /tmp/freeq.log
+          exit 1
+
       - name: Sanitize branch name for artifact
         id: branch_slug
         run: |
@@ -75,6 +112,10 @@ jobs:
           GITHUB_REF_NAME: ${{ github.ref_name }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           COVERAGE_PERCENT: ${{ steps.coverage.outputs.coverage }}
+
+      - name: Print freeq server log
+        run: cat /tmp/freeq.log
+        if: always()
 
       - name: Generate coverage badge
         run: ops/ci/badges/badges.rb
