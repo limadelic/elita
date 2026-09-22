@@ -9,6 +9,7 @@ defmodule Elita.Freeq do
     only: [nick: 2, user: 2, join: 2, message: 3, pong: 2]
 
   import Elita.Freeq.Answer, only: [privmsg: 3]
+  import Elita.Freeq.Lines, only: [send: 3]
 
   def start_link(opts) do
     agent = fetch!(opts, :agent)
@@ -56,7 +57,7 @@ defmodule Elita.Freeq do
 
   @impl true
   def handle_info({:answer, text}, %{socket: socket, channel: channel} = state) do
-    message(socket, channel, text)
+    send(socket, channel, text)
     {:noreply, state}
   end
 
