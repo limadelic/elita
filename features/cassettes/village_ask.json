@@ -1,0 +1,20 @@
+[
+  {
+    "q": {
+      "agent": "worker",
+      "messages": [
+        {
+          "content": "/\\[from isabella\\].*party/",
+          "role": "user"
+        }
+      ]
+    },
+    "a": [
+      {
+        "type": "text",
+        "text": "The party is tomorrow at 8pm!"
+      }
+    ],
+    "times": "always"
+  }
+]

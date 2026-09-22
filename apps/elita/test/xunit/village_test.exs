@@ -41,4 +41,48 @@ defmodule VillageTest do
         assert_join_message(socket, nick, retries - 1)
     end
   end
+
+  @tag cassette: "village_ask"
+  test "one villager asks another in channel" do
+    {:ok, observer_socket} = :gen_tcp.connect(~c"127.0.0.1", 6667, active: true, packet: :line)
+
+    connect_to_irc(observer_socket, "observer", "#village")
+
+    {:ok, supervisor} =
+      Elita.Village.start_link(cast: ["isabella", "worker"], channel: "#village")
+
+    assert_join_message(observer_socket, "isabella")
+    assert_join_message(observer_socket, "worker")
+
+    isabella_client = Elita.Village.fetch(supervisor, "isabella")
+    Elita.Freeq.tell(isabella_client, "worker", "what time is the party?")
+
+    assert_answer_received(observer_socket, "worker", "party")
+
+    :gen_tcp.close(observer_socket)
+    Supervisor.stop(supervisor)
+  end
+
+  defp assert_answer_received(socket, from_nick, contains, retries \\ 30)
+
+  defp assert_answer_received(_socket, _from_nick, _contains, 0) do
+    flunk("Answer not received")
+  end
+
+  defp assert_answer_received(socket, from_nick, contains, retries) do
+    receive do
+      {:tcp, ^socket, line} ->
+        line_str = to_string(line)
+
+        if String.match?(line_str, ~r/:#{from_nick}!/) and
+             String.contains?(line_str, contains) do
+          true
+        else
+          assert_answer_received(socket, from_nick, contains, retries - 1)
+        end
+    after
+      1000 ->
+        assert_answer_received(socket, from_nick, contains, retries - 1)
+    end
+  end
 end
