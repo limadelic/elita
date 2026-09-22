@@ -8,8 +8,8 @@ defmodule Elita.Freeq.Parser do
       trim: 1
     ]
 
-  import Regex, only: [escape: 1]
   import List, only: [first: 1]
+  import Enum, only: [any?: 2]
 
   def parse(msg, nick, channel) do
     msg |> split(" PRIVMSG ", parts: 2) |> find(nick, channel)
@@ -49,8 +49,8 @@ defmodule Elita.Freeq.Parser do
   end
 
   defp cite(text, nick) do
-    starts_with?(text, "#{nick}:") or starts_with?(text, "#{nick},") or
-      starts_with?(text, "@#{nick}") or Regex.match?(~r/^@?#{escape(nick)}[,:\s]/, text)
+    prefixes = ["#{nick}:", "#{nick},", "#{nick} ", "@#{nick}:", "@#{nick},", "@#{nick} "]
+    any?(prefixes, &starts_with?(text, &1))
   end
 
   defp clean(text, nick) do
