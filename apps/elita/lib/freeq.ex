@@ -29,7 +29,6 @@ defmodule Elita.Freeq do
   def init({agent, channel, ask}) do
     {:ok, socket} = :gen_tcp.connect(~c"127.0.0.1", 6667, active: true, packet: :line)
     boot(socket, agent, channel)
-    wait_for_join(socket)
     {:ok, %{socket: socket, agent: agent, channel: channel, ask: ask}}
   end
 
@@ -65,20 +64,6 @@ defmodule Elita.Freeq do
     nick(socket, agent)
     user(socket, agent)
     join(socket, channel)
-  end
-
-  defp wait_for_join(socket) do
-    receive do
-      {:tcp, ^socket, line} ->
-        if String.contains?(to_string(line), " 366 ") do
-          :ok
-        else
-          wait_for_join(socket)
-        end
-    after
-      2000 ->
-        raise "JOIN timeout"
-    end
   end
 
   defp handle("PING " <> server, %{socket: socket} = state) do

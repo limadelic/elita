@@ -164,5 +164,4 @@ defmodule VillageTest do
         acc
     end
   end
-
 end
