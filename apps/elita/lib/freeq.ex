@@ -1,11 +1,10 @@
 defmodule Elita.Freeq do
   use GenServer
-  require Logger
 
   import Keyword, only: [fetch!: 2]
-  import String, only: [contains?: 2, trim_trailing: 2]
+  import String, only: [trim_trailing: 2]
   import GenServer, only: [start_link: 3, call: 2]
-  import Logger, only: [info: 1]
+  import Elita, only: [spawn: 2]
 
   def start_link(opts) do
     nick = fetch!(opts, :nick)
@@ -21,6 +20,7 @@ defmodule Elita.Freeq do
   def init({nick, channel}) do
     {:ok, socket} = :gen_tcp.connect(~c"127.0.0.1", 6667, active: true, packet: :line)
     boot(socket, nick, channel)
+    {:ok, _} = spawn(nick, [nick])
     {:ok, %{socket: socket, nick: nick, channel: channel}}
   end
 
@@ -51,8 +51,12 @@ defmodule Elita.Freeq do
     {:noreply, state}
   end
 
-  defp handle(":" <> msg, state) do
-    privmsg(msg)
+  defp handle(":" <> msg, %{nick: nick, channel: channel, socket: socket} = state) do
+    case Elita.Freeq.Parser.parse(msg, nick, channel) do
+      {:ask, sender, text} -> reply(socket, channel, sender, nick, text)
+      :noop -> :ok
+    end
+
     {:noreply, state}
   end
 
@@ -60,15 +64,16 @@ defmodule Elita.Freeq do
     {:noreply, state}
   end
 
-  defp privmsg(msg) do
-    privmsg(contains?(msg, "PRIVMSG"), msg)
+  defp reply(socket, channel, sender, nick, text) do
+    full_msg = "[from #{sender}] #{text}"
+
+    case GenServer.call(via(nick), {:ask, full_msg}, :infinity) do
+      {:error, _} -> :noop
+      reply -> :gen_tcp.send(socket, "PRIVMSG #{channel} :#{reply}\r\n")
+    end
   end
 
-  defp privmsg(true, msg) do
-    info(msg)
-  end
-
-  defp privmsg(false, _msg) do
-    :noop
+  defp via(nick) do
+    {:via, Registry, {ElitaRegistry, Utils.Normalize.name(nick), %{kind: :native, folder: nil}}}
   end
 end
