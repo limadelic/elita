@@ -37,6 +37,7 @@ defmodule FreeqGreetTest do
   defp connect do
     :gen_tcp.connect(~c"127.0.0.1", 6667, [
       :binary,
+      {:packet, :line},
       {:active, false},
       {:reuseaddr, true},
       {:nodelay, true}
@@ -51,6 +52,7 @@ defmodule FreeqGreetTest do
     wait_for_line(socket, deadline, fn line -> String.contains?(line, "001") end, counter)
 
     :gen_tcp.send(socket, "JOIN #the-lab\r\n")
+    wait_for_line(socket, deadline, fn line -> String.contains?(line, " 366 ") end, counter)
   end
 
   defp assert_greet_joins(socket, counter) do
