@@ -1,12 +1,15 @@
 defmodule ServerWait do
   import :gen_tcp, only: [connect: 4, close: 1]
+  import System, only: [monotonic_time: 1]
+
+  @opts [:binary, {:packet, :line}, {:active, false}, {:reuseaddr, true}, {:nodelay, true}]
 
   def wait(host, port) do
-    retry(host, port, System.monotonic_time(:millisecond) + 30000)
+    retry(host, port, monotonic_time(:millisecond) + 30000)
   end
 
   defp retry(host, port, deadline) do
-    remaining = deadline - System.monotonic_time(:millisecond)
+    remaining = deadline - monotonic_time(:millisecond)
     go(remaining > 0, host, port, remaining, deadline)
   end
 
@@ -16,8 +19,7 @@ defmodule ServerWait do
 
   defp go(true, host, port, remaining, deadline) do
     timeout = min(500, remaining)
-    opts = [:binary, {:packet, :line}, {:active, false}, {:reuseaddr, true}, {:nodelay, true}]
-    connect(host, port, opts, timeout) |> proceed(host, port, deadline)
+    connect(host, port, @opts, timeout) |> proceed(host, port, deadline)
   end
 
   defp proceed({:ok, socket}, _, _, _) do
@@ -25,10 +27,10 @@ defmodule ServerWait do
   end
 
   defp proceed({:error, _}, host, port, deadline) do
-    delay_retry(host, port, deadline)
+    defer(host, port, deadline)
   end
 
-  defp delay_retry(host, port, deadline) do
+  defp defer(host, port, deadline) do
     receive do
     after
       100 -> retry(host, port, deadline)
