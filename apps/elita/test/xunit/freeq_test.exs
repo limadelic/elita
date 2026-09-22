@@ -104,4 +104,20 @@ defmodule FreeqTest do
 
     :gen_tcp.close(observer_socket)
   end
+
+  test "addresses another nick in channel" do
+    spawn(:isabella)
+
+    {:ok, client_pid} = Elita.Freeq.start_link(agent: "isabella", channel: "#hobbs-cafe")
+
+    {:ok, observer_socket} = :gen_tcp.connect(~c"127.0.0.1", 6667, active: true, packet: :line)
+
+    connect_to_irc(observer_socket, "observer", "#hobbs-cafe")
+
+    Elita.Freeq.tell(client_pid, "someone", "hello")
+
+    assert_message_received(observer_socket, "someone: hello")
+
+    :gen_tcp.close(observer_socket)
+  end
 end

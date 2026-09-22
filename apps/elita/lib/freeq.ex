@@ -21,6 +21,10 @@ defmodule Elita.Freeq do
     call(pid, {:say, text})
   end
 
+  def tell(pid, nick, text) do
+    call(pid, {:tell, nick, text})
+  end
+
   @impl true
   def init({agent, channel, ask}) do
     {:ok, socket} = :gen_tcp.connect(~c"127.0.0.1", 6667, active: true, packet: :line)
@@ -31,6 +35,12 @@ defmodule Elita.Freeq do
   @impl true
   def handle_call({:say, text}, _from, %{socket: socket, channel: channel} = state) do
     message(socket, channel, text)
+    {:reply, :ok, state}
+  end
+
+  @impl true
+  def handle_call({:tell, nick, text}, _from, %{socket: socket, channel: channel} = state) do
+    message(socket, channel, "#{nick}: #{text}")
     {:reply, :ok, state}
   end
 
