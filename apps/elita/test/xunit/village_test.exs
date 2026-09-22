@@ -92,6 +92,40 @@ defmodule VillageTest do
     Application.delete_env(:elita, :clock_override)
   end
 
+  @tag cassette: "village_tick"
+  test "tick works with villagers added via environment" do
+    Application.put_env(:elita, :clock_override, "2025-07-07T10:30:00")
+
+    {:ok, observer_socket} = :gen_tcp.connect(~c"127.0.0.1", 6667, active: true, packet: :line)
+    connect_to_irc(observer_socket, "observer", "#village")
+
+    cast = ["clock", "isabella", "worker", "tom", "maria"]
+    {:ok, supervisor} = Elita.Village.start_link(cast: cast, channel: "#village")
+
+    assert_join_message(observer_socket, "clock")
+    assert_join_message(observer_socket, "isabella")
+    assert_join_message(observer_socket, "worker")
+    assert_join_message(observer_socket, "tom")
+    assert_join_message(observer_socket, "maria")
+
+    clock_client = Elita.Village.fetch(supervisor, "clock")
+    assert clock_client != nil, "Clock should be available in supervisor"
+
+    Elita.Tick.tick(supervisor)
+
+    messages = collect_messages(observer_socket, 30)
+
+    assert Enum.any?(messages, &String.contains?(&1, "isabella ready")),
+           "Isabella's answer not received"
+
+    assert Enum.any?(messages, &String.contains?(&1, "worker standing")),
+           "Worker's answer not received"
+
+    :gen_tcp.close(observer_socket)
+    Supervisor.stop(supervisor)
+    Application.delete_env(:elita, :clock_override)
+  end
+
   defp assert_answer_received(socket, from_nick, contains, retries \\ 30)
 
   defp assert_answer_received(_socket, _from_nick, _contains, 0) do
