@@ -15,11 +15,13 @@ defmodule Elita.Freeq.Answer do
     :noop
   end
 
-  def reply({:ask, sender, text}, agent, ask, pid) do
+  def reply({:ask, sender, text}, agent, ask, pid) when sender != agent do
     start(fn ->
       ask.(agent, "[from #{sender}] #{text}") |> relay(pid)
     end)
   end
+
+  def reply({:ask, _sender, _text}, _agent, _ask, _pid), do: :ok
 
   def reply(:noop, _agent, _ask, _pid), do: :ok
 
