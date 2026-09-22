@@ -1,9 +1,11 @@
 defmodule FreeqGreetTest do
   use Tester
 
+  Code.require_file("../support/server.exs", __DIR__)
+
   @tag cassette: "greet_lab"
   test "brian and greet have a real conversation in the lab" do
-    ServerWait.wait(~c"127.0.0.1", 6667)
+    Server.wait(~c"127.0.0.1", 6667)
     {:ok, socket} = connect()
     {:ok, counter} = Agent.start_link(fn -> 1 end)
 

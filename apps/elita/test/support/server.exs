@@ -1,4 +1,4 @@
-defmodule ServerWait do
+defmodule Server do
   import :gen_tcp, only: [connect: 4, close: 1]
   import System, only: [monotonic_time: 1]
 
