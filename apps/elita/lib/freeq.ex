@@ -52,10 +52,8 @@ defmodule Elita.Freeq do
   end
 
   defp handle(":" <> msg, %{nick: nick, channel: channel, socket: socket} = state) do
-    case Elita.Freeq.Parser.parse(msg, nick, channel) do
-      {:ask, sender, text} -> reply(socket, channel, sender, nick, text)
-      :noop -> :ok
-    end
+    Elita.Freeq.Parser.parse(msg, nick, channel)
+    |> maybe_reply(socket, channel, nick)
 
     {:noreply, state}
   end
@@ -64,16 +62,22 @@ defmodule Elita.Freeq do
     {:noreply, state}
   end
 
-  defp reply(socket, channel, sender, nick, text) do
-    full_msg = "[from #{sender}] #{text}"
+  defp maybe_reply({:ask, sender, text}, socket, channel, nick) do
+    msg = "[from #{sender}] #{text}"
+    reply(socket, channel, nick, msg)
+  end
 
-    case GenServer.call(via(nick), {:ask, full_msg}, :infinity) do
+  defp maybe_reply(:noop, _socket, _channel, _nick), do: :ok
+
+  defp reply(socket, channel, nick, msg) do
+    case GenServer.call(via(nick), {:ask, msg}, :infinity) do
       {:error, _} -> :noop
-      reply -> :gen_tcp.send(socket, "PRIVMSG #{channel} :#{reply}\r\n")
+      answer -> :gen_tcp.send(socket, "PRIVMSG #{channel} :#{answer}\r\n")
     end
   end
 
   defp via(nick) do
-    {:via, Registry, {ElitaRegistry, Utils.Normalize.name(nick), %{kind: :native, folder: nil}}}
+    normalized = Utils.Normalize.name(nick)
+    {:via, Registry, {ElitaRegistry, normalized, %{kind: :native, folder: nil}}}
   end
 end

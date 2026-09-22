@@ -1,5 +1,6 @@
 defmodule Elita.Freeq.Parser do
-  import String, only: [split: 3, starts_with?: 2, trim_leading: 1, trim_leading: 2]
+  import String,
+    only: [split: 3, starts_with?: 2, trim_leading: 1, trim_leading: 2]
 
   def parse(msg, nick, channel) do
     msg |> split(" PRIVMSG ", parts: 2) |> match(nick, channel)
@@ -13,19 +14,23 @@ defmodule Elita.Freeq.Parser do
   defp match(_, _nick, _channel), do: :noop
 
   defp ask([target, text], nick, channel, sender) do
-    cond do
-      target == channel and mention?(text, nick) -> {:ask, sender, strip(text, nick)}
-      target == nick -> {:ask, sender, text}
-      true -> :noop
+    if target == channel && mention?(text, nick) do
+      {:ask, sender, strip(text, nick)}
+    else
+      maybe_ask_direct(target, nick, sender, text)
     end
   end
 
   defp ask(_, _nick, _channel, _sender), do: :noop
 
+  defp maybe_ask_direct(target, nick, sender, text) do
+    if target == nick, do: {:ask, sender, text}, else: :noop
+  end
+
   defp mention?(text, nick) do
-    starts_with?(text, "#{nick}:") or
-      starts_with?(text, "#{nick},") or
-      starts_with?(text, "@#{nick}") or
+    starts_with?(text, "#{nick}:") ||
+      starts_with?(text, "#{nick},") ||
+      starts_with?(text, "@#{nick}") ||
       Regex.match?(~r/^@?#{Regex.escape(nick)}[,:\s]/, text)
   end
 
