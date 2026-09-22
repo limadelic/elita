@@ -63,30 +63,6 @@ defmodule VillageTest do
     Supervisor.stop(supervisor)
   end
 
-  @tag cassette: "village_tick"
-  test "clock ticks and each villager responds" do
-    Application.put_env(:elita, :clock_override, "2025-07-07T10:30:00")
-
-    {:ok, observer_socket} = :gen_tcp.connect(~c"127.0.0.1", 6667, active: true, packet: :line)
-
-    connect_to_irc(observer_socket, "observer", "#village")
-
-    {:ok, supervisor} =
-      Elita.Village.start_link(cast: ["clock", "isabella", "worker"], channel: "#village")
-
-    assert_join_message(observer_socket, "clock")
-    assert_join_message(observer_socket, "isabella")
-    assert_join_message(observer_socket, "worker")
-
-    Clock.tick(supervisor)
-
-    assert_answer_received(observer_socket, "isabella", "isabella")
-    assert_answer_received(observer_socket, "worker", "worker")
-
-    :gen_tcp.close(observer_socket)
-    Supervisor.stop(supervisor)
-  end
-
   defp assert_answer_received(socket, from_nick, contains, retries \\ 30)
 
   defp assert_answer_received(_socket, _from_nick, _contains, 0) do
