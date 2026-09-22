@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-module InjectLegend
+module Legend
   LEGEND_CSS = <<~CSS
     <style>
       .legend-container {
@@ -110,4 +110,4 @@ module InjectLegend
   end
 end
 
-InjectLegend.run
+Legend.run

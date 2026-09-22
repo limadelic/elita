@@ -14,7 +14,8 @@ defmodule Elita.Umbrella do
         elita: [
           applications: [el: :permanent, elita: :permanent, matrix: :permanent, tape: :permanent]
         ]
-      ]
+      ],
+      test_coverage: [ignore_modules: [~r/^Tape($|\.)/]]
     ]
   end
 
@@ -31,6 +32,7 @@ defmodule Elita.Umbrella do
       cukes: [&run_cukes/1],
       cuke: [&run_cuke/1],
       build: [&run_build/1],
+      cover: [&run_cover/1],
       ship: "cmd bin/release"
     ]
   end
@@ -41,6 +43,12 @@ defmodule Elita.Umbrella do
       check("cd apps/elita && mix test")
       check("cd apps/el && mix test")
       check("cd apps/matrix && mix test")
+    end
+  end
+
+  defp run_cover(_) do
+    unless Mix.Task.recursing?() do
+      check("ruby ops/ci/cover/run.rb")
     end
   end
 

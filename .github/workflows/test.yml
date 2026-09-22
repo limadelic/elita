@@ -29,6 +29,21 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-mix-1.20.2-29-
 
+      - name: Sanitize branch name for artifact
+        id: branch_slug
+        run: |
+          branch="${{ github.ref_name }}"
+          slug="${branch//\//-}"
+          echo "slug=$slug" >> "$GITHUB_OUTPUT"
+
+      - name: Compute deployment prefix
+        id: prefix
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: ${{ github.ref_name }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: echo "prefix=$(ops/ci/site/prefix.rb)" >> "$GITHUB_OUTPUT"
+
       - name: Get dependencies
         run: mix deps.get
 
@@ -36,3 +51,60 @@ jobs:
         run: mix test
         env:
           MIX_ENV: test
+
+      - name: Run coverage
+        run: bash -o pipefail -c 'mix cover 2>&1 | tee /tmp/cover_output.txt'
+        env:
+          MIX_ENV: test
+
+      - name: Extract and report coverage
+        run: |
+          COVERAGE=$(grep "| Total" /tmp/cover_output.txt | grep -oE '[0-9]+\.[0-9]+' | tail -1)
+          echo "coverage=$COVERAGE" >> $GITHUB_OUTPUT
+          echo "## Coverage Report" >> $GITHUB_STEP_SUMMARY
+          echo "Total coverage: **$COVERAGE%**" >> $GITHUB_STEP_SUMMARY
+        id: coverage
+        if: always()
+
+      - name: Post coverage to PR
+        run: ops/ci/cover/comment.rb
+        if: always()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          COVERAGE_PERCENT: ${{ steps.coverage.outputs.coverage }}
+
+      - name: Generate coverage badge
+        run: ops/ci/badges/badges.rb
+        env:
+          BRANCH: ${{ github.ref_name }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          COVERAGE_PERCENT: ${{ steps.coverage.outputs.coverage }}
+          GH_TOKEN: ${{ github.token }}
+        if: always()
+
+      - name: Copy coverage HTML files
+        run: |
+          if [ -d "apps/elita/cover" ]; then
+            PREFIX="${{ steps.prefix.outputs.prefix }}"
+            mkdir -p "site/${PREFIX}cover"
+            find apps/elita/cover -maxdepth 1 -name "*.html" -exec cp {} "site/${PREFIX}cover/" \;
+          fi
+        if: always()
+
+      - name: Generate coverage index
+        run: |
+          mkdir -p "site/${{ steps.prefix.outputs.prefix }}cover"
+          ops/ci/cover/report.rb
+        env:
+          PREFIX: ${{ steps.prefix.outputs.prefix }}
+        if: always()
+
+      - name: Upload coverage badge artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-badge-${{ steps.branch_slug.outputs.slug }}
+          path: site/

@@ -61,11 +61,11 @@ jobs:
         if: always()
 
       - name: Inject legend into cucumber report
-        run: ops/ci/inject_legend.rb site/report.html
+        run: ops/ci/cukes/legend.rb site/report.html
         if: always()
 
       - name: Generate cucumber badge
-        run: ops/ci/badges.rb
+        run: ops/ci/badges/badges.rb
         env:
           BRANCH: ${{ github.ref_name }}
           GITHUB_REPOSITORY: ${{ github.repository }}

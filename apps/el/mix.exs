@@ -16,7 +16,8 @@ defmodule El.MixProject do
       deps_path: "../../deps",
       lockfile: "../../mix.lock",
       compilers: [:yecc, :leex, :erlang, :elixir, :app],
-      elixirc_options: [warnings_as_errors: true]
+      elixirc_options: [warnings_as_errors: true],
+      test_coverage: [output: "cover", export: "el"]
     ]
   end
 
@@ -25,7 +26,7 @@ defmodule El.MixProject do
 
   defp aliases do
     [
-      test: fn _ -> :ok end,
+      test: ["test"],
       lint: ["format --check-formatted", "credo --strict"]
     ]
   end

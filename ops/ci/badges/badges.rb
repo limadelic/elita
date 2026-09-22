@@ -2,6 +2,7 @@
 
 require 'json'
 require 'fileutils'
+require_relative 'cover'
 
 module Badges
   def self.run
@@ -9,6 +10,7 @@ module Badges
     FileUtils.mkdir_p("site/#{pref}")
     quality(pref)
     cukes(pref)
+    Cover.run(pref)
   end
 
   def self.prefix
