@@ -1,8 +1,13 @@
 defmodule FreeqTest do
-  use ExUnit.Case, async: false
+  use Tester
+  @moduletag :xunit
 
+  @tag :live
+  @tag cassette: "freeq_hello"
   test "joins channel and broadcasts messages" do
-    {:ok, client_pid} = Elita.Freeq.start_link(nick: "isabella", channel: "#hobbs-cafe")
+    spawn(:isabella)
+
+    {:ok, client_pid} = Elita.Freeq.start_link(agent: "isabella", channel: "#hobbs-cafe")
 
     {:ok, observer_socket} = :gen_tcp.connect(~c"127.0.0.1", 6667, active: true, packet: :line)
 
@@ -16,18 +21,21 @@ defmodule FreeqTest do
   end
 
   @tag :live
+  @tag cassette: "freeq_isabella"
   test "agent answers channel question" do
-    {:ok, _} = Elita.Freeq.start_link(nick: "isabella", channel: "#hobbs-cafe")
+    {:ok, _} = Elita.Freeq.start_link(agent: "isabella", channel: "#hobbs-cafe")
 
     {:ok, observer_socket} = :gen_tcp.connect(~c"127.0.0.1", 6667, active: true, packet: :line)
 
     connect_to_irc(observer_socket, "observer", "#hobbs-cafe")
 
+    spawn(:isabella)
+
     Process.sleep(500)
 
     :gen_tcp.send(observer_socket, "PRIVMSG #hobbs-cafe :isabella: when is the party?\r\n")
 
-    assert_message_received(observer_socket, ~w(party tomorrow 5), 30_000)
+    assert_message_received(observer_socket, ~w(:isabella! party tomorrow Valentine), 30_000)
 
     :gen_tcp.close(observer_socket)
   end

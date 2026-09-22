@@ -1,43 +1,63 @@
 defmodule Elita.Freeq.Parser do
-  import String, only: [split: 3, starts_with?: 2]
+  import String,
+    only: [
+      split: 3,
+      starts_with?: 2,
+      trim_leading: 1,
+      trim_leading: 2,
+      trim: 1
+    ]
+
+  import Regex, only: [escape: 1]
+  import List, only: [first: 1]
 
   def parse(msg, nick, channel) do
-    msg |> split(" PRIVMSG ", parts: 2) |> match(nick, channel)
+    msg |> split(" PRIVMSG ", parts: 2) |> find(nick, channel)
   end
 
-  defp match([sender_part, rest], nick, channel) do
-    name = sender_part |> String.trim_leading() |> String.split("!") |> List.first()
-    rest |> split(" :", parts: 2) |> ask(nick, channel, name)
+  defp find([sender_part, rest], nick, channel) do
+    name = sender_part |> trim_leading() |> split("!", parts: 2) |> first()
+    rest |> split(" :", parts: 2) |> route(nick, channel, name)
   end
 
-  defp match(_, _nick, _channel), do: :noop
+  defp find(_, _nick, _channel), do: :noop
 
-  defp ask([target, text], nick, channel, sender) do
-    cond do
-      target == channel && mention?(text, nick) ->
-        {:ask, sender, trim(text, nick)}
-
-      target == nick ->
-        {:ask, sender, text}
-
-      true ->
-        :noop
-    end
+  defp route([target, text], nick, channel, sender) do
+    said(target == channel, target == nick, sender, text, nick)
   end
 
-  defp ask(_, _nick, _channel, _sender), do: :noop
+  defp route(_, _nick, _channel, _sender), do: :noop
 
-  defp mention?(text, nick) do
-    starts_with?(text, "#{nick}:") || starts_with?(text, "#{nick},") ||
-      starts_with?(text, "@#{nick}") ||
-      Regex.match?(~r/^@?#{Regex.escape(nick)}[,:\s]/, text)
+  defp said(true, _false, sender, text, nick) do
+    result(cite(text, nick), sender, text, nick)
   end
 
-  defp trim(text, nick) do
-    text
-    |> String.trim_leading("@")
-    |> String.trim_leading("#{nick}:")
-    |> String.trim_leading("#{nick},")
-    |> String.trim()
+  defp said(_true, true, sender, text, _nick) do
+    {:ask, sender, text}
+  end
+
+  defp said(_true, _false, _sender, _text, _nick) do
+    :noop
+  end
+
+  defp result(true, sender, text, nick) do
+    {:ask, sender, clean(text, nick)}
+  end
+
+  defp result(false, _sender, _text, _nick) do
+    :noop
+  end
+
+  defp cite(text, nick) do
+    starts_with?(text, "#{nick}:") or starts_with?(text, "#{nick},") or
+      starts_with?(text, "@#{nick}") or Regex.match?(~r/^@?#{escape(nick)}[,:\s]/, text)
+  end
+
+  defp clean(text, nick) do
+    text |> trim_leading("@") |> cut(nick) |> trim()
+  end
+
+  defp cut(text, nick) do
+    trim_leading(text, "#{nick}:") |> trim_leading("#{nick},")
   end
 end
