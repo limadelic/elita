@@ -1,11 +1,11 @@
 defmodule Elita.Freeq do
   use GenServer
-
   import Keyword, only: [fetch!: 2, get: 3]
   import String, only: [contains?: 2, trim_trailing: 2]
   import GenServer, only: [start_link: 3, call: 2]
   import Elita, only: [request: 2]
   import Elita.Freeq.Parser, only: [parse: 3]
+  import Elita.Freeq.Writer
   import Task, only: [start: 1]
 
   def start_link(opts) do
@@ -28,7 +28,7 @@ defmodule Elita.Freeq do
 
   @impl true
   def handle_call({:say, text}, _from, %{socket: socket, channel: channel} = state) do
-    :gen_tcp.send(socket, "PRIVMSG #{channel} :#{text}\r\n")
+    message(socket, channel, text)
     {:reply, :ok, state}
   end
 
@@ -44,18 +44,18 @@ defmodule Elita.Freeq do
 
   @impl true
   def handle_info({:answer, text}, %{socket: socket, channel: channel} = state) do
-    :gen_tcp.send(socket, "PRIVMSG #{channel} :#{text}\r\n")
+    message(socket, channel, text)
     {:noreply, state}
   end
 
   defp boot(socket, agent, channel) do
-    :gen_tcp.send(socket, "NICK #{agent}\r\n")
-    :gen_tcp.send(socket, "USER #{agent} 0 * :#{agent}\r\n")
-    :gen_tcp.send(socket, "JOIN #{channel}\r\n")
+    nick(socket, agent)
+    user(socket, agent)
+    join(socket, channel)
   end
 
   defp handle("PING " <> server, %{socket: socket} = state) do
-    :gen_tcp.send(socket, "PONG #{server}\r\n")
+    pong(socket, server)
     {:noreply, state}
   end
 
