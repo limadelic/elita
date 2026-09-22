@@ -1,7 +1,7 @@
 defmodule Elita.Freeq do
   use GenServer
   import Keyword, only: [fetch!: 2, get: 3]
-  import String, only: [trim_trailing: 2, contains?: 2]
+  import String, only: [trim_trailing: 2]
   import GenServer, only: [start_link: 3, call: 2]
   import Elita, only: [request: 2]
 
@@ -10,6 +10,7 @@ defmodule Elita.Freeq do
 
   import Elita.Freeq.Answer, only: [privmsg: 3]
   import Elita.Freeq.Lines, only: [send: 3]
+  import Elita.Freeq.Ready, only: [wait: 1]
 
   def start_link(opts) do
     agent = fetch!(opts, :agent)
@@ -65,25 +66,8 @@ defmodule Elita.Freeq do
     nick(socket, agent)
     user(socket, agent)
     join(socket, channel)
-    await(socket)
+    wait(socket)
   end
-
-  defp await(socket) do
-    receive do
-      {:tcp, ^socket, line} -> check(line, socket)
-      {:tcp_closed, ^socket} -> raise "Socket closed waiting for 366"
-    after
-      5000 -> raise "Timeout waiting for 366"
-    end
-  end
-
-  defp check(line, socket) do
-    str = line |> to_string() |> trim_trailing("\r\n")
-    contains?(str, " 366 ") |> ready(socket)
-  end
-
-  defp ready(true, _socket), do: :ok
-  defp ready(false, socket), do: await(socket)
 
   defp handle("PING " <> server, %{socket: socket} = state) do
     pong(socket, server)
