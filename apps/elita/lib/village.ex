@@ -17,7 +17,7 @@ defmodule Elita.Village do
   end
 
   defp boot(name) do
-    spawn(to_string(name), [to_string(name)])
+    {:ok, _pid} = spawn(to_string(name), [to_string(name)])
   end
 
   defp client(name, channel) do

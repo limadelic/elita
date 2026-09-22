@@ -7,12 +7,14 @@ defmodule VillageTest do
 
     connect_to_irc(observer_socket, "observer", "#village")
 
-    {:ok, _supervisor} = Elita.Village.start_link(cast: ["alice", "bob"], channel: "#village")
+    {:ok, supervisor} =
+      Elita.Village.start_link(cast: ["isabella", "worker"], channel: "#village")
 
-    assert_nick_joined(observer_socket, "alice")
-    assert_nick_joined(observer_socket, "bob")
+    assert_join_message(observer_socket, "isabella")
+    assert_join_message(observer_socket, "worker")
 
     :gen_tcp.close(observer_socket)
+    Supervisor.stop(supervisor)
   end
 
   defp connect_to_irc(socket, nick, channel) do
@@ -21,20 +23,22 @@ defmodule VillageTest do
     :gen_tcp.send(socket, "JOIN #{channel}\r\n")
   end
 
-  defp assert_nick_joined(socket, nick, retries \\ 30)
-  defp assert_nick_joined(_socket, nick, 0), do: flunk("Nick #{nick} did not join")
+  defp assert_join_message(socket, nick, retries \\ 30)
+  defp assert_join_message(_socket, nick, 0), do: flunk("Nick #{nick} did not send JOIN")
 
-  defp assert_nick_joined(socket, nick, retries) do
+  defp assert_join_message(socket, nick, retries) do
     receive do
       {:tcp, ^socket, line} ->
-        if String.contains?(to_string(line), nick) do
+        line_str = to_string(line)
+
+        if String.match?(line_str, ~r/^:#{nick}!.* JOIN #/) do
           true
         else
-          assert_nick_joined(socket, nick, retries - 1)
+          assert_join_message(socket, nick, retries - 1)
         end
     after
       1000 ->
-        assert_nick_joined(socket, nick, retries - 1)
+        assert_join_message(socket, nick, retries - 1)
     end
   end
 end
