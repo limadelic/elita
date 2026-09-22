@@ -43,7 +43,7 @@ jobs:
           cd /tmp/freeq && git checkout 2ff392ec2540289eb202e6caebeff8c50ad6a3b0
           rustup toolchain install stable
           cargo build --release -p freeq-server
-          mkdir -p .freeq-bin
+          mkdir -p ${{ github.workspace }}/.freeq-bin
           cp target/release/freeq-server ${{ github.workspace }}/.freeq-bin/
 
       - name: Start freeq server
@@ -58,9 +58,8 @@ jobs:
 
       - name: Wait for freeq server
         run: |
-          for i in {1..60}; do
+          for i in {1..30}; do
             timeout 1 bash -c "echo -n '' > /dev/tcp/127.0.0.1/6667" 2>/dev/null && exit 0
-            sleep 0.5
           done
           echo "Timeout waiting for freeq server"
           cat /tmp/freeq.log
@@ -114,7 +113,12 @@ jobs:
           COVERAGE_PERCENT: ${{ steps.coverage.outputs.coverage }}
 
       - name: Print freeq server log
-        run: cat /tmp/freeq.log
+        run: |
+          if [ -f /tmp/freeq.log ]; then
+            cat /tmp/freeq.log
+          else
+            echo "freeq log not found"
+          fi
         if: always()
 
       - name: Generate coverage badge
