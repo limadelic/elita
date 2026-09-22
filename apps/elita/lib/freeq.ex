@@ -2,7 +2,7 @@ defmodule Elita.Freeq do
   use GenServer
 
   import Keyword, only: [fetch!: 2]
-  import String, only: [trim_trailing: 2]
+  import String, only: [contains?: 2, trim_trailing: 2]
   import GenServer, only: [start_link: 3, call: 2]
   import Elita, only: [spawn: 2]
 
@@ -52,9 +52,7 @@ defmodule Elita.Freeq do
   end
 
   defp handle(":" <> msg, %{nick: nick, channel: channel, socket: socket} = state) do
-    Elita.Freeq.Parser.parse(msg, nick, channel)
-    |> maybe_reply(socket, channel, nick)
-
+    privmsg(msg, nick, channel, socket)
     {:noreply, state}
   end
 
@@ -62,22 +60,32 @@ defmodule Elita.Freeq do
     {:noreply, state}
   end
 
-  defp maybe_reply({:ask, sender, text}, socket, channel, nick) do
-    msg = "[from #{sender}] #{text}"
-    reply(socket, channel, nick, msg)
+  defp privmsg(msg, nick, channel, socket) do
+    privmsg(contains?(msg, "PRIVMSG"), msg, nick, channel, socket)
   end
 
-  defp maybe_reply(:noop, _socket, _channel, _nick), do: :ok
+  defp privmsg(true, msg, nick, channel, socket) do
+    Elita.Freeq.Parser.parse(msg, nick, channel)
+    |> reply(socket, channel, nick)
+  end
 
-  defp reply(socket, channel, nick, msg) do
-    case GenServer.call(via(nick), {:ask, msg}, :infinity) do
+  defp privmsg(false, _msg, _nick, _channel, _socket) do
+    :noop
+  end
+
+  defp reply({:ask, sender, text}, socket, channel, nick) do
+    msg = "[from #{sender}] #{text}"
+    addr = via(nick)
+
+    case GenServer.call(addr, {:ask, msg}, :infinity) do
       {:error, _} -> :noop
       answer -> :gen_tcp.send(socket, "PRIVMSG #{channel} :#{answer}\r\n")
     end
   end
 
+  defp reply(:noop, _socket, _channel, _nick), do: :ok
+
   defp via(nick) do
-    normalized = Utils.Normalize.name(nick)
-    {:via, Registry, {ElitaRegistry, normalized, %{kind: :native, folder: nil}}}
+    {:via, Registry, {ElitaRegistry, Utils.Normalize.name(nick), %{kind: :native, folder: nil}}}
   end
 end
