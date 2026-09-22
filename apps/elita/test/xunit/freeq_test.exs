@@ -1,4 +1,4 @@
-defmodule Elita.FreeqTest do
+defmodule FreeqTest do
   use ExUnit.Case, async: false
 
   test "joins channel and broadcasts messages" do
