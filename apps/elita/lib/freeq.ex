@@ -11,6 +11,7 @@ defmodule Elita.Freeq do
   import Elita.Freeq.Answer, only: [privmsg: 3]
   import Elita.Freeq.Lines, only: [send: 3]
   import Elita.Freeq.Ready, only: [wait: 1]
+  import Elita.Freeq.Welcome, only: [greet: 1]
 
   def start_link(opts) do
     agent = fetch!(opts, :agent)
@@ -63,10 +64,15 @@ defmodule Elita.Freeq do
   end
 
   defp boot(socket, agent, channel) do
-    nick(socket, agent)
-    user(socket, agent)
+    register(socket, agent)
     join(socket, channel)
     wait(socket)
+  end
+
+  defp register(socket, agent) do
+    nick(socket, agent)
+    user(socket, agent)
+    greet(socket)
   end
 
   defp handle("PING " <> server, %{socket: socket} = state) do
