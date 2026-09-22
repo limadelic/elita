@@ -9,6 +9,7 @@ defmodule Elita do
   import Msg, only: [user: 1]
   import Reply, only: [deliver: 2]
   import String, only: [trim: 1]
+  import System, only: [get_env: 1]
   import Keyword, only: [get: 3]
   import Utils.Normalize, only: [name: 1]
   import Process, only: [flag: 2]
@@ -39,17 +40,10 @@ defmodule Elita do
   end
 
   defp setup(opts, name, configs) do
-    settings = get(opts, :tape_env, tape_from_env())
+    settings = get(opts, :tape_env, %{tape: get_env("TAPE")})
     create(name)
     seed(get(settings, :tape))
     {:ok, state(name, configs, opts, settings)}
-  end
-
-  defp tape_from_env do
-    case System.get_env("TAPE") do
-      "rec" -> %{tape: "rec"}
-      _ -> %{}
-    end
   end
 
   defp state(name, configs, opts, settings) do
