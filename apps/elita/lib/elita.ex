@@ -39,10 +39,17 @@ defmodule Elita do
   end
 
   defp setup(opts, name, configs) do
-    settings = get(opts, :tape_env, %{})
+    settings = get(opts, :tape_env, tape_from_env())
     create(name)
     seed(get(settings, :tape))
     {:ok, state(name, configs, opts, settings)}
+  end
+
+  defp tape_from_env do
+    case System.get_env("TAPE") do
+      "rec" -> %{tape: "rec"}
+      _ -> %{}
+    end
   end
 
   defp state(name, configs, opts, settings) do
