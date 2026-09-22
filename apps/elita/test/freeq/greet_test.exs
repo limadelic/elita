@@ -3,7 +3,7 @@ defmodule FreeqGreetTest do
 
   Code.require_file("../support/server.exs", __DIR__)
 
-  @tag cassette: "greet_lab"
+  @tag cassette: "greet"
   test "brian and greet have a real conversation in the lab" do
     Server.wait(~c"127.0.0.1", 6667)
     {:ok, socket} = connect()
@@ -15,7 +15,8 @@ defmodule FreeqGreetTest do
       Elita.Freeq.start_link(
         agent: "greet",
         channel: "#the-lab",
-        ask: &tape_ask/2
+        ask: &tape_ask/2,
+        driver: "brian"
       )
 
     assert_greet_joins(socket, counter)

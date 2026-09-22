@@ -7,23 +7,26 @@ defmodule Elita.Freeq.Answer do
     privmsg(contains?(msg, "PRIVMSG"), msg, state, pid)
   end
 
-  def privmsg(true, msg, %{agent: agent, channel: channel, ask: ask}, pid) do
-    parse(msg, agent, channel) |> reply(agent, ask, pid)
+  def privmsg(true, msg, %{agent: agent, channel: channel, ask: ask, driver: driver}, pid) do
+    parse(msg, agent, channel) |> reply(agent, ask, pid, driver)
   end
 
   def privmsg(false, _msg, _state, _pid) do
     :noop
   end
 
-  def reply({:ask, sender, text}, agent, ask, pid) when sender != agent do
+  def reply({:ask, sender, text}, agent, ask, pid, driver) when sender != agent do
     start(fn ->
-      ask.(agent, "[from #{sender}] #{text}") |> relay(pid)
+      ask.(agent, format(sender, text, driver)) |> relay(pid)
     end)
   end
 
-  def reply({:ask, _sender, _text}, _agent, _ask, _pid), do: :ok
+  def reply({:ask, _sender, _text}, _agent, _ask, _pid, _driver), do: :ok
 
-  def reply(:noop, _agent, _ask, _pid), do: :ok
+  def reply(:noop, _agent, _ask, _pid, _driver), do: :ok
+
+  defp format(driver, text, driver), do: text
+  defp format(sender, text, _driver), do: "[from #{sender}] #{text}"
 
   def relay({:error, _}, _pid), do: :noop
   def relay(answer, pid), do: send(pid, {:answer, answer})

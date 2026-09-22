@@ -13,10 +13,12 @@ defmodule Elita.Freeq do
   import Elita.Freeq.Boot, only: [run: 3]
 
   def start_link(opts) do
-    agent = fetch!(opts, :agent)
-    channel = fetch!(opts, :channel)
-    ask = get(opts, :ask, &request/2)
-    start_link(__MODULE__, {agent, channel, ask}, [])
+    start_link(__MODULE__, tuple(opts), [])
+  end
+
+  defp tuple(opts) do
+    {fetch!(opts, :agent), fetch!(opts, :channel), get(opts, :ask, &request/2),
+     get(opts, :driver, nil)}
   end
 
   def say(pid, text) do
@@ -28,11 +30,15 @@ defmodule Elita.Freeq do
   end
 
   @impl true
-  def init({agent, channel, ask}) do
+  def init({agent, channel, ask, driver}) do
     {:ok, socket} = :gen_tcp.connect(~c"127.0.0.1", 6667, active: true, packet: :line)
     flag(:trap_exit, true)
     run(socket, agent, channel)
-    {:ok, %{socket: socket, agent: agent, channel: channel, ask: ask}}
+    {:ok, state(socket, agent, channel, ask, driver)}
+  end
+
+  defp state(socket, agent, channel, ask, driver) do
+    %{socket: socket, agent: agent, channel: channel, ask: ask, driver: driver}
   end
 
   @impl true
