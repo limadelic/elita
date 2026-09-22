@@ -3,6 +3,7 @@ defmodule FreeqGreetTest do
 
   @tag cassette: "greet_lab"
   test "brian and greet have a real conversation in the lab" do
+    wait_for_server(~c"127.0.0.1", 6667)
     {:ok, socket} = connect()
     {:ok, counter} = Agent.start_link(fn -> 1 end)
 
@@ -42,6 +43,41 @@ defmodule FreeqGreetTest do
       {:reuseaddr, true},
       {:nodelay, true}
     ])
+  end
+
+  defp wait_for_server(host, port) do
+    deadline = System.monotonic_time(:millisecond) + 30000
+    wait_for_server_until(host, port, deadline)
+  end
+
+  defp wait_for_server_until(host, port, deadline) do
+    remaining = deadline - System.monotonic_time(:millisecond)
+
+    if remaining <= 0 do
+      raise "Timeout waiting for freeq server at #{host}:#{port}"
+    end
+
+    options = [
+      :binary,
+      {:packet, :line},
+      {:active, false},
+      {:reuseaddr, true},
+      {:nodelay, true}
+    ]
+
+    timeout = min(500, remaining)
+
+    case :gen_tcp.connect(host, port, options, timeout) do
+      {:ok, socket} ->
+        :gen_tcp.close(socket)
+
+      {:error, _reason} ->
+        receive do
+        after
+          100 ->
+            wait_for_server_until(host, port, deadline)
+        end
+    end
   end
 
   defp register_brian(socket, counter) do

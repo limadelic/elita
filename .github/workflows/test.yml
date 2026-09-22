@@ -56,15 +56,6 @@ jobs:
             > /tmp/freeq.log 2>&1 &
           echo "$!" > /tmp/freeq.pid
 
-      - name: Wait for freeq server
-        run: |
-          for i in {1..30}; do
-            timeout 1 bash -c "echo -n '' > /dev/tcp/127.0.0.1/6667" 2>/dev/null && exit 0
-          done
-          echo "Timeout waiting for freeq server"
-          cat /tmp/freeq.log
-          exit 1
-
       - name: Sanitize branch name for artifact
         id: branch_slug
         run: |
