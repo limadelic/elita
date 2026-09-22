@@ -5,13 +5,11 @@ defmodule Elita.Freeq do
   import GenServer, only: [start_link: 3, call: 2]
   import Elita, only: [request: 2]
 
-  import Elita.Freeq.Writer,
-    only: [nick: 2, user: 2, join: 2, message: 3, pong: 2]
+  import Elita.Freeq.Writer, only: [message: 3, pong: 2]
 
   import Elita.Freeq.Answer, only: [privmsg: 3]
   import Elita.Freeq.Lines, only: [send: 3]
-  import Elita.Freeq.Ready, only: [wait: 1]
-  import Elita.Freeq.Welcome, only: [greet: 1]
+  import Elita.Freeq.Boot, only: [run: 3]
 
   def start_link(opts) do
     agent = fetch!(opts, :agent)
@@ -31,7 +29,8 @@ defmodule Elita.Freeq do
   @impl true
   def init({agent, channel, ask}) do
     {:ok, socket} = :gen_tcp.connect(~c"127.0.0.1", 6667, active: true, packet: :line)
-    boot(socket, agent, channel)
+    Process.flag(:trap_exit, true)
+    run(socket, agent, channel)
     {:ok, %{socket: socket, agent: agent, channel: channel, ask: ask}}
   end
 
@@ -58,21 +57,23 @@ defmodule Elita.Freeq do
   end
 
   @impl true
+  def handle_info({:EXIT, _pid, _reason}, state) do
+    {:stop, :normal, state}
+  end
+
+  @impl true
   def handle_info({:answer, text}, %{socket: socket, channel: channel} = state) do
     send(socket, channel, text)
     {:noreply, state}
   end
 
-  defp boot(socket, agent, channel) do
-    register(socket, agent)
-    join(socket, channel)
-    wait(socket)
-  end
-
-  defp register(socket, agent) do
-    nick(socket, agent)
-    user(socket, agent)
-    greet(socket)
+  @impl true
+  def terminate(_reason, %{socket: socket}) do
+    :gen_tcp.send(socket, "QUIT\r\n")
+    :gen_tcp.close(socket)
+    :ok
+  rescue
+    _ -> :ok
   end
 
   defp handle("PING " <> server, %{socket: socket} = state) do
