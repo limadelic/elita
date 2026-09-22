@@ -4,6 +4,7 @@ defmodule Elita.Freeq do
   import String, only: [trim_trailing: 2]
   import GenServer, only: [start_link: 3, call: 2]
   import Elita, only: [request: 2]
+  import Process, only: [flag: 2]
 
   import Elita.Freeq.Writer, only: [message: 3, pong: 2]
 
@@ -29,7 +30,7 @@ defmodule Elita.Freeq do
   @impl true
   def init({agent, channel, ask}) do
     {:ok, socket} = :gen_tcp.connect(~c"127.0.0.1", 6667, active: true, packet: :line)
-    Process.flag(:trap_exit, true)
+    flag(:trap_exit, true)
     run(socket, agent, channel)
     {:ok, %{socket: socket, agent: agent, channel: channel, ask: ask}}
   end
@@ -71,7 +72,6 @@ defmodule Elita.Freeq do
   def terminate(_reason, %{socket: socket}) do
     :gen_tcp.send(socket, "QUIT\r\n")
     :gen_tcp.close(socket)
-    :ok
   rescue
     _ -> :ok
   end
