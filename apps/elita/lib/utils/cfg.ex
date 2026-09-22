@@ -54,11 +54,12 @@ defmodule Cfg do
   defp join(_, md), do: %{content: md}
 
   defp build(header, body) do
-    pairs = header |> map(&props/1) |> reject(&void/1)
-    pairs |> new() |> put(:content, trim(body))
+    header
+    |> map(&props/1)
+    |> new()
+    |> put(:content, trim(body))
   end
 
-  defp void({_, v}), do: v == nil
   defp props({k, v}), do: {to_atom(k), v}
 
   defp default(config, defaults) do
