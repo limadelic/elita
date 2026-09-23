@@ -19,7 +19,7 @@ defmodule Freeq.Writer do
     line(socket, "PONG #{server}")
   end
 
-  defp line(socket, text) do
+  def line(socket, text) do
     :gen_tcp.send(socket, "#{text}\r\n")
   end
 end
