@@ -8,6 +8,14 @@ defmodule FreeqCase do
       Code.require_file("../support/server.exs", __DIR__)
       Code.require_file("../support/freeq_client.exs", __DIR__)
 
+      def say(text) do
+        FreeqTestClient.say(text)
+      end
+
+      def hears(fragment) do
+        FreeqTestClient.hears(fragment)
+      end
+
       setup do
         Server.wait(~c"127.0.0.1", 6667)
         {:ok, socket} = FreeqTestClient.connect()

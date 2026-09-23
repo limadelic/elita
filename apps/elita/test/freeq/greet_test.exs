@@ -5,19 +5,19 @@ defmodule FreeqGreetTest do
 
   @tag cassette: "greet"
   test "brian and greet have a real conversation in the lab" do
-    join("greet")
+    join(:greet)
 
-    FreeqTestClient.send_turn("greet: hello")
-    FreeqTestClient.wait_fragment("who am i talking to")
-
-    Process.sleep(3000)
-
-    FreeqTestClient.send_turn("greet: Mike")
-    FreeqTestClient.wait_fragment("wonderful to meet you")
+    say("greet: hello")
+    hears("who am i talking to")
 
     Process.sleep(3000)
 
-    FreeqTestClient.send_turn("greet: how are you?")
-    FreeqTestClient.wait_fragment("i am greeeet")
+    say("greet: Mike")
+    hears("wonderful to meet you")
+
+    Process.sleep(3000)
+
+    say("greet: how are you?")
+    hears("i am greeeet")
   end
 end

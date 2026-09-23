@@ -9,20 +9,20 @@ defmodule FreeqBossTest do
     join(:dev, :worker)
     join(:qa, :worker)
 
-    FreeqTestClient.send_turn("boss: you manage a software development team with a dev and a qa")
+    say("boss: you manage a software development team with a dev and a qa")
 
-    FreeqTestClient.wait_fragment("ready")
+    hears("ready")
 
-    FreeqTestClient.send_turn("boss: we need more test created")
-    FreeqTestClient.wait_fragment("done")
+    say("boss: we need more test created")
+    hears("done")
 
-    FreeqTestClient.send_turn("dev: did you receive a task from boss?")
+    say("dev: did you receive a task from boss?")
 
-    FreeqTestClient.wait_fragment("no")
+    hears("no")
 
-    FreeqTestClient.send_turn("qa: did you receive a task from boss?")
+    say("qa: did you receive a task from boss?")
 
-    FreeqTestClient.wait_fragment("yes")
+    hears("yes")
   end
 
   @tag cassette: "boss2"
@@ -32,24 +32,24 @@ defmodule FreeqBossTest do
     join(:pam, :worker)
     join(:jim, :worker)
 
-    FreeqTestClient.send_turn("michael: you manage dwight the assistant regional manager")
+    say("michael: you manage dwight the assistant regional manager")
 
-    FreeqTestClient.wait_fragment("understand")
+    hears("understand")
 
-    FreeqTestClient.send_turn("dwight: you manage pam the receptionist and jim the salesman")
+    say("dwight: you manage pam the receptionist and jim the salesman")
 
-    FreeqTestClient.wait_fragment("understand")
+    hears("understand")
 
-    FreeqTestClient.send_turn("michael: we need 50 copies of the quarterly sales report")
+    say("michael: we need 50 copies of the quarterly sales report")
 
-    FreeqTestClient.wait_fragment("done")
+    hears("done")
 
-    FreeqTestClient.send_turn("jim: did you receive a task?")
+    say("jim: did you receive a task?")
 
-    FreeqTestClient.wait_fragment("no")
+    hears("no")
 
-    FreeqTestClient.send_turn("pam: did you receive a task to make copies?")
+    say("pam: did you receive a task to make copies?")
 
-    FreeqTestClient.wait_fragment("yes")
+    hears("yes")
   end
 end

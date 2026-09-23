@@ -36,16 +36,12 @@ defmodule FreeqTestClient do
     line(deadline, match)
   end
 
-  def send_turn(text) do
-    send_turn("#the-lab", text)
-  end
-
-  def send_turn(channel, text) do
+  def say(text) do
     socket = Process.get(:freeq_socket)
-    :gen_tcp.send(socket, "PRIVMSG #{channel} :#{text}\r\n")
+    :gen_tcp.send(socket, "PRIVMSG #the-lab :#{text}\r\n")
   end
 
-  def wait_fragment(fragment) do
+  def hears(fragment) do
     deadline = epoch() + 5000
     scan(deadline, fragment)
   end
@@ -116,11 +112,11 @@ defmodule FreeqTestClient do
   end
 
   defp print(lines) do
-    counter = Process.get(:freeq_counter)
-    Enum.each(lines, fn line -> write(line, counter) end)
+    Enum.each(lines, fn line -> write(line) end)
   end
 
-  defp write(line, counter) do
+  defp write(line) do
+    counter = Process.get(:freeq_counter)
     count = Agent.get_and_update(counter, fn c -> {c, c + 1} end)
     IO.puts("#{count}: #{line}")
   end
