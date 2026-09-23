@@ -5,12 +5,18 @@ defmodule FreeqTestClient do
   def connect, do: :gen_tcp.connect(~c"127.0.0.1", 6667, @opts)
 
   def register_brian do
+    request_caps()
     send_line("NICK brian")
     send_line("USER brian 0 * :brian")
     await("001", &String.contains?(&1, " 001 "))
     send_line("JOIN #the-lab")
     await("366", &String.contains?(&1, " 366 "))
     Process.put(:freeq_transcript, [])
+  end
+
+  defp request_caps do
+    send_line("CAP REQ :batch draft/multiline")
+    send_line("CAP END")
   end
 
   def wait_join(agent), do: await("#{agent} JOIN", &joined(&1, agent))

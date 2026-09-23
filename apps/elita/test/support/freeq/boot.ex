@@ -10,8 +10,14 @@ defmodule Freeq.Boot do
   end
 
   defp register(socket, agent) do
+    request_caps(socket)
     nick(socket, agent)
     user(socket, agent)
     greet(socket)
+  end
+
+  defp request_caps(socket) do
+    :gen_tcp.send(socket, "CAP REQ :batch draft/multiline\r\n")
+    :gen_tcp.send(socket, "CAP END\r\n")
   end
 end
