@@ -125,6 +125,28 @@ jobs:
           fi
           cp ops/ci/site/greet.mp4 "$DEST/greet.mp4"
 
+      - name: Download freeq video artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: freeq-video-${{ steps.branch_slug.outputs.slug }}
+          path: /tmp/freeq-video-art
+        continue-on-error: true
+
+      - name: Copy freeq video to prefix
+        run: |
+          PREFIX="${{ steps.prefix.outputs.prefix }}"
+          if [ -n "$PREFIX" ]; then
+            mkdir -p "site/$PREFIX"
+            DEST="site/$PREFIX"
+          else
+            mkdir -p site
+            DEST="site"
+          fi
+          if [ -f "/tmp/freeq-video-art/freeq.mp4" ]; then
+            cp "/tmp/freeq-video-art/freeq.mp4" "$DEST/freeq.mp4"
+          fi
+        continue-on-error: true
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
 

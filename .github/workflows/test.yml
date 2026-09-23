@@ -160,6 +160,83 @@ jobs:
         env:
           MIX_ENV: test
 
+      - name: Record freeq tests
+        run: |
+          LOG_FILE="$RUNNER_TEMP/greet-cam.log"
+          PID_FILE="$RUNNER_TEMP/greet-cam.pid"
+
+          # Start record.js in background
+          node ops/ci/greet-cam/record.js \
+            --out "$RUNNER_TEMP/greet-cam-out" \
+            --channel "#the-lab" \
+            > "$LOG_FILE" 2>&1 &
+          echo "$!" > "$PID_FILE"
+
+          # Wait for GREETCAM READY
+          deadline=$((SECONDS + 60))
+          while [ $SECONDS -lt $deadline ]; do
+            if grep -q "GREETCAM FAILED" "$LOG_FILE"; then
+              echo "Recorder failed:"
+              cat "$LOG_FILE"
+              exit 1
+            fi
+            if grep -q "GREETCAM READY" "$LOG_FILE"; then
+              echo "Recorder ready"
+              break
+            fi
+            sleep 0.5
+          done
+
+          if [ $SECONDS -ge $deadline ]; then
+            echo "Timeout waiting for GREETCAM READY (60s)"
+            cat "$LOG_FILE"
+            exit 1
+          fi
+
+          # Run the freeq tests ONLY
+          cd apps/elita && mix test test/freeq
+
+          # Stop the recorder
+          PID=$(cat "$PID_FILE")
+          [ -n "$PID" ] && [ "$PID" -gt 1 ] || { echo "refusing to signal pid '$PID'"; exit 1; }
+          kill -TERM "$PID"
+
+          cd "${{ github.workspace }}"
+
+          # Wait for GREETCAM DONE
+          deadline=$((SECONDS + 60))
+          MP4_PATH=""
+          while [ $SECONDS -lt $deadline ]; do
+            if grep -q "GREETCAM DONE" "$LOG_FILE"; then
+              done_line=$(grep "GREETCAM DONE" "$LOG_FILE" | tail -1)
+              if [[ "$done_line" =~ mp4:([^ ]+) ]]; then
+                MP4_PATH="${BASH_REMATCH[1]}"
+              fi
+              break
+            fi
+            sleep 0.5
+          done
+
+          if [ $SECONDS -ge $deadline ]; then
+            echo "Timeout waiting for GREETCAM DONE (60s)"
+            cat "$LOG_FILE"
+            exit 1
+          fi
+
+          if [ -z "$MP4_PATH" ]; then
+            echo "Failed to parse mp4 path from GREETCAM DONE line"
+            cat "$LOG_FILE"
+            exit 1
+          fi
+
+          # Copy to freeq.mp4 and validate
+          cp "$MP4_PATH" freeq.mp4
+          test -s freeq.mp4 || { echo "freeq.mp4 is empty or does not exist"; exit 1; }
+
+          ls -la freeq.mp4
+        env:
+          GREETCAM_WORLD_URL: http://127.0.0.1:5173/?freeq=ws://127.0.0.1:8080/irc
+
       - name: Extract and report coverage
         run: |
           COVERAGE=$(grep "| Total" /tmp/cover_output.txt | grep -oE '[0-9]+\.[0-9]+' | tail -1)
@@ -220,3 +297,10 @@ jobs:
         with:
           name: coverage-badge-${{ steps.branch_slug.outputs.slug }}
           path: site/
+
+      - name: Upload freeq video artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: freeq-video-${{ steps.branch_slug.outputs.slug }}
+          path: freeq.mp4
