@@ -6,10 +6,10 @@ defmodule Freeq do
   import Elita, only: [request: 2]
   import Process, only: [flag: 2]
 
-  import Freeq.Writer, only: [message: 3, pong: 2]
-
-  import Freeq.Answer, only: [privmsg: 3]
+  import Freeq.Writer, only: [message: 3]
   import Freeq.Lines, only: [send: 3]
+  import Freeq.Inbox, only: [route: 2]
+  import Freeq.Batch, only: [absorb: 1]
   import Freeq.Boot, only: [run: 3]
 
   def start_link(opts) do
@@ -51,13 +51,13 @@ defmodule Freeq do
 
   @impl true
   def handle_call({:tell, nick, text}, _from, %{socket: socket, channel: channel} = state) do
-    message(socket, channel, "#{nick}: #{text}")
+    send(socket, channel, "#{nick}: #{text}")
     {:reply, :ok, state}
   end
 
   @impl true
   def handle_info({:tcp, _socket, line}, state) do
-    line |> to_string() |> trim_trailing("\r\n") |> Freeq.Batch.strip() |> handle(state)
+    line |> to_string() |> trim_trailing("\r\n") |> List.wrap() |> absorb() |> route(state)
   end
 
   @impl true
@@ -82,19 +82,5 @@ defmodule Freeq do
     :gen_tcp.close(socket)
   rescue
     _ -> :ok
-  end
-
-  defp handle("PING " <> server, %{socket: socket} = state) do
-    pong(socket, server)
-    {:noreply, state}
-  end
-
-  defp handle(":" <> msg, state) do
-    privmsg(msg, state, self())
-    {:noreply, state}
-  end
-
-  defp handle(_msg, state) do
-    {:noreply, state}
   end
 end
