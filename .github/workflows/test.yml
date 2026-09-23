@@ -53,8 +53,46 @@ jobs:
             --bind 127.0.0.1:6667 \
             --db-path /tmp/freeq-data/irc.db \
             --data-dir /tmp/freeq-data \
+            --web-addr 127.0.0.1:8080 \
             > /tmp/freeq.log 2>&1 &
           echo "$!" > /tmp/freeq.pid
+
+      - name: Wait for web listener on 8080
+        run: |
+          for i in {1..50}; do
+            if nc -z 127.0.0.1 8080 2>/dev/null; then
+              echo "Web listener ready"
+              break
+            fi
+            sleep 0.2
+            if [ $i -eq 50 ]; then
+              echo "Timeout waiting for 8080"
+              exit 1
+            fi
+          done
+
+      - name: Check web API and WebSocket
+        run: |
+          echo "Checking HTTP on 8080..."
+          curl -i --fail http://127.0.0.1:8080/
+
+          echo "Checking WebSocket upgrade on /irc..."
+          WS_RESPONSE=$(curl -i -N --http1.1 \
+            -H "Connection: Upgrade" \
+            -H "Upgrade: websocket" \
+            -H "Sec-WebSocket-Version: 13" \
+            -H "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==" \
+            -H "Origin: http://127.0.0.1:5173" \
+            --max-time 3 \
+            http://127.0.0.1:8080/irc 2>&1)
+
+          if echo "$WS_RESPONSE" | grep -q "101"; then
+            echo "WebSocket upgrade successful"
+          else
+            echo "WebSocket upgrade failed:"
+            echo "$WS_RESPONSE"
+            exit 1
+          fi
 
       - name: Sanitize branch name for artifact
         id: branch_slug
