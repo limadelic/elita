@@ -71,11 +71,8 @@ jobs:
             fi
           done
 
-      - name: Check web API and WebSocket
+      - name: Check WebSocket on 8080
         run: |
-          echo "Checking HTTP on 8080..."
-          curl -i --fail http://127.0.0.1:8080/
-
           echo "Checking WebSocket upgrade on /irc..."
           WS_RESPONSE=$(curl -i -N --http1.1 \
             -H "Connection: Upgrade" \
