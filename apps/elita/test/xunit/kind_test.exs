@@ -4,19 +4,12 @@ defmodule KindTest do
 
   test "dispatch to a module-based kind" do
     name = "kind"
-    {:ok, _pid} = Elita.spawn(name, ["greet"], kind: TestKind)
+    {:ok, pid} = Elita.spawn(name, ["greet"], kind: TestKind)
     result = Agent.Harness.dispatch(name, "hello", :ask)
     assert result =~ "asked"
     Agent.Harness.dispatch(name, "world", :tell)
 
-    on_exit(fn ->
-      via = {:via, Registry, {ElitaRegistry, name, %{kind: TestKind, folder: nil}}}
-
-      case GenServer.whereis(via) do
-        nil -> :ok
-        pid -> GenServer.stop(pid)
-      end
-    end)
+    on_exit(fn -> GenServer.stop(pid) end)
   end
 end
 
