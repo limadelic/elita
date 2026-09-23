@@ -80,6 +80,48 @@ jobs:
           ws.addEventListener('error', (err) => { console.log(err.message || err); clearTimeout(timeout); process.exit(1); });
           "
 
+      - name: Clone freeqworld
+        run: |
+          git clone https://github.com/chad/freeqworld.git $RUNNER_TEMP/freeqworld
+          cd $RUNNER_TEMP/freeqworld
+          git checkout 93da7a1
+
+      - name: Apply freeqworld patch
+        run: |
+          cd $RUNNER_TEMP/freeqworld
+          git apply ${{ github.workspace }}/ops/ci/greet-cam/freeqworld.patch
+
+      - name: Build freeqworld
+        run: |
+          cd $RUNNER_TEMP/freeqworld
+          npm install
+          npm run build
+
+      - name: Start freeqworld server
+        run: |
+          cd $RUNNER_TEMP/freeqworld
+          PORT_A=5173 npm run dev > $RUNNER_TEMP/freeqworld.log 2>&1 &
+          echo "$!" > $RUNNER_TEMP/freeqworld.pid
+
+      - name: Wait for freeqworld on 5173
+        run: |
+          for i in {1..150}; do
+            if nc -z 127.0.0.1 5173 2>/dev/null; then
+              http_code=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:5173/)
+              if [ "$http_code" = "200" ]; then
+                echo "FreeqWorld ready with HTTP 200"
+                exit 0
+              fi
+            fi
+            sleep 0.2
+            if [ $i -eq 150 ]; then
+              echo "Timeout waiting for freeqworld on 5173"
+              echo "Server log:"
+              cat $RUNNER_TEMP/freeqworld.log
+              exit 1
+            fi
+          done
+
       - name: Sanitize branch name for artifact
         id: branch_slug
         run: |
