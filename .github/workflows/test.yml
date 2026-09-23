@@ -163,14 +163,21 @@ jobs:
       - name: Record freeq tests
         run: |
           LOG_FILE="$RUNNER_TEMP/greet-cam.log"
-          PID_FILE="$RUNNER_TEMP/greet-cam.pid"
 
-          # Start record.js in background
+          trap "echo '=== greet-cam.log ===' && cat '$LOG_FILE'" EXIT
+
+          # Create fifo to hold stdin open
+          mkfifo "$RUNNER_TEMP/cam.in"
+
+          # Start record.js in background with stdin from fifo
           node ops/ci/greet-cam/record.js \
             --out "$RUNNER_TEMP/greet-cam-out" \
             --channel "#the-lab" \
+            < "$RUNNER_TEMP/cam.in" \
             > "$LOG_FILE" 2>&1 &
-          echo "$!" > "$PID_FILE"
+
+          # Open write FD to fifo (after process starts, before it reads)
+          exec 3> "$RUNNER_TEMP/cam.in"
 
           # Wait for GREETCAM READY
           deadline=$((SECONDS + 60))
@@ -196,12 +203,10 @@ jobs:
           # Run the freeq tests ONLY
           cd apps/elita && mix test test/freeq
 
-          # Stop the recorder
-          PID=$(cat "$PID_FILE")
-          [ -n "$PID" ] && [ "$PID" -gt 1 ] || { echo "refusing to signal pid '$PID'"; exit 1; }
-          kill -TERM "$PID"
-
           cd "${{ github.workspace }}"
+
+          # Stop the recorder by closing fd 3 (closes stdin, record.js exits)
+          exec 3>&-
 
           # Wait for GREETCAM DONE
           deadline=$((SECONDS + 60))
