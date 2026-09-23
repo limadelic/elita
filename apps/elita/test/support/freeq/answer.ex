@@ -1,6 +1,6 @@
-defmodule Elita.Freeq.Answer do
+defmodule Freeq.Answer do
   import String, only: [contains?: 2]
-  import Elita.Freeq.Parser, only: [parse: 3]
+  import Freeq.Parser, only: [parse: 3]
   import Task, only: [start: 1]
 
   def privmsg(msg, state, pid) do

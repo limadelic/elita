@@ -1,4 +1,4 @@
-defmodule Elita.Freeq.Parser do
+defmodule Freeq.Parser do
   import String,
     only: [
       split: 3,

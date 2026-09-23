@@ -32,7 +32,7 @@ defmodule FreeqCase do
         name = to_string(agent)
         id = to_atom("freeq_#{name}")
         config = [agent: name, channel: "#the-lab", driver: "brian"]
-        start_supervised!({Elita.Freeq, config}, id: id)
+        start_supervised!({Freeq, config}, id: id)
         wait_join(name)
       end
     end

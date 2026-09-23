@@ -1,4 +1,4 @@
-defmodule Elita.Freeq do
+defmodule Freeq do
   use GenServer
   import Keyword, only: [fetch!: 2, get: 3]
   import String, only: [trim_trailing: 2]
@@ -6,11 +6,11 @@ defmodule Elita.Freeq do
   import Elita, only: [request: 2]
   import Process, only: [flag: 2]
 
-  import Elita.Freeq.Writer, only: [message: 3, pong: 2]
+  import Freeq.Writer, only: [message: 3, pong: 2]
 
-  import Elita.Freeq.Answer, only: [privmsg: 3]
-  import Elita.Freeq.Lines, only: [send: 3]
-  import Elita.Freeq.Boot, only: [run: 3]
+  import Freeq.Answer, only: [privmsg: 3]
+  import Freeq.Lines, only: [send: 3]
+  import Freeq.Boot, only: [run: 3]
 
   def start_link(opts) do
     start_link(__MODULE__, tuple(opts), [])

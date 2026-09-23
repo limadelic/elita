@@ -1,4 +1,4 @@
-defmodule Elita.Freeq.Ready do
+defmodule Freeq.Ready do
   import String, only: [trim_trailing: 2, contains?: 2]
 
   def wait(socket) do

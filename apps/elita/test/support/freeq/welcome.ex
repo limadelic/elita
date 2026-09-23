@@ -1,4 +1,4 @@
-defmodule Elita.Freeq.Welcome do
+defmodule Freeq.Welcome do
   import String, only: [trim_trailing: 2, contains?: 2]
 
   def greet(socket) do

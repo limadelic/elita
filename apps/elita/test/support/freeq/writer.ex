@@ -1,4 +1,4 @@
-defmodule Elita.Freeq.Writer do
+defmodule Freeq.Writer do
   def nick(socket, agent) do
     line(socket, "NICK #{agent}")
   end
