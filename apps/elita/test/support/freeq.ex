@@ -57,7 +57,7 @@ defmodule Freeq do
 
   @impl true
   def handle_info({:tcp, _socket, line}, state) do
-    line |> to_string() |> trim_trailing("\r\n") |> handle(state)
+    line |> to_string() |> trim_trailing("\r\n") |> Freeq.Batch.strip() |> handle(state)
   end
 
   @impl true

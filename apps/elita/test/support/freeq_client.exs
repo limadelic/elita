@@ -1,4 +1,5 @@
 defmodule FreeqTestClient do
+  import Freeq.Batch, only: [absorb: 1]
   @opts [:binary, {:packet, :line}, {:active, false}, {:reuseaddr, true}, {:nodelay, true}]
   @timeout 5000
 
@@ -15,7 +16,7 @@ defmodule FreeqTestClient do
   end
 
   defp request_caps do
-    send_line("CAP REQ :batch draft/multiline")
+    send_line("CAP REQ :batch draft/multiline message-tags")
     send_line("CAP END")
   end
 
@@ -45,7 +46,7 @@ defmodule FreeqTestClient do
   defp read(what, deadline) do
     left = deadline - epoch()
     left > 0 || raise("timeout waiting for #{what}")
-    :gen_tcp.recv(socket(), 0, left) |> lines(what) |> record()
+    :gen_tcp.recv(socket(), 0, left) |> lines(what) |> absorb() |> record()
   end
 
   defp record(lines) do
