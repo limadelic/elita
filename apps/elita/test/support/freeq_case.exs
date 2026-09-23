@@ -15,7 +15,6 @@ defmodule FreeqCase do
         Server.wait(~c"127.0.0.1", 6667)
         {:ok, socket} = connect()
         Process.put(:freeq_socket, socket)
-        Process.put(:freeq_counter, 1)
         register_brian()
         on_exit(fn -> :gen_tcp.close(socket) end)
         :ok

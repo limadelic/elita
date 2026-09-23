@@ -64,7 +64,6 @@ defmodule FreeqTestClient do
 
   defp handle_line({:ok, data}, deadline, match) do
     lines = String.split(data, "\r\n", trim: true)
-    print(lines)
     found(lines, match) || line(deadline, match)
   end
 
@@ -90,7 +89,6 @@ defmodule FreeqTestClient do
 
   defp handle_scan({:ok, data}, deadline, fragment) do
     lines = String.split(data, "\r\n", trim: true)
-    print(lines)
     hunt(lines, fragment) || scan(deadline, fragment)
   end
 
@@ -109,15 +107,5 @@ defmodule FreeqTestClient do
   defp hunt(lines, fragment) do
     lower = String.downcase(fragment)
     Enum.find(lines, fn line -> String.contains?(String.downcase(line), lower) end)
-  end
-
-  defp print(lines) do
-    Enum.each(lines, fn line -> write(line) end)
-  end
-
-  defp write(line) do
-    count = Process.get(:freeq_counter)
-    Process.put(:freeq_counter, count + 1)
-    IO.puts("#{count}: #{line}")
   end
 end
