@@ -9,41 +9,60 @@ defmodule FreeqTestClient do
     ])
   end
 
-  def register_brian(socket, counter) do
+  def register_brian do
+    socket = Process.get(:freeq_socket)
+    counter = Process.get(:freeq_counter)
+
     :gen_tcp.send(socket, "NICK brian\r\n")
     :gen_tcp.send(socket, "USER brian 0 * :brian\r\n")
 
     deadline = System.monotonic_time(:millisecond) + 5000
-    wait_for_line(socket, deadline, fn line -> String.contains?(line, "001") end, counter)
+    wait_for_line(deadline, fn line -> String.contains?(line, "001") end)
 
     :gen_tcp.send(socket, "JOIN #the-lab\r\n")
-    wait_for_line(socket, deadline, fn line -> String.contains?(line, " 366 ") end, counter)
+    wait_for_line(deadline, fn line -> String.contains?(line, " 366 ") end)
   end
 
-  def wait_join(socket, agent, counter) do
+  def wait_join(agent) do
+    wait_join(agent, nil)
+  end
+
+  def wait_join(agent, _counter) do
     deadline = System.monotonic_time(:millisecond) + 5000
 
     wait_for_line(
-      socket,
       deadline,
       fn line ->
         String.contains?(line, agent) and String.contains?(line, "JOIN")
-      end,
-      counter
+      end
     )
   end
 
-  def send_turn(socket, channel, text, _counter) do
+  def send_turn(text) do
+    send_turn("#the-lab", text)
+  end
+
+  def send_turn(channel, text) do
+    send_turn(channel, text, nil)
+  end
+
+  def send_turn(channel, text, _counter) do
+    socket = Process.get(:freeq_socket)
     :gen_tcp.send(socket, "PRIVMSG #{channel} :#{text}\r\n")
   end
 
-  def wait_fragment(socket, fragment, counter) do
-    deadline = System.monotonic_time(:millisecond) + 5000
-
-    scan_for_fragment(socket, deadline, fragment, counter)
+  def wait_fragment(fragment) do
+    wait_fragment(fragment, nil)
   end
 
-  def scan_for_fragment(socket, deadline, fragment, counter) do
+  def wait_fragment(fragment, _counter) do
+    deadline = System.monotonic_time(:millisecond) + 5000
+    scan_for_fragment(deadline, fragment)
+  end
+
+  defp scan_for_fragment(deadline, fragment) do
+    socket = Process.get(:freeq_socket)
+    counter = Process.get(:freeq_counter)
     remaining = deadline - System.monotonic_time(:millisecond)
 
     if remaining <= 0 do
@@ -61,7 +80,7 @@ defmodule FreeqTestClient do
                String.contains?(String.downcase(line), fragment_lower)
              end) do
           nil ->
-            scan_for_fragment(socket, deadline, fragment, counter)
+            scan_for_fragment(deadline, fragment)
 
           _line ->
             :ok
@@ -75,7 +94,9 @@ defmodule FreeqTestClient do
     end
   end
 
-  def wait_for_line(socket, deadline, matcher, counter) do
+  defp wait_for_line(deadline, matcher) do
+    socket = Process.get(:freeq_socket)
+    counter = Process.get(:freeq_counter)
     remaining = deadline - System.monotonic_time(:millisecond)
 
     if remaining <= 0 do
@@ -89,7 +110,7 @@ defmodule FreeqTestClient do
 
         case Enum.find(lines, fn line -> matcher.(line) end) do
           nil ->
-            wait_for_line(socket, deadline, matcher, counter)
+            wait_for_line(deadline, matcher)
 
           _line ->
             :ok
@@ -103,7 +124,7 @@ defmodule FreeqTestClient do
     end
   end
 
-  def count_and_print(lines, counter) do
+  defp count_and_print(lines, counter) do
     lines
     |> Enum.each(fn line ->
       count = Agent.get_and_update(counter, fn c -> {c, c + 1} end)

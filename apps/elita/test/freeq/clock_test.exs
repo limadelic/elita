@@ -4,7 +4,7 @@ defmodule FreeqClockTest do
   use FreeqCase
 
   @tag cassette: "clock"
-  test "clock tells the time", %{socket: socket, counter: counter} do
+  test "clock tells the time" do
     Tester.spawn(:clock)
 
     {:ok, clock_pid} =
@@ -14,10 +14,10 @@ defmodule FreeqClockTest do
         driver: "brian"
       )
 
-    FreeqTestClient.wait_join(socket, "clock", counter)
+    FreeqTestClient.wait_join("clock")
 
-    FreeqTestClient.send_turn(socket, "#the-lab", "clock: what time is it", counter)
-    FreeqTestClient.wait_fragment(socket, "2025-07-07 10:00", counter)
+    FreeqTestClient.send_turn("clock: what time is it")
+    FreeqTestClient.wait_fragment("2025-07-07 10:00")
 
     GenServer.stop(clock_pid)
   end

@@ -11,11 +11,14 @@ defmodule FreeqCase do
         {:ok, socket} = FreeqTestClient.connect()
         {:ok, counter} = Agent.start_link(fn -> 1 end)
 
-        FreeqTestClient.register_brian(socket, counter)
+        Process.put(:freeq_socket, socket)
+        Process.put(:freeq_counter, counter)
+
+        FreeqTestClient.register_brian()
 
         on_exit(fn -> :gen_tcp.close(socket) end)
 
-        {:ok, socket: socket, counter: counter}
+        :ok
       end
     end
   end
