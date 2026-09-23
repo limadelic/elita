@@ -28,5 +28,7 @@ defmodule FreeqBossTest do
     verify("done", ask(:michael, "we need 50 copies of the quarterly sales report"))
     verify("no", ask(:jim, "did you receive a task?"))
     verify("yes", ask(:pam, "did you receive a task to make copies?"))
+    assert FreeqTestClient.said?("michael", "dwight", "50 copies")
+    assert FreeqTestClient.said?("dwight", "pam", "50 copies")
   end
 end
