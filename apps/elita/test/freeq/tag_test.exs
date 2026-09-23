@@ -25,4 +25,9 @@ defmodule FreeqTagTest do
     line = "@+elita-ask=1 :alice!a@h BATCH +mlA draft/multiline #the-lab"
     assert Freeq.Tag.read(line, "+elita-ask") == "1"
   end
+
+  test "reads plus tag value from privmsg line" do
+    line = "@+elita-ask=1;batch=mlA :alice!a@h PRIVMSG #the-lab :bob: move"
+    assert Freeq.Tag.read(line, "+elita-ask") == "1"
+  end
 end
