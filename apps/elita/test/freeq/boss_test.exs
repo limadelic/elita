@@ -36,10 +36,22 @@ defmodule FreeqBossTest do
     FreeqTestClient.send_turn(socket, "#the-lab", "boss: we need more test created", counter)
     FreeqTestClient.wait_fragment(socket, "done", counter)
 
-    FreeqTestClient.send_turn(socket, "#the-lab", "dev: did you receive a task from boss?", counter)
+    FreeqTestClient.send_turn(
+      socket,
+      "#the-lab",
+      "dev: did you receive a task from boss?",
+      counter
+    )
+
     FreeqTestClient.wait_fragment(socket, "no", counter)
 
-    FreeqTestClient.send_turn(socket, "#the-lab", "qa: did you receive a task from boss?", counter)
+    FreeqTestClient.send_turn(
+      socket,
+      "#the-lab",
+      "qa: did you receive a task from boss?",
+      counter
+    )
+
     FreeqTestClient.wait_fragment(socket, "yes", counter)
 
     :gen_tcp.close(socket)
