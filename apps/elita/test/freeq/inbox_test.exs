@@ -3,10 +3,10 @@ defmodule FreeqInboxTest do
 
   @refusal ":freeq 404 alice #the-lab :Flood protection: sending too fast"
 
-  test "a refused message raises with the server text" do
-    assert_raise RuntimeError, ~r/Flood protection: sending too fast/, fn ->
-      Freeq.Inbox.route([@refusal], %{})
-    end
+  setup do
+    Application.put_env(:elita, :flood_window, 0)
+    on_exit(fn -> Application.delete_env(:elita, :flood_window) end)
+    :ok
   end
 
   @echo ":alice!u@h PRIVMSG #the-lab :bob: hello"
@@ -19,7 +19,8 @@ defmodule FreeqInboxTest do
       channel: "#the-lab",
       ask: fn _, _ -> {:error, :none} end,
       driver: driver,
-      pending: pending
+      pending: pending,
+      attempts: 0
     }
   end
 
@@ -36,5 +37,25 @@ defmodule FreeqInboxTest do
   test "a nick that merely starts with ours clears nothing" do
     {:noreply, state} = Freeq.Inbox.route([@twin], state(["bob: hello"], "alice2"))
     assert state.pending == ["bob: hello"]
+  end
+
+  test "a refused message is scheduled to go again" do
+    {:noreply, state} = Freeq.Inbox.route([@refusal], state(["bob: hello"], nil))
+    assert_receive {:retry, "bob: hello"}
+    assert state.attempts == 1
+  end
+
+  test "refused too many times, it raises with the server's own words" do
+    state = %{state(["bob: hello"], nil) | attempts: 3}
+
+    assert_raise RuntimeError, ~r/Flood protection: sending too fast/, fn ->
+      Freeq.Inbox.route([@refusal], state)
+    end
+  end
+
+  test "a refusal with nothing queued raises rather than guessing" do
+    assert_raise RuntimeError, ~r/never queued/, fn ->
+      Freeq.Inbox.route([@refusal], state([], nil))
+    end
   end
 end

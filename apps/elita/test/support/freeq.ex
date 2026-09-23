@@ -36,7 +36,16 @@ defmodule Freeq do
   defp state(socket, agent, channel, ask, driver) do
     name = "freeq_#{agent}" |> String.to_atom()
     Process.register(self(), name)
-    %{socket: socket, agent: agent, channel: channel, ask: ask, driver: driver, pending: []}
+
+    %{
+      socket: socket,
+      agent: agent,
+      channel: channel,
+      ask: ask,
+      driver: driver,
+      pending: [],
+      attempts: 0
+    }
   end
 
   @impl true
@@ -65,6 +74,12 @@ defmodule Freeq do
   def handle_info({:answer, text}, %{socket: socket, channel: channel} = state) do
     send(socket, channel, text)
     {:noreply, push(state, text)}
+  end
+
+  @impl true
+  def handle_info({:retry, text}, %{socket: socket, channel: channel} = state) do
+    send(socket, channel, text)
+    {:noreply, state}
   end
 
   @impl true

@@ -2,7 +2,8 @@ defmodule Freeq.Inbox do
   import Freeq.Writer, only: [pong: 2]
   import Freeq.Answer, only: [privmsg: 3]
   import String, only: [contains?: 2, split: 3]
-  import Freeq.Pending, only: [drop: 1]
+  import Freeq.Pending, only: [drop: 1, head: 1]
+  import Freeq.Flood, only: [defer: 3]
 
   def route([], state), do: {:noreply, state}
   def route([line], state), do: handle(line, state)
@@ -18,7 +19,7 @@ defmodule Freeq.Inbox do
 
   defp refused?(msg), do: contains?(msg, " 404 ") and contains?(msg, "Flood protection")
 
-  defp relay(true, msg, _state), do: raise("freeq refused a message: #{msg}")
+  defp relay(true, msg, state), do: {:noreply, defer(state, head(state), msg)}
 
   defp relay(false, msg, state) do
     privmsg(msg, state, self())
