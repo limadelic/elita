@@ -1,7 +1,8 @@
 defmodule Freeq.Inbox do
   import Freeq.Writer, only: [pong: 2]
   import Freeq.Answer, only: [privmsg: 3]
-  import String, only: [contains?: 2]
+  import String, only: [contains?: 2, split: 3]
+  import Freeq.Pending, only: [drop: 1]
 
   def route([], state), do: {:noreply, state}
   def route([line], state), do: handle(line, state)
@@ -21,6 +22,13 @@ defmodule Freeq.Inbox do
 
   defp relay(false, msg, state) do
     privmsg(msg, state, self())
-    {:noreply, state}
+    {:noreply, settle(mine?(msg, state), state)}
   end
+
+  defp mine?(msg, %{agent: agent}), do: nick(msg) == agent
+
+  defp nick(msg), do: msg |> split("!", parts: 2) |> hd()
+
+  defp settle(true, state), do: drop(state)
+  defp settle(false, state), do: state
 end

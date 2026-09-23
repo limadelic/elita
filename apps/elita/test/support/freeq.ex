@@ -6,8 +6,8 @@ defmodule Freeq do
   import Elita, only: [request: 2]
   import Process, only: [flag: 2]
 
-  import Freeq.Writer, only: [message: 3]
   import Freeq.Lines, only: [send: 3]
+  import Freeq.Pending, only: [push: 2]
   import Freeq.Inbox, only: [route: 2]
   import Freeq.Batch, only: [absorb: 1]
   import Freeq.Boot, only: [run: 3]
@@ -19,10 +19,6 @@ defmodule Freeq do
   defp tuple(opts) do
     {fetch!(opts, :agent), fetch!(opts, :channel), get(opts, :ask, &request/2),
      get(opts, :driver, nil)}
-  end
-
-  def say(pid, text) do
-    call(pid, {:say, text})
   end
 
   def tell(pid, nick, text) do
@@ -40,19 +36,14 @@ defmodule Freeq do
   defp state(socket, agent, channel, ask, driver) do
     name = "freeq_#{agent}" |> String.to_atom()
     Process.register(self(), name)
-    %{socket: socket, agent: agent, channel: channel, ask: ask, driver: driver}
-  end
-
-  @impl true
-  def handle_call({:say, text}, _from, %{socket: socket, channel: channel} = state) do
-    message(socket, channel, text)
-    {:reply, :ok, state}
+    %{socket: socket, agent: agent, channel: channel, ask: ask, driver: driver, pending: []}
   end
 
   @impl true
   def handle_call({:tell, nick, text}, _from, %{socket: socket, channel: channel} = state) do
-    send(socket, channel, "#{nick}: #{text}")
-    {:reply, :ok, state}
+    text = "#{nick}: #{text}"
+    send(socket, channel, text)
+    {:reply, :ok, push(state, text)}
   end
 
   @impl true
@@ -73,7 +64,7 @@ defmodule Freeq do
   @impl true
   def handle_info({:answer, text}, %{socket: socket, channel: channel} = state) do
     send(socket, channel, text)
-    {:noreply, state}
+    {:noreply, push(state, text)}
   end
 
   @impl true
