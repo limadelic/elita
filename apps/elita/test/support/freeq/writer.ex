@@ -20,6 +20,6 @@ defmodule Freeq.Writer do
   end
 
   def line(socket, text) do
-    :gen_tcp.send(socket, "#{text}\r\n")
+    :ok = :gen_tcp.send(socket, "#{text}\r\n")
   end
 end
