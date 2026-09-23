@@ -1,13 +1,15 @@
 Code.require_file("../support/freeq_case.exs", __DIR__)
+Code.require_file("../support/freeq_client.exs", __DIR__)
 
 defmodule FreeqClockTest do
   use FreeqCase
+  import FreeqTestClient, only: [say: 1, hears: 1]
 
   @tag cassette: "clock"
   test "clock tells the time" do
-    join(:clock)
+    join :clock
 
-    say("clock: what time is it")
-    hears("2025-07-07 10:00")
+    say "clock: what time is it"
+    hears "2025-07-07 10:00"
   end
 end

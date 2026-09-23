@@ -1,23 +1,21 @@
 Code.require_file("../support/freeq_case.exs", __DIR__)
+Code.require_file("../support/freeq_client.exs", __DIR__)
 
 defmodule FreeqGreetTest do
   use FreeqCase
+  import FreeqTestClient, only: [say: 1, hears: 1]
 
   @tag cassette: "greet"
   test "brian and greet have a real conversation in the lab" do
-    join(:greet)
+    join :greet
 
-    say("greet: hello")
-    hears("who am i talking to")
+    say "greet: hello"
+    hears "who am i talking to"
 
-    Process.sleep(3000)
+    say "greet: Mike"
+    hears "wonderful to meet you"
 
-    say("greet: Mike")
-    hears("wonderful to meet you")
-
-    Process.sleep(3000)
-
-    say("greet: how are you?")
-    hears("i am greeeet")
+    say "greet: how are you?"
+    hears "i am greeeet"
   end
 end

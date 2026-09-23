@@ -1,55 +1,57 @@
 Code.require_file("../support/freeq_case.exs", __DIR__)
+Code.require_file("../support/freeq_client.exs", __DIR__)
 
 defmodule FreeqBossTest do
   use FreeqCase
+  import FreeqTestClient, only: [say: 1, hears: 1]
 
   @tag cassette: "boss"
   test "boss delegates in the lab" do
-    join(:boss)
-    join(:dev, :worker)
-    join(:qa, :worker)
+    join :boss
+    join :dev, :worker
+    join :qa, :worker
 
-    say("boss: you manage a software development team with a dev and a qa")
+    say "boss: you manage a software development team with a dev and a qa"
 
-    hears("ready")
+    hears "ready"
 
-    say("boss: we need more test created")
-    hears("done")
+    say "boss: we need more test created"
+    hears "done"
 
-    say("dev: did you receive a task from boss?")
+    say "dev: did you receive a task from boss?"
 
-    hears("no")
+    hears "no"
 
-    say("qa: did you receive a task from boss?")
+    say "qa: did you receive a task from boss?"
 
-    hears("yes")
+    hears "yes"
   end
 
   @tag cassette: "boss2"
   test "michael asks dwight to photocopy sales reports" do
-    join(:michael, :boss)
-    join(:dwight, :boss)
-    join(:pam, :worker)
-    join(:jim, :worker)
+    join :michael, :boss
+    join :dwight, :boss
+    join :pam, :worker
+    join :jim, :worker
 
-    say("michael: you manage dwight the assistant regional manager")
+    say "michael: you manage dwight the assistant regional manager"
 
-    hears("understand")
+    hears "understand"
 
-    say("dwight: you manage pam the receptionist and jim the salesman")
+    say "dwight: you manage pam the receptionist and jim the salesman"
 
-    hears("understand")
+    hears "understand"
 
-    say("michael: we need 50 copies of the quarterly sales report")
+    say "michael: we need 50 copies of the quarterly sales report"
 
-    hears("done")
+    hears "done"
 
-    say("jim: did you receive a task?")
+    say "jim: did you receive a task?"
 
-    hears("no")
+    hears "no"
 
-    say("pam: did you receive a task to make copies?")
+    say "pam: did you receive a task to make copies?"
 
-    hears("yes")
+    hears "yes"
   end
 end
