@@ -4,16 +4,11 @@ defmodule FreeqGreetTest do
   use FreeqCase
 
   @tag cassette: "greet"
-  test "brian and greet have a real conversation in the lab" do
-    join :greet
+  test "greet conversation flow" do
+    spawn(:greet)
 
-    say "greet: hello"
-    hears "who am i talking to"
-
-    say "greet: Mike"
-    hears "wonderful to meet you"
-
-    say "greet: how are you?"
-    hears "i am greeeet"
+    verify("who am i talking to", ask(:greet, "hello"))
+    verify("wonderful to meet you", ask(:greet, "Mike"))
+    verify("i am greeeet", ask(:greet, "how are you?"))
   end
 end
