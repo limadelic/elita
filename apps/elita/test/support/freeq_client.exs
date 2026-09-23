@@ -69,11 +69,13 @@ defmodule FreeqTestClient do
   defp handle_batch_line("BATCH -" <> id, acc) do
     bid = String.trim(id)
     batches = Process.get(:freeq_batches, %{})
+
     case Map.pop(batches, bid) do
       {{_t, _tgt, lines}, rest} ->
         Process.put(:freeq_batches, rest)
         assembled = Freeq.Batch.assemble(Enum.reverse(lines))
         [":" <> assembled | acc]
+
       {nil, _rest} ->
         acc
     end
@@ -81,18 +83,23 @@ defmodule FreeqTestClient do
 
   defp handle_batch_line("@batch=" <> rest, acc) do
     batches = Process.get(:freeq_batches, %{})
+
     if map_size(batches) > 0 do
       [bid, msg] = String.split(rest, " ", parts: 2)
       bid = String.split(bid, ";") |> List.first()
+
       case Map.get(batches, bid) do
         {t, tgt, lines} ->
-          body = case String.split(msg, " :", parts: 2) do
-            [_prefix, b] -> b
-            _ -> ""
-          end
+          body =
+            case String.split(msg, " :", parts: 2) do
+              [_prefix, b] -> b
+              _ -> ""
+            end
+
           new_batches = Map.put(batches, bid, {t, tgt, [body | lines]})
           Process.put(:freeq_batches, new_batches)
           acc
+
         nil ->
           [rest | acc]
       end

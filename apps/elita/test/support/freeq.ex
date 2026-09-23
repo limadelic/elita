@@ -48,16 +48,19 @@ defmodule Freeq do
     message(socket, channel, text)
     {:reply, :ok, state}
   end
+
   @impl true
   def handle_call({:tell, nick, text}, _from, %{socket: socket, channel: channel} = state) do
     message(socket, channel, "#{nick}: #{text}")
     {:reply, :ok, state}
   end
+
   @impl true
   def handle_info({:tcp, _socket, line}, state) do
     str = line |> to_string() |> trim_trailing("\r\n")
     process(str, state)
   end
+
   @impl true
   def handle_info({:tcp_closed, _socket}, state), do: {:stop, :normal, state}
   @impl true
@@ -74,14 +77,17 @@ defmodule Freeq do
       result -> result
     end
   end
+
   defp handle("PING " <> server, %{socket: socket} = state) do
     pong(socket, server)
     {:noreply, state}
   end
+
   defp handle(":" <> msg, state) do
     privmsg(msg, state, self())
     {:noreply, state}
   end
+
   defp handle(_msg, state), do: {:noreply, state}
 
   @impl true
@@ -92,4 +98,3 @@ defmodule Freeq do
     _ -> :ok
   end
 end
-
