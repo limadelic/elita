@@ -61,8 +61,11 @@ defmodule Freeq.Batch do
 
   defp text(body) do
     [_src, rest] = split(body, " PRIVMSG ", parts: 2)
-    rest |> split(" ", parts: 2) |> last() |> trim_leading(":")
+    rest |> split(" ", parts: 2) |> last() |> body()
   end
+
+  defp body(":" <> text), do: text
+  defp body(text), do: text
 
   defp assemble(%{src: src, chan: chan, lines: lines}) do
     "#{src} PRIVMSG #{chan} :#{join(lines, "\n")}"
