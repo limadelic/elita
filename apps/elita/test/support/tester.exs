@@ -1,4 +1,5 @@
 defmodule Tester do
+  import Kernel, except: [spawn: 1, spawn: 2, spawn: 3]
   import ExUnit.Assertions
   import ExUnit.Callbacks
   import Elita, only: [request: 2, dispatch: 2]
@@ -6,7 +7,7 @@ defmodule Tester do
   defmacro __using__(opts) do
     quote do
       use ExUnit.Case
-      import Kernel, except: [spawn: 1, spawn: 2]
+      import Kernel, except: [spawn: 1, spawn: 2, spawn: 3]
       import Tester, except: unquote(Keyword.get(opts, :except, []))
 
       setup_all do
@@ -38,12 +39,16 @@ defmodule Tester do
   end
 
   def spawn(name) do
-    spawn(name, [name])
+    spawn(name, [name], [])
   end
 
   def spawn(name, configs) do
+    spawn(name, configs, [])
+  end
+
+  def spawn(name, configs, extra) do
     kill(name)
-    opts = tape_opts()
+    opts = tape_opts() ++ extra
     Elita.spawn(to_string(name), to_configs(configs), opts)
     on_exit(fn -> kill(name) end)
   end
@@ -70,11 +75,9 @@ defmodule Tester do
   defp kill(name) do
     normalized = name |> to_string() |> String.downcase()
 
-    {:via, Registry, {ElitaRegistry, normalized, %{kind: :native, folder: nil}}}
-    |> GenServer.whereis()
-    |> case do
-      nil -> :ok
-      pid -> GenServer.stop(pid)
+    case Registry.lookup(ElitaRegistry, normalized) do
+      [{pid, _meta}] -> GenServer.stop(pid)
+      _ -> :ok
     end
   end
 
