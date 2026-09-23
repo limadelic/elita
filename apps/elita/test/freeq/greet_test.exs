@@ -9,13 +9,14 @@ defmodule FreeqGreetTest do
     {:ok, socket} = connect()
     {:ok, counter} = Agent.start_link(fn -> 1 end)
 
+    Tester.spawn("greet")
+
     register_brian(socket, counter)
 
     {:ok, greet_pid} =
       Elita.Freeq.start_link(
         agent: "greet",
         channel: "#the-lab",
-        ask: &tape_ask/2,
         driver: "brian"
       )
 
@@ -149,21 +150,4 @@ defmodule FreeqGreetTest do
       IO.puts("#{count}: #{line}")
     end)
   end
-
-  defp tape_ask(agent, text) do
-    body = %{messages: [%{content: text}]}
-
-    Tape.handle(
-      body,
-      agent,
-      fn -> {:error, :no_tape_response} end,
-      tape: System.get_env("TAPE"),
-      on_miss: :raise
-    )
-    |> extract_text()
-  end
-
-  defp extract_text([%{"text" => text, "type" => "text"} | _]), do: text
-  defp extract_text([%{"text" => text} | _]), do: text
-  defp extract_text(error), do: error
 end

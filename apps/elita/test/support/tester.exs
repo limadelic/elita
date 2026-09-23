@@ -23,6 +23,7 @@ defmodule Tester do
       setup context do
         cassette = context[:cassette] || default_cassette()
         System.put_env("CASSETTE", cassette)
+        Tape.Writer.reset()
         :ok
       end
 
