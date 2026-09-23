@@ -40,7 +40,7 @@ defmodule Freeq do
   defp state(socket, agent, channel, ask, driver) do
     name = "freeq_#{agent}" |> String.to_atom()
     Process.register(self(), name)
-    %{socket: socket, agent: agent, channel: channel, ask: ask, driver: driver, batches: %{}}
+    %{socket: socket, agent: agent, channel: channel, ask: ask, driver: driver}
   end
 
   @impl true
@@ -57,25 +57,31 @@ defmodule Freeq do
 
   @impl true
   def handle_info({:tcp, _socket, line}, state) do
-    str = line |> to_string() |> trim_trailing("\r\n")
-    process(str, state)
+    line |> to_string() |> trim_trailing("\r\n") |> handle(state)
   end
 
   @impl true
-  def handle_info({:tcp_closed, _socket}, state), do: {:stop, :normal, state}
+  def handle_info({:tcp_closed, _socket}, state) do
+    {:stop, :normal, state}
+  end
+
   @impl true
-  def handle_info({:EXIT, _pid, _reason}, state), do: {:stop, :normal, state}
+  def handle_info({:EXIT, _pid, _reason}, state) do
+    {:stop, :normal, state}
+  end
+
   @impl true
   def handle_info({:answer, text}, %{socket: socket, channel: channel} = state) do
     send(socket, channel, text)
     {:noreply, state}
   end
 
-  defp process(str, state) do
-    case Freeq.Inbound.route(str, state, &handle/2) do
-      {:continue, msg, st} -> handle(msg, st)
-      result -> result
-    end
+  @impl true
+  def terminate(_reason, %{socket: socket}) do
+    :gen_tcp.send(socket, "QUIT\r\n")
+    :gen_tcp.close(socket)
+  rescue
+    _ -> :ok
   end
 
   defp handle("PING " <> server, %{socket: socket} = state) do
@@ -88,13 +94,7 @@ defmodule Freeq do
     {:noreply, state}
   end
 
-  defp handle(_msg, state), do: {:noreply, state}
-
-  @impl true
-  def terminate(_reason, %{socket: socket}) do
-    :gen_tcp.send(socket, "QUIT\r\n")
-    :gen_tcp.close(socket)
-  rescue
-    _ -> :ok
+  defp handle(_msg, state) do
+    {:noreply, state}
   end
 end

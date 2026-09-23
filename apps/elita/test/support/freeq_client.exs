@@ -5,16 +5,12 @@ defmodule FreeqTestClient do
   def connect, do: :gen_tcp.connect(~c"127.0.0.1", 6667, @opts)
 
   def register_brian do
-    send_line("CAP REQ batch draft/multiline")
-    await("CAP", &String.contains?(&1, " CAP "))
-    send_line("CAP END")
     send_line("NICK brian")
     send_line("USER brian 0 * :brian")
     await("001", &String.contains?(&1, " 001 "))
     send_line("JOIN #the-lab")
     await("366", &String.contains?(&1, " 366 "))
     Process.put(:freeq_transcript, [])
-    Process.put(:freeq_batches, %{})
   end
 
   def wait_join(agent), do: await("#{agent} JOIN", &joined(&1, agent))
@@ -43,7 +39,7 @@ defmodule FreeqTestClient do
   defp read(what, deadline) do
     left = deadline - epoch()
     left > 0 || raise("timeout waiting for #{what}")
-    :gen_tcp.recv(socket(), 0, left) |> lines(what) |> process_batches() |> record()
+    :gen_tcp.recv(socket(), 0, left) |> lines(what) |> record()
   end
 
   defp record(lines) do
@@ -55,63 +51,6 @@ defmodule FreeqTestClient do
   defp lines({:error, :timeout}, what), do: raise("timeout waiting for #{what}")
   defp lines({:error, reason}, _what), do: raise("socket error: #{inspect(reason)}")
 
-  defp process_batches(lines) do
-    Enum.reduce(lines, [], &handle_batch_line/2) |> Enum.reverse()
-  end
-
-  defp handle_batch_line("BATCH +" <> rest, acc) do
-    [id, type, target | _] = String.split(rest)
-    batches = Process.get(:freeq_batches, %{})
-    Process.put(:freeq_batches, Map.put(batches, id, {type, target, []}))
-    acc
-  end
-
-  defp handle_batch_line("BATCH -" <> id, acc) do
-    bid = String.trim(id)
-    batches = Process.get(:freeq_batches, %{})
-
-    case Map.pop(batches, bid) do
-      {{_t, _tgt, lines}, rest} ->
-        Process.put(:freeq_batches, rest)
-        assembled = Freeq.Batch.assemble(Enum.reverse(lines))
-        [":" <> assembled | acc]
-
-      {nil, _rest} ->
-        acc
-    end
-  end
-
-  defp handle_batch_line("@batch=" <> rest, acc) do
-    batches = Process.get(:freeq_batches, %{})
-
-    if map_size(batches) > 0 do
-      [bid, msg] = String.split(rest, " ", parts: 2)
-      bid = String.split(bid, ";") |> List.first()
-
-      case Map.get(batches, bid) do
-        {t, tgt, lines} ->
-          body =
-            case String.split(msg, " :", parts: 2) do
-              [_prefix, b] -> b
-              _ -> ""
-            end
-
-          new_batches = Map.put(batches, bid, {t, tgt, [body | lines]})
-          Process.put(:freeq_batches, new_batches)
-          acc
-
-        nil ->
-          [rest | acc]
-      end
-    else
-      ["@batch=" <> rest | acc]
-    end
-  end
-
-  defp handle_batch_line(line, acc) do
-    [line | acc]
-  end
-
   def reply(agent) do
     name = to_string(agent)
     await("reply from #{name}", &from(&1, name)) |> text()
@@ -120,10 +59,6 @@ defmodule FreeqTestClient do
   def said?(from, to, fragment) do
     transcript = Process.get(:freeq_transcript, [])
     Enum.any?(transcript, &matches?(&1, from, to, fragment))
-  end
-
-  def wait_said?(from, to, fragment) do
-    await("#{from} tells #{to}: #{fragment}", &matches?(&1, from, to, fragment))
   end
 
   defp matches?(line, from, to, fragment) do

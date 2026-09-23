@@ -11,33 +11,12 @@ defmodule Freeq.Writer do
     line(socket, "JOIN #{channel}")
   end
 
-  def cap(socket, cmd) do
-    line(socket, "CAP #{cmd}")
-  end
-
   def message(socket, channel, text) do
-    if String.contains?(text, "\n") do
-      batch(socket, channel, text)
-    else
-      line(socket, "PRIVMSG #{channel} :#{text}")
-    end
+    line(socket, "PRIVMSG #{channel} :#{text}")
   end
 
   def pong(socket, server) do
     line(socket, "PONG #{server}")
-  end
-
-  defp batch(socket, channel, text) do
-    id = "b1"
-    line(socket, "BATCH +#{id} draft/multiline #{channel}")
-    text
-    |> String.split("\n", trim: false)
-    |> Enum.each(&privmsg_line(socket, channel, id, &1))
-    line(socket, "BATCH -#{id}")
-  end
-
-  defp privmsg_line(socket, channel, id, body) do
-    line(socket, "@batch=#{id} PRIVMSG #{channel} :#{body}")
   end
 
   defp line(socket, text) do
