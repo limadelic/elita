@@ -71,6 +71,15 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: echo "prefix=$(ops/ci/site/prefix.rb)" >> "$GITHUB_OUTPUT"
 
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Print tool versions
+        run: |
+          ffmpeg -version | head -1
+          google-chrome --version
+          node --version
+
       - name: Get dependencies
         run: mix deps.get
 
