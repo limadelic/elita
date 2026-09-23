@@ -1,38 +1,24 @@
 defmodule FreeqCase do
+  Code.require_file("../support/freeq_client.exs", __DIR__)
+
   defmacro __using__(_opts) do
     quote do
       use Tester
       import String, only: [to_atom: 1]
-      import Agent, only: [start_link: 1]
+
+      Code.require_file("../support/server.exs", __DIR__)
 
       import FreeqTestClient,
         only: [say: 1, hears: 1, connect: 0, register_brian: 0, wait_join: 1]
 
-      Code.require_file("../support/server.exs", __DIR__)
-      Code.require_file("../support/freeq_client.exs", __DIR__)
-
       setup do
         Server.wait(~c"127.0.0.1", 6667)
-        socket = setup_socket()
+        {:ok, socket} = connect()
+        Process.put(:freeq_socket, socket)
+        Process.put(:freeq_counter, 1)
+        register_brian()
         on_exit(fn -> :gen_tcp.close(socket) end)
         :ok
-      end
-
-      defp setup_socket do
-        {:ok, socket} = connect()
-        init(socket)
-        socket
-      end
-
-      defp init(socket) do
-        {:ok, counter} = start_link(fn -> 1 end)
-        store(socket, counter)
-      end
-
-      defp store(socket, counter) do
-        Process.put(:freeq_socket, socket)
-        Process.put(:freeq_counter, counter)
-        register_brian()
       end
 
       def join(agent, role \\ nil) do

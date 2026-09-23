@@ -116,8 +116,8 @@ defmodule FreeqTestClient do
   end
 
   defp write(line) do
-    counter = Process.get(:freeq_counter)
-    count = Agent.get_and_update(counter, fn c -> {c, c + 1} end)
+    count = Process.get(:freeq_counter)
+    Process.put(:freeq_counter, count + 1)
     IO.puts("#{count}: #{line}")
   end
 end

@@ -1,5 +1,4 @@
 Code.require_file("../support/freeq_case.exs", __DIR__)
-Code.require_file("../support/freeq_client.exs", __DIR__)
 
 defmodule FreeqBossTest do
   use FreeqCase
