@@ -1,37 +1,39 @@
 defmodule FreeqTestClient do
+  @opts [
+    :binary,
+    {:packet, :line},
+    {:active, false},
+    {:reuseaddr, true},
+    {:nodelay, true}
+  ]
+
   def connect do
-    :gen_tcp.connect(~c"127.0.0.1", 6667, [
-      :binary,
-      {:packet, :line},
-      {:active, false},
-      {:reuseaddr, true},
-      {:nodelay, true}
-    ])
+    :gen_tcp.connect(~c"127.0.0.1", 6667, @opts)
   end
 
   def register_brian do
-    socket = Process.get(:freeq_socket)
-    counter = Process.get(:freeq_counter)
+    auth()
+    deadline = epoch() + 5000
+    line(deadline, fn l -> String.contains?(l, "001") end)
+    enter(deadline)
+  end
 
+  defp auth do
+    socket = Process.get(:freeq_socket)
     :gen_tcp.send(socket, "NICK brian\r\n")
     :gen_tcp.send(socket, "USER brian 0 * :brian\r\n")
+  end
 
-    deadline = System.monotonic_time(:millisecond) + 5000
-    wait_for_line(deadline, fn line -> String.contains?(line, "001") end)
-
+  defp enter(deadline) do
+    socket = Process.get(:freeq_socket)
     :gen_tcp.send(socket, "JOIN #the-lab\r\n")
-    wait_for_line(deadline, fn line -> String.contains?(line, " 366 ") end)
+    line(deadline, fn l -> String.contains?(l, " 366 ") end)
   end
 
   def wait_join(agent) do
-    deadline = System.monotonic_time(:millisecond) + 5000
-
-    wait_for_line(
-      deadline,
-      fn line ->
-        String.contains?(line, agent) and String.contains?(line, "JOIN")
-      end
-    )
+    deadline = epoch() + 5000
+    match = fn l -> String.contains?(l, agent) and String.contains?(l, "JOIN") end
+    line(deadline, match)
   end
 
   def send_turn(text) do
@@ -44,79 +46,82 @@ defmodule FreeqTestClient do
   end
 
   def wait_fragment(fragment) do
-    deadline = System.monotonic_time(:millisecond) + 5000
-    scan_for_fragment(deadline, fragment)
+    deadline = epoch() + 5000
+    scan(deadline, fragment)
   end
 
-  defp scan_for_fragment(deadline, fragment) do
+  defp epoch do
+    System.monotonic_time(:millisecond)
+  end
+
+  defp line(deadline, match) do
+    remaining = deadline - epoch()
+    remaining > 0 || raise("Timeout waiting for matching line")
+    fetch_line(deadline, match)
+  end
+
+  defp fetch_line(deadline, match) do
     socket = Process.get(:freeq_socket)
-    counter = Process.get(:freeq_counter)
-    remaining = deadline - System.monotonic_time(:millisecond)
-
-    if remaining <= 0 do
-      raise "Timeout waiting for fragment: #{fragment}"
-    end
-
-    case :gen_tcp.recv(socket, 0, remaining) do
-      {:ok, data} ->
-        lines = String.split(data, "\r\n", trim: true)
-        count_and_print(lines, counter)
-
-        fragment_lower = String.downcase(fragment)
-
-        case Enum.find(lines, fn line ->
-               String.contains?(String.downcase(line), fragment_lower)
-             end) do
-          nil ->
-            scan_for_fragment(deadline, fragment)
-
-          _line ->
-            :ok
-        end
-
-      {:error, :timeout} ->
-        raise "Timeout waiting for fragment: #{fragment}"
-
-      {:error, reason} ->
-        raise "Socket error: #{inspect(reason)}"
-    end
+    result = :gen_tcp.recv(socket, 0, deadline - epoch())
+    result |> handle_line(deadline, match)
   end
 
-  defp wait_for_line(deadline, matcher) do
+  defp handle_line({:ok, data}, deadline, match) do
+    lines = String.split(data, "\r\n", trim: true)
+    print(lines)
+    found(lines, match) || line(deadline, match)
+  end
+
+  defp handle_line({:error, :timeout}, _, _) do
+    raise "Timeout waiting for matching line"
+  end
+
+  defp handle_line({:error, reason}, _, _) do
+    raise "Socket error: #{inspect(reason)}"
+  end
+
+  defp scan(deadline, fragment) do
+    remaining = deadline - epoch()
+    remaining > 0 || raise("Timeout waiting for fragment: #{fragment}")
+    fetch_scan(deadline, fragment)
+  end
+
+  defp fetch_scan(deadline, fragment) do
     socket = Process.get(:freeq_socket)
-    counter = Process.get(:freeq_counter)
-    remaining = deadline - System.monotonic_time(:millisecond)
-
-    if remaining <= 0 do
-      raise "Timeout waiting for matching line"
-    end
-
-    case :gen_tcp.recv(socket, 0, remaining) do
-      {:ok, data} ->
-        lines = String.split(data, "\r\n", trim: true)
-        count_and_print(lines, counter)
-
-        case Enum.find(lines, fn line -> matcher.(line) end) do
-          nil ->
-            wait_for_line(deadline, matcher)
-
-          _line ->
-            :ok
-        end
-
-      {:error, :timeout} ->
-        raise "Timeout waiting for matching line"
-
-      {:error, reason} ->
-        raise "Socket error: #{inspect(reason)}"
-    end
+    result = :gen_tcp.recv(socket, 0, deadline - epoch())
+    result |> handle_scan(deadline, fragment)
   end
 
-  defp count_and_print(lines, counter) do
-    lines
-    |> Enum.each(fn line ->
-      count = Agent.get_and_update(counter, fn c -> {c, c + 1} end)
-      IO.puts("#{count}: #{line}")
-    end)
+  defp handle_scan({:ok, data}, deadline, fragment) do
+    lines = String.split(data, "\r\n", trim: true)
+    print(lines)
+    hunt(lines, fragment) || scan(deadline, fragment)
+  end
+
+  defp handle_scan({:error, :timeout}, _, fragment) do
+    raise "Timeout waiting for fragment: #{fragment}"
+  end
+
+  defp handle_scan({:error, reason}, _, _) do
+    raise "Socket error: #{inspect(reason)}"
+  end
+
+  defp found(lines, match) do
+    Enum.find(lines, fn line -> match.(line) end)
+  end
+
+  defp hunt(lines, fragment) do
+    lower = String.downcase(fragment)
+    Enum.find(lines, fn line -> String.contains?(String.downcase(line), lower) end)
+  end
+
+  defp print(lines) do
+    counter = Process.get(:freeq_counter)
+    Enum.each(lines, fn line -> write(line, counter) end)
+  end
+
+  defp write(line, counter) do
+    count = Agent.get_and_update(counter, fn c -> {c, c + 1} end)
+    IO.puts("#{count}: #{line}")
   end
 end

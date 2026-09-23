@@ -2,7 +2,13 @@ defmodule Server do
   import :gen_tcp, only: [connect: 4, close: 1]
   import System, only: [monotonic_time: 1]
 
-  @opts [:binary, {:packet, :line}, {:active, false}, {:reuseaddr, true}, {:nodelay, true}]
+  @opts [
+    :binary,
+    {:packet, :line},
+    {:active, false},
+    {:reuseaddr, true},
+    {:nodelay, true}
+  ]
 
   def wait(host, port) do
     retry(host, port, monotonic_time(:millisecond) + 30000)
