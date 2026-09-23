@@ -1,0 +1,151 @@
+diff --git a/client/src/app.ts b/client/src/app.ts
+index f346abb..a99a114 100644
+--- a/client/src/app.ts
++++ b/client/src/app.ts
+@@ -41,8 +41,15 @@ import {
+ } from './gfx'
+ 
+ const TILE_PX = 8
+-const VIEW_W = 320
+-const VIEW_H = 180
++/** The canvas rasterizes at 1080p, so labels and bubbles get native detail. */
++const CANVAS_W = 1920
++const CANVAS_H = 1080
++/**
++ * The logical drawing area, in world pixels. It is the canvas divided by the
++ * zoom of the room on screen, so it changes as rooms change size.
++ */
++let VIEW_W = CANVAS_W
++let VIEW_H = CANVAS_H
+ const WALK_SPEED = 6 // tiles/sec
+ const POS_SEND_MS = 100 // ≤10 updates/sec (spec §7.4)
+ 
+@@ -164,15 +171,20 @@ export class App {
+   private lastEnsemble = 0
+   private canvas = el<HTMLCanvasElement>('world')
+   private ctx = this.canvas.getContext('2d')!
+-  private lightMap = new LightMap(VIEW_W, VIEW_H)
+-  private dust = new DustField(VIEW_W, VIEW_H)
++  private lightMap = new LightMap(CANVAS_W, CANVAS_H)
++  private dust = new DustField(CANVAS_W, CANVAS_H)
++  /** whole-pixel zoom of the room on screen, and its centring offset */
++  private zoom = 1
++  private offX = 0
++  private offY = 0
+   /** lights collected during the tile pass, composited after the entity pass */
+   private frameLights: { x: number; y: number; r: number; c: string; p: number }[] = []
+   private spriteSets = new Map<string, SpriteSet>()
+ 
+   start(): void {
+-    this.canvas.width = VIEW_W
+-    this.canvas.height = VIEW_H
++    this.canvas.width = CANVAS_W
++    this.canvas.height = CANVAS_H
++    this.ctx.imageSmoothingEnabled = false
+     this.fitCanvas()
+     this.updateSparkHud()
+     window.addEventListener('resize', () => this.fitCanvas())
+@@ -1728,10 +1740,12 @@ export class App {
+   private onCanvasClick(e: MouseEvent): void {
+     if (!this.map) return
+     const rect = this.canvas.getBoundingClientRect()
+-    const scaleX = this.canvas.width / rect.width
+-    const scaleY = this.canvas.height / rect.height
+-    const px = (e.clientX - rect.left) * scaleX
+-    const py = (e.clientY - rect.top) * scaleY
++    // CSS pixels -> canvas device pixels -> world pixels, undoing the centring
++    // offset and the room zoom that draw() applies.
++    const dx = (e.clientX - rect.left) * (CANVAS_W / rect.width)
++    const dy = (e.clientY - rect.top) * (CANVAS_H / rect.height)
++    const px = (dx - this.offX) / this.zoom
++    const py = (dy - this.offY) / this.zoom
+     const cam = this.camera()
+     const wx = (px + cam.x) / TILE_PX
+     const wy = (py + cam.y) / TILE_PX
+@@ -1841,20 +1855,42 @@ export class App {
+   // ---------- render ----------
+ 
+   private fitCanvas(): void {
++    // The backing store stays 1920x1080; the element is sized to fit the panel
++    // at 16:9. On a 2x display a 960px box is still 1920 device pixels, so the
++    // detail survives, and a smaller panel scales the room instead of cropping.
+     const wrap = el('worldwrap')
+-    // integer scaling when practical (spec §12.1), half-steps when an integer wastes >35% of the panel
+-    const raw = Math.min(wrap.clientWidth / VIEW_W, wrap.clientHeight / VIEW_H)
+-    const scale = Math.max(1, Math.floor(raw * 2) / 2)
+-    this.canvas.style.width = `${VIEW_W * scale}px`
+-    this.canvas.style.height = `${VIEW_H * scale}px`
++    const fit = Math.min(wrap.clientWidth / CANVAS_W, wrap.clientHeight / CANVAS_H)
++    this.canvas.style.width = `${Math.floor(CANVAS_W * fit)}px`
++    this.canvas.style.height = `${Math.floor(CANVAS_H * fit)}px`
++  }
++
++  /**
++   * Picks the whole-number zoom that makes the room as large as the canvas
++   * allows, and the offset that centres it on whole device pixels. A room too
++   * big to fit at zoom 1 keeps the zoom at 1 and lets the camera follow.
++   */
++  private fitRoom(): void {
++    if (!this.map) return
++    const mapW = this.map.width * TILE_PX
++    const mapH = this.map.height * TILE_PX
++    this.zoom = Math.max(1, Math.floor(Math.min(CANVAS_W / mapW, CANVAS_H / mapH)))
++    VIEW_W = CANVAS_W / this.zoom
++    VIEW_H = CANVAS_H / this.zoom
++    const fits = mapW <= VIEW_W && mapH <= VIEW_H
++    this.offX = fits ? Math.floor((CANVAS_W - mapW * this.zoom) / 2) : 0
++    this.offY = fits ? Math.floor((CANVAS_H - mapH * this.zoom) / 2) : 0
+   }
+ 
+   private camera(): { x: number; y: number } {
+     if (!this.map) return { x: 0, y: 0 }
+     const px = this.me.x * TILE_PX
+     const py = this.me.y * TILE_PX
+-    const maxX = Math.max(0, this.map.width * TILE_PX - VIEW_W)
+-    const maxY = Math.max(0, this.map.height * TILE_PX - VIEW_H)
++    const mapW = this.map.width * TILE_PX
++    const mapH = this.map.height * TILE_PX
++    // A room that fits is centred by the transform offset, so it draws at 0,0.
++    if (mapW <= VIEW_W && mapH <= VIEW_H) return { x: 0, y: 0 }
++    const maxX = Math.max(0, mapW - VIEW_W)
++    const maxY = Math.max(0, mapH - VIEW_H)
+     return {
+       x: Math.min(maxX, Math.max(0, px - VIEW_W / 2)),
+       y: Math.min(maxY, Math.max(0, py - VIEW_H / 2)),
+@@ -1983,10 +2019,14 @@ export class App {
+ 
+   private draw(): void {
+     const ctx = this.ctx
++    ctx.setTransform(1, 0, 0, 1, 0, 0)
++    ctx.imageSmoothingEnabled = false
+     ctx.fillStyle = '#000'
+-    ctx.fillRect(0, 0, VIEW_W, VIEW_H)
++    ctx.fillRect(0, 0, CANVAS_W, CANVAS_H)
+     const room = this.rooms.get(this.channel)
+     if (!this.map || !room) return
++    this.fitRoom()
++    ctx.setTransform(this.zoom, 0, 0, this.zoom, this.offX, this.offY)
+     const pal = TEMPLATE_PALETTES[room.template] ?? TEMPLATE_PALETTES.plaza!
+     const cam = this.camera()
+ 
+@@ -2297,14 +2337,17 @@ export class App {
+     if (hour >= 5 && hour < 8) tint = `rgba(255,190,120,${(0.09 * (1 - Math.abs(hour - 6.5) / 1.5)).toFixed(3)})`
+     else if (hour >= 17 && hour < 21) tint = `rgba(190,110,200,${(0.10 * (1 - Math.abs(hour - 19) / 2)).toFixed(3)})`
+     else if (hour >= 21 || hour < 5) tint = 'rgba(40,60,140,0.10)'
++    // The finish covers the whole canvas, not just the room, so it is drawn
++    // without the room zoom.
++    ctx.setTransform(1, 0, 0, 1, 0, 0)
+     if (tint) {
+       ctx.fillStyle = tint
+-      ctx.fillRect(0, 0, VIEW_W, VIEW_H)
++      ctx.fillRect(0, 0, CANVAS_W, CANVAS_H)
+     }
+ 
+     // CRT finish: corner falloff + scanlines, kept light enough to read 7px text
+-    drawVignette(ctx, VIEW_W, VIEW_H, 0.36)
+-    drawScanlines(ctx, VIEW_W, VIEW_H, 0.05)
++    drawVignette(ctx, CANVAS_W, CANVAS_H, 0.36)
++    drawScanlines(ctx, CANVAS_W, CANVAS_H, 0.05)
+   }
+ 
+   private parkedLayout = new Map<string, { x: number; y: number }>()
