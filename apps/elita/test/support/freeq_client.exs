@@ -24,10 +24,6 @@ defmodule FreeqTestClient do
   end
 
   def wait_join(agent) do
-    wait_join(agent, nil)
-  end
-
-  def wait_join(agent, _counter) do
     deadline = System.monotonic_time(:millisecond) + 5000
 
     wait_for_line(
@@ -43,19 +39,11 @@ defmodule FreeqTestClient do
   end
 
   def send_turn(channel, text) do
-    send_turn(channel, text, nil)
-  end
-
-  def send_turn(channel, text, _counter) do
     socket = Process.get(:freeq_socket)
     :gen_tcp.send(socket, "PRIVMSG #{channel} :#{text}\r\n")
   end
 
   def wait_fragment(fragment) do
-    wait_fragment(fragment, nil)
-  end
-
-  def wait_fragment(fragment, _counter) do
     deadline = System.monotonic_time(:millisecond) + 5000
     scan_for_fragment(deadline, fragment)
   end

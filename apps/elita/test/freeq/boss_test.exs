@@ -5,17 +5,9 @@ defmodule FreeqBossTest do
 
   @tag cassette: "boss"
   test "boss delegates in the lab" do
-    Tester.spawn(:boss)
-    Tester.spawn(:dev, :worker)
-    Tester.spawn(:qa, :worker)
-
-    {:ok, boss_pid} = Elita.Freeq.start_link(agent: "boss", channel: "#the-lab", driver: "brian")
-    {:ok, dev_pid} = Elita.Freeq.start_link(agent: "dev", channel: "#the-lab", driver: "brian")
-    {:ok, qa_pid} = Elita.Freeq.start_link(agent: "qa", channel: "#the-lab", driver: "brian")
-
-    FreeqTestClient.wait_join("boss")
-    FreeqTestClient.wait_join("dev")
-    FreeqTestClient.wait_join("qa")
+    join(:boss)
+    join(:dev, :worker)
+    join(:qa, :worker)
 
     FreeqTestClient.send_turn("boss: you manage a software development team with a dev and a qa")
 
@@ -31,32 +23,14 @@ defmodule FreeqBossTest do
     FreeqTestClient.send_turn("qa: did you receive a task from boss?")
 
     FreeqTestClient.wait_fragment("yes")
-
-    GenServer.stop(boss_pid)
-    GenServer.stop(dev_pid)
-    GenServer.stop(qa_pid)
   end
 
   @tag cassette: "boss2"
   test "michael asks dwight to photocopy sales reports" do
-    Tester.spawn(:michael, :boss)
-    Tester.spawn(:dwight, :boss)
-    Tester.spawn(:pam, :worker)
-    Tester.spawn(:jim, :worker)
-
-    {:ok, michael_pid} =
-      Elita.Freeq.start_link(agent: "michael", channel: "#the-lab", driver: "brian")
-
-    {:ok, dwight_pid} =
-      Elita.Freeq.start_link(agent: "dwight", channel: "#the-lab", driver: "brian")
-
-    {:ok, pam_pid} = Elita.Freeq.start_link(agent: "pam", channel: "#the-lab", driver: "brian")
-    {:ok, jim_pid} = Elita.Freeq.start_link(agent: "jim", channel: "#the-lab", driver: "brian")
-
-    FreeqTestClient.wait_join("michael")
-    FreeqTestClient.wait_join("dwight")
-    FreeqTestClient.wait_join("pam")
-    FreeqTestClient.wait_join("jim")
+    join(:michael, :boss)
+    join(:dwight, :boss)
+    join(:pam, :worker)
+    join(:jim, :worker)
 
     FreeqTestClient.send_turn("michael: you manage dwight the assistant regional manager")
 
@@ -77,10 +51,5 @@ defmodule FreeqBossTest do
     FreeqTestClient.send_turn("pam: did you receive a task to make copies?")
 
     FreeqTestClient.wait_fragment("yes")
-
-    GenServer.stop(michael_pid)
-    GenServer.stop(dwight_pid)
-    GenServer.stop(pam_pid)
-    GenServer.stop(jim_pid)
   end
 end
