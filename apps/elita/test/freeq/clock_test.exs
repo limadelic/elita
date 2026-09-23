@@ -5,9 +5,8 @@ defmodule FreeqClockTest do
 
   @tag cassette: "clock"
   test "clock tells the time" do
-    join :clock
+    spawn(:clock)
 
-    say "clock: what time is it"
-    hears "2025-07-07 10:00"
+    verify("2025-07-07 10:00", ask(:clock, "what time is it"))
   end
 end
