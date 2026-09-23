@@ -73,23 +73,12 @@ jobs:
 
       - name: Check WebSocket on 8080
         run: |
-          echo "Checking WebSocket upgrade on /irc..."
-          WS_RESPONSE=$(curl -i -N --http1.1 \
-            -H "Connection: Upgrade" \
-            -H "Upgrade: websocket" \
-            -H "Sec-WebSocket-Version: 13" \
-            -H "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==" \
-            -H "Origin: http://127.0.0.1:5173" \
-            --max-time 3 \
-            http://127.0.0.1:8080/irc 2>&1)
-
-          if echo "$WS_RESPONSE" | grep -q "101"; then
-            echo "WebSocket upgrade successful"
-          else
-            echo "WebSocket upgrade failed:"
-            echo "$WS_RESPONSE"
-            exit 1
-          fi
+          node -e "
+          const ws = new WebSocket('ws://127.0.0.1:8080/irc');
+          const timeout = setTimeout(() => { console.log('ws timeout'); process.exit(1); }, 5000);
+          ws.addEventListener('open', () => { console.log('ws open'); clearTimeout(timeout); process.exit(0); });
+          ws.addEventListener('error', (err) => { console.log(err.message || err); clearTimeout(timeout); process.exit(1); });
+          "
 
       - name: Sanitize branch name for artifact
         id: branch_slug
