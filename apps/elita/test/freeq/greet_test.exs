@@ -1,18 +1,11 @@
-defmodule FreeqGreetTest do
-  use Tester
+Code.require_file("../support/freeq_case.exs", __DIR__)
 
-  Code.require_file("../support/server.exs", __DIR__)
-  Code.require_file("../support/freeq_client.exs", __DIR__)
+defmodule FreeqGreetTest do
+  use FreeqCase
 
   @tag cassette: "greet"
-  test "brian and greet have a real conversation in the lab" do
-    Server.wait(~c"127.0.0.1", 6667)
-    {:ok, socket} = FreeqTestClient.connect()
-    {:ok, counter} = Agent.start_link(fn -> 1 end)
-
+  test "brian and greet have a real conversation in the lab", %{socket: socket, counter: counter} do
     Tester.spawn("greet")
-
-    FreeqTestClient.register_brian(socket, counter)
 
     {:ok, greet_pid} =
       Elita.Freeq.start_link(
@@ -36,7 +29,6 @@ defmodule FreeqGreetTest do
     FreeqTestClient.send_turn(socket, "#the-lab", "greet: how are you?", counter)
     FreeqTestClient.wait_fragment(socket, "i am greeeet", counter)
 
-    :gen_tcp.close(socket)
     GenServer.stop(greet_pid)
   end
 end

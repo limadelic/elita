@@ -1,20 +1,13 @@
-defmodule FreeqBossTest do
-  use Tester
+Code.require_file("../support/freeq_case.exs", __DIR__)
 
-  Code.require_file("../support/server.exs", __DIR__)
-  Code.require_file("../support/freeq_client.exs", __DIR__)
+defmodule FreeqBossTest do
+  use FreeqCase
 
   @tag cassette: "boss"
-  test "boss delegates in the lab" do
-    Server.wait(~c"127.0.0.1", 6667)
-    {:ok, socket} = FreeqTestClient.connect()
-    {:ok, counter} = Agent.start_link(fn -> 1 end)
-
+  test "boss delegates in the lab", %{socket: socket, counter: counter} do
     Tester.spawn(:boss)
     Tester.spawn(:dev, :worker)
     Tester.spawn(:qa, :worker)
-
-    FreeqTestClient.register_brian(socket, counter)
 
     {:ok, boss_pid} = Elita.Freeq.start_link(agent: "boss", channel: "#the-lab", driver: "brian")
     {:ok, dev_pid} = Elita.Freeq.start_link(agent: "dev", channel: "#the-lab", driver: "brian")
@@ -54,24 +47,17 @@ defmodule FreeqBossTest do
 
     FreeqTestClient.wait_fragment(socket, "yes", counter)
 
-    :gen_tcp.close(socket)
     GenServer.stop(boss_pid)
     GenServer.stop(dev_pid)
     GenServer.stop(qa_pid)
   end
 
   @tag cassette: "boss2"
-  test "michael asks dwight to photocopy sales reports" do
-    Server.wait(~c"127.0.0.1", 6667)
-    {:ok, socket} = FreeqTestClient.connect()
-    {:ok, counter} = Agent.start_link(fn -> 1 end)
-
+  test "michael asks dwight to photocopy sales reports", %{socket: socket, counter: counter} do
     Tester.spawn(:michael, :boss)
     Tester.spawn(:dwight, :boss)
     Tester.spawn(:pam, :worker)
     Tester.spawn(:jim, :worker)
-
-    FreeqTestClient.register_brian(socket, counter)
 
     {:ok, michael_pid} =
       Elita.Freeq.start_link(agent: "michael", channel: "#the-lab", driver: "brian")
@@ -127,7 +113,6 @@ defmodule FreeqBossTest do
 
     FreeqTestClient.wait_fragment(socket, "yes", counter)
 
-    :gen_tcp.close(socket)
     GenServer.stop(michael_pid)
     GenServer.stop(dwight_pid)
     GenServer.stop(pam_pid)
