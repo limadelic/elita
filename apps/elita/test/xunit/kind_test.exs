@@ -3,25 +3,20 @@ defmodule KindTest do
   @moduletag :xunit
 
   test "dispatch to a module-based kind" do
-    name = :tester
-    opts = [kind: TestKind]
-    {:ok, _pid} = Elita.spawn(to_string(name), ["tester"], opts)
-    result = Agent.Harness.dispatch(to_string(name), "hello", :ask)
+    name = "kind"
+    {:ok, _pid} = Elita.spawn(name, ["greet"], kind: TestKind)
+    result = Agent.Harness.dispatch(name, "hello", :ask)
     assert result =~ "asked"
-    Agent.Harness.dispatch(to_string(name), "world", :tell)
+    Agent.Harness.dispatch(name, "world", :tell)
 
     on_exit(fn ->
-      GenServer.stop(registry_lookup(to_string(name)))
+      via = {:via, Registry, {ElitaRegistry, name, %{kind: TestKind, folder: nil}}}
+
+      case GenServer.whereis(via) do
+        nil -> :ok
+        pid -> GenServer.stop(pid)
+      end
     end)
-  end
-
-  defp registry_lookup(name) do
-    normalized = name |> String.downcase()
-
-    case Registry.lookup(ElitaRegistry, normalized) do
-      [{pid, _meta}] -> pid
-      _ -> nil
-    end
   end
 end
 
