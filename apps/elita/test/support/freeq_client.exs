@@ -1,5 +1,6 @@
 defmodule FreeqTestClient do
   import Freeq.Batch, only: [absorb: 1]
+  import Freeq.Said, only: [matches?: 4]
   @opts [:binary, {:packet, :line}, {:active, false}, {:reuseaddr, true}, {:nodelay, true}]
   @timeout 5000
 
@@ -63,28 +64,16 @@ defmodule FreeqTestClient do
     await("reply from #{name}", &from(&1, name)) |> text()
   end
 
-  def said?(from, to, fragment) do
-    transcript = Process.get(:freeq_transcript, [])
-    Enum.any?(transcript, &matches?(&1, from, to, fragment))
+  defdelegate said?(from, to, fragment), to: Freeq.Said
+
+  def wait_said?(from, to, fragment) do
+    said?(from, to, fragment) or found(from, to, fragment)
   end
 
-  defp matches?(line, from, to, fragment) do
-    String.starts_with?(line, ":#{from}!") and
-      String.contains?(line, "PRIVMSG #the-lab :") and
-      addressee_match(line, to, fragment)
+  defp found(from, to, fragment) do
+    await("#{from} to #{to}: #{fragment}", &matches?(&1, from, to, fragment))
+    true
   end
-
-  defp addressee_match(line, to, fragment) do
-    case String.split(line, "PRIVMSG #the-lab :", parts: 2) do
-      [_, message] -> starts_with?(message, to) and includes?(message, fragment)
-      _ -> false
-    end
-  end
-
-  defp starts_with?(message, to), do: String.starts_with?(message, "#{to}: ")
-
-  defp includes?(message, fragment),
-    do: String.contains?(String.downcase(message), String.downcase(fragment))
 
   defp from(line, agent),
     do: String.starts_with?(line, ":#{agent}!") and String.contains?(line, "PRIVMSG")
