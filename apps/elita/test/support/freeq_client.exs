@@ -44,4 +44,14 @@ defmodule FreeqTestClient do
   defp lines({:ok, data}, _what), do: String.split(data, "\r\n", trim: true)
   defp lines({:error, :timeout}, what), do: raise("timeout waiting for #{what}")
   defp lines({:error, reason}, _what), do: raise("socket error: #{inspect(reason)}")
+
+  def reply(agent) do
+    name = to_string(agent)
+    await("reply from #{name}", &from(&1, name)) |> text()
+  end
+
+  defp from(line, agent),
+    do: String.starts_with?(line, ":#{agent}!") and String.contains?(line, "PRIVMSG")
+
+  defp text(line), do: line |> String.split(" :", parts: 2) |> List.last()
 end
