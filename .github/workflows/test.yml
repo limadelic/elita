@@ -100,7 +100,7 @@ jobs:
       - name: Start freeqworld server
         run: |
           cd $RUNNER_TEMP/freeqworld
-          PORT_A=5173 npm run dev > $RUNNER_TEMP/freeqworld.log 2>&1 &
+          FIMP_START=1 PORT_A=5173 npx vite-node server/src/main.ts > $RUNNER_TEMP/freeqworld.log 2>&1 &
           echo "$!" > $RUNNER_TEMP/freeqworld.pid
 
       - name: Wait for freeqworld on 5173
@@ -116,6 +116,7 @@ jobs:
             sleep 0.2
             if [ $i -eq 150 ]; then
               echo "Timeout waiting for freeqworld on 5173"
+              ps -p $(cat $RUNNER_TEMP/freeqworld.pid) -o pid,stat,etime,args || echo "freeqworld pid gone"
               echo "Server log:"
               cat $RUNNER_TEMP/freeqworld.log
               exit 1
