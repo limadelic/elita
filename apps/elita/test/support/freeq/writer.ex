@@ -16,11 +16,28 @@ defmodule Freeq.Writer do
   end
 
   def message(socket, channel, text) do
-    line(socket, "PRIVMSG #{channel} :#{text}")
+    if String.contains?(text, "\n") do
+      batch(socket, channel, text)
+    else
+      line(socket, "PRIVMSG #{channel} :#{text}")
+    end
   end
 
   def pong(socket, server) do
     line(socket, "PONG #{server}")
+  end
+
+  defp batch(socket, channel, text) do
+    id = "b1"
+    line(socket, "BATCH +#{id} draft/multiline #{channel}")
+    text
+    |> String.split("\n", trim: false)
+    |> Enum.each(&privmsg_line(socket, channel, id, &1))
+    line(socket, "BATCH -#{id}")
+  end
+
+  defp privmsg_line(socket, channel, id, body) do
+    line(socket, "@batch=#{id} PRIVMSG #{channel} :#{body}")
   end
 
   defp line(socket, text) do
