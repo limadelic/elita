@@ -2,7 +2,7 @@ defmodule Freeq.Batch do
   import String, only: [split: 3, contains?: 2, trim_leading: 2, starts_with?: 2]
   import Enum, only: [join: 2, flat_map: 2]
   import List, only: [last: 1, first: 1]
-  import Process, only: [get: 1, put: 2]
+  import Map, only: [put: 3, delete: 2, has_key?: 2, fetch!: 2]
 
   def new, do: %{}
 
@@ -10,15 +10,15 @@ defmodule Freeq.Batch do
 
   defp step(line), do: state() |> feed(line) |> emit()
 
-  defp state, do: get(:freeq_batch) || new()
+  defp state, do: Process.get(:freeq_batch) || new()
 
   defp emit({:message, line, state}) do
-    put(:freeq_batch, state)
+    Process.put(:freeq_batch, state)
     [line]
   end
 
   defp emit({:pending, state}) do
-    put(:freeq_batch, state)
+    Process.put(:freeq_batch, state)
     []
   end
 
@@ -36,36 +36,38 @@ defmodule Freeq.Batch do
   defp multi(true), do: :open
   defp multi(false), do: :skip
 
-  defp act(:open, _ref, body, _state), do: {:pending, start(body)}
+  defp act(:open, _ref, body, state), do: {:pending, open(state, body)}
   defp act(:skip, _ref, _body, state), do: {:pending, state}
   defp act(:close, _ref, body, state), do: shut(state, tail(body))
-  defp act(:plain, ref, body, state), do: keep(mine?(state, ref), body, state)
+  defp act(:plain, ref, body, state), do: keep(has_key?(state, ref), ref, body, state)
 
-  defp shut(%{ref: ref} = state, ref), do: {:message, assemble(state), new()}
-  defp shut(state, _ref), do: {:pending, state}
-
-  defp mine?(%{ref: ref}, ref), do: true
-  defp mine?(_state, _ref), do: false
-
-  defp keep(true, body, state), do: {:pending, add(state, text(body))}
-  defp keep(false, body, state), do: {:message, body, state}
-
-  defp start(body) do
+  defp open(state, body) do
     [src, _batch, ref, _type, chan] = split(body, " ", parts: 5)
-    %{ref: trim_leading(ref, "+"), src: src, chan: chan, lines: []}
+    put(state, trim_leading(ref, "+"), %{src: src, chan: chan, lines: []})
   end
 
-  defp add(%{lines: lines} = state, text), do: %{state | lines: lines ++ [text]}
+  defp shut(state, ref), do: close(has_key?(state, ref), state, ref)
+
+  defp close(true, state, ref), do: {:message, assemble(fetch!(state, ref)), delete(state, ref)}
+  defp close(false, state, _ref), do: {:pending, state}
+
+  defp keep(true, ref, body, state), do: {:pending, add(state, ref, text(body))}
+  defp keep(false, _ref, body, state), do: {:message, body, state}
+
+  defp add(state, ref, text) do
+    batch = fetch!(state, ref)
+    put(state, ref, %{batch | lines: batch.lines ++ [text]})
+  end
 
   defp tail(body), do: body |> split(" ", parts: 2) |> last() |> trim_leading("-")
 
   defp text(body) do
     [_src, rest] = split(body, " PRIVMSG ", parts: 2)
-    rest |> split(" ", parts: 2) |> last() |> body()
+    rest |> split(" ", parts: 2) |> last() |> payload()
   end
 
-  defp body(":" <> text), do: text
-  defp body(text), do: text
+  defp payload(":" <> text), do: text
+  defp payload(text), do: text
 
   defp assemble(%{src: src, chan: chan, lines: lines}) do
     "#{src} PRIVMSG #{chan} :#{join(lines, "\n")}"
