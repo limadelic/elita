@@ -3,7 +3,6 @@ Code.require_file("../support/freeq_client.exs", __DIR__)
 
 defmodule FreeqGreetTest do
   use FreeqCase
-  import FreeqTestClient, only: [say: 1, hears: 1]
 
   @tag cassette: "greet"
   test "brian and greet have a real conversation in the lab" do

@@ -3,7 +3,6 @@ Code.require_file("../support/freeq_client.exs", __DIR__)
 
 defmodule FreeqBossTest do
   use FreeqCase
-  import FreeqTestClient, only: [say: 1, hears: 1]
 
   @tag cassette: "boss"
   test "boss delegates in the lab" do

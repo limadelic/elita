@@ -3,7 +3,6 @@ Code.require_file("../support/freeq_client.exs", __DIR__)
 
 defmodule FreeqClockTest do
   use FreeqCase
-  import FreeqTestClient, only: [say: 1, hears: 1]
 
   @tag cassette: "clock"
   test "clock tells the time" do

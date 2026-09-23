@@ -3,6 +3,10 @@ defmodule FreeqCase do
     quote do
       use Tester
       import String, only: [to_atom: 1]
+      import Agent, only: [start_link: 1]
+
+      import FreeqTestClient,
+        only: [say: 1, hears: 1, connect: 0, register_brian: 0, wait_join: 1]
 
       Code.require_file("../support/server.exs", __DIR__)
       Code.require_file("../support/freeq_client.exs", __DIR__)
@@ -15,12 +19,20 @@ defmodule FreeqCase do
       end
 
       defp setup_socket do
-        {:ok, socket} = FreeqTestClient.connect()
-        {:ok, counter} = Agent.start_link(fn -> 1 end)
+        {:ok, socket} = connect()
+        init(socket)
+        socket
+      end
+
+      defp init(socket) do
+        {:ok, counter} = start_link(fn -> 1 end)
+        store(socket, counter)
+      end
+
+      defp store(socket, counter) do
         Process.put(:freeq_socket, socket)
         Process.put(:freeq_counter, counter)
-        FreeqTestClient.register_brian()
-        socket
+        register_brian()
       end
 
       def join(agent, role \\ nil) do
@@ -36,7 +48,7 @@ defmodule FreeqCase do
         id = to_atom("freeq_#{name}")
         config = [agent: name, channel: "#the-lab", driver: "brian"]
         start_supervised!({Elita.Freeq, config}, id: id)
-        FreeqTestClient.wait_join(name)
+        wait_join(name)
       end
     end
   end
