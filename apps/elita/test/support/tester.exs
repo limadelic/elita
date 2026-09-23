@@ -43,7 +43,6 @@ defmodule Tester do
 
   def spawn(name, configs) do
     kill(name)
-    reset_tape_writer()
     opts = tape_opts()
     Elita.spawn(to_string(name), to_configs(configs), opts)
     on_exit(fn -> kill(name) end)
@@ -77,10 +76,6 @@ defmodule Tester do
       nil -> :ok
       pid -> GenServer.stop(pid)
     end
-  end
-
-  defp reset_tape_writer do
-    Tape.Writer.acquire(fn -> :ok end)
   end
 
   def tell(name, msg) do
