@@ -3,6 +3,7 @@ defmodule FreeqTestClient do
   import Freeq.Said, only: [matches?: 4]
   @opts [:binary, {:packet, :line}, {:active, false}, {:reuseaddr, true}, {:nodelay, true}]
   @timeout 5000
+  @driver "brian"
 
   def connect, do: :gen_tcp.connect(~c"127.0.0.1", 6667, @opts)
 
@@ -75,8 +76,10 @@ defmodule FreeqTestClient do
     true
   end
 
-  defp from(line, agent),
-    do: String.starts_with?(line, ":#{agent}!") and String.contains?(line, "PRIVMSG")
+  defp from(line, agent) do
+    String.starts_with?(line, ":#{agent}!") and
+      String.contains?(line, "PRIVMSG #the-lab :#{@driver}: ")
+  end
 
-  defp text(line), do: line |> String.split(" :", parts: 2) |> List.last()
+  defp text(line), do: line |> String.split(" :#{@driver}: ", parts: 2) |> List.last()
 end
