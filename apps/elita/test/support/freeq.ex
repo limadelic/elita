@@ -38,6 +38,8 @@ defmodule Freeq do
   end
 
   defp state(socket, agent, channel, ask, driver) do
+    name = "freeq_#{agent}" |> String.to_atom()
+    Process.register(self(), name)
     %{socket: socket, agent: agent, channel: channel, ask: ask, driver: driver}
   end
 

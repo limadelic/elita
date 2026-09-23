@@ -12,6 +12,9 @@ defmodule FreeqBossTest do
     verify("done", ask(:boss, "we need more test created"))
     verify("no", ask(:dev, "did you receive a task from boss?"))
     verify("yes", ask(:qa, "did you receive a task from boss?"))
+    assert FreeqTestClient.said?("boss", "qa", "We need more tests")
+    assert FreeqTestClient.said?("boss", "qa", "prioritize")
+    assert FreeqTestClient.said?("boss", "qa", "test coverage")
   end
 
   @tag cassette: "boss2"

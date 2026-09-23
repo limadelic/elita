@@ -10,6 +10,7 @@ defmodule FreeqTestClient do
     await("001", &String.contains?(&1, " 001 "))
     send_line("JOIN #the-lab")
     await("366", &String.contains?(&1, " 366 "))
+    Process.put(:freeq_transcript, [])
   end
 
   def wait_join(agent), do: await("#{agent} JOIN", &joined(&1, agent))
@@ -38,7 +39,12 @@ defmodule FreeqTestClient do
   defp read(what, deadline) do
     left = deadline - epoch()
     left > 0 || raise("timeout waiting for #{what}")
-    :gen_tcp.recv(socket(), 0, left) |> lines(what)
+    :gen_tcp.recv(socket(), 0, left) |> lines(what) |> record()
+  end
+
+  defp record(lines) do
+    Process.put(:freeq_transcript, Process.get(:freeq_transcript, []) ++ lines)
+    lines
   end
 
   defp lines({:ok, data}, _what), do: String.split(data, "\r\n", trim: true)
@@ -49,6 +55,29 @@ defmodule FreeqTestClient do
     name = to_string(agent)
     await("reply from #{name}", &from(&1, name)) |> text()
   end
+
+  def said?(from, to, fragment) do
+    transcript = Process.get(:freeq_transcript, [])
+    Enum.any?(transcript, &matches?(&1, from, to, fragment))
+  end
+
+  defp matches?(line, from, to, fragment) do
+    String.starts_with?(line, ":#{from}!") and
+      String.contains?(line, "PRIVMSG #the-lab :") and
+      addressee_match(line, to, fragment)
+  end
+
+  defp addressee_match(line, to, fragment) do
+    case String.split(line, "PRIVMSG #the-lab :", parts: 2) do
+      [_, message] -> starts_with?(message, to) and includes?(message, fragment)
+      _ -> false
+    end
+  end
+
+  defp starts_with?(message, to), do: String.starts_with?(message, "#{to}: ")
+
+  defp includes?(message, fragment),
+    do: String.contains?(String.downcase(message), String.downcase(fragment))
 
   defp from(line, agent),
     do: String.starts_with?(line, ":#{agent}!") and String.contains?(line, "PRIVMSG")

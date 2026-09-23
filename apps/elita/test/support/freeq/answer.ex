@@ -2,6 +2,7 @@ defmodule Freeq.Answer do
   import String, only: [contains?: 2]
   import Freeq.Parser, only: [parse: 3]
   import Task, only: [start: 1]
+  import Elita, only: [dispatch: 2]
 
   def privmsg(msg, state, pid) do
     privmsg(contains?(msg, "PRIVMSG"), msg, state, pid)
@@ -15,10 +16,14 @@ defmodule Freeq.Answer do
     :noop
   end
 
-  def reply({:ask, sender, text}, agent, ask, pid, driver) when sender != agent do
-    start(fn ->
-      ask.(agent, format(sender, text, driver)) |> relay(pid)
-    end)
+  def reply({:ask, sender, text}, agent, ask, pid, driver)
+      when sender != agent and sender == driver do
+    start(fn -> ask.(agent, format(sender, text, driver)) |> relay(pid) end)
+  end
+
+  def reply({:ask, sender, text}, agent, _ask, _pid, driver)
+      when sender != agent and sender != driver do
+    dispatch(agent, format(sender, text, driver))
   end
 
   def reply({:ask, _sender, _text}, _agent, _ask, _pid, _driver), do: :ok

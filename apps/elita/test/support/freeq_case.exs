@@ -20,12 +20,14 @@ defmodule FreeqCase do
       end
 
       def spawn(name) do
-        Tester.spawn(name)
+        {:ok, pid} = Elita.spawn(to_string(name), [to_string(name)], kind: Freeq.Kind)
+        on_exit(fn -> GenServer.stop(pid) end)
         enter(name)
       end
 
       def spawn(name, role) do
-        Tester.spawn(name, role)
+        {:ok, pid} = Elita.spawn(to_string(name), [to_string(role)], kind: Freeq.Kind)
+        on_exit(fn -> GenServer.stop(pid) end)
         enter(name)
       end
 
