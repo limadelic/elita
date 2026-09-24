@@ -13,7 +13,9 @@ defmodule Freeq.BossTest do
     spawn(:dev, :worker)
     spawn(:qa, :worker)
     tell(:boss, "you manage a software development team with a dev and a qa")
-    verify("done", ask(:boss, "we need more test created"))
+    reply = ask(:boss, "we need more test created")
+    verify("done", reply)
+    verify("qa", reply)
     verify("no", ask(:dev, "did you receive a task from boss?"))
     verify("yes", ask(:qa, "did you receive a task from boss?"))
   end

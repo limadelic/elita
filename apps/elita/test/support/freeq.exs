@@ -6,10 +6,9 @@ defmodule Freeq do
   import Elita, only: [request: 2]
   import Process, only: [get: 1, put: 2]
   import String, only: [split: 2, trim: 1]
-  import Enum, only: [reject: 2, map: 2, join: 2]
-  import File, only: [read: 1]
-  import Path, only: [expand: 1]
-  import System, only: [pid: 0]
+  import Enum, only: [reject: 2, map: 2]
+  import File, only: [ls: 1, read: 1]
+  import Path, only: [expand: 1, join: 2]
 
   def spawn(agent) do
     spawn(agent, [agent])
@@ -72,9 +71,9 @@ defmodule Freeq do
       |> reject(&blank/1)
       |> map(&emit(sock, pattern, &1))
 
-    delegations(agent_str, sock)
+    deleg = delegations(agent_str, sock)
     bubble(reply)
-    texts |> join("\n")
+    (texts ++ deleg) |> Enum.join("\n")
   end
 
   def tell(agent, msg) do
@@ -99,19 +98,42 @@ defmodule Freeq do
   end
 
   defp log(agent) do
-    path = expand("~/.elita/sessions/#{agent}_#{pid()}.log")
+    dir = expand("~/.elita/sessions")
+    pattern = compile!("^#{escape(agent)}_\\d+\\.log$")
 
-    case read(path) do
+    case ls(dir) do
+      {:ok, files} ->
+        files
+        |> reject(&is_nil(&1))
+        |> Enum.filter(&run(pattern, &1, []))
+        |> case do
+          [] -> ""
+          logs -> logs |> Enum.sort() |> Enum.max_by(&mtime(&1, dir)) |> fetch(dir)
+        end
+
+      _ ->
+        ""
+    end
+  end
+
+  defp mtime(file, dir) do
+    dir |> join(file) |> File.stat!() |> Map.get(:mtime)
+  rescue
+    _ -> 0
+  end
+
+  defp fetch(file, dir) do
+    case read(join(dir, file)) do
       {:ok, content} -> content
       _ -> ""
     end
   end
 
   defp shout(line, agent) do
-    pattern = compile!("^📢 #{escape(agent)} → [^:]+: (.*)$")
+    pattern = compile!("^📢 #{escape(agent)} → ([^:]+): (.*)$")
 
     case run(pattern, trim(line), capture: :all_but_first) do
-      [msg] -> msg
+      [recipient, msg] -> "#{recipient}: #{msg}"
       _ -> nil
     end
   end
