@@ -1,14 +1,12 @@
 defmodule Freeq do
   import :gen_tcp, only: [connect: 3, controlling_process: 2]
-  import Regex, only: [compile!: 1, escape: 1, run: 3]
+  import Regex, only: [compile!: 1, escape: 1]
   import Brian, except: [join: 2]
   import ExUnit.Callbacks, only: [on_exit: 1]
   import Elita, only: [request: 2]
   import Process, only: [get: 1, put: 2]
   import String, only: [split: 2, trim: 1]
-  import Enum, only: [reject: 2, map: 2, filter: 2, join: 2]
-  import File, only: [ls: 1, read: 1]
-  import Path, only: [expand: 1]
+  import Enum, only: [reject: 2, map: 2, join: 2]
 
   def spawn(agent) do
     spawn(agent, [agent])
@@ -65,8 +63,6 @@ defmodule Freeq do
     sock = get(agent)
     pattern = compile!("^:#{escape(name)}!\\S+ PRIVMSG #the-lab :(.*)")
 
-    delegations(name, sock)
-
     texts =
       reply
       |> split("\n")
@@ -86,49 +82,6 @@ defmodule Freeq do
     result = grab(room() |> elem(0), pattern)
     bubble(line)
     result
-  end
-
-  defp delegations(agent, sock) do
-    pattern = compile!("^:#{escape(agent)}!\\S+ PRIVMSG #the-lab :(.*)")
-
-    log(agent)
-    |> split("\n")
-    |> reject(&blank/1)
-    |> map(&shout(&1, agent))
-    |> reject(&is_nil/1)
-    |> map(&emit(sock, pattern, &1))
-  end
-
-  defp log(agent) do
-    dir = expand("~/.elita/sessions")
-    pattern = compile!("^#{escape(agent)}_\\d+\\.log$")
-    ls(dir) |> harvest(pattern, dir)
-  end
-
-  defp harvest({:ok, files}, pattern, dir) do
-    files
-    |> filter(&run(pattern, &1, []))
-    |> first(dir)
-  end
-
-  defp harvest(_, _pattern, _dir), do: ""
-
-  defp first([], _dir), do: ""
-
-  defp first([file | _], dir) do
-    read(Path.join(dir, file)) |> unwrap()
-  end
-
-  defp unwrap({:ok, content}), do: content
-  defp unwrap(_), do: ""
-
-  defp shout(line, agent) do
-    pattern = compile!("^📢 #{escape(agent)} → ([^:]+): (.*)$")
-
-    case run(pattern, trim(line), capture: :all_but_first) do
-      [recipient, msg] -> "#{recipient}: #{msg}"
-      _ -> nil
-    end
   end
 
   defp room, do: get(:room)
