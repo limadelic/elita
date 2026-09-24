@@ -1,4 +1,4 @@
-import { writeFileSync, readFileSync, existsSync, statSync } from 'fs';
+import { writeFileSync, readFileSync, existsSync, statSync, renameSync } from 'fs';
 import { execSync } from 'child_process';
 import { DefaultArtifactClient } from '@actions/artifact';
 
@@ -26,8 +26,17 @@ async function upload() {
     return null;
   }
 
+  const branch = process.env.GITHUB_REF_NAME || 'unknown';
+  const slug = branch.replace(/\//g, '-');
+  const artifactName = `cam-${slug}`;
+
+  if (existsSync('/tmp/cam/greet.webm')) {
+    const freeqPath = '/tmp/cam/freeq.webm';
+    renameSync('/tmp/cam/greet.webm', freeqPath);
+  }
+
   const client = new DefaultArtifactClient();
-  const result = await client.uploadArtifact('cam', ['/tmp/cam/greet.webm'], '/tmp/cam');
+  const result = await client.uploadArtifact(artifactName, ['/tmp/cam/freeq.webm'], '/tmp/cam');
   return result;
 }
 
