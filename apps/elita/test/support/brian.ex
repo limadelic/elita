@@ -1,6 +1,6 @@
 defmodule Brian do
   import :gen_tcp, only: [connect: 3, recv: 3, controlling_process: 2]
-  import Regex, only: [compile!: 1, escape: 1]
+  import Regex, only: [compile!: 1, escape: 1, run: 3]
   import String, only: [trim: 1]
   import Process, only: [put: 2, sleep: 1]
 
@@ -120,7 +120,7 @@ defmodule Brian do
   end
 
   def grab(sock, regex, line) do
-    case Regex.run(regex, line, capture: :all_but_first) do
+    case run(regex, line, capture: :all_but_first) do
       [capture] -> capture
       _ -> grab(sock, regex)
     end
