@@ -6,31 +6,24 @@ defmodule Freeq.GreetTest do
   import String, only: [trim: 1]
   import Kernel, except: [send: 2]
 
-  setup _context do
+  setup context do
     {:ok, sock} = connect(~c"127.0.0.1", 6667, packet: :line, active: false)
     login(sock)
     join(sock)
-    greet(sock, "hello")
+    greet(sock, word(context))
 
-    keeper = spawn(fn -> keeper(sock) end)
-    controlling_process(sock, keeper)
-
-    on_exit(fn ->
-      ref = make_ref()
-      Process.send(keeper, {:teardown, self(), ref}, [])
-
-      receive do
-        {:ok, ^ref} -> :ok
-        {:error, ^ref, e} -> raise e
-      after
-        10000 -> :ok
-      end
-    end)
+    pid = spawn(&owner/0)
+    controlling_process(sock, pid)
+    on_exit(fn -> tear(sock, pid) end)
 
     {:ok, socket: sock}
   end
 
   test "greet", %{socket: _sock} do
+  end
+
+  defp word(context) do
+    context.test |> Atom.to_string()
   end
 
   defp login(sock) do
@@ -82,17 +75,20 @@ defmodule Freeq.GreetTest do
     scan(sock, regex)
   end
 
-  defp keeper(sock) do
+  defp owner do
     receive do
-      {:teardown, caller, ref} ->
-        try do
-          part(sock)
-          quit(sock)
-          Process.send(caller, {:ok, ref}, [])
-        rescue
-          e -> Process.send(caller, {:error, ref, e}, [])
-        end
+      :stop -> :ok
     end
+  end
+
+  defp tear(sock, pid) do
+    part(sock)
+    quit(sock)
+    stop(pid)
+  end
+
+  defp stop(pid) do
+    Kernel.send(pid, :stop)
   end
 
   defp part(sock) do
