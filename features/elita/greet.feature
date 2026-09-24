@@ -6,7 +6,7 @@ Feature: Greet
     * greet> hello
       | who am i talking to |
 
-    * greet> Mike
+    * greet> Brian
       | wonderful to meet you |
 
     * greet> how are you?
