@@ -39,8 +39,8 @@ async function main() {
   mkdirSync('/tmp/cam', { recursive: true });
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({
-    viewport: { width: 1280, height: 720 },
-    recordVideo: { dir: '/tmp/cam', size: { width: 1280, height: 720 } }
+    viewport: { width: 1920, height: 1080 },
+    recordVideo: { dir: '/tmp/cam', size: { width: 1920, height: 1080 } }
   });
   const page = await context.newPage();
   await context.addInitScript(() => {
