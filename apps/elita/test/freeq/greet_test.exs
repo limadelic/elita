@@ -14,8 +14,9 @@ defmodule Freeq.GreetTest do
     {:ok, socket: sock}
   end
 
-  test "greet" do
-    :ok
+  test "greet", %{socket: sock} do
+    part(sock)
+    quit(sock)
   end
 
   defp login(sock) do
@@ -47,7 +48,7 @@ defmodule Freeq.GreetTest do
 
   defp scan(sock, regex) do
     {:ok, data} = recv(sock, 0, 5000)
-    scan(sock, regex, Kernel.to_string(data))
+    scan(sock, regex, to_string(data))
   end
 
   defp scan(sock, regex, "PING " <> server) do
@@ -70,5 +71,20 @@ defmodule Freeq.GreetTest do
 
   defp word(name) do
     name |> Atom.to_string() |> split(~r/[ _]/) |> last()
+  end
+
+  defp part(sock) do
+    :gen_tcp.send(sock, "PART #the-lab\r\n")
+    pattern = compile!("^:brian!\\S+ PART #the-lab\\r?$")
+    expect(sock, pattern)
+  end
+
+  defp quit(sock) do
+    :gen_tcp.send(sock, "QUIT\r\n")
+
+    case recv(sock, 0, 1000) do
+      {:error, _} -> :ok
+      {:ok, _} -> raise "Expected no response after QUIT"
+    end
   end
 end
