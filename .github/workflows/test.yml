@@ -47,6 +47,34 @@ jobs:
       - name: Get dependencies
         run: mix deps.get
 
+      - name: Checkout freeq
+        uses: actions/checkout@v4
+        with:
+          repository: msuarz/freeq
+          ref: 6859c084e254e399dbdd2b854d8d911e79a33014
+          path: freeq
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build freeq Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: freeq
+          load: true
+          tags: freeq:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Start freeq server
+        run: docker run -d --name freeq -p 6667:6667 -p 8080:8080 freeq:ci
+
+      - name: Wait for freeq to be ready
+        run: timeout 60 bash -c 'until nc -z 127.0.0.1 6667; do sleep 1; done'
+
+      - name: Check freeq logs
+        run: docker logs freeq
+
       - name: Run tests
         run: mix test
         env:
