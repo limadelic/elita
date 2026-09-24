@@ -2,11 +2,13 @@ defmodule Brian do
   import :gen_tcp, only: [connect: 3, recv: 3, controlling_process: 2]
   import Regex, only: [compile!: 1, escape: 1]
   import String, only: [trim: 1]
+  import Process, only: [put: 2, sleep: 1]
 
   defmacro brian(test_name, do: block) do
     quote do
       test unquote(test_name), context do
         var!(room) = join("#the-lab")
+        put(:room, var!(room))
         pause()
         say(var!(room), name(context))
         on_exit(fn -> leave(var!(room)) end)
@@ -41,9 +43,9 @@ defmodule Brian do
     scan(sock, pattern)
   end
 
-  defp bubble(text) do
+  def bubble(text) do
     time = 4500 + String.length(text) * 30
-    Process.sleep(time)
+    sleep(time)
   end
 
   def leave({sock, pid, channel, nick}) do
