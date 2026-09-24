@@ -10,6 +10,6 @@
   "scripts": {
     "fmt": "prettier --write 'features/**/*.feature'",
     "fmt:check": "prettier --check 'features/**/*.feature'",
-    "freeq": "node apps/elita/test/freeq/greet.mjs"
+    "cam": "node apps/elita/test/freeq/cam.mjs"
   }
 }

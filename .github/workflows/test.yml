@@ -95,30 +95,10 @@ jobs:
       - name: Install Playwright with Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: Start cameraman
-        run: node apps/elita/test/freeq/greet.mjs > /tmp/camera.log 2>&1 &
-
-      - name: Wait for cameraman ready
-        run: timeout 60 bash -c 'until [ -f /tmp/camera.ready ]; do sleep 1; done'
+      - uses: ./.github/actions/cam
 
       - name: Run greet test
         run: cd apps/elita && mix test --only freeq
-
-      - name: Wait for video
-        run: timeout 120 bash -c 'until [ -s /tmp/freeq-video/greet.webm ]; do sleep 1; done'; cat /tmp/camera.log
-
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: brian-greet
-          path: /tmp/freeq-video
-
-      - name: Comment on PR with greet video
-        if: always() && github.ref_name != 'main'
-        run: gh pr comment "${{ github.head_ref || github.ref_name }}" --body "Greet video available in [artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true
 
       - name: Run coverage
         run: bash -o pipefail -c 'mix cover 2>&1 | tee /tmp/cover_output.txt'
