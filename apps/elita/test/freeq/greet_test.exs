@@ -18,7 +18,7 @@ defmodule Freeq.GreetTest do
     :gen_tcp.send(sock, "NICK brian\r\n")
     :gen_tcp.send(sock, "USER brian 0 * :brian\r\n")
     :gen_tcp.send(sock, "CAP END\r\n")
-    expect(sock, ~r/001/)
+    expect(sock, ~r/^:\S+ 001 brian /)
   end
 
   defp join(sock) do
@@ -28,7 +28,7 @@ defmodule Freeq.GreetTest do
 
   defp greet(sock, word) do
     :gen_tcp.send(sock, "PRIVMSG #the-lab :#{word}\r\n")
-    pattern = Regex.compile!("^:brian!.*PRIVMSG #the-lab :#{Regex.escape(word)}")
+    pattern = Regex.compile!("^:brian!\\S+ PRIVMSG #the-lab :#{Regex.escape(word)}\\r?$")
     expect(sock, pattern)
   end
 
