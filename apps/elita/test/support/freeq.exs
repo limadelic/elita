@@ -1,12 +1,14 @@
 defmodule Freeq do
   import :gen_tcp, only: [connect: 3, controlling_process: 2]
-  import Regex, only: [compile!: 1, escape: 1]
+  import Regex, only: [compile!: 1, escape: 1, run: 3]
   import Brian, except: [join: 2]
   import ExUnit.Callbacks, only: [on_exit: 1]
   import Elita, only: [request: 2]
   import Process, only: [get: 1, put: 2]
   import String, only: [split: 2, trim: 1]
   import Enum, only: [reject: 2, map: 2, join: 2]
+  import File, only: [read: 1]
+  import System, only: [pid: 0, get_env: 2]
 
   def spawn(agent) do
     spawn(agent, [agent])
@@ -57,10 +59,11 @@ defmodule Freeq do
   end
 
   def ask(agent, msg) do
+    agent_str = to_string(agent)
     say(room(), msg)
-    reply = request(to_string(agent), msg)
+    reply = request(agent_str, msg)
     sock = get(agent)
-    pattern = compile!("^:#{escape(to_string(agent))}!\\S+ PRIVMSG #the-lab :(.*)")
+    pattern = compile!("^:#{escape(agent_str)}!\\S+ PRIVMSG #the-lab :(.*)")
 
     texts =
       reply
@@ -68,6 +71,7 @@ defmodule Freeq do
       |> reject(&blank/1)
       |> map(&emit(sock, pattern, &1))
 
+    delegations(agent_str, sock)
     bubble(reply)
     texts |> join("\n")
   end
@@ -80,6 +84,41 @@ defmodule Freeq do
   defp emit(sock, pattern, line) do
     write(sock, "PRIVMSG #the-lab :#{line}\r\n")
     grab(room() |> elem(0), pattern)
+  end
+
+  defp delegations(agent, sock) do
+    pattern = compile!("^:#{escape(agent)}!\\S+ PRIVMSG #the-lab :(.*)")
+
+    read_log(agent)
+    |> split("\n")
+    |> reject(&blank/1)
+    |> map(&parse_delegation(&1, agent))
+    |> reject(&is_nil/1)
+    |> map(&emit(sock, pattern, &1))
+  end
+
+  defp read_log(agent) do
+    home = get_env("HOME", "~")
+    expanded = expand_home(home)
+    path = expanded <> "/.elita/sessions/#{agent}_#{pid()}.log"
+
+    case read(path) do
+      {:ok, content} -> content
+      _ -> ""
+    end
+  end
+
+  defp expand_home("~"), do: get_env("HOME", "~")
+  defp expand_home("~/" <> rest), do: get_env("HOME", "~") <> "/" <> rest
+  defp expand_home(path), do: path
+
+  defp parse_delegation(line, agent) do
+    pattern = compile!("^📢 #{escape(agent)} → [^:]+: (.*)$")
+
+    case run(pattern, trim(line), capture: :all_but_first) do
+      [msg] -> msg
+      _ -> nil
+    end
   end
 
   defp room, do: get(:room)
