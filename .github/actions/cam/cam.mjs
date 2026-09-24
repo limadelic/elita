@@ -1,28 +1,5 @@
 import { chromium } from 'playwright';
 import { writeFileSync, mkdirSync, renameSync, watch } from 'fs';
-import { createConnection } from 'net';
-
-function irc() {
-  const client = createConnection(6667, 'localhost');
-  client.write('NICK stage\r\n');
-  client.write('USER stage 0 * :stage\r\n');
-  client.on('data', (data) => {
-    const msg = data.toString();
-    if (msg.includes('PING')) {
-      const token = msg.split(' ')[1];
-      client.write(`PONG ${token}\r\n`);
-    }
-    if (msg.includes('001')) {
-      client.write('JOIN #the-lab\r\n');
-    }
-  });
-  return {
-    close() {
-      client.write('QUIT\r\n');
-      client.end();
-    }
-  };
-}
 
 async function join(page) {
   const url = 'http://localhost:8787/?freeq=ws://localhost:8080/irc&room=%23the-lab&nick=cam';
@@ -60,7 +37,6 @@ async function wait() {
 
 async function main() {
   mkdirSync('/tmp/cam', { recursive: true });
-  const stage = irc();
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({
     viewport: { width: 1280, height: 720 },
@@ -81,7 +57,6 @@ async function main() {
   const video = await page.video()?.path();
   await context.close();
   await browser.close();
-  stage.close();
 
   if (video) {
     renameSync(video, '/tmp/cam/greet.webm');
