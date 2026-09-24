@@ -8,6 +8,7 @@ module Badge
     "#{lint}\n" \
     "#{cukes}\n" \
     "#{cover}\n" \
+    "#{freeq}\n" \
     "<!-- badges-end -->\n"
   end
 
@@ -26,5 +27,11 @@ module Badge
     pr = ENV.fetch('PR_NUMBER')
     url = ENV.fetch('COVER_URL')
     "[![cover](https://img.shields.io/endpoint?url=#{url})](https://limadelic.github.io/elita/#{pr}/cover/index.html)"
+  end
+
+  def self.freeq
+    pr = ENV.fetch('PR_NUMBER')
+    url = ENV.fetch('FREEQ_URL')
+    "[![freeq](https://img.shields.io/endpoint?url=#{url})](https://limadelic.github.io/elita/#{pr}/freeq.webm)"
   end
 end
