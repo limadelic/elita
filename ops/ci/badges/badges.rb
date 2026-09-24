@@ -10,6 +10,7 @@ module Badges
     FileUtils.mkdir_p("site/#{pref}")
     quality(pref)
     cukes(pref)
+    freeq(pref)
     Cover.run(pref)
   end
 
@@ -83,6 +84,17 @@ module Badges
     msg, color = outcome(n, scenarios.length)
     File.write("site/#{pref}/cukes.json", JSON.generate(badge('cukes', msg, color, 'cucumber')))
     File.write("site/#{pref}/cukes_badge.txt", "cukes: #{msg}")
+  end
+
+  def self.freeq(pref)
+    result = fetch('/tmp/freeq.json')
+    write_freeq(pref, result) if result
+  end
+
+  def self.write_freeq(pref, result)
+    status = result['status']
+    color = status == 'pass' ? '23D96C' : 'e05d44'
+    File.write("site/#{pref}/freeq.json", JSON.generate(badge('freeq', status, color)))
   end
 
   def self.passed(scenarios)
