@@ -9,7 +9,6 @@ defmodule Brian do
         room = join("#the-lab")
         pause()
         say(room, name(context))
-        pause()
         on_exit(fn -> leave(room) end)
         unquote(block)
       end
@@ -34,6 +33,12 @@ defmodule Brian do
     write(sock, "PRIVMSG #{channel} :#{word}\r\n")
     pattern = compile!("^:brian!\\S+ PRIVMSG #{channel} :#{escape(word)}\\r?$")
     scan(sock, pattern)
+    bubble(word)
+  end
+
+  defp bubble(text) do
+    time = 4500 + String.length(text) * 30
+    Process.sleep(time)
   end
 
   def leave({sock, pid, channel}) do
