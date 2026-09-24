@@ -9,7 +9,7 @@ defmodule Freeq.GreetTest do
     {agent, sock, pid} = Freeq.spawn(:greet)
 
     on_exit(fn ->
-      part(sock, "#the-lab", agent)
+      part(sock, "#the-lab", to_string(agent))
       quit(sock)
       send(pid, :stop)
     end)
