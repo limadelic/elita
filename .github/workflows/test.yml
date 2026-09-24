@@ -6,6 +6,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    permissions:
+      contents: read
+      pull-requests: write
 
     steps:
       - uses: actions/checkout@v4
@@ -102,8 +105,8 @@ jobs:
           path: /tmp/freeq-playwright-videos
 
       - name: Comment on PR with greet video
-        if: always()
-        run: gh pr comment brian --body "Greet video available in [artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+        if: always() && github.ref_name != 'main'
+        run: gh pr comment "${{ github.head_ref || github.ref_name }}" --body "Greet video available in [artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
