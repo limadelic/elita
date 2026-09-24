@@ -40,9 +40,9 @@ defmodule Elita.Umbrella do
   defp run_test(_) do
     unless Mix.Task.recursing?() do
       check("mix compile --force")
-      check("cd apps/elita && mix test")
-      check("cd apps/el && mix test")
-      check("cd apps/matrix && mix test")
+      check("cd apps/elita && mix test --warnings-as-errors")
+      check("cd apps/el && mix test --warnings-as-errors")
+      check("cd apps/matrix && mix test --warnings-as-errors")
     end
   end
 
