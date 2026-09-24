@@ -1,52 +1,55 @@
 import { chromium } from 'playwright';
-import { execSync } from 'child_process';
+import { writeFileSync, mkdirSync, renameSync } from 'fs';
 
-async function run() {
-  const browser = await chromium.launch({ headless: true });
-  const context = await browser.newContext({ recordVideo: { dir: '/tmp/freeq-videos' } });
-  const page = await context.newPage();
-
-  try {
-    // Open and login as watcher
-    await page.goto('http://127.0.0.1:8080/#auto-join=%23the-lab');
-    await page.click('button:has-text("Guest")');
-
-    const nickInput = page.locator('input[placeholder="your_nick"]');
-    await nickInput.fill('watcher');
-    await nickInput.press('Enter');
-
-    // Wait for compose input
-    const composeInput = page.locator('[data-testid="compose-input"]');
-    await composeInput.waitFor({ timeout: 10000 });
-
-    // Wait until in channel - check for members list
-    const memberAside = page.locator('aside[aria-label="Channel members"]');
-    await memberAside.waitFor({ timeout: 10000 });
-
-    // Run tests
-    try {
-      execSync('cd apps/elita && mix test --only freeq --warnings-as-errors', {
-        cwd: process.cwd(),
-        stdio: 'inherit'
-      });
-    } catch (err) {
-      console.error(`Tests failed: ${err.message}`);
-      throw err;
-    }
-  } finally {
-    await context.close();
-    await browser.close();
-
-    const videoPath = await page.video()?.path();
-    if (videoPath) {
-      console.log(videoPath);
-    }
-
-    process.exit(0);
-  }
+async function join(page) {
+  await page.goto('http://127.0.0.1:8080/#auto-join=%23the-lab');
+  await page.click('button:has-text("Guest")');
+  const nick = page.locator('input[placeholder="your_nick"]');
+  await nick.fill('watcher');
+  await nick.press('Enter');
 }
 
-run().catch(err => {
-  console.error(`ERROR: ${err.message}`);
-  process.exit(1);
-});
+async function ready(page) {
+  await page.locator('[data-testid="compose-input"]').waitFor({ timeout: 10000 });
+  await page.locator('aside[aria-label="Channel members"]').waitFor({ timeout: 10000 });
+}
+
+async function wait(page) {
+  const list = page.locator('[data-testid="message-list"]');
+  const timeout = 5 * 60 * 1000;
+  const start = Date.now();
+  let saw = false;
+  while (Date.now() - start < timeout) {
+    const text = await list.textContent().catch(() => '');
+    if (text.includes('greet') && text.includes('left')) {
+      saw = true;
+      break;
+    }
+    await page.waitForTimeout(500);
+  }
+  if (!saw) process.exit(1);
+}
+
+async function main() {
+  mkdirSync('/tmp/freeq-video', { recursive: true });
+  const browser = await chromium.launch({ headless: true });
+  const context = await browser.newContext({ recordVideo: { dir: '/tmp/freeq-video' } });
+  const page = await context.newPage();
+
+  await join(page);
+  await ready(page);
+  writeFileSync('/tmp/camera.ready', '');
+
+  await wait(page);
+
+  const video = await page.video()?.path();
+  await context.close();
+  await browser.close();
+
+  if (video) {
+    renameSync(video, '/tmp/freeq-video/greet.webm');
+  }
+  process.exit(0);
+}
+
+main().catch(() => process.exit(1));
