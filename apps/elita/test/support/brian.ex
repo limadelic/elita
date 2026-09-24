@@ -7,7 +7,9 @@ defmodule Brian do
     quote do
       test unquote(test_name), context do
         room = join("#the-lab")
+        pause()
         say(room, name(context))
+        pause()
         on_exit(fn -> leave(room) end)
         unquote(block)
       end
@@ -43,6 +45,8 @@ defmodule Brian do
   def name(context) do
     context.test |> to_string()
   end
+
+  def pause, do: Process.sleep(1000)
 
   defp auth(sock) do
     handshake(sock)
