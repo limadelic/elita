@@ -9,12 +9,12 @@ defmodule Freeq do
   import Enum, only: [reject: 2, map: 2, join: 2]
 
   def spawn(agent) do
-    spawn(agent, nil)
+    spawn(agent, [agent])
   end
 
   def spawn(agent, config) do
     nick = to_string(agent)
-    if config, do: Tester.spawn(agent, config), else: Tester.spawn(agent)
+    Tester.spawn(agent, config)
     sock = dial()
     enter(sock, nick, "#the-lab")
     pid = Kernel.spawn(&keeper/0)
