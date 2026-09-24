@@ -94,7 +94,6 @@ jobs:
       - name: Run greet test
         id: greet
         run: cd apps/elita && mix test --only freeq
-        continue-on-error: true
 
       - name: Record freeq result
         run: |
@@ -103,6 +102,7 @@ jobs:
           else
             echo '{"status": "fail"}' > /tmp/freeq.json
           fi
+        if: always()
 
       - name: Run coverage
         run: bash -o pipefail -c 'mix cover 2>&1 | tee /tmp/cover_output.txt'

@@ -88,10 +88,10 @@ module Badges
 
   def self.freeq(pref)
     result = fetch('/tmp/freeq.json')
-    write_freeq(pref, result) if result
+    record(pref, result) if result
   end
 
-  def self.write_freeq(pref, result)
+  def self.record(pref, result)
     status = result['status']
     color = status == 'pass' ? '23D96C' : 'e05d44'
     File.write("site/#{pref}/freeq.json", JSON.generate(badge('freeq', status, color)))
