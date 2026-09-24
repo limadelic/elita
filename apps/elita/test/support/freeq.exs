@@ -65,13 +65,14 @@ defmodule Freeq do
     sock = get(agent)
     pattern = compile!("^:#{escape(name)}!\\S+ PRIVMSG #the-lab :(.*)")
 
+    delegations(name, sock)
+
     texts =
       reply
       |> split("\n")
       |> reject(&blank/1)
       |> map(&emit(sock, pattern, &1))
 
-    delegations(name, sock)
     texts |> join("\n")
   end
 
@@ -82,7 +83,9 @@ defmodule Freeq do
 
   defp emit(sock, pattern, line) do
     write(sock, "PRIVMSG #the-lab :#{line}\r\n")
-    grab(room() |> elem(0), pattern)
+    result = grab(room() |> elem(0), pattern)
+    bubble(line)
+    result
   end
 
   defp delegations(agent, sock) do
@@ -99,25 +102,25 @@ defmodule Freeq do
   defp log(agent) do
     dir = expand("~/.elita/sessions")
     pattern = compile!("^#{escape(agent)}_\\d+\\.log$")
-    ls(dir) |> logs_from(pattern, dir)
+    ls(dir) |> harvest(pattern, dir)
   end
 
-  defp logs_from({:ok, files}, pattern, dir) do
+  defp harvest({:ok, files}, pattern, dir) do
     files
     |> filter(&run(pattern, &1, []))
     |> first(dir)
   end
 
-  defp logs_from(_, _pattern, _dir), do: ""
+  defp harvest(_, _pattern, _dir), do: ""
 
   defp first([], _dir), do: ""
 
   defp first([file | _], dir) do
-    read(Path.join(dir, file)) |> fetch_content()
+    read(Path.join(dir, file)) |> unwrap()
   end
 
-  defp fetch_content({:ok, content}), do: content
-  defp fetch_content(_), do: ""
+  defp unwrap({:ok, content}), do: content
+  defp unwrap(_), do: ""
 
   defp shout(line, agent) do
     pattern = compile!("^📢 #{escape(agent)} → ([^:]+): (.*)$")
