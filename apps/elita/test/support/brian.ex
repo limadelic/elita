@@ -3,6 +3,8 @@ defmodule Brian do
   import Regex, only: [compile!: 1, escape: 1, run: 3]
   import String, only: [trim: 1]
   import Process, only: [put: 2, sleep: 1]
+  import System, only: [get_env: 1]
+  import ExUnit.Callbacks, only: [on_exit: 1]
 
   defmacro brian(test_name, do: block) do
     quote do
@@ -11,7 +13,11 @@ defmodule Brian do
         put(:room, var!(room))
         pause()
         say(var!(room), name(context))
-        on_exit(fn -> leave(var!(room)) end)
+
+        on_exit(fn ->
+          leave(var!(room))
+        end)
+
         unquote(block)
       end
     end
@@ -45,8 +51,12 @@ defmodule Brian do
 
   def bubble(text) do
     time = 4500 + String.length(text) * 30
-    sleep(time)
+    rest(time)
   end
+
+  defp rest(ms), do: rest(ms, get_env("CAM"))
+  defp rest(_, nil), do: :ok
+  defp rest(ms, _), do: sleep(ms)
 
   def leave({sock, pid, channel, nick}) do
     part(sock, channel, nick)
@@ -68,7 +78,7 @@ defmodule Brian do
     context.test |> to_string()
   end
 
-  def pause, do: Process.sleep(1000)
+  def pause, do: rest(1000)
 
   defp auth(sock, nick) do
     handshake(sock, nick)

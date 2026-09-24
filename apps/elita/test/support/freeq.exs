@@ -9,8 +9,12 @@ defmodule Freeq do
   import Enum, only: [reject: 2, map: 2, join: 2]
 
   def spawn(agent) do
+    spawn(agent, [agent])
+  end
+
+  def spawn(agent, config) do
     nick = to_string(agent)
-    Tester.spawn(agent)
+    Tester.spawn(agent, config)
     sock = dial()
     enter(sock, nick, "#the-lab")
     pid = Kernel.spawn(&keeper/0)
@@ -53,10 +57,11 @@ defmodule Freeq do
   end
 
   def ask(agent, msg) do
+    name = to_string(agent)
     say(room(), msg)
-    reply = request(to_string(agent), msg)
+    reply = request(name, msg)
     sock = get(agent)
-    pattern = compile!("^:#{escape(to_string(agent))}!\\S+ PRIVMSG #the-lab :(.*)")
+    pattern = compile!("^:#{escape(name)}!\\S+ PRIVMSG #the-lab :(.*)")
 
     texts =
       reply
@@ -64,13 +69,19 @@ defmodule Freeq do
       |> reject(&blank/1)
       |> map(&emit(sock, pattern, &1))
 
-    bubble(reply)
     texts |> join("\n")
+  end
+
+  def tell(agent, msg) do
+    say(room(), msg)
+    Tester.tell(agent, msg)
   end
 
   defp emit(sock, pattern, line) do
     write(sock, "PRIVMSG #the-lab :#{line}\r\n")
-    grab(room() |> elem(0), pattern)
+    result = grab(room() |> elem(0), pattern)
+    bubble(line)
+    result
   end
 
   defp room, do: get(:room)
