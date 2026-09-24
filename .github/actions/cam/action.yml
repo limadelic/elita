@@ -1,5 +1,10 @@
 name: 'Cam Recorder'
 description: 'Record test runs with browser camera'
+inputs:
+  token:
+    description: 'GitHub token for uploading artifacts and posting comments'
+    required: false
+    default: ''
 runs:
   using: 'node20'
   main: 'main.mjs'

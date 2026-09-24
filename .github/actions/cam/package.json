@@ -1,0 +1,9 @@
+{
+  "name": "cam-action",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "playwright": "^1.50.0",
+    "@actions/artifact": "^2.1.0"
+  }
+}

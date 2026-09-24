@@ -1,12 +1,22 @@
-import { spawn } from 'child_process';
-import { writeFileSync } from 'fs';
-import { resolve } from 'path';
+import { spawn, spawnSync } from 'child_process';
+import { writeFileSync, openSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+async function install() {
+  const dir = dirname(fileURLToPath(import.meta.url));
+  spawnSync('npm', ['ci'], { cwd: dir, stdio: 'inherit' });
+  spawnSync('npx', ['playwright', 'install', '--with-deps', 'chromium'], { cwd: dir, stdio: 'inherit' });
+}
 
 async function start() {
-  const scriptPath = resolve(import.meta.url, '..', 'cam.mjs').slice(7);
+  const dir = dirname(fileURLToPath(import.meta.url));
+  const scriptPath = join(dir, 'cam.mjs');
+  const logFile = openSync('/tmp/cam.log', 'a');
+
   const proc = spawn('node', [scriptPath], {
     detached: true,
-    stdio: ['ignore', 'append:/tmp/cam.log', 'append:/tmp/cam.log']
+    stdio: ['ignore', logFile, logFile]
   });
   const pid = proc.pid;
   proc.unref();
@@ -30,4 +40,9 @@ async function start() {
   });
 }
 
-start().catch(() => process.exit(1));
+async function main() {
+  await install();
+  await start();
+}
+
+main().catch(() => process.exit(1));

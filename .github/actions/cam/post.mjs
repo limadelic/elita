@@ -1,5 +1,6 @@
-import { writeFileSync, readFileSync, existsSync } from 'fs';
-import { exec } from 'child_process';
+import { writeFileSync, readFileSync, existsSync, statSync } from 'fs';
+import { execSync } from 'child_process';
+import { DefaultArtifactClient } from '@actions/artifact';
 
 async function stop() {
   writeFileSync('/tmp/cam.stop', '');
@@ -8,7 +9,7 @@ async function stop() {
     const timeout = setTimeout(() => resolve(), 120000);
     const check = setInterval(() => {
       if (existsSync('/tmp/cam/greet.webm')) {
-        const stat = require('fs').statSync('/tmp/cam/greet.webm');
+        const stat = statSync('/tmp/cam/greet.webm');
         if (stat.size > 0) {
           clearTimeout(timeout);
           clearInterval(check);
@@ -20,14 +21,25 @@ async function stop() {
 }
 
 async function upload() {
-  if (process.env.GITHUB_ACTIONS && process.env.GITHUB_REPOSITORY) {
-    try {
-      await exec('npx @actions/artifact upload-artifact --name brian-cam --path /tmp/cam', (err) => {
-        if (err) console.error('Upload failed:', err.message);
-      });
-    } catch (e) {
-      console.error('Upload error:', e.message);
-    }
+  if (!process.env.ACTIONS_RUNTIME_TOKEN) {
+    console.log('upload skipped');
+    return null;
+  }
+
+  const client = new DefaultArtifactClient();
+  const result = await client.uploadArtifact('cam', ['/tmp/cam/greet.webm'], '/tmp/cam');
+  return result;
+}
+
+async function comment(token, url) {
+  if (!token) return;
+  try {
+    execSync(`gh pr comment --body "Video: ${url}"`, {
+      env: { ...process.env, GH_TOKEN: token },
+      stdio: 'inherit'
+    });
+  } catch {
+    // Silently fail if not in PR context
   }
 }
 
@@ -36,7 +48,13 @@ async function main() {
   if (existsSync('/tmp/cam.log')) {
     console.log(readFileSync('/tmp/cam.log', 'utf8'));
   }
-  await upload();
+
+  const result = await upload();
+  if (result) {
+    const token = process.env.INPUT_TOKEN || '';
+    const url = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
+    await comment(token, url);
+  }
 }
 
 main().catch(() => process.exit(1));
