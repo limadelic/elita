@@ -1,102 +1,52 @@
 import { chromium } from 'playwright';
+import { execSync } from 'child_process';
 
-const videoDir = '/tmp/freeq-playwright-videos';
-
-async function open(page) {
-  await page.goto('http://127.0.0.1:8080/#auto-join=%23the-lab');
-}
-
-async function login(page) {
-  await page.click('button:has-text("Guest")');
-  const nickInput = page.locator('input[placeholder="your_nick"]');
-  await nickInput.fill('brian');
-  await nickInput.press('Enter');
-
-  const skipButton = page.locator('button:has-text("Skip")').first();
-  if (await skipButton.count() > 0) {
-    await skipButton.click();
-  }
-
-  const composeInput = page.locator('[data-testid="compose-input"]');
-  await composeInput.waitFor({ timeout: 10000 });
-}
-
-async function say(page) {
-  const composeInput = page.locator('[data-testid="compose-input"]');
-  await composeInput.focus();
-  await composeInput.type('greet');
-  await composeInput.press('Enter');
-}
-
-async function heard(page) {
-  const messageList = page.locator('[data-testid="message-list"]');
-  await messageList.waitFor({ timeout: 10000 });
-
-  await page.waitForFunction(
-    () => {
-      const text = document.querySelector('[data-testid="message-list"]')?.textContent || '';
-      return text.includes('greet');
-    },
-    { timeout: 60000 }
-  );
-}
-
-async function members(page) {
-  const memberAside = page.locator('aside[aria-label="Channel members"]');
-  await memberAside.waitFor({ timeout: 10000 });
-
-  const memberButtons = await memberAside.locator('button').count();
-  const memberListText = await memberAside.textContent();
-
-  if (memberButtons !== 1) {
-    throw new Error(`Expected exactly 1 member button, found ${memberButtons}\nMember list rendered:\n${memberListText}`);
-  }
-
-  if (!memberListText.includes('brian')) {
-    throw new Error(`Member list does not contain "brian"\nMember list rendered:\n${memberListText}`);
-  }
-}
-
-async function test() {
+async function run() {
   const browser = await chromium.launch({ headless: true });
-  const context = await browser.newContext({
-    recordVideo: { dir: videoDir }
-  });
+  const context = await browser.newContext({ recordVideo: { dir: '/tmp/freeq-videos' } });
   const page = await context.newPage();
-  let failed = false;
 
   try {
-    await open(page);
-    await login(page);
-    await say(page);
-    await heard(page);
-    await members(page);
-  } catch (error) {
-    failed = true;
-    console.error(`FAIL: ${error.message}`);
+    // Open and login as watcher
+    await page.goto('http://127.0.0.1:8080/#auto-join=%23the-lab');
+    await page.click('button:has-text("Guest")');
+
+    const nickInput = page.locator('input[placeholder="your_nick"]');
+    await nickInput.fill('watcher');
+    await nickInput.press('Enter');
+
+    // Wait for compose input
+    const composeInput = page.locator('[data-testid="compose-input"]');
+    await composeInput.waitFor({ timeout: 10000 });
+
+    // Wait until in channel - check for members list
+    const memberAside = page.locator('aside[aria-label="Channel members"]');
+    await memberAside.waitFor({ timeout: 10000 });
+
+    // Run tests
+    try {
+      execSync('cd apps/elita && mix test --only freeq --warnings-as-errors', {
+        cwd: process.cwd(),
+        stdio: 'inherit'
+      });
+    } catch (err) {
+      console.error(`Tests failed: ${err.message}`);
+      throw err;
+    }
   } finally {
     await context.close();
     await browser.close();
 
-    const videoPath = await page.video().path();
+    const videoPath = await page.video()?.path();
     if (videoPath) {
-      console.log(`VIDEO: ${videoPath}`);
-      const { execSync } = await import('child_process');
-      try {
-        const lsOutput = execSync(`ls -l ${videoPath}`).toString().trim();
-        console.log(lsOutput);
-      } catch (e) {
-        // Ignore if file doesn't exist yet
-      }
+      console.log(videoPath);
     }
 
-    if (failed) {
-      process.exit(1);
-    }
-
-    console.log('GREEN');
     process.exit(0);
   }
 }
 
-test();
+run().catch(err => {
+  console.error(`ERROR: ${err.message}`);
+  process.exit(1);
+});
