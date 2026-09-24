@@ -3,16 +3,27 @@ defmodule Brian do
   import Regex, only: [compile!: 1, escape: 1, run: 3]
   import String, only: [trim: 1]
   import Process, only: [put: 2, sleep: 1]
-  import System, only: [get_env: 1]
+  import System, only: [get_env: 1, put_env: 2, tmp_dir!: 0, unique_integer: 1]
+  import ExUnit.Callbacks, only: [on_exit: 1]
+  import File, only: [mkdir_p!: 1]
 
   defmacro brian(test_name, do: block) do
     quote do
       test unquote(test_name), context do
+        orig_home = get_env("HOME")
+        scratch = tmp_dir!() |> Path.join("freeq#{unique_integer([:positive])}")
+        mkdir_p!(scratch)
+        put_env("HOME", scratch)
         var!(room) = join("#the-lab")
         put(:room, var!(room))
         pause()
         say(var!(room), name(context))
-        on_exit(fn -> leave(var!(room)) end)
+
+        on_exit(fn ->
+          leave(var!(room))
+          put_env("HOME", orig_home)
+        end)
+
         unquote(block)
       end
     end
