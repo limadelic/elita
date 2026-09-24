@@ -45,8 +45,11 @@ defmodule Brian do
 
   def bubble(text) do
     time = 4500 + String.length(text) * 30
-    sleep(time)
+    do_sleep(time, System.get_env("CAM"))
   end
+
+  defp do_sleep(_, nil), do: :ok
+  defp do_sleep(time, _), do: sleep(time)
 
   def leave({sock, pid, channel, nick}) do
     part(sock, channel, nick)
@@ -68,7 +71,10 @@ defmodule Brian do
     context.test |> to_string()
   end
 
-  def pause, do: Process.sleep(1000)
+  def pause, do: pause_sleep(System.get_env("CAM"))
+
+  defp pause_sleep(nil), do: :ok
+  defp pause_sleep(_), do: Process.sleep(1000)
 
   defp auth(sock, nick) do
     handshake(sock, nick)

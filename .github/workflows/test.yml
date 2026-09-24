@@ -115,6 +115,8 @@ jobs:
       - name: Run greet test
         id: greet
         run: cd apps/elita && mix test --only freeq
+        env:
+          CAM: 1
 
       - name: Record freeq result
         run: |
