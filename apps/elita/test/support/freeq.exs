@@ -48,11 +48,21 @@ defmodule Freeq do
     say(room(), msg)
     reply = request(to_string(agent), msg)
     sock = get(agent)
-    write(sock, "PRIVMSG #the-lab :#{reply}\r\n")
     pattern = compile!("^:#{escape(to_string(agent))}!\\S+ PRIVMSG #the-lab :(.*)")
-    text = grab(room() |> elem(0), pattern)
+
+    texts =
+      reply
+      |> String.split("\n")
+      |> Enum.reject(&(String.trim(&1) == ""))
+      |> Enum.map(&emit(sock, pattern, &1))
+
     bubble(reply)
-    text
+    texts |> Enum.join("\n")
+  end
+
+  defp emit(sock, pattern, line) do
+    write(sock, "PRIVMSG #the-lab :#{line}\r\n")
+    grab(room() |> elem(0), pattern)
   end
 
   defp room, do: get(:room)
