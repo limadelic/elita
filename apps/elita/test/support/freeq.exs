@@ -6,7 +6,7 @@ defmodule Freeq do
   import Elita, only: [request: 2]
   import Process, only: [get: 1, put: 2]
   import String, only: [split: 2, trim: 1]
-  import Enum, only: [reject: 2, map: 2, filter: 2, sort: 1, max_by: 2, join: 2]
+  import Enum, only: [reject: 2, map: 2, filter: 2, join: 2]
   import File, only: [ls: 1, read: 1]
   import Path, only: [expand: 1]
 
@@ -59,11 +59,11 @@ defmodule Freeq do
   end
 
   def ask(agent, msg) do
-    nom = to_string(agent)
+    name = to_string(agent)
     say(room(), msg)
-    reply = request(nom, msg)
+    reply = request(name, msg)
     sock = get(agent)
-    pattern = compile!("^:#{escape(nom)}!\\S+ PRIVMSG #the-lab :(.*)")
+    pattern = compile!("^:#{escape(name)}!\\S+ PRIVMSG #the-lab :(.*)")
 
     texts =
       reply
@@ -71,7 +71,7 @@ defmodule Freeq do
       |> reject(&blank/1)
       |> map(&emit(sock, pattern, &1))
 
-    delegation = delegations(nom, sock)
+    delegation = delegations(name, sock)
     bubble(reply)
     (texts ++ delegation) |> join("\n")
   end
@@ -105,26 +105,15 @@ defmodule Freeq do
 
   defp logs_from({:ok, files}, pattern, dir) do
     files
-    |> reject(&is_nil(&1))
     |> filter(&run(pattern, &1, []))
-    |> latest_log(dir)
+    |> first_or_empty(dir)
   end
 
   defp logs_from(_, _pattern, _dir), do: ""
 
-  defp latest_log([], _dir), do: ""
+  defp first_or_empty([], _dir), do: ""
 
-  defp latest_log(logs, dir) do
-    logs |> sort() |> max_by(&mtime(&1, dir)) |> fetch(dir)
-  end
-
-  defp mtime(file, dir) do
-    dir |> Path.join(file) |> File.stat!() |> Map.get(:mtime)
-  rescue
-    _ -> 0
-  end
-
-  defp fetch(file, dir) do
+  defp first_or_empty([file | _], dir) do
     read(Path.join(dir, file)) |> fetch_content()
   end
 

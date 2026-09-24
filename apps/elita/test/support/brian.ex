@@ -10,8 +10,8 @@ defmodule Brian do
   defmacro brian(test_name, do: block) do
     quote do
       test unquote(test_name), context do
-        orig_home = get_env("HOME")
-        scratch = tmp_dir!() |> Path.join("freeq#{unique_integer([:positive])}")
+        home = get_env("HOME")
+        scratch = home_scratch()
         mkdir_p!(scratch)
         put_env("HOME", scratch)
         var!(room) = join("#the-lab")
@@ -21,12 +21,16 @@ defmodule Brian do
 
         on_exit(fn ->
           leave(var!(room))
-          put_env("HOME", orig_home)
+          put_env("HOME", home)
         end)
 
         unquote(block)
       end
     end
+  end
+
+  def home_scratch do
+    tmp_dir!() |> Path.join("freeq#{unique_integer([:positive])}")
   end
 
   def join(channel, nick \\ "brian") do
