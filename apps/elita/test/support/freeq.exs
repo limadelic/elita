@@ -72,6 +72,11 @@ defmodule Freeq do
     texts |> join("\n")
   end
 
+  def tell(agent, msg) do
+    say(room(), msg)
+    Tester.tell(agent, msg)
+  end
+
   defp emit(sock, pattern, line) do
     write(sock, "PRIVMSG #the-lab :#{line}\r\n")
     grab(room() |> elem(0), pattern)
