@@ -10,7 +10,7 @@ function irc() {
     const msg = data.toString();
     if (msg.includes('PING')) {
       const token = msg.split(' ')[1];
-      client.write(`PONG ${token}`);
+      client.write(`PONG ${token}\r\n`);
     }
     if (msg.includes('001')) {
       client.write('JOIN #the-lab\r\n');
@@ -35,6 +35,10 @@ async function ready(page) {
   const world = page.locator('#world');
   try {
     await world.waitFor({ timeout: 10000, state: 'visible' });
+    await page.waitForFunction(
+      () => document.querySelector('header .loc')?.textContent.includes('#the-lab'),
+      { timeout: 10000 }
+    );
     return true;
   } catch {
     return false;
