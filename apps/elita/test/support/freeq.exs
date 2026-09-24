@@ -5,6 +5,8 @@ defmodule Freeq do
   import ExUnit.Callbacks, only: [on_exit: 1]
   import Elita, only: [request: 2]
   import Process, only: [get: 1, put: 2]
+  import String, only: [split: 2, trim: 1]
+  import Enum, only: [reject: 2, map: 2]
 
   def spawn(agent) do
     nick = to_string(agent)
@@ -21,6 +23,8 @@ defmodule Freeq do
       quit(sock)
       send(pid, :stop)
     end)
+
+    pause()
   end
 
   defp dial do
@@ -34,6 +38,10 @@ defmodule Freeq do
     write(sock, "USER temp 0 * :temp\r\n")
     pattern = compile!("^:\\S+ 001 temp ")
     scan(sock, pattern)
+  end
+
+  defp blank(text) do
+    trim(text) == ""
   end
 
   defp enter(sock, agent, channel) do
@@ -52,9 +60,9 @@ defmodule Freeq do
 
     texts =
       reply
-      |> String.split("\n")
-      |> Enum.reject(&(String.trim(&1) == ""))
-      |> Enum.map(&emit(sock, pattern, &1))
+      |> split("\n")
+      |> reject(&blank/1)
+      |> map(&emit(sock, pattern, &1))
 
     bubble(reply)
     texts |> Enum.join("\n")

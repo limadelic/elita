@@ -9,7 +9,6 @@ defmodule Freeq.GreetTest do
 
   brian "greet" do
     spawn(:greet)
-    pause()
     verify("who am i talking to", ask(:greet, "hello"))
     verify("wonderful to meet you", ask(:greet, "Mike"))
     verify("i am greeeet", ask(:greet, "how are you?"))
