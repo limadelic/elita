@@ -25,8 +25,11 @@ function irc() {
 }
 
 async function join(page) {
-  const url = 'http://localhost:8787/?freeq=ws://localhost:8080/irc&room=%23the-lab&nick=cam&bare=1';
+  const url = 'http://localhost:8787/?freeq=ws://localhost:8080/irc';
   await page.goto(url);
+  await page.fill('#name-input', 'cam');
+  await page.click('#enter-guest');
+  await page.click('#mode-world');
 }
 
 async function ready(page) {
@@ -36,7 +39,7 @@ async function ready(page) {
   try {
     await world.waitFor({ timeout: 10000, state: 'visible' });
     await page.waitForFunction(
-      () => document.querySelector('header .loc')?.textContent.includes('#the-lab'),
+      () => document.querySelector('[data-testid="header-loc"]')?.textContent.includes('#the-lab'),
       { timeout: 10000 }
     );
     return true;
@@ -62,7 +65,10 @@ async function main() {
   mkdirSync('/tmp/cam', { recursive: true });
   const stage = irc();
   const browser = await chromium.launch({ headless: true });
-  const context = await browser.newContext({ recordVideo: { dir: '/tmp/cam' } });
+  const context = await browser.newContext({
+    viewport: { width: 1280, height: 720 },
+    recordVideo: { dir: '/tmp/cam', size: { width: 1280, height: 720 } }
+  });
   const page = await context.newPage();
   await context.addInitScript(() => {
     localStorage.setItem('fimp-first-steps-dismissed', '1');
