@@ -115,6 +115,7 @@ Naming/FileName:
     - 'bin/**/*'
     - 'features/step_definitions/**/*'
     - 'tmp/**/*'
+    - '**/*_spec.rb'
 
 Naming/MethodName:
   EnforcedStyle: snake_case
