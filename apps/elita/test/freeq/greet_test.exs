@@ -6,5 +6,7 @@ defmodule Freeq.GreetTest do
   import Brian
 
   brian "greet" do
+    Freeq.spawn(:greet)
+    pause()
   end
 end
