@@ -49,34 +49,34 @@ async function members(page) {
   const memberListText = await memberAside.textContent();
 
   if (memberButtons !== 1) {
-    console.error(`FAIL: Expected exactly 1 member button, found ${memberButtons}`);
-    console.error('Member list rendered:');
-    console.error(memberListText);
-    process.exit(1);
+    throw new Error(`Expected exactly 1 member button, found ${memberButtons}\nMember list rendered:\n${memberListText}`);
   }
 
   if (!memberListText.includes('brian')) {
-    console.error('FAIL: Member list does not contain "brian"');
-    console.error('Member list rendered:');
-    console.error(memberListText);
-    process.exit(1);
+    throw new Error(`Member list does not contain "brian"\nMember list rendered:\n${memberListText}`);
   }
 }
 
 async function test() {
   const browser = await chromium.launch({ headless: true });
+  const context = await browser.newContext({
+    recordVideo: { dir: videoDir }
+  });
+  const page = await context.newPage();
+  let failed = false;
 
   try {
-    const context = await browser.newContext({
-      recordVideo: { dir: videoDir }
-    });
-
-    const page = await context.newPage();
-
     await open(page);
     await login(page);
     await say(page);
     await heard(page);
+    await members(page);
+  } catch (error) {
+    failed = true;
+    console.error(`FAIL: ${error.message}`);
+  } finally {
+    await context.close();
+    await browser.close();
 
     const videoPath = await page.video().path();
     if (videoPath) {
@@ -90,16 +90,12 @@ async function test() {
       }
     }
 
-    await members(page);
-    await context.close();
+    if (failed) {
+      process.exit(1);
+    }
 
     console.log('GREEN');
     process.exit(0);
-  } catch (error) {
-    console.error('Test failed:', error.message);
-    process.exit(1);
-  } finally {
-    await browser.close();
   }
 }
 
