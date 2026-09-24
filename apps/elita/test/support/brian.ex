@@ -4,6 +4,15 @@ defmodule Brian do
   import String, only: [trim: 1]
   import Kernel
 
+  defmacro brian(test_name, do: block) do
+    quote do
+      brian_connection = join("#the-lab")
+      say(brian_connection, unquote(test_name))
+      on_exit(fn -> leave(brian_connection) end)
+      unquote(block)
+    end
+  end
+
   def join(channel) do
     sock = dial()
     enter(sock, channel)

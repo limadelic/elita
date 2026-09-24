@@ -5,13 +5,8 @@ defmodule Freeq.GreetTest do
 
   import Brian
 
-  setup context do
-    brian = join("#the-lab")
-    say(brian, name(context))
-    on_exit(fn -> leave(brian) end)
-    :ok
-  end
-
   test "greet" do
+    brian "greet" do
+    end
   end
 end
