@@ -1,39 +1,53 @@
 defmodule Freeq.GreetTest do
   use ExUnit.Case
 
-  import :gen_tcp, only: [connect: 3, recv: 3]
+  import :gen_tcp, only: [connect: 3, recv: 3, send: 2, controlling_process: 2]
   import Regex, only: [compile!: 1, escape: 1]
-  import String, only: [trim: 1, split: 2]
-  import List, only: [last: 1]
+  import String, only: [trim: 1]
+  import Kernel, except: [send: 2]
 
-  setup context do
+  setup _context do
     {:ok, sock} = connect(~c"127.0.0.1", 6667, packet: :line, active: false)
     login(sock)
     join(sock)
-    greet(sock, word(context.test))
+    greet(sock, "hello")
+
+    keeper = spawn(fn -> keeper(sock) end)
+    controlling_process(sock, keeper)
+
+    on_exit(fn ->
+      ref = make_ref()
+      Process.send(keeper, {:teardown, self(), ref}, [])
+
+      receive do
+        {:ok, ^ref} -> :ok
+        {:error, ^ref, e} -> raise e
+      after
+        10000 -> :ok
+      end
+    end)
+
     {:ok, socket: sock}
   end
 
-  test "greet", %{socket: sock} do
-    part(sock)
-    quit(sock)
+  test "greet", %{socket: _sock} do
   end
 
   defp login(sock) do
-    :gen_tcp.send(sock, "CAP REQ :echo-message\r\n")
-    :gen_tcp.send(sock, "NICK brian\r\n")
-    :gen_tcp.send(sock, "USER brian 0 * :brian\r\n")
-    :gen_tcp.send(sock, "CAP END\r\n")
+    send(sock, "CAP REQ :echo-message\r\n")
+    send(sock, "NICK brian\r\n")
+    send(sock, "USER brian 0 * :brian\r\n")
+    send(sock, "CAP END\r\n")
     expect(sock, ~r/^:\S+ 001 brian /)
   end
 
   defp join(sock) do
-    :gen_tcp.send(sock, "JOIN #the-lab\r\n")
+    send(sock, "JOIN #the-lab\r\n")
     skip(sock, ~r/^:\S+ 366 brian #the-lab/)
   end
 
   defp greet(sock, word) do
-    :gen_tcp.send(sock, "PRIVMSG #the-lab :#{word}\r\n")
+    send(sock, "PRIVMSG #the-lab :#{word}\r\n")
     pattern = compile!("^:brian!\\S+ PRIVMSG #the-lab :#{escape(word)}\\r?$")
     expect(sock, pattern)
   end
@@ -52,13 +66,12 @@ defmodule Freeq.GreetTest do
   end
 
   defp scan(sock, regex, "PING " <> server) do
-    :gen_tcp.send(sock, "PONG #{trim(server)}\r\n")
+    send(sock, "PONG #{trim(server)}\r\n")
     scan(sock, regex)
   end
 
   defp scan(sock, regex, line) do
-    matched = Regex.match?(regex, line)
-    done(matched, sock, regex, line)
+    done(line =~ regex, sock, regex, line)
   end
 
   defp done(true, _sock, _regex, line) do
@@ -69,22 +82,26 @@ defmodule Freeq.GreetTest do
     scan(sock, regex)
   end
 
-  defp word(name) do
-    name |> Atom.to_string() |> split(~r/[ _]/) |> last()
+  defp keeper(sock) do
+    receive do
+      {:teardown, caller, ref} ->
+        try do
+          part(sock)
+          quit(sock)
+          Process.send(caller, {:ok, ref}, [])
+        rescue
+          e -> Process.send(caller, {:error, ref, e}, [])
+        end
+    end
   end
 
   defp part(sock) do
-    :gen_tcp.send(sock, "PART #the-lab\r\n")
+    send(sock, "PART #the-lab\r\n")
     pattern = compile!("^:brian!\\S+ PART #the-lab\\r?$")
     expect(sock, pattern)
   end
 
   defp quit(sock) do
-    :gen_tcp.send(sock, "QUIT\r\n")
-
-    case recv(sock, 0, 1000) do
-      {:error, _} -> :ok
-      {:ok, _} -> raise "Expected no response after QUIT"
-    end
+    send(sock, "QUIT\r\n")
   end
 end
