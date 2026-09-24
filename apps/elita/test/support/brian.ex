@@ -1,35 +1,33 @@
 defmodule Brian do
-  import :gen_tcp, only: [connect: 3, recv: 3, send: 2, controlling_process: 2]
+  import :gen_tcp, only: [connect: 3, recv: 3, controlling_process: 2]
   import Regex, only: [compile!: 1, escape: 1]
   import String, only: [trim: 1]
-  import Kernel, except: [send: 2]
+  import Kernel
 
   def join(channel) do
-    sock = setup()
+    sock = dial()
     enter(sock, channel)
     pid = spawn(&keeper/0)
     controlling_process(sock, pid)
-    {sock, pid}
+    {sock, pid, channel}
   end
 
-  defp setup do
+  defp dial do
     {:ok, sock} = connect(~c"127.0.0.1", 6667, packet: :line, active: false)
     auth(sock)
     sock
   end
 
-  def say(handle, word) do
-    {sock, _} = handle
-    send(sock, "PRIVMSG #the-lab :#{word}\r\n")
-    pattern = compile!("^:brian!\\S+ PRIVMSG #the-lab :#{escape(word)}\\r?$")
-    listen(sock, pattern)
+  def say({sock, _, channel}, word) do
+    write(sock, "PRIVMSG #{channel} :#{word}\r\n")
+    pattern = compile!("^:brian!\\S+ PRIVMSG #{channel} :#{escape(word)}\\r?$")
+    scan(sock, pattern)
   end
 
-  def leave(handle) do
-    {sock, pid} = handle
-    part(sock)
+  def leave({sock, pid, channel}) do
+    part(sock, channel)
     quit(sock)
-    stop(pid)
+    send(pid, :stop)
   end
 
   def name(context) do
@@ -38,34 +36,34 @@ defmodule Brian do
 
   defp auth(sock) do
     handshake(sock)
-    listen(sock, compile!("^:\\S+ 001 brian "))
+    scan(sock, compile!("^:\\S+ 001 brian "))
   end
 
   defp handshake(sock) do
-    send(sock, "CAP REQ :echo-message\r\n")
-    send(sock, "NICK brian\r\n")
-    send(sock, "USER brian 0 * :brian\r\n")
-    send(sock, "CAP END\r\n")
+    write(sock, "CAP REQ :echo-message\r\n")
+    write(sock, "NICK brian\r\n")
+    write(sock, "USER brian 0 * :brian\r\n")
+    write(sock, "CAP END\r\n")
   end
 
   defp enter(sock, channel) do
-    send(sock, "JOIN #{channel}\r\n")
-    pattern = compile!("^:\\S+ 366 brian #{Regex.escape(channel)}")
+    write(sock, "JOIN #{channel}\r\n")
+    pattern = compile!("^:\\S+ 366 brian #{escape(channel)}")
     scan(sock, pattern)
   end
 
-  defp part(sock) do
-    send(sock, "PART #the-lab\r\n")
-    pattern = compile!("^:brian!\\S+ PART #the-lab\\r?$")
-    listen(sock, pattern)
+  defp part(sock, channel) do
+    write(sock, "PART #{channel}\r\n")
+    pattern = compile!("^:brian!\\S+ PART #{channel}\\r?$")
+    scan(sock, pattern)
   end
 
   defp quit(sock) do
-    send(sock, "QUIT\r\n")
+    write(sock, "QUIT\r\n")
   end
 
-  defp listen(sock, regex) do
-    scan(sock, regex)
+  defp write(sock, line) do
+    :gen_tcp.send(sock, line)
   end
 
   defp scan(sock, regex) do
@@ -74,7 +72,7 @@ defmodule Brian do
   end
 
   defp scan(sock, regex, "PING " <> server) do
-    send(sock, "PONG #{trim(server)}\r\n")
+    write(sock, "PONG #{trim(server)}\r\n")
     scan(sock, regex)
   end
 
@@ -89,9 +87,5 @@ defmodule Brian do
     receive do
       :stop -> :ok
     end
-  end
-
-  defp stop(pid) do
-    Kernel.send(pid, :stop)
   end
 end
