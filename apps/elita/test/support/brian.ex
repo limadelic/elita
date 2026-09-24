@@ -10,9 +10,14 @@ defmodule Brian do
         pause()
         say(room, name(context))
         on_exit(fn -> leave(room) end)
+        Process.put(:brian_room, room)
         unquote(block)
       end
     end
+  end
+
+  def current_room do
+    Process.get(:brian_room)
   end
 
   def join(channel) do
@@ -36,6 +41,11 @@ defmodule Brian do
     bubble(word)
   end
 
+  def wait_join({sock, _, _}, agent, channel) do
+    pattern = compile!("^:#{to_string(agent)}!\\S+ JOIN #{escape(channel)}")
+    scan(sock, pattern)
+  end
+
   defp bubble(text) do
     time = 4500 + String.length(text) * 30
     Process.sleep(time)
@@ -45,6 +55,16 @@ defmodule Brian do
     part(sock, channel)
     quit(sock)
     send(pid, :stop)
+  end
+
+  def part(sock, channel) do
+    write(sock, "PART #{channel}\r\n")
+    pattern = compile!("^:brian!\\S+ PART #{channel}\\r?$")
+    scan(sock, pattern)
+  end
+
+  def quit(sock) do
+    write(sock, "QUIT\r\n")
   end
 
   def name(context) do
@@ -71,38 +91,28 @@ defmodule Brian do
     scan(sock, pattern)
   end
 
-  defp part(sock, channel) do
-    write(sock, "PART #{channel}\r\n")
-    pattern = compile!("^:brian!\\S+ PART #{channel}\\r?$")
-    scan(sock, pattern)
-  end
-
-  defp quit(sock) do
-    write(sock, "QUIT\r\n")
-  end
-
-  defp write(sock, line) do
+  def write(sock, line) do
     :gen_tcp.send(sock, line)
   end
 
-  defp scan(sock, regex) do
+  def scan(sock, regex) do
     {:ok, data} = recv(sock, 0, 5000)
     scan(sock, regex, to_string(data))
   end
 
-  defp scan(sock, regex, "PING " <> server) do
+  def scan(sock, regex, "PING " <> server) do
     write(sock, "PONG #{trim(server)}\r\n")
     scan(sock, regex)
   end
 
-  defp scan(sock, regex, line) do
+  def scan(sock, regex, line) do
     check(line =~ regex, sock, regex)
   end
 
   defp check(true, _sock, _regex), do: :ok
   defp check(false, sock, regex), do: scan(sock, regex)
 
-  defp keeper do
+  def keeper do
     receive do
       :stop -> :ok
     end
