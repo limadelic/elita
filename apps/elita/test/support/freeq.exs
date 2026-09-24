@@ -5,9 +5,10 @@ defmodule Freeq do
   import ExUnit.Callbacks, only: [on_exit: 1]
   import Elita, only: [request: 2]
   import Process, only: [get: 1, put: 2]
+  import System, only: [tmp_dir!: 0, get_env: 1, put_env: 2]
   import String, only: [split: 2, trim: 1]
-  import Enum, only: [reject: 2, map: 2]
-  import File, only: [ls: 1, read: 1]
+  import Enum, only: [reject: 2, map: 2, filter: 2, sort: 1, max_by: 2]
+  import File, only: [ls: 1, read: 1, mkdir_p!: 1]
   import Path, only: [expand: 1, join: 2]
 
   def spawn(agent) do
@@ -16,6 +17,10 @@ defmodule Freeq do
 
   def spawn(agent, config) do
     nick = to_string(agent)
+    original_home = get_env("HOME")
+    scratch_home = tmp_dir!() |> join(to_string(agent))
+    mkdir_p!(scratch_home)
+    put_env("HOME", scratch_home)
     Tester.spawn(agent, config)
     sock = dial()
     enter(sock, nick, "#the-lab")
@@ -28,6 +33,7 @@ defmodule Freeq do
       part(sock, "#the-lab", nick)
       quit(sock)
       send(pid, :stop)
+      put_env("HOME", original_home)
     end)
 
     pause()
@@ -71,9 +77,9 @@ defmodule Freeq do
       |> reject(&blank/1)
       |> map(&emit(sock, pattern, &1))
 
-    deleg = delegations(agent_str, sock)
+    delegation = delegations(agent_str, sock)
     bubble(reply)
-    (texts ++ deleg) |> Enum.join("\n")
+    (texts ++ delegation) |> Enum.join("\n")
   end
 
   def tell(agent, msg) do
@@ -105,10 +111,10 @@ defmodule Freeq do
       {:ok, files} ->
         files
         |> reject(&is_nil(&1))
-        |> Enum.filter(&run(pattern, &1, []))
+        |> filter(&run(pattern, &1, []))
         |> case do
           [] -> ""
-          logs -> logs |> Enum.sort() |> Enum.max_by(&mtime(&1, dir)) |> fetch(dir)
+          logs -> logs |> sort() |> max_by(&mtime(&1, dir)) |> fetch(dir)
         end
 
       _ ->
