@@ -2,6 +2,7 @@ defmodule Freeq do
   import :gen_tcp, only: [connect: 3, controlling_process: 2]
   import Regex, only: [compile!: 1, escape: 1]
   import Brian
+  import ExUnit.Callbacks, only: [on_exit: 1]
 
   def spawn(agent) do
     nick = to_string(agent)
@@ -10,7 +11,14 @@ defmodule Freeq do
     enter(sock, nick, "#the-lab")
     pid = Kernel.spawn(&keeper/0)
     controlling_process(sock, pid)
-    {agent, sock, pid}
+    Process.put(agent, sock)
+    Process.put({:pid, agent}, pid)
+
+    on_exit(fn ->
+      part(sock, "#the-lab", nick)
+      quit(sock)
+      send(pid, :stop)
+    end)
   end
 
   defp dial do

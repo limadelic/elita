@@ -3,18 +3,13 @@ defmodule Freeq.GreetTest do
 
   @moduletag :freeq
 
+  import Tester, except: [spawn: 1, ask: 2]
+  import Freeq, only: [spawn: 1]
   import Brian
 
   brian "greet" do
-    {agent, sock, pid} = Freeq.spawn(:greet)
-
-    on_exit(fn ->
-      part(sock, "#the-lab", to_string(agent))
-      quit(sock)
-      send(pid, :stop)
-    end)
-
+    spawn(:greet)
     pause()
-    watch(room, agent, "#the-lab")
+    watch(room, :greet, "#the-lab")
   end
 end
