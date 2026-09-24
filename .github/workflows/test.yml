@@ -80,6 +80,34 @@ jobs:
         env:
           MIX_ENV: test
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Install Playwright with Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run greet test
+        run: node apps/elita/test/freeq/greet.mjs
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: brian-greet
+          path: /tmp/freeq-playwright-videos
+
+      - name: Comment on PR with greet video
+        if: always()
+        run: gh pr comment brian --body "Greet video available in [artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
       - name: Run coverage
         run: bash -o pipefail -c 'mix cover 2>&1 | tee /tmp/cover_output.txt'
         env:
