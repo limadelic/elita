@@ -2,14 +2,15 @@ defmodule Brian do
   import :gen_tcp, only: [connect: 3, recv: 3, controlling_process: 2]
   import Regex, only: [compile!: 1, escape: 1]
   import String, only: [trim: 1]
-  import Kernel
 
   defmacro brian(test_name, do: block) do
     quote do
-      brian_connection = join("#the-lab")
-      say(brian_connection, unquote(test_name))
-      on_exit(fn -> leave(brian_connection) end)
-      unquote(block)
+      test unquote(test_name), context do
+        room = join("#the-lab")
+        say(room, name(context))
+        on_exit(fn -> leave(room) end)
+        unquote(block)
+      end
     end
   end
 

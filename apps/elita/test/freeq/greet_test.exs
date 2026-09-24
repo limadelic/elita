@@ -5,8 +5,6 @@ defmodule Freeq.GreetTest do
 
   import Brian
 
-  test "greet" do
-    brian "greet" do
-    end
+  brian "greet" do
   end
 end
