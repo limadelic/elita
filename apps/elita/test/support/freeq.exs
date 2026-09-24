@@ -1,12 +1,12 @@
 defmodule Freeq do
   import :gen_tcp, only: [connect: 3, controlling_process: 2]
   import Regex, only: [compile!: 1, escape: 1]
-  import Brian
+  import Brian, except: [join: 2]
   import ExUnit.Callbacks, only: [on_exit: 1]
   import Elita, only: [request: 2]
   import Process, only: [get: 1, put: 2]
   import String, only: [split: 2, trim: 1]
-  import Enum, only: [reject: 2, map: 2]
+  import Enum, only: [reject: 2, map: 2, join: 2]
 
   def spawn(agent) do
     nick = to_string(agent)
@@ -65,7 +65,7 @@ defmodule Freeq do
       |> map(&emit(sock, pattern, &1))
 
     bubble(reply)
-    texts |> Enum.join("\n")
+    texts |> join("\n")
   end
 
   defp emit(sock, pattern, line) do
