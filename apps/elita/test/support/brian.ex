@@ -6,42 +6,37 @@ defmodule Brian do
   defmacro brian(test_name, do: block) do
     quote do
       test unquote(test_name), context do
-        room = join("#the-lab")
+        var!(room) = join("#the-lab")
         pause()
-        say(room, name(context))
-        on_exit(fn -> leave(room) end)
-        Process.put(:brian_room, room)
+        say(var!(room), name(context))
+        on_exit(fn -> leave(var!(room)) end)
         unquote(block)
       end
     end
   end
 
-  def current_room do
-    Process.get(:brian_room)
-  end
-
-  def join(channel) do
-    sock = dial()
-    enter(sock, channel)
+  def join(channel, nick \\ "brian") do
+    sock = dial(nick)
+    enter(sock, nick, channel)
     pid = spawn(&keeper/0)
     controlling_process(sock, pid)
-    {sock, pid, channel}
+    {sock, pid, channel, nick}
   end
 
-  defp dial do
+  defp dial(nick) do
     {:ok, sock} = connect(~c"127.0.0.1", 6667, packet: :line, active: false)
-    auth(sock)
+    auth(sock, nick)
     sock
   end
 
-  def say({sock, _, channel}, word) do
+  def say({sock, _, channel, nick}, word) do
     write(sock, "PRIVMSG #{channel} :#{word}\r\n")
-    pattern = compile!("^:brian!\\S+ PRIVMSG #{channel} :#{escape(word)}\\r?$")
+    pattern = compile!("^:#{escape(nick)}!\\S+ PRIVMSG #{channel} :#{escape(word)}\\r?$")
     scan(sock, pattern)
     bubble(word)
   end
 
-  def wait_join({sock, _, _}, agent, channel) do
+  def watch({sock, _, _, _}, agent, channel) do
     pattern = compile!("^:#{to_string(agent)}!\\S+ JOIN #{escape(channel)}")
     scan(sock, pattern)
   end
@@ -51,15 +46,15 @@ defmodule Brian do
     Process.sleep(time)
   end
 
-  def leave({sock, pid, channel}) do
-    part(sock, channel)
+  def leave({sock, pid, channel, nick}) do
+    part(sock, channel, nick)
     quit(sock)
     send(pid, :stop)
   end
 
-  def part(sock, channel) do
+  def part(sock, channel, nick \\ "brian") do
     write(sock, "PART #{channel}\r\n")
-    pattern = compile!("^:brian!\\S+ PART #{channel}\\r?$")
+    pattern = compile!("^:#{escape(nick)}!\\S+ PART #{escape(channel)}\\r?$")
     scan(sock, pattern)
   end
 
@@ -73,21 +68,21 @@ defmodule Brian do
 
   def pause, do: Process.sleep(1000)
 
-  defp auth(sock) do
-    handshake(sock)
-    scan(sock, compile!("^:\\S+ 001 brian "))
+  defp auth(sock, nick) do
+    handshake(sock, nick)
+    scan(sock, compile!("^:\\S+ 001 #{escape(nick)} "))
   end
 
-  defp handshake(sock) do
+  defp handshake(sock, nick) do
     write(sock, "CAP REQ :echo-message\r\n")
-    write(sock, "NICK brian\r\n")
-    write(sock, "USER brian 0 * :brian\r\n")
+    write(sock, "NICK #{nick}\r\n")
+    write(sock, "USER #{nick} 0 * :#{nick}\r\n")
     write(sock, "CAP END\r\n")
   end
 
-  defp enter(sock, channel) do
+  defp enter(sock, nick, channel) do
     write(sock, "JOIN #{channel}\r\n")
-    pattern = compile!("^:\\S+ 366 brian #{escape(channel)}")
+    pattern = compile!("^:\\S+ 366 #{escape(nick)} #{escape(channel)}")
     scan(sock, pattern)
   end
 

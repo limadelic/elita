@@ -9,12 +9,12 @@ defmodule Freeq.GreetTest do
     {agent, sock, pid} = Freeq.spawn(:greet)
 
     on_exit(fn ->
-      part(sock, "#the-lab")
+      part(sock, "#the-lab", agent)
       quit(sock)
       send(pid, :stop)
     end)
 
     pause()
-    wait_join(current_room(), agent, "#the-lab")
+    watch(room, agent, "#the-lab")
   end
 end

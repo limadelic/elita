@@ -4,10 +4,10 @@ defmodule Freeq do
   import Brian
 
   def spawn(agent) do
-    agent_str = to_string(agent)
+    nick = to_string(agent)
     Tester.spawn(agent)
     sock = dial()
-    enter(sock, agent_str, "#the-lab")
+    enter(sock, nick, "#the-lab")
     pid = Kernel.spawn(&keeper/0)
     controlling_process(sock, pid)
     {agent, sock, pid}
