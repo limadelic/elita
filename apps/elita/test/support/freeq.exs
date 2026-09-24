@@ -3,6 +3,7 @@ defmodule Freeq do
   import Regex, only: [compile!: 1, escape: 1]
   import Brian
   import ExUnit.Callbacks, only: [on_exit: 1]
+  import Elita, only: [request: 2]
 
   def spawn(agent) do
     nick = to_string(agent)
@@ -40,5 +41,30 @@ defmodule Freeq do
     write(sock, "JOIN #{channel}\r\n")
     pattern = compile!("^:\\S+ 366 #{escape(agent)} #{escape(channel)}")
     scan(sock, pattern)
+  end
+
+  def ask(agent, msg) do
+    talk(room(), msg)
+    reply = request(to_string(agent), msg)
+    sock = Process.get(agent)
+    write(sock, "PRIVMSG #the-lab :#{reply}\r\n")
+    pattern = compile!("^:greet!\\S+ PRIVMSG #the-lab :(.*)")
+    text = grab(room() |> elem(0), pattern)
+    bubble(reply)
+    text
+  end
+
+  defp room, do: Process.get(:room)
+
+  defp talk(room, msg) do
+    {sock, _, channel, nick} = room
+    write(sock, "PRIVMSG #{channel} :#{msg}\r\n")
+    pattern = compile!("^:#{escape(nick)}!\\S+ PRIVMSG #{channel} :#{escape(msg)}\\r?$")
+    scan(sock, pattern)
+  end
+
+  defp bubble(text) do
+    time = 4500 + String.length(text) * 30
+    Process.sleep(time)
   end
 end

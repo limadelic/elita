@@ -107,6 +107,23 @@ defmodule Brian do
   defp check(true, _sock, _regex), do: :ok
   defp check(false, sock, regex), do: scan(sock, regex)
 
+  def grab(sock, regex) do
+    {:ok, data} = recv(sock, 0, 5000)
+    grab(sock, regex, to_string(data))
+  end
+
+  def grab(sock, regex, "PING " <> server) do
+    write(sock, "PONG #{trim(server)}\r\n")
+    grab(sock, regex)
+  end
+
+  def grab(sock, regex, line) do
+    case Regex.run(regex, line, capture: :all_but_first) do
+      [capture] -> capture
+      _ -> grab(sock, regex)
+    end
+  end
+
   def keeper do
     receive do
       :stop -> :ok
