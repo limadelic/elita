@@ -1,7 +1,7 @@
 From c49b1096ed626841e90ed610818a87972040fd83 Mon Sep 17 00:00:00 2001
 From: msuarz <mikemps@gmail.com>
 Date: Wed, 23 Sep 2026 15:15:08 -0400
-Subject: [PATCH 1/8] bare mode: hide all 8 elements and features
+Subject: [PATCH 1/9] bare mode: hide all 8 elements and features
 
 ---
  .claude/settings.json          |   5 +
@@ -1671,7 +1671,7 @@ index 0000000..b2c556c
 From b51bd1cc9b12fba1b18960f6ffc94f931e97fabc Mon Sep 17 00:00:00 2001
 From: msuarz <mikemps@gmail.com>
 Date: Wed, 23 Sep 2026 15:25:59 -0400
-Subject: [PATCH 2/8] Lab bare view as Mike approved
+Subject: [PATCH 2/9] Lab bare view as Mike approved
 
 ---
  bare-proof.mjs         | 107 +++++++++++++++++++++++++++++++++++++++++
@@ -1919,7 +1919,7 @@ index 0000000..16dce27
 From 4115575ef031fa2a2dfa992092b750bd16785790 Mon Sep 17 00:00:00 2001
 From: msuarz <mikemps@gmail.com>
 Date: Wed, 23 Sep 2026 15:29:51 -0400
-Subject: [PATCH 3/8] Sharp canvas backing 1920x1080
+Subject: [PATCH 3/9] Sharp canvas backing 1920x1080
 
 ---
  client/src/app.ts | 6 ++++--
@@ -1956,7 +1956,7 @@ index cd71497..c1af06a 100644
 From 9f32128990355b08f5ae59c71b68b22c7e47e664 Mon Sep 17 00:00:00 2001
 From: msuarz <mikemps@gmail.com>
 Date: Wed, 23 Sep 2026 16:02:54 -0400
-Subject: [PATCH 4/8] Remove test and proof scripts
+Subject: [PATCH 4/9] Remove test and proof scripts
 
 ---
  .tmp-test/test.html         |  63 -----------
@@ -3456,7 +3456,7 @@ index b2c556c..0000000
 From 85c9277fcfe212c8f70dc763eb4fada5bf028675 Mon Sep 17 00:00:00 2001
 From: msuarz <mikemps@gmail.com>
 Date: Wed, 23 Sep 2026 16:02:58 -0400
-Subject: [PATCH 5/8] Remove added e2e tests
+Subject: [PATCH 5/9] Remove added e2e tests
 
 ---
  e2e/canvas-bare-mode.spec.ts   | 84 ----------------------------------
@@ -3626,7 +3626,7 @@ index 31ffbeb..0000000
 From 3e2c8bd1190a55cf3ecb83279f82f4f01c2a9069 Mon Sep 17 00:00:00 2001
 From: msuarz <mikemps@gmail.com>
 Date: Wed, 23 Sep 2026 16:03:23 -0400
-Subject: [PATCH 6/8] Remove added settings
+Subject: [PATCH 6/9] Remove added settings
 
 ---
  .claude/settings.json | 5 -----
@@ -3651,7 +3651,7 @@ index b92a720..0000000
 From fbcdeee57412919de116aa4f8e728b00f95b8a16 Mon Sep 17 00:00:00 2001
 From: msuarz <mikemps@gmail.com>
 Date: Wed, 23 Sep 2026 16:23:14 -0400
-Subject: [PATCH 7/8] Lab view without a mode flag
+Subject: [PATCH 7/9] Lab view without a mode flag
 
 ---
  client/index.html |  4 ---
@@ -3825,7 +3825,7 @@ index c1af06a..c9ff219 100644
 From 6810cfc4507a18475f2ce245340184c89c8abc61 Mon Sep 17 00:00:00 2001
 From: msuarz <mikemps@gmail.com>
 Date: Wed, 23 Sep 2026 16:35:02 -0400
-Subject: [PATCH 8/8] Keep only 1080p and fit changes
+Subject: [PATCH 8/9] Keep only 1080p and fit changes
 
 ---
  client/src/app.ts | 64 ++++++++++++++++++++++++++++++++++++++---------
@@ -3942,6 +3942,48 @@ index c9ff219..12c8452 100644
        void this.renderObelisk(body)
      } else if (o.id === 'lectern') {
        this.renderLectern(body)
+-- 
+2.39.2
+
+
+From 25d00a0ec88d99124b16e6878e41dd6be7457886 Mon Sep 17 00:00:00 2001
+From: msuarz <mikemps@gmail.com>
+Date: Thu, 24 Sep 2026 00:04:42 -0400
+Subject: [PATCH 9/9] Read nick and room params, open in World
+
+---
+ client/src/app.ts | 16 +++++++++++-----
+ 1 file changed, 11 insertions(+), 5 deletions(-)
+
+diff --git a/client/src/app.ts b/client/src/app.ts
+index 12c8452..5b59de5 100644
+--- a/client/src/app.ts
++++ b/client/src/app.ts
+@@ -189,13 +189,19 @@ export class App {
+       return
+     }
+     this.identity = loadIdentity()
++    const params = new URLSearchParams(location.search)
++    const nickParam = params.get('nick')
++    const roomParam = params.get('room')
++    if (nickParam && !this.identity) this.identity = createIdentity(nickParam)
++    if (roomParam) this.channel = roomParam
+     if (this.identity) {
+       el('landing').classList.add('hidden')
+-      // NOTE: no freshOAuth here — a stored web_token was already spent (the
+-      // server consumes it on first authentication), so this connect MUST go
+-      // through the broker for a new one.
+-      this.connect()
+-    } else if (this.backendKind() === 'town') {
++      this.setMode('world')
++      this.connect(this.channel)
++      requestAnimationFrame(() => this.frame())
++      return
++    }
++    if (this.backendKind() === 'town') {
+       // read-only spectator behind the landing card (spec §6.1)
+       this.connectSpectator(this.townUrl())
+     } else {
 -- 
 2.39.2
 

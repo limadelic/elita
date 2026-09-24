@@ -25,11 +25,8 @@ function irc() {
 }
 
 async function join(page) {
-  const url = 'http://localhost:8787/?freeq=ws://localhost:8080/irc';
+  const url = 'http://localhost:8787/?freeq=ws://localhost:8080/irc&room=%23the-lab&nick=cam';
   await page.goto(url);
-  await page.fill('#name-input', 'cam');
-  await page.click('#enter-guest');
-  await page.click('#mode-world');
 }
 
 async function ready(page) {
