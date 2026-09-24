@@ -1,7 +1,7 @@
 From c49b1096ed626841e90ed610818a87972040fd83 Mon Sep 17 00:00:00 2001
 From: msuarz <mikemps@gmail.com>
 Date: Wed, 23 Sep 2026 15:15:08 -0400
-Subject: [PATCH 1/9] bare mode: hide all 8 elements and features
+Subject: [PATCH 01/12] bare mode: hide all 8 elements and features
 
 ---
  .claude/settings.json          |   5 +
@@ -1671,7 +1671,7 @@ index 0000000..b2c556c
 From b51bd1cc9b12fba1b18960f6ffc94f931e97fabc Mon Sep 17 00:00:00 2001
 From: msuarz <mikemps@gmail.com>
 Date: Wed, 23 Sep 2026 15:25:59 -0400
-Subject: [PATCH 2/9] Lab bare view as Mike approved
+Subject: [PATCH 02/12] Lab bare view as Mike approved
 
 ---
  bare-proof.mjs         | 107 +++++++++++++++++++++++++++++++++++++++++
@@ -1919,7 +1919,7 @@ index 0000000..16dce27
 From 4115575ef031fa2a2dfa992092b750bd16785790 Mon Sep 17 00:00:00 2001
 From: msuarz <mikemps@gmail.com>
 Date: Wed, 23 Sep 2026 15:29:51 -0400
-Subject: [PATCH 3/9] Sharp canvas backing 1920x1080
+Subject: [PATCH 03/12] Sharp canvas backing 1920x1080
 
 ---
  client/src/app.ts | 6 ++++--
@@ -1956,7 +1956,7 @@ index cd71497..c1af06a 100644
 From 9f32128990355b08f5ae59c71b68b22c7e47e664 Mon Sep 17 00:00:00 2001
 From: msuarz <mikemps@gmail.com>
 Date: Wed, 23 Sep 2026 16:02:54 -0400
-Subject: [PATCH 4/9] Remove test and proof scripts
+Subject: [PATCH 04/12] Remove test and proof scripts
 
 ---
  .tmp-test/test.html         |  63 -----------
@@ -3456,7 +3456,7 @@ index b2c556c..0000000
 From 85c9277fcfe212c8f70dc763eb4fada5bf028675 Mon Sep 17 00:00:00 2001
 From: msuarz <mikemps@gmail.com>
 Date: Wed, 23 Sep 2026 16:02:58 -0400
-Subject: [PATCH 5/9] Remove added e2e tests
+Subject: [PATCH 05/12] Remove added e2e tests
 
 ---
  e2e/canvas-bare-mode.spec.ts   | 84 ----------------------------------
@@ -3626,7 +3626,7 @@ index 31ffbeb..0000000
 From 3e2c8bd1190a55cf3ecb83279f82f4f01c2a9069 Mon Sep 17 00:00:00 2001
 From: msuarz <mikemps@gmail.com>
 Date: Wed, 23 Sep 2026 16:03:23 -0400
-Subject: [PATCH 6/9] Remove added settings
+Subject: [PATCH 06/12] Remove added settings
 
 ---
  .claude/settings.json | 5 -----
@@ -3651,7 +3651,7 @@ index b92a720..0000000
 From fbcdeee57412919de116aa4f8e728b00f95b8a16 Mon Sep 17 00:00:00 2001
 From: msuarz <mikemps@gmail.com>
 Date: Wed, 23 Sep 2026 16:23:14 -0400
-Subject: [PATCH 7/9] Lab view without a mode flag
+Subject: [PATCH 07/12] Lab view without a mode flag
 
 ---
  client/index.html |  4 ---
@@ -3825,7 +3825,7 @@ index c1af06a..c9ff219 100644
 From 6810cfc4507a18475f2ce245340184c89c8abc61 Mon Sep 17 00:00:00 2001
 From: msuarz <mikemps@gmail.com>
 Date: Wed, 23 Sep 2026 16:35:02 -0400
-Subject: [PATCH 8/9] Keep only 1080p and fit changes
+Subject: [PATCH 08/12] Keep only 1080p and fit changes
 
 ---
  client/src/app.ts | 64 ++++++++++++++++++++++++++++++++++++++---------
@@ -3949,7 +3949,7 @@ index c9ff219..12c8452 100644
 From 25d00a0ec88d99124b16e6878e41dd6be7457886 Mon Sep 17 00:00:00 2001
 From: msuarz <mikemps@gmail.com>
 Date: Thu, 24 Sep 2026 00:04:42 -0400
-Subject: [PATCH 9/9] Read nick and room params, open in World
+Subject: [PATCH 09/12] Read nick and room params, open in World
 
 ---
  client/src/app.ts | 16 +++++++++++-----
@@ -3984,6 +3984,322 @@ index 12c8452..5b59de5 100644
        // read-only spectator behind the landing card (spec §6.1)
        this.connectSpectator(this.townUrl())
      } else {
+-- 
+2.39.2
+
+
+From ec2eb4332736fa902991963f0ac2c02da6ef0c32 Mon Sep 17 00:00:00 2001
+From: msuarz <mikemps@gmail.com>
+Date: Thu, 24 Sep 2026 01:27:56 -0400
+Subject: [PATCH 10/12] Scale and center room to fill canvas
+
+---
+ client/src/app.ts         | 42 +++++++++++++++++++++------
+ client/src/layout.test.ts | 60 +++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 93 insertions(+), 9 deletions(-)
+ create mode 100644 client/src/layout.test.ts
+
+diff --git a/client/src/app.ts b/client/src/app.ts
+index 5b59de5..54d435d 100644
+--- a/client/src/app.ts
++++ b/client/src/app.ts
+@@ -169,6 +169,9 @@ export class App {
+   /** lights collected during the tile pass, composited after the entity pass */
+   private frameLights: { x: number; y: number; r: number; c: string; p: number }[] = []
+   private spriteSets = new Map<string, SpriteSet>()
++  private renderScale = 6
++  private renderOffsetX = 0
++  private renderOffsetY = 0
+ 
+   start(): void {
+     this.canvas.width = 1920
+@@ -1733,13 +1736,11 @@ export class App {
+   private onCanvasClick(e: MouseEvent): void {
+     if (!this.map) return
+     const rect = this.canvas.getBoundingClientRect()
+-    const scale = Math.min(rect.width / VIEW_W, rect.height / VIEW_H)
+-    const renderedW = VIEW_W * scale
+-    const renderedH = VIEW_H * scale
+-    const offsetX = (rect.width - renderedW) / 2
+-    const offsetY = (rect.height - renderedH) / 2
+-    const px = (e.clientX - rect.left - offsetX) / scale
+-    const py = (e.clientY - rect.top - offsetY) / scale
++    const displayScale = Math.min(rect.width / 1920, rect.height / 1080)
++    const canvasX = (e.clientX - rect.left) / displayScale
++    const canvasY = (e.clientY - rect.top) / displayScale
++    const px = (canvasX - this.renderOffsetX) / this.renderScale
++    const py = (canvasY - this.renderOffsetY) / this.renderScale
+     const cam = this.camera()
+     const wx = (px + cam.x) / TILE_PX
+     const wy = (py + cam.y) / TILE_PX
+@@ -1861,6 +1862,28 @@ export class App {
+     }
+   }
+ 
++  private updateRenderTransform(): void {
++    if (!this.map) {
++      this.renderScale = 6
++      this.renderOffsetX = 0
++      this.renderOffsetY = 0
++      return
++    }
++    const mapPxW = this.map.width * TILE_PX
++    const mapPxH = this.map.height * TILE_PX
++    if (mapPxW >= VIEW_W && mapPxH >= VIEW_H) {
++      this.renderScale = 6
++      this.renderOffsetX = 0
++      this.renderOffsetY = 0
++      return
++    }
++    this.renderScale = Math.min(1920 / mapPxW, 1080 / mapPxH)
++    const scaledW = mapPxW * this.renderScale
++    const scaledH = mapPxH * this.renderScale
++    this.renderOffsetX = (1920 - scaledW) / 2
++    this.renderOffsetY = (1080 - scaledH) / 2
++  }
++
+   private frame(): void {
+     const now = performance.now()
+     const dt = Math.min(0.05, (now - this.lastFrameTime) / 1000)
+@@ -1983,9 +2006,10 @@ export class App {
+ 
+   private draw(): void {
+     const ctx = this.ctx
+-    ctx.setTransform(6, 0, 0, 6, 0, 0)
++    this.updateRenderTransform()
+     ctx.fillStyle = '#000'
+-    ctx.fillRect(0, 0, VIEW_W, VIEW_H)
++    ctx.fillRect(0, 0, 1920, 1080)
++    ctx.setTransform(this.renderScale, 0, 0, this.renderScale, this.renderOffsetX, this.renderOffsetY)
+     const room = this.rooms.get(this.channel)
+     if (!this.map || !room) return
+     const pal = TEMPLATE_PALETTES[room.template] ?? TEMPLATE_PALETTES.plaza!
+diff --git a/client/src/layout.test.ts b/client/src/layout.test.ts
+new file mode 100644
+index 0000000..f0c1fc5
+--- /dev/null
++++ b/client/src/layout.test.ts
+@@ -0,0 +1,60 @@
++import { describe, expect, it } from 'vitest'
++
++const TILE_PX = 8
++const VIEW_W = 320
++const VIEW_H = 180
++
++function calculateScaleAndOffset(mapWidth: number, mapHeight: number): { scale: number; offsetX: number; offsetY: number } {
++  const mapPxW = mapWidth * TILE_PX
++  const mapPxH = mapHeight * TILE_PX
++  if (mapPxW >= VIEW_W && mapPxH >= VIEW_H) {
++    return { scale: 6, offsetX: 0, offsetY: 0 }
++  }
++  const scale = Math.min(1920 / mapPxW, 1080 / mapPxH)
++  const scaledW = mapPxW * scale
++  const scaledH = mapPxH * scale
++  const offsetX = (1920 - scaledW) / 2
++  const offsetY = (1080 - scaledH) / 2
++  return { scale, offsetX, offsetY }
++}
++
++describe('room scale and centering', () => {
++  it('uses normal scale for large maps', () => {
++    const { scale, offsetX, offsetY } = calculateScaleAndOffset(40, 24)
++    expect(scale).toBe(6)
++    expect(offsetX).toBe(0)
++    expect(offsetY).toBe(0)
++  })
++
++  it('scales and centers small square maps', () => {
++    const { scale, offsetX, offsetY } = calculateScaleAndOffset(24, 24)
++    expect(scale).toBeLessThan(6)
++    expect(offsetX).toBeGreaterThan(0)
++    expect(offsetY).toBe(0)
++  })
++
++  it('scales and centers small maps vertically', () => {
++    const { scale, offsetX, offsetY } = calculateScaleAndOffset(40, 16)
++    expect(scale).toBe(6)
++    expect(offsetX).toBe(0)
++    expect(offsetY).toBeGreaterThan(0)
++  })
++
++  it('fills minimum dimension exactly', () => {
++    const { scale } = calculateScaleAndOffset(20, 16)
++    const mapPxW = 20 * TILE_PX
++    const mapPxH = 16 * TILE_PX
++    const scaledW = mapPxW * scale
++    const scaledH = mapPxH * scale
++    const fillsW = Math.abs(scaledW - 1920) < 1
++    const fillsH = Math.abs(scaledH - 1080) < 1
++    expect(fillsW || fillsH).toBe(true)
++  })
++
++  it('has zero offsets when scale would be at least 6', () => {
++    const { scale, offsetX, offsetY } = calculateScaleAndOffset(40, 24)
++    expect(scale).toBe(6)
++    expect(offsetX).toBe(0)
++    expect(offsetY).toBe(0)
++  })
++})
+-- 
+2.39.2
+
+
+From ad7019b48d9bdfc1efc083aaa5fa2e414f937a23 Mon Sep 17 00:00:00 2001
+From: msuarz <mikemps@gmail.com>
+Date: Thu, 24 Sep 2026 01:32:03 -0400
+Subject: [PATCH 11/12] Extract scale/offset calculation, fix overlay canvas
+ positioning
+
+---
+ client/src/app.ts         | 25 +++++++++----------------
+ client/src/layout.test.ts | 19 +------------------
+ client/src/layout.ts      | 20 ++++++++++++++++++++
+ 3 files changed, 30 insertions(+), 34 deletions(-)
+ create mode 100644 client/src/layout.ts
+
+diff --git a/client/src/app.ts b/client/src/app.ts
+index 54d435d..a06dea6 100644
+--- a/client/src/app.ts
++++ b/client/src/app.ts
+@@ -39,6 +39,7 @@ import {
+   drawDoorTile,
+   drawTag,
+ } from './gfx'
++import { calculateScaleAndOffset } from './layout'
+ 
+ const TILE_PX = 8
+ const VIEW_W = 320
+@@ -1869,19 +1870,10 @@ export class App {
+       this.renderOffsetY = 0
+       return
+     }
+-    const mapPxW = this.map.width * TILE_PX
+-    const mapPxH = this.map.height * TILE_PX
+-    if (mapPxW >= VIEW_W && mapPxH >= VIEW_H) {
+-      this.renderScale = 6
+-      this.renderOffsetX = 0
+-      this.renderOffsetY = 0
+-      return
+-    }
+-    this.renderScale = Math.min(1920 / mapPxW, 1080 / mapPxH)
+-    const scaledW = mapPxW * this.renderScale
+-    const scaledH = mapPxH * this.renderScale
+-    this.renderOffsetX = (1920 - scaledW) / 2
+-    this.renderOffsetY = (1080 - scaledH) / 2
++    const { scale, offsetX, offsetY } = calculateScaleAndOffset(this.map.width, this.map.height)
++    this.renderScale = scale
++    this.renderOffsetX = offsetX
++    this.renderOffsetY = offsetY
+   }
+ 
+   private frame(): void {
+@@ -2317,6 +2309,7 @@ export class App {
+     this.dust.draw(ctx, Math.min(0.05, (now - this.lastFrameTime) / 1000 || 0.016))
+ 
+     // time of day breathes through the palette (local clock, subtle)
++    ctx.setTransform(1, 0, 0, 1, 0, 0)
+     const hour = new Date().getHours() + new Date().getMinutes() / 60
+     let tint: string | null = null
+     if (hour >= 5 && hour < 8) tint = `rgba(255,190,120,${(0.09 * (1 - Math.abs(hour - 6.5) / 1.5)).toFixed(3)})`
+@@ -2324,12 +2317,12 @@ export class App {
+     else if (hour >= 21 || hour < 5) tint = 'rgba(40,60,140,0.10)'
+     if (tint) {
+       ctx.fillStyle = tint
+-      ctx.fillRect(0, 0, VIEW_W, VIEW_H)
++      ctx.fillRect(0, 0, 1920, 1080)
+     }
+ 
+     // CRT finish: corner falloff + scanlines, kept light enough to read 7px text
+-    drawVignette(ctx, VIEW_W, VIEW_H, 0.36)
+-    drawScanlines(ctx, VIEW_W, VIEW_H, 0.05)
++    drawVignette(ctx, 1920, 1080, 0.36)
++    drawScanlines(ctx, 1920, 1080, 0.05)
+   }
+ 
+   private parkedLayout = new Map<string, { x: number; y: number }>()
+diff --git a/client/src/layout.test.ts b/client/src/layout.test.ts
+index f0c1fc5..f43e468 100644
+--- a/client/src/layout.test.ts
++++ b/client/src/layout.test.ts
+@@ -1,22 +1,5 @@
+ import { describe, expect, it } from 'vitest'
+-
+-const TILE_PX = 8
+-const VIEW_W = 320
+-const VIEW_H = 180
+-
+-function calculateScaleAndOffset(mapWidth: number, mapHeight: number): { scale: number; offsetX: number; offsetY: number } {
+-  const mapPxW = mapWidth * TILE_PX
+-  const mapPxH = mapHeight * TILE_PX
+-  if (mapPxW >= VIEW_W && mapPxH >= VIEW_H) {
+-    return { scale: 6, offsetX: 0, offsetY: 0 }
+-  }
+-  const scale = Math.min(1920 / mapPxW, 1080 / mapPxH)
+-  const scaledW = mapPxW * scale
+-  const scaledH = mapPxH * scale
+-  const offsetX = (1920 - scaledW) / 2
+-  const offsetY = (1080 - scaledH) / 2
+-  return { scale, offsetX, offsetY }
+-}
++import { calculateScaleAndOffset, TILE_PX } from './layout'
+ 
+ describe('room scale and centering', () => {
+   it('uses normal scale for large maps', () => {
+diff --git a/client/src/layout.ts b/client/src/layout.ts
+new file mode 100644
+index 0000000..c4fb229
+--- /dev/null
++++ b/client/src/layout.ts
+@@ -0,0 +1,20 @@
++export const TILE_PX = 8
++const VIEW_W = 320
++const VIEW_H = 180
++
++export function calculateScaleAndOffset(
++  mapWidth: number,
++  mapHeight: number
++): { scale: number; offsetX: number; offsetY: number } {
++  const mapPxW = mapWidth * TILE_PX
++  const mapPxH = mapHeight * TILE_PX
++  if (mapPxW >= VIEW_W && mapPxH >= VIEW_H) {
++    return { scale: 6, offsetX: 0, offsetY: 0 }
++  }
++  const scale = Math.min(1920 / mapPxW, 1080 / mapPxH)
++  const scaledW = mapPxW * scale
++  const scaledH = mapPxH * scale
++  const offsetX = (1920 - scaledW) / 2
++  const offsetY = (1080 - scaledH) / 2
++  return { scale, offsetX, offsetY }
++}
+-- 
+2.39.2
+
+
+From ed3834eb45c798eac342e2bfc86e963075a701fa Mon Sep 17 00:00:00 2001
+From: msuarz <mikemps@gmail.com>
+Date: Thu, 24 Sep 2026 01:33:44 -0400
+Subject: [PATCH 12/12] Fix overlay scale: draw vignette, scanlines at 6x
+
+---
+ client/src/app.ts | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/client/src/app.ts b/client/src/app.ts
+index a06dea6..0335eca 100644
+--- a/client/src/app.ts
++++ b/client/src/app.ts
+@@ -2321,8 +2321,9 @@ export class App {
+     }
+ 
+     // CRT finish: corner falloff + scanlines, kept light enough to read 7px text
+-    drawVignette(ctx, 1920, 1080, 0.36)
+-    drawScanlines(ctx, 1920, 1080, 0.05)
++    ctx.setTransform(6, 0, 0, 6, 0, 0)
++    drawVignette(ctx, VIEW_W, VIEW_H, 0.36)
++    drawScanlines(ctx, VIEW_W, VIEW_H, 0.05)
+   }
+ 
+   private parkedLayout = new Map<string, { x: number; y: number }>()
 -- 
 2.39.2
 
