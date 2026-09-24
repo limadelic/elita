@@ -1,17 +1,44 @@
 import { chromium } from 'playwright';
 import { writeFileSync, mkdirSync, renameSync, watch } from 'fs';
+import { createConnection } from 'net';
+
+function irc() {
+  const client = createConnection(6667, 'localhost');
+  client.write('NICK stage\r\n');
+  client.write('USER stage 0 * :stage\r\n');
+  client.on('data', (data) => {
+    const msg = data.toString();
+    if (msg.includes('PING')) {
+      const token = msg.split(' ')[1];
+      client.write(`PONG ${token}`);
+    }
+    if (msg.includes('001')) {
+      client.write('JOIN #the-lab\r\n');
+    }
+  });
+  return {
+    close() {
+      client.write('QUIT\r\n');
+      client.end();
+    }
+  };
+}
 
 async function join(page) {
-  await page.goto('http://127.0.0.1:8080/#auto-join=%23the-lab');
-  await page.click('button:has-text("Guest")');
-  const nick = page.locator('input[placeholder="your_nick"]');
-  await nick.fill('cam');
-  await nick.press('Enter');
+  const url = 'http://localhost:8787/?freeq=ws://localhost:8080/irc&room=%23the-lab&nick=cam&bare=1';
+  await page.goto(url);
 }
 
 async function ready(page) {
-  await page.locator('[data-testid="compose-input"]').waitFor({ timeout: 10000 });
-  await page.locator('aside[aria-label="Channel members"]').waitFor({ timeout: 10000 });
+  const canvas = page.locator('canvas#world');
+  await canvas.waitFor({ timeout: 10000 });
+  const world = page.locator('#world');
+  try {
+    await world.waitFor({ timeout: 10000, state: 'visible' });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 async function wait() {
@@ -29,19 +56,25 @@ async function wait() {
 
 async function main() {
   mkdirSync('/tmp/cam', { recursive: true });
+  const stage = irc();
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({ recordVideo: { dir: '/tmp/cam' } });
   const page = await context.newPage();
+  await context.addInitScript(() => {
+    localStorage.setItem('fimp-first-steps-dismissed', '1');
+  });
 
   await join(page);
-  await ready(page);
-  writeFileSync('/tmp/cam.ready', '');
+  if (await ready(page)) {
+    writeFileSync('/tmp/cam.ready', '');
+  }
 
   await wait();
 
   const video = await page.video()?.path();
   await context.close();
   await browser.close();
+  stage.close();
 
   if (video) {
     renameSync(video, '/tmp/cam/greet.webm');

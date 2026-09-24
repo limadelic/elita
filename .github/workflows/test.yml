@@ -87,6 +87,27 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Checkout freeqworld
+        uses: actions/checkout@v4
+        with:
+          repository: chad/freeqworld
+          ref: 93da7a11fe2d49d5bcf42576826c1cc73a6c0f46
+          path: freeqworld
+
+      - name: Apply lab patch
+        run: cd freeqworld && git apply ../.github/actions/cam/lab.patch
+
+      - name: Build freeqworld
+        run: cd freeqworld && npm ci && npm run build
+
+      - name: Start freeqworld
+        run: cd freeqworld && FIMP_START=1 FREEQ_HTTP=http://localhost:8080 npm run dev &
+        env:
+          FREEQ_HTTP: http://localhost:8080
+
+      - name: Wait for freeqworld
+        run: timeout 60 bash -c 'until curl -s http://localhost:8787/api/town > /dev/null; do sleep 1; done'
+
       - uses: ./.github/actions/cam
         with:
           token: ${{ github.token }}

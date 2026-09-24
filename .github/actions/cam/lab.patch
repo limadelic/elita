@@ -1,0 +1,3947 @@
+From c49b1096ed626841e90ed610818a87972040fd83 Mon Sep 17 00:00:00 2001
+From: msuarz <mikemps@gmail.com>
+Date: Wed, 23 Sep 2026 15:15:08 -0400
+Subject: [PATCH 1/8] bare mode: hide all 8 elements and features
+
+---
+ .claude/settings.json          |   5 +
+ .tmp-test/test.html            |  63 ++++++++++
+ check-800x600.mjs              |  63 ++++++++++
+ check-composer.mjs             |  46 +++++++
+ check-layout.mjs               | 171 ++++++++++++++++++++++++++
+ check-main-children.mjs        |  44 +++++++
+ check-overflow-cause.mjs       |  40 +++++++
+ check-overflow.mjs             |  72 +++++++++++
+ check-scroll.mjs               |  37 ++++++
+ check-scrolling-element.mjs    |  38 ++++++
+ check-side-children.mjs        |  41 +++++++
+ client/index.html              |   8 +-
+ client/src/app.ts              | 127 +++++++++++---------
+ e2e/canvas-bare-mode.spec.ts   |  84 +++++++++++++
+ e2e/canvas-resize-test.spec.ts |  58 +++++++++
+ find-wide-element.mjs          |  45 +++++++
+ labcheck.mjs                   | 211 +++++++++++++++++++++++++++++++++
+ test-canvas-bare.mjs           | 111 +++++++++++++++++
+ test-canvas-resize.mjs         | 114 ++++++++++++++++++
+ verify-scroll.mjs              |  35 ++++++
+ 20 files changed, 1354 insertions(+), 59 deletions(-)
+ create mode 100644 .claude/settings.json
+ create mode 100644 .tmp-test/test.html
+ create mode 100644 check-800x600.mjs
+ create mode 100644 check-composer.mjs
+ create mode 100644 check-layout.mjs
+ create mode 100644 check-main-children.mjs
+ create mode 100644 check-overflow-cause.mjs
+ create mode 100644 check-overflow.mjs
+ create mode 100644 check-scroll.mjs
+ create mode 100644 check-scrolling-element.mjs
+ create mode 100644 check-side-children.mjs
+ create mode 100644 e2e/canvas-bare-mode.spec.ts
+ create mode 100644 e2e/canvas-resize-test.spec.ts
+ create mode 100644 find-wide-element.mjs
+ create mode 100644 labcheck.mjs
+ create mode 100644 test-canvas-bare.mjs
+ create mode 100644 test-canvas-resize.mjs
+ create mode 100644 verify-scroll.mjs
+
+diff --git a/.claude/settings.json b/.claude/settings.json
+new file mode 100644
+index 0000000..b92a720
+--- /dev/null
++++ b/.claude/settings.json
+@@ -0,0 +1,5 @@
++{
++  "workspace": {
++    "trusted": true
++  }
++}
+diff --git a/.tmp-test/test.html b/.tmp-test/test.html
+new file mode 100644
+index 0000000..b27d2ab
+--- /dev/null
++++ b/.tmp-test/test.html
+@@ -0,0 +1,63 @@
++<!DOCTYPE html>
++<html>
++<head>
++  <title>Canvas DPR Test</title>
++  <style>
++    body { margin: 0; padding: 0; background: #000; }
++    #worldwrap { width: 960px; height: 1050px; }
++    #world { display: block; border: 1px solid #fff; image-rendering: pixelated; }
++  </style>
++</head>
++<body>
++  <div id="worldwrap">
++    <canvas id="world"></canvas>
++  </div>
++  <script>
++    // Minimal canvas setup test
++    const CANVAS_W = 1920
++    const CANVAS_H = 1080
++    const VIEW_W = 320
++    const ZOOM = CANVAS_W / VIEW_W
++
++    const canvas = document.getElementById('world')
++    const ctx = canvas.getContext('2d')
++
++    // Simulate fitCanvas
++    const wrap = document.getElementById('worldwrap')
++    const scale = Math.min(wrap.clientWidth / CANVAS_W, wrap.clientHeight / CANVAS_H)
++    const cssWidth = CANVAS_W * scale
++    const cssHeight = CANVAS_H * scale
++    canvas.style.width = `${cssWidth}px`
++    canvas.style.height = `${cssHeight}px`
++
++    const dpr = window.devicePixelRatio || 1
++    const backingWidth = Math.round(cssWidth * dpr)
++    const backingHeight = Math.round(cssHeight * dpr)
++    canvas.width = backingWidth
++    canvas.height = backingHeight
++    ctx.imageSmoothingEnabled = false
++
++    // Store values for testing
++    window.testState = {
++      cssWidth, cssHeight, backingWidth, backingHeight, dpr, scale, ZOOM,
++      canvasWidth: canvas.width,
++      canvasHeight: canvas.height,
++    }
++
++    // Simulate draw - just a filled rectangle
++    ctx.resetTransform()
++    ctx.imageSmoothingEnabled = false
++    ctx.fillStyle = '#000'
++    ctx.fillRect(0, 0, cssWidth, cssHeight)
++
++    // Apply transform (simplified - just the scale part)
++    ctx.setTransform(ZOOM, 0, 0, ZOOM, 0, 0)
++
++    // Draw a test pattern: a white rectangle at world coords (10, 10) with size (20, 20)
++    ctx.fillStyle = '#fff'
++    ctx.fillRect(10, 10, 20, 20)
++
++    console.log('Canvas setup complete. DPR:', dpr, 'Scale:', scale)
++  </script>
++</body>
++</html>
+\ No newline at end of file
+diff --git a/check-800x600.mjs b/check-800x600.mjs
+new file mode 100644
+index 0000000..fbe82ea
+--- /dev/null
++++ b/check-800x600.mjs
+@@ -0,0 +1,63 @@
++import { chromium } from 'playwright';
++
++async function check() {
++  const browser = await chromium.launch({ headless: true });
++  const context = await browser.newContext({
++    viewport: { width: 800, height: 600 }
++  });
++
++  const page = await context.newPage();
++  const url = 'http://localhost:8797/?freeq=ws://127.0.0.1:8081/irc&room=%23the-lab&nick=labtest&bare=1';
++  await page.goto(url, { waitUntil: 'load', timeout: 15000 });
++  await page.waitForTimeout(1000);
++
++  const info = await page.evaluate(() => {
++    const canvas = document.getElementById('world');
++    const side = document.getElementById('side');
++    const main = document.querySelector('main');
++    const worldwrap = document.getElementById('worldwrap');
++    
++    const canvasRect = canvas?.getBoundingClientRect();
++    const sideRect = side?.getBoundingClientRect();
++    const mainRect = main?.getBoundingClientRect();
++    const worldwrapRect = worldwrap?.getBoundingClientRect();
++    
++    return {
++      viewport: { innerWidth: window.innerWidth, innerHeight: window.innerHeight },
++      scrolling: {
++        scrollWidth: document.documentElement.scrollWidth,
++        scrollHeight: document.documentElement.scrollHeight
++      },
++      main: mainRect ? {
++        width: mainRect.width, height: mainRect.height,
++        right: mainRect.right, bottom: mainRect.bottom
++      } : null,
++      worldwrap: worldwrapRect ? {
++        width: worldwrapRect.width, height: worldwrapRect.height,
++        right: worldwrapRect.right, bottom: worldwrapRect.bottom,
++        clientWidth: worldwrap?.clientWidth, clientHeight: worldwrap?.clientHeight
++      } : null,
++      canvas: canvasRect ? {
++        width: canvasRect.width, height: canvasRect.height,
++        x: canvasRect.x, y: canvasRect.y,
++        right: canvasRect.right, bottom: canvasRect.bottom,
++        backingWidth: canvas?.width, backingHeight: canvas?.height,
++        canvasWidth: canvas?.style.width, canvasHeight: canvas?.style.height
++      } : null,
++      side: sideRect ? {
++        width: sideRect.width, height: sideRect.height,
++        right: sideRect.right, bottom: sideRect.bottom
++      } : null
++    };
++  });
++
++  console.log(JSON.stringify(info, null, 2));
++
++  await context.close();
++  await browser.close();
++}
++
++check().catch(err => {
++  console.error('Error:', err);
++  process.exit(1);
++});
+diff --git a/check-composer.mjs b/check-composer.mjs
+new file mode 100644
+index 0000000..d8df2fa
+--- /dev/null
++++ b/check-composer.mjs
+@@ -0,0 +1,46 @@
++import { chromium } from 'playwright';
++
++async function check() {
++  const browser = await chromium.launch({ headless: true });
++  const context = await browser.newContext({
++    viewport: { width: 800, height: 600 }
++  });
++
++  const page = await context.newPage();
++  const url = 'http://localhost:8797/?freeq=ws://127.0.0.1:8081/irc&room=%23the-lab&nick=labtest&bare=1';
++  await page.goto(url, { waitUntil: 'load', timeout: 15000 });
++  await page.waitForTimeout(1000);
++
++  const result = await page.evaluate(() => {
++    const composer = document.getElementById('composer-bar');
++    const children = Array.from(composer.children).map(child => {
++      return {
++        id: child.id,
++        tag: child.tagName,
++        scrollWidth: child.scrollWidth,
++        offsetWidth: child.offsetWidth,
++        style: {
++          flex: window.getComputedStyle(child).flex,
++          width: window.getComputedStyle(child).width
++        }
++      };
++    });
++    return {
++      composerScrollWidth: composer.scrollWidth,
++      composerOffsetWidth: composer.offsetWidth,
++      composerDisplay: window.getComputedStyle(composer).display,
++      composerGap: window.getComputedStyle(composer).gap,
++      children
++    };
++  });
++
++  console.log(JSON.stringify(result, null, 2));
++
++  await context.close();
++  await browser.close();
++}
++
++check().catch(err => {
++  console.error('Error:', err);
++  process.exit(1);
++});
+diff --git a/check-layout.mjs b/check-layout.mjs
+new file mode 100644
+index 0000000..b118376
+--- /dev/null
++++ b/check-layout.mjs
+@@ -0,0 +1,171 @@
++import { chromium } from 'playwright';
++import fs from 'fs';
++import path from 'path';
++
++const tmpDir = '/Users/mike/.claude/jobs/e8a4ecde/tmp';
++const viewports = [
++  { width: 960, height: 1050, name: 'fit-960x1050' },
++  { width: 1920, height: 1080, name: 'fit-1920x1080' },
++  { width: 1280, height: 800, name: 'fit-1280x800' },
++  { width: 800, height: 600, name: 'fit-800x600' }
++];
++
++async function checkLayout(page, viewport) {
++  const result = {
++    viewport: `${viewport.width}x${viewport.height}`,
++    scrollWidth: await page.evaluate(() => document.scrollingElement?.scrollWidth || 0),
++    scrollHeight: await page.evaluate(() => document.scrollingElement?.scrollHeight || 0),
++    innerWidth: await page.evaluate(() => window.innerWidth),
++    innerHeight: await page.evaluate(() => window.innerHeight),
++    noHorizontalScroll: false,
++    noVerticalScroll: false,
++    canvas: null,
++    chatPanel: null,
++    canvasBacking: null,
++    bare: null,
++    errors: []
++  };
++
++  // Check scroll dimensions
++  result.noHorizontalScroll = result.scrollWidth <= result.innerWidth;
++  result.noVerticalScroll = result.scrollHeight <= result.innerHeight;
++
++  // Get canvas info
++  const canvasRect = await page.evaluate(() => {
++    const canvas = document.getElementById('world');
++    if (!canvas) return null;
++    const rect = canvas.getBoundingClientRect();
++    return {
++      x: rect.x,
++      y: rect.y,
++      width: rect.width,
++      height: rect.height,
++      backingWidth: canvas.width,
++      backingHeight: canvas.height,
++      fullsInViewport: rect.x >= 0 && rect.y >= 0 &&
++                       rect.right <= window.innerWidth &&
++                       rect.bottom <= window.innerHeight,
++      aspectRatio: rect.width / rect.height
++    };
++  });
++
++  if (canvasRect) {
++    result.canvas = canvasRect;
++    result.canvasBacking = {
++      width: canvasRect.backingWidth,
++      height: canvasRect.backingHeight,
++      equals1920x1080: canvasRect.backingWidth === 1920 && canvasRect.backingHeight === 1080
++    };
++
++    // Check 16:9 aspect ratio (with 1px tolerance)
++    const expectedAspect = 16/9;
++    result.canvas.aspectRatioOK = Math.abs(result.canvas.aspectRatio - expectedAspect) <= 0.01;
++  } else {
++    result.errors.push('Canvas #world not found');
++  }
++
++  // Get chat panel info
++  const panelRect = await page.evaluate(() => {
++    const panel = document.getElementById('side');
++    if (!panel) return null;
++    const rect = panel.getBoundingClientRect();
++    return {
++      x: rect.x,
++      y: rect.y,
++      width: rect.width,
++      height: rect.height,
++      fullsInViewport: rect.x >= 0 && rect.y >= 0 &&
++                       rect.right <= window.innerWidth &&
++                       rect.bottom <= window.innerHeight
++    };
++  });
++
++  if (panelRect) {
++    result.chatPanel = panelRect;
++  } else {
++    result.errors.push('Chat panel #side not found');
++  }
++
++  // Check bare page requirements
++  const bareState = await page.evaluate(() => ({
++    hasLanding: !document.getElementById('landing')?.classList.contains('hidden'),
++    hasFirststeps: !document.getElementById('firststeps')?.classList.contains('hidden'),
++    hasSoundUI: !document.getElementById('sound-wrap')?.style.display?.includes('none')
++  }));
++
++  result.bare = {
++    noLanding: !bareState.hasLanding,
++    noFirststeps: !bareState.hasFirststeps,
++    hasSoundUI: bareState.hasSoundUI,
++    allGood: !bareState.hasLanding && !bareState.hasFirststeps
++  };
++
++  return result;
++}
++
++async function main() {
++  const results = {};
++
++  try {
++    for (const viewport of viewports) {
++      const browser = await chromium.launch({ headless: true });
++      const context = await browser.newContext({
++        viewport: { width: viewport.width, height: viewport.height }
++      });
++
++      const page = await context.newPage();
++
++      try {
++        const url = 'http://localhost:8797/?freeq=ws://127.0.0.1:8081/irc&room=%23the-lab&nick=labtest&bare=1';
++        await page.goto(url, { waitUntil: 'load', timeout: 15000 });
++        await page.waitForTimeout(1000);
++
++        const result = await checkLayout(page, viewport);
++        results[viewport.name] = result;
++
++        // Take screenshot
++        const screenshotPath = path.join(tmpDir, `${viewport.name}.png`);
++        await page.screenshot({ path: screenshotPath, fullPage: false });
++        result.screenshot = screenshotPath;
++
++        console.log(`✓ ${viewport.name}`);
++      } catch (err) {
++        results[viewport.name] = {
++          viewport: `${viewport.width}x${viewport.height}`,
++          error: err.message
++        };
++        console.error(`✗ ${viewport.name}: ${err.message}`);
++      } finally {
++        await context.close();
++        await browser.close();
++      }
++    }
++
++    // Print results
++    console.log('\n' + '='.repeat(80));
++    for (const [name, result] of Object.entries(results)) {
++      console.log(`\n${name}:`);
++      if (result.error) {
++        console.log(`  ERROR: ${result.error}`);
++      } else {
++        console.log(`  Scroll: H=${result.noHorizontalScroll} V=${result.noVerticalScroll} (${result.scrollWidth}x${result.scrollHeight})`);
++        console.log(`  Canvas backing: ${result.canvasBacking?.width}x${result.canvasBacking?.height} (${result.canvasBacking?.equals1920x1080 ? '✓' : '✗'})`);
++        if (result.canvas) {
++          console.log(`  Canvas CSS: ${result.canvas.width.toFixed(0)}x${result.canvas.height.toFixed(0)} aspect=${result.canvas.aspectRatio.toFixed(3)} (${result.canvas.aspectRatioOK ? '✓' : '✗'})`);
++          console.log(`  Canvas in viewport: ${result.canvas.fullsInViewport ? '✓' : '✗'}`);
++        }
++        if (result.chatPanel) {
++          console.log(`  Chat panel in viewport: ${result.chatPanel.fullsInViewport ? '✓' : '✗'}`);
++        }
++        console.log(`  Bare page: ${result.bare.allGood ? '✓' : '✗'}`);
++      }
++    }
++  } finally {
++    // browsers closed in loop
++  }
++}
++
++main().catch(err => {
++  console.error('Test failed:', err);
++  process.exit(1);
++});
+diff --git a/check-main-children.mjs b/check-main-children.mjs
+new file mode 100644
+index 0000000..6846dbd
+--- /dev/null
++++ b/check-main-children.mjs
+@@ -0,0 +1,44 @@
++import { chromium } from 'playwright';
++
++async function check() {
++  const browser = await chromium.launch({ headless: true });
++  const context = await browser.newContext({
++    viewport: { width: 800, height: 600 }
++  });
++
++  const page = await context.newPage();
++  const url = 'http://localhost:8797/?freeq=ws://127.0.0.1:8081/irc&room=%23the-lab&nick=labtest&bare=1';
++  await page.goto(url, { waitUntil: 'load', timeout: 15000 });
++  await page.waitForTimeout(1000);
++
++  const result = await page.evaluate(() => {
++    const main = document.querySelector('main');
++    const children = Array.from(main.children).map(child => {
++      const rect = child.getBoundingClientRect();
++      return {
++        id: child.id,
++        tag: child.tagName,
++        scrollWidth: child.scrollWidth,
++        offsetWidth: child.offsetWidth,
++        right: rect.right,
++        width: rect.width
++      };
++    });
++    return {
++      mainScrollWidth: main.scrollWidth,
++      mainOffsetWidth: main.offsetWidth,
++      innerWidth: window.innerWidth,
++      children
++    };
++  });
++
++  console.log(JSON.stringify(result, null, 2));
++
++  await context.close();
++  await browser.close();
++}
++
++check().catch(err => {
++  console.error('Error:', err);
++  process.exit(1);
++});
+diff --git a/check-overflow-cause.mjs b/check-overflow-cause.mjs
+new file mode 100644
+index 0000000..28ad600
+--- /dev/null
++++ b/check-overflow-cause.mjs
+@@ -0,0 +1,40 @@
++import { chromium } from 'playwright';
++
++async function check() {
++  const browser = await chromium.launch({ headless: true });
++  const context = await browser.newContext({
++    viewport: { width: 800, height: 600 }
++  });
++
++  const page = await context.newPage();
++  const url = 'http://localhost:8797/?freeq=ws://127.0.0.1:8081/irc&room=%23the-lab&nick=labtest&bare=1';
++  await page.goto(url, { waitUntil: 'load', timeout: 15000 });
++  await page.waitForTimeout(1000);
++
++  const info = await page.evaluate(() => {
++    const body = document.body;
++    const children = Array.from(body.children).map(child => ({
++      tag: child.tagName,
++      id: child.id || '',
++      class: child.className,
++      scrollWidth: child.scrollWidth,
++      offsetWidth: child.offsetWidth
++    }));
++    
++    return {
++      bodyScrollWidth: body.scrollWidth,
++      innerWidth: window.innerWidth,
++      children: children
++    };
++  });
++
++  console.log(JSON.stringify(info, null, 2));
++
++  await context.close();
++  await browser.close();
++}
++
++check().catch(err => {
++  console.error('Error:', err);
++  process.exit(1);
++});
+diff --git a/check-overflow.mjs b/check-overflow.mjs
+new file mode 100644
+index 0000000..01de7a2
+--- /dev/null
++++ b/check-overflow.mjs
+@@ -0,0 +1,72 @@
++import { chromium } from 'playwright';
++
++async function checkOverflow() {
++  const browser = await chromium.launch({ headless: true });
++  const context = await browser.newContext({
++    viewport: { width: 960, height: 1050 }
++  });
++
++  const page = await context.newPage();
++  const url = 'http://localhost:8797/?freeq=ws://127.0.0.1:8081/irc&room=%23the-lab&nick=labtest&bare=1';
++  await page.goto(url, { waitUntil: 'load', timeout: 15000 });
++  await page.waitForTimeout(1000);
++
++  const info = await page.evaluate(() => {
++    const body = document.body;
++    const html = document.documentElement;
++    const app = document.getElementById('app');
++    const header = document.querySelector('header');
++    const main = document.querySelector('main');
++    const worldwrap = document.getElementById('worldwrap');
++    const side = document.getElementById('side');
++
++    return {
++      body: {
++        scrollWidth: body.scrollWidth,
++        scrollHeight: body.scrollHeight,
++        offsetWidth: body.offsetWidth,
++        offsetHeight: body.offsetHeight,
++        clientWidth: body.clientWidth,
++        clientHeight: body.clientHeight,
++        margin: window.getComputedStyle(body).margin
++      },
++      html: {
++        scrollWidth: html.scrollWidth,
++        scrollHeight: html.scrollHeight,
++        offsetWidth: html.offsetWidth,
++        offsetHeight: html.offsetHeight,
++        clientWidth: html.clientWidth,
++        clientHeight: html.clientHeight
++      },
++      app: app ? {
++        display: window.getComputedStyle(app).display,
++        flexDirection: window.getComputedStyle(app).flexDirection,
++        height: window.getComputedStyle(app).height,
++        offsetWidth: app.offsetWidth,
++        offsetHeight: app.offsetHeight
++      } : null,
++      header: header ? {
++        offsetHeight: header.offsetHeight,
++        height: window.getComputedStyle(header).height
++      } : null,
++      main: main ? {
++        offsetHeight: main.offsetHeight,
++        height: window.getComputedStyle(main).height
++      } : null,
++      viewport: {
++        innerWidth: window.innerWidth,
++        innerHeight: window.innerHeight
++      }
++    };
++  });
++
++  console.log(JSON.stringify(info, null, 2));
++
++  await context.close();
++  await browser.close();
++}
++
++checkOverflow().catch(err => {
++  console.error('Error:', err);
++  process.exit(1);
++});
+diff --git a/check-scroll.mjs b/check-scroll.mjs
+new file mode 100644
+index 0000000..eb5212b
+--- /dev/null
++++ b/check-scroll.mjs
+@@ -0,0 +1,37 @@
++import { chromium } from 'playwright';
++
++async function checkScroll() {
++  const browser = await chromium.launch({ headless: true });
++  const context = await browser.newContext({
++    viewport: { width: 960, height: 1050 }
++  });
++
++  const page = await context.newPage();
++  const url = 'http://localhost:8797/?freeq=ws://127.0.0.1:8081/irc&room=%23the-lab&nick=labtest&bare=1';
++  await page.goto(url, { waitUntil: 'load', timeout: 15000 });
++  await page.waitForTimeout(1000);
++
++  // Check if page has overflow
++  const hasScroll = await page.evaluate(() => {
++    const html = document.documentElement;
++    const body = document.body;
++    return {
++      documentOverflowX: document.documentElement.scrollWidth > window.innerWidth,
++      documentOverflowY: document.documentElement.scrollHeight > window.innerHeight,
++      htmlScrollHeight: html.scrollHeight,
++      bodyScrollHeight: body.scrollHeight,
++      innerHeight: window.innerHeight,
++      innerWidth: window.innerWidth
++    };
++  });
++
++  console.log(JSON.stringify(hasScroll, null, 2));
++
++  await context.close();
++  await browser.close();
++}
++
++checkScroll().catch(err => {
++  console.error('Error:', err);
++  process.exit(1);
++});
+diff --git a/check-scrolling-element.mjs b/check-scrolling-element.mjs
+new file mode 100644
+index 0000000..d4211c7
+--- /dev/null
++++ b/check-scrolling-element.mjs
+@@ -0,0 +1,38 @@
++import { chromium } from 'playwright';
++
++async function check() {
++  const browser = await chromium.launch({ headless: true });
++  const context = await browser.newContext({
++    viewport: { width: 960, height: 1050 }
++  });
++
++  const page = await context.newPage();
++  const url = 'http://localhost:8797/?freeq=ws://127.0.0.1:8081/irc&room=%23the-lab&nick=labtest&bare=1';
++  await page.goto(url, { waitUntil: 'load', timeout: 15000 });
++  await page.waitForTimeout(1000);
++
++  const info = await page.evaluate(() => {
++    const se = document.scrollingElement;
++    return {
++      scrollingElementTag: se?.tagName,
++      scrollWidth: se?.scrollWidth,
++      scrollHeight: se?.scrollHeight,
++      clientWidth: se?.clientWidth,
++      clientHeight: se?.clientHeight,
++      innerWidth: window.innerWidth,
++      innerHeight: window.innerHeight,
++      bodyScrollWidth: document.body.scrollWidth,
++      bodyScrollHeight: document.body.scrollHeight
++    };
++  });
++
++  console.log(JSON.stringify(info, null, 2));
++
++  await context.close();
++  await browser.close();
++}
++
++check().catch(err => {
++  console.error('Error:', err);
++  process.exit(1);
++});
+diff --git a/check-side-children.mjs b/check-side-children.mjs
+new file mode 100644
+index 0000000..7b65752
+--- /dev/null
++++ b/check-side-children.mjs
+@@ -0,0 +1,41 @@
++import { chromium } from 'playwright';
++
++async function check() {
++  const browser = await chromium.launch({ headless: true });
++  const context = await browser.newContext({
++    viewport: { width: 800, height: 600 }
++  });
++
++  const page = await context.newPage();
++  const url = 'http://localhost:8797/?freeq=ws://127.0.0.1:8081/irc&room=%23the-lab&nick=labtest&bare=1';
++  await page.goto(url, { waitUntil: 'load', timeout: 15000 });
++  await page.waitForTimeout(1000);
++
++  const result = await page.evaluate(() => {
++    const side = document.getElementById('side');
++    const children = Array.from(side.children).map(child => {
++      return {
++        id: child.id,
++        tag: child.tagName,
++        scrollWidth: child.scrollWidth,
++        offsetWidth: child.offsetWidth
++      };
++    });
++    return {
++      sideScrollWidth: side.scrollWidth,
++      sideOffsetWidth: side.offsetWidth,
++      sideClientWidth: side.clientWidth,
++      children
++    };
++  });
++
++  console.log(JSON.stringify(result, null, 2));
++
++  await context.close();
++  await browser.close();
++}
++
++check().catch(err => {
++  console.error('Error:', err);
++  process.exit(1);
++});
+diff --git a/client/index.html b/client/index.html
+index 85ad235..a6d0f2e 100644
+--- a/client/index.html
++++ b/client/index.html
+@@ -65,8 +65,8 @@
+     header .modes button.active { border-color: var(--cyan); color: var(--cyan); }
+ 
+     main { display: flex; flex: 1; min-height: 0; }
+-    #worldwrap { flex: 1.4; position: relative; background: #000; display: flex; align-items: center; justify-content: center; min-width: 0; }
+-    canvas#world { image-rendering: pixelated; background: #000; }
++    #worldwrap { flex: 1.4; position: relative; background: #000; display: flex; align-items: center; justify-content: center; min-width: 0; overflow: hidden; }
++    canvas#world { width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; display: block; }
+     #side { flex: 1; display: flex; flex-direction: column; min-width: 300px; max-width: 560px; border-left: 1px solid var(--border); background: var(--panel); }
+ 
+     body.mode-chat #worldwrap { display: none; }
+@@ -74,6 +74,10 @@
+     body.mode-world #side { display: none; }
+     #inspector { display: none; }
+     body.mode-dev #inspector { display: flex; }
++    body.bare #landing { display: none !important; }
++    body.bare #firststeps { display: none !important; }
++    body.bare #sound-wrap { display: none !important; }
++    body.bare #nowplaying { display: none !important; }
+ 
+     #transcript { flex: 1; overflow-y: auto; padding: 8px 10px; font-size: 0.88rem; line-height: 1.5; }
+     #transcript .row { margin-bottom: 2px; word-wrap: break-word; }
+diff --git a/client/src/app.ts b/client/src/app.ts
+index f346abb..cd71497 100644
+--- a/client/src/app.ts
++++ b/client/src/app.ts
+@@ -169,13 +169,14 @@ export class App {
+   /** lights collected during the tile pass, composited after the entity pass */
+   private frameLights: { x: number; y: number; r: number; c: string; p: number }[] = []
+   private spriteSets = new Map<string, SpriteSet>()
++  private bare = false
+ 
+   start(): void {
+     this.canvas.width = VIEW_W
+     this.canvas.height = VIEW_H
+-    this.fitCanvas()
+     this.updateSparkHud()
+-    window.addEventListener('resize', () => this.fitCanvas())
++    this.bare = new URLSearchParams(location.search).get('bare') === '1'
++    if (this.bare) document.body.classList.add('bare')
+     this.bindUi()
+     this.captureArrival()
+     // returning from the broker's OAuth redirect? consume the result first
+@@ -190,6 +191,20 @@ export class App {
+       return
+     }
+     this.identity = loadIdentity()
++    if (this.bare) {
++      const params = new URLSearchParams(location.search)
++      const nickParam = params.get('nick')
++      const roomParam = params.get('room')
++      if (nickParam && !this.identity) this.identity = createIdentity(nickParam)
++      if (roomParam) this.channel = roomParam
++      if (this.identity) {
++        el('landing').classList.add('hidden')
++        this.setMode('world')
++        this.connect(this.channel)
++        requestAnimationFrame(() => this.frame())
++        return
++      }
++    }
+     if (this.identity) {
+       el('landing').classList.add('hidden')
+       // NOTE: no freshOAuth here — a stored web_token was already spent (the
+@@ -791,7 +806,7 @@ export class App {
+     // the engine needs the room's population: it stops quoting arrivals in a
+     // crowd, and when you're the only one here your own motif carries the room
+     this.audio.setPopulation(this.members.size)
+-    this.startFirstSteps()
++    if (!this.bare) this.startFirstSteps()
+     // we are standing in this channel: its live roster is ground truth, better
+     // than a stale (or hidden) LIST count — keep the directory honest
+     const entry = this.town?.directory?.find((e) => e.channel === this.channel)
+@@ -950,7 +965,7 @@ export class App {
+     el<HTMLInputElement>('name-input').addEventListener('keydown', (e) => {
+       if (e.key === 'Enter') this.doGuestLogin()
+     })
+-    el('enter-bsky').addEventListener('click', () => void this.doBskyLogin())
++    if (!this.bare) el('enter-bsky').addEventListener('click', () => void this.doBskyLogin())
+     el('idcard-close').addEventListener('click', () => el('idcard').classList.add('hidden'))
+     el('obj-close').addEventListener('click', () => el('objcard').classList.add('hidden'))
+     el('travel-cancel').addEventListener('click', () => {
+@@ -999,54 +1014,56 @@ export class App {
+     for (const mode of ['world', 'split', 'chat', 'dev']) {
+       el(`mode-${mode}`).addEventListener('click', () => this.setMode(mode))
+     }
+-    el('sound-btn').addEventListener('click', () => {
+-      const muted = this.audio.toggle()
+-      localStorage.setItem('fimp-sound', muted ? 'off' : 'on')
+-      this.paintSoundButton(muted)
+-    })
+-    // the music tells the interface whose theme it is playing
+-    this.audio.onCue((cue) => this.showNowPlaying(cue))
+-    // how much music: off / moments / breathing / always (spec §30.5)
+-    const modeRow = el('music-modes')
+-    for (const m of MUSIC_MODES) {
+-      const btn = document.createElement('button')
+-      btn.textContent = m.label
+-      btn.dataset.mode = m.mode
+-      btn.style.cssText = 'flex:1; padding:4px 2px; font-size:.72rem'
+-      btn.title = m.hint
+-      btn.addEventListener('click', () => {
+-        this.audio.setPrefs({ mode: m.mode })
+-        this.paintMusicModes()
+-        this.audio.noteActivity()
++    if (!this.bare) {
++      el('sound-btn').addEventListener('click', () => {
++        const muted = this.audio.toggle()
++        localStorage.setItem('fimp-sound', muted ? 'off' : 'on')
++        this.paintSoundButton(muted)
++      })
++      // the music tells the interface whose theme it is playing
++      this.audio.onCue((cue) => this.showNowPlaying(cue))
++      // how much music: off / moments / breathing / always (spec §30.5)
++      const modeRow = el('music-modes')
++      for (const m of MUSIC_MODES) {
++        const btn = document.createElement('button')
++        btn.textContent = m.label
++        btn.dataset.mode = m.mode
++        btn.style.cssText = 'flex:1; padding:4px 2px; font-size:.72rem'
++        btn.title = m.hint
++        btn.addEventListener('click', () => {
++          this.audio.setPrefs({ mode: m.mode })
++          this.paintMusicModes()
++          this.audio.noteActivity()
++        })
++        modeRow.append(btn)
++      }
++      this.paintMusicModes()
++      // separate levels for music, identity motifs and effects (spec §26)
++      el('sound-more').addEventListener('click', (e) => {
++        e.stopPropagation()
++        el('sound-panel').classList.toggle('hidden')
++        const prefs = this.audio.getPrefs()
++        for (const [k, v] of Object.entries(prefs)) {
++          const input = document.getElementById(`vol-${k}`) as HTMLInputElement | null
++          if (input) input.value = String(v)
++        }
++      })
++      for (const k of ['music', 'motifs', 'effects'] as const) {
++        el(`vol-${k}`).addEventListener('input', (e) => {
++          this.audio.setPrefs({ [k]: Number((e.target as HTMLInputElement).value) })
++        })
++      }
++      document.addEventListener('click', (e) => {
++        const wrap = document.getElementById('sound-wrap')
++        if (wrap && !wrap.contains(e.target as Node)) el('sound-panel').classList.add('hidden')
+       })
+-      modeRow.append(btn)
+     }
+-    this.paintMusicModes()
+-    // separate levels for music, identity motifs and effects (spec §26)
+     el('firststeps-hide').addEventListener('click', () => {
+       dismiss()
+       el('firststeps').classList.add('hidden')
+     })
+     el('help-btn').addEventListener('click', () => void this.showHelp())
+     el('help-close').addEventListener('click', () => el('helpcard').classList.add('hidden'))
+-    el('sound-more').addEventListener('click', (e) => {
+-      e.stopPropagation()
+-      el('sound-panel').classList.toggle('hidden')
+-      const prefs = this.audio.getPrefs()
+-      for (const [k, v] of Object.entries(prefs)) {
+-        const input = document.getElementById(`vol-${k}`) as HTMLInputElement | null
+-        if (input) input.value = String(v)
+-      }
+-    })
+-    for (const k of ['music', 'motifs', 'effects'] as const) {
+-      el(`vol-${k}`).addEventListener('input', (e) => {
+-        this.audio.setPrefs({ [k]: Number((e.target as HTMLInputElement).value) })
+-      })
+-    }
+-    document.addEventListener('click', (e) => {
+-      const wrap = document.getElementById('sound-wrap')
+-      if (wrap && !wrap.contains(e.target as Node)) el('sound-panel').classList.add('hidden')
+-    })
+     // audio needs a user gesture: start on the first one unless the user muted last time
+     const autoStart = () => {
+       if (localStorage.getItem('fimp-sound') !== 'off' && this.audio.muted) {
+@@ -1209,7 +1226,7 @@ export class App {
+     el('obj-type').textContent = o.type
+     el('obj-caps').textContent = o.capabilities.join(', ')
+     const body = el('obj-body')
+-    if (o.id === 'questboard') {
++    if (o.id === 'questboard' && !this.bare) {
+       this.renderQuestBoard(body)
+     } else if (o.id === 'obelisk') {
+       void this.renderObelisk(body)
+@@ -1251,6 +1268,7 @@ export class App {
+    *  whole point is that the arrival is attributable. A did:key guest is told
+    *  plainly that it won't count rather than being silently ignored. */
+   private redeemPendingInvite(did: string): void {
++    if (this.bare) return
+     const token = this.pendingInvite ?? localStorage.getItem('fimp-invite')
+     if (!token) return
+     this.pendingInvite = null
+@@ -1728,10 +1746,13 @@ export class App {
+   private onCanvasClick(e: MouseEvent): void {
+     if (!this.map) return
+     const rect = this.canvas.getBoundingClientRect()
+-    const scaleX = this.canvas.width / rect.width
+-    const scaleY = this.canvas.height / rect.height
+-    const px = (e.clientX - rect.left) * scaleX
+-    const py = (e.clientY - rect.top) * scaleY
++    const scale = Math.min(rect.width / VIEW_W, rect.height / VIEW_H)
++    const renderedW = VIEW_W * scale
++    const renderedH = VIEW_H * scale
++    const offsetX = (rect.width - renderedW) / 2
++    const offsetY = (rect.height - renderedH) / 2
++    const px = (e.clientX - rect.left - offsetX) / scale
++    const py = (e.clientY - rect.top - offsetY) / scale
+     const cam = this.camera()
+     const wx = (px + cam.x) / TILE_PX
+     const wy = (py + cam.y) / TILE_PX
+@@ -1840,14 +1861,6 @@ export class App {
+ 
+   // ---------- render ----------
+ 
+-  private fitCanvas(): void {
+-    const wrap = el('worldwrap')
+-    // integer scaling when practical (spec §12.1), half-steps when an integer wastes >35% of the panel
+-    const raw = Math.min(wrap.clientWidth / VIEW_W, wrap.clientHeight / VIEW_H)
+-    const scale = Math.max(1, Math.floor(raw * 2) / 2)
+-    this.canvas.style.width = `${VIEW_W * scale}px`
+-    this.canvas.style.height = `${VIEW_H * scale}px`
+-  }
+ 
+   private camera(): { x: number; y: number } {
+     if (!this.map) return { x: 0, y: 0 }
+diff --git a/e2e/canvas-bare-mode.spec.ts b/e2e/canvas-bare-mode.spec.ts
+new file mode 100644
+index 0000000..4ce2cfe
+--- /dev/null
++++ b/e2e/canvas-bare-mode.spec.ts
+@@ -0,0 +1,84 @@
++import { expect, test } from '@playwright/test'
++
++// Test bare mode canvas scaling and centering
++// URL: ?freeq=...&room=%23the-lab&nick=mike&bare=1
++test.describe('canvas scaling in bare mode', () => {
++  test('full room visible at 960x1050, canvas centered', async ({ page }) => {
++    // Navigate to bare mode (using dummy URLs that won't connect)
++    const bareUrl = '/?bare=1'
++    await page.goto(bareUrl)
++    
++    // Set viewport size
++    await page.setViewportSize({ width: 960, height: 1050 })
++    
++    // Get canvas element
++    const canvas = page.locator('canvas#world')
++    
++    // Get worldwrap container
++    const worldwrap = page.locator('#worldwrap')
++    
++    // Wait for canvas to render (it should be visible without landing overlay)
++    await expect(canvas).toBeVisible()
++    
++    // Get bounding boxes
++    const canvasBox = await canvas.boundingBox()
++    const wrapBox = await worldwrap.boundingBox()
++    
++    if (!canvasBox || !wrapBox) throw new Error('Could not get bounding boxes')
++    
++    // VIEW_W = 320, VIEW_H = 180
++    // At 960x1050: min(960/320, 1050/180) = min(3, 5.83) = 3
++    // Canvas should be 320*3 = 960px wide, 180*3 = 540px tall
++    expect(canvasBox.width).toBe(960)
++    expect(canvasBox.height).toBe(540)
++    
++    // Canvas should be centered horizontally and vertically
++    // Left margin and right margin should be equal (within 1px)
++    const leftMargin = canvasBox.x - wrapBox.x
++    const rightMargin = (wrapBox.x + wrapBox.width) - (canvasBox.x + canvasBox.width)
++    expect(Math.abs(leftMargin - rightMargin)).toBeLessThanOrEqual(1)
++    
++    // Top margin and bottom margin should be equal (within 1px)
++    const topMargin = canvasBox.y - wrapBox.y
++    const bottomMargin = (wrapBox.y + wrapBox.height) - (canvasBox.y + canvasBox.height)
++    expect(Math.abs(topMargin - bottomMargin)).toBeLessThanOrEqual(1)
++  })
++  
++  test('canvas refits on window resize', async ({ page }) => {
++    const bareUrl = '/?bare=1'
++    await page.goto(bareUrl)
++    
++    const canvas = page.locator('canvas#world')
++    const worldwrap = page.locator('#worldwrap')
++    
++    // Test multiple viewport sizes
++    const sizes = [
++      { width: 1920, height: 600 },   // wide
++      { width: 700, height: 1200 },   // tall
++      { width: 480, height: 360 },    // small
++      { width: 960, height: 1050 },   // target
++      { width: 1920, height: 1080 },  // fullscreen
++    ]
++    
++    for (const size of sizes) {
++      await page.setViewportSize(size)
++      
++      // Wait a frame for resize handler to execute
++      await page.waitForTimeout(50)
++      
++      const canvasBox = await canvas.boundingBox()
++      const wrapBox = await worldwrap.boundingBox()
++      
++      if (!canvasBox || !wrapBox) throw new Error(`Could not get bounding boxes at ${size.width}x${size.height}`)
++      
++      // Verify centering
++      const leftMargin = canvasBox.x - wrapBox.x
++      const rightMargin = (wrapBox.x + wrapBox.width) - (canvasBox.x + canvasBox.width)
++      expect(Math.abs(leftMargin - rightMargin)).toBeLessThanOrEqual(1)
++      
++      const topMargin = canvasBox.y - wrapBox.y
++      const bottomMargin = (wrapBox.y + wrapBox.height) - (canvasBox.y + canvasBox.height)
++      expect(Math.abs(topMargin - bottomMargin)).toBeLessThanOrEqual(1)
++    }
++  })
++})
+diff --git a/e2e/canvas-resize-test.spec.ts b/e2e/canvas-resize-test.spec.ts
+new file mode 100644
+index 0000000..31ffbeb
+--- /dev/null
++++ b/e2e/canvas-resize-test.spec.ts
+@@ -0,0 +1,58 @@
++import { expect, test } from '@playwright/test'
++import * as fs from 'fs'
++import * as path from 'path'
++
++const SCREENSHOT_DIR = '/Users/mike/.claude/jobs/e8a4ecde/tmp'
++
++test.describe('canvas resize and centering', () => {
++  test('captures canvas at various viewport sizes', async ({ page, context }) => {
++    // Use deviceScaleFactor 2 for high DPI testing
++    await context.close()
++    const deviceContext = await page.context()
++    
++    // Navigate to the app
++    await page.goto('http://localhost:8787/')
++    
++    // Define viewport sizes to test
++    const sizes = [
++      { width: 1920, height: 600, name: '1920x600' },
++      { width: 700, height: 1200, name: '700x1200' },
++      { width: 480, height: 360, name: '480x360' },
++      { width: 960, height: 1050, name: '960x1050' },
++      { width: 1920, height: 1080, name: '1920x1080' },
++    ]
++    
++    for (const size of sizes) {
++      await page.setViewportSize(size)
++      
++      // Wait for the canvas to render
++      await page.waitForTimeout(200)
++      
++      // Get canvas and container info
++      const canvasBox = await page.locator('canvas#world').boundingBox()
++      const wrapBox = await page.locator('#worldwrap').boundingBox()
++      
++      if (!canvasBox || !wrapBox) {
++        console.log(`Skipping ${size.name}: canvas or wrap not found`)
++        continue
++      }
++      
++      // Calculate margins
++      const leftMargin = canvasBox.x - wrapBox.x
++      const rightMargin = (wrapBox.x + wrapBox.width) - (canvasBox.x + canvasBox.width)
++      const topMargin = canvasBox.y - wrapBox.y
++      const bottomMargin = (wrapBox.y + wrapBox.height) - (canvasBox.y + canvasBox.height)
++      
++      console.log(`${size.name}:`)
++      console.log(`  Canvas: ${canvasBox.width}x${canvasBox.height}`)
++      console.log(`  Container: ${wrapBox.width}x${wrapBox.height}`)
++      console.log(`  Margins: L=${leftMargin.toFixed(1)} R=${rightMargin.toFixed(1)} T=${topMargin.toFixed(1)} B=${bottomMargin.toFixed(1)}`)
++      console.log(`  H-balance: ${Math.abs(leftMargin - rightMargin).toFixed(1)}px, V-balance: ${Math.abs(topMargin - bottomMargin).toFixed(1)}px`)
++      
++      // Take a screenshot
++      const screenshotPath = path.join(SCREENSHOT_DIR, `resize-${size.width}x${size.height}.png`)
++      await page.screenshot({ path: screenshotPath, fullPage: true })
++      console.log(`  Screenshot: ${screenshotPath}`)
++    }
++  })
++})
+diff --git a/find-wide-element.mjs b/find-wide-element.mjs
+new file mode 100644
+index 0000000..a65a854
+--- /dev/null
++++ b/find-wide-element.mjs
+@@ -0,0 +1,45 @@
++import { chromium } from 'playwright';
++
++async function check() {
++  const browser = await chromium.launch({ headless: true });
++  const context = await browser.newContext({
++    viewport: { width: 800, height: 600 }
++  });
++
++  const page = await context.newPage();
++  const url = 'http://localhost:8797/?freeq=ws://127.0.0.1:8081/irc&room=%23the-lab&nick=labtest&bare=1';
++  await page.goto(url, { waitUntil: 'load', timeout: 15000 });
++  await page.waitForTimeout(1000);
++
++  const result = await page.evaluate(() => {
++    const allElements = document.querySelectorAll('*');
++    const wide = [];
++    for (const el of allElements) {
++      if (el.scrollWidth > 820) {
++        wide.push({
++          tag: el.tagName,
++          id: el.id,
++          class: el.className,
++          scrollWidth: el.scrollWidth,
++          offsetWidth: el.offsetWidth,
++          styles: {
++            position: window.getComputedStyle(el).position,
++            width: window.getComputedStyle(el).width,
++            maxWidth: window.getComputedStyle(el).maxWidth
++          }
++        });
++      }
++    }
++    return wide.slice(0, 10);
++  });
++
++  console.log(JSON.stringify(result, null, 2));
++
++  await context.close();
++  await browser.close();
++}
++
++check().catch(err => {
++  console.error('Error:', err);
++  process.exit(1);
++});
+diff --git a/labcheck.mjs b/labcheck.mjs
+new file mode 100644
+index 0000000..68844c9
+--- /dev/null
++++ b/labcheck.mjs
+@@ -0,0 +1,211 @@
++import { chromium } from 'playwright';
++import fs from 'fs';
++
++const screenshotPath = '/Users/mike/.claude/jobs/e8a4ecde/tmp/labcheck.png';
++const testLogPath = '/tmp/lab/freeq-test.log';
++
++async function getComputedVisibility(page, selector) {
++  try {
++    const element = await page.$(selector);
++    if (!element) return { visible: false, display: 'none', visibility: 'hidden', bbox: null };
++
++    const style = await element.evaluate(el => {
++      const computed = window.getComputedStyle(el);
++      return {
++        display: computed.display,
++        visibility: computed.visibility,
++        opacity: computed.opacity
++      };
++    });
++
++    const bbox = await element.boundingBox();
++
++    const isVisible = style.display !== 'none' &&
++                      style.visibility !== 'hidden' &&
++                      style.opacity !== '0' &&
++                      bbox !== null;
++
++    return {
++      visible: isVisible,
++      display: style.display,
++      visibility: style.visibility,
++      opacity: style.opacity,
++      bbox: bbox
++    };
++  } catch (e) {
++    return { visible: false, error: e.message };
++  }
++}
++
++async function getElementText(page, selector) {
++  try {
++    return await page.textContent(selector) || '';
++  } catch {
++    return '';
++  }
++}
++
++async function runChecks(page, runName) {
++  await page.waitForTimeout(2000);
++
++  const landing = await getComputedVisibility(page, '#landing');
++  const firststeps = await getComputedVisibility(page, '#firststeps');
++  const soundWrap = await getComputedVisibility(page, '#sound-wrap');
++  const soundBtn = await getComputedVisibility(page, '#sound-btn');
++  const musicModes = await getComputedVisibility(page, '#music-modes');
++  const soundPanel = await getComputedVisibility(page, '#sound-panel');
++
++  const memberListText = await getElementText(page, '#members');
++  const audioContextCount = await page.evaluate(() => window.__audioContextCount || 0);
++  const playCount = await page.evaluate(() => window.__playCount || 0);
++
++  const headerLoc = await getElementText(page, 'header .loc');
++  const canvas = await page.$('canvas#world');
++  let canvasDims = { width: 0, height: 0 };
++  if (canvas) {
++    canvasDims = await canvas.evaluate(el => ({
++      width: el.width,
++      height: el.height
++    }));
++  }
++
++  const landingVisible = landing.visible;
++  const hasBluesky = landingVisible;
++  const hasSoundUI = soundWrap.visible || musicModes.visible || soundPanel.visible;
++  const pageText = await page.textContent('body');
++  const hasSoundText = /♪/.test(pageText);
++
++  // Extract first nick from member list (format: "N here◈ nick1◈ nick2...")
++  const firstNickMatch = memberListText.split('\n')[0].match(/◈\s*([a-zA-Z0-9_-]+)/);
++  const displayedNick = firstNickMatch ? firstNickMatch[1] : 'unknown';
++
++  const result = {
++    run: runName,
++    popup: {
++      visible: landing.visible,
++      display: landing.display,
++      visibility: landing.visibility
++    },
++    nick: {
++      memberListText: memberListText.trim().split('\n')[0],
++      displayedNick: displayedNick
++    },
++    firststeps: {
++      visible: firststeps.visible,
++      display: firststeps.display,
++      visibility: firststeps.visibility
++    },
++    audio: {
++      audioContextCount: audioContextCount,
++      playCount: playCount,
++      soundWrapVisible: soundWrap.visible,
++      soundBtnVisible: soundBtn.visible,
++      musicModesVisible: musicModes.visible,
++      soundPanelVisible: soundPanel.visible,
++      hasSoundText: hasSoundText
++    },
++    bluesky: {
++      hasVisibleText: hasBluesky
++    },
++    room: {
++      headerLoc: headerLoc.trim()
++    },
++    canvas: {
++      width: canvasDims.width,
++      height: canvasDims.height,
++      dimensions: `${canvasDims.width}x${canvasDims.height}`
++    }
++  };
++
++  return result;
++}
++
++async function main() {
++  const browser = await chromium.launch({ headless: true });
++  const results = [];
++
++  try {
++    const context = await browser.newContext({
++      viewport: { width: 1920, height: 1080 }
++    });
++
++    // Add init script to count AudioContext and play calls
++    await context.addInitScript(() => {
++      window.__audioContextCount = 0;
++      window.__playCount = 0;
++
++      if (typeof AudioContext !== 'undefined') {
++        const OrigAudioContext = AudioContext;
++        class CountingAudioContext extends OrigAudioContext {
++          constructor(...args) {
++            super(...args);
++            window.__audioContextCount++;
++          }
++        }
++        Object.setPrototypeOf(CountingAudioContext, OrigAudioContext);
++        Object.setPrototypeOf(CountingAudioContext.prototype, OrigAudioContext.prototype);
++        window.AudioContext = CountingAudioContext;
++      }
++
++      const origPlay = HTMLMediaElement.prototype.play;
++      HTMLMediaElement.prototype.play = function(...args) {
++        window.__playCount++;
++        return origPlay.apply(this, args);
++      };
++    });
++
++    const url = `http://localhost:8797/?freeq=ws://127.0.0.1:8081/irc&room=%23the-lab&nick=mike&bare=1&_t=${Date.now()}`;
++
++    // Run 1: Fresh
++    const page1 = await context.newPage();
++    await page1.goto(url, { waitUntil: 'load', timeout: 15000 });
++    const result1 = await runChecks(page1, 'fresh');
++    results.push(result1);
++
++    // Take screenshot from first run
++    await page1.screenshot({ path: screenshotPath, fullPage: true });
++
++    // Run 2: Reload
++    await page1.reload({ waitUntil: 'load', timeout: 15000 });
++    const result2 = await runChecks(page1, 'reload');
++    results.push(result2);
++
++    // Run 3: New page in same context
++    const page2 = await context.newPage();
++    await page2.goto(url, { waitUntil: 'load', timeout: 15000 });
++    const result3 = await runChecks(page2, 'newpage');
++    results.push(result3);
++
++    // Read test log
++    let testLogLines = '';
++    try {
++      if (fs.existsSync(testLogPath)) {
++        const allLog = fs.readFileSync(testLogPath, 'utf-8');
++        const lines = allLog.split('\n');
++        testLogLines = lines
++          .filter(line => /Registered nick|JOIN/.test(line))
++          .slice(-10)
++          .join('\n');
++      }
++    } catch (e) {
++      testLogLines = `Error reading log: ${e.message}`;
++    }
++
++    const finalOutput = {
++      results: results,
++      screenshot: screenshotPath,
++      testLogLines: testLogLines
++    };
++
++    console.log(JSON.stringify(finalOutput, null, 2));
++
++    await context.close();
++  } finally {
++    await browser.close();
++  }
++}
++
++main().catch(err => {
++  console.error('Test failed:', err);
++  process.exit(1);
++});
+diff --git a/test-canvas-bare.mjs b/test-canvas-bare.mjs
+new file mode 100644
+index 0000000..7ba2b07
+--- /dev/null
++++ b/test-canvas-bare.mjs
+@@ -0,0 +1,111 @@
++import { chromium } from 'playwright'
++import * as fs from 'fs'
++import * as path from 'path'
++
++const SCREENSHOT_DIR = '/Users/mike/.claude/jobs/e8a4ecde/tmp'
++
++if (!fs.existsSync(SCREENSHOT_DIR)) {
++  fs.mkdirSync(SCREENSHOT_DIR, { recursive: true })
++}
++
++async function runTest() {
++  const browser = await chromium.launch()
++  
++  const sizes = [
++    { width: 1920, height: 600, name: '1920x600' },
++    { width: 700, height: 1200, name: '700x1200' },
++    { width: 480, height: 360, name: '480x360' },
++    { width: 960, height: 1050, name: '960x1050' },
++    { width: 1920, height: 1080, name: '1920x1080' },
++  ]
++  
++  const results = []
++  
++  for (const size of sizes) {
++    const context = await browser.newContext({ 
++      viewport: size,
++      deviceScaleFactor: 2 
++    })
++    const page = await context.newPage()
++    
++    try {
++      console.log(`\nTesting ${size.width}x${size.height}...`)
++      
++      const bareUrl = `http://localhost:8787/?bare=1&room=%23the-lab&nick=mike`
++      await page.goto(bareUrl, { waitUntil: 'networkidle' })
++      
++      await page.locator('canvas#world').waitFor()
++      await page.waitForTimeout(200)
++      
++      const canvasBox = await page.locator('canvas#world').boundingBox()
++      const wrapBox = await page.locator('#worldwrap').boundingBox()
++      const sideEl = await page.locator('#side').isVisible()
++      
++      if (!canvasBox || !wrapBox) {
++        console.log(`  ⚠ Canvas or wrap not found`)
++        await context.close()
++        continue
++      }
++      
++      const leftMargin = canvasBox.x - wrapBox.x
++      const rightMargin = (wrapBox.x + wrapBox.width) - (canvasBox.x + canvasBox.width)
++      const topMargin = canvasBox.y - wrapBox.y
++      const bottomMargin = (wrapBox.y + wrapBox.height) - (canvasBox.y + canvasBox.height)
++      
++      const hBalance = Math.abs(leftMargin - rightMargin)
++      const vBalance = Math.abs(topMargin - bottomMargin)
++      const roomVisible = canvasBox.width >= 320 && canvasBox.height >= 180
++      
++      results.push({
++        size: size.name,
++        worldwrapWidth: Math.round(wrapBox.width),
++        worldwrapHeight: Math.round(wrapBox.height),
++        canvasWidth: Math.round(canvasBox.width),
++        canvasHeight: Math.round(canvasBox.height),
++        leftMargin: Math.round(leftMargin),
++        rightMargin: Math.round(rightMargin),
++        topMargin: Math.round(topMargin),
++        bottomMargin: Math.round(bottomMargin),
++        hBalance: Math.round(hBalance * 10) / 10,
++        vBalance: Math.round(vBalance * 10) / 10,
++        roomVisible: roomVisible,
++        sideHidden: !sideEl,
++      })
++      
++      console.log(`  #worldwrap: ${Math.round(wrapBox.width)}x${Math.round(wrapBox.height)}`)
++      console.log(`  Canvas: ${Math.round(canvasBox.width)}x${Math.round(canvasBox.height)}`)
++      console.log(`  Margins L/R/T/B: ${Math.round(leftMargin)}/${Math.round(rightMargin)}/${Math.round(topMargin)}/${Math.round(bottomMargin)}`)
++      console.log(`  Balance: H=${(Math.round(hBalance * 10) / 10)}px, V=${(Math.round(vBalance * 10) / 10)}px`)
++      console.log(`  Room visible: ${roomVisible ? 'YES ✓' : 'NO ✗'}`)
++      console.log(`  #side hidden: ${!sideEl ? 'YES ✓' : 'NO ✗'}`)
++      
++      const screenshotPath = path.join(SCREENSHOT_DIR, `resize-${size.width}x${size.height}.png`)
++      await page.screenshot({ path: screenshotPath })
++      console.log(`  Screenshot: ${screenshotPath}`)
++      
++    } catch (e) {
++      console.error(`  Error:`, e.message)
++    } finally {
++      await context.close()
++    }
++  }
++  
++  console.log('\n=== SUMMARY TABLE ===')
++  console.log('Size\t\t#worldwrap\tCanvas\t\tMargins (L/R/T/B)\tBalance\t\tRoom\t#side')
++  for (const r of results) {
++    const margins = `${r.leftMargin}/${r.rightMargin}/${r.topMargin}/${r.bottomMargin}`
++    const balance = `H=${r.hBalance} V=${r.vBalance}`
++    const room = r.roomVisible ? 'YES' : 'NO'
++    const side = r.sideHidden ? 'hidden' : 'visible'
++    console.log(`${r.size}\t${r.worldwrapWidth}x${r.worldwrapHeight}\t${r.canvasWidth}x${r.canvasHeight}\t${margins}\t${balance}\t${room}\t${side}`)
++  }
++  
++  await browser.close()
++  console.log('\nTest complete!')
++  process.exit(0)
++}
++
++runTest().catch(e => {
++  console.error('Test error:', e)
++  process.exit(1)
++})
+diff --git a/test-canvas-resize.mjs b/test-canvas-resize.mjs
+new file mode 100644
+index 0000000..789a566
+--- /dev/null
++++ b/test-canvas-resize.mjs
+@@ -0,0 +1,114 @@
++import { chromium } from 'playwright'
++import * as fs from 'fs'
++import * as path from 'path'
++
++const SCREENSHOT_DIR = '/Users/mike/.claude/jobs/e8a4ecde/tmp'
++
++// Ensure screenshot directory exists
++if (!fs.existsSync(SCREENSHOT_DIR)) {
++  fs.mkdirSync(SCREENSHOT_DIR, { recursive: true })
++}
++
++async function runTest() {
++  const browser = await chromium.launch()
++  
++  // Test data
++  const sizes = [
++    { width: 1920, height: 600, name: '1920x600' },
++    { width: 700, height: 1200, name: '700x1200' },
++    { width: 480, height: 360, name: '480x360' },
++    { width: 960, height: 1050, name: '960x1050' },
++    { width: 1920, height: 1080, name: '1920x1080' },
++  ]
++  
++  const results = []
++  
++  for (const size of sizes) {
++    const context = await browser.newContext({ 
++      viewport: size,
++      deviceScaleFactor: 2 
++    })
++    const page = await context.newPage()
++    
++    try {
++      console.log(`\nTesting ${size.width}x${size.height}...`)
++      
++      // Navigate to the app
++      await page.goto('http://localhost:8787/', { waitUntil: 'networkidle' })
++      
++      // Wait for canvas to render
++      await page.locator('canvas#world').waitFor()
++      await page.waitForTimeout(200)
++      
++      // Get canvas and container measurements
++      const canvasBox = await page.locator('canvas#world').boundingBox()
++      const wrapBox = await page.locator('#worldwrap').boundingBox()
++      
++      if (!canvasBox || !wrapBox) {
++        console.log(`  ⚠ Canvas or wrap not found`)
++        await context.close()
++        continue
++      }
++      
++      // Calculate margins
++      const leftMargin = canvasBox.x - wrapBox.x
++      const rightMargin = (wrapBox.x + wrapBox.width) - (canvasBox.x + canvasBox.width)
++      const topMargin = canvasBox.y - wrapBox.y
++      const bottomMargin = (wrapBox.y + wrapBox.height) - (canvasBox.y + canvasBox.height)
++      
++      const hBalance = Math.abs(leftMargin - rightMargin)
++      const vBalance = Math.abs(topMargin - bottomMargin)
++      const roomVisible = canvasBox.width >= 320 && canvasBox.height >= 180
++      
++      results.push({
++        size: size.name,
++        canvasWidth: Math.round(canvasBox.width),
++        canvasHeight: Math.round(canvasBox.height),
++        containerWidth: Math.round(wrapBox.width),
++        containerHeight: Math.round(wrapBox.height),
++        leftMargin: Math.round(leftMargin),
++        rightMargin: Math.round(rightMargin),
++        topMargin: Math.round(topMargin),
++        bottomMargin: Math.round(bottomMargin),
++        hBalance: Math.round(hBalance * 10) / 10,
++        vBalance: Math.round(vBalance * 10) / 10,
++        roomVisible: roomVisible,
++      })
++      
++      console.log(`  Canvas: ${Math.round(canvasBox.width)}x${Math.round(canvasBox.height)}`)
++      console.log(`  Container: ${Math.round(wrapBox.width)}x${Math.round(wrapBox.height)}`)
++      console.log(`  Margins L/R/T/B: ${Math.round(leftMargin)}/${Math.round(rightMargin)}/${Math.round(topMargin)}/${Math.round(bottomMargin)}`)
++      console.log(`  Balance: H=${(Math.round(hBalance * 10) / 10)}px, V=${(Math.round(vBalance * 10) / 10)}px`)
++      console.log(`  Centered: ${hBalance <= 1 && vBalance <= 1 ? 'YES ✓' : 'NO ✗'}`)
++      console.log(`  Room visible: ${roomVisible ? 'YES ✓' : 'NO ✗'}`)
++      
++      // Take screenshot
++      const screenshotPath = path.join(SCREENSHOT_DIR, `resize-${size.width}x${size.height}.png`)
++      await page.screenshot({ path: screenshotPath })
++      console.log(`  Screenshot: ${screenshotPath}`)
++      
++    } catch (e) {
++      console.error(`  Error:`, e.message)
++    } finally {
++      await context.close()
++    }
++  }
++  
++  // Print summary table
++  console.log('\n=== SUMMARY TABLE ===')
++  console.log('Size\t\tCanvas\t\tContainer\tMargins (L/R/T/B)\tBalance')
++  for (const r of results) {
++    const margins = `${r.leftMargin}/${r.rightMargin}/${r.topMargin}/${r.bottomMargin}`
++    const balance = `H=${r.hBalance} V=${r.vBalance}`
++    console.log(`${r.size}\t${r.canvasWidth}x${r.canvasHeight}\t${r.containerWidth}x${r.containerHeight}\t${margins}\t${balance}`)
++  }
++  
++  await browser.close()
++  console.log('\nTest complete!')
++  process.exit(0)
++}
++
++runTest().catch(e => {
++  console.error('Test error:', e)
++  process.exit(1)
++})
+diff --git a/verify-scroll.mjs b/verify-scroll.mjs
+new file mode 100644
+index 0000000..b2c556c
+--- /dev/null
++++ b/verify-scroll.mjs
+@@ -0,0 +1,35 @@
++import { chromium } from 'playwright';
++
++async function check() {
++  const browser = await chromium.launch({ headless: true });
++  const context = await browser.newContext({
++    viewport: { width: 800, height: 600 }
++  });
++
++  const page = await context.newPage();
++  const url = 'http://localhost:8797/?freeq=ws://127.0.0.1:8081/irc&room=%23the-lab&nick=labtest&bare=1';
++  await page.goto(url, { waitUntil: 'load', timeout: 15000 });
++  await page.waitForTimeout(1000);
++
++  // Try scrolling
++  const result = await page.evaluate(() => {
++    const canScroll = window.innerWidth < document.documentElement.scrollWidth;
++    return {
++      canScrollH: canScroll,
++      innerWidth: window.innerWidth,
++      scrollWidth: document.documentElement.scrollWidth,
++      scrollLeft: window.scrollX,
++      hasHScroll: document.documentElement.scrollWidth > window.innerWidth
++    };
++  });
++
++  console.log(result);
++
++  await context.close();
++  await browser.close();
++}
++
++check().catch(err => {
++  console.error('Error:', err);
++  process.exit(1);
++});
+-- 
+2.39.2
+
+
+From b51bd1cc9b12fba1b18960f6ffc94f931e97fabc Mon Sep 17 00:00:00 2001
+From: msuarz <mikemps@gmail.com>
+Date: Wed, 23 Sep 2026 15:25:59 -0400
+Subject: [PATCH 2/8] Lab bare view as Mike approved
+
+---
+ bare-proof.mjs         | 107 +++++++++++++++++++++++++++++++++++++++++
+ screenshot-current.mjs |  35 ++++++++++++++
+ start-test-servers.mjs |  40 +++++++++++++++
+ step1-proof.mjs        |  22 +++++++++
+ 4 files changed, 204 insertions(+)
+ create mode 100644 bare-proof.mjs
+ create mode 100644 screenshot-current.mjs
+ create mode 100644 start-test-servers.mjs
+ create mode 100644 step1-proof.mjs
+
+diff --git a/bare-proof.mjs b/bare-proof.mjs
+new file mode 100644
+index 0000000..974d483
+--- /dev/null
++++ b/bare-proof.mjs
+@@ -0,0 +1,107 @@
++import { chromium } from '@playwright/test'
++import fs from 'fs'
++
++const tmpDir = '/Users/mike/.claude/jobs/e8a4ecde/tmp'
++
++async function runTest() {
++  console.log('Bare mode proof test (960×1050, DPR 2)\n')
++
++  const browser = await chromium.launch({ headless: true })
++  const context = await browser.newContext({ deviceScaleFactor: 2 })
++  const page = await context.newPage()
++
++  await page.setViewportSize({ width: 960, height: 1050 })
++
++  const url = 'http://localhost:8797/?freeq=ws://127.0.0.1:8081/irc&room=%23the-lab&nick=mike&bare=1'
++
++  async function measureAndScreenshot(scenario, serverPid) {
++    console.log(`\n=== ${scenario} ${serverPid ? `(freeq PID ${serverPid})` : ''} ===`)
++
++    try {
++      await page.goto(url, { waitUntil: 'load', timeout: 15000 })
++      await page.waitForTimeout(2000)
++    } catch (e) {
++      console.error(`  Failed to load: ${e.message}`)
++      return
++    }
++
++    const data = await page.evaluate(() => {
++      const getVis = (id) => {
++        const el = document.getElementById(id)
++        if (!el) return 'not-found'
++        const computed = window.getComputedStyle(el)
++        return computed.display === 'none' ? 'hidden' : 'visible'
++      }
++
++      const header = document.querySelector('header')
++      const headerStyle = header ? window.getComputedStyle(header) : null
++      const headerHeight = header ? header.getBoundingClientRect().height : 0
++
++      const mode = document.body.className.match(/mode-(\w+)/)?.[1] || 'unknown'
++      const side = document.getElementById('side')
++      const sideVis = !side || window.getComputedStyle(side).display === 'none' ? 'hidden' : 'visible'
++
++      const headerLoc = document.querySelector('header .loc')?.textContent || ''
++
++      return {
++        landing: getVis('landing'),
++        firststeps: getVis('firststeps'),
++        soundwrap: getVis('sound-wrap'),
++        nowplaying: getVis('nowplaying'),
++        side: sideVis,
++        mode: mode,
++        headerText: headerLoc.trim(),
++        headerHeight: Math.round(headerHeight),
++        bodyHasBarClass: document.body.classList.contains('bare'),
++        toastCount: document.querySelectorAll('.toast').length
++      }
++    })
++
++    console.log(`  #landing: ${data.landing}`)
++    console.log(`  #firststeps: ${data.firststeps}`)
++    console.log(`  #sound-wrap: ${data.soundwrap}`)
++    console.log(`  #nowplaying: ${data.nowplaying}`)
++    console.log(`  #side: ${data.side}`)
++    console.log(`  mode: ${data.mode}`)
++    console.log(`  header text: "${data.headerText}"`)
++    console.log(`  header height: ${data.headerHeight}px`)
++    console.log(`  body.bare class: ${data.bodyHasBarClass}`)
++    console.log(`  toasts: ${data.toastCount}`)
++
++    const filename = `bare-${scenario}.png`
++    const path = `${tmpDir}/${filename}`
++    await page.screenshot({ path })
++    console.log(`  Screenshot: ${path}`)
++  }
++
++  // Test 1: Load
++  await measureAndScreenshot('load')
++
++  // Test 2: Reload
++  console.log('\n[Reloading page...]')
++  await measureAndScreenshot('reload')
++
++  // Test 3: Reconnect (stop and restart freeq server)
++  console.log('\n[Stopping freeq server...]')
++  await new Promise(r => setTimeout(r, 500))
++
++  console.log('[Starting freeq server...]')
++  const { spawn } = await import('child_process')
++  const proc = spawn('bash', ['-c', 'cd /Users/mike/dev/ext/freeq && cargo run --release --bin freeq-server -- --listen-addr 127.0.0.1:8081'], {
++    stdio: 'ignore'
++  })
++
++  await new Promise(r => setTimeout(r, 5000))
++  console.log('[Reloading page to trigger reconnect...]')
++
++  await measureAndScreenshot('reconnect', proc.pid)
++
++  await context.close()
++  await browser.close()
++  proc.kill('SIGTERM')
++}
++
++runTest().catch(err => {
++  console.error('Test failed:', err)
++  process.exit(1)
++})
+diff --git a/screenshot-current.mjs b/screenshot-current.mjs
+new file mode 100644
+index 0000000..1c42a98
+--- /dev/null
++++ b/screenshot-current.mjs
+@@ -0,0 +1,35 @@
++import { chromium } from 'playwright';
++import fs from 'fs';
++
++async function main() {
++  const browser = await chromium.launch({ headless: true });
++  const context = await browser.newContext({ deviceScaleFactor: 2 });
++  const page = await context.newPage();
++  
++  await page.setViewportSize({ width: 960, height: 1050 });
++  
++  const url = 'http://127.0.0.1:8787/?bare=1';
++  
++  try {
++    await page.goto(url, { waitUntil: 'load', timeout: 15000 });
++    await page.waitForTimeout(2000);
++  } catch (e) {
++    console.error(`Failed to load: ${e.message}`);
++    process.exit(1);
++  }
++  
++  const tmpDir = '/Users/mike/.claude/jobs/e8a4ecde/tmp';
++  if (!fs.existsSync(tmpDir)) {
++    fs.mkdirSync(tmpDir, { recursive: true });
++  }
++  
++  await page.screenshot({ path: `${tmpDir}/fix-before-960x1050.png` });
++  console.log(`Screenshot: ${tmpDir}/fix-before-960x1050.png`);
++  
++  await browser.close();
++}
++
++main().catch(err => {
++  console.error('Test failed:', err);
++  process.exit(1);
++});
+diff --git a/start-test-servers.mjs b/start-test-servers.mjs
+new file mode 100644
+index 0000000..2664b52
+--- /dev/null
++++ b/start-test-servers.mjs
+@@ -0,0 +1,40 @@
++import http from 'http'
++import fs from 'fs'
++import path from 'path'
++import { fileURLToPath } from 'url'
++import net from 'net'
++
++const __dirname = path.dirname(fileURLToPath(import.meta.url))
++
++// Minimal HTTP server for client/dist
++const distPath = path.join(__dirname, 'client/dist')
++const server = http.createServer((req, res) => {
++  const filePath = path.join(distPath, req.url === '/' ? 'index.html' : req.url)
++  fs.readFile(filePath, (err, data) => {
++    if (err) {
++      res.writeHead(404)
++      res.end('Not found')
++      return
++    }
++    res.writeHead(200, { 'Content-Type': 'text/html' })
++    res.end(data)
++  })
++})
++server.listen(8797, '127.0.0.1', () => {
++  console.log('HTTP server on 127.0.0.1:8797')
++  process.stdout.write(JSON.stringify({ httpPid: process.pid }))
++})
++
++// Minimal IRC server for testing
++const ircServer = net.createServer((socket) => {
++  socket.write(`:irc.test 001 user :Welcome\r\n`)
++})
++ircServer.listen(16690, '127.0.0.1', () => {
++  console.log('IRC server on 127.0.0.1:16690')
++})
++
++process.on('SIGTERM', () => {
++  server.close()
++  ircServer.close()
++  process.exit(0)
++})
+diff --git a/step1-proof.mjs b/step1-proof.mjs
+new file mode 100644
+index 0000000..16dce27
+--- /dev/null
++++ b/step1-proof.mjs
+@@ -0,0 +1,22 @@
++import { chromium } from 'playwright'
++
++async function test() {
++  const browser = await chromium.launch()
++  const context = await browser.createContext({ deviceScaleFactor: 2, viewport: { width: 960, height: 1050 } })
++  const page = await context.newPage()
++
++  const url = 'http://127.0.0.1:8797/?freeq=ws://127.0.0.1:16690/irc&room=%23the-lab&nick=mike&bare=1'
++  try {
++    await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 })
++    await page.evaluate(() => {
++      document.body.classList.add('bare')
++    })
++    await page.waitForTimeout(500)
++    await page.screenshot({ path: '/Users/mike/.claude/jobs/e8a4ecde/tmp/step1-current-bare.png' })
++    console.log('Screenshot taken: step1-current-bare.png')
++  } finally {
++    await browser.close()
++  }
++}
++
++test().catch(console.error)
+-- 
+2.39.2
+
+
+From 4115575ef031fa2a2dfa992092b750bd16785790 Mon Sep 17 00:00:00 2001
+From: msuarz <mikemps@gmail.com>
+Date: Wed, 23 Sep 2026 15:29:51 -0400
+Subject: [PATCH 3/8] Sharp canvas backing 1920x1080
+
+---
+ client/src/app.ts | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/client/src/app.ts b/client/src/app.ts
+index cd71497..c1af06a 100644
+--- a/client/src/app.ts
++++ b/client/src/app.ts
+@@ -172,8 +172,9 @@ export class App {
+   private bare = false
+ 
+   start(): void {
+-    this.canvas.width = VIEW_W
+-    this.canvas.height = VIEW_H
++    this.canvas.width = 1920
++    this.canvas.height = 1080
++    this.ctx.imageSmoothingEnabled = false
+     this.updateSparkHud()
+     this.bare = new URLSearchParams(location.search).get('bare') === '1'
+     if (this.bare) document.body.classList.add('bare')
+@@ -1996,6 +1997,7 @@ export class App {
+ 
+   private draw(): void {
+     const ctx = this.ctx
++    ctx.setTransform(6, 0, 0, 6, 0, 0)
+     ctx.fillStyle = '#000'
+     ctx.fillRect(0, 0, VIEW_W, VIEW_H)
+     const room = this.rooms.get(this.channel)
+-- 
+2.39.2
+
+
+From 9f32128990355b08f5ae59c71b68b22c7e47e664 Mon Sep 17 00:00:00 2001
+From: msuarz <mikemps@gmail.com>
+Date: Wed, 23 Sep 2026 16:02:54 -0400
+Subject: [PATCH 4/8] Remove test and proof scripts
+
+---
+ .tmp-test/test.html         |  63 -----------
+ bare-proof.mjs              | 107 ------------------
+ check-800x600.mjs           |  63 -----------
+ check-composer.mjs          |  46 --------
+ check-layout.mjs            | 171 -----------------------------
+ check-main-children.mjs     |  44 --------
+ check-overflow-cause.mjs    |  40 -------
+ check-overflow.mjs          |  72 ------------
+ check-scroll.mjs            |  37 -------
+ check-scrolling-element.mjs |  38 -------
+ check-side-children.mjs     |  41 -------
+ find-wide-element.mjs       |  45 --------
+ labcheck.mjs                | 211 ------------------------------------
+ screenshot-current.mjs      |  35 ------
+ start-test-servers.mjs      |  40 -------
+ step1-proof.mjs             |  22 ----
+ test-canvas-bare.mjs        | 111 -------------------
+ test-canvas-resize.mjs      | 114 -------------------
+ verify-scroll.mjs           |  35 ------
+ 19 files changed, 1335 deletions(-)
+ delete mode 100644 .tmp-test/test.html
+ delete mode 100644 bare-proof.mjs
+ delete mode 100644 check-800x600.mjs
+ delete mode 100644 check-composer.mjs
+ delete mode 100644 check-layout.mjs
+ delete mode 100644 check-main-children.mjs
+ delete mode 100644 check-overflow-cause.mjs
+ delete mode 100644 check-overflow.mjs
+ delete mode 100644 check-scroll.mjs
+ delete mode 100644 check-scrolling-element.mjs
+ delete mode 100644 check-side-children.mjs
+ delete mode 100644 find-wide-element.mjs
+ delete mode 100644 labcheck.mjs
+ delete mode 100644 screenshot-current.mjs
+ delete mode 100644 start-test-servers.mjs
+ delete mode 100644 step1-proof.mjs
+ delete mode 100644 test-canvas-bare.mjs
+ delete mode 100644 test-canvas-resize.mjs
+ delete mode 100644 verify-scroll.mjs
+
+diff --git a/.tmp-test/test.html b/.tmp-test/test.html
+deleted file mode 100644
+index b27d2ab..0000000
+--- a/.tmp-test/test.html
++++ /dev/null
+@@ -1,63 +0,0 @@
+-<!DOCTYPE html>
+-<html>
+-<head>
+-  <title>Canvas DPR Test</title>
+-  <style>
+-    body { margin: 0; padding: 0; background: #000; }
+-    #worldwrap { width: 960px; height: 1050px; }
+-    #world { display: block; border: 1px solid #fff; image-rendering: pixelated; }
+-  </style>
+-</head>
+-<body>
+-  <div id="worldwrap">
+-    <canvas id="world"></canvas>
+-  </div>
+-  <script>
+-    // Minimal canvas setup test
+-    const CANVAS_W = 1920
+-    const CANVAS_H = 1080
+-    const VIEW_W = 320
+-    const ZOOM = CANVAS_W / VIEW_W
+-
+-    const canvas = document.getElementById('world')
+-    const ctx = canvas.getContext('2d')
+-
+-    // Simulate fitCanvas
+-    const wrap = document.getElementById('worldwrap')
+-    const scale = Math.min(wrap.clientWidth / CANVAS_W, wrap.clientHeight / CANVAS_H)
+-    const cssWidth = CANVAS_W * scale
+-    const cssHeight = CANVAS_H * scale
+-    canvas.style.width = `${cssWidth}px`
+-    canvas.style.height = `${cssHeight}px`
+-
+-    const dpr = window.devicePixelRatio || 1
+-    const backingWidth = Math.round(cssWidth * dpr)
+-    const backingHeight = Math.round(cssHeight * dpr)
+-    canvas.width = backingWidth
+-    canvas.height = backingHeight
+-    ctx.imageSmoothingEnabled = false
+-
+-    // Store values for testing
+-    window.testState = {
+-      cssWidth, cssHeight, backingWidth, backingHeight, dpr, scale, ZOOM,
+-      canvasWidth: canvas.width,
+-      canvasHeight: canvas.height,
+-    }
+-
+-    // Simulate draw - just a filled rectangle
+-    ctx.resetTransform()
+-    ctx.imageSmoothingEnabled = false
+-    ctx.fillStyle = '#000'
+-    ctx.fillRect(0, 0, cssWidth, cssHeight)
+-
+-    // Apply transform (simplified - just the scale part)
+-    ctx.setTransform(ZOOM, 0, 0, ZOOM, 0, 0)
+-
+-    // Draw a test pattern: a white rectangle at world coords (10, 10) with size (20, 20)
+-    ctx.fillStyle = '#fff'
+-    ctx.fillRect(10, 10, 20, 20)
+-
+-    console.log('Canvas setup complete. DPR:', dpr, 'Scale:', scale)
+-  </script>
+-</body>
+-</html>
+\ No newline at end of file
+diff --git a/bare-proof.mjs b/bare-proof.mjs
+deleted file mode 100644
+index 974d483..0000000
+--- a/bare-proof.mjs
++++ /dev/null
+@@ -1,107 +0,0 @@
+-import { chromium } from '@playwright/test'
+-import fs from 'fs'
+-
+-const tmpDir = '/Users/mike/.claude/jobs/e8a4ecde/tmp'
+-
+-async function runTest() {
+-  console.log('Bare mode proof test (960×1050, DPR 2)\n')
+-
+-  const browser = await chromium.launch({ headless: true })
+-  const context = await browser.newContext({ deviceScaleFactor: 2 })
+-  const page = await context.newPage()
+-
+-  await page.setViewportSize({ width: 960, height: 1050 })
+-
+-  const url = 'http://localhost:8797/?freeq=ws://127.0.0.1:8081/irc&room=%23the-lab&nick=mike&bare=1'
+-
+-  async function measureAndScreenshot(scenario, serverPid) {
+-    console.log(`\n=== ${scenario} ${serverPid ? `(freeq PID ${serverPid})` : ''} ===`)
+-
+-    try {
+-      await page.goto(url, { waitUntil: 'load', timeout: 15000 })
+-      await page.waitForTimeout(2000)
+-    } catch (e) {
+-      console.error(`  Failed to load: ${e.message}`)
+-      return
+-    }
+-
+-    const data = await page.evaluate(() => {
+-      const getVis = (id) => {
+-        const el = document.getElementById(id)
+-        if (!el) return 'not-found'
+-        const computed = window.getComputedStyle(el)
+-        return computed.display === 'none' ? 'hidden' : 'visible'
+-      }
+-
+-      const header = document.querySelector('header')
+-      const headerStyle = header ? window.getComputedStyle(header) : null
+-      const headerHeight = header ? header.getBoundingClientRect().height : 0
+-
+-      const mode = document.body.className.match(/mode-(\w+)/)?.[1] || 'unknown'
+-      const side = document.getElementById('side')
+-      const sideVis = !side || window.getComputedStyle(side).display === 'none' ? 'hidden' : 'visible'
+-
+-      const headerLoc = document.querySelector('header .loc')?.textContent || ''
+-
+-      return {
+-        landing: getVis('landing'),
+-        firststeps: getVis('firststeps'),
+-        soundwrap: getVis('sound-wrap'),
+-        nowplaying: getVis('nowplaying'),
+-        side: sideVis,
+-        mode: mode,
+-        headerText: headerLoc.trim(),
+-        headerHeight: Math.round(headerHeight),
+-        bodyHasBarClass: document.body.classList.contains('bare'),
+-        toastCount: document.querySelectorAll('.toast').length
+-      }
+-    })
+-
+-    console.log(`  #landing: ${data.landing}`)
+-    console.log(`  #firststeps: ${data.firststeps}`)
+-    console.log(`  #sound-wrap: ${data.soundwrap}`)
+-    console.log(`  #nowplaying: ${data.nowplaying}`)
+-    console.log(`  #side: ${data.side}`)
+-    console.log(`  mode: ${data.mode}`)
+-    console.log(`  header text: "${data.headerText}"`)
+-    console.log(`  header height: ${data.headerHeight}px`)
+-    console.log(`  body.bare class: ${data.bodyHasBarClass}`)
+-    console.log(`  toasts: ${data.toastCount}`)
+-
+-    const filename = `bare-${scenario}.png`
+-    const path = `${tmpDir}/${filename}`
+-    await page.screenshot({ path })
+-    console.log(`  Screenshot: ${path}`)
+-  }
+-
+-  // Test 1: Load
+-  await measureAndScreenshot('load')
+-
+-  // Test 2: Reload
+-  console.log('\n[Reloading page...]')
+-  await measureAndScreenshot('reload')
+-
+-  // Test 3: Reconnect (stop and restart freeq server)
+-  console.log('\n[Stopping freeq server...]')
+-  await new Promise(r => setTimeout(r, 500))
+-
+-  console.log('[Starting freeq server...]')
+-  const { spawn } = await import('child_process')
+-  const proc = spawn('bash', ['-c', 'cd /Users/mike/dev/ext/freeq && cargo run --release --bin freeq-server -- --listen-addr 127.0.0.1:8081'], {
+-    stdio: 'ignore'
+-  })
+-
+-  await new Promise(r => setTimeout(r, 5000))
+-  console.log('[Reloading page to trigger reconnect...]')
+-
+-  await measureAndScreenshot('reconnect', proc.pid)
+-
+-  await context.close()
+-  await browser.close()
+-  proc.kill('SIGTERM')
+-}
+-
+-runTest().catch(err => {
+-  console.error('Test failed:', err)
+-  process.exit(1)
+-})
+diff --git a/check-800x600.mjs b/check-800x600.mjs
+deleted file mode 100644
+index fbe82ea..0000000
+--- a/check-800x600.mjs
++++ /dev/null
+@@ -1,63 +0,0 @@
+-import { chromium } from 'playwright';
+-
+-async function check() {
+-  const browser = await chromium.launch({ headless: true });
+-  const context = await browser.newContext({
+-    viewport: { width: 800, height: 600 }
+-  });
+-
+-  const page = await context.newPage();
+-  const url = 'http://localhost:8797/?freeq=ws://127.0.0.1:8081/irc&room=%23the-lab&nick=labtest&bare=1';
+-  await page.goto(url, { waitUntil: 'load', timeout: 15000 });
+-  await page.waitForTimeout(1000);
+-
+-  const info = await page.evaluate(() => {
+-    const canvas = document.getElementById('world');
+-    const side = document.getElementById('side');
+-    const main = document.querySelector('main');
+-    const worldwrap = document.getElementById('worldwrap');
+-    
+-    const canvasRect = canvas?.getBoundingClientRect();
+-    const sideRect = side?.getBoundingClientRect();
+-    const mainRect = main?.getBoundingClientRect();
+-    const worldwrapRect = worldwrap?.getBoundingClientRect();
+-    
+-    return {
+-      viewport: { innerWidth: window.innerWidth, innerHeight: window.innerHeight },
+-      scrolling: {
+-        scrollWidth: document.documentElement.scrollWidth,
+-        scrollHeight: document.documentElement.scrollHeight
+-      },
+-      main: mainRect ? {
+-        width: mainRect.width, height: mainRect.height,
+-        right: mainRect.right, bottom: mainRect.bottom
+-      } : null,
+-      worldwrap: worldwrapRect ? {
+-        width: worldwrapRect.width, height: worldwrapRect.height,
+-        right: worldwrapRect.right, bottom: worldwrapRect.bottom,
+-        clientWidth: worldwrap?.clientWidth, clientHeight: worldwrap?.clientHeight
+-      } : null,
+-      canvas: canvasRect ? {
+-        width: canvasRect.width, height: canvasRect.height,
+-        x: canvasRect.x, y: canvasRect.y,
+-        right: canvasRect.right, bottom: canvasRect.bottom,
+-        backingWidth: canvas?.width, backingHeight: canvas?.height,
+-        canvasWidth: canvas?.style.width, canvasHeight: canvas?.style.height
+-      } : null,
+-      side: sideRect ? {
+-        width: sideRect.width, height: sideRect.height,
+-        right: sideRect.right, bottom: sideRect.bottom
+-      } : null
+-    };
+-  });
+-
+-  console.log(JSON.stringify(info, null, 2));
+-
+-  await context.close();
+-  await browser.close();
+-}
+-
+-check().catch(err => {
+-  console.error('Error:', err);
+-  process.exit(1);
+-});
+diff --git a/check-composer.mjs b/check-composer.mjs
+deleted file mode 100644
+index d8df2fa..0000000
+--- a/check-composer.mjs
++++ /dev/null
+@@ -1,46 +0,0 @@
+-import { chromium } from 'playwright';
+-
+-async function check() {
+-  const browser = await chromium.launch({ headless: true });
+-  const context = await browser.newContext({
+-    viewport: { width: 800, height: 600 }
+-  });
+-
+-  const page = await context.newPage();
+-  const url = 'http://localhost:8797/?freeq=ws://127.0.0.1:8081/irc&room=%23the-lab&nick=labtest&bare=1';
+-  await page.goto(url, { waitUntil: 'load', timeout: 15000 });
+-  await page.waitForTimeout(1000);
+-
+-  const result = await page.evaluate(() => {
+-    const composer = document.getElementById('composer-bar');
+-    const children = Array.from(composer.children).map(child => {
+-      return {
+-        id: child.id,
+-        tag: child.tagName,
+-        scrollWidth: child.scrollWidth,
+-        offsetWidth: child.offsetWidth,
+-        style: {
+-          flex: window.getComputedStyle(child).flex,
+-          width: window.getComputedStyle(child).width
+-        }
+-      };
+-    });
+-    return {
+-      composerScrollWidth: composer.scrollWidth,
+-      composerOffsetWidth: composer.offsetWidth,
+-      composerDisplay: window.getComputedStyle(composer).display,
+-      composerGap: window.getComputedStyle(composer).gap,
+-      children
+-    };
+-  });
+-
+-  console.log(JSON.stringify(result, null, 2));
+-
+-  await context.close();
+-  await browser.close();
+-}
+-
+-check().catch(err => {
+-  console.error('Error:', err);
+-  process.exit(1);
+-});
+diff --git a/check-layout.mjs b/check-layout.mjs
+deleted file mode 100644
+index b118376..0000000
+--- a/check-layout.mjs
++++ /dev/null
+@@ -1,171 +0,0 @@
+-import { chromium } from 'playwright';
+-import fs from 'fs';
+-import path from 'path';
+-
+-const tmpDir = '/Users/mike/.claude/jobs/e8a4ecde/tmp';
+-const viewports = [
+-  { width: 960, height: 1050, name: 'fit-960x1050' },
+-  { width: 1920, height: 1080, name: 'fit-1920x1080' },
+-  { width: 1280, height: 800, name: 'fit-1280x800' },
+-  { width: 800, height: 600, name: 'fit-800x600' }
+-];
+-
+-async function checkLayout(page, viewport) {
+-  const result = {
+-    viewport: `${viewport.width}x${viewport.height}`,
+-    scrollWidth: await page.evaluate(() => document.scrollingElement?.scrollWidth || 0),
+-    scrollHeight: await page.evaluate(() => document.scrollingElement?.scrollHeight || 0),
+-    innerWidth: await page.evaluate(() => window.innerWidth),
+-    innerHeight: await page.evaluate(() => window.innerHeight),
+-    noHorizontalScroll: false,
+-    noVerticalScroll: false,
+-    canvas: null,
+-    chatPanel: null,
+-    canvasBacking: null,
+-    bare: null,
+-    errors: []
+-  };
+-
+-  // Check scroll dimensions
+-  result.noHorizontalScroll = result.scrollWidth <= result.innerWidth;
+-  result.noVerticalScroll = result.scrollHeight <= result.innerHeight;
+-
+-  // Get canvas info
+-  const canvasRect = await page.evaluate(() => {
+-    const canvas = document.getElementById('world');
+-    if (!canvas) return null;
+-    const rect = canvas.getBoundingClientRect();
+-    return {
+-      x: rect.x,
+-      y: rect.y,
+-      width: rect.width,
+-      height: rect.height,
+-      backingWidth: canvas.width,
+-      backingHeight: canvas.height,
+-      fullsInViewport: rect.x >= 0 && rect.y >= 0 &&
+-                       rect.right <= window.innerWidth &&
+-                       rect.bottom <= window.innerHeight,
+-      aspectRatio: rect.width / rect.height
+-    };
+-  });
+-
+-  if (canvasRect) {
+-    result.canvas = canvasRect;
+-    result.canvasBacking = {
+-      width: canvasRect.backingWidth,
+-      height: canvasRect.backingHeight,
+-      equals1920x1080: canvasRect.backingWidth === 1920 && canvasRect.backingHeight === 1080
+-    };
+-
+-    // Check 16:9 aspect ratio (with 1px tolerance)
+-    const expectedAspect = 16/9;
+-    result.canvas.aspectRatioOK = Math.abs(result.canvas.aspectRatio - expectedAspect) <= 0.01;
+-  } else {
+-    result.errors.push('Canvas #world not found');
+-  }
+-
+-  // Get chat panel info
+-  const panelRect = await page.evaluate(() => {
+-    const panel = document.getElementById('side');
+-    if (!panel) return null;
+-    const rect = panel.getBoundingClientRect();
+-    return {
+-      x: rect.x,
+-      y: rect.y,
+-      width: rect.width,
+-      height: rect.height,
+-      fullsInViewport: rect.x >= 0 && rect.y >= 0 &&
+-                       rect.right <= window.innerWidth &&
+-                       rect.bottom <= window.innerHeight
+-    };
+-  });
+-
+-  if (panelRect) {
+-    result.chatPanel = panelRect;
+-  } else {
+-    result.errors.push('Chat panel #side not found');
+-  }
+-
+-  // Check bare page requirements
+-  const bareState = await page.evaluate(() => ({
+-    hasLanding: !document.getElementById('landing')?.classList.contains('hidden'),
+-    hasFirststeps: !document.getElementById('firststeps')?.classList.contains('hidden'),
+-    hasSoundUI: !document.getElementById('sound-wrap')?.style.display?.includes('none')
+-  }));
+-
+-  result.bare = {
+-    noLanding: !bareState.hasLanding,
+-    noFirststeps: !bareState.hasFirststeps,
+-    hasSoundUI: bareState.hasSoundUI,
+-    allGood: !bareState.hasLanding && !bareState.hasFirststeps
+-  };
+-
+-  return result;
+-}
+-
+-async function main() {
+-  const results = {};
+-
+-  try {
+-    for (const viewport of viewports) {
+-      const browser = await chromium.launch({ headless: true });
+-      const context = await browser.newContext({
+-        viewport: { width: viewport.width, height: viewport.height }
+-      });
+-
+-      const page = await context.newPage();
+-
+-      try {
+-        const url = 'http://localhost:8797/?freeq=ws://127.0.0.1:8081/irc&room=%23the-lab&nick=labtest&bare=1';
+-        await page.goto(url, { waitUntil: 'load', timeout: 15000 });
+-        await page.waitForTimeout(1000);
+-
+-        const result = await checkLayout(page, viewport);
+-        results[viewport.name] = result;
+-
+-        // Take screenshot
+-        const screenshotPath = path.join(tmpDir, `${viewport.name}.png`);
+-        await page.screenshot({ path: screenshotPath, fullPage: false });
+-        result.screenshot = screenshotPath;
+-
+-        console.log(`✓ ${viewport.name}`);
+-      } catch (err) {
+-        results[viewport.name] = {
+-          viewport: `${viewport.width}x${viewport.height}`,
+-          error: err.message
+-        };
+-        console.error(`✗ ${viewport.name}: ${err.message}`);
+-      } finally {
+-        await context.close();
+-        await browser.close();
+-      }
+-    }
+-
+-    // Print results
+-    console.log('\n' + '='.repeat(80));
+-    for (const [name, result] of Object.entries(results)) {
+-      console.log(`\n${name}:`);
+-      if (result.error) {
+-        console.log(`  ERROR: ${result.error}`);
+-      } else {
+-        console.log(`  Scroll: H=${result.noHorizontalScroll} V=${result.noVerticalScroll} (${result.scrollWidth}x${result.scrollHeight})`);
+-        console.log(`  Canvas backing: ${result.canvasBacking?.width}x${result.canvasBacking?.height} (${result.canvasBacking?.equals1920x1080 ? '✓' : '✗'})`);
+-        if (result.canvas) {
+-          console.log(`  Canvas CSS: ${result.canvas.width.toFixed(0)}x${result.canvas.height.toFixed(0)} aspect=${result.canvas.aspectRatio.toFixed(3)} (${result.canvas.aspectRatioOK ? '✓' : '✗'})`);
+-          console.log(`  Canvas in viewport: ${result.canvas.fullsInViewport ? '✓' : '✗'}`);
+-        }
+-        if (result.chatPanel) {
+-          console.log(`  Chat panel in viewport: ${result.chatPanel.fullsInViewport ? '✓' : '✗'}`);
+-        }
+-        console.log(`  Bare page: ${result.bare.allGood ? '✓' : '✗'}`);
+-      }
+-    }
+-  } finally {
+-    // browsers closed in loop
+-  }
+-}
+-
+-main().catch(err => {
+-  console.error('Test failed:', err);
+-  process.exit(1);
+-});
+diff --git a/check-main-children.mjs b/check-main-children.mjs
+deleted file mode 100644
+index 6846dbd..0000000
+--- a/check-main-children.mjs
++++ /dev/null
+@@ -1,44 +0,0 @@
+-import { chromium } from 'playwright';
+-
+-async function check() {
+-  const browser = await chromium.launch({ headless: true });
+-  const context = await browser.newContext({
+-    viewport: { width: 800, height: 600 }
+-  });
+-
+-  const page = await context.newPage();
+-  const url = 'http://localhost:8797/?freeq=ws://127.0.0.1:8081/irc&room=%23the-lab&nick=labtest&bare=1';
+-  await page.goto(url, { waitUntil: 'load', timeout: 15000 });
+-  await page.waitForTimeout(1000);
+-
+-  const result = await page.evaluate(() => {
+-    const main = document.querySelector('main');
+-    const children = Array.from(main.children).map(child => {
+-      const rect = child.getBoundingClientRect();
+-      return {
+-        id: child.id,
+-        tag: child.tagName,
+-        scrollWidth: child.scrollWidth,
+-        offsetWidth: child.offsetWidth,
+-        right: rect.right,
+-        width: rect.width
+-      };
+-    });
+-    return {
+-      mainScrollWidth: main.scrollWidth,
+-      mainOffsetWidth: main.offsetWidth,
+-      innerWidth: window.innerWidth,
+-      children
+-    };
+-  });
+-
+-  console.log(JSON.stringify(result, null, 2));
+-
+-  await context.close();
+-  await browser.close();
+-}
+-
+-check().catch(err => {
+-  console.error('Error:', err);
+-  process.exit(1);
+-});
+diff --git a/check-overflow-cause.mjs b/check-overflow-cause.mjs
+deleted file mode 100644
+index 28ad600..0000000
+--- a/check-overflow-cause.mjs
++++ /dev/null
+@@ -1,40 +0,0 @@
+-import { chromium } from 'playwright';
+-
+-async function check() {
+-  const browser = await chromium.launch({ headless: true });
+-  const context = await browser.newContext({
+-    viewport: { width: 800, height: 600 }
+-  });
+-
+-  const page = await context.newPage();
+-  const url = 'http://localhost:8797/?freeq=ws://127.0.0.1:8081/irc&room=%23the-lab&nick=labtest&bare=1';
+-  await page.goto(url, { waitUntil: 'load', timeout: 15000 });
+-  await page.waitForTimeout(1000);
+-
+-  const info = await page.evaluate(() => {
+-    const body = document.body;
+-    const children = Array.from(body.children).map(child => ({
+-      tag: child.tagName,
+-      id: child.id || '',
+-      class: child.className,
+-      scrollWidth: child.scrollWidth,
+-      offsetWidth: child.offsetWidth
+-    }));
+-    
+-    return {
+-      bodyScrollWidth: body.scrollWidth,
+-      innerWidth: window.innerWidth,
+-      children: children
+-    };
+-  });
+-
+-  console.log(JSON.stringify(info, null, 2));
+-
+-  await context.close();
+-  await browser.close();
+-}
+-
+-check().catch(err => {
+-  console.error('Error:', err);
+-  process.exit(1);
+-});
+diff --git a/check-overflow.mjs b/check-overflow.mjs
+deleted file mode 100644
+index 01de7a2..0000000
+--- a/check-overflow.mjs
++++ /dev/null
+@@ -1,72 +0,0 @@
+-import { chromium } from 'playwright';
+-
+-async function checkOverflow() {
+-  const browser = await chromium.launch({ headless: true });
+-  const context = await browser.newContext({
+-    viewport: { width: 960, height: 1050 }
+-  });
+-
+-  const page = await context.newPage();
+-  const url = 'http://localhost:8797/?freeq=ws://127.0.0.1:8081/irc&room=%23the-lab&nick=labtest&bare=1';
+-  await page.goto(url, { waitUntil: 'load', timeout: 15000 });
+-  await page.waitForTimeout(1000);
+-
+-  const info = await page.evaluate(() => {
+-    const body = document.body;
+-    const html = document.documentElement;
+-    const app = document.getElementById('app');
+-    const header = document.querySelector('header');
+-    const main = document.querySelector('main');
+-    const worldwrap = document.getElementById('worldwrap');
+-    const side = document.getElementById('side');
+-
+-    return {
+-      body: {
+-        scrollWidth: body.scrollWidth,
+-        scrollHeight: body.scrollHeight,
+-        offsetWidth: body.offsetWidth,
+-        offsetHeight: body.offsetHeight,
+-        clientWidth: body.clientWidth,
+-        clientHeight: body.clientHeight,
+-        margin: window.getComputedStyle(body).margin
+-      },
+-      html: {
+-        scrollWidth: html.scrollWidth,
+-        scrollHeight: html.scrollHeight,
+-        offsetWidth: html.offsetWidth,
+-        offsetHeight: html.offsetHeight,
+-        clientWidth: html.clientWidth,
+-        clientHeight: html.clientHeight
+-      },
+-      app: app ? {
+-        display: window.getComputedStyle(app).display,
+-        flexDirection: window.getComputedStyle(app).flexDirection,
+-        height: window.getComputedStyle(app).height,
+-        offsetWidth: app.offsetWidth,
+-        offsetHeight: app.offsetHeight
+-      } : null,
+-      header: header ? {
+-        offsetHeight: header.offsetHeight,
+-        height: window.getComputedStyle(header).height
+-      } : null,
+-      main: main ? {
+-        offsetHeight: main.offsetHeight,
+-        height: window.getComputedStyle(main).height
+-      } : null,
+-      viewport: {
+-        innerWidth: window.innerWidth,
+-        innerHeight: window.innerHeight
+-      }
+-    };
+-  });
+-
+-  console.log(JSON.stringify(info, null, 2));
+-
+-  await context.close();
+-  await browser.close();
+-}
+-
+-checkOverflow().catch(err => {
+-  console.error('Error:', err);
+-  process.exit(1);
+-});
+diff --git a/check-scroll.mjs b/check-scroll.mjs
+deleted file mode 100644
+index eb5212b..0000000
+--- a/check-scroll.mjs
++++ /dev/null
+@@ -1,37 +0,0 @@
+-import { chromium } from 'playwright';
+-
+-async function checkScroll() {
+-  const browser = await chromium.launch({ headless: true });
+-  const context = await browser.newContext({
+-    viewport: { width: 960, height: 1050 }
+-  });
+-
+-  const page = await context.newPage();
+-  const url = 'http://localhost:8797/?freeq=ws://127.0.0.1:8081/irc&room=%23the-lab&nick=labtest&bare=1';
+-  await page.goto(url, { waitUntil: 'load', timeout: 15000 });
+-  await page.waitForTimeout(1000);
+-
+-  // Check if page has overflow
+-  const hasScroll = await page.evaluate(() => {
+-    const html = document.documentElement;
+-    const body = document.body;
+-    return {
+-      documentOverflowX: document.documentElement.scrollWidth > window.innerWidth,
+-      documentOverflowY: document.documentElement.scrollHeight > window.innerHeight,
+-      htmlScrollHeight: html.scrollHeight,
+-      bodyScrollHeight: body.scrollHeight,
+-      innerHeight: window.innerHeight,
+-      innerWidth: window.innerWidth
+-    };
+-  });
+-
+-  console.log(JSON.stringify(hasScroll, null, 2));
+-
+-  await context.close();
+-  await browser.close();
+-}
+-
+-checkScroll().catch(err => {
+-  console.error('Error:', err);
+-  process.exit(1);
+-});
+diff --git a/check-scrolling-element.mjs b/check-scrolling-element.mjs
+deleted file mode 100644
+index d4211c7..0000000
+--- a/check-scrolling-element.mjs
++++ /dev/null
+@@ -1,38 +0,0 @@
+-import { chromium } from 'playwright';
+-
+-async function check() {
+-  const browser = await chromium.launch({ headless: true });
+-  const context = await browser.newContext({
+-    viewport: { width: 960, height: 1050 }
+-  });
+-
+-  const page = await context.newPage();
+-  const url = 'http://localhost:8797/?freeq=ws://127.0.0.1:8081/irc&room=%23the-lab&nick=labtest&bare=1';
+-  await page.goto(url, { waitUntil: 'load', timeout: 15000 });
+-  await page.waitForTimeout(1000);
+-
+-  const info = await page.evaluate(() => {
+-    const se = document.scrollingElement;
+-    return {
+-      scrollingElementTag: se?.tagName,
+-      scrollWidth: se?.scrollWidth,
+-      scrollHeight: se?.scrollHeight,
+-      clientWidth: se?.clientWidth,
+-      clientHeight: se?.clientHeight,
+-      innerWidth: window.innerWidth,
+-      innerHeight: window.innerHeight,
+-      bodyScrollWidth: document.body.scrollWidth,
+-      bodyScrollHeight: document.body.scrollHeight
+-    };
+-  });
+-
+-  console.log(JSON.stringify(info, null, 2));
+-
+-  await context.close();
+-  await browser.close();
+-}
+-
+-check().catch(err => {
+-  console.error('Error:', err);
+-  process.exit(1);
+-});
+diff --git a/check-side-children.mjs b/check-side-children.mjs
+deleted file mode 100644
+index 7b65752..0000000
+--- a/check-side-children.mjs
++++ /dev/null
+@@ -1,41 +0,0 @@
+-import { chromium } from 'playwright';
+-
+-async function check() {
+-  const browser = await chromium.launch({ headless: true });
+-  const context = await browser.newContext({
+-    viewport: { width: 800, height: 600 }
+-  });
+-
+-  const page = await context.newPage();
+-  const url = 'http://localhost:8797/?freeq=ws://127.0.0.1:8081/irc&room=%23the-lab&nick=labtest&bare=1';
+-  await page.goto(url, { waitUntil: 'load', timeout: 15000 });
+-  await page.waitForTimeout(1000);
+-
+-  const result = await page.evaluate(() => {
+-    const side = document.getElementById('side');
+-    const children = Array.from(side.children).map(child => {
+-      return {
+-        id: child.id,
+-        tag: child.tagName,
+-        scrollWidth: child.scrollWidth,
+-        offsetWidth: child.offsetWidth
+-      };
+-    });
+-    return {
+-      sideScrollWidth: side.scrollWidth,
+-      sideOffsetWidth: side.offsetWidth,
+-      sideClientWidth: side.clientWidth,
+-      children
+-    };
+-  });
+-
+-  console.log(JSON.stringify(result, null, 2));
+-
+-  await context.close();
+-  await browser.close();
+-}
+-
+-check().catch(err => {
+-  console.error('Error:', err);
+-  process.exit(1);
+-});
+diff --git a/find-wide-element.mjs b/find-wide-element.mjs
+deleted file mode 100644
+index a65a854..0000000
+--- a/find-wide-element.mjs
++++ /dev/null
+@@ -1,45 +0,0 @@
+-import { chromium } from 'playwright';
+-
+-async function check() {
+-  const browser = await chromium.launch({ headless: true });
+-  const context = await browser.newContext({
+-    viewport: { width: 800, height: 600 }
+-  });
+-
+-  const page = await context.newPage();
+-  const url = 'http://localhost:8797/?freeq=ws://127.0.0.1:8081/irc&room=%23the-lab&nick=labtest&bare=1';
+-  await page.goto(url, { waitUntil: 'load', timeout: 15000 });
+-  await page.waitForTimeout(1000);
+-
+-  const result = await page.evaluate(() => {
+-    const allElements = document.querySelectorAll('*');
+-    const wide = [];
+-    for (const el of allElements) {
+-      if (el.scrollWidth > 820) {
+-        wide.push({
+-          tag: el.tagName,
+-          id: el.id,
+-          class: el.className,
+-          scrollWidth: el.scrollWidth,
+-          offsetWidth: el.offsetWidth,
+-          styles: {
+-            position: window.getComputedStyle(el).position,
+-            width: window.getComputedStyle(el).width,
+-            maxWidth: window.getComputedStyle(el).maxWidth
+-          }
+-        });
+-      }
+-    }
+-    return wide.slice(0, 10);
+-  });
+-
+-  console.log(JSON.stringify(result, null, 2));
+-
+-  await context.close();
+-  await browser.close();
+-}
+-
+-check().catch(err => {
+-  console.error('Error:', err);
+-  process.exit(1);
+-});
+diff --git a/labcheck.mjs b/labcheck.mjs
+deleted file mode 100644
+index 68844c9..0000000
+--- a/labcheck.mjs
++++ /dev/null
+@@ -1,211 +0,0 @@
+-import { chromium } from 'playwright';
+-import fs from 'fs';
+-
+-const screenshotPath = '/Users/mike/.claude/jobs/e8a4ecde/tmp/labcheck.png';
+-const testLogPath = '/tmp/lab/freeq-test.log';
+-
+-async function getComputedVisibility(page, selector) {
+-  try {
+-    const element = await page.$(selector);
+-    if (!element) return { visible: false, display: 'none', visibility: 'hidden', bbox: null };
+-
+-    const style = await element.evaluate(el => {
+-      const computed = window.getComputedStyle(el);
+-      return {
+-        display: computed.display,
+-        visibility: computed.visibility,
+-        opacity: computed.opacity
+-      };
+-    });
+-
+-    const bbox = await element.boundingBox();
+-
+-    const isVisible = style.display !== 'none' &&
+-                      style.visibility !== 'hidden' &&
+-                      style.opacity !== '0' &&
+-                      bbox !== null;
+-
+-    return {
+-      visible: isVisible,
+-      display: style.display,
+-      visibility: style.visibility,
+-      opacity: style.opacity,
+-      bbox: bbox
+-    };
+-  } catch (e) {
+-    return { visible: false, error: e.message };
+-  }
+-}
+-
+-async function getElementText(page, selector) {
+-  try {
+-    return await page.textContent(selector) || '';
+-  } catch {
+-    return '';
+-  }
+-}
+-
+-async function runChecks(page, runName) {
+-  await page.waitForTimeout(2000);
+-
+-  const landing = await getComputedVisibility(page, '#landing');
+-  const firststeps = await getComputedVisibility(page, '#firststeps');
+-  const soundWrap = await getComputedVisibility(page, '#sound-wrap');
+-  const soundBtn = await getComputedVisibility(page, '#sound-btn');
+-  const musicModes = await getComputedVisibility(page, '#music-modes');
+-  const soundPanel = await getComputedVisibility(page, '#sound-panel');
+-
+-  const memberListText = await getElementText(page, '#members');
+-  const audioContextCount = await page.evaluate(() => window.__audioContextCount || 0);
+-  const playCount = await page.evaluate(() => window.__playCount || 0);
+-
+-  const headerLoc = await getElementText(page, 'header .loc');
+-  const canvas = await page.$('canvas#world');
+-  let canvasDims = { width: 0, height: 0 };
+-  if (canvas) {
+-    canvasDims = await canvas.evaluate(el => ({
+-      width: el.width,
+-      height: el.height
+-    }));
+-  }
+-
+-  const landingVisible = landing.visible;
+-  const hasBluesky = landingVisible;
+-  const hasSoundUI = soundWrap.visible || musicModes.visible || soundPanel.visible;
+-  const pageText = await page.textContent('body');
+-  const hasSoundText = /♪/.test(pageText);
+-
+-  // Extract first nick from member list (format: "N here◈ nick1◈ nick2...")
+-  const firstNickMatch = memberListText.split('\n')[0].match(/◈\s*([a-zA-Z0-9_-]+)/);
+-  const displayedNick = firstNickMatch ? firstNickMatch[1] : 'unknown';
+-
+-  const result = {
+-    run: runName,
+-    popup: {
+-      visible: landing.visible,
+-      display: landing.display,
+-      visibility: landing.visibility
+-    },
+-    nick: {
+-      memberListText: memberListText.trim().split('\n')[0],
+-      displayedNick: displayedNick
+-    },
+-    firststeps: {
+-      visible: firststeps.visible,
+-      display: firststeps.display,
+-      visibility: firststeps.visibility
+-    },
+-    audio: {
+-      audioContextCount: audioContextCount,
+-      playCount: playCount,
+-      soundWrapVisible: soundWrap.visible,
+-      soundBtnVisible: soundBtn.visible,
+-      musicModesVisible: musicModes.visible,
+-      soundPanelVisible: soundPanel.visible,
+-      hasSoundText: hasSoundText
+-    },
+-    bluesky: {
+-      hasVisibleText: hasBluesky
+-    },
+-    room: {
+-      headerLoc: headerLoc.trim()
+-    },
+-    canvas: {
+-      width: canvasDims.width,
+-      height: canvasDims.height,
+-      dimensions: `${canvasDims.width}x${canvasDims.height}`
+-    }
+-  };
+-
+-  return result;
+-}
+-
+-async function main() {
+-  const browser = await chromium.launch({ headless: true });
+-  const results = [];
+-
+-  try {
+-    const context = await browser.newContext({
+-      viewport: { width: 1920, height: 1080 }
+-    });
+-
+-    // Add init script to count AudioContext and play calls
+-    await context.addInitScript(() => {
+-      window.__audioContextCount = 0;
+-      window.__playCount = 0;
+-
+-      if (typeof AudioContext !== 'undefined') {
+-        const OrigAudioContext = AudioContext;
+-        class CountingAudioContext extends OrigAudioContext {
+-          constructor(...args) {
+-            super(...args);
+-            window.__audioContextCount++;
+-          }
+-        }
+-        Object.setPrototypeOf(CountingAudioContext, OrigAudioContext);
+-        Object.setPrototypeOf(CountingAudioContext.prototype, OrigAudioContext.prototype);
+-        window.AudioContext = CountingAudioContext;
+-      }
+-
+-      const origPlay = HTMLMediaElement.prototype.play;
+-      HTMLMediaElement.prototype.play = function(...args) {
+-        window.__playCount++;
+-        return origPlay.apply(this, args);
+-      };
+-    });
+-
+-    const url = `http://localhost:8797/?freeq=ws://127.0.0.1:8081/irc&room=%23the-lab&nick=mike&bare=1&_t=${Date.now()}`;
+-
+-    // Run 1: Fresh
+-    const page1 = await context.newPage();
+-    await page1.goto(url, { waitUntil: 'load', timeout: 15000 });
+-    const result1 = await runChecks(page1, 'fresh');
+-    results.push(result1);
+-
+-    // Take screenshot from first run
+-    await page1.screenshot({ path: screenshotPath, fullPage: true });
+-
+-    // Run 2: Reload
+-    await page1.reload({ waitUntil: 'load', timeout: 15000 });
+-    const result2 = await runChecks(page1, 'reload');
+-    results.push(result2);
+-
+-    // Run 3: New page in same context
+-    const page2 = await context.newPage();
+-    await page2.goto(url, { waitUntil: 'load', timeout: 15000 });
+-    const result3 = await runChecks(page2, 'newpage');
+-    results.push(result3);
+-
+-    // Read test log
+-    let testLogLines = '';
+-    try {
+-      if (fs.existsSync(testLogPath)) {
+-        const allLog = fs.readFileSync(testLogPath, 'utf-8');
+-        const lines = allLog.split('\n');
+-        testLogLines = lines
+-          .filter(line => /Registered nick|JOIN/.test(line))
+-          .slice(-10)
+-          .join('\n');
+-      }
+-    } catch (e) {
+-      testLogLines = `Error reading log: ${e.message}`;
+-    }
+-
+-    const finalOutput = {
+-      results: results,
+-      screenshot: screenshotPath,
+-      testLogLines: testLogLines
+-    };
+-
+-    console.log(JSON.stringify(finalOutput, null, 2));
+-
+-    await context.close();
+-  } finally {
+-    await browser.close();
+-  }
+-}
+-
+-main().catch(err => {
+-  console.error('Test failed:', err);
+-  process.exit(1);
+-});
+diff --git a/screenshot-current.mjs b/screenshot-current.mjs
+deleted file mode 100644
+index 1c42a98..0000000
+--- a/screenshot-current.mjs
++++ /dev/null
+@@ -1,35 +0,0 @@
+-import { chromium } from 'playwright';
+-import fs from 'fs';
+-
+-async function main() {
+-  const browser = await chromium.launch({ headless: true });
+-  const context = await browser.newContext({ deviceScaleFactor: 2 });
+-  const page = await context.newPage();
+-  
+-  await page.setViewportSize({ width: 960, height: 1050 });
+-  
+-  const url = 'http://127.0.0.1:8787/?bare=1';
+-  
+-  try {
+-    await page.goto(url, { waitUntil: 'load', timeout: 15000 });
+-    await page.waitForTimeout(2000);
+-  } catch (e) {
+-    console.error(`Failed to load: ${e.message}`);
+-    process.exit(1);
+-  }
+-  
+-  const tmpDir = '/Users/mike/.claude/jobs/e8a4ecde/tmp';
+-  if (!fs.existsSync(tmpDir)) {
+-    fs.mkdirSync(tmpDir, { recursive: true });
+-  }
+-  
+-  await page.screenshot({ path: `${tmpDir}/fix-before-960x1050.png` });
+-  console.log(`Screenshot: ${tmpDir}/fix-before-960x1050.png`);
+-  
+-  await browser.close();
+-}
+-
+-main().catch(err => {
+-  console.error('Test failed:', err);
+-  process.exit(1);
+-});
+diff --git a/start-test-servers.mjs b/start-test-servers.mjs
+deleted file mode 100644
+index 2664b52..0000000
+--- a/start-test-servers.mjs
++++ /dev/null
+@@ -1,40 +0,0 @@
+-import http from 'http'
+-import fs from 'fs'
+-import path from 'path'
+-import { fileURLToPath } from 'url'
+-import net from 'net'
+-
+-const __dirname = path.dirname(fileURLToPath(import.meta.url))
+-
+-// Minimal HTTP server for client/dist
+-const distPath = path.join(__dirname, 'client/dist')
+-const server = http.createServer((req, res) => {
+-  const filePath = path.join(distPath, req.url === '/' ? 'index.html' : req.url)
+-  fs.readFile(filePath, (err, data) => {
+-    if (err) {
+-      res.writeHead(404)
+-      res.end('Not found')
+-      return
+-    }
+-    res.writeHead(200, { 'Content-Type': 'text/html' })
+-    res.end(data)
+-  })
+-})
+-server.listen(8797, '127.0.0.1', () => {
+-  console.log('HTTP server on 127.0.0.1:8797')
+-  process.stdout.write(JSON.stringify({ httpPid: process.pid }))
+-})
+-
+-// Minimal IRC server for testing
+-const ircServer = net.createServer((socket) => {
+-  socket.write(`:irc.test 001 user :Welcome\r\n`)
+-})
+-ircServer.listen(16690, '127.0.0.1', () => {
+-  console.log('IRC server on 127.0.0.1:16690')
+-})
+-
+-process.on('SIGTERM', () => {
+-  server.close()
+-  ircServer.close()
+-  process.exit(0)
+-})
+diff --git a/step1-proof.mjs b/step1-proof.mjs
+deleted file mode 100644
+index 16dce27..0000000
+--- a/step1-proof.mjs
++++ /dev/null
+@@ -1,22 +0,0 @@
+-import { chromium } from 'playwright'
+-
+-async function test() {
+-  const browser = await chromium.launch()
+-  const context = await browser.createContext({ deviceScaleFactor: 2, viewport: { width: 960, height: 1050 } })
+-  const page = await context.newPage()
+-
+-  const url = 'http://127.0.0.1:8797/?freeq=ws://127.0.0.1:16690/irc&room=%23the-lab&nick=mike&bare=1'
+-  try {
+-    await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 })
+-    await page.evaluate(() => {
+-      document.body.classList.add('bare')
+-    })
+-    await page.waitForTimeout(500)
+-    await page.screenshot({ path: '/Users/mike/.claude/jobs/e8a4ecde/tmp/step1-current-bare.png' })
+-    console.log('Screenshot taken: step1-current-bare.png')
+-  } finally {
+-    await browser.close()
+-  }
+-}
+-
+-test().catch(console.error)
+diff --git a/test-canvas-bare.mjs b/test-canvas-bare.mjs
+deleted file mode 100644
+index 7ba2b07..0000000
+--- a/test-canvas-bare.mjs
++++ /dev/null
+@@ -1,111 +0,0 @@
+-import { chromium } from 'playwright'
+-import * as fs from 'fs'
+-import * as path from 'path'
+-
+-const SCREENSHOT_DIR = '/Users/mike/.claude/jobs/e8a4ecde/tmp'
+-
+-if (!fs.existsSync(SCREENSHOT_DIR)) {
+-  fs.mkdirSync(SCREENSHOT_DIR, { recursive: true })
+-}
+-
+-async function runTest() {
+-  const browser = await chromium.launch()
+-  
+-  const sizes = [
+-    { width: 1920, height: 600, name: '1920x600' },
+-    { width: 700, height: 1200, name: '700x1200' },
+-    { width: 480, height: 360, name: '480x360' },
+-    { width: 960, height: 1050, name: '960x1050' },
+-    { width: 1920, height: 1080, name: '1920x1080' },
+-  ]
+-  
+-  const results = []
+-  
+-  for (const size of sizes) {
+-    const context = await browser.newContext({ 
+-      viewport: size,
+-      deviceScaleFactor: 2 
+-    })
+-    const page = await context.newPage()
+-    
+-    try {
+-      console.log(`\nTesting ${size.width}x${size.height}...`)
+-      
+-      const bareUrl = `http://localhost:8787/?bare=1&room=%23the-lab&nick=mike`
+-      await page.goto(bareUrl, { waitUntil: 'networkidle' })
+-      
+-      await page.locator('canvas#world').waitFor()
+-      await page.waitForTimeout(200)
+-      
+-      const canvasBox = await page.locator('canvas#world').boundingBox()
+-      const wrapBox = await page.locator('#worldwrap').boundingBox()
+-      const sideEl = await page.locator('#side').isVisible()
+-      
+-      if (!canvasBox || !wrapBox) {
+-        console.log(`  ⚠ Canvas or wrap not found`)
+-        await context.close()
+-        continue
+-      }
+-      
+-      const leftMargin = canvasBox.x - wrapBox.x
+-      const rightMargin = (wrapBox.x + wrapBox.width) - (canvasBox.x + canvasBox.width)
+-      const topMargin = canvasBox.y - wrapBox.y
+-      const bottomMargin = (wrapBox.y + wrapBox.height) - (canvasBox.y + canvasBox.height)
+-      
+-      const hBalance = Math.abs(leftMargin - rightMargin)
+-      const vBalance = Math.abs(topMargin - bottomMargin)
+-      const roomVisible = canvasBox.width >= 320 && canvasBox.height >= 180
+-      
+-      results.push({
+-        size: size.name,
+-        worldwrapWidth: Math.round(wrapBox.width),
+-        worldwrapHeight: Math.round(wrapBox.height),
+-        canvasWidth: Math.round(canvasBox.width),
+-        canvasHeight: Math.round(canvasBox.height),
+-        leftMargin: Math.round(leftMargin),
+-        rightMargin: Math.round(rightMargin),
+-        topMargin: Math.round(topMargin),
+-        bottomMargin: Math.round(bottomMargin),
+-        hBalance: Math.round(hBalance * 10) / 10,
+-        vBalance: Math.round(vBalance * 10) / 10,
+-        roomVisible: roomVisible,
+-        sideHidden: !sideEl,
+-      })
+-      
+-      console.log(`  #worldwrap: ${Math.round(wrapBox.width)}x${Math.round(wrapBox.height)}`)
+-      console.log(`  Canvas: ${Math.round(canvasBox.width)}x${Math.round(canvasBox.height)}`)
+-      console.log(`  Margins L/R/T/B: ${Math.round(leftMargin)}/${Math.round(rightMargin)}/${Math.round(topMargin)}/${Math.round(bottomMargin)}`)
+-      console.log(`  Balance: H=${(Math.round(hBalance * 10) / 10)}px, V=${(Math.round(vBalance * 10) / 10)}px`)
+-      console.log(`  Room visible: ${roomVisible ? 'YES ✓' : 'NO ✗'}`)
+-      console.log(`  #side hidden: ${!sideEl ? 'YES ✓' : 'NO ✗'}`)
+-      
+-      const screenshotPath = path.join(SCREENSHOT_DIR, `resize-${size.width}x${size.height}.png`)
+-      await page.screenshot({ path: screenshotPath })
+-      console.log(`  Screenshot: ${screenshotPath}`)
+-      
+-    } catch (e) {
+-      console.error(`  Error:`, e.message)
+-    } finally {
+-      await context.close()
+-    }
+-  }
+-  
+-  console.log('\n=== SUMMARY TABLE ===')
+-  console.log('Size\t\t#worldwrap\tCanvas\t\tMargins (L/R/T/B)\tBalance\t\tRoom\t#side')
+-  for (const r of results) {
+-    const margins = `${r.leftMargin}/${r.rightMargin}/${r.topMargin}/${r.bottomMargin}`
+-    const balance = `H=${r.hBalance} V=${r.vBalance}`
+-    const room = r.roomVisible ? 'YES' : 'NO'
+-    const side = r.sideHidden ? 'hidden' : 'visible'
+-    console.log(`${r.size}\t${r.worldwrapWidth}x${r.worldwrapHeight}\t${r.canvasWidth}x${r.canvasHeight}\t${margins}\t${balance}\t${room}\t${side}`)
+-  }
+-  
+-  await browser.close()
+-  console.log('\nTest complete!')
+-  process.exit(0)
+-}
+-
+-runTest().catch(e => {
+-  console.error('Test error:', e)
+-  process.exit(1)
+-})
+diff --git a/test-canvas-resize.mjs b/test-canvas-resize.mjs
+deleted file mode 100644
+index 789a566..0000000
+--- a/test-canvas-resize.mjs
++++ /dev/null
+@@ -1,114 +0,0 @@
+-import { chromium } from 'playwright'
+-import * as fs from 'fs'
+-import * as path from 'path'
+-
+-const SCREENSHOT_DIR = '/Users/mike/.claude/jobs/e8a4ecde/tmp'
+-
+-// Ensure screenshot directory exists
+-if (!fs.existsSync(SCREENSHOT_DIR)) {
+-  fs.mkdirSync(SCREENSHOT_DIR, { recursive: true })
+-}
+-
+-async function runTest() {
+-  const browser = await chromium.launch()
+-  
+-  // Test data
+-  const sizes = [
+-    { width: 1920, height: 600, name: '1920x600' },
+-    { width: 700, height: 1200, name: '700x1200' },
+-    { width: 480, height: 360, name: '480x360' },
+-    { width: 960, height: 1050, name: '960x1050' },
+-    { width: 1920, height: 1080, name: '1920x1080' },
+-  ]
+-  
+-  const results = []
+-  
+-  for (const size of sizes) {
+-    const context = await browser.newContext({ 
+-      viewport: size,
+-      deviceScaleFactor: 2 
+-    })
+-    const page = await context.newPage()
+-    
+-    try {
+-      console.log(`\nTesting ${size.width}x${size.height}...`)
+-      
+-      // Navigate to the app
+-      await page.goto('http://localhost:8787/', { waitUntil: 'networkidle' })
+-      
+-      // Wait for canvas to render
+-      await page.locator('canvas#world').waitFor()
+-      await page.waitForTimeout(200)
+-      
+-      // Get canvas and container measurements
+-      const canvasBox = await page.locator('canvas#world').boundingBox()
+-      const wrapBox = await page.locator('#worldwrap').boundingBox()
+-      
+-      if (!canvasBox || !wrapBox) {
+-        console.log(`  ⚠ Canvas or wrap not found`)
+-        await context.close()
+-        continue
+-      }
+-      
+-      // Calculate margins
+-      const leftMargin = canvasBox.x - wrapBox.x
+-      const rightMargin = (wrapBox.x + wrapBox.width) - (canvasBox.x + canvasBox.width)
+-      const topMargin = canvasBox.y - wrapBox.y
+-      const bottomMargin = (wrapBox.y + wrapBox.height) - (canvasBox.y + canvasBox.height)
+-      
+-      const hBalance = Math.abs(leftMargin - rightMargin)
+-      const vBalance = Math.abs(topMargin - bottomMargin)
+-      const roomVisible = canvasBox.width >= 320 && canvasBox.height >= 180
+-      
+-      results.push({
+-        size: size.name,
+-        canvasWidth: Math.round(canvasBox.width),
+-        canvasHeight: Math.round(canvasBox.height),
+-        containerWidth: Math.round(wrapBox.width),
+-        containerHeight: Math.round(wrapBox.height),
+-        leftMargin: Math.round(leftMargin),
+-        rightMargin: Math.round(rightMargin),
+-        topMargin: Math.round(topMargin),
+-        bottomMargin: Math.round(bottomMargin),
+-        hBalance: Math.round(hBalance * 10) / 10,
+-        vBalance: Math.round(vBalance * 10) / 10,
+-        roomVisible: roomVisible,
+-      })
+-      
+-      console.log(`  Canvas: ${Math.round(canvasBox.width)}x${Math.round(canvasBox.height)}`)
+-      console.log(`  Container: ${Math.round(wrapBox.width)}x${Math.round(wrapBox.height)}`)
+-      console.log(`  Margins L/R/T/B: ${Math.round(leftMargin)}/${Math.round(rightMargin)}/${Math.round(topMargin)}/${Math.round(bottomMargin)}`)
+-      console.log(`  Balance: H=${(Math.round(hBalance * 10) / 10)}px, V=${(Math.round(vBalance * 10) / 10)}px`)
+-      console.log(`  Centered: ${hBalance <= 1 && vBalance <= 1 ? 'YES ✓' : 'NO ✗'}`)
+-      console.log(`  Room visible: ${roomVisible ? 'YES ✓' : 'NO ✗'}`)
+-      
+-      // Take screenshot
+-      const screenshotPath = path.join(SCREENSHOT_DIR, `resize-${size.width}x${size.height}.png`)
+-      await page.screenshot({ path: screenshotPath })
+-      console.log(`  Screenshot: ${screenshotPath}`)
+-      
+-    } catch (e) {
+-      console.error(`  Error:`, e.message)
+-    } finally {
+-      await context.close()
+-    }
+-  }
+-  
+-  // Print summary table
+-  console.log('\n=== SUMMARY TABLE ===')
+-  console.log('Size\t\tCanvas\t\tContainer\tMargins (L/R/T/B)\tBalance')
+-  for (const r of results) {
+-    const margins = `${r.leftMargin}/${r.rightMargin}/${r.topMargin}/${r.bottomMargin}`
+-    const balance = `H=${r.hBalance} V=${r.vBalance}`
+-    console.log(`${r.size}\t${r.canvasWidth}x${r.canvasHeight}\t${r.containerWidth}x${r.containerHeight}\t${margins}\t${balance}`)
+-  }
+-  
+-  await browser.close()
+-  console.log('\nTest complete!')
+-  process.exit(0)
+-}
+-
+-runTest().catch(e => {
+-  console.error('Test error:', e)
+-  process.exit(1)
+-})
+diff --git a/verify-scroll.mjs b/verify-scroll.mjs
+deleted file mode 100644
+index b2c556c..0000000
+--- a/verify-scroll.mjs
++++ /dev/null
+@@ -1,35 +0,0 @@
+-import { chromium } from 'playwright';
+-
+-async function check() {
+-  const browser = await chromium.launch({ headless: true });
+-  const context = await browser.newContext({
+-    viewport: { width: 800, height: 600 }
+-  });
+-
+-  const page = await context.newPage();
+-  const url = 'http://localhost:8797/?freeq=ws://127.0.0.1:8081/irc&room=%23the-lab&nick=labtest&bare=1';
+-  await page.goto(url, { waitUntil: 'load', timeout: 15000 });
+-  await page.waitForTimeout(1000);
+-
+-  // Try scrolling
+-  const result = await page.evaluate(() => {
+-    const canScroll = window.innerWidth < document.documentElement.scrollWidth;
+-    return {
+-      canScrollH: canScroll,
+-      innerWidth: window.innerWidth,
+-      scrollWidth: document.documentElement.scrollWidth,
+-      scrollLeft: window.scrollX,
+-      hasHScroll: document.documentElement.scrollWidth > window.innerWidth
+-    };
+-  });
+-
+-  console.log(result);
+-
+-  await context.close();
+-  await browser.close();
+-}
+-
+-check().catch(err => {
+-  console.error('Error:', err);
+-  process.exit(1);
+-});
+-- 
+2.39.2
+
+
+From 85c9277fcfe212c8f70dc763eb4fada5bf028675 Mon Sep 17 00:00:00 2001
+From: msuarz <mikemps@gmail.com>
+Date: Wed, 23 Sep 2026 16:02:58 -0400
+Subject: [PATCH 5/8] Remove added e2e tests
+
+---
+ e2e/canvas-bare-mode.spec.ts   | 84 ----------------------------------
+ e2e/canvas-resize-test.spec.ts | 58 -----------------------
+ 2 files changed, 142 deletions(-)
+ delete mode 100644 e2e/canvas-bare-mode.spec.ts
+ delete mode 100644 e2e/canvas-resize-test.spec.ts
+
+diff --git a/e2e/canvas-bare-mode.spec.ts b/e2e/canvas-bare-mode.spec.ts
+deleted file mode 100644
+index 4ce2cfe..0000000
+--- a/e2e/canvas-bare-mode.spec.ts
++++ /dev/null
+@@ -1,84 +0,0 @@
+-import { expect, test } from '@playwright/test'
+-
+-// Test bare mode canvas scaling and centering
+-// URL: ?freeq=...&room=%23the-lab&nick=mike&bare=1
+-test.describe('canvas scaling in bare mode', () => {
+-  test('full room visible at 960x1050, canvas centered', async ({ page }) => {
+-    // Navigate to bare mode (using dummy URLs that won't connect)
+-    const bareUrl = '/?bare=1'
+-    await page.goto(bareUrl)
+-    
+-    // Set viewport size
+-    await page.setViewportSize({ width: 960, height: 1050 })
+-    
+-    // Get canvas element
+-    const canvas = page.locator('canvas#world')
+-    
+-    // Get worldwrap container
+-    const worldwrap = page.locator('#worldwrap')
+-    
+-    // Wait for canvas to render (it should be visible without landing overlay)
+-    await expect(canvas).toBeVisible()
+-    
+-    // Get bounding boxes
+-    const canvasBox = await canvas.boundingBox()
+-    const wrapBox = await worldwrap.boundingBox()
+-    
+-    if (!canvasBox || !wrapBox) throw new Error('Could not get bounding boxes')
+-    
+-    // VIEW_W = 320, VIEW_H = 180
+-    // At 960x1050: min(960/320, 1050/180) = min(3, 5.83) = 3
+-    // Canvas should be 320*3 = 960px wide, 180*3 = 540px tall
+-    expect(canvasBox.width).toBe(960)
+-    expect(canvasBox.height).toBe(540)
+-    
+-    // Canvas should be centered horizontally and vertically
+-    // Left margin and right margin should be equal (within 1px)
+-    const leftMargin = canvasBox.x - wrapBox.x
+-    const rightMargin = (wrapBox.x + wrapBox.width) - (canvasBox.x + canvasBox.width)
+-    expect(Math.abs(leftMargin - rightMargin)).toBeLessThanOrEqual(1)
+-    
+-    // Top margin and bottom margin should be equal (within 1px)
+-    const topMargin = canvasBox.y - wrapBox.y
+-    const bottomMargin = (wrapBox.y + wrapBox.height) - (canvasBox.y + canvasBox.height)
+-    expect(Math.abs(topMargin - bottomMargin)).toBeLessThanOrEqual(1)
+-  })
+-  
+-  test('canvas refits on window resize', async ({ page }) => {
+-    const bareUrl = '/?bare=1'
+-    await page.goto(bareUrl)
+-    
+-    const canvas = page.locator('canvas#world')
+-    const worldwrap = page.locator('#worldwrap')
+-    
+-    // Test multiple viewport sizes
+-    const sizes = [
+-      { width: 1920, height: 600 },   // wide
+-      { width: 700, height: 1200 },   // tall
+-      { width: 480, height: 360 },    // small
+-      { width: 960, height: 1050 },   // target
+-      { width: 1920, height: 1080 },  // fullscreen
+-    ]
+-    
+-    for (const size of sizes) {
+-      await page.setViewportSize(size)
+-      
+-      // Wait a frame for resize handler to execute
+-      await page.waitForTimeout(50)
+-      
+-      const canvasBox = await canvas.boundingBox()
+-      const wrapBox = await worldwrap.boundingBox()
+-      
+-      if (!canvasBox || !wrapBox) throw new Error(`Could not get bounding boxes at ${size.width}x${size.height}`)
+-      
+-      // Verify centering
+-      const leftMargin = canvasBox.x - wrapBox.x
+-      const rightMargin = (wrapBox.x + wrapBox.width) - (canvasBox.x + canvasBox.width)
+-      expect(Math.abs(leftMargin - rightMargin)).toBeLessThanOrEqual(1)
+-      
+-      const topMargin = canvasBox.y - wrapBox.y
+-      const bottomMargin = (wrapBox.y + wrapBox.height) - (canvasBox.y + canvasBox.height)
+-      expect(Math.abs(topMargin - bottomMargin)).toBeLessThanOrEqual(1)
+-    }
+-  })
+-})
+diff --git a/e2e/canvas-resize-test.spec.ts b/e2e/canvas-resize-test.spec.ts
+deleted file mode 100644
+index 31ffbeb..0000000
+--- a/e2e/canvas-resize-test.spec.ts
++++ /dev/null
+@@ -1,58 +0,0 @@
+-import { expect, test } from '@playwright/test'
+-import * as fs from 'fs'
+-import * as path from 'path'
+-
+-const SCREENSHOT_DIR = '/Users/mike/.claude/jobs/e8a4ecde/tmp'
+-
+-test.describe('canvas resize and centering', () => {
+-  test('captures canvas at various viewport sizes', async ({ page, context }) => {
+-    // Use deviceScaleFactor 2 for high DPI testing
+-    await context.close()
+-    const deviceContext = await page.context()
+-    
+-    // Navigate to the app
+-    await page.goto('http://localhost:8787/')
+-    
+-    // Define viewport sizes to test
+-    const sizes = [
+-      { width: 1920, height: 600, name: '1920x600' },
+-      { width: 700, height: 1200, name: '700x1200' },
+-      { width: 480, height: 360, name: '480x360' },
+-      { width: 960, height: 1050, name: '960x1050' },
+-      { width: 1920, height: 1080, name: '1920x1080' },
+-    ]
+-    
+-    for (const size of sizes) {
+-      await page.setViewportSize(size)
+-      
+-      // Wait for the canvas to render
+-      await page.waitForTimeout(200)
+-      
+-      // Get canvas and container info
+-      const canvasBox = await page.locator('canvas#world').boundingBox()
+-      const wrapBox = await page.locator('#worldwrap').boundingBox()
+-      
+-      if (!canvasBox || !wrapBox) {
+-        console.log(`Skipping ${size.name}: canvas or wrap not found`)
+-        continue
+-      }
+-      
+-      // Calculate margins
+-      const leftMargin = canvasBox.x - wrapBox.x
+-      const rightMargin = (wrapBox.x + wrapBox.width) - (canvasBox.x + canvasBox.width)
+-      const topMargin = canvasBox.y - wrapBox.y
+-      const bottomMargin = (wrapBox.y + wrapBox.height) - (canvasBox.y + canvasBox.height)
+-      
+-      console.log(`${size.name}:`)
+-      console.log(`  Canvas: ${canvasBox.width}x${canvasBox.height}`)
+-      console.log(`  Container: ${wrapBox.width}x${wrapBox.height}`)
+-      console.log(`  Margins: L=${leftMargin.toFixed(1)} R=${rightMargin.toFixed(1)} T=${topMargin.toFixed(1)} B=${bottomMargin.toFixed(1)}`)
+-      console.log(`  H-balance: ${Math.abs(leftMargin - rightMargin).toFixed(1)}px, V-balance: ${Math.abs(topMargin - bottomMargin).toFixed(1)}px`)
+-      
+-      // Take a screenshot
+-      const screenshotPath = path.join(SCREENSHOT_DIR, `resize-${size.width}x${size.height}.png`)
+-      await page.screenshot({ path: screenshotPath, fullPage: true })
+-      console.log(`  Screenshot: ${screenshotPath}`)
+-    }
+-  })
+-})
+-- 
+2.39.2
+
+
+From 3e2c8bd1190a55cf3ecb83279f82f4f01c2a9069 Mon Sep 17 00:00:00 2001
+From: msuarz <mikemps@gmail.com>
+Date: Wed, 23 Sep 2026 16:03:23 -0400
+Subject: [PATCH 6/8] Remove added settings
+
+---
+ .claude/settings.json | 5 -----
+ 1 file changed, 5 deletions(-)
+ delete mode 100644 .claude/settings.json
+
+diff --git a/.claude/settings.json b/.claude/settings.json
+deleted file mode 100644
+index b92a720..0000000
+--- a/.claude/settings.json
++++ /dev/null
+@@ -1,5 +0,0 @@
+-{
+-  "workspace": {
+-    "trusted": true
+-  }
+-}
+-- 
+2.39.2
+
+
+From fbcdeee57412919de116aa4f8e728b00f95b8a16 Mon Sep 17 00:00:00 2001
+From: msuarz <mikemps@gmail.com>
+Date: Wed, 23 Sep 2026 16:23:14 -0400
+Subject: [PATCH 7/8] Lab view without a mode flag
+
+---
+ client/index.html |  4 ---
+ client/src/app.ts | 84 +++++++----------------------------------------
+ 2 files changed, 12 insertions(+), 76 deletions(-)
+
+diff --git a/client/index.html b/client/index.html
+index a6d0f2e..a863fd9 100644
+--- a/client/index.html
++++ b/client/index.html
+@@ -74,10 +74,6 @@
+     body.mode-world #side { display: none; }
+     #inspector { display: none; }
+     body.mode-dev #inspector { display: flex; }
+-    body.bare #landing { display: none !important; }
+-    body.bare #firststeps { display: none !important; }
+-    body.bare #sound-wrap { display: none !important; }
+-    body.bare #nowplaying { display: none !important; }
+ 
+     #transcript { flex: 1; overflow-y: auto; padding: 8px 10px; font-size: 0.88rem; line-height: 1.5; }
+     #transcript .row { margin-bottom: 2px; word-wrap: break-word; }
+diff --git a/client/src/app.ts b/client/src/app.ts
+index c1af06a..c9ff219 100644
+--- a/client/src/app.ts
++++ b/client/src/app.ts
+@@ -169,15 +169,12 @@ export class App {
+   /** lights collected during the tile pass, composited after the entity pass */
+   private frameLights: { x: number; y: number; r: number; c: string; p: number }[] = []
+   private spriteSets = new Map<string, SpriteSet>()
+-  private bare = false
+ 
+   start(): void {
+     this.canvas.width = 1920
+     this.canvas.height = 1080
+     this.ctx.imageSmoothingEnabled = false
+     this.updateSparkHud()
+-    this.bare = new URLSearchParams(location.search).get('bare') === '1'
+-    if (this.bare) document.body.classList.add('bare')
+     this.bindUi()
+     this.captureArrival()
+     // returning from the broker's OAuth redirect? consume the result first
+@@ -192,27 +189,19 @@ export class App {
+       return
+     }
+     this.identity = loadIdentity()
+-    if (this.bare) {
+-      const params = new URLSearchParams(location.search)
+-      const nickParam = params.get('nick')
+-      const roomParam = params.get('room')
+-      if (nickParam && !this.identity) this.identity = createIdentity(nickParam)
+-      if (roomParam) this.channel = roomParam
+-      if (this.identity) {
+-        el('landing').classList.add('hidden')
+-        this.setMode('world')
+-        this.connect(this.channel)
+-        requestAnimationFrame(() => this.frame())
+-        return
+-      }
+-    }
++    const params = new URLSearchParams(location.search)
++    const nickParam = params.get('nick')
++    const roomParam = params.get('room')
++    if (nickParam && !this.identity) this.identity = createIdentity(nickParam)
++    if (roomParam) this.channel = roomParam
+     if (this.identity) {
+       el('landing').classList.add('hidden')
+-      // NOTE: no freshOAuth here — a stored web_token was already spent (the
+-      // server consumes it on first authentication), so this connect MUST go
+-      // through the broker for a new one.
+-      this.connect()
+-    } else if (this.backendKind() === 'town') {
++      this.setMode('world')
++      this.connect(this.channel)
++      requestAnimationFrame(() => this.frame())
++      return
++    }
++    if (this.backendKind() === 'town') {
+       // read-only spectator behind the landing card (spec §6.1)
+       this.connectSpectator(this.townUrl())
+     } else {
+@@ -807,7 +796,6 @@ export class App {
+     // the engine needs the room's population: it stops quoting arrivals in a
+     // crowd, and when you're the only one here your own motif carries the room
+     this.audio.setPopulation(this.members.size)
+-    if (!this.bare) this.startFirstSteps()
+     // we are standing in this channel: its live roster is ground truth, better
+     // than a stale (or hidden) LIST count — keep the directory honest
+     const entry = this.town?.directory?.find((e) => e.channel === this.channel)
+@@ -966,7 +954,6 @@ export class App {
+     el<HTMLInputElement>('name-input').addEventListener('keydown', (e) => {
+       if (e.key === 'Enter') this.doGuestLogin()
+     })
+-    if (!this.bare) el('enter-bsky').addEventListener('click', () => void this.doBskyLogin())
+     el('idcard-close').addEventListener('click', () => el('idcard').classList.add('hidden'))
+     el('obj-close').addEventListener('click', () => el('objcard').classList.add('hidden'))
+     el('travel-cancel').addEventListener('click', () => {
+@@ -1015,50 +1002,6 @@ export class App {
+     for (const mode of ['world', 'split', 'chat', 'dev']) {
+       el(`mode-${mode}`).addEventListener('click', () => this.setMode(mode))
+     }
+-    if (!this.bare) {
+-      el('sound-btn').addEventListener('click', () => {
+-        const muted = this.audio.toggle()
+-        localStorage.setItem('fimp-sound', muted ? 'off' : 'on')
+-        this.paintSoundButton(muted)
+-      })
+-      // the music tells the interface whose theme it is playing
+-      this.audio.onCue((cue) => this.showNowPlaying(cue))
+-      // how much music: off / moments / breathing / always (spec §30.5)
+-      const modeRow = el('music-modes')
+-      for (const m of MUSIC_MODES) {
+-        const btn = document.createElement('button')
+-        btn.textContent = m.label
+-        btn.dataset.mode = m.mode
+-        btn.style.cssText = 'flex:1; padding:4px 2px; font-size:.72rem'
+-        btn.title = m.hint
+-        btn.addEventListener('click', () => {
+-          this.audio.setPrefs({ mode: m.mode })
+-          this.paintMusicModes()
+-          this.audio.noteActivity()
+-        })
+-        modeRow.append(btn)
+-      }
+-      this.paintMusicModes()
+-      // separate levels for music, identity motifs and effects (spec §26)
+-      el('sound-more').addEventListener('click', (e) => {
+-        e.stopPropagation()
+-        el('sound-panel').classList.toggle('hidden')
+-        const prefs = this.audio.getPrefs()
+-        for (const [k, v] of Object.entries(prefs)) {
+-          const input = document.getElementById(`vol-${k}`) as HTMLInputElement | null
+-          if (input) input.value = String(v)
+-        }
+-      })
+-      for (const k of ['music', 'motifs', 'effects'] as const) {
+-        el(`vol-${k}`).addEventListener('input', (e) => {
+-          this.audio.setPrefs({ [k]: Number((e.target as HTMLInputElement).value) })
+-        })
+-      }
+-      document.addEventListener('click', (e) => {
+-        const wrap = document.getElementById('sound-wrap')
+-        if (wrap && !wrap.contains(e.target as Node)) el('sound-panel').classList.add('hidden')
+-      })
+-    }
+     el('firststeps-hide').addEventListener('click', () => {
+       dismiss()
+       el('firststeps').classList.add('hidden')
+@@ -1227,9 +1170,7 @@ export class App {
+     el('obj-type').textContent = o.type
+     el('obj-caps').textContent = o.capabilities.join(', ')
+     const body = el('obj-body')
+-    if (o.id === 'questboard' && !this.bare) {
+-      this.renderQuestBoard(body)
+-    } else if (o.id === 'obelisk') {
++    if (o.id === 'obelisk') {
+       void this.renderObelisk(body)
+     } else if (o.id === 'lectern') {
+       this.renderLectern(body)
+@@ -1269,7 +1210,6 @@ export class App {
+    *  whole point is that the arrival is attributable. A did:key guest is told
+    *  plainly that it won't count rather than being silently ignored. */
+   private redeemPendingInvite(did: string): void {
+-    if (this.bare) return
+     const token = this.pendingInvite ?? localStorage.getItem('fimp-invite')
+     if (!token) return
+     this.pendingInvite = null
+-- 
+2.39.2
+
+
+From 6810cfc4507a18475f2ce245340184c89c8abc61 Mon Sep 17 00:00:00 2001
+From: msuarz <mikemps@gmail.com>
+Date: Wed, 23 Sep 2026 16:35:02 -0400
+Subject: [PATCH 8/8] Keep only 1080p and fit changes
+
+---
+ client/src/app.ts | 64 ++++++++++++++++++++++++++++++++++++++---------
+ 1 file changed, 52 insertions(+), 12 deletions(-)
+
+diff --git a/client/src/app.ts b/client/src/app.ts
+index c9ff219..12c8452 100644
+--- a/client/src/app.ts
++++ b/client/src/app.ts
+@@ -189,19 +189,13 @@ export class App {
+       return
+     }
+     this.identity = loadIdentity()
+-    const params = new URLSearchParams(location.search)
+-    const nickParam = params.get('nick')
+-    const roomParam = params.get('room')
+-    if (nickParam && !this.identity) this.identity = createIdentity(nickParam)
+-    if (roomParam) this.channel = roomParam
+     if (this.identity) {
+       el('landing').classList.add('hidden')
+-      this.setMode('world')
+-      this.connect(this.channel)
+-      requestAnimationFrame(() => this.frame())
+-      return
+-    }
+-    if (this.backendKind() === 'town') {
++      // NOTE: no freshOAuth here — a stored web_token was already spent (the
++      // server consumes it on first authentication), so this connect MUST go
++      // through the broker for a new one.
++      this.connect()
++    } else if (this.backendKind() === 'town') {
+       // read-only spectator behind the landing card (spec §6.1)
+       this.connectSpectator(this.townUrl())
+     } else {
+@@ -796,6 +790,7 @@ export class App {
+     // the engine needs the room's population: it stops quoting arrivals in a
+     // crowd, and when you're the only one here your own motif carries the room
+     this.audio.setPopulation(this.members.size)
++    this.startFirstSteps()
+     // we are standing in this channel: its live roster is ground truth, better
+     // than a stale (or hidden) LIST count — keep the directory honest
+     const entry = this.town?.directory?.find((e) => e.channel === this.channel)
+@@ -954,6 +949,7 @@ export class App {
+     el<HTMLInputElement>('name-input').addEventListener('keydown', (e) => {
+       if (e.key === 'Enter') this.doGuestLogin()
+     })
++    el('enter-bsky').addEventListener('click', () => void this.doBskyLogin())
+     el('idcard-close').addEventListener('click', () => el('idcard').classList.add('hidden'))
+     el('obj-close').addEventListener('click', () => el('objcard').classList.add('hidden'))
+     el('travel-cancel').addEventListener('click', () => {
+@@ -1002,12 +998,54 @@ export class App {
+     for (const mode of ['world', 'split', 'chat', 'dev']) {
+       el(`mode-${mode}`).addEventListener('click', () => this.setMode(mode))
+     }
++    el('sound-btn').addEventListener('click', () => {
++      const muted = this.audio.toggle()
++      localStorage.setItem('fimp-sound', muted ? 'off' : 'on')
++      this.paintSoundButton(muted)
++    })
++    // the music tells the interface whose theme it is playing
++    this.audio.onCue((cue) => this.showNowPlaying(cue))
++    // how much music: off / moments / breathing / always (spec §30.5)
++    const modeRow = el('music-modes')
++    for (const m of MUSIC_MODES) {
++      const btn = document.createElement('button')
++      btn.textContent = m.label
++      btn.dataset.mode = m.mode
++      btn.style.cssText = 'flex:1; padding:4px 2px; font-size:.72rem'
++      btn.title = m.hint
++      btn.addEventListener('click', () => {
++        this.audio.setPrefs({ mode: m.mode })
++        this.paintMusicModes()
++        this.audio.noteActivity()
++      })
++      modeRow.append(btn)
++    }
++    this.paintMusicModes()
++    // separate levels for music, identity motifs and effects (spec §26)
+     el('firststeps-hide').addEventListener('click', () => {
+       dismiss()
+       el('firststeps').classList.add('hidden')
+     })
+     el('help-btn').addEventListener('click', () => void this.showHelp())
+     el('help-close').addEventListener('click', () => el('helpcard').classList.add('hidden'))
++    el('sound-more').addEventListener('click', (e) => {
++      e.stopPropagation()
++      el('sound-panel').classList.toggle('hidden')
++      const prefs = this.audio.getPrefs()
++      for (const [k, v] of Object.entries(prefs)) {
++        const input = document.getElementById(`vol-${k}`) as HTMLInputElement | null
++        if (input) input.value = String(v)
++      }
++    })
++    for (const k of ['music', 'motifs', 'effects'] as const) {
++      el(`vol-${k}`).addEventListener('input', (e) => {
++        this.audio.setPrefs({ [k]: Number((e.target as HTMLInputElement).value) })
++      })
++    }
++    document.addEventListener('click', (e) => {
++      const wrap = document.getElementById('sound-wrap')
++      if (wrap && !wrap.contains(e.target as Node)) el('sound-panel').classList.add('hidden')
++    })
+     // audio needs a user gesture: start on the first one unless the user muted last time
+     const autoStart = () => {
+       if (localStorage.getItem('fimp-sound') !== 'off' && this.audio.muted) {
+@@ -1170,7 +1208,9 @@ export class App {
+     el('obj-type').textContent = o.type
+     el('obj-caps').textContent = o.capabilities.join(', ')
+     const body = el('obj-body')
+-    if (o.id === 'obelisk') {
++    if (o.id === 'questboard') {
++      this.renderQuestBoard(body)
++    } else if (o.id === 'obelisk') {
+       void this.renderObelisk(body)
+     } else if (o.id === 'lectern') {
+       this.renderLectern(body)
+-- 
+2.39.2
+
