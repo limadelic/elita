@@ -23,7 +23,7 @@ defmodule Freeq.GreetTest do
   end
 
   defp word(context) do
-    context.test |> Atom.to_string()
+    context.test |> to_string()
   end
 
   defp login(sock) do
