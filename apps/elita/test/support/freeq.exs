@@ -8,7 +8,8 @@ defmodule Freeq do
   import String, only: [split: 2, trim: 1]
   import Enum, only: [reject: 2, map: 2, join: 2]
   import File, only: [read: 1]
-  import System, only: [pid: 0, get_env: 2]
+  import Path, only: [expand: 1]
+  import System, only: [pid: 0]
 
   def spawn(agent) do
     spawn(agent, [agent])
@@ -89,18 +90,16 @@ defmodule Freeq do
   defp delegations(agent, sock) do
     pattern = compile!("^:#{escape(agent)}!\\S+ PRIVMSG #the-lab :(.*)")
 
-    read_log(agent)
+    log(agent)
     |> split("\n")
     |> reject(&blank/1)
-    |> map(&parse_delegation(&1, agent))
+    |> map(&shout(&1, agent))
     |> reject(&is_nil/1)
     |> map(&emit(sock, pattern, &1))
   end
 
-  defp read_log(agent) do
-    home = get_env("HOME", "~")
-    expanded = expand_home(home)
-    path = expanded <> "/.elita/sessions/#{agent}_#{pid()}.log"
+  defp log(agent) do
+    path = expand("~/.elita/sessions/#{agent}_#{pid()}.log")
 
     case read(path) do
       {:ok, content} -> content
@@ -108,11 +107,7 @@ defmodule Freeq do
     end
   end
 
-  defp expand_home("~"), do: get_env("HOME", "~")
-  defp expand_home("~/" <> rest), do: get_env("HOME", "~") <> "/" <> rest
-  defp expand_home(path), do: path
-
-  defp parse_delegation(line, agent) do
+  defp shout(line, agent) do
     pattern = compile!("^📢 #{escape(agent)} → [^:]+: (.*)$")
 
     case run(pattern, trim(line), capture: :all_but_first) do
