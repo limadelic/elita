@@ -71,9 +71,8 @@ defmodule Freeq do
       |> reject(&blank/1)
       |> map(&emit(sock, pattern, &1))
 
-    delegation = delegations(name, sock)
-    bubble(reply)
-    (texts ++ delegation) |> join("\n")
+    delegations(name, sock)
+    texts |> join("\n")
   end
 
   def tell(agent, msg) do
@@ -106,14 +105,14 @@ defmodule Freeq do
   defp logs_from({:ok, files}, pattern, dir) do
     files
     |> filter(&run(pattern, &1, []))
-    |> first_or_empty(dir)
+    |> first(dir)
   end
 
   defp logs_from(_, _pattern, _dir), do: ""
 
-  defp first_or_empty([], _dir), do: ""
+  defp first([], _dir), do: ""
 
-  defp first_or_empty([file | _], dir) do
+  defp first([file | _], dir) do
     read(Path.join(dir, file)) |> fetch_content()
   end
 

@@ -15,7 +15,6 @@ defmodule Freeq.BossTest do
     tell(:boss, "you manage a software development team with a dev and a qa")
     reply = ask(:boss, "we need more test created")
     verify("done", reply)
-    verify("qa", reply)
     verify("no", ask(:dev, "did you receive a task from boss?"))
     verify("yes", ask(:qa, "did you receive a task from boss?"))
   end

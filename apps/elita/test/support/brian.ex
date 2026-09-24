@@ -11,7 +11,7 @@ defmodule Brian do
     quote do
       test unquote(test_name), context do
         home = get_env("HOME")
-        scratch = home_scratch()
+        scratch = scratch()
         mkdir_p!(scratch)
         put_env("HOME", scratch)
         var!(room) = join("#the-lab")
@@ -29,7 +29,7 @@ defmodule Brian do
     end
   end
 
-  def home_scratch do
+  def scratch do
     tmp_dir!() |> Path.join("freeq#{unique_integer([:positive])}")
   end
 
