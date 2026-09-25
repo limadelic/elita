@@ -24,15 +24,17 @@ defmodule FreeqCase do
       end
 
       def spawn(name) do
-        {:ok, pid} = Elita.spawn(to_string(name), [to_string(name)], kind: Freeq.Kind)
-        on_exit(fn -> GenServer.stop(pid) end)
-        enter(name)
+        {:ok, agent_pid, freeq_pid} = Freeq.Resident.start(name, "#the-lab", ~c"127.0.0.1", port(), "brian")
+        on_exit(fn -> GenServer.stop(agent_pid) end)
+        on_exit(fn -> GenServer.stop(freeq_pid) end)
+        wait_join(to_string(name))
       end
 
       def spawn(name, role) do
-        {:ok, pid} = Elita.spawn(to_string(name), [to_string(role)], kind: Freeq.Kind)
-        on_exit(fn -> GenServer.stop(pid) end)
-        enter(name)
+        {:ok, agent_pid, freeq_pid} = Freeq.Resident.start(name, "#the-lab", ~c"127.0.0.1", port(), "brian")
+        on_exit(fn -> GenServer.stop(agent_pid) end)
+        on_exit(fn -> GenServer.stop(freeq_pid) end)
+        wait_join(to_string(name))
       end
 
       def ask(agent, query) do
@@ -52,16 +54,6 @@ defmodule FreeqCase do
 
       defp boot(name, nil), do: __MODULE__.spawn(name)
       defp boot(name, role), do: __MODULE__.spawn(name, role)
-
-      defp enter(agent) do
-        name = to_string(agent)
-        start_supervised!({Freeq, config(name)}, id: String.to_atom("freeq_#{name}"))
-        wait_join(name)
-      end
-
-      defp config(name) do
-        [agent: name, channel: "#the-lab", driver: "brian", host: ~c"127.0.0.1", port: port()]
-      end
 
       defp port do
         String.to_integer(System.get_env("FREEQ_PORT", "6667"))
