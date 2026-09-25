@@ -62,7 +62,7 @@ defmodule FreeqTestClient do
     result = absorb([raw])
     case result do
       [^raw] -> [raw]
-      [stripped] when stripped == strip(raw) -> [raw]
+      [stripped] -> if stripped == strip(raw), do: [raw], else: [stripped]
       other -> other
     end
   end
