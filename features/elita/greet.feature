@@ -21,3 +21,4 @@ Feature: Greet
 
     * el> ls //
       | node: elita-cukes |
+      | lab (freeq)       |

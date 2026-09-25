@@ -1,27 +1,62 @@
 defmodule El.Commands.Nodes do
   import El.Commands.Address.World, only: [build: 0]
-  import Enum, only: [filter: 2, sort_by: 2, map: 2, join: 2]
+  import Enum, only: [filter: 2, sort_by: 2, map: 2, join: 2, concat: 2]
+  import Application, only: [get_env: 2]
+  import String, only: [split: 2, split: 3]
 
   def list do
-    build()
-    |> filter(&(&1.kind == :node))
-    |> sort_by(& &1.name)
-    |> show()
+    nodes = build() |> filter(&(&1.kind == :node)) |> sort_by(& &1.name)
+    extras = nodes(:elita) |> parse()
+    concat(nodes, extras) |> show()
+  end
+
+  defp nodes(app) do
+    get_env(app, :nodes)
+  end
+
+  defp parse(nil) do
+    []
+  end
+
+  defp parse("") do
+    []
+  end
+
+  defp parse(text) do
+    text
+    |> split(",")
+    |> map(&entry/1)
+  end
+
+  defp entry(line) do
+    [name, rest] = split(line, "=", parts: 2)
+    world = split(rest, "://", parts: 2) |> fetch()
+    {name, world}
+  end
+
+  defp fetch([world, _rest]) do
+    world
+  end
+
+  defp fetch(_other) do
+    ""
   end
 
   defp show([]) do
     "no agents"
   end
 
-  defp show(entries) do
-    entries |> map(&format/1) |> join("\n")
+  defp show(entries) when is_list(entries) do
+    entries
+    |> map(&format/1)
+    |> join("\n")
   end
 
   defp format(%{kind: :node} = entry) do
-    "#{entry.name} #{label(:node)}"
+    "#{entry.name} node"
   end
 
-  defp label(:node) do
-    "node"
+  defp format({name, world}) do
+    "#{name} (#{world})"
   end
 end
