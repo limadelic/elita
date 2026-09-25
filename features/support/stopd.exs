@@ -1,6 +1,6 @@
 #!/usr/bin/env elixir
 
-defmodule StopD do
+defmodule Stop do
   def validate(nil), do: "cukes"
   def validate("") do
     IO.puts("refuse: live node")
@@ -9,7 +9,7 @@ defmodule StopD do
   def validate(name), do: name
 end
 
-run_name = StopD.validate(System.get_env("ELITA_RUN"))
+run_name = Stop.validate(System.get_env("ELITA_RUN"))
 node_name = :"elita-#{run_name}@127.0.0.1"
 
 unless Node.alive? do
