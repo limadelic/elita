@@ -34,3 +34,8 @@ Feature: Greet
     * > el spawn greet@lab/the-lab
       | no node, run el node |
     * el fails
+
+  Scenario: Spawn fails when nick is in use
+    * > el spawn brian@lab/the-lab
+      | brian: nick in use |
+    * el fails
