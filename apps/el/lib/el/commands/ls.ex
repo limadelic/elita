@@ -24,7 +24,7 @@ defmodule El.Commands.Ls do
   defp respond(true, path), do: render(path)
 
   defp render("//") do
-    list() |> show()
+    list()
   end
 
   defp render(path) do
@@ -50,10 +50,6 @@ defmodule El.Commands.Ls do
 
   defp show(entries) do
     entries |> map(&format/1) |> join("\n")
-  end
-
-  defp format(%{kind: :node} = entry) do
-    "#{entry.name} #{label(entry.kind)}"
   end
 
   defp format(entry) do
@@ -92,7 +88,6 @@ defmodule El.Commands.Ls do
   defp label(:file), do: "file"
   defp label(:folder), do: "folder"
   defp label(:session), do: "session"
-  defp label(:node), do: "node"
   defp ready?, do: check(:ets.whereis(:elita_vault))
   defp check(:undefined), do: false
   defp check(_), do: :ets.lookup(:elita_vault, :ready) == [ready: true]
