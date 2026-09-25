@@ -1,5 +1,5 @@
 defmodule Freeq do
-  use GenServer
+  use GenServer, restart: :temporary
   import Keyword, only: [fetch!: 2, get: 3]
   import String, only: [trim_trailing: 2, to_atom: 1]
   import GenServer, only: [start_link: 3, call: 2]
