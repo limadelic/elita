@@ -9,9 +9,10 @@
         }
       ],
       "q": {
+        "agent": "greet",
         "messages": [
           {
-            "content": "[from brian] hello",
+            "content": "hello",
             "role": "user"
           }
         ],
@@ -26,9 +27,10 @@
         }
       ],
       "q": {
+        "agent": "greet",
         "messages": [
           {
-            "content": "[from brian] Brian",
+            "content": "Brian",
             "role": "user"
           }
         ],
@@ -43,10 +45,11 @@
         }
       ],
       "q": {
+        "agent": "greet",
         "messages": [
           {
             "role": "user",
-            "content": "[from brian] how are you?"
+            "content": "how are you?"
           }
         ],
         "n": 5

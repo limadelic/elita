@@ -9,19 +9,19 @@ defmodule Freeq.Answer do
     privmsg(contains?(msg, "PRIVMSG"), msg, state, pid)
   end
 
-  def privmsg(true, msg, %{agent: agent, channel: channel, ask: ask, config: config}, pid) do
-    parse(msg, agent, channel) |> reply(agent, ask, pid, config)
+  def privmsg(true, msg, %{agent: agent, channel: channel, ask: ask, config: c}, pid) do
+    parse(msg, agent, channel) |> reply(agent, ask, pid, c)
   end
 
   def privmsg(false, _msg, _state, _pid) do
     :noop
   end
 
-  def reply({:ask, s, t}, a, k, p, config) do
-    reply(%{sender: s, text: t, agent: a, ask: k, pid: p, config: config})
+  def reply({:ask, s, t}, a, k, p, c) do
+    reply(%{sender: s, text: t, agent: a, ask: k, pid: p, config: c})
   end
 
-  def reply(:noop, _agent, _ask, _pid, _config), do: :ok
+  def reply(:noop, _agent, _ask, _pid, _c), do: :ok
 
   defp reply(ctx), do: handle(kind(ctx), ctx)
 
@@ -30,8 +30,8 @@ defmodule Freeq.Answer do
 
   defp handle(:same, _), do: :ok
 
-  defp handle(:other, %{sender: s, text: t, agent: a, ask: ask, pid: p, config: config}) do
-    start(fn -> safe(ask, a, s, t, config) |> relay(p, s) end)
+  defp handle(:other, %{sender: s, text: t, agent: a, ask: ask, pid: p, config: c}) do
+    start(fn -> safe(ask, a, s, t, c) |> relay(p, s) end)
   end
 
   defp safe(ask, agent, sender, text, config) do

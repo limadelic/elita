@@ -24,26 +24,17 @@ defmodule FreeqCase do
       end
 
       def spawn(name) do
-        {:ok, agent_pid, freeq_pid} = Freeq.Resident.start(name, "#the-lab", ~c"127.0.0.1", port(), tape_options())
+        {:ok, agent_pid, freeq_pid} = Freeq.Resident.start(name, "#the-lab", ~c"127.0.0.1", port())
         on_exit(fn -> GenServer.stop(agent_pid) end)
         on_exit(fn -> GenServer.stop(freeq_pid) end)
         wait_join(to_string(name))
       end
 
       def spawn(name, role) do
-        {:ok, agent_pid, freeq_pid} = Freeq.Resident.start(name, "#the-lab", ~c"127.0.0.1", port(), tape_options())
+        {:ok, agent_pid, freeq_pid} = Freeq.Resident.start(name, "#the-lab", ~c"127.0.0.1", port())
         on_exit(fn -> GenServer.stop(agent_pid) end)
         on_exit(fn -> GenServer.stop(freeq_pid) end)
         wait_join(to_string(name))
-      end
-
-      defp tape_options do
-        %{
-          tape: System.get_env("TAPE"),
-          live: System.get_env("LIVE"),
-          cassette: System.get_env("CASSETTE"),
-          cassette_dir: System.get_env("CASSETTE_DIR")
-        }
       end
 
       def ask(agent, query) do
