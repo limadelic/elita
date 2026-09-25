@@ -132,7 +132,7 @@ module Spawn
   end
 
   def mint(cmd)
-    cmd_env = cmd.include?("@") ? cloak(cmd) : cmd
+    cmd_env = cmd.start_with?("@") ? cloak(cmd) : cmd
     PTY.spawn("/bin/sh", "-c", cmd_env)
   end
 

@@ -16,12 +16,18 @@ When(/^> el tell (.+)$/) do |args, *rest|
   handle(rest.first, output)
 end
 
+When(/^> el spawn (.+)$/) do |args, *rest|
+  output = one("spawn #{args}")
+  track(output.dup, output.gsub(/\e\[[0-9;]*m/, ''))
+  handle(rest.first, output)
+end
+
 When(/^> el$/) do |*rest|
   boot('')
   handle(rest.first, transcript)
 end
 
-When(/^> el (.+)$/) do |args, *rest|
+When(/^> el (?!tell|spawn)(.+)$/) do |args, *rest|
   route(args)
   handle(rest.first, transcript)
 end
@@ -80,8 +86,8 @@ end
 
 def track(chunk, stripped)
   if @transcript.nil?
-    @transcript = ''
-    @transcript_stripped = ''
+    @transcript = +""
+    @transcript_stripped = +""
   end
   @transcript << chunk
   @transcript_stripped << stripped
