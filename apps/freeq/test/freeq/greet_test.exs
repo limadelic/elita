@@ -45,8 +45,24 @@ defmodule FreeqGreetTest do
     poll_until_gone(name, System.monotonic_time(:millisecond) + 500)
   end
 
+  defp agent_gone?(name) do
+    lookup(ElitaRegistry, name) == []
+  end
+
+  defp time_left?(deadline) do
+    System.monotonic_time(:millisecond) < deadline
+  end
+
+  defp wait_again(name, deadline) do
+    Process.sleep(10)
+    poll_until_gone(name, deadline)
+  end
+
+  defp retry_if_time_left(name, deadline) do
+    time_left?(deadline) && wait_again(name, deadline)
+  end
+
   defp poll_until_gone(name, deadline) do
-    lookup(ElitaRegistry, name) == [] ||
-    (System.monotonic_time(:millisecond) < deadline && (Process.sleep(10) && poll_until_gone(name, deadline)))
+    agent_gone?(name) || retry_if_time_left(name, deadline)
   end
 end
