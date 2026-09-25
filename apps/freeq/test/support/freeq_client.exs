@@ -26,17 +26,16 @@ defmodule FreeqTestClient do
   end
 
   def wait_join(agent) do
-    await("#{agent} JOIN", &joined(&1, agent))
-    |> find_raw_join(agent)
+    processed_line = await("#{agent} JOIN", &joined(&1, agent))
+    lookup_raw_line(processed_line)
   end
 
-  defp find_raw_join(processed_line, agent) do
-    raw_lines = Process.get(:freeq_raw_lines, [])
-    raw_lines
-    |> Enum.find(fn raw ->
-      absorb([raw]) |> Enum.any?(&joined(&1, agent))
-    end)
-    || processed_line
+  defp lookup_raw_line(processed_line) do
+    pairs = Process.get(:freeq_line_map, [])
+    case Enum.find(pairs, fn {proc, _} -> proc == processed_line end) do
+      {_, raw} -> raw
+      nil -> processed_line
+    end
   end
 
   def say(text), do: send_line("PRIVMSG #the-lab :#{text}")
@@ -66,6 +65,11 @@ defmodule FreeqTestClient do
     raw = :gen_tcp.recv(socket(), 0, left) |> lines(what)
     processed = raw |> absorb() |> record()
     Process.put(:freeq_raw_lines, (Process.get(:freeq_raw_lines, []) ++ raw))
+
+    pairs = Enum.zip(processed, raw)
+    all_pairs = Process.get(:freeq_line_map, [])
+    Process.put(:freeq_line_map, all_pairs ++ pairs)
+
     processed
   end
 
