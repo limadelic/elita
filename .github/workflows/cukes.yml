@@ -79,6 +79,15 @@ jobs:
         env:
           MIX_ENV: test
 
+      - name: Run freeq Cucumber tests
+        run: |
+          mkdir -p reports
+          mix cuke freeq --format html --out reports/cucumber_freeq.html --format json --out reports/cucumber_freeq.json --publish-quiet
+        env:
+          FREEQ_PORT: "16683"
+          MIX_ENV: test
+          TAPE: replay
+
       - name: Copy cucumber report to site
         run: |
           mkdir -p site
