@@ -18,6 +18,7 @@ defmodule El.RPC do
   defp safe(command, cwd), do: handle(command, cwd)
 
   defp handle(["ls"], cwd), do: remote(cwd: cwd)
+  defp handle(["ls", path], _cwd), do: remote(path: path)
   defp handle(["ask", agent, msg], _cwd), do: ask(agent, msg)
   defp handle(_, _cwd), do: ""
 

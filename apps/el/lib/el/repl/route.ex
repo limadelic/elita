@@ -9,7 +9,7 @@ defmodule El.Repl.Route do
   import Elita, only: [spawn: 3]
   import System, only: [get_env: 1]
   import Utils.Normalize, only: [name: 1]
-  import El.Command.Ls, only: [list: 0]
+  import El.Command.Ls, only: [list: 0, list: 1]
 
   def route([name, "log"], _a, _p, _i), do: name |> log() |> puts()
 
@@ -50,6 +50,11 @@ defmodule El.Repl.Route do
 
   def via(["ls"], _p, _i, agent) do
     list()
+    {"", agent, nil}
+  end
+
+  def via(["ls", path], _p, _i, agent) do
+    list(path)
     {"", agent, nil}
   end
 

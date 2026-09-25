@@ -18,3 +18,5 @@ Feature: Greet
     * el> greet &
     * el> ls
       | greet |
+
+    * el> ls //
