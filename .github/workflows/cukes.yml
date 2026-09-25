@@ -69,7 +69,7 @@ jobs:
         run: docker run -d --name freeq -p 16683:6667 -p 8081:8080 freeq:ci
 
       - name: Wait for freeq to be ready
-        run: timeout 60 bash -c 'until curl -s http://127.0.0.1:8081/api/v1/health | grep -q active; do sleep 1; done'
+        run: timeout 60 bash -c 'until curl -sf http://127.0.0.1:8081/api/v1/health; do sleep 1; done'
 
       - name: Run Cucumber tests
         id: cukes
