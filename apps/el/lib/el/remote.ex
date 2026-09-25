@@ -1,11 +1,11 @@
-defmodule El.Command.Ls.Remote do
+defmodule El.Remote do
   @moduledoc false
   import :erpc, only: [call: 4]
   import Node, only: [connect: 1]
   import File, only: [cwd!: 0]
   import El.Run, only: [address: 0]
 
-  def send(cmd) do
+  def call(cmd) do
     connect(address()) |> dial(cmd)
   catch
     _, _ -> :error

@@ -1,9 +1,9 @@
 defmodule El.Command.Ls.Query do
   @moduledoc false
-  import El.Command.Ls.Remote, only: [send: 1]
+  import El.Remote, only: [call: 1]
 
   def fetch(path) do
-    path |> route() |> send()
+    path |> route() |> call()
   end
 
   defp route(nil), do: ["ls"]
