@@ -14,11 +14,10 @@ defmodule FreeqCase do
       import Freeq.Pace, only: [join: 0, bubble: 1]
 
       setup do
-        port = String.to_integer(System.get_env("FREEQ_PORT", "6667"))
-        Server.wait(~c"127.0.0.1", port)
+        p = port()
+        Server.wait(~c"127.0.0.1", p)
         {:ok, socket} = connect()
         Process.put(:freeq_socket, socket)
-        Process.put(:freeq_port, port)
         register_brian()
         on_exit(fn -> :gen_tcp.close(socket) end)
         :ok
@@ -61,8 +60,11 @@ defmodule FreeqCase do
       end
 
       defp config(name) do
-        port = Process.get(:freeq_port)
-        [agent: name, channel: "#the-lab", driver: "brian", host: ~c"127.0.0.1", port: port]
+        [agent: name, channel: "#the-lab", driver: "brian", host: ~c"127.0.0.1", port: port()]
+      end
+
+      defp port do
+        String.to_integer(System.get_env("FREEQ_PORT", "6667"))
       end
     end
   end
