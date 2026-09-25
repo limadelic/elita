@@ -2,6 +2,8 @@ defmodule Freeq.Answer do
   import String, only: [contains?: 2]
   import Freeq.Parser, only: [parse: 3]
   import Task, only: [start: 1]
+  import Kernel, except: [spawn: 3]
+  import Elita, only: [spawn: 3]
 
   def privmsg(msg, state, pid) do
     privmsg(contains?(msg, "PRIVMSG"), msg, state, pid)
@@ -33,6 +35,13 @@ defmodule Freeq.Answer do
   end
 
   defp safe(ask, agent, sender, text) do
+    ask.(agent, "[from #{sender}] #{text}")
+  catch
+    _, _ -> live(ask, agent, sender, text)
+  end
+
+  defp live(ask, agent, sender, text) do
+    spawn(agent, [agent], kind: Freeq.Kind)
     ask.(agent, "[from #{sender}] #{text}")
   catch
     _, _ -> {:error, :failed}
