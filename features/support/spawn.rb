@@ -30,7 +30,7 @@ module Spawn
       "CASSETTE_DIR=#{dir} " +
       clock_prefix +
       "MIX_ENV=test " +
-      (@elita_run ? "ELITA_RUN=#{@elita_run} " : "") +
+      "ELITA_RUN=#{flux} " +
       "#{gate} " +
       "#{args}"
     ).strip
@@ -116,7 +116,7 @@ module Spawn
   end
 
   def flux
-    [@elita_run, ENV["ELITA_RUN"], ""].compact.first
+    [@elita_run, ENV["ELITA_RUN"], "cukes"].compact.first
   end
 
   def spine
