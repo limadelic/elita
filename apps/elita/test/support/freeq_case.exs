@@ -33,7 +33,7 @@ defmodule FreeqCase do
       end
 
       def ask(agent, query) do
-        say("#{agent}: #{query}")
+        say("@#{agent} #{query}")
         reply(agent)
       end
 

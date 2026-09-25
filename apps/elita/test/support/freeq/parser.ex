@@ -58,6 +58,6 @@ defmodule Freeq.Parser do
   end
 
   defp cut(text, nick) do
-    trim_leading(text, "#{nick}:") |> trim_leading("#{nick},")
+    trim_leading(text, "#{nick}:") |> trim_leading("#{nick},") |> trim_leading("#{nick} ")
   end
 end
