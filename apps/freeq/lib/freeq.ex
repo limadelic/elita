@@ -17,30 +17,30 @@ defmodule Freeq do
 
   defp tuple(opts) do
     {fetch!(opts, :agent), fetch!(opts, :channel), get(opts, :ask, &request/2),
-     get(opts, :driver, nil), fetch!(opts, :host), fetch!(opts, :port)}
+     fetch!(opts, :host), fetch!(opts, :port)}
   end
 
   def tell(pid, nick, text), do: call(pid, {:tell, nick, text})
 
   @impl true
-  def init({agent, channel, ask, driver, host, port}) do
+  def init({agent, channel, ask, host, port}) do
     {:ok, socket} = socket(host, port)
     flag(:trap_exit, true)
     run(socket, agent, channel)
-    {:ok, setup(socket, agent, channel, ask, driver)}
+    {:ok, setup(socket, agent, channel, ask)}
   end
 
   defp socket(host, port) do
     :gen_tcp.connect(host, port, active: true, packet: :line)
   end
 
-  defp setup(socket, agent, channel, ask, driver) do
+  defp setup(socket, agent, channel, ask) do
     register(self(), "freeq_#{agent}" |> to_atom())
-    state(socket, agent, channel, ask, driver)
+    state(socket, agent, channel, ask)
   end
 
-  defp state(socket, agent, channel, ask, driver) do
-    %{socket: socket, agent: agent, channel: channel, ask: ask, driver: driver,
+  defp state(socket, agent, channel, ask) do
+    %{socket: socket, agent: agent, channel: channel, ask: ask,
       pending: [], attempts: 0}
   end
 
@@ -61,8 +61,8 @@ defmodule Freeq do
   def handle_info({:EXIT, _pid, _reason}, state), do: {:stop, :normal, state}
 
   @impl true
-  def handle_info({:answer, text}, %{socket: socket, channel: channel, driver: driver} = state) do
-    text = "@#{driver} #{text}"
+  def handle_info({:answer, text, sender}, %{socket: socket, channel: channel} = state) do
+    text = "@#{sender} #{text}"
     send(socket, channel, text)
     {:noreply, push(state, text)}
   end

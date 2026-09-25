@@ -24,14 +24,14 @@ defmodule FreeqCase do
       end
 
       def spawn(name) do
-        {:ok, agent_pid, freeq_pid} = Freeq.Resident.start(name, "#the-lab", ~c"127.0.0.1", port(), "brian")
+        {:ok, agent_pid, freeq_pid} = Freeq.Resident.start(name, "#the-lab", ~c"127.0.0.1", port())
         on_exit(fn -> GenServer.stop(agent_pid) end)
         on_exit(fn -> GenServer.stop(freeq_pid) end)
         wait_join(to_string(name))
       end
 
       def spawn(name, role) do
-        {:ok, agent_pid, freeq_pid} = Freeq.Resident.start(name, "#the-lab", ~c"127.0.0.1", port(), "brian")
+        {:ok, agent_pid, freeq_pid} = Freeq.Resident.start(name, "#the-lab", ~c"127.0.0.1", port())
         on_exit(fn -> GenServer.stop(agent_pid) end)
         on_exit(fn -> GenServer.stop(freeq_pid) end)
         wait_join(to_string(name))
