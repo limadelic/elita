@@ -40,8 +40,15 @@ When(/^(\w+)> (.+)$/) do |prompt, input, *rest|
   table = rest.first
 
   note(prompt, input) if table && valid?(table)
-  emit(input, prompt)
-  output = retrying(15) { collect(prompt, input) }
+
+  if freeq_session?(prompt)
+    freeq_emit(prompt, input)
+    output = retrying(15) { freeq_collect(prompt) }
+  else
+    emit(input, prompt)
+    output = retrying(15) { collect(prompt, input) }
+  end
+
   reply(prompt, table, output) if table && valid?(table)
   settle(table, output)
 end

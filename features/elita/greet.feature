@@ -39,3 +39,9 @@ Feature: Greet
   Scenario: Greet joins the lab
     * > el spawn greet@lab/the-lab
       | greet started |
+
+    * brian> /names #the-lab
+      | greet=agent |
+
+    * brian> /whois greet
+      | actor_class=agent |

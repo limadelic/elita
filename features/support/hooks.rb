@@ -8,6 +8,7 @@ require_relative 'reap'
 require_relative 'kill'
 require_relative 'track'
 require_relative 'guard'
+require_relative 'freeq'
 
 module Hooks
 end
@@ -99,6 +100,10 @@ end
 Before('@malko') do
   burrow
   enforce
+end
+
+Before('@freeq') do
+  freeq_connect('brian', '127.0.0.1', 16683)
 end
 
 After do |_scenario|
