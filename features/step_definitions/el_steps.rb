@@ -3,7 +3,7 @@
 require 'pty'
 
 When(/^no elita node$/) do
-  ENV["ELITA_RUN"] = "nosuch"
+  @elita_run = "nosuch"
 end
 
 When(/^clock (.+)$/) do |time|
