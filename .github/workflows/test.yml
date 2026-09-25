@@ -9,6 +9,8 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+    env:
+      FREEQ_PORT: "6667"
 
     steps:
       - uses: actions/checkout@v4
@@ -82,7 +84,6 @@ jobs:
         run: mix test
         env:
           MIX_ENV: test
-          FREEQ_PORT: "6667"
 
       - uses: actions/setup-node@v4
         with:
