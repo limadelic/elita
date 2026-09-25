@@ -8,14 +8,25 @@ defmodule Freeq.Inbox do
   def route([], state), do: {:noreply, state}
   def route([line], state), do: handle(line, state)
 
-  defp handle("PING " <> server, %{socket: socket} = state) do
-    pong(socket, server)
+  defp handle("PING " <> token, %{socket: socket} = state) do
+    pong(socket, token)
     {:noreply, state}
   end
 
-  defp handle(":" <> msg, state), do: relay(check(msg), msg, state)
+  defp handle(":" <> msg, %{socket: socket} = state) do
+    dispatch(split(msg, " PING ", parts: 2), msg, socket, state)
+  end
 
   defp handle(_msg, state), do: {:noreply, state}
+
+  defp dispatch([_server, token], _msg, socket, state) do
+    pong(socket, token)
+    {:noreply, state}
+  end
+
+  defp dispatch(_no_ping, msg, _socket, state) do
+    relay(check(msg), msg, state)
+  end
 
   defp check(msg), do: check(contains?(msg, " 404 "), msg)
 
