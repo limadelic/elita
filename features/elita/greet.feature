@@ -33,3 +33,11 @@ Feature: Greet
 
     * brian> /whois greet
       | actor_class=agent |
+
+  @freeq
+  Scenario: Bob joins the lab from his own folder
+    * a folder outside the repo with bob.md
+    * > el spawn bob@lab/the-lab
+      | bob started |
+    * brian> /names #the-lab
+      | bob=agent |

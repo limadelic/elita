@@ -2,6 +2,23 @@
 
 require 'pty'
 
+When(/^a folder outside the repo with bob.md$/) do
+  tmp_dir = File.expand_path('../../tmp', __dir__)
+  FileUtils.mkdir_p(tmp_dir)
+  @scratch = Dir.mktmpdir('bob', tmp_dir)
+  bin_dir = File.join(@scratch, 'bin')
+  Dir.mkdir(bin_dir)
+  el_escript = File.expand_path('../../apps/el/el', __dir__)
+  FileUtils.cp(el_escript, File.join(bin_dir, 'el'))
+  File.chmod(0755, File.join(bin_dir, 'el'))
+  bob_file = File.join(@scratch, 'bob.md')
+  File.write(bob_file, bob_content)
+end
+
+def bob_content
+  "---\nname: bob\ndescription: Agent Bob\n---\n\n# Bob\n\nBob the agent."
+end
+
 When(/^no elita node$/) do
   @elita_run = "nosuch"
 end
