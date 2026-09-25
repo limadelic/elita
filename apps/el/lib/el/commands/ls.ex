@@ -52,6 +52,10 @@ defmodule El.Commands.Ls do
     entries |> map(&format/1) |> join("\n")
   end
 
+  defp format(%{kind: :node} = entry) do
+    "#{entry.name} #{label(entry.kind)}"
+  end
+
   defp format(entry) do
     "#{entry.name} #{label(entry.kind)} #{status(entry.name)}"
   end
