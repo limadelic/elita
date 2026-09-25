@@ -2,7 +2,7 @@ defmodule El.Commands.Nodes do
   import El.Commands.Address.World, only: [build: 0]
 
   import Enum,
-    only: [filter: 2, sort_by: 2, map: 2, join: 2, concat: 2, any?: 2]
+    only: [filter: 2, sort_by: 2, map: 2, join: 2, concat: 2, any?: 2, find: 2]
 
   import Application, only: [get_env: 2]
   import String, only: [split: 2, split: 3]
@@ -17,6 +17,12 @@ defmodule El.Commands.Nodes do
     get_env(:elita, :nodes)
     |> parse()
     |> any?(&matches(&1, name))
+  end
+
+  def find(name) do
+    get_env(:elita, :nodes)
+    |> parse()
+    |> find(&matches(&1, name))
   end
 
   defp parse(nil) do
@@ -35,19 +41,18 @@ defmodule El.Commands.Nodes do
 
   defp entry(line) do
     [name, rest] = split(line, "=", parts: 2)
-    world = split(rest, "://", parts: 2) |> fetch()
-    {name, world}
+    [world | addr] = split(rest, "://", parts: 2)
+    {host, port} = pair(addr)
+    {name, world, host, port}
   end
 
-  defp fetch([world, _rest]) do
-    world
-  end
+  defp pair([]), do: {"", ""}
+  defp pair(addr), do: parts(addr |> join(":") |> split(":", parts: 2))
 
-  defp fetch(_other) do
-    ""
-  end
+  defp parts([host, port]), do: {host, port}
+  defp parts([host]), do: {host, ""}
 
-  defp matches({node_name, _world}, name) do
+  defp matches({node_name, _world, _host, _port}, name) do
     node_name == name
   end
 
@@ -65,7 +70,7 @@ defmodule El.Commands.Nodes do
     "#{entry.name} node"
   end
 
-  defp format({name, world}) do
+  defp format({name, world, _host, _port}) do
     "#{name} (#{world})"
   end
 end
