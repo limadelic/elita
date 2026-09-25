@@ -77,7 +77,10 @@ defmodule FreeqCase do
       defp boot(name, role), do: __MODULE__.spawn(name, role)
 
       defp port do
-        String.to_integer(System.get_env("FREEQ_PORT", "16683"))
+        {:ok, port_string} = System.fetch_env("FREEQ_PORT")
+        String.to_integer(port_string)
+      rescue
+        MatchError -> raise("FREEQ_PORT not set")
       end
     end
   end

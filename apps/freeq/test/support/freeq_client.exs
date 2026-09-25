@@ -6,8 +6,11 @@ defmodule FreeqTestClient do
   @driver "brian"
 
   def connect do
-    port = String.to_integer(System.get_env("FREEQ_PORT", "16683"))
+    {:ok, port_string} = System.fetch_env("FREEQ_PORT")
+    port = String.to_integer(port_string)
     :gen_tcp.connect(~c"127.0.0.1", port, @opts)
+  rescue
+    MatchError -> raise("FREEQ_PORT not set")
   end
 
   def register_brian do
