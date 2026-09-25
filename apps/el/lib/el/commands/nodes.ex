@@ -1,6 +1,9 @@
 defmodule El.Commands.Nodes do
   import El.Commands.Address.World, only: [build: 0]
-  import Enum, only: [filter: 2, sort_by: 2, map: 2, join: 2, concat: 2]
+
+  import Enum,
+    only: [filter: 2, sort_by: 2, map: 2, join: 2, concat: 2, any?: 2]
+
   import Application, only: [get_env: 2]
   import String, only: [split: 2, split: 3]
 
@@ -8,6 +11,12 @@ defmodule El.Commands.Nodes do
     nodes = build() |> filter(&(&1.kind == :node)) |> sort_by(& &1.name)
     extras = get_env(:elita, :nodes) |> parse()
     concat(nodes, extras) |> show()
+  end
+
+  def known?(name) do
+    get_env(:elita, :nodes)
+    |> parse()
+    |> any?(&matches(&1, name))
   end
 
   defp parse(nil) do
@@ -36,6 +45,10 @@ defmodule El.Commands.Nodes do
 
   defp fetch(_other) do
     ""
+  end
+
+  defp matches({node_name, _world}, name) do
+    node_name == name
   end
 
   defp show([]) do

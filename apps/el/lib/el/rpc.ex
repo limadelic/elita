@@ -1,12 +1,13 @@
 defmodule El.RPC do
   @moduledoc false
 
-  import Application, only: [ensure_all_started: 1, get_env: 2]
+  import Application, only: [ensure_all_started: 1]
   import File, only: [cwd!: 0]
   import El.Commands.Ls, only: [remote: 1]
   import El.Commands.Ask, only: [ask: 2]
+  import El.Commands.Nodes, only: [known?: 1]
   import String, only: [split: 2]
-  import Enum, only: [at: 2, any?: 2, map: 2]
+  import Enum, only: [at: 2]
 
   def dispatch(command, cwd \\ cwd!()) do
     ensure_all_started(:elita)
@@ -34,26 +35,6 @@ defmodule El.RPC do
     addr |> split("@") |> at(1) |> split("/") |> at(0)
   end
 
-  defp known?(node) do
-    get_env(:elita, :nodes)
-    |> entries()
-    |> any?(&match(&1, node))
-  end
-
-  defp entries(nil), do: []
-  defp entries(""), do: []
-
-  defp entries(text) do
-    text
-    |> split(",")
-    |> map(&first/1)
-  end
-
-  defp first(line) do
-    line |> split("=") |> at(0)
-  end
-
-  defp match(name, node), do: name == node
   defp result(true, _node), do: ""
   defp result(false, node), do: "unknown node: #{node}"
 
