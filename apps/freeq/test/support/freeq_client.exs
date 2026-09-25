@@ -21,11 +21,13 @@ defmodule FreeqTestClient do
   end
 
   defp request_caps do
-    send_line("CAP REQ :batch draft/multiline message-tags")
+    send_line("CAP REQ :batch draft/multiline message-tags extended-join")
     send_line("CAP END")
   end
 
-  def wait_join(agent), do: await("#{agent} JOIN", &joined(&1, agent))
+  def wait_join(agent) do
+    await("#{agent} JOIN", &joined(&1, agent))
+  end
 
   def say(text), do: send_line("PRIVMSG #the-lab :#{text}")
 

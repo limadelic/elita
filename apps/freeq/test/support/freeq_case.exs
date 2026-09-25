@@ -56,7 +56,6 @@ defmodule FreeqCase do
       defp enter(agent) do
         name = to_string(agent)
         start_supervised!({Freeq, config(name)}, id: String.to_atom("freeq_#{name}"))
-        wait_join(name)
         join()
       end
 

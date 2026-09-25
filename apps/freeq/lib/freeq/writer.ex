@@ -19,6 +19,10 @@ defmodule Freeq.Writer do
     line(socket, "PONG #{server}")
   end
 
+  def agent(socket) do
+    line(socket, "AGENT REGISTER class=agent")
+  end
+
   def line(socket, text) do
     :ok = :gen_tcp.send(socket, "#{text}\r\n")
   end
