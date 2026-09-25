@@ -18,7 +18,7 @@ defmodule Freeq.Boot do
   end
 
   defp caps(socket) do
-    line(socket, "CAP REQ :batch draft/multiline message-tags extended-join")
+    line(socket, "CAP REQ :batch draft/multiline message-tags echo-message")
     line(socket, "CAP END")
   end
 end

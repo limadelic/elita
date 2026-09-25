@@ -6,8 +6,7 @@ defmodule FreeqGreetTest do
   @moduletag :freeq
   @tag cassette: "greet"
   test "greet conversation flow" do
-    spawn(:greet)
-    line = wait_join("greet")
+    line = spawn(:greet)
     assert String.contains?(line, "actor-class=agent")
 
     verify("who am i talking to", ask(:greet, "hello"))
