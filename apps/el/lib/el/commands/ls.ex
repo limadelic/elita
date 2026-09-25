@@ -24,7 +24,7 @@ defmodule El.Commands.Ls do
   defp respond(true, path), do: render(path)
 
   defp render("//") do
-    list()
+    list() |> show()
   end
 
   defp render(path) do
@@ -46,6 +46,10 @@ defmodule El.Commands.Ls do
 
   defp show([]) do
     "no agents"
+  end
+
+  defp show([first | _] = entries) when is_binary(first) do
+    join(entries, "\n")
   end
 
   defp show(entries) do
