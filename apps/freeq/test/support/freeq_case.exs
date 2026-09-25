@@ -13,6 +13,8 @@ defmodule FreeqCase do
 
       import Freeq.Pace, only: [join: 0, bubble: 1]
 
+      import Registry, only: [lookup: 2]
+
       setup do
         p = port()
         Server.wait(~c"127.0.0.1", p)
@@ -23,6 +25,10 @@ defmodule FreeqCase do
         :ok
       end
 
+      def spawn(name, _role) do
+        spawn(name)
+      end
+
       def spawn(name) do
         {:ok, _agent_pid, _freeq_pid} = Freeq.Resident.start(name, "#the-lab", ~c"127.0.0.1", port())
         agent_name = to_string(name)
@@ -30,14 +36,24 @@ defmodule FreeqCase do
         wait_join(agent_name)
       end
 
-      def spawn(name, role) do
-        {:ok, _agent_pid, _freeq_pid} = Freeq.Resident.start(name, "#the-lab", ~c"127.0.0.1", port())
-        agent_name = to_string(name)
-        on_exit(fn -> stop_freeq_service(agent_name) end)
-        wait_join(agent_name)
+      defp stop_freeq_service(agent_name) do
+        stop_greet_agent(agent_name)
+        stop_freeq_bridge(agent_name)
       end
 
-      defp stop_freeq_service(agent_name) do
+      defp stop_greet_agent(agent_name) do
+        lookup(ElitaRegistry, agent_name) |> stop_agent_process()
+      end
+
+      defp stop_agent_process([{pid, _meta}]) do
+        GenServer.stop(pid)
+      end
+
+      defp stop_agent_process([]) do
+        :ok
+      end
+
+      defp stop_freeq_bridge(agent_name) do
         freeq_process_name = "freeq_#{agent_name}" |> String.to_atom()
         Process.whereis(freeq_process_name) && GenServer.stop(freeq_process_name)
       end
