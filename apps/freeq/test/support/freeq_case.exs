@@ -18,22 +18,34 @@ defmodule FreeqCase do
         Server.wait(~c"127.0.0.1", port)
         {:ok, socket} = connect()
         Process.put(:freeq_socket, socket)
-        Process.put(:freeq_port, port)
         register_brian()
         on_exit(fn -> :gen_tcp.close(socket) end)
-        :ok
+        {:ok, %{freeq_port: port}}
       end
 
       def spawn(name) do
         {:ok, pid} = Elita.spawn(to_string(name), [to_string(name)], kind: Freeq.Kind)
         on_exit(fn -> GenServer.stop(pid) end)
-        enter(name)
+        enter(name, %{})
       end
 
-      def spawn(name, role) do
+      def spawn(name, role_or_context) do
+        case role_or_context do
+          ctx when is_map(ctx) ->
+            {:ok, pid} = Elita.spawn(to_string(name), [to_string(name)], kind: Freeq.Kind)
+            on_exit(fn -> GenServer.stop(pid) end)
+            enter(name, ctx)
+          role ->
+            {:ok, pid} = Elita.spawn(to_string(name), [to_string(role)], kind: Freeq.Kind)
+            on_exit(fn -> GenServer.stop(pid) end)
+            enter(name, %{})
+        end
+      end
+
+      def spawn(name, role, context) do
         {:ok, pid} = Elita.spawn(to_string(name), [to_string(role)], kind: Freeq.Kind)
         on_exit(fn -> GenServer.stop(pid) end)
-        enter(name)
+        enter(name, context)
       end
 
       def ask(agent, query) do
@@ -49,19 +61,19 @@ defmodule FreeqCase do
         :ok
       end
 
-      def join(agent, role \\ nil), do: boot(agent, role)
+      def join(agent, role \\ nil, context \\ %{}), do: boot(agent, role, context)
 
-      defp boot(name, nil), do: __MODULE__.spawn(name)
-      defp boot(name, role), do: __MODULE__.spawn(name, role)
+      defp boot(name, nil, context), do: spawn(name, context)
+      defp boot(name, role, context), do: spawn(name, role, context)
 
-      defp enter(agent) do
+      defp enter(agent, context) do
         name = to_string(agent)
-        start_supervised!({Freeq, config(name)}, id: String.to_atom("freeq_#{name}"))
+        start_supervised!({Freeq, config(name, context)}, id: String.to_atom("freeq_#{name}"))
         wait_join(name)
       end
 
-      defp config(name) do
-        port = Process.get(:freeq_port)
+      defp config(name, context) do
+        port = context[:freeq_port] || String.to_integer(System.get_env("FREEQ_PORT", "6667"))
         [agent: name, channel: "#the-lab", driver: "brian", host: ~c"127.0.0.1", port: port]
       end
     end
