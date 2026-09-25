@@ -4,7 +4,7 @@ defmodule FreeqGreetTest do
   use FreeqCase
 
   @moduletag :freeq
-  @tag cassette: "greet_freeq"
+  @tag cassette: "greet"
   test "greet conversation flow" do
     line = spawn(:greet)
     assert String.contains?(line, "actor-class=agent")
@@ -14,7 +14,7 @@ defmodule FreeqGreetTest do
     verify("i am greeeet", ask(:greet, "how are you?"))
   end
 
-  @tag cassette: "greet_freeq"
+  @tag cassette: "greet"
   test "greet survives a failed answer" do
     spawn(:greet)
 
