@@ -103,7 +103,14 @@ Before('@malko') do
 end
 
 Before('@freeq') do
-  freeq_connect('brian', '127.0.0.1', 16683)
+  port = ENV["FREEQ_PORT"]
+  raise "FREEQ_PORT not set" unless port
+
+  freeq_connect('brian', '127.0.0.1', port.to_i)
+end
+
+After('@freeq') do
+  freeq_close('brian')
 end
 
 After do |_scenario|

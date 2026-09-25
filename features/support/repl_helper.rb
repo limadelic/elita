@@ -153,7 +153,7 @@ module ReplHelper
     sessions
     vet(prompt)
     activate(prompt)
-    push(input)
+    freeq_session?(prompt) ? freeq_emit(prompt, input) : push(input)
   end
 
   def vet(prompt)
@@ -161,7 +161,11 @@ module ReplHelper
   end
 
   def collect(prompt, input)
-    input == "/exit" ? assure : hold(prompt)
+    input == "/exit" ? assure : relay(prompt)
+  end
+
+  def relay(prompt)
+    freeq_session?(prompt) ? freeq_collect(prompt) : hold(prompt)
   end
 
   def hold(prompt)

@@ -4,7 +4,7 @@ module Freeq
   def freeq_connect(name, host, port)
     socket = TCPSocket.new(host, port)
     setup(socket, name)
-    sessions[name] = { socket: socket, buffer: "", name: name, type: :freeq }
+    sessions[name] = { socket: socket, name: name, type: :freeq }
     @current = name
   end
 
@@ -13,25 +13,24 @@ module Freeq
   end
 
   def freeq_emit(name, command)
-    session = sessions[name] || raise("No freeq session: #{name}")
-    cmd = strip_slash(command)
-    emit_cmd(session, cmd)
+    session = sessions[name]
+    raise "No freeq session: #{name}" if session.nil?
+    emit_cmd(session, strip_slash(command))
   end
 
   def strip_slash(command)
     command.start_with?('/') ? command[1..-1] : command
   end
 
-  def freeq_collect(name, timeout_sec = 5)
+  def freeq_collect(name)
     session = sessions[name]
-    raise "No freeq session: #{name}" unless session
-
-    collect_response(session, timeout_sec)
+    raise "No freeq session: #{name}" if session.nil?
+    read_reply(session)
   end
 
   def freeq_close(name)
     session = sessions[name]
-    close_session(session)
+    close_session(session) if session
     sessions.delete(name)
   end
 
@@ -62,63 +61,43 @@ module Freeq
   end
 
   def read_until_code(socket, code)
-    deadline = Time.now + 5
-    loop { return if code_found?(socket, code, deadline) }
+    data = ""
+    loop do
+      data = gather(socket, data)
+      return if data.include?(" #{code} ")
+    end
   end
 
-  def code_found?(socket, code, deadline)
-    available?(deadline) && code?(socket, code)
+  def gather(socket, accum)
+    chunk = grab(socket)
+    accum << chunk
   end
 
-  def available?(deadline)
-    Time.now < deadline
-  end
+  def grab(socket)
+    result = IO.select([socket], nil, nil, 0.1)
+    return "" if result.nil?
 
-  def code?(socket, code)
-    ready = IO.select([socket], nil, nil, 0.1)
-    ready && socket.readpartial(4096).include?(code)
+    socket.readpartial(4096)
+  rescue EOFError
+    ""
   end
 
   def emit_cmd(session, cmd)
-    session[:buffer] = ""
     session[:socket].write("#{cmd}\r\n")
     session[:socket].flush
   end
 
-  def collect_response(session, timeout_sec)
-    deadline = Time.now + timeout_sec
-    response = ""
+  def read_reply(session)
+    reply = ""
     loop do
-      break if Time.now > deadline
-
-      response = read_chunk(session, response, deadline)
+      chunk = grab(session[:socket])
+      reply << chunk
+      return reply if ended?(reply)
     end
-    response
   end
 
-  def read_chunk(session, response, deadline)
-    return response if should_skip?(session, deadline)
-
-    accumulate(session, response)
-  end
-
-  def should_skip?(session, deadline)
-    expired?(deadline) || !socket_ready?(session)
-  end
-
-  def expired?(deadline)
-    Time.now > deadline
-  end
-
-  def socket_ready?(session)
-    IO.select([session[:socket]], nil, nil, 0.1)
-  end
-
-  def accumulate(session, response)
-    chunk = session[:socket].readpartial(4096)
-    response << chunk
-    session[:buffer] << chunk
-    response
+  def ended?(data)
+    data.include?(" 366 ") || data.include?(" 318 ")
   end
 
   def close_session(session)
