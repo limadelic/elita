@@ -8,7 +8,8 @@ require_relative 'reap'
 require_relative 'kill'
 require_relative 'track'
 require_relative 'guard'
-require_relative 'freeq'
+require_relative 'freeq_client'
+require_relative 'freeq_reply'
 
 module Hooks
 end
