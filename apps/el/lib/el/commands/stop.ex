@@ -4,7 +4,7 @@ defmodule El.Commands.Stop do
   import El.Commands.Tell, only: [target: 2]
   import IO, only: [puts: 1]
   import Keyword, only: [get: 3]
-  import Utils.Normalize, only: [name: 1]
+  import Node, only: [monitor: 2]
 
   def stop(agent, opts \\ []) do
     start()
@@ -18,25 +18,28 @@ defmodule El.Commands.Stop do
   end
 
   defp halt(node, agent) do
-    signal(node, agent, name(agent))
+    :ok = monitor(node, true)
+    signal(node, agent)
   end
 
-  defp signal(node, agent, normalized) do
-    fetch(node, normalized) |> term(node, agent)
+  defp signal(node, agent) do
+    call(node) |> handle(node, agent)
   end
 
-  defp fetch(node, normalized) do
-    :erpc.call(node, Registry, :lookup, [ElitaRegistry, normalized], 5_000)
+  defp call(node) do
+    :erpc.call(node, :init, :stop, [0], 5_000)
   catch
-    _, _ -> []
+    _, _ -> :error
   end
 
-  defp term([{pid, _} | _], node, agent) do
-    :erpc.call(node, DynamicSupervisor, :terminate_child, [Elita.Spawner, pid], 5_000)
-    puts("stopped: #{agent}")
-  end
+  defp handle(:ok, node, agent), do: wait(node, agent)
+  defp handle(_, _node, agent), do: puts("stop failed: #{agent}")
 
-  defp term([], _node, agent) do
-    puts("stop failed: #{agent}")
+  defp wait(node, agent) do
+    receive do
+      {:nodedown, ^node} -> puts("stopped: #{agent}")
+    after
+      5000 -> puts("stop timeout: #{agent}")
+    end
   end
 end
