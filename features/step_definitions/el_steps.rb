@@ -2,6 +2,10 @@
 
 require 'pty'
 
+When(/^no elita node$/) do
+  ENV["ELITA_RUN"] = "nosuch"
+end
+
 When(/^clock (.+)$/) do |time|
   @clock = time
 end

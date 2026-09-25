@@ -82,5 +82,8 @@ defmodule El.CLI do
     halt(1)
   end
 
-  defp show(:error), do: :ok
+  defp show(:error) do
+    puts("no node, run el node")
+    halt(1)
+  end
 end
