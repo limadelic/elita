@@ -31,11 +31,11 @@ module FreeqReply
     limit = Time.now + 5
     loop do
       reply = gather_bytes(reply, session[:socket])
-      return reply if done?(reply, limit)
+      return reply if replied?(reply, limit)
     end
   end
 
-  def done?(reply, limit)
+  def replied?(reply, limit)
     final?(reply) || Time.now > limit
   end
 
