@@ -24,17 +24,22 @@ defmodule FreeqCase do
       end
 
       def spawn(name) do
-        {:ok, agent_pid, freeq_pid} = Freeq.Resident.start(name, "#the-lab", ~c"127.0.0.1", port())
-        on_exit(fn -> GenServer.stop(agent_pid) end)
-        on_exit(fn -> GenServer.stop(freeq_pid) end)
-        wait_join(to_string(name))
+        {:ok, _agent_pid, _freeq_pid} = Freeq.Resident.start(name, "#the-lab", ~c"127.0.0.1", port())
+        agent_name = to_string(name)
+        on_exit(fn -> stop_freeq_service(agent_name) end)
+        wait_join(agent_name)
       end
 
       def spawn(name, role) do
-        {:ok, agent_pid, freeq_pid} = Freeq.Resident.start(name, "#the-lab", ~c"127.0.0.1", port())
-        on_exit(fn -> GenServer.stop(agent_pid) end)
-        on_exit(fn -> GenServer.stop(freeq_pid) end)
-        wait_join(to_string(name))
+        {:ok, _agent_pid, _freeq_pid} = Freeq.Resident.start(name, "#the-lab", ~c"127.0.0.1", port())
+        agent_name = to_string(name)
+        on_exit(fn -> stop_freeq_service(agent_name) end)
+        wait_join(agent_name)
+      end
+
+      defp stop_freeq_service(agent_name) do
+        freeq_process_name = "freeq_#{agent_name}" |> String.to_atom()
+        Process.whereis(freeq_process_name) && GenServer.stop(freeq_process_name)
       end
 
       def ask(agent, query) do
