@@ -48,7 +48,7 @@ module FreeqReply
     net_read(socket)
   end
 
-  def final?(data) = data.match?(/ (366|318|PRIVMSG) /)
+  def final?(data) = data.match?(/ (674|318|PRIVMSG) /)
 
   def dispatch_emit(prompt, input)
     freeq_session?(prompt) ? freeq_emit(prompt, input) : push(input)
