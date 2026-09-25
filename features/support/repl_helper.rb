@@ -116,7 +116,7 @@ module ReplHelper
   def one(args)
     @cassette = @cassette || "greet"
     cmd = command(args)
-    run(cmd)
+    run(cmd, args)
   end
 
   def post(input, prompt)

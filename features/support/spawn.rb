@@ -122,17 +122,17 @@ module Spawn
     [(@scratch ? "#{@scratch}/bin" : nil), ENV["PATH"]].compact.join(":")
   end
 
-  def run(cmd)
+  def run(cmd, args = "")
     output = ""
-    reader, writer, pid = mint(cmd)
+    reader, writer, pid = mint(cmd, args)
     watch(pid)
     extract(reader, Time.now + 30, output)
     kill(writer, pid)
     output
   end
 
-  def mint(cmd)
-    cmd_env = cmd.start_with?("@") ? cloak(cmd) : cmd
+  def mint(cmd, args = "")
+    cmd_env = args.start_with?("@") ? cloak(cmd) : cmd
     PTY.spawn("/bin/sh", "-c", cmd_env)
   end
 
