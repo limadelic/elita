@@ -4,6 +4,7 @@ defmodule Freeq.Answer do
   import Task, only: [start: 1]
   import Kernel, except: [spawn: 3]
   import Elita, only: [spawn: 3]
+  import Enum, only: [find: 2]
 
   def privmsg(msg, state, pid) do
     privmsg(contains?(msg, "PRIVMSG"), msg, state, pid)
@@ -41,7 +42,8 @@ defmodule Freeq.Answer do
   end
 
   defp live(agent, config) do
-    spawn(agent, [agent], config)
+    kind = find(config, fn {k, _} -> k == :kind end)
+    spawn(agent, [agent], [kind])
     {:error, :failed}
   end
 
