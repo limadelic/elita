@@ -1,5 +1,4 @@
 Code.require_file("support/tester.exs", __DIR__)
-Code.require_file("support/freeq.exs", __DIR__)
 Application.ensure_all_started(:tape)
 
 scratch_home = Path.join(System.tmp_dir!(), "elita-test-#{System.pid()}")
