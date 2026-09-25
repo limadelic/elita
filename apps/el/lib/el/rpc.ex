@@ -57,9 +57,11 @@ defmodule El.RPC do
   defp verify(true, node, agent, room, opts) do
     {_n, _w, host, port} = find(node)
     {ch, pt} = convert(host, port)
-    start(agent, "#" <> room, ch, pt, opts)
-    "#{agent} started"
+    reply(agent, start(agent, "#" <> room, ch, pt, opts))
   end
+
+  defp reply(agent, {:ok, _pid, _freeq}), do: "#{agent} started"
+  defp reply(agent, {:error, reason}), do: {:error, "#{agent}: #{reason}"}
 
   defp convert(host, port) do
     {to_charlist(host), to_integer(port)}
