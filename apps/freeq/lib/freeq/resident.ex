@@ -4,15 +4,14 @@ defmodule Freeq.Resident do
   import Elita, only: [spawn: 3]
 
   def start(agent, channel, host, port, opts \\ %{}) do
-    name = to_string(agent)
-    {:ok, pid} = spawn(name, [name], [kind: Freeq.Kind, tape_env: opts])
-    {:ok, freeq} = boot(name, channel, host, port)
+    setup = [kind: Freeq.Kind, tape_env: opts]
+    {:ok, pid} = spawn(agent, [agent], setup)
+    {:ok, freeq} = boot(agent, channel, host, port, setup)
     {:ok, pid, freeq}
   end
 
-  defp boot(name, channel, host, port) do
-    start_child(Elita.Spawner, {Freeq, [
-      agent: name, channel: channel, host: host, port: port
-    ]})
-  end
+  defp boot(name, channel, host, port, setup),
+    do: start_child(Elita.Spawner,
+                    {Freeq, [agent: name, channel: channel, host: host,
+                             port: port, config: setup]})
 end
