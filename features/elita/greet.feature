@@ -34,3 +34,16 @@ Feature: Greet
     * > el spawn greet@lab/the-lab
       | no node, run el node |
     * el fails
+
+  Scenario: Stop agent only, not node
+    * > el
+    * el> greet &
+    * el> ls
+      | greet |
+    * > el stop greet
+      | stopped: greet |
+    * > el
+    * el> ls
+    * el> ls //
+      | node: elita-cukes |
+      | lab (freeq)       |
