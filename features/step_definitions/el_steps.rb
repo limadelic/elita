@@ -56,7 +56,7 @@ end
 
 Then(/^el fails$/) do
   raise "Exit status not captured" unless @exit_status
-  raise "Expected exit code 1, got #{@exit_status}" if @exit_status.zero?
+  raise "expected nonzero, got #{@exit_status}" if @exit_status.zero?
 end
 
 When(/^(\w+):$/) do |name, *rest|
