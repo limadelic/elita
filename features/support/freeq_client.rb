@@ -1,5 +1,6 @@
 require 'socket'
 module FreeqClient
+  CAPS = "CAP REQ :batch draft/multiline message-tags extended-join"
   def freeq_connect(name, host, port)
     socket = TCPSocket.new(host, port)
     setup(socket, name)
@@ -26,7 +27,7 @@ module FreeqClient
   end
 
   def write_capabilities(socket)
-    socket.write("CAP REQ :batch draft/multiline message-tags extended-join\r\n")
+    socket.write("#{CAPS}\r\n")
     socket.write("CAP END\r\n")
     socket.flush
   end
