@@ -147,7 +147,7 @@ module Spawn
   end
 
   def snuff(pid)
-    Process.wait(pid) if pid
+    @exit_status = Process.wait(pid) if pid
   end
 
   def seal(writer)

@@ -26,3 +26,4 @@ Feature: Greet
   Scenario: Greet on a node el does not know
     * > el spawn greet@nowhere/the-lab
       | unknown node: nowhere |
+    * el fails
