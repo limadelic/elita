@@ -14,8 +14,12 @@ defmodule El.RPC do
     build(safe(command, cwd))
   end
 
-  defp build(output) do
+  defp build(output) when is_binary(output) do
     "#{marker()}\n#{output}"
+  end
+
+  defp build({:error, output}) do
+    {:error, "#{marker()}\n#{output}"}
   end
 
   defp safe(command, cwd), do: handle(command, cwd)
@@ -36,7 +40,7 @@ defmodule El.RPC do
   end
 
   defp result(true, _node), do: ""
-  defp result(false, node), do: "unknown node: #{node}"
+  defp result(false, node), do: {:error, "unknown node: #{node}"}
 
   defp marker, do: "node: #{here()}"
 

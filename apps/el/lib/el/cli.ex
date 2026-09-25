@@ -16,7 +16,6 @@ defmodule El.CLI do
   import El.Bin, only: [locate: 0]
   import El.Remote, only: [call: 1]
   import System, only: [pid: 0, halt: 1]
-  import String, only: [contains?: 2]
 
   @usage """
   Usage:
@@ -76,15 +75,12 @@ defmodule El.CLI do
 
   defp show({:ok, output}) do
     puts(output)
-    fail(output)
+  end
+
+  defp show({:error, output}) do
+    puts(output)
+    halt(1)
   end
 
   defp show(:error), do: :ok
-
-  defp fail(output) do
-    output |> contains?("unknown node:") |> decide()
-  end
-
-  defp decide(true), do: halt(1)
-  defp decide(false), do: :ok
 end

@@ -13,9 +13,12 @@ defmodule El.Remote do
 
   defp dial(true, cmd) do
     cwd = cwd!()
-    output = call(address(), El.RPC, :dispatch, [cmd, cwd])
-    {:ok, output}
+    result = call(address(), El.RPC, :dispatch, [cmd, cwd])
+    normalize(result)
   end
 
   defp dial(_, _), do: :error
+
+  defp normalize({:error, text}), do: {:error, text}
+  defp normalize(text) when is_binary(text), do: {:ok, text}
 end
