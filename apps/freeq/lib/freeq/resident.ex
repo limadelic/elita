@@ -1,5 +1,6 @@
 defmodule Freeq.Resident do
   import DynamicSupervisor, only: [start_child: 2]
+  import GenServer, only: [stop: 1]
   import Kernel, except: [spawn: 3]
   import Elita, only: [spawn: 3]
 
@@ -10,11 +11,15 @@ defmodule Freeq.Resident do
   end
 
   defp result({:ok, freeq}, pid), do: {:ok, pid, freeq}
-  defp result({:error, {%{message: msg}, _}}, _pid)
+  defp result({:error, {%{message: msg}, _}}, pid)
        when is_binary(msg) do
+    stop(pid)
     {:error, msg}
   end
-  defp result({:error, error}, _pid), do: {:error, to_string(error)}
+  defp result({:error, error}, pid) do
+    stop(pid)
+    {:error, to_string(error)}
+  end
 
   defp setup(opts) when map_size(opts) == 0, do: [kind: Freeq.Kind]
   defp setup(opts), do: [kind: Freeq.Kind, tape_env: opts]

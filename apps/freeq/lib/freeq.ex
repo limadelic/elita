@@ -19,6 +19,7 @@ defmodule Freeq do
     {fetch!(opts, :agent), fetch!(opts, :channel), get(opts, :ask, &request/2),
      fetch!(opts, :host), fetch!(opts, :port), get(opts, :config, [])}
   end
+
   def tell(pid, nick, text), do: call(pid, {:tell, nick, text})
 
   @impl true
@@ -32,23 +33,20 @@ defmodule Freeq do
   defp ready(:ok, {socket, agent, channel, ask, config}) do
     {:ok, setup(socket, agent, channel, ask, config)}
   end
-
   defp ready({:error, reason}, _) do
     {:stop, reason}
   end
+
   defp socket(host, port) do
     :gen_tcp.connect(host, port, active: true, packet: :line)
   end
 
   defp setup(socket, agent, channel, ask, config) do
     register(self(), "freeq_#{agent}" |> to_atom())
-    state(socket, agent, channel, ask, config)
-  end
-
-  defp state(socket, agent, channel, ask, config) do
     %{socket: socket, agent: agent, channel: channel, ask: ask,
       pending: [], attempts: 0, config: config}
   end
+
   @impl true
   def handle_call({:tell, nick, text}, _from, %{socket: socket, channel: channel} = state) do
     text = "#{nick}: #{text}"
@@ -84,11 +82,13 @@ defmodule Freeq do
     send(socket, channel, text)
     {:noreply, state}
   end
+
   defp recv(line, state) do
     clean(line) |> absorb() |> process(state)
   end
 
   defp clean(line), do: line |> to_string() |> trim_trailing("\r\n") |> wrap()
+
   defp process(lines, state), do: route(lines, state)
 
   @impl true

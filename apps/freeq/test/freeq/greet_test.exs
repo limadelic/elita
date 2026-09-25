@@ -3,6 +3,8 @@ Code.require_file("../support/freeq_case.exs", __DIR__)
 defmodule FreeqGreetTest do
   use FreeqCase
 
+  import Registry, only: [lookup: 2]
+
   @moduletag :freeq
   @tag cassette: "greet"
   test "greet conversation flow" do
@@ -36,5 +38,6 @@ defmodule FreeqGreetTest do
     assert {:error, msg} = result
     assert String.contains?(msg, "nick brian in use")
     assert elapsed < 1000
+    assert lookup(ElitaRegistry, "brian") == []
   end
 end
