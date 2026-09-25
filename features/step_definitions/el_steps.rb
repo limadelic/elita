@@ -11,9 +11,11 @@ When(/^cassette (.+)$/) do |name|
 end
 
 When(/^> el tell (.+)$/) do |args, *rest|
-  output = one("tell #{args}")
-  track(output, output.gsub(/\e\[[0-9;]*m/, ''))
-  handle(rest.first, output)
+  output = one_shot("tell #{args}", rest.first)
+end
+
+When(/^> el spawn (.+)$/) do |args, *rest|
+  output = one_shot("spawn #{args}", rest.first)
 end
 
 When(/^> el$/) do |*rest|
@@ -21,7 +23,7 @@ When(/^> el$/) do |*rest|
   handle(rest.first, transcript)
 end
 
-When(/^> el (.+)$/) do |args, *rest|
+When(/^> el (?!(tell|spawn) )(.+)$/) do |_neg, args, *rest|
   route(args)
   handle(rest.first, transcript)
 end
@@ -58,6 +60,20 @@ When(/^(\w+):$/) do |name, *rest|
   end
 end
 
+def one_shot(cmd, table)
+  output = one_raw(cmd)
+  ensure_transcript
+  track(output, output.gsub(/\e\[[0-9;]*m/, ''))
+  handle(table, output)
+end
+
+def ensure_transcript
+  return unless @transcript.nil? || @transcript.frozen?
+
+  @transcript = ''
+  @transcript_stripped = ''
+end
+
 def handle(table, output)
   return unless table
 
@@ -79,12 +95,12 @@ def finalize(table, output)
 end
 
 def track(chunk, stripped)
-  if @transcript.nil?
-    @transcript = ''
-    @transcript_stripped = ''
+  if @transcript.nil? || @transcript.frozen?
+    @transcript = ''.dup
+    @transcript_stripped = ''.dup
   end
-  @transcript << chunk
-  @transcript_stripped << stripped
+  @transcript << chunk.dup
+  @transcript_stripped << stripped.dup
 end
 
 def note(prompt, input)

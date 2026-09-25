@@ -1,5 +1,6 @@
 defmodule El.Cli.Parse do
   import Enum, only: [join: 2]
+  import String, only: [contains?: 2]
 
   @known_tools ["claude", "codex"]
 
@@ -21,6 +22,11 @@ defmodule El.Cli.Parse do
 
   def parse(["ask", agent, msg]), do: {:ask, nil, agent, msg}
   def parse(["tell", agent, msg]), do: {:tell, nil, agent, msg}
+
+  def parse(["spawn", addr]) do
+    if contains?(addr, "@"), do: {:spawn_remote, addr}, else: :usage
+  end
+
   def parse(["spawn", name, agent]), do: {:spawn, name, agent}
   def parse(["stop", agent]), do: {:stop, agent}
   def parse(["@" <> agent | rest]), do: {:ask_tool, agent, rest |> join(" ")}

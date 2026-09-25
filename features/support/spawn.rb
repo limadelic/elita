@@ -131,9 +131,22 @@ module Spawn
     output
   end
 
+  def run_raw(cmd)
+    output = ""
+    reader, writer, pid = mint_raw(cmd)
+    watch(pid)
+    extract(reader, Time.now + 30, output)
+    kill(writer, pid)
+    output
+  end
+
   def mint(cmd)
     cmd_env = cmd.include?("@") ? cloak(cmd) : cmd
     PTY.spawn("/bin/sh", "-c", cmd_env)
+  end
+
+  def mint_raw(cmd)
+    PTY.spawn("/bin/sh", "-c", cmd)
   end
 
   def cloak(cmd)
