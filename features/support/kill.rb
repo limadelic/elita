@@ -6,25 +6,22 @@ module Kill
   end
 
   def grace(pid)
-    pgid = Process.getpgid(pid)
-    Process.kill("TERM", -pgid)
-    dwell(pgid)
-    force(pgid)
+    dwell(pid)
   rescue Errno::ESRCH, Errno::EPERM
     nil
   end
 
-  def force(pgid)
-    Process.kill("KILL", -pgid) if alive?(pgid)
+  def force(_pgid)
+    nil
   end
 
-  def dwell(pgid)
-    10.times do
-      return true unless alive?(pgid)
-
-      sleep 0.2
-    end
-    false
+  def dwell(pid)
+    Timeout.timeout(2) { Process.wait(pid) }
+    true
+  rescue Timeout::Error
+    raise "el client #{pid} did not exit"
+  rescue Errno::ECHILD
+    true
   end
 
   def alive?(pgid)
