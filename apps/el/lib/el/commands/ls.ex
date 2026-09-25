@@ -76,9 +76,9 @@ defmodule El.Commands.Ls do
   end
 
   defp headless(names) do
-    ElitaRegistry
-    |> select([{{:"$1", :_, %{kind: :headless}}, [], [:"$1"]}])
-    |> filter(&absent?(names, &1))
+    h = ElitaRegistry |> select([{{:"$1", :_, %{kind: :headless}}, [], [:"$1"]}])
+    n = ElitaRegistry |> select([{{:"$1", :_, %{kind: :native}}, [], [:"$1"]}])
+    (h ++ n) |> filter(&absent?(names, &1))
   end
 
   defp absent?(list, n) do

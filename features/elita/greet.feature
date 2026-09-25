@@ -11,3 +11,10 @@ Feature: Greet
 
     * greet> how are you?
       | i am greeeet |
+
+  Scenario: Greet runs in the background
+    * > el
+
+    * el> greet &
+    * el> ls
+      | greet |

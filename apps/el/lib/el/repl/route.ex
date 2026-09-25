@@ -9,6 +9,7 @@ defmodule El.Repl.Route do
   import Elita, only: [spawn: 3]
   import System, only: [get_env: 1]
   import Utils.Normalize, only: [name: 1]
+  import El.Command.Ls, only: [list: 0]
 
   def route([name, "log"], _a, _p, _i), do: name |> log() |> puts()
 
@@ -46,6 +47,12 @@ defmodule El.Repl.Route do
     }
 
   def via(["log"], _p, _i, agent), do: {agent |> log(), agent, nil}
+
+  def via(["ls"], _p, _i, agent) do
+    list()
+    {"", agent, nil}
+  end
+
   def via([_w], p, i, agent), do: {ask(p, i), agent, p}
   def via([w, msg], p, _i, agent), do: send(w, msg, p, agent, known?(w))
   def via(_, p, i, agent), do: {ask(p, i), agent, p}
@@ -58,6 +65,11 @@ defmodule El.Repl.Route do
   defp registered?(key), do: :global.whereis_name({key, :puppet}) != :undefined
 
   defp file?(w), do: w in agents()
+
+  def send(w, "&", p, _agent, true) do
+    w |> locate() |> choose(p)
+    {w <> " started", w, nil}
+  end
 
   def send(w, msg, p, _agent, true) do
     pid = w |> locate() |> choose(p)
