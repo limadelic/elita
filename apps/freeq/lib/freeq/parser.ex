@@ -49,7 +49,8 @@ defmodule Freeq.Parser do
   end
 
   defp cite(text, nick) do
-    prefixes = ["#{nick}:", "#{nick},", "#{nick} ", "@#{nick}:", "@#{nick},", "@#{nick} "]
+    prefixes = ["#{nick}:", "#{nick},", "#{nick} ",
+                "@#{nick}:", "@#{nick},", "@#{nick} "]
     any?(prefixes, &starts_with?(text, &1))
   end
 
@@ -58,6 +59,9 @@ defmodule Freeq.Parser do
   end
 
   defp cut(text, nick) do
-    trim_leading(text, "#{nick}:") |> trim_leading("#{nick},") |> trim_leading("#{nick} ")
+    text
+    |> trim_leading("#{nick}:")
+    |> trim_leading("#{nick},")
+    |> trim_leading("#{nick} ")
   end
 end

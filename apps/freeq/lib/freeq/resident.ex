@@ -12,9 +12,29 @@ defmodule Freeq.Resident do
     started(spawn(name, [name], opt(cfg, get(opts, :cwd, nil))), boot)
   end
 
-  defp started({:ok, pid}, boot), do: result(boot.(), pid)
-  defp started({:error, {:shutdown, {:failed_to_start_child, _, {%{message: msg}, _}}}}, _boot),
-    do: {:error, msg}
+defp started({:ok, pid}, boot) do
+    result(boot.(), pid)
+  end
+
+  defp started({:error, err}, _boot) do
+    {:error, split(err)}
+  end
+
+  defp split({:shutdown, info}) do
+    child(info)
+  end
+
+  defp split(other) do
+    to_string(other)
+  end
+
+  defp child({:failed_to_start_child, _, {%{message: msg}, _}}) do
+    msg
+  end
+
+  defp child(_) do
+    "unknown error"
+  end
 
   defp opt(cfg, nil), do: cfg
   defp opt(cfg, cwd), do: cfg ++ [cwd: cwd]

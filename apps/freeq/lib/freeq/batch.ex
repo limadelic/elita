@@ -29,7 +29,9 @@ defmodule Freeq.Batch do
     act(kind(body), ref(line), body, state)
   end
 
-  defp kind(body), do: sort(contains?(body, " BATCH +"), starts_with?(body, "BATCH -"), body)
+  defp kind(body) do
+    sort(contains?(body, " BATCH +"), starts_with?(body, "BATCH -"), body)
+  end
 
   defp sort(true, _close, body), do: multi(contains?(body, " draft/multiline "))
   defp sort(_open, true, _body), do: :close
@@ -41,7 +43,9 @@ defmodule Freeq.Batch do
   defp act(:open, _ref, body, state), do: {:pending, open(state, body)}
   defp act(:skip, _ref, _body, state), do: {:pending, state}
   defp act(:close, _ref, body, state), do: shut(state, tail(body))
-  defp act(:plain, ref, body, state), do: keep(has_key?(state, ref), ref, body, state)
+  defp act(:plain, ref, body, state) do
+    keep(has_key?(state, ref), ref, body, state)
+  end
 
   defp open(state, body) do
     [src, _batch, ref, _type, chan] = split(body, " ", parts: 5)
@@ -50,8 +54,13 @@ defmodule Freeq.Batch do
 
   defp shut(state, ref), do: close(has_key?(state, ref), state, ref)
 
-  defp close(true, state, ref), do: {:message, assemble(fetch!(state, ref)), delete(state, ref)}
-  defp close(false, state, _ref), do: {:pending, state}
+  defp close(true, state, ref) do
+    {:message, assemble(fetch!(state, ref)), delete(state, ref)}
+  end
+
+  defp close(false, state, _ref) do
+    {:pending, state}
+  end
 
   defp keep(true, ref, body, state), do: {:pending, add(state, ref, text(body))}
   defp keep(false, _ref, body, state), do: {:message, body, state}
@@ -61,7 +70,9 @@ defmodule Freeq.Batch do
     put(state, ref, %{batch | lines: batch.lines ++ [text]})
   end
 
-  defp tail(body), do: body |> split(" ", parts: 2) |> last() |> trim_leading("-")
+  defp tail(body) do
+    body |> split(" ", parts: 2) |> last() |> trim_leading("-")
+  end
 
   defp text(body) do
     [_src, rest] = split(body, " PRIVMSG ", parts: 2)
@@ -75,7 +86,9 @@ defmodule Freeq.Batch do
     "#{src} PRIVMSG #{chan} :#{join(lines, "\n")}"
   end
 
-  defp ref("@batch=" <> rest), do: rest |> split(" ", parts: 2) |> first() |> tagval()
+  defp ref("@batch=" <> rest) do
+    rest |> split(" ", parts: 2) |> first() |> tagval()
+  end
   defp ref(_line), do: ""
 
   defp tagval(value), do: value |> split(";", parts: 2) |> first()

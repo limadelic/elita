@@ -36,8 +36,13 @@ defmodule Freeq.Welcome do
       {:tcp, ^socket, line} -> check(line, socket, count)
       {:tcp_closed, ^socket} -> raise "Socket closed waiting for 001"
     after
-      5000 -> raise("Timeout waiting for 001: Last line: #{last} (#{count} lines received)")
+      5000 ->
+        raise(delay(last, count))
     end
+  end
+
+  defp delay(last, count) do
+    "Timeout waiting for 001: Last line: #{last} (#{count} lines received)"
   end
 
   defp nick(str) do

@@ -48,7 +48,8 @@ defmodule Freeq do
   end
 
   @impl true
-  def handle_call({:tell, nick, text}, _from, %{socket: socket, channel: channel} = state) do
+  def handle_call({:tell, nick, text}, _from, state) do
+    %{socket: socket, channel: channel} = state
     text = "#{nick}: #{text}"
     send(socket, channel, text)
     {:reply, :ok, push(state, text)}
@@ -64,33 +65,31 @@ defmodule Freeq do
   def handle_info({:EXIT, _pid, _reason}, state), do: {:stop, :normal, state}
 
   @impl true
-  def handle_info({:answer, text, sender}, %{socket: socket, channel: channel} = state) do
+  def handle_info({:answer, text, sender}, state) do
+    %{socket: socket, channel: channel} = state
     text = "@#{sender} #{text}"
     send(socket, channel, text)
     {:noreply, push(state, text)}
   end
 
   @impl true
-  def handle_info({:error_answer, sender}, %{socket: socket, channel: channel} = state) do
+  def handle_info({:error_answer, sender}, state) do
+    %{socket: socket, channel: channel} = state
     text = "@#{sender} could not answer"
     send(socket, channel, text)
     {:noreply, push(state, text)}
   end
 
   @impl true
-  def handle_info({:retry, text}, %{socket: socket, channel: channel} = state) do
+  def handle_info({:retry, text}, state) do
+    %{socket: socket, channel: channel} = state
     send(socket, channel, text)
     {:noreply, state}
   end
 
-  defp recv(line, state) do
-    clean(line) |> absorb() |> process(state)
-  end
-
+  defp recv(line, state), do: clean(line) |> absorb() |> process(state)
   defp clean(line), do: line |> to_string() |> trim_trailing("\r\n") |> wrap()
-
   defp process(lines, state), do: route(lines, state)
-
   @impl true
   def terminate(_reason, %{socket: socket}) do
     :gen_tcp.send(socket, "QUIT\r\n")
