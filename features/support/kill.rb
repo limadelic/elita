@@ -16,17 +16,17 @@ module Kill
   end
 
   def dwell(pid)
-    uphold(pid)
+    sustain(pid)
   rescue Errno::ECHILD
     true
   end
 
-  def uphold(pid)
-    enforce(pid)
+  def sustain(pid)
+    endure(pid)
     true
   end
 
-  def enforce(pid)
+  def endure(pid)
     Timeout.timeout(2) { Process.wait(pid) }
   rescue Timeout::Error
     raise "el client #{pid} did not exit"
