@@ -16,12 +16,24 @@ When(/^> el tell (.+)$/) do |args, *rest|
   handle(rest.first, output)
 end
 
+When(/^> el spawn (.+)$/) do |args, *rest|
+  output = one("spawn #{args}")
+  if @transcript.nil? || @transcript.frozen?
+    @transcript = output.to_s
+    @transcript_stripped = output.gsub(/\e\[[0-9;]*m/, '').to_s
+  else
+    @transcript << output
+    @transcript_stripped << output.gsub(/\e\[[0-9;]*m/, '')
+  end
+  handle(rest.first, output)
+end
+
 When(/^> el$/) do |*rest|
   boot('')
   handle(rest.first, transcript)
 end
 
-When(/^> el (.+)$/) do |args, *rest|
+When(/^> el (?!spawn )(.+)$/) do |args, *rest|
   route(args)
   handle(rest.first, transcript)
 end

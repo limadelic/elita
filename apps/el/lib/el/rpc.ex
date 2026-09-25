@@ -5,6 +5,7 @@ defmodule El.RPC do
   import File, only: [cwd!: 0]
   import El.Commands.Ls, only: [remote: 1]
   import El.Commands.Ask, only: [ask: 2]
+  import El.Commands.Nodes, only: [check: 1]
 
   def dispatch(command, cwd \\ cwd!()) do
     ensure_all_started(:elita)
@@ -20,6 +21,7 @@ defmodule El.RPC do
   defp handle(["ls"], cwd), do: remote(cwd: cwd)
   defp handle(["ls", path], _cwd), do: remote(path: path)
   defp handle(["ask", agent, msg], _cwd), do: ask(agent, msg)
+  defp handle(["spawn", addr], _cwd), do: check(addr)
   defp handle(_, _cwd), do: ""
 
   defp marker, do: "node: #{here()}"
