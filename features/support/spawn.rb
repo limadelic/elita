@@ -1,4 +1,4 @@
-module Spawn
+module Spawn # rubocop:disable Metrics/ModuleLength
   def realm
     @scratch || "apps/elita/agents/elita"
   end
@@ -16,6 +16,7 @@ module Spawn
       "CASSETTE_DIR=#{dir} " +
       clock_prefix +
       "MIX_ENV=test " +
+      "ELITA_RUN=#{flux} " +
       "#{gate} " +
       "#{args}"
     ).strip
@@ -116,7 +117,7 @@ module Spawn
   end
 
   def flux
-    [@elita_run, ENV["ELITA_RUN"], "cukes"].compact.first
+    [@elita_run, ENV["ELITA_RUN"], "cukes"].find { |r| r.to_s != "" }
   end
 
   def spine
