@@ -1,5 +1,5 @@
 defmodule FreeqTestClient do
-  import Freeq.Batch, only: [absorb: 1]
+  import Freeq.Batch, only: [absorb: 1, strip: 1]
   import Freeq.Said, only: [matches?: 4]
   @opts [:binary, {:packet, :line}, {:active, false}, {:reuseaddr, true}, {:nodelay, true}]
   @timeout 5000
@@ -26,16 +26,7 @@ defmodule FreeqTestClient do
   end
 
   def wait_join(agent) do
-    processed_line = await("#{agent} JOIN", &joined(&1, agent))
-    lookup_raw_line(processed_line)
-  end
-
-  defp lookup_raw_line(processed_line) do
-    pairs = Process.get(:freeq_line_map, [])
-    case Enum.find(pairs, fn {proc, _} -> proc == processed_line end) do
-      {_, raw} -> raw
-      nil -> processed_line
-    end
+    await("#{agent} JOIN", &joined(&1, agent))
   end
 
   def say(text), do: send_line("PRIVMSG #the-lab :#{text}")
@@ -63,14 +54,17 @@ defmodule FreeqTestClient do
     left = deadline - epoch()
     left > 0 || raise("timeout waiting for #{what}")
     raw = :gen_tcp.recv(socket(), 0, left) |> lines(what)
-    processed = raw |> absorb() |> record()
-    Process.put(:freeq_raw_lines, (Process.get(:freeq_raw_lines, []) ++ raw))
-
-    pairs = Enum.zip(processed, raw)
-    all_pairs = Process.get(:freeq_line_map, [])
-    Process.put(:freeq_line_map, all_pairs ++ pairs)
-
+    processed = raw |> Enum.flat_map(&feed_one/1) |> record()
     processed
+  end
+
+  defp feed_one(raw) do
+    result = absorb([raw])
+    case result do
+      [^raw] -> [raw]
+      [stripped] when stripped == strip(raw) -> [raw]
+      other -> other
+    end
   end
 
   defp record(lines) do
@@ -99,7 +93,8 @@ defmodule FreeqTestClient do
   end
 
   defp from(line, agent) do
-    String.starts_with?(line, ":#{agent}!") and
+    stripped = strip(line)
+    String.starts_with?(stripped, ":#{agent}!") and
       String.contains?(line, "PRIVMSG #the-lab :@#{@driver} ")
   end
 

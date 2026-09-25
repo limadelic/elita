@@ -1,10 +1,13 @@
 defmodule Freeq.Said do
+  import Freeq.Batch, only: [strip: 1]
+
   def said?(from, to, fragment) do
     Process.get(:freeq_transcript, []) |> Enum.any?(&matches?(&1, from, to, fragment))
   end
 
   def matches?(line, from, to, fragment) do
-    String.starts_with?(line, ":#{from}!") and
+    stripped = strip(line)
+    String.starts_with?(stripped, ":#{from}!") and
       String.contains?(line, "PRIVMSG #the-lab :") and
       addressee(line, to, fragment)
   end
