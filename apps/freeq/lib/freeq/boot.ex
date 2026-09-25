@@ -10,13 +10,13 @@ defmodule Freeq.Boot do
   end
 
   defp register(socket, agent) do
-    request_caps(socket)
+    caps(socket)
     nick(socket, agent)
     user(socket, agent)
     greet(socket)
   end
 
-  defp request_caps(socket) do
+  defp caps(socket) do
     line(socket, "CAP REQ :batch draft/multiline message-tags echo-message")
     line(socket, "CAP END")
   end

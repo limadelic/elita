@@ -114,7 +114,7 @@ jobs:
 
       - name: Run greet test
         id: greet
-        run: cd apps/elita && mix test --only freeq
+        run: cd apps/freeq && mix test --include freeq
 
       - name: Record freeq result
         run: |

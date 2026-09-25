@@ -1,8 +1,10 @@
 defmodule Freeq.Batch do
-  import String, only: [split: 3, contains?: 2, trim_leading: 2, starts_with?: 2]
+  import String,
+    only: [split: 3, contains?: 2, trim_leading: 2, starts_with?: 2]
   import Enum, only: [join: 2, flat_map: 2]
   import List, only: [last: 1, first: 1]
   import Map, only: [put: 3, delete: 2, has_key?: 2, fetch!: 2]
+  import Process, only: [get: 2, put: 2]
 
   def new, do: %{}
 
@@ -10,15 +12,15 @@ defmodule Freeq.Batch do
 
   defp step(line), do: state() |> feed(line) |> emit()
 
-  defp state, do: Process.get(:freeq_batch) || new()
+  defp state, do: get(:freeq_batch, new())
 
   defp emit({:message, line, state}) do
-    Process.put(:freeq_batch, state)
+    put(:freeq_batch, state)
     [line]
   end
 
   defp emit({:pending, state}) do
-    Process.put(:freeq_batch, state)
+    put(:freeq_batch, state)
     []
   end
 

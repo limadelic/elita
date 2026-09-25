@@ -16,19 +16,27 @@ defmodule Freeq.Answer do
     :noop
   end
 
-  def reply({:ask, sender, text}, agent, ask, pid, driver)
-      when sender != agent and sender == driver do
-    start(fn -> ask.(agent, format(sender, text, driver)) |> relay(pid) end)
+  def reply({:ask, s, t}, a, k, p, d) do
+    reply(%{sender: s, text: t, agent: a, ask: k, pid: p, driver: d})
   end
-
-  def reply({:ask, sender, text}, agent, _ask, _pid, driver)
-      when sender != agent and sender != driver do
-    dispatch(agent, format(sender, text, driver))
-  end
-
-  def reply({:ask, _sender, _text}, _agent, _ask, _pid, _driver), do: :ok
 
   def reply(:noop, _agent, _ask, _pid, _driver), do: :ok
+
+  defp reply(ctx), do: handle(kind(ctx), ctx)
+
+  defp kind(%{sender: s, agent: a}) when s == a, do: :same
+  defp kind(%{sender: s, driver: d}) when s == d, do: :driver
+  defp kind(_), do: :other
+
+  defp handle(:same, _), do: :ok
+
+  defp handle(:driver, %{sender: s, text: t, agent: a, ask: ask, pid: p, driver: d}) do
+    start(fn -> ask.(a, format(s, t, d)) |> relay(p) end)
+  end
+
+  defp handle(:other, %{sender: s, text: t, agent: a, driver: d}) do
+    dispatch(a, format(s, t, d))
+  end
 
   defp format(driver, text, driver), do: text
   defp format(sender, text, _driver), do: "[from #{sender}] #{text}"

@@ -10,4 +10,4 @@ System.put_env(
   Path.join(System.user_home!(), "Library/Caches/ms-playwright")
 )
 
-ExUnit.start(exclude: [:freeq, :integration])
+ExUnit.start(exclude: [:integration])

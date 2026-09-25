@@ -1,5 +1,6 @@
 defmodule FreeqCase do
-  Code.require_file("../support/freeq_client.exs", __DIR__)
+  Code.require_file("../../../elita/test/support/tester.exs", __DIR__)
+  Code.require_file("freeq_client.exs", __DIR__)
 
   defmacro __using__(_opts) do
     quote do

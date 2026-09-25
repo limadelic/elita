@@ -13,11 +13,14 @@ defmodule Freeq.Inbox do
     {:noreply, state}
   end
 
-  defp handle(":" <> msg, state), do: relay(refused?(msg), msg, state)
+  defp handle(":" <> msg, state), do: relay(check(msg), msg, state)
 
   defp handle(_msg, state), do: {:noreply, state}
 
-  defp refused?(msg), do: contains?(msg, " 404 ") and contains?(msg, "Flood protection")
+  defp check(msg), do: check(contains?(msg, " 404 "), msg)
+
+  defp check(false, _msg), do: false
+  defp check(true, msg), do: contains?(msg, "Flood protection")
 
   defp relay(true, msg, state), do: {:noreply, defer(state, head(state), msg)}
 
