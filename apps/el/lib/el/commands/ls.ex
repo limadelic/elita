@@ -72,10 +72,10 @@ defmodule El.Commands.Ls do
 
   defp harvest(visible) do
     names = map(visible, & &1.name)
-    headless(names) |> map(&entry/1)
+    live(names) |> map(&entry/1)
   end
 
-  defp headless(names) do
+  defp live(names) do
     h = ElitaRegistry |> select([{{:"$1", :_, %{kind: :headless}}, [], [:"$1"]}])
     n = ElitaRegistry |> select([{{:"$1", :_, %{kind: :native}}, [], [:"$1"]}])
     (h ++ n) |> filter(&absent?(names, &1))
