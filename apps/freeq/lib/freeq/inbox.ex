@@ -19,12 +19,20 @@ defmodule Freeq.Inbox do
 
   defp handle(_msg, state), do: {:noreply, state}
 
-  defp dispatch([_server, token], _msg, socket, state) do
+  defp dispatch([server, token], msg, socket, state) do
+    respond(contains?(server, " "), token, msg, socket, state)
+  end
+
+  defp dispatch([_], msg, _socket, state) do
+    relay(check(msg), msg, state)
+  end
+
+  defp respond(false, token, _msg, socket, state) do
     pong(socket, token)
     {:noreply, state}
   end
 
-  defp dispatch(_no_ping, msg, _socket, state) do
+  defp respond(true, _token, msg, _socket, state) do
     relay(check(msg), msg, state)
   end
 
