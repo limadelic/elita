@@ -1,7 +1,16 @@
 #!/usr/bin/env elixir
-# Stop the elita-cukes node gracefully via Erlang RPC
 
-node_name = :"elita-cukes@127.0.0.1"
+defmodule StopD do
+  def validate(nil), do: "cukes"
+  def validate("") do
+    IO.puts("refuse: live node")
+    System.halt(1)
+  end
+  def validate(name), do: name
+end
+
+run_name = StopD.validate(System.get_env("ELITA_RUN"))
+node_name = :"elita-#{run_name}@127.0.0.1"
 
 unless Node.alive? do
   Node.start(:"cukes_stopd@127.0.0.1")
@@ -13,6 +22,5 @@ case Node.connect(node_name) do
     Process.sleep(500)
     System.halt(0)
   false ->
-    # Node not running, nothing to stop
     System.halt(0)
 end
