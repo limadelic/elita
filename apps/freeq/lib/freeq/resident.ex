@@ -7,10 +7,14 @@ defmodule Freeq.Resident do
 
   def start(agent, channel, host, port, opts \\ %{}) do
     cfg = setup(opts)
-    cwd = get(opts, :cwd, nil)
-    {:ok, pid} = spawn(to_string(agent), [to_string(agent)], opt(cfg, cwd))
-    result(boot(to_string(agent), channel, host, port, cfg), pid)
+    name = to_string(agent)
+    boot = fn -> boot(name, channel, host, port, cfg) end
+    started(spawn(name, [name], opt(cfg, get(opts, :cwd, nil))), boot)
   end
+
+  defp started({:ok, pid}, boot), do: result(boot.(), pid)
+  defp started({:error, {:shutdown, {:failed_to_start_child, _, {%{message: msg}, _}}}}, _boot),
+    do: {:error, msg}
 
   defp opt(cfg, nil), do: cfg
   defp opt(cfg, cwd), do: cfg ++ [cwd: cwd]

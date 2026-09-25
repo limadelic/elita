@@ -11,3 +11,8 @@ Feature: Greet sad paths
     * > el spawn greet@lab/the-lab
       | no node, run el node |
     * el fails
+
+  Scenario: Spawn an unknown agent
+    * > el spawn nobody@lab/the-lab
+      | unknown agent: nobody |
+    * el fails
