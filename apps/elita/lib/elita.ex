@@ -45,24 +45,26 @@ defmodule Elita do
     {:ok, state(name, configs, opts, settings)}
   end
 
-  defp state(name, configs, opts, settings) do
-    base = base(name, configs)
-    sender = get(opts, :sender, name)
-    skip = get(opts, :skip_logs, false)
-    merge(merge(base, settings), %{sender: sender, skip_logs: skip})
-  end
-
-  defp base(name, configs) do
-    history = restore(name)
-    %{name: name, config: load(configs), history: history, configs: configs}
+  defp state(n, c, o, s) do
+    b = %{name: n, config: load(c), history: restore(n), configs: c}
+    x = %{sender: get(o, :sender, n), skip_logs: get(o, :skip_logs, false)}
+    merge(merge(b, s), x)
   end
 
   defp seed(nil), do: :ok
   defp seed(_), do: :rand.seed(:exsss, {1, 2, 3})
+
   @impl true
   def handle_call({:ask, msg}, from, state), do: handle_call({:act, msg}, from, state)
   @impl true
-  def handle_call({:act, msg}, _, state), do: act(msg, state)
+  def handle_call({:act, msg}, _, state), do: guard(msg, state)
+
+  defp guard(msg, state) do
+    act(msg, state)
+  catch
+    _, _ -> {:reply, {:error, :failed}, state}
+  end
+
   @impl true
   def handle_cast({:act, msg}, state) do
     {_, _, state} = act(msg, state)

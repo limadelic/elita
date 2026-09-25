@@ -29,9 +29,15 @@ defmodule Freeq.Answer do
   defp handle(:same, _), do: :ok
 
   defp handle(:other, %{sender: s, text: t, agent: a, ask: ask, pid: p}) do
-    start(fn -> ask.(a, "[from #{s}] #{t}") |> relay(p, s) end)
+    start(fn -> safe(ask, a, s, t) |> relay(p, s) end)
   end
 
-  def relay({:error, _}, _pid, _sender), do: :noop
+  defp safe(ask, agent, sender, text) do
+    ask.(agent, "[from #{sender}] #{text}")
+  catch
+    _, _ -> {:error, :failed}
+  end
+
+  def relay({:error, _}, pid, sender), do: send(pid, {:error_answer, sender})
   def relay(answer, pid, sender), do: send(pid, {:answer, answer, sender})
 end

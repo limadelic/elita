@@ -68,6 +68,13 @@ defmodule Freeq do
   end
 
   @impl true
+  def handle_info({:error_answer, sender}, %{socket: socket, channel: channel} = state) do
+    text = "@#{sender} could not answer"
+    send(socket, channel, text)
+    {:noreply, push(state, text)}
+  end
+
+  @impl true
   def handle_info({:retry, text}, %{socket: socket, channel: channel} = state) do
     send(socket, channel, text)
     {:noreply, state}
