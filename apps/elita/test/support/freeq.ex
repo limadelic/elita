@@ -77,7 +77,7 @@ defmodule Freeq do
 
   @impl true
   def handle_info({:answer, text}, %{socket: socket, channel: channel, driver: driver} = state) do
-    text = "#{driver}: #{text}"
+    text = "@#{driver} #{text}"
     send(socket, channel, text)
     {:noreply, push(state, text)}
   end

@@ -81,8 +81,8 @@ defmodule FreeqTestClient do
 
   defp from(line, agent) do
     String.starts_with?(line, ":#{agent}!") and
-      String.contains?(line, "PRIVMSG #the-lab :#{@driver}: ")
+      String.contains?(line, "PRIVMSG #the-lab :@#{@driver} ")
   end
 
-  defp text(line), do: line |> String.split(" :#{@driver}: ", parts: 2) |> List.last()
+  defp text(line), do: line |> String.split(" :@#{@driver} ", parts: 2) |> List.last()
 end
