@@ -111,10 +111,6 @@ Before('@freeq') do
   freeq_connect('brian', '127.0.0.1', port.to_i)
 end
 
-After('@freeq') do
-  freeq_close('brian')
-end
-
 After do |_scenario|
   Timeout.timeout(30) do
     merge_screens if ENV["TAPE"] == "rec"
@@ -125,6 +121,10 @@ rescue Timeout::Error
   STDERR.puts "After hook timed out after 30s"
   purge
   slash
+end
+
+After('@freeq') do
+  freeq_close('brian')
 end
 
 def merge_screens
