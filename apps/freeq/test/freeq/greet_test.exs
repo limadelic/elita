@@ -38,6 +38,15 @@ defmodule FreeqGreetTest do
     assert {:error, msg} = result
     assert String.contains?(msg, "nick brian in use")
     assert elapsed < 1000
-    assert lookup(ElitaRegistry, "brian") == []
+    assert agent_left?("brian")
+  end
+
+  defp agent_left?(name) do
+    poll_until_gone(name, System.monotonic_time(:millisecond) + 500)
+  end
+
+  defp poll_until_gone(name, deadline) do
+    lookup(ElitaRegistry, name) == [] ||
+    (System.monotonic_time(:millisecond) < deadline && (Process.sleep(10) && poll_until_gone(name, deadline)))
   end
 end
