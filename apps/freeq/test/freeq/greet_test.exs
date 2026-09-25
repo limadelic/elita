@@ -27,4 +27,13 @@ defmodule FreeqGreetTest do
     answer = ask(:greet, "Brian")
     verify("wonderful to meet you", answer)
   end
+
+  @tag cassette: "greet"
+  test "an agent cannot take a nick already in use" do
+    spawn(:greet)
+
+    port_num = String.to_integer(System.get_env("FREEQ_PORT", "6667"))
+    {:error, msg} = Freeq.Resident.start(:greet, "#the-lab", ~c"127.0.0.1", port_num)
+    assert String.contains?(msg, "nick greet in use")
+  end
 end
