@@ -27,6 +27,16 @@ defmodule FreeqTestClient do
 
   def wait_join(agent) do
     await("#{agent} JOIN", &joined(&1, agent))
+    |> find_raw_join(agent)
+  end
+
+  defp find_raw_join(processed_line, agent) do
+    raw_lines = Process.get(:freeq_raw_lines, [])
+    raw_lines
+    |> Enum.find(fn raw ->
+      absorb([raw]) |> Enum.any?(&joined(&1, agent))
+    end)
+    || processed_line
   end
 
   def say(text), do: send_line("PRIVMSG #the-lab :#{text}")
@@ -53,7 +63,10 @@ defmodule FreeqTestClient do
   defp read(what, deadline) do
     left = deadline - epoch()
     left > 0 || raise("timeout waiting for #{what}")
-    :gen_tcp.recv(socket(), 0, left) |> lines(what) |> absorb() |> record()
+    raw = :gen_tcp.recv(socket(), 0, left) |> lines(what)
+    processed = raw |> absorb() |> record()
+    Process.put(:freeq_raw_lines, (Process.get(:freeq_raw_lines, []) ++ raw))
+    processed
   end
 
   defp record(lines) do
