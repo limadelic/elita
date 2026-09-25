@@ -1,4 +1,8 @@
-module Spawn # rubocop:disable Metrics/ModuleLength
+require_relative 'run'
+
+module Spawn
+  include Run
+
   def realm
     @scratch || "apps/elita/agents/elita"
   end
@@ -16,7 +20,7 @@ module Spawn # rubocop:disable Metrics/ModuleLength
       "CASSETTE_DIR=#{dir} " +
       clock_prefix +
       "MIX_ENV=test " +
-      "ELITA_RUN=#{flux} " +
+      "ELITA_RUN=#{elita_run(@elita_run)} " +
       "#{gate} " +
       "#{args}"
     ).strip
@@ -31,7 +35,7 @@ module Spawn # rubocop:disable Metrics/ModuleLength
       "CASSETTE_DIR=#{dir} " +
       clock_prefix +
       "MIX_ENV=test " +
-      "ELITA_RUN=#{flux} " +
+      "ELITA_RUN=#{elita_run(@elita_run)} " +
       "#{gate} " +
       "#{args}"
     ).strip
@@ -79,7 +83,7 @@ module Spawn # rubocop:disable Metrics/ModuleLength
       "CASSETTE" => @cassette,
       "CASSETTE_DIR" => dir,
       "MIX_ENV" => "test",
-      "ELITA_RUN" => flux,
+      "ELITA_RUN" => elita_run(@elita_run),
       "HOME" => ENV["HOME"]
     }
     clock = clock_env
@@ -114,10 +118,6 @@ module Spawn # rubocop:disable Metrics/ModuleLength
 
   def live
     ENV["LIVE"] || ""
-  end
-
-  def flux
-    [@elita_run, ENV["ELITA_RUN"], "cukes"].find { |r| r.to_s != "" }
   end
 
   def spine
