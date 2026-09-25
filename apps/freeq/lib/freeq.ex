@@ -6,6 +6,7 @@ defmodule Freeq do
   import Elita, only: [request: 2]
   import Process, only: [flag: 2, register: 2]
   import List, only: [wrap: 1]
+  import System, only: [get_env: 2]
 
   import Freeq.Lines, only: [send: 3]
   import Freeq.Pending, only: [push: 2]
@@ -30,7 +31,7 @@ defmodule Freeq do
     {:ok, setup(socket, agent, channel, ask, driver)}
   end
 
-  defp env, do: to_integer(System.get_env("FREEQ_PORT", "6667"))
+  defp env, do: to_integer(get_env("FREEQ_PORT", "6667"))
 
   defp socket(port) do
     :gen_tcp.connect(~c"127.0.0.1", port, active: true, packet: :line)
