@@ -14,7 +14,6 @@ defmodule El.CLI do
   import El.Ask, only: [invoke: 2]
   import El.Cli.Parse, only: [parse: 1, name: 1]
   import El.Bin, only: [locate: 0]
-  import El.Commands.Nodes, only: [check: 1]
 
   @usage """
   Usage:
@@ -58,7 +57,6 @@ defmodule El.CLI do
   defp exec({:ask, tool, agent, msg}), do: ask(agent, msg, tool)
   defp exec({:tell, tool, agent, msg}), do: send(agent, msg, tool)
   defp exec({:spawn, name, agent}), do: spawn(name, agent)
-  defp exec({:spawn_remote, addr}), do: addr |> check() |> reply()
   defp exec({:stop, agent}), do: stop(agent)
   defp exec({:ask_tool, agent, msg}), do: invoke(agent, msg)
   defp exec({:claude, name}), do: claude(name)
@@ -66,7 +64,4 @@ defmodule El.CLI do
   defp exec({:cd, path}), do: cd(path)
   defp exec(:node), do: launch()
   defp exec(_), do: :usage
-
-  defp reply(""), do: nil
-  defp reply(msg), do: puts(msg)
 end
