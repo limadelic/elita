@@ -27,4 +27,15 @@ defmodule FreeqGreetTest do
     answer = ask(:greet, "Brian")
     verify("wonderful to meet you", answer)
   end
+
+  @tag cassette: "greet"
+  test "an agent cannot take a nick already in use" do
+    spawn(:greet)
+    start_time = System.monotonic_time(:millisecond)
+    result = Freeq.Resident.start(:greet, "#the-lab", ~c"127.0.0.1", port())
+    elapsed = System.monotonic_time(:millisecond) - start_time
+    assert {:error, msg} = result
+    assert String.contains?(msg, "nick greet in use")
+    assert elapsed < 1000
+  end
 end

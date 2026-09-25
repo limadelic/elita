@@ -6,7 +6,6 @@ defmodule Freeq do
   import Elita, only: [request: 2]
   import Process, only: [flag: 2, register: 2]
   import List, only: [wrap: 1]
-
   import Freeq.Lines, only: [send: 3]
   import Freeq.Pending, only: [push: 2]
   import Freeq.Inbox, only: [route: 2]
@@ -14,20 +13,26 @@ defmodule Freeq do
   import Freeq.Boot, only: [run: 3]
 
   def start_link(opts), do: start_link(__MODULE__, tuple(opts), [])
-
   defp tuple(opts) do
     {fetch!(opts, :agent), fetch!(opts, :channel), get(opts, :ask, &request/2),
      fetch!(opts, :host), fetch!(opts, :port), get(opts, :config, [])}
   end
-
   def tell(pid, nick, text), do: call(pid, {:tell, nick, text})
 
   @impl true
   def init({agent, channel, ask, host, port, config}) do
     {:ok, socket} = socket(host, port)
     flag(:trap_exit, true)
-    run(socket, agent, channel)
+    ready(run(socket, agent, channel),
+          {socket, agent, channel, ask, config})
+  end
+
+  defp ready(:ok, {socket, agent, channel, ask, config}) do
     {:ok, setup(socket, agent, channel, ask, config)}
+  end
+
+  defp ready({:error, reason}, _) do
+    {:stop, reason}
   end
 
   defp socket(host, port) do
@@ -45,14 +50,16 @@ defmodule Freeq do
   end
 
   @impl true
-  def handle_call({:tell, nick, text}, _from, %{socket: socket, channel: channel} = state) do
-    text = "#{nick}: #{text}"
-    send(socket, channel, text)
-    {:reply, :ok, push(state, text)}
+  def handle_call({:tell, nick, text}, _from, %{socket: socket,
+                                                  channel: channel} = state) do
+    send(socket, channel, "#{nick}: #{text}")
+    {:reply, :ok, push(state, "#{nick}: #{text}")}
   end
 
   @impl true
-  def handle_info({:tcp, _socket, line}, state), do: recv(line, state)
+  def handle_info({:tcp, _socket, line}, state) do
+    clean(line) |> absorb() |> route(state)
+  end
 
   @impl true
   def handle_info({:tcp_closed, _socket}, state), do: {:stop, :normal, state}
@@ -80,13 +87,8 @@ defmodule Freeq do
     {:noreply, state}
   end
 
-  defp recv(line, state) do
-    clean(line) |> absorb() |> process(state)
-  end
-
-  defp clean(line), do: line |> to_string() |> trim_trailing("\r\n") |> wrap()
-
-  defp process(lines, state), do: route(lines, state)
+  defp clean(line),
+    do: line |> to_string() |> trim_trailing("\r\n") |> wrap()
 
   @impl true
   def terminate(_reason, %{socket: socket}) do

@@ -4,17 +4,21 @@ defmodule Freeq.Boot do
   import Freeq.Welcome, only: [greet: 1]
 
   def run(socket, name, channel) do
-    register(socket, name)
-    agent(socket)
-    join(socket, channel)
-    wait(socket)
-  end
-
-  defp register(socket, name) do
     caps(socket)
     nick(socket, name)
     user(socket, name)
-    greet(socket)
+    register(greet(socket), socket, channel)
+  end
+
+  defp register(:ok, socket, channel) do
+    agent(socket)
+    join(socket, channel)
+    wait(socket)
+    :ok
+  end
+
+  defp register({:error, reason}, _socket, _channel) do
+    {:error, reason}
   end
 
   defp caps(socket) do
