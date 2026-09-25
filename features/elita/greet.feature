@@ -23,7 +23,10 @@ Feature: Greet
       | node: elita-cukes |
       | lab (freeq)       |
 
-  Scenario: Greet on a node el does not know
+  Scenario: Greet needs a known node and a room
     * > el spawn greet@nowhere/the-lab
       | unknown node: nowhere |
+    * el fails
+    * > el spawn greet@lab
+      | lab needs a room |
     * el fails

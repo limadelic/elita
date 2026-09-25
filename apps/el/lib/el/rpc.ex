@@ -32,15 +32,22 @@ defmodule El.RPC do
 
   defp check(addr) do
     node = extract(addr)
-    known?(node) |> result(node)
+    r = room(addr)
+    verify(known?(node), node, r)
   end
 
   defp extract(addr) do
     addr |> split("@") |> at(1) |> split("/") |> at(0)
   end
 
-  defp result(true, _node), do: ""
-  defp result(false, node), do: {:error, "unknown node: #{node}"}
+  defp room(addr) do
+    addr |> split("/") |> at(1)
+  end
+
+  defp verify(false, node, _), do: {:error, "unknown node: #{node}"}
+  defp verify(true, node, nil), do: {:error, "#{node} needs a room"}
+  defp verify(true, node, ""), do: {:error, "#{node} needs a room"}
+  defp verify(true, _, _), do: ""
 
   defp marker, do: "node: #{here()}"
 
