@@ -1,12 +1,11 @@
 defmodule Freeq do
   use GenServer
   import Keyword, only: [fetch!: 2, get: 3]
-  import String, only: [trim_trailing: 2, to_integer: 1, to_atom: 1]
+  import String, only: [trim_trailing: 2, to_atom: 1]
   import GenServer, only: [start_link: 3, call: 2]
   import Elita, only: [request: 2]
   import Process, only: [flag: 2, register: 2]
   import List, only: [wrap: 1]
-  import System, only: [get_env: 2]
 
   import Freeq.Lines, only: [send: 3]
   import Freeq.Pending, only: [push: 2]
@@ -18,23 +17,21 @@ defmodule Freeq do
 
   defp tuple(opts) do
     {fetch!(opts, :agent), fetch!(opts, :channel), get(opts, :ask, &request/2),
-     get(opts, :driver, nil)}
+     get(opts, :driver, nil), fetch!(opts, :host), fetch!(opts, :port)}
   end
 
   def tell(pid, nick, text), do: call(pid, {:tell, nick, text})
 
   @impl true
-  def init({agent, channel, ask, driver}) do
-    {:ok, socket} = socket(env())
+  def init({agent, channel, ask, driver, host, port}) do
+    {:ok, socket} = socket(host, port)
     flag(:trap_exit, true)
     run(socket, agent, channel)
     {:ok, setup(socket, agent, channel, ask, driver)}
   end
 
-  defp env, do: to_integer(get_env("FREEQ_PORT", "6667"))
-
-  defp socket(port) do
-    :gen_tcp.connect(~c"127.0.0.1", port, active: true, packet: :line)
+  defp socket(host, port) do
+    :gen_tcp.connect(host, port, active: true, packet: :line)
   end
 
   defp setup(socket, agent, channel, ask, driver) do

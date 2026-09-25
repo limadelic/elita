@@ -18,6 +18,7 @@ defmodule FreeqCase do
         Server.wait(~c"127.0.0.1", port)
         {:ok, socket} = connect()
         Process.put(:freeq_socket, socket)
+        Process.put(:freeq_port, port)
         register_brian()
         on_exit(fn -> :gen_tcp.close(socket) end)
         :ok
@@ -59,7 +60,10 @@ defmodule FreeqCase do
         wait_join(name)
       end
 
-      defp config(name), do: [agent: name, channel: "#the-lab", driver: "brian"]
+      defp config(name) do
+        port = Process.get(:freeq_port)
+        [agent: name, channel: "#the-lab", driver: "brian", host: ~c"127.0.0.1", port: port]
+      end
     end
   end
 end
