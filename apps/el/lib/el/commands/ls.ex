@@ -48,10 +48,6 @@ defmodule El.Commands.Ls do
     "no agents"
   end
 
-  defp show([first | _] = entries) when is_binary(first) do
-    join(entries, "\n")
-  end
-
   defp show(entries) do
     entries |> map(&format/1) |> join("\n")
   end
@@ -92,6 +88,7 @@ defmodule El.Commands.Ls do
   defp label(:file), do: "file"
   defp label(:folder), do: "folder"
   defp label(:session), do: "session"
+  defp label(:node), do: "node"
   defp ready?, do: check(:ets.whereis(:elita_vault))
   defp check(:undefined), do: false
   defp check(_), do: :ets.lookup(:elita_vault, :ready) == [ready: true]
