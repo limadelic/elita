@@ -1,24 +1,10 @@
 defmodule El.Command.Ls.Query do
   @moduledoc false
-  import :erpc, only: [call: 4]
-  import Node, only: [connect: 1]
-  import File, only: [cwd!: 0]
-  import El.Run, only: [address: 0]
+  import El.Command.Ls.Remote, only: [send: 1]
 
   def fetch(path) do
-    connect(address()) |> dial(path)
-  catch
-    _, _ -> :error
+    path |> route() |> send()
   end
-
-  defp dial(true, path) do
-    cwd = cwd!()
-    cmd = route(path)
-    output = call(address(), El.RPC, :dispatch, [cmd, cwd])
-    {:ok, output}
-  end
-
-  defp dial(_, _), do: :error
 
   defp route(nil), do: ["ls"]
   defp route(path), do: ["ls", path]
