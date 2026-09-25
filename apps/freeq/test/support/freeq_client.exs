@@ -6,7 +6,7 @@ defmodule FreeqTestClient do
   @driver "brian"
 
   def connect do
-    port = String.to_integer(System.get_env("FREEQ_PORT", "6667"))
+    port = String.to_integer(System.get_env("FREEQ_PORT", "16683"))
     :gen_tcp.connect(~c"127.0.0.1", port, @opts)
   end
 

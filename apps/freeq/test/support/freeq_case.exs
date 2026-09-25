@@ -77,7 +77,7 @@ defmodule FreeqCase do
       defp boot(name, role), do: __MODULE__.spawn(name, role)
 
       defp port do
-        String.to_integer(System.get_env("FREEQ_PORT", "6667"))
+        String.to_integer(System.get_env("FREEQ_PORT", "16683"))
       end
     end
   end

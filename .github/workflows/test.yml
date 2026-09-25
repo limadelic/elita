@@ -82,6 +82,7 @@ jobs:
         run: mix test
         env:
           MIX_ENV: test
+          FREEQ_PORT: "6667"
 
       - uses: actions/setup-node@v4
         with:
