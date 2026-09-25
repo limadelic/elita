@@ -16,12 +16,20 @@ module Kill
   end
 
   def dwell(pid)
-    Timeout.timeout(2) { Process.wait(pid) }
-    true
-  rescue Timeout::Error
-    raise "el client #{pid} did not exit"
+    uphold(pid)
   rescue Errno::ECHILD
     true
+  end
+
+  def uphold(pid)
+    enforce(pid)
+    true
+  end
+
+  def enforce(pid)
+    Timeout.timeout(2) { Process.wait(pid) }
+  rescue Timeout::Error
+    raise "el client #{pid} did not exit"
   end
 
   def alive?(pgid)
