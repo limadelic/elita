@@ -11,21 +11,11 @@ When(/^cassette (.+)$/) do |name|
 end
 
 When(/^> el tell (.+)$/) do |args, *rest|
-  output = one("tell #{args}")
-  track(output, output.gsub(/\e\[[0-9;]*m/, ''))
-  handle(rest.first, output)
+  run_command("tell", args, rest)
 end
 
 When(/^> el spawn (.+)$/) do |args, *rest|
-  output = one("spawn #{args}")
-  if @transcript.nil? || @transcript.frozen?
-    @transcript = output.to_s
-    @transcript_stripped = output.gsub(/\e\[[0-9;]*m/, '').to_s
-  else
-    @transcript << output
-    @transcript_stripped << output.gsub(/\e\[[0-9;]*m/, '')
-  end
-  handle(rest.first, output)
+  run_command("spawn", args, rest)
 end
 
 When(/^> el$/) do |*rest|
@@ -97,6 +87,20 @@ def track(chunk, stripped)
   end
   @transcript << chunk
   @transcript_stripped << stripped
+end
+
+def run_command(command, args, rest)
+  output = one("#{command} #{args}")
+  strip = output.gsub(/\e\[[0-9;]*m/, '')
+  new_transcript? ? begin_transcript(output, strip) : track(output, strip); handle(rest.first, output)
+end
+
+def new_transcript?
+  @transcript.nil? || @transcript.frozen?
+end
+
+def begin_transcript(output, strip)
+  @transcript = output.to_s; @transcript_stripped = strip.to_s
 end
 
 def note(prompt, input)

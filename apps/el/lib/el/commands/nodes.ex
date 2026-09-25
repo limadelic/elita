@@ -16,9 +16,8 @@ defmodule El.Commands.Nodes do
   defp reply(false, node), do: "unknown node: #{node}"
 
   def list do
-    nodes = build() |> filter(&(&1.kind == :node)) |> sort_by(& &1.name)
     extras = get_env(:elita, :nodes) |> parse()
-    concat(nodes, extras) |> show()
+    concat(nodes() |> sort_by(& &1.name), extras) |> show()
   end
 
   defp extract(addr) do
@@ -31,10 +30,14 @@ defmodule El.Commands.Nodes do
   defp tail([_, t]), do: split(t, "/", parts: 2)
   defp tail(_), do: []
 
+  defp nodes do
+    build() |> filter(&(&1.kind == :node))
+  end
+
   defp known?(node) do
-    nodes = build() |> filter(&(&1.kind == :node)) |> map(& &1.name)
+    names = nodes() |> map(& &1.name)
     extras = get_env(:elita, :nodes) |> parse() |> map(&elem(&1, 0))
-    any?(concat(nodes, extras), &(&1 == node))
+    any?(concat(names, extras), &(&1 == node))
   end
 
   defp parse(nil) do
