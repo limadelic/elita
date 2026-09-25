@@ -34,7 +34,9 @@ defmodule FreeqCase do
 
       def ask(agent, query) do
         say("@#{agent} #{query}")
-        reply(agent)
+        answer = reply(agent)
+        pace_bubble(answer)
+        answer
       end
 
       def tell(agent, msg) do
@@ -52,9 +54,23 @@ defmodule FreeqCase do
         name = to_string(agent)
         start_supervised!({Freeq, config(name)}, id: String.to_atom("freeq_#{name}"))
         wait_join(name)
+        pace_join()
       end
 
       defp config(name), do: [agent: name, channel: "#the-lab", driver: "brian"]
+
+      defp pace_join do
+        if System.get_env("FREEQ_PACE") do
+          Process.sleep(1000)
+        end
+      end
+
+      defp pace_bubble(text) do
+        if System.get_env("FREEQ_PACE") do
+          time = 4500 + String.length(text) * 30
+          Process.sleep(time)
+        end
+      end
     end
   end
 end
