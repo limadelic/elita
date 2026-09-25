@@ -35,6 +35,14 @@ Feature: Greet
       | actor_class=agent |
 
   @freeq
+  Scenario: Brian talks to greet
+    * > el spawn greet@lab/the-lab
+      | greet started |
+
+    * brian> @greet hello
+      | @brian Who am I talking to? |
+
+  @freeq
   Scenario: Bob joins the lab from his own folder
     * a folder outside the repo with bob.md
     * > el spawn bob@lab/the-lab

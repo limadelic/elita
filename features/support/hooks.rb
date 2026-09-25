@@ -104,14 +104,11 @@ Before('@malko') do
 end
 
 Before('@freeq') do
+  deliver
   port = ENV["FREEQ_PORT"]
   raise "FREEQ_PORT not set" unless port
 
   freeq_connect('brian', '127.0.0.1', port.to_i)
-end
-
-After('@freeq') do
-  freeq_close('brian')
 end
 
 After do |_scenario|
@@ -124,6 +121,10 @@ rescue Timeout::Error
   STDERR.puts "After hook timed out after 30s"
   purge
   slash
+end
+
+After('@freeq') do
+  freeq_close('brian')
 end
 
 def merge_screens

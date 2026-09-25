@@ -71,7 +71,10 @@ module FreeqClient
   end
 
   def close_session(session)
-    session.dig(:socket)&.close
+    socket = session.dig(:socket)
+    socket.write("QUIT\r\n")
+    socket.flush
+    socket.close
   end
 end
 
