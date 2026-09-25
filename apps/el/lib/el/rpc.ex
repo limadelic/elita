@@ -6,7 +6,7 @@ defmodule El.RPC do
   import El.Commands.Ls, only: [remote: 1]
   import El.Commands.Ask, only: [ask: 2]
   import El.Commands.Nodes, only: [known?: 1, find: 1]
-  import String, only: [split: 2]
+  import String, only: [split: 2, to_integer: 1]
   import Enum, only: [at: 2]
   import Freeq.Resident, only: [start: 4]
 
@@ -56,8 +56,13 @@ defmodule El.RPC do
 
   defp verify(true, node, agent, room) do
     {_n, _w, host, port} = find(node)
-    start(agent, "#" <> room, host, port)
+    {ch, pt} = convert(host, port)
+    start(agent, "#" <> room, ch, pt)
     "#{agent} started"
+  end
+
+  defp convert(host, port) do
+    {to_charlist(host), to_integer(port)}
   end
 
   defp marker, do: "node: #{here()}"
