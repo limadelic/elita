@@ -104,6 +104,7 @@ Before('@malko') do
 end
 
 Before('@freeq') do
+  deliver
   port = ENV["FREEQ_PORT"]
   raise "FREEQ_PORT not set" unless port
 

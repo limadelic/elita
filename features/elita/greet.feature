@@ -33,3 +33,11 @@ Feature: Greet
 
     * brian> /whois greet
       | actor_class=agent |
+
+  @freeq
+  Scenario: Brian talks to greet
+    * > el spawn greet@lab/the-lab
+      | greet started |
+
+    * brian> @greet hello
+      | @brian Who am I talking to? |

@@ -3,7 +3,7 @@ module FreeqReply
     session = sessions[name]
     raise "No freeq session: #{name}" if session.nil?
 
-    net_write(session, command.sub(/\A\//, ''))
+    net_write(session, line(command))
   end
 
   def freeq_collect(name)
@@ -15,6 +15,12 @@ module FreeqReply
 
   private
 
+  def line(text)
+    return text.delete_prefix('/') if text.start_with?('/')
+
+    "PRIVMSG #the-lab :#{text}"
+  end
+
   def net_write(session, cmd)
     session[:socket].write("#{cmd}\r\n")
     session[:socket].flush
@@ -22,10 +28,15 @@ module FreeqReply
 
   def receive(session)
     reply = ""
+    limit = Time.now + 5
     loop do
       reply = gather_bytes(reply, session[:socket])
-      return reply if final?(reply)
+      return reply if done?(reply, limit)
     end
+  end
+
+  def done?(reply, limit)
+    final?(reply) || Time.now > limit
   end
 
   def gather_bytes(accum, socket)
@@ -37,9 +48,7 @@ module FreeqReply
     net_read(socket)
   end
 
-  def final?(data)
-    data.include?(" 366 ") || data.include?(" 318 ")
-  end
+  def final?(data) = data.match?(/ (366|318|PRIVMSG) /)
 
   def dispatch_emit(prompt, input)
     freeq_session?(prompt) ? freeq_emit(prompt, input) : push(input)
