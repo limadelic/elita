@@ -45,8 +45,8 @@ defmodule FreeqCase do
         lookup(ElitaRegistry, agent_name) |> stop_agent_process()
       end
 
-      defp stop_agent_process([{pid, _meta}]) do
-        GenServer.stop(pid)
+      defp stop_agent_process([{agent_pid, _meta}]) do
+        GenServer.stop(agent_pid)
       end
 
       defp stop_agent_process([]) do
