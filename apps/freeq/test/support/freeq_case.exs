@@ -30,8 +30,9 @@ defmodule FreeqCase do
       end
 
       def spawn(name) do
-        {:ok, _agent_pid, _freeq_pid} = Freeq.Resident.start(name, "#the-lab",
-                                                              ~c"127.0.0.1", port())
+        lab = "#the-lab"
+        {:ok, _agent_pid, _freeq_pid} = Freeq.Resident.start(
+          name, lab, ~c"127.0.0.1", port())
         agent_name = to_string(name)
         on_exit(fn -> stop_freeq_service(agent_name) end)
         wait_join(agent_name)

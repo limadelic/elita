@@ -6,7 +6,8 @@ defmodule FreeqTestClient do
   @driver "brian"
 
   def freeq_port do
-    String.to_integer(System.get_env("FREEQ_PORT") || raise "FREEQ_PORT not set")
+    env = System.get_env("FREEQ_PORT") || raise("FREEQ_PORT not set")
+    String.to_integer(env)
   end
 
   def connect do
