@@ -20,3 +20,4 @@ Feature: Greet
       | greet |
 
     * el> ls //
+      | node: elita-cukes |
