@@ -6,12 +6,8 @@ defmodule El.Commands.Nodes do
 
   def list do
     nodes = build() |> filter(&(&1.kind == :node)) |> sort_by(& &1.name)
-    extras = nodes(:elita) |> parse()
+    extras = get_env(:elita, :nodes) |> parse()
     concat(nodes, extras) |> show()
-  end
-
-  defp nodes(app) do
-    get_env(app, :nodes)
   end
 
   defp parse(nil) do
@@ -46,7 +42,7 @@ defmodule El.Commands.Nodes do
     "no agents"
   end
 
-  defp show(entries) when is_list(entries) do
+  defp show(entries) do
     entries
     |> map(&format/1)
     |> join("\n")
