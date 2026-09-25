@@ -3,14 +3,20 @@
 require 'pty'
 
 When(/^a folder outside the repo with bob.md$/) do
-  tmp_dir = File.expand_path('../../tmp', __dir__)
-  FileUtils.mkdir_p(tmp_dir)
-  @scratch = Dir.mktmpdir('bob', tmp_dir)
+  @scratch = Dir.mktmpdir('bob')
+  copy_el_binary
+  write_bob_file
+end
+
+def copy_el_binary
   bin_dir = File.join(@scratch, 'bin')
   Dir.mkdir(bin_dir)
   el_escript = File.expand_path('../../apps/el/el', __dir__)
   FileUtils.cp(el_escript, File.join(bin_dir, 'el'))
   File.chmod(0755, File.join(bin_dir, 'el'))
+end
+
+def write_bob_file
   bob_file = File.join(@scratch, 'bob.md')
   File.write(bob_file, bob_content)
 end
