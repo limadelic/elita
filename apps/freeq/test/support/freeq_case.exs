@@ -30,7 +30,8 @@ defmodule FreeqCase do
       end
 
       def spawn(name) do
-        {:ok, _agent_pid, _freeq_pid} = Freeq.Resident.start(name, "#the-lab", ~c"127.0.0.1", port())
+        {:ok, _agent_pid, _freeq_pid} = Freeq.Resident.start(name, "#the-lab",
+                                                              ~c"127.0.0.1", port())
         agent_name = to_string(name)
         on_exit(fn -> stop_freeq_service(agent_name) end)
         wait_join(agent_name)
@@ -76,12 +77,7 @@ defmodule FreeqCase do
       defp boot(name, nil), do: __MODULE__.spawn(name)
       defp boot(name, role), do: __MODULE__.spawn(name, role)
 
-      defp port do
-        {:ok, port_string} = System.fetch_env("FREEQ_PORT")
-        String.to_integer(port_string)
-      rescue
-        MatchError -> raise("FREEQ_PORT not set")
-      end
+      defp port, do: FreeqTestClient.freeq_port()
     end
   end
 end
