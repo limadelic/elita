@@ -8,6 +8,7 @@ defmodule El.RPC do
   import El.Commands.Nodes, only: [known?: 1, find: 1]
   import String, only: [split: 2, to_integer: 1]
   import Enum, only: [at: 2]
+  import Map, only: [put: 3]
   import Freeq.Resident, only: [start: 5]
 
   def dispatch(command, cwd \\ cwd!(), opts \\ %{}) do
@@ -28,7 +29,7 @@ defmodule El.RPC do
   defp handle(["ls"], cwd, _opts), do: remote(cwd: cwd)
   defp handle(["ls", path], _cwd, _opts), do: remote(path: path)
   defp handle(["ask", agent, msg], _cwd, _opts), do: ask(agent, msg)
-  defp handle(["spawn", addr], _cwd, opts), do: check(addr, opts)
+  defp handle(["spawn", addr], cwd, opts), do: check(addr, put(opts, :cwd, cwd))
   defp handle(_, _cwd, _opts), do: ""
 
   defp check(addr, opts) do

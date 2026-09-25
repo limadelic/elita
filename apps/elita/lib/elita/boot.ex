@@ -80,6 +80,7 @@ defmodule Elita.Boot do
 
   defp via(n, opts \\ []) do
     kind = Keyword.get(opts, :kind, :native)
-    {:via, Registry, {ElitaRegistry, name(n), %{kind: kind, folder: nil}}}
+    folder = Keyword.get(opts, :cwd, nil)
+    {:via, Registry, {ElitaRegistry, name(n), %{kind: kind, folder: folder}}}
   end
 end

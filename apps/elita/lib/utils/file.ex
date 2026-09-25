@@ -17,6 +17,14 @@ defmodule Utils.File do
     |> ensure(name)
   end
 
+  def file(name, cwd) when is_nil(cwd), do: file(name)
+
+  def file(name, cwd) do
+    ([join(cwd, name)] ++ paths(name))
+    |> find_value(&fetch/1)
+    |> ensure(name)
+  end
+
   defp paths(name) do
     map(@paths, fn path -> concat("#{@app_root}/#{path}", name) end) ++
       nested(name)
