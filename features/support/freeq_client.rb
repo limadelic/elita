@@ -26,8 +26,7 @@ module FreeqClient
   end
 
   def write_capabilities(socket)
-    socket.write("CAP REQ :batch draft/multiline\r\n")
-    socket.write("message-tags extended-join\r\n")
+    socket.write("CAP REQ :batch draft/multiline message-tags extended-join\r\n")
     socket.write("CAP END\r\n")
     socket.flush
   end
