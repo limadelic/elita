@@ -3,9 +3,9 @@ defmodule Freeq.Resident do
   import Kernel, except: [spawn: 3]
   import Elita, only: [spawn: 3]
 
-  def start(agent, channel, host, port) do
+  def start(agent, channel, host, port, opts \\ %{}) do
     name = to_string(agent)
-    {:ok, pid} = spawn(name, [name], kind: Freeq.Kind)
+    {:ok, pid} = spawn(name, [name], [kind: Freeq.Kind, tape_env: opts])
     {:ok, freeq} = boot(name, channel, host, port)
     {:ok, pid, freeq}
   end

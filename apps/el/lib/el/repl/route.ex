@@ -7,9 +7,9 @@ defmodule El.Repl.Route do
   import Utils.World, only: [agents: 0]
   import El.Distribution, only: [wait: 1]
   import Elita, only: [spawn: 3]
-  import System, only: [get_env: 1]
   import Utils.Normalize, only: [name: 1]
   import El.Command.Ls, only: [list: 0, list: 1]
+  import El.Run, only: [options: 0]
 
   def route([name, "log"], _a, _p, _i), do: name |> log() |> puts()
 
@@ -36,15 +36,7 @@ defmodule El.Repl.Route do
     via(words, puppet, input, agent)
   end
 
-  defp opts, do: [tape_env: build()]
-
-  defp build,
-    do: %{
-      tape: get_env("TAPE"),
-      live: get_env("LIVE"),
-      cassette: get_env("CASSETTE"),
-      cassette_dir: get_env("CASSETTE_DIR")
-    }
+  defp opts, do: [tape_env: options()]
 
   def via(["log"], _p, _i, agent), do: {agent |> log(), agent, nil}
 
