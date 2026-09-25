@@ -34,3 +34,8 @@ Feature: Greet
     * > el spawn greet@lab/the-lab
       | no node, run el node |
     * el fails
+
+  @freeq
+  Scenario: Greet joins the lab
+    * > el spawn greet@lab/the-lab
+      | greet started |

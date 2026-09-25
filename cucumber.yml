@@ -1,3 +1,4 @@
-default: --require features/step_definitions --require features/support --publish-quiet --format progress --format html --out reports/cucumber.html --tags '(not @wip) and (not @live)'
+default: --require features/step_definitions --require features/support --publish-quiet --format progress --format html --out reports/cucumber.html --tags '(not @wip) and (not @live) and (not @freeq)'
 wip: --require features/step_definitions --require features/support --publish-quiet --format progress --format html --out reports/cucumber.html --tags '@wip'
 live: --require features/step_definitions --require features/support --publish-quiet --format progress --format html --out reports/cucumber.html --tags '@live'
+freeq: --require features/step_definitions --require features/support --publish-quiet --format progress --format html --out reports/cucumber.html --tags '@freeq'
