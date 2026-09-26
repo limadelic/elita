@@ -12,7 +12,6 @@ defmodule Freeq do
   import Freeq.Batch, only: [absorb: 1]
   import Freeq.Boot, only: [run: 3]
   import Freeq.Result, only: [clean: 1, mark: 3, untag: 1]
-
   def start_link(opts), do: start_link(__MODULE__, tuple(opts), [])
 
   defp tuple(opts) do
@@ -33,9 +32,7 @@ defmodule Freeq do
   defp ready(:ok, {socket, agent, channel, ask, config}) do
     {:ok, setup(socket, agent, channel, ask, config)}
   end
-  defp ready({:error, reason}, _) do
-    {:stop, reason}
-  end
+  defp ready({:error, reason}, _), do: {:stop, reason}
 
   defp socket(host, port) do
     :gen_tcp.connect(host, port, active: true, packet: :line)
@@ -48,7 +45,8 @@ defmodule Freeq do
   end
 
   @impl true
-  def handle_call({:tell, nick, text}, _from, %{socket: socket, channel: channel} = state) do
+  def handle_call({:tell, nick, text}, _from, state) do
+    %{socket: socket, channel: channel} = state
     text = "#{nick}: #{text}"
     send(socket, channel, text)
     {:reply, :ok, push(state, text)}
@@ -64,28 +62,33 @@ defmodule Freeq do
   def handle_info({:EXIT, _pid, _reason}, state), do: {:stop, :normal, state}
 
   @impl true
-  def handle_info({:answer, text, sender}, %{socket: socket, channel: channel} = state) do
+  def handle_info({:answer, text, sender}, state) do
+    %{socket: socket, channel: channel} = state
     text = "@#{sender} #{text}"
     answer(socket, channel, text)
     {:noreply, push(state, text)}
   end
 
   @impl true
-  def handle_info({:error_answer, sender}, %{socket: socket, channel: channel} = state) do
+  def handle_info({:error_answer, sender}, state) do
+    %{socket: socket, channel: channel} = state
     text = "@#{sender} could not answer"
     answer(socket, channel, text)
     {:noreply, push(state, text)}
   end
 
   @impl true
-  def handle_info({:retry, text}, %{socket: socket, channel: channel} = state) do
+  def handle_info({:retry, text}, state) do
+    %{socket: socket, channel: channel} = state
     send(socket, channel, text)
     {:noreply, state}
   end
 
   defp recv(line, state), do: clean(line) |> absorb() |> process(line, state)
 
-  defp process(lines, line, state), do: route(untag(lines), mark(state, line, lines))
+  defp process(lines, line, state) do
+    route(untag(lines), mark(state, line, lines))
+  end
 
   @impl true
   def terminate(_reason, %{socket: socket}) do

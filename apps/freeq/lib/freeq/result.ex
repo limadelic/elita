@@ -7,7 +7,10 @@ defmodule Freeq.Result do
 
   def clean(line), do: line |> to_string() |> trim_trailing("\r\n") |> wrap()
 
-  def mark(state, line, lines), do: put(state, :result, any?([to_string(line) | lines], &result?/1))
+  def mark(state, line, lines) do
+    marked = any?([to_string(line) | lines], &result?/1)
+    put(state, :result, marked)
+  end
 
   def untag(lines), do: map(lines, &strip/1)
 end

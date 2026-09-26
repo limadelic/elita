@@ -4,9 +4,13 @@ defmodule Freeq.Flood do
 
   @limit 3
 
-  def defer(_state, nil, msg), do: raise("freeq refused a message we never queued: #{msg}")
+  def defer(_state, nil, msg) do
+    raise("freeq refused a message we never queued: #{msg}")
+  end
 
-  def defer(%{attempts: attempts} = state, text, msg), do: retry(attempts + 1, state, text, msg)
+  def defer(%{attempts: attempts} = state, text, msg) do
+    retry(attempts + 1, state, text, msg)
+  end
 
   defp retry(count, state, text, _msg) when count <= @limit do
     send_after(self(), {:retry, text}, window())

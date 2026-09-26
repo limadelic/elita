@@ -5,7 +5,7 @@ defmodule Freeq.Batch do
   import List, only: [last: 1, first: 1]
   import Map, only: [put: 3, delete: 2, has_key?: 2, fetch!: 2]
   import Process, only: [get: 2, put: 2]
-  import Freeq.Tags, only: [result?: 1]
+  import Freeq.Tags, only: [result?: 1, strip: 1, result: 0]
 
   def new, do: %{}
 
@@ -30,7 +30,9 @@ defmodule Freeq.Batch do
     act(kind(body), ref(line), body, line, state)
   end
 
-  defp kind(body), do: sort(contains?(body, " BATCH +"), starts_with?(body, "BATCH -"), body)
+  defp kind(body) do
+    sort(contains?(body, " BATCH +"), starts_with?(body, "BATCH -"), body)
+  end
 
   defp sort(true, _close, body), do: multi(contains?(body, " draft/multiline "))
   defp sort(_open, true, _body), do: :close
@@ -39,10 +41,14 @@ defmodule Freeq.Batch do
   defp multi(true), do: :open
   defp multi(false), do: :skip
 
-  defp act(:open, _ref, body, line, state), do: {:pending, open(state, body, result?(line))}
+  defp act(:open, _ref, body, line, state) do
+    {:pending, open(state, body, result?(line))}
+  end
   defp act(:skip, _ref, _body, _line, state), do: {:pending, state}
   defp act(:close, _ref, body, _line, state), do: shut(state, tail(body))
-  defp act(:plain, ref, body, _line, state), do: keep(has_key?(state, ref), ref, body, state)
+  defp act(:plain, ref, body, _line, state) do
+    keep(has_key?(state, ref), ref, body, state)
+  end
 
   defp open(state, body, result) do
     [src, _batch, ref, _type, chan] = split(body, " ", parts: 5)
@@ -53,7 +59,9 @@ defmodule Freeq.Batch do
 
   defp shut(state, ref), do: close(has_key?(state, ref), state, ref)
 
-  defp close(true, state, ref), do: {:message, assemble(fetch!(state, ref)), delete(state, ref)}
+  defp close(true, state, ref) do
+    {:message, assemble(fetch!(state, ref)), delete(state, ref)}
+  end
   defp close(false, state, _ref), do: {:pending, state}
 
   defp keep(true, ref, body, state), do: {:pending, add(state, ref, text(body))}
@@ -64,7 +72,9 @@ defmodule Freeq.Batch do
     put(state, ref, %{batch | lines: batch.lines ++ [text]})
   end
 
-  defp tail(body), do: body |> split(" ", parts: 2) |> last() |> trim_leading("-")
+  defp tail(body) do
+    body |> split(" ", parts: 2) |> last() |> trim_leading("-")
+  end
 
   defp text(body) do
     [_src, rest] = split(body, " PRIVMSG ", parts: 2)
@@ -78,14 +88,13 @@ defmodule Freeq.Batch do
     "#{flag(result)}#{src} PRIVMSG #{chan} :#{join(lines, "\n")}"
   end
 
-  defp flag(true), do: "@+elita/result "
+  defp flag(true), do: result()
   defp flag(false), do: ""
 
-  defp ref("@batch=" <> rest), do: rest |> split(" ", parts: 2) |> first() |> tagval()
+  defp ref("@batch=" <> rest) do
+    rest |> split(" ", parts: 2) |> first() |> tagval()
+  end
   defp ref(_line), do: ""
 
   defp tagval(value), do: value |> split(";", parts: 2) |> first()
-
-  def strip("@" <> rest), do: rest |> split(" ", parts: 2) |> last()
-  def strip(line), do: line
 end

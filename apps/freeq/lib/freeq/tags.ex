@@ -8,6 +8,8 @@ defmodule Freeq.Tags do
 
   def result?(_line), do: false
 
+  def result, do: "@+elita/result "
+
   def strip("@" <> rest), do: rest |> split(" ", parts: 2) |> last()
   def strip(line), do: line
 end

@@ -13,7 +13,10 @@ defmodule Freeq.Resident do
   end
 
   defp started({:ok, pid}, boot), do: result(boot.(), pid)
-  defp started({:error, {:shutdown, {:failed_to_start_child, _, {%{message: msg}, _}}}}, _boot),
+  defp started(
+    {:error, {:shutdown, {:failed_to_start_child, _, {%{message: msg}, _}}}},
+    _boot
+  ),
     do: {:error, msg}
 
   defp opt(cfg, nil), do: cfg

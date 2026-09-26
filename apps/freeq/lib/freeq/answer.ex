@@ -9,7 +9,8 @@ defmodule Freeq.Answer do
     privmsg(contains?(msg, "PRIVMSG"), msg, state, pid)
   end
 
-  def privmsg(true, msg, %{agent: agent, channel: channel, ask: ask, config: config}, pid) do
+  def privmsg(true, msg, state, pid) do
+    %{agent: agent, channel: channel, ask: ask, config: config} = state
     parse(msg, agent, channel) |> reply(agent, ask, pid, config)
   end
 
