@@ -5,8 +5,7 @@ defmodule Freeq.Boot do
   import Freeq.SASL, only: [login: 2]
 
   def run(socket, name, channel) do
-    setup(socket, name)
-    register(greet(socket), socket, channel)
+    setup(socket, name) |> start(socket, channel)
   end
 
   defp setup(socket, name) do
@@ -14,6 +13,14 @@ defmodule Freeq.Boot do
     nick(socket, name)
     user(socket, name)
     login(socket, name)
+  end
+
+  defp start(:ok, socket, channel) do
+    register(greet(socket), socket, channel)
+  end
+
+  defp start({:error, _} = e, _socket, _channel) do
+    e
   end
 
   defp register(:ok, socket, channel) do
