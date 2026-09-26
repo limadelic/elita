@@ -53,5 +53,6 @@ Feature: Greet
     * brian> /names #the-lab
       | bob=agent |
     * brian> @bob hello
-      | :bob!  |
-      | @brian |
+      | :bob!    |
+      | @brian   |
+      | bob here |

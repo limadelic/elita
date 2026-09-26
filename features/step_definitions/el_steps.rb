@@ -22,7 +22,8 @@ def write_bob_file
 end
 
 def bob_content
-  "---\nname: bob\ndescription: Agent Bob\n---\n\n# Bob\n\nBob the agent."
+  m = "Start every answer with 'bob here'.\n\nBob the agent."
+  "---\nname: bob\ndescription: Agent Bob\n---\n\n# Bob\n\n#{m}"
 end
 
 When(/^no elita node$/) do
