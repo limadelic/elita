@@ -33,8 +33,7 @@ create_release() {
   echo "Creating GitHub release..."
   gh release create "v$version" \
     --title "elita $version" \
-    --notes "el CLI via brew" \
-    --target wip
+    --notes "el CLI via brew"
 }
 
 compute_sha() {

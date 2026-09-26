@@ -3,7 +3,7 @@ defmodule Elita.Umbrella do
 
   def project do
     [
-      version: "0.0.2",
+      version: "0.0.3",
       elixir: "~> 1.18",
       apps_path: "apps",
       config_path: "config/config.exs",
