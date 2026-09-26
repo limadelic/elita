@@ -2,6 +2,15 @@
 
 require 'pty'
 
+When(/^a folder named elita$/) do
+  tmp_dir = File.expand_path('../../tmp', __dir__)
+  FileUtils.mkdir_p(tmp_dir)
+  parent = Dir.mktmpdir('scratch', tmp_dir)
+  @scratch = File.join(parent, 'elita')
+  Dir.mkdir(@scratch)
+  copy_el_binary
+end
+
 When(/^a folder outside the repo with bob.md$/) do
   @scratch = Dir.mktmpdir('bob')
   copy_el_binary
@@ -44,8 +53,8 @@ When(/^> el tell (.+)$/) do |args, *rest|
   handle(rest.first, output)
 end
 
-When(/^> el spawn (.+)$/) do |args, *rest|
-  output = one("spawn #{args}")
+When(/^> el (spawn|ls) (.+)$/) do |verb, args, *rest|
+  output = one("#{verb} #{args}")
   track(output.dup, output.gsub(/\e\[[0-9;]*m/, ''))
   handle(rest.first, output)
 end
@@ -55,7 +64,7 @@ When(/^> el$/) do |*rest|
   handle(rest.first, transcript)
 end
 
-When(/^> el (?!tell|spawn)(.+)$/) do |args, *rest|
+When(/^> el (?!tell|spawn|ls)(.+)$/) do |args, *rest|
   route(args)
   handle(rest.first, transcript)
 end
