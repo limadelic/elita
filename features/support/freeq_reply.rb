@@ -15,10 +15,7 @@ module FreeqReply
 
   def freeq_quiet(name)
     heard = freeq_collect(name)
-    case heard.match?(/ PRIVMSG #the-lab /)
-    when true
-      raise "Expected quiet, heard:\n#{heard}"
-    end
+    (!heard.match?(/ PRIVMSG #the-lab /) or raise("Expected quiet, heard:\n#{heard}"))
   end
 
   def freeq_hears(name, table)
