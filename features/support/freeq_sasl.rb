@@ -13,8 +13,8 @@ module FreeqSasl
   end
 
   def build_did(key)
-    pub = key.raw_public_key
-    "did:key:z" + base58btc("\xED\x01".b + pub)
+    public_key = key.raw_public_key
+    "did:key:z" + base58btc("\xED\x01".b + public_key)
   end
 
   def base58btc(bytes)
@@ -25,33 +25,33 @@ module FreeqSasl
     (["1"] * zeros + digits).join
   end
 
-  def b64(x)
-    Base64.urlsafe_encode64(x, padding: false)
+  def encode(bytes)
+    Base64.urlsafe_encode64(bytes, padding: false)
   end
 
   def challenge(socket)
     write_line(socket, "AUTHENTICATE ATPROTO-CHALLENGE")
-    chal_line = read_line(socket, /^AUTHENTICATE /)
-    chal_b64 = chal_line.split(" ", 2)[1]
-    padding = (4 - chal_b64.length % 4) % 4
-    chal_b64 += "=" * padding
-    Base64.urlsafe_decode64(chal_b64)
+    line = read_line(socket, /^AUTHENTICATE /)
+    encoded = line.split(" ", 2)[1]
+    padding = (4 - encoded.length % 4) % 4
+    encoded += "=" * padding
+    Base64.urlsafe_decode64(encoded)
   end
 
-  def sign(key, chal)
-    key.sign(nil, chal)
+  def sign(key, challenge)
+    key.sign(nil, challenge)
   end
 
-  def msgsig(socket, pub)
-    write_line(socket, "MSGSIG #{b64(pub)}")
+  def msgsig(socket, public_key)
+    write_line(socket, "MSGSIG #{encode(public_key)}")
     read_line(socket, /MSGSIG OK/)
   end
 
   def sasl_authenticate(socket, name)
     key = load_key(name)
-    sig = sign(key, challenge(socket))
-    auth_data = JSON.generate({ did: build_did(key), signature: b64(sig) })
-    write_line(socket, "AUTHENTICATE #{b64(auth_data)}")
+    signature = sign(key, challenge(socket))
+    auth_data = JSON.generate({ did: build_did(key), signature: encode(signature) })
+    write_line(socket, "AUTHENTICATE #{encode(auth_data)}")
     read_line(socket, / 903 /)
   end
 
