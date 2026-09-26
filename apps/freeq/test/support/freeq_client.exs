@@ -1,5 +1,6 @@
 defmodule FreeqTestClient do
-  import Freeq.Batch, only: [absorb: 1, strip: 1]
+  import Freeq.Batch, only: [absorb: 1]
+  import Freeq.Tags, only: [strip: 1]
   import Freeq.Said, only: [matches?: 4]
   @opts [:binary, {:packet, :line}, {:active, false}, {:reuseaddr, true}, {:nodelay, true}]
   @timeout 5000
