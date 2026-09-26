@@ -1,0 +1,95 @@
+{
+  "screens": {},
+  "tape": [
+    {
+      "a": [
+        {
+          "text": "Hello! Who am I talking to?",
+          "type": "text"
+        }
+      ],
+      "q": {
+        "agent": "greet",
+        "messages": [
+          {
+            "content": "[from brian] hello",
+            "role": "user"
+          }
+        ],
+        "n": 1
+      }
+    },
+    {
+      "a": [
+        {
+          "text": "I am Greeeet! \n\nWonderful to meet you, Brian! 🎉 Let me pass along your hello to Bob!",
+          "type": "text"
+        },
+        {
+          "caller": {
+            "type": "direct"
+          },
+          "id": "toolu_01S95NxDgVUzRDbsRZYE2nCQ",
+          "input": {
+            "message": "Hi Bob! Brian says hi to you!",
+            "recipient": "bob"
+          },
+          "name": "tell",
+          "type": "tool_use"
+        }
+      ],
+      "q": {
+        "agent": "greet",
+        "messages": [
+          {
+            "content": "[from brian] I am brian, say hi to @bob for me",
+            "role": "user"
+          }
+        ],
+        "n": 3
+      }
+    },
+    {
+      "a": [
+        {
+          "text": "All set, Brian! I've sent your greeting to Bob! 👋",
+          "type": "text"
+        }
+      ],
+      "q": {
+        "agent": "greet",
+        "messages": [
+          {
+            "content": [
+              {
+                "content": "sent",
+                "tool_use_id": "toolu_01S95NxDgVUzRDbsRZYE2nCQ",
+                "type": "tool_result"
+              }
+            ],
+            "role": "user"
+          }
+        ],
+        "n": 5
+      }
+    },
+    {
+      "a": [
+        {
+          "text": "Bob here.\n\nHey! Thanks for passing that along - tell Brian I said hi back! Always good to hear from folks. What can I help you with today?",
+          "type": "text"
+        }
+      ],
+      "q": {
+        "agent": "bob",
+        "messages": [
+          {
+            "role": "user",
+            "content": "[from greet] Hi Bob! Brian says hi to you!"
+          }
+        ],
+        "n": 1
+      }
+    }
+  ]
+}
