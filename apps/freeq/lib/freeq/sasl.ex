@@ -2,12 +2,13 @@ defmodule Freeq.SASL do
   import String, only: [trim_trailing: 2, split: 1, contains?: 2]
   import Base, only: [url_encode64: 2, url_decode64!: 2]
   import Enum, only: [reverse: 1]
-  import Freeq.Did, only: [key: 0, sign: 2, did: 1]
+  import Freeq.Did, only: [key: 1, sign: 2, did: 1]
+  import Freeq.Keys, only: [seed: 1]
   import Freeq.Writer, only: [line: 2]
   import Jason, only: [encode!: 1]
 
-  def login(socket) do
-    {pub, priv} = key()
+  def login(socket, name) do
+    {pub, priv} = name |> seed() |> elem(1) |> key()
     line(socket, "AUTHENTICATE ATPROTO-CHALLENGE")
     respond(socket, did(pub), sign(challenge(socket), priv))
     auth(socket)

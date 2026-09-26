@@ -7,6 +7,8 @@ defmodule Freeq.Did do
 
   def key, do: :crypto.generate_key(:eddsa, :ed25519)
 
+  def key(seed), do: :crypto.generate_key(:eddsa, :ed25519, seed)
+
   def sign(bytes, priv) do
     :crypto.sign(:eddsa, :none, bytes, [priv, :ed25519])
   end
