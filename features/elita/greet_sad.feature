@@ -37,9 +37,10 @@ Feature: Greet sad paths
     * brian hears nothing more
 
   @freeq
-  Scenario: Greet cannot join a locked room
+  Scenario: An agent brian did not vouch for cannot join his locked room
     * brian> /JOIN #locked
     * brian> /MODE #locked +i
-    * > el spawn greet@lab/locked
-      | greet: #locked is invite only |
+    * a folder outside the repo with bob.md
+    * > el spawn bob@lab/locked
+      | bob: #locked is invite only |
     * el fails
