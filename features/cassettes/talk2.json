@@ -4,7 +4,7 @@
     {
       "a": [
         {
-          "text": "Hello! Who am I talking to?",
+          "text": "Who am I talking to?",
           "type": "text"
         }
       ],
@@ -22,16 +22,16 @@
     {
       "a": [
         {
-          "text": "I am Greeeet! \n\nWonderful to meet you, Brian! 🎉 Let me pass along your hello to Bob!",
+          "text": "I am Greeeet! Hello Brian, wonderful to meet you! 🎉\n\nLet me pass along your greeting to Bob!",
           "type": "text"
         },
         {
           "caller": {
             "type": "direct"
           },
-          "id": "toolu_01S95NxDgVUzRDbsRZYE2nCQ",
+          "id": "toolu_01PXvxrTYeZRAj3fc2jyD326",
           "input": {
-            "message": "Hi Bob! Brian says hi to you!",
+            "message": "Hi Bob! Brian says hello to you!",
             "recipient": "bob"
           },
           "name": "tell",
@@ -52,7 +52,7 @@
     {
       "a": [
         {
-          "text": "All set, Brian! I've sent your greeting to Bob! 👋",
+          "text": "Done! Your message is on its way to Bob. 😊",
           "type": "text"
         }
       ],
@@ -63,7 +63,7 @@
             "content": [
               {
                 "content": "sent",
-                "tool_use_id": "toolu_01S95NxDgVUzRDbsRZYE2nCQ",
+                "tool_use_id": "toolu_01PXvxrTYeZRAj3fc2jyD326",
                 "type": "tool_result"
               }
             ],
@@ -76,7 +76,25 @@
     {
       "a": [
         {
-          "text": "Bob here.\n\nHey! Thanks for passing that along - tell Brian I said hi back! Always good to hear from folks. What can I help you with today?",
+          "text": "bob here.\nHey Brian! Great to hear from you, thanks for the hello! How can I help you today?",
+          "type": "text"
+        }
+      ],
+      "q": {
+        "agent": "bob",
+        "messages": [
+          {
+            "content": "[from greet] Hi Bob! Brian says hello to you!",
+            "role": "user"
+          }
+        ],
+        "n": 1
+      }
+    },
+    {
+      "a": [
+        {
+          "text": "bob here.\nI'm doing great, thanks for asking! Ready to help with whatever you need. What's on your mind?",
           "type": "text"
         }
       ],
@@ -85,10 +103,10 @@
         "messages": [
           {
             "role": "user",
-            "content": "[from greet] Hi Bob! Brian says hi to you!"
+            "content": "[from brian] how are you"
           }
         ],
-        "n": 1
+        "n": 3
       }
     }
   ]

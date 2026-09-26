@@ -14,7 +14,7 @@ module FreeqReply
   end
 
   def freeq_quiet(name)
-    heard = "#{@heard}#{freeq_collect(name)}"
+    heard = freeq_collect(name)
     raise "Expected quiet, heard:\n#{heard}" if heard.match?(/ PRIVMSG #the-lab /)
   end
 
@@ -68,9 +68,7 @@ module FreeqReply
   end
 
   def batch_satisfied?(data)
-    has_open = data.include?("BATCH +")
-    has_close = data.include?("BATCH -")
-    !has_open || has_close
+    data.scan(/BATCH \+/).count == data.scan(/BATCH -/).count
   end
 
   def dispatch_emit(prompt, input)
