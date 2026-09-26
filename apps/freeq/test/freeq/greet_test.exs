@@ -31,6 +31,12 @@ defmodule FreeqGreetTest do
 
   @tag cassette: "greet"
   test "an agent cannot take a nick already in use" do
+    old_keys = System.get_env("ELITA_KEYS")
+    directory = Path.join(System.tmp_dir!(), "elita-keys-#{System.unique_integer()}")
+    File.mkdir_p!(directory)
+    System.put_env("ELITA_KEYS", directory)
+    on_exit(fn -> restore(old_keys) end)
+
     start_time = System.monotonic_time(:millisecond)
     result = Freeq.Resident.start(:brian, "#the-lab", ~c"127.0.0.1", port())
     elapsed = System.monotonic_time(:millisecond) - start_time
@@ -39,6 +45,9 @@ defmodule FreeqGreetTest do
     assert elapsed < 1000
     assert agent_left?("brian")
   end
+
+  defp restore(nil), do: System.delete_env("ELITA_KEYS")
+  defp restore(value), do: System.put_env("ELITA_KEYS", value)
 
   defp agent_left?(name) do
     poll_until_gone(name, System.monotonic_time(:millisecond) + 500)

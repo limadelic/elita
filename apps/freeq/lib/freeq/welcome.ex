@@ -2,38 +2,45 @@ defmodule Freeq.Welcome do
   import String, only: [trim_trailing: 2, contains?: 2, split: 1]
   import Enum, only: [at: 3]
 
-  def greet(socket) do
+  def greet(socket, nick) do
     receive do
-      {:tcp, ^socket, line} -> check(line, socket, 0)
+      {:tcp, ^socket, line} -> check(line, socket, nick, 0)
       {:tcp_closed, ^socket} -> raise "Socket closed waiting for 001"
     after
       5000 -> raise("Timeout waiting for 001: no lines received")
     end
   end
 
-  defp check(line, socket, count) do
+  defp check(line, socket, nick, count) do
     str = line |> to_string() |> trim_trailing("\r\n")
-    status(contains?(str, " 433 "), contains?(str, " 001 "))
-    |> proceed(socket, str, count)
+    status(contains?(str, " 433 "), contains?(str, " 001 "), nick, str)
+    |> proceed(socket, str, count, nick)
   end
 
-  defp status(true, _), do: :nick_taken
-  defp status(false, true), do: :ok
-  defp status(false, false), do: :continue
+  defp status(true, _, _, _), do: :nick_taken
+  defp status(false, true, nick, str), do: verify(nick, target(str))
+  defp status(false, false, _, _), do: :continue
 
-  defp proceed(:nick_taken, _socket, str, _count) do
+  defp verify(nick, received_nick) when nick == received_nick, do: :ok
+  defp verify(nick, _), do: {:nick_taken, nick}
+
+  defp proceed(:nick_taken, _socket, str, _count, _nick) do
     {:error, "nick #{nick(str)} in use"}
   end
 
-  defp proceed(:ok, _socket, _last, _count), do: :ok
-
-  defp proceed(:continue, socket, last, count) do
-    loop(socket, last, count)
+  defp proceed({:nick_taken, nick}, _socket, _str, _count, _nick) do
+    {:error, "nick #{nick} in use"}
   end
 
-  defp loop(socket, last, count) do
+  defp proceed(:ok, _socket, _last, _count, _nick), do: :ok
+
+  defp proceed(:continue, socket, last, count, nick) do
+    loop(socket, last, count, nick)
+  end
+
+  defp loop(socket, last, count, nick) do
     receive do
-      {:tcp, ^socket, line} -> check(line, socket, count)
+      {:tcp, ^socket, line} -> check(line, socket, nick, count)
       {:tcp_closed, ^socket} -> raise "Socket closed waiting for 001"
     after
       5000 -> raise(timeout(last, count))
@@ -46,5 +53,9 @@ defmodule Freeq.Welcome do
 
   defp nick(str) do
     str |> split() |> at(3, "unknown")
+  end
+
+  defp target(str) do
+    str |> split() |> at(2, "unknown")
   end
 end

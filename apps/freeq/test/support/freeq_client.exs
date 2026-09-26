@@ -19,15 +19,15 @@ defmodule FreeqTestClient do
     request_caps()
     send_line("NICK brian")
     send_line("USER brian 0 * :brian")
-    await("001", &String.contains?(&1, " 001 "))
-    send_line("JOIN #the-lab")
-    await("366", &String.contains?(&1, " 366 "))
+    FreeqTestLogin.login(socket())
+    send_line("NAMES #the-lab")
+    await("366", &String.contains?(&1, " 366 brian #the-lab "))
     Process.put(:freeq_transcript, [])
   end
 
   defp request_caps do
-    send_line("CAP REQ :batch draft/multiline message-tags extended-join")
-    send_line("CAP END")
+    send_line("CAP LS 302")
+    send_line("CAP REQ :sasl batch draft/multiline message-tags extended-join")
   end
 
   def wait_join(agent) do

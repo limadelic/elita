@@ -1,7 +1,7 @@
 defmodule Freeq.Boot do
   import Freeq.Writer, only: [nick: 2, user: 2, join: 2, line: 2, agent: 1]
   import Freeq.Ready, only: [wait: 2]
-  import Freeq.Welcome, only: [greet: 1]
+  import Freeq.Welcome, only: [greet: 2]
   import Freeq.SASL, only: [login: 2]
 
   def run(socket, name, channel) do
@@ -12,11 +12,14 @@ defmodule Freeq.Boot do
     caps(socket)
     nick(socket, name)
     user(socket, name)
-    login(socket, name)
+    done(login(socket, name), name)
   end
 
-  defp start(:ok, socket, channel) do
-    register(greet(socket), socket, channel)
+  defp done(:ok, name), do: {:ok, name}
+  defp done({:error, _} = e, _name), do: e
+
+  defp start({:ok, name}, socket, channel) do
+    register(greet(socket, name), socket, channel)
   end
 
   defp start({:error, _} = e, _socket, _channel) do
