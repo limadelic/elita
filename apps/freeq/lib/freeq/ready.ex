@@ -1,30 +1,30 @@
 defmodule Freeq.Ready do
   import String, only: [trim_trailing: 2, contains?: 2]
 
-  def wait(socket) do
-    await(socket, "", 0)
+  def wait(socket, channel) do
+    await(socket, channel, "", 0)
   end
 
-  defp await(socket, last, count) do
+  defp await(socket, channel, last, count) do
     receive do
-      {:tcp, ^socket, line} -> check(line, socket, count)
+      {:tcp, ^socket, line} -> check(line, socket, channel, count)
       {:tcp_closed, ^socket} -> raise "Socket closed waiting for 366"
     after
       5000 -> raise("Timeout waiting for 366: #{text(count, last)}")
     end
   end
 
-  defp check(line, socket, count) do
+  defp check(line, socket, channel, count) do
     str = line |> to_string() |> trim_trailing("\r\n")
-    c366 = contains?(str, " 366 ")
-    c473 = contains?(str, " 473 ")
-    {c366, c473} |> classify(socket, str, count + 1)
+    mark = " #{channel} :"
+    {contains?(str, " 366 "), contains?(str, " 473 "), contains?(str, mark)}
+    |> classify(socket, channel, str, count + 1)
   end
 
-  defp classify({true, _}, _socket, _last, _count), do: :ok
-  defp classify({_, true}, _socket, _last, _count), do: :invite
-  defp classify({false, false}, socket, last, count) do
-    await(socket, last, count)
+  defp classify({true, _, true}, _socket, _channel, _last, _count), do: :ok
+  defp classify({_, true, true}, _socket, _channel, _last, _count), do: :invite
+  defp classify(_, socket, channel, last, count) do
+    await(socket, channel, last, count)
   end
 
   defp text(0, _), do: "no lines received"

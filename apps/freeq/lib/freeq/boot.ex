@@ -1,6 +1,6 @@
 defmodule Freeq.Boot do
   import Freeq.Writer, only: [nick: 2, user: 2, join: 2, line: 2, agent: 1]
-  import Freeq.Ready, only: [wait: 1]
+  import Freeq.Ready, only: [wait: 2]
   import Freeq.Welcome, only: [greet: 1]
   import Freeq.SASL, only: [login: 2]
 
@@ -26,7 +26,7 @@ defmodule Freeq.Boot do
   defp register(:ok, socket, channel) do
     agent(socket)
     join(socket, channel)
-    wait(socket) |> joined(channel)
+    wait(socket, channel) |> joined(channel)
   end
 
   defp register({:error, reason}, _socket, _channel) do
