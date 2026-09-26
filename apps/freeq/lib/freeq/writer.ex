@@ -15,6 +15,10 @@ defmodule Freeq.Writer do
     line(socket, "PRIVMSG #{channel} :#{text}")
   end
 
+  def result(socket, channel, text) do
+    line(socket, "@+elita/result PRIVMSG #{channel} :#{text}")
+  end
+
   def pong(socket, server) do
     line(socket, "PONG #{server}")
   end

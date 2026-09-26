@@ -40,7 +40,7 @@ Feature: Greet
       | greet started |
 
     * brian> @greet hello
-      | @brian Who am I talking to? |
+      | +elita/result | @brian Who am I talking to? |
 
   @freeq
   Scenario: Bob joins the lab from his own folder

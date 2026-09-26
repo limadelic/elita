@@ -7,7 +7,7 @@ defmodule Freeq do
   import Process, only: [flag: 2, register: 2]
   import Map, only: [put: 3]
 
-  import Freeq.Lines, only: [send: 3]
+  import Freeq.Lines, only: [send: 3, answer: 3]
   import Freeq.Pending, only: [push: 2]
   import Freeq.Inbox, only: [route: 2]
   import Freeq.Batch, only: [absorb: 1]
@@ -67,14 +67,14 @@ defmodule Freeq do
   @impl true
   def handle_info({:answer, text, sender}, %{socket: socket, channel: channel} = state) do
     text = "@#{sender} #{text}"
-    send(socket, channel, text)
+    answer(socket, channel, text)
     {:noreply, push(state, text)}
   end
 
   @impl true
   def handle_info({:error_answer, sender}, %{socket: socket, channel: channel} = state) do
     text = "@#{sender} could not answer"
-    send(socket, channel, text)
+    answer(socket, channel, text)
     {:noreply, push(state, text)}
   end
 
