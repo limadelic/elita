@@ -45,12 +45,14 @@ compute_sha() {
 update_tap() {
   local version=$1
   local sha=$2
+  local formula="$PWD/ops/brew/elita.rb"
   local temp_dir
   temp_dir=$(mktemp -d)
 
   cd "$temp_dir"
   git clone git@github.com:limadelic/homebrew-tap.git
   cd homebrew-tap
+  cp "$formula" Formula/elita.rb
 
   sed -i '' "s|url.*github.com/limadelic/elita/archive.*|url \"https://github.com/limadelic/elita/archive/refs/tags/v${version}.tar.gz\"|" Formula/elita.rb
   sed -i '' "s|sha256.*|sha256 \"${sha}\"|" Formula/elita.rb
