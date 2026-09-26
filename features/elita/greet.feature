@@ -51,3 +51,11 @@ Feature: Greet
       | bob started |
     * brian> /names #the-lab
       | bob=agent |
+
+  @freeq
+  Scenario: Brian is himself
+    * > el spawn greet@lab/the-lab
+      | greet started |
+
+    * brian> /whois brian
+      | is authenticated as |
