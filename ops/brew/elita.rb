@@ -11,7 +11,16 @@ class Elita < Formula
     build
     libexec.install "apps/el/el"
     pkgshare.install "apps/elita/agents"
+    bin.install "ops/brew/el-node"
     wrap
+  end
+
+  service do
+    run opt_bin / "el-node"
+    environment_variables PATH: std_service_path_env
+    keep_alive true
+    log_path var / "log/elita.log"
+    error_log_path var / "log/elita.log"
   end
 
   test do
