@@ -1,18 +1,17 @@
 defmodule Freeq do
   use GenServer, restart: :temporary
   import Keyword, only: [fetch!: 2, get: 3]
-  import String, only: [trim_trailing: 2, to_atom: 1]
+  import String, only: [to_atom: 1]
   import GenServer, only: [start_link: 3, call: 2]
   import Elita, only: [request: 2]
   import Process, only: [flag: 2, register: 2]
-  import List, only: [wrap: 1]
 
-  import Freeq.Lines, only: [send: 3]
+  import Freeq.Lines, only: [send: 3, answer: 3]
   import Freeq.Pending, only: [push: 2]
   import Freeq.Inbox, only: [route: 2]
   import Freeq.Batch, only: [absorb: 1]
   import Freeq.Boot, only: [run: 3]
-
+  import Freeq.Result, only: [clean: 1, mark: 3, untag: 1]
   def start_link(opts), do: start_link(__MODULE__, tuple(opts), [])
 
   defp tuple(opts) do
@@ -33,9 +32,7 @@ defmodule Freeq do
   defp ready(:ok, {socket, agent, channel, ask, config}) do
     {:ok, setup(socket, agent, channel, ask, config)}
   end
-  defp ready({:error, reason}, _) do
-    {:stop, reason}
-  end
+  defp ready({:error, reason}, _), do: {:stop, reason}
 
   defp socket(host, port) do
     :gen_tcp.connect(host, port, active: true, packet: :line)
@@ -50,7 +47,7 @@ defmodule Freeq do
   @impl true
   def handle_call({:tell, nick, text}, _from, state) do
     %{socket: socket, channel: channel} = state
-    text = "#{nick}: #{text}"
+    text = "@#{nick} #{text}"
     send(socket, channel, text)
     {:reply, :ok, push(state, text)}
   end
@@ -68,7 +65,7 @@ defmodule Freeq do
   def handle_info({:answer, text, sender}, state) do
     %{socket: socket, channel: channel} = state
     text = "@#{sender} #{text}"
-    send(socket, channel, text)
+    answer(socket, channel, text)
     {:noreply, push(state, text)}
   end
 
@@ -76,7 +73,7 @@ defmodule Freeq do
   def handle_info({:error_answer, sender}, state) do
     %{socket: socket, channel: channel} = state
     text = "@#{sender} could not answer"
-    send(socket, channel, text)
+    answer(socket, channel, text)
     {:noreply, push(state, text)}
   end
 
@@ -87,9 +84,12 @@ defmodule Freeq do
     {:noreply, state}
   end
 
-  defp recv(line, state), do: clean(line) |> absorb() |> process(state)
-  defp clean(line), do: line |> to_string() |> trim_trailing("\r\n") |> wrap()
-  defp process(lines, state), do: route(lines, state)
+  defp recv(line, state), do: clean(line) |> absorb() |> process(line, state)
+
+  defp process(lines, line, state) do
+    route(untag(lines), mark(state, line, lines))
+  end
+
   @impl true
   def terminate(_reason, %{socket: socket}) do
     :gen_tcp.send(socket, "QUIT\r\n")

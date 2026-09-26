@@ -1,5 +1,5 @@
 defmodule Freeq.Said do
-  import Freeq.Batch, only: [strip: 1]
+  import Freeq.Tags, only: [strip: 1]
 
   def said?(from, to, fragment) do
     Process.get(:freeq_transcript, []) |> Enum.any?(&matches?(&1, from, to, fragment))
@@ -17,7 +17,7 @@ defmodule Freeq.Said do
   end
 
   defp body([_, message], to, fragment) do
-    String.starts_with?(message, "#{to}: ") and includes?(message, fragment)
+    String.starts_with?(message, "@#{to} ") and includes?(message, fragment)
   end
 
   defp body(_split, _to, _fragment), do: false

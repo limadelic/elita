@@ -4,7 +4,6 @@ defmodule Freeq.Pending do
   end
 
   def drop(%{pending: []} = state), do: state
-
   def drop(%{pending: [_ | rest]} = state) do
     %{state | pending: rest, attempts: 0}
   end

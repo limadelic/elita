@@ -10,7 +10,18 @@ module FreeqReply
     session = sessions[name]
     raise "No freeq session: #{name}" if session.nil?
 
-    receive(session)
+    @heard = receive(session)
+  end
+
+  def freeq_quiet(name)
+    heard = freeq_collect(name)
+    raise "Expected quiet, heard:\n#{heard}" if heard.match?(/ PRIVMSG #the-lab /)
+  end
+
+  def freeq_hears(name, table)
+    heard = +"#{@heard}"
+    retrying(24) { verify_cells(table, heard << freeq_collect(name)) }
+    @heard = ''
   end
 
   private
@@ -48,7 +59,17 @@ module FreeqReply
     net_read(socket)
   end
 
-  def final?(data) = data.match?(/ (674|318|PRIVMSG) /)
+  def final?(data)
+    reply?(data) && batch_satisfied?(data)
+  end
+
+  def reply?(data)
+    data.match?(/ (674|318|PRIVMSG) /)
+  end
+
+  def batch_satisfied?(data)
+    data.scan(/BATCH \+/).count == data.scan(/BATCH -/).count
+  end
 
   def dispatch_emit(prompt, input)
     freeq_session?(prompt) ? freeq_emit(prompt, input) : push(input)

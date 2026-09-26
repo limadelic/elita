@@ -49,9 +49,9 @@ defmodule Freeq.Parser do
   end
 
   defp cite(text, nick) do
-    prefixes = ["#{nick}:", "#{nick},", "#{nick} ",
-                "@#{nick}:", "@#{nick},", "@#{nick} "]
-    any?(prefixes, &starts_with?(text, &1))
+    prefixes = ["#{nick}:", "#{nick},", "#{nick} "]
+    at = ["@#{nick}:", "@#{nick},", "@#{nick} "]
+    any?(prefixes ++ at, &starts_with?(text, &1))
   end
 
   defp clean(text, nick) do

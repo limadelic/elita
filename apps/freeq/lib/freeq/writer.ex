@@ -1,4 +1,6 @@
 defmodule Freeq.Writer do
+  import Freeq.Tags, only: [result: 0]
+
   def nick(socket, agent) do
     line(socket, "NICK #{agent}")
   end
@@ -13,6 +15,10 @@ defmodule Freeq.Writer do
 
   def message(socket, channel, text) do
     line(socket, "PRIVMSG #{channel} :#{text}")
+  end
+
+  def result(socket, channel, text) do
+    line(socket, "#{result()}PRIVMSG #{channel} :#{text}")
   end
 
   def pong(socket, server) do

@@ -68,7 +68,7 @@ defmodule FreeqCase do
       end
 
       def tell(agent, msg) do
-        say("#{agent}: #{msg}")
+        say("@#{agent} #{msg}")
         reply(agent)
         :ok
       end

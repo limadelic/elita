@@ -5,6 +5,7 @@ defmodule Freeq.Batch do
   import List, only: [last: 1, first: 1]
   import Map, only: [put: 3, delete: 2, has_key?: 2, fetch!: 2]
   import Process, only: [get: 2, put: 2]
+  import Freeq.Tags, only: [result?: 1, strip: 1, result: 0]
 
   def new, do: %{}
 
@@ -26,7 +27,7 @@ defmodule Freeq.Batch do
 
   def feed(state, line) do
     body = strip(line)
-    act(kind(body), ref(line), body, state)
+    act(kind(body), ref(line), body, line, state)
   end
 
   defp kind(body) do
@@ -40,16 +41,20 @@ defmodule Freeq.Batch do
   defp multi(true), do: :open
   defp multi(false), do: :skip
 
-  defp act(:open, _ref, body, state), do: {:pending, open(state, body)}
-  defp act(:skip, _ref, _body, state), do: {:pending, state}
-  defp act(:close, _ref, body, state), do: shut(state, tail(body))
-  defp act(:plain, ref, body, state) do
+  defp act(:open, _ref, body, line, state) do
+    {:pending, open(state, body, result?(line))}
+  end
+  defp act(:skip, _ref, _body, _line, state), do: {:pending, state}
+  defp act(:close, _ref, body, _line, state), do: shut(state, tail(body))
+  defp act(:plain, ref, body, _line, state) do
     keep(has_key?(state, ref), ref, body, state)
   end
 
-  defp open(state, body) do
+  defp open(state, body, result) do
     [src, _batch, ref, _type, chan] = split(body, " ", parts: 5)
-    put(state, trim_leading(ref, "+"), %{src: src, chan: chan, lines: []})
+    key = trim_leading(ref, "+")
+    value = %{src: src, chan: chan, lines: [], result: result}
+    put(state, key, value)
   end
 
   defp shut(state, ref), do: close(has_key?(state, ref), state, ref)
@@ -57,10 +62,7 @@ defmodule Freeq.Batch do
   defp close(true, state, ref) do
     {:message, assemble(fetch!(state, ref)), delete(state, ref)}
   end
-
-  defp close(false, state, _ref) do
-    {:pending, state}
-  end
+  defp close(false, state, _ref), do: {:pending, state}
 
   defp keep(true, ref, body, state), do: {:pending, add(state, ref, text(body))}
   defp keep(false, _ref, body, state), do: {:message, body, state}
@@ -82,9 +84,12 @@ defmodule Freeq.Batch do
   defp payload(":" <> text), do: text
   defp payload(text), do: text
 
-  defp assemble(%{src: src, chan: chan, lines: lines}) do
-    "#{src} PRIVMSG #{chan} :#{join(lines, "\n")}"
+  defp assemble(%{src: src, chan: chan, lines: lines, result: result}) do
+    "#{flag(result)}#{src} PRIVMSG #{chan} :#{join(lines, "\n")}"
   end
+
+  defp flag(true), do: result()
+  defp flag(false), do: ""
 
   defp ref("@batch=" <> rest) do
     rest |> split(" ", parts: 2) |> first() |> tagval()
@@ -92,7 +97,4 @@ defmodule Freeq.Batch do
   defp ref(_line), do: ""
 
   defp tagval(value), do: value |> split(";", parts: 2) |> first()
-
-  def strip("@" <> rest), do: rest |> split(" ", parts: 2) |> last()
-  def strip(line), do: line
 end

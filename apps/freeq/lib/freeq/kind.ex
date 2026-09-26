@@ -22,10 +22,7 @@ defmodule Freeq.Kind do
   defp process([_prefix, rest], _message) do
     split(rest, "] ", parts: 2) |> extract()
   end
-
-  defp process(_rest, message) do
-    {"unknown", message}
-  end
+  defp process(_rest, message), do: {"unknown", message}
 
   defp extract([sender, body]), do: {sender, body}
   defp extract(_), do: {"unknown", ""}

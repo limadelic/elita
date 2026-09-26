@@ -22,7 +22,8 @@ def write_bob_file
 end
 
 def bob_content
-  "---\nname: bob\ndescription: Agent Bob\n---\n\n# Bob\n\nBob the agent."
+  prompt = "Answer in two lines. Line 1: bob here. Line 2: your answer.\n\nBob the agent."
+  "---\nname: bob\ndescription: Agent Bob\n---\n\n# Bob\n\n#{prompt}"
 end
 
 When(/^no elita node$/) do
@@ -86,6 +87,12 @@ Then(/^el fails$/) do
 
   exitstatus = @exit_status.exitstatus
   raise "expected nonzero, got #{exitstatus}" if exitstatus&.zero?
+end
+
+Then(/^(\w+) hears$/) { |name, table| freeq_hears(name, table) }
+
+Then(/^(\w+) hears nothing more$/) do |name|
+  freeq_quiet(name)
 end
 
 When(/^(\w+):$/) do |name, *rest|
