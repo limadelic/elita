@@ -1,0 +1,6 @@
+#!/bin/bash
+set -a
+. "$HOME/.elita/env" >/dev/null 2>&1
+set +a
+export ELITA_NODES="${ELITA_NODES:-lab=freeq://127.0.0.1:6667}"
+exec el node
