@@ -1,3 +1,5 @@
+System.put_env("ELITA_KEYS", Path.expand("../../../features/support/keys", __DIR__))
+
 Code.require_file("../../elita/test/support/tester.exs", __DIR__)
 Application.ensure_all_started(:tape)
 
