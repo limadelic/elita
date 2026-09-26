@@ -44,9 +44,12 @@ defmodule Freeq.Inbox do
   defp relay(true, msg, state), do: {:noreply, defer(state, head(state), msg)}
 
   defp relay(false, msg, state) do
-    privmsg(msg, state, self())
+    answer(state, msg)
     {:noreply, settle(mine?(msg, state), state)}
   end
+
+  defp answer(%{result: true}, _msg), do: :ok
+  defp answer(state, msg), do: privmsg(msg, state, self())
 
   defp mine?(msg, %{agent: agent}), do: nick(msg) == agent
 

@@ -88,6 +88,10 @@ Then(/^el fails$/) do
   raise "expected nonzero, got #{exitstatus}" if exitstatus&.zero?
 end
 
+Then(/^(\w+) hears nothing more$/) do |name|
+  freeq_quiet(name)
+end
+
 When(/^(\w+):$/) do |name, *rest|
   table = rest.first
   activate(name)

@@ -16,3 +16,11 @@ Feature: Greet sad paths
     * > el spawn nobody@lab/the-lab
       | unknown agent: nobody |
     * el fails
+
+  @freeq
+  @tape:greet
+  Scenario: Greet stays quiet on a finished answer
+    * > el spawn greet@lab/the-lab
+      | greet started |
+    * brian> /@+elita/result PRIVMSG #the-lab :@greet hello
+    * brian hears nothing more

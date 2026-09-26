@@ -10,7 +10,12 @@ module FreeqReply
     session = sessions[name]
     raise "No freeq session: #{name}" if session.nil?
 
-    receive(session)
+    @heard = receive(session)
+  end
+
+  def freeq_quiet(name)
+    heard = "#{@heard}#{freeq_collect(name)}"
+    raise "Expected quiet, heard:\n#{heard}" if heard.match?(/ PRIVMSG #the-lab /)
   end
 
   private

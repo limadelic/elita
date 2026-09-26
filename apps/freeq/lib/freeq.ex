@@ -1,17 +1,18 @@
 defmodule Freeq do
   use GenServer, restart: :temporary
   import Keyword, only: [fetch!: 2, get: 3]
-  import String, only: [trim_trailing: 2, to_atom: 1]
+  import String, only: [to_atom: 1]
   import GenServer, only: [start_link: 3, call: 2]
   import Elita, only: [request: 2]
   import Process, only: [flag: 2, register: 2]
-  import List, only: [wrap: 1]
+  import Map, only: [put: 3]
 
   import Freeq.Lines, only: [send: 3]
   import Freeq.Pending, only: [push: 2]
   import Freeq.Inbox, only: [route: 2]
   import Freeq.Batch, only: [absorb: 1]
   import Freeq.Boot, only: [run: 3]
+  import Freeq.Result, only: [result?: 1, clean: 1]
 
   def start_link(opts), do: start_link(__MODULE__, tuple(opts), [])
 
@@ -83,11 +84,8 @@ defmodule Freeq do
     {:noreply, state}
   end
 
-  defp recv(line, state) do
-    clean(line) |> absorb() |> process(state)
-  end
-
-  defp clean(line), do: line |> to_string() |> trim_trailing("\r\n") |> wrap()
+  defp recv(line, state), do: clean(line) |> absorb() |> process(mark(line, state))
+  defp mark(line, state), do: put(state, :result, result?(to_string(line)))
 
   defp process(lines, state), do: route(lines, state)
 
