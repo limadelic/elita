@@ -27,7 +27,7 @@ BeforeAll do
     if ENV["TAPE"] == "rec"
       raise "record mode needs a single feature file" unless ARGV.grep(/\.feature$/).one?
     end
-    ENV["ELITA_KEYS"] = File.expand_path("../keys", __dir__)
+    ENV["ELITA_KEYS"] = File.expand_path("keys", __dir__)
     scavenge
     nest
     summon
