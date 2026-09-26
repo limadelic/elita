@@ -47,7 +47,7 @@ defmodule Freeq do
   @impl true
   def handle_call({:tell, nick, text}, _from, state) do
     %{socket: socket, channel: channel} = state
-    text = "#{nick}: #{text}"
+    text = "@#{nick} #{text}"
     send(socket, channel, text)
     {:reply, :ok, push(state, text)}
   end

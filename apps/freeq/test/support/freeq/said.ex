@@ -17,7 +17,7 @@ defmodule Freeq.Said do
   end
 
   defp body([_, message], to, fragment) do
-    String.starts_with?(message, "#{to}: ") and includes?(message, fragment)
+    String.starts_with?(message, "@#{to} ") and includes?(message, fragment)
   end
 
   defp body(_split, _to, _fragment), do: false
