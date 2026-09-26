@@ -33,3 +33,9 @@ Feature: Greet Live
       | :@brian       |
       | +elita/result |
     * brian hears nothing more
+    * brian> @bob how are you
+      | :bob!         |
+      | :@brian       |
+      | bob here      |
+      | +elita/result |
+    * brian hears nothing more

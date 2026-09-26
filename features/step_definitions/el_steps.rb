@@ -22,7 +22,7 @@ def write_bob_file
 end
 
 def bob_content
-  prompt = "Start every answer with 'bob here'.\n\nBob the agent."
+  prompt = "Answer in two lines. Line 1: bob here. Line 2: your answer.\n\nBob the agent."
   "---\nname: bob\ndescription: Agent Bob\n---\n\n# Bob\n\n#{prompt}"
 end
 

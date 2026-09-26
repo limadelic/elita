@@ -59,7 +59,19 @@ module FreeqReply
     net_read(socket)
   end
 
-  def final?(data) = data.match?(/ (674|318|PRIVMSG) /)
+  def final?(data)
+    reply?(data) && batch_satisfied?(data)
+  end
+
+  def reply?(data)
+    data.match?(/ (674|318|PRIVMSG) /)
+  end
+
+  def batch_satisfied?(data)
+    has_open = data.include?("BATCH +")
+    has_close = data.include?("BATCH -")
+    !has_open || has_close
+  end
 
   def dispatch_emit(prompt, input)
     freeq_session?(prompt) ? freeq_emit(prompt, input) : push(input)
