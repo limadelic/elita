@@ -1,4 +1,8 @@
+require_relative 'run'
+
 module Spawn
+  include Run
+
   def realm
     @scratch || "apps/elita/agents/elita"
   end
@@ -16,6 +20,7 @@ module Spawn
       "CASSETTE_DIR=#{dir} " +
       clock_prefix +
       "MIX_ENV=test " +
+      "ELITA_RUN=#{elita_run(@elita_run)} " +
       "#{gate} " +
       "#{args}"
     ).strip
@@ -30,6 +35,7 @@ module Spawn
       "CASSETTE_DIR=#{dir} " +
       clock_prefix +
       "MIX_ENV=test " +
+      "ELITA_RUN=#{elita_run(@elita_run)} " +
       "#{gate} " +
       "#{args}"
     ).strip
@@ -77,7 +83,7 @@ module Spawn
       "CASSETTE" => @cassette,
       "CASSETTE_DIR" => dir,
       "MIX_ENV" => "test",
-      "ELITA_RUN" => flux,
+      "ELITA_RUN" => elita_run(@elita_run),
       "HOME" => ENV["HOME"]
     }
     clock = clock_env
@@ -114,25 +120,21 @@ module Spawn
     ENV["LIVE"] || ""
   end
 
-  def flux
-    ENV["ELITA_RUN"] || ""
-  end
-
   def spine
     [(@scratch ? "#{@scratch}/bin" : nil), ENV["PATH"]].compact.join(":")
   end
 
-  def run(cmd)
+  def run(cmd, args = "")
     output = ""
-    reader, writer, pid = mint(cmd)
+    reader, writer, pid = mint(cmd, args)
     watch(pid)
     extract(reader, Time.now + 30, output)
     kill(writer, pid)
     output
   end
 
-  def mint(cmd)
-    cmd_env = cmd.include?("@") ? cloak(cmd) : cmd
+  def mint(cmd, args = "")
+    cmd_env = args.start_with?("@") ? cloak(cmd) : cmd
     PTY.spawn("/bin/sh", "-c", cmd_env)
   end
 
@@ -147,7 +149,9 @@ module Spawn
   end
 
   def snuff(pid)
-    Process.wait(pid) if pid
+    return unless pid
+
+    @exit_status = Process.wait2(pid)[1]
   end
 
   def seal(writer)

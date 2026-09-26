@@ -2,11 +2,11 @@ defmodule Cfg do
   import Enum, only: [map: 2, reject: 2, reduce: 3]
   import Map, only: [new: 1, put: 3, put_new: 3]
   import String, only: [split: 2, split: 3, trim: 1, to_atom: 1]
-  import Utils.File, only: [file: 1]
+  import Utils.File, only: [file: 2]
   import YamlElixir, only: [read_from_string: 1]
 
-  def config(name) do
-    file("#{name}.md")
+  def config(name, cwd \\ nil) do
+    file("#{name}.md", cwd)
     |> valid(name)
     |> finalize(name)
   end

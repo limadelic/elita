@@ -7,8 +7,9 @@ defmodule El.Repl.Route do
   import Utils.World, only: [agents: 0]
   import El.Distribution, only: [wait: 1]
   import Elita, only: [spawn: 3]
-  import System, only: [get_env: 1]
   import Utils.Normalize, only: [name: 1]
+  import El.Command.Ls, only: [list: 0, list: 1]
+  import El.Run, only: [options: 0]
 
   def route([name, "log"], _a, _p, _i), do: name |> log() |> puts()
 
@@ -35,17 +36,20 @@ defmodule El.Repl.Route do
     via(words, puppet, input, agent)
   end
 
-  defp opts, do: [tape_env: build()]
-
-  defp build,
-    do: %{
-      tape: get_env("TAPE"),
-      live: get_env("LIVE"),
-      cassette: get_env("CASSETTE"),
-      cassette_dir: get_env("CASSETTE_DIR")
-    }
+  defp opts, do: [tape_env: options()]
 
   def via(["log"], _p, _i, agent), do: {agent |> log(), agent, nil}
+
+  def via(["ls"], _p, _i, agent) do
+    list()
+    {"", agent, nil}
+  end
+
+  def via(["ls", path], _p, _i, agent) do
+    list(path)
+    {"", agent, nil}
+  end
+
   def via([_w], p, i, agent), do: {ask(p, i), agent, p}
   def via([w, msg], p, _i, agent), do: send(w, msg, p, agent, known?(w))
   def via(_, p, i, agent), do: {ask(p, i), agent, p}
@@ -58,6 +62,11 @@ defmodule El.Repl.Route do
   defp registered?(key), do: :global.whereis_name({key, :puppet}) != :undefined
 
   defp file?(w), do: w in agents()
+
+  def send(w, "&", p, _agent, true) do
+    w |> locate() |> choose(p)
+    {w <> " started", w, nil}
+  end
 
   def send(w, msg, p, _agent, true) do
     pid = w |> locate() |> choose(p)

@@ -2,6 +2,7 @@ defmodule El.Commands.Ls do
   @moduledoc "Lists agents in the current folder with their registration status."
 
   import El.Commands.Address.World, only: [build: 0, cwd: 0]
+  import El.Commands.Nodes, only: [list: 0]
   import Enum, only: [map: 2, sort_by: 2, filter: 2, join: 2, any?: 2]
   import IO, only: [puts: 1]
   import Keyword, only: [get: 2]
@@ -23,10 +24,7 @@ defmodule El.Commands.Ls do
   defp respond(true, path), do: render(path)
 
   defp render("//") do
-    build()
-    |> filter(&(&1.kind == :node))
-    |> sort_by(& &1.name)
-    |> show()
+    list()
   end
 
   defp render(path) do
@@ -54,10 +52,6 @@ defmodule El.Commands.Ls do
     entries |> map(&format/1) |> join("\n")
   end
 
-  defp format(%{kind: :node} = entry) do
-    "#{entry.name} #{label(entry.kind)}"
-  end
-
   defp format(entry) do
     "#{entry.name} #{label(entry.kind)} #{status(entry.name)}"
   end
@@ -72,13 +66,13 @@ defmodule El.Commands.Ls do
 
   defp harvest(visible) do
     names = map(visible, & &1.name)
-    headless(names) |> map(&entry/1)
+    live(names) |> map(&entry/1)
   end
 
-  defp headless(names) do
-    ElitaRegistry
-    |> select([{{:"$1", :_, %{kind: :headless}}, [], [:"$1"]}])
-    |> filter(&absent?(names, &1))
+  defp live(names) do
+    h = ElitaRegistry |> select([{{:"$1", :_, %{kind: :headless}}, [], [:"$1"]}])
+    n = ElitaRegistry |> select([{{:"$1", :_, %{kind: :native}}, [], [:"$1"]}])
+    (h ++ n) |> filter(&absent?(names, &1))
   end
 
   defp absent?(list, n) do
@@ -94,7 +88,6 @@ defmodule El.Commands.Ls do
   defp label(:file), do: "file"
   defp label(:folder), do: "folder"
   defp label(:session), do: "session"
-  defp label(:node), do: "node"
   defp ready?, do: check(:ets.whereis(:elita_vault))
   defp check(:undefined), do: false
   defp check(_), do: :ets.lookup(:elita_vault, :ready) == [ready: true]

@@ -8,6 +8,8 @@ require_relative 'reap'
 require_relative 'kill'
 require_relative 'track'
 require_relative 'guard'
+require_relative 'freeq_client'
+require_relative 'freeq_reply'
 
 module Hooks
 end
@@ -101,6 +103,14 @@ Before('@malko') do
   enforce
 end
 
+Before('@freeq') do
+  deliver
+  port = ENV["FREEQ_PORT"]
+  raise "FREEQ_PORT not set" unless port
+
+  freeq_connect('brian', '127.0.0.1', port.to_i)
+end
+
 After do |_scenario|
   Timeout.timeout(30) do
     merge_screens if ENV["TAPE"] == "rec"
@@ -111,6 +121,10 @@ rescue Timeout::Error
   STDERR.puts "After hook timed out after 30s"
   purge
   slash
+end
+
+After('@freeq') do
+  freeq_close('brian')
 end
 
 def merge_screens

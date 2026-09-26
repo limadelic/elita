@@ -9,6 +9,8 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+    env:
+      FREEQ_PORT: "6667"
 
     steps:
       - uses: actions/checkout@v4
@@ -114,7 +116,7 @@ jobs:
 
       - name: Run greet test
         id: greet
-        run: cd apps/elita && mix test --only freeq
+        run: cd apps/freeq && mix test --include freeq
 
       - name: Record freeq result
         run: |

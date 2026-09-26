@@ -1,0 +1,23 @@
+{
+  "screens": {},
+  "tape": [
+    {
+      "a": [
+        {
+          "text": "Bob here.\nHey Brian! Good to hear from you.",
+          "type": "text"
+        }
+      ],
+      "q": {
+        "agent": "bob",
+        "messages": [
+          {
+            "role": "user",
+            "content": "[from brian] hello"
+          }
+        ],
+        "n": 1
+      }
+    }
+  ]
+}

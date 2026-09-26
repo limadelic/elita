@@ -116,7 +116,7 @@ module ReplHelper
   def one(args)
     @cassette = @cassette || "greet"
     cmd = command(args)
-    run(cmd)
+    run(cmd, args)
   end
 
   def post(input, prompt)
@@ -153,7 +153,7 @@ module ReplHelper
     sessions
     vet(prompt)
     activate(prompt)
-    push(input)
+    dispatch_emit(prompt, input)
   end
 
   def vet(prompt)
@@ -161,7 +161,7 @@ module ReplHelper
   end
 
   def collect(prompt, input)
-    input == "/exit" ? assure : hold(prompt)
+    input == "/exit" ? assure : dispatch_collect(prompt)
   end
 
   def hold(prompt)

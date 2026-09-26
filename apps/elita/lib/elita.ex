@@ -1,7 +1,7 @@
 defmodule Elita do
   use GenServer
 
-  import Cfgs, only: [load: 1]
+  import Cfgs, only: [load: 2]
   import History, only: [record: 1]
   import Llm, only: [llm: 1]
   import Map, only: [merge: 2, get: 2]
@@ -46,15 +46,17 @@ defmodule Elita do
   end
 
   defp state(name, configs, opts, settings) do
-    base = base(name, configs)
+    base = base(name, configs, opts)
     sender = get(opts, :sender, name)
     skip = get(opts, :skip_logs, false)
     merge(merge(base, settings), %{sender: sender, skip_logs: skip})
   end
 
-  defp base(name, configs) do
+  defp base(name, configs, opts) do
+    cwd = Keyword.get(opts, :cwd, nil)
     history = restore(name)
-    %{name: name, config: load(configs), history: history, configs: configs}
+    cfg = load(configs, cwd)
+    %{name: name, config: cfg, history: history, configs: configs}
   end
 
   defp seed(nil), do: :ok

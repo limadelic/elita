@@ -11,11 +11,14 @@ defmodule Utils.File do
     "test/specs/"
   ]
 
-  def file(name) do
-    paths(name)
+  def file(name, cwd \\ nil) do
+    (here(cwd, name) ++ paths(name))
     |> find_value(&fetch/1)
     |> ensure(name)
   end
+
+  defp here(nil, _name), do: []
+  defp here(cwd, name), do: [join(cwd, name)]
 
   defp paths(name) do
     map(@paths, fn path -> concat("#{@app_root}/#{path}", name) end) ++
