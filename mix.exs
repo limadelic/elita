@@ -32,8 +32,7 @@ defmodule Elita.Umbrella do
       cukes: [&run_cukes/1],
       cuke: [&run_cuke/1],
       build: [&run_build/1],
-      cover: [&run_cover/1],
-      ship: "cmd bin/release"
+      cover: [&run_cover/1]
     ]
   end
 
