@@ -28,6 +28,7 @@ defmodule Freeq.Boot do
   end
 
   defp caps(socket) do
+    line(socket, "CAP LS 302")
     line(socket, "CAP REQ :sasl batch draft/multiline message-tags echo-message")
   end
 end
