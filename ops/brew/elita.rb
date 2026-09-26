@@ -8,7 +8,7 @@ class Elita < Formula
   depends_on "elixir"
 
   def install
-    build
+    compile
     libexec.install "apps/el/el"
     pkgshare.install "apps/elita/agents"
     bin.install "ops/brew/el-node"
@@ -29,7 +29,7 @@ class Elita < Formula
 
   private
 
-  def build
+  def compile
     ENV["MIX_ENV"] = "prod"
     ENV["MIX_HOME"] = buildpath / ".mix"
     ENV["HEX_HOME"] = buildpath / ".hex"
