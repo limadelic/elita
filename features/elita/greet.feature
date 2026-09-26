@@ -33,6 +33,7 @@ Feature: Greet
 
     * brian> /whois greet
       | actor_class=agent |
+      | did:key:z         |
 
   @freeq
   Scenario: Brian talks to greet
