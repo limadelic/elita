@@ -14,8 +14,7 @@ module FreeqReply
   end
 
   def freeq_quiet(name)
-    heard = freeq_collect(name)
-    raise "Expected quiet, heard:\n#{heard}" if heard.match?(/ PRIVMSG #the-lab /)
+    refute(' PRIVMSG #the-lab ', freeq_collect(name))
   end
 
   def freeq_hears(name, table)
