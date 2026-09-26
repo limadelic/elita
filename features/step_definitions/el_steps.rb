@@ -53,8 +53,8 @@ When(/^> el tell (.+)$/) do |args, *rest|
   handle(rest.first, output)
 end
 
-When(/^> el spawn (.+)$/) do |args, *rest|
-  output = one("spawn #{args}")
+When(/^> el (spawn|ls) (.+)$/) do |verb, args, *rest|
+  output = one("#{verb} #{args}")
   track(output.dup, output.gsub(/\e\[[0-9;]*m/, ''))
   handle(rest.first, output)
 end
@@ -64,7 +64,7 @@ When(/^> el$/) do |*rest|
   handle(rest.first, transcript)
 end
 
-When(/^> el (?!tell|spawn)(.+)$/) do |args, *rest|
+When(/^> el (?!tell|spawn|ls)(.+)$/) do |args, *rest|
   route(args)
   handle(rest.first, transcript)
 end
