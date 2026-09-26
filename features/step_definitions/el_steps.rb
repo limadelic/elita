@@ -22,8 +22,8 @@ def write_bob_file
 end
 
 def bob_content
-  m = "Start every answer with 'bob here'.\n\nBob the agent."
-  "---\nname: bob\ndescription: Agent Bob\n---\n\n# Bob\n\n#{m}"
+  prompt = "Start every answer with 'bob here'.\n\nBob the agent."
+  "---\nname: bob\ndescription: Agent Bob\n---\n\n# Bob\n\n#{prompt}"
 end
 
 When(/^no elita node$/) do
@@ -87,6 +87,19 @@ Then(/^el fails$/) do
 
   exitstatus = @exit_status.exitstatus
   raise "expected nonzero, got #{exitstatus}" if exitstatus&.zero?
+end
+
+Then(/^(\w+) hears$/) do |name, *rest|
+  table = rest.first
+  return unless table
+
+  heard = ""
+  heard << @heard if @heard
+  retrying(24) do
+    heard << freeq_collect(name)
+    verify_cells(table, heard)
+  end
+  @heard = ""
 end
 
 Then(/^(\w+) hears nothing more$/) do |name|
