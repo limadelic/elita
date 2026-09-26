@@ -54,5 +54,5 @@ Feature: Greet
   Scenario: ls connects through hidden tunnel
     * a folder named elita
     * > el ls //
-      | node: elita     |
-      | (nonode@nohost) |
+      | node: elita-cukes |
+      | lab (freeq)       |
