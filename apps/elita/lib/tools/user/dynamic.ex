@@ -2,10 +2,9 @@ defmodule Tools.User.Load.Schema do
   import Tools.User.Cfg, only: [parse: 1]
   import Tools.User.Def, only: [spec: 2]
   import Tools.User.Validate, only: [check: 1]
-  import Path, only: [expand: 2, join: 2]
+  import Path, only: [join: 2]
   import File, only: [exists?: 1]
-
-  @app_root expand("../../..", __DIR__)
+  import Utils.File, only: [root: 0]
 
   def get(name, state) do
     name |> path() |> load() |> check() |> spec(state)
@@ -16,7 +15,7 @@ defmodule Tools.User.Load.Schema do
   end
 
   defp path(name) do
-    join(@app_root, "agents/tools/#{name}.md")
+    join(root(), "agents/tools/#{name}.md")
   end
 
   defp load(file) do
