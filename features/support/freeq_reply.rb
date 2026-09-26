@@ -18,6 +18,12 @@ module FreeqReply
     raise "Expected quiet, heard:\n#{heard}" if heard.match?(/ PRIVMSG #the-lab /)
   end
 
+  def freeq_hears(name, table)
+    heard = +"#{@heard}"
+    retrying(24) { verify_cells(table, heard << freeq_collect(name)) }
+    @heard = ''
+  end
+
   private
 
   def line(text)

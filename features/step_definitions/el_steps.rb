@@ -89,18 +89,7 @@ Then(/^el fails$/) do
   raise "expected nonzero, got #{exitstatus}" if exitstatus&.zero?
 end
 
-Then(/^(\w+) hears$/) do |name, *rest|
-  table = rest.first
-  return unless table
-
-  heard = ""
-  heard << @heard if @heard
-  retrying(24) do
-    heard << freeq_collect(name)
-    verify_cells(table, heard)
-  end
-  @heard = ""
-end
+Then(/^(\w+) hears$/) { |name, table| freeq_hears(name, table) }
 
 Then(/^(\w+) hears nothing more$/) do |name|
   freeq_quiet(name)
