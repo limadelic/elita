@@ -50,3 +50,9 @@ Feature: Greet
       | bob started |
     * brian> /names #the-lab
       | bob=agent |
+
+  Scenario: ls connects through hidden tunnel
+    * a folder named elita
+    * > el ls //
+      | node: elita     |
+      | (nonode@nohost) |

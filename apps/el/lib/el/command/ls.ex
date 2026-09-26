@@ -4,12 +4,14 @@ defmodule El.Command.Ls do
   import IO, only: [puts: 1]
   import Application, only: [get_env: 2]
   import Process, only: [sleep: 1]
-  import El.Distribution, only: [start: 0]
+  import El.Distribution, only: [start: 0, hidden: 1]
   import El.Command.Ls.Query, only: [fetch: 1]
   import El.Command.Ls.Boot, only: [spawn: 0]
   import El.Commands.Ls, only: [ls: 1]
+  import System, only: [pid: 0]
 
   def list(path \\ nil) do
+    hidden("tunnel_#{pid()}")
     start()
     fetch(path) |> reach(path)
   end

@@ -2,6 +2,13 @@
 
 require 'pty'
 
+When(/^a folder named elita$/) do
+  parent = Dir.mktmpdir('scratch')
+  @scratch = File.join(parent, 'elita')
+  Dir.mkdir(@scratch)
+  copy_el_binary
+end
+
 When(/^a folder outside the repo with bob.md$/) do
   @scratch = Dir.mktmpdir('bob')
   copy_el_binary
