@@ -8,30 +8,34 @@ defmodule Freeq.SASL do
   import Jason, only: [encode!: 1]
 
   def login(socket, name) do
-    {pub, priv} = name |> seed() |> elem(1) |> key()
     line(socket, "AUTHENTICATE ATPROTO-CHALLENGE")
-    respond(socket, did(pub), sign(challenge(socket), priv))
-    await(socket, " 903 ") |> done(socket)
+    socket |> await("AUTHENTICATE ") |> respond(socket, name)
   end
 
-  defp done({:ok, _text}, socket) do
+  defp respond({:ok, text}, socket, name) do
+    chal = decode(text)
+    prove(socket, chal, name)
+    socket |> await(" 903 ") |> finish(socket)
+  end
+
+  defp respond(error, _socket, _name), do: error
+
+  defp finish({:ok, _}, socket) do
     line(socket, "CAP END")
     :ok
   end
 
-  defp done({:error, _} = e, _socket) do
-    e
-  end
+  defp finish(error, _socket), do: error
 
-  defp challenge(socket) do
-    {:ok, text} = await(socket, "AUTHENTICATE ")
+  defp decode(text) do
     [chal | _] = text |> split() |> reverse()
     url_decode64!(chal, padding: false)
   end
 
-  defp respond(socket, did, sig) do
-    sig64 = url_encode64(sig, padding: false)
-    json = encode!(%{did: did, signature: sig64})
+  defp prove(socket, chal, name) do
+    {pub, priv} = name |> seed() |> elem(1) |> key()
+    sig64 = url_encode64(sign(chal, priv), padding: false)
+    json = encode!(%{did: did(pub), signature: sig64})
     line(socket, "AUTHENTICATE #{url_encode64(json, padding: false)}")
   end
 
