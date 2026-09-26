@@ -1,4 +1,4 @@
-System.put_env("ELITA_KEYS", Path.join(System.tmp_dir!(), "elita-keys-#{System.unique_integer([:positive])}"))
+System.put_env("ELITA_KEYS", Path.expand("../../../features/support/keys", __DIR__))
 
 Code.require_file("../../elita/test/support/tester.exs", __DIR__)
 Application.ensure_all_started(:tape)

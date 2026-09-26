@@ -9,7 +9,7 @@ defmodule FreeqCase do
       Code.require_file("../support/server.exs", __DIR__)
 
       import FreeqTestClient,
-        only: [say: 1, hears: 1, connect: 0, register_brian: 0, wait_join: 1, reply: 1]
+        only: [say: 1, hears: 1, connect: 0, register_brian: 0, reply: 1]
 
       import Freeq.Pace, only: [join: 0, bubble: 1]
 
@@ -35,7 +35,7 @@ defmodule FreeqCase do
           name, lab, ~c"127.0.0.1", port())
         agent_name = to_string(name)
         on_exit(fn -> stop_freeq_service(agent_name) end)
-        wait_join(agent_name)
+        :ok
       end
 
       defp stop_freeq_service(agent_name) do
