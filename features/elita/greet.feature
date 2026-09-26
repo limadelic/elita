@@ -42,3 +42,11 @@ Feature: Greet
     * brian> @greet hello
       | +elita/result               |
       | @brian Who am I talking to? |
+
+  @freeq
+  Scenario: Bob joins the lab from his own folder
+    * a folder outside the repo with bob.md
+    * > el spawn bob@lab/the-lab
+      | bob started |
+    * brian> /names #the-lab
+      | bob=agent |

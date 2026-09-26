@@ -3,7 +3,7 @@ Feature: Greet Live
   @freeq
   @live
   @tape:bob
-  Scenario: Bob joins the lab from his own folder
+  Scenario: Bob answers from his own folder
     * a folder outside the repo with bob.md
     * > el spawn bob@lab/the-lab
       | bob started |
