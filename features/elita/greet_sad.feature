@@ -24,3 +24,14 @@ Feature: Greet sad paths
       | greet started |
     * brian> /@+elita/result PRIVMSG #the-lab :@greet hello
     * brian hears nothing more
+
+  @freeq
+  @tape:greet
+  Scenario: Greet stays quiet on a finished long answer
+    * > el spawn greet@lab/the-lab
+      | greet started |
+    * brian> /@+elita/result BATCH +m1 draft/multiline #the-lab
+    * brian> /@batch=m1 PRIVMSG #the-lab :@greet hello
+    * brian> /@batch=m1 PRIVMSG #the-lab :how are you
+    * brian> /BATCH -m1
+    * brian hears nothing more

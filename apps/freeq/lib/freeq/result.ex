@@ -1,12 +1,13 @@
 defmodule Freeq.Result do
-  import String, only: [split: 3, contains?: 2, trim_trailing: 2]
+  import String, only: [trim_trailing: 2]
   import List, only: [wrap: 1]
-
-  def result?("@" <> rest) do
-    rest |> split(" ", parts: 2) |> hd() |> contains?("+elita/result")
-  end
-
-  def result?(_line), do: false
+  import Enum, only: [any?: 2, map: 2]
+  import Map, only: [put: 3]
+  import Freeq.Tags, only: [result?: 1, strip: 1]
 
   def clean(line), do: line |> to_string() |> trim_trailing("\r\n") |> wrap()
+
+  def mark(state, line, lines), do: put(state, :result, any?([to_string(line) | lines], &result?/1))
+
+  def untag(lines), do: map(lines, &strip/1)
 end

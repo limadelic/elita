@@ -5,14 +5,13 @@ defmodule Freeq do
   import GenServer, only: [start_link: 3, call: 2]
   import Elita, only: [request: 2]
   import Process, only: [flag: 2, register: 2]
-  import Map, only: [put: 3]
 
   import Freeq.Lines, only: [send: 3, answer: 3]
   import Freeq.Pending, only: [push: 2]
   import Freeq.Inbox, only: [route: 2]
   import Freeq.Batch, only: [absorb: 1]
   import Freeq.Boot, only: [run: 3]
-  import Freeq.Result, only: [result?: 1, clean: 1]
+  import Freeq.Result, only: [clean: 1, mark: 3, untag: 1]
 
   def start_link(opts), do: start_link(__MODULE__, tuple(opts), [])
 
@@ -84,10 +83,9 @@ defmodule Freeq do
     {:noreply, state}
   end
 
-  defp recv(line, state), do: clean(line) |> absorb() |> process(mark(line, state))
-  defp mark(line, state), do: put(state, :result, result?(to_string(line)))
+  defp recv(line, state), do: clean(line) |> absorb() |> process(line, state)
 
-  defp process(lines, state), do: route(lines, state)
+  defp process(lines, line, state), do: route(untag(lines), mark(state, line, lines))
 
   @impl true
   def terminate(_reason, %{socket: socket}) do
