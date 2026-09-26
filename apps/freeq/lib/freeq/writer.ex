@@ -13,6 +13,10 @@ defmodule Freeq.Writer do
     line(socket, "JOIN #{channel}")
   end
 
+  def names(socket, channel) do
+    line(socket, "NAMES #{channel}")
+  end
+
   def message(socket, channel, text) do
     line(socket, "PRIVMSG #{channel} :#{text}")
   end
