@@ -26,13 +26,15 @@ defmodule Freeq.Boot do
   defp register(:ok, socket, channel) do
     agent(socket)
     join(socket, channel)
-    wait(socket)
-    :ok
+    wait(socket) |> joined(channel)
   end
 
   defp register({:error, reason}, _socket, _channel) do
     {:error, reason}
   end
+
+  defp joined(:ok, _), do: :ok
+  defp joined(:invite, ch), do: {:error, "#{ch} is invite only"}
 
   defp caps(socket) do
     line(socket, "CAP LS 302")

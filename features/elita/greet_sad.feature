@@ -35,3 +35,11 @@ Feature: Greet sad paths
     * brian> /@batch=m1 PRIVMSG #the-lab :how are you
     * brian> /BATCH -m1
     * brian hears nothing more
+
+  @freeq
+  Scenario: Greet cannot join a locked room
+    * brian> /JOIN #locked
+    * brian> /MODE #locked +i
+    * > el spawn greet@lab/locked
+      | greet: #locked is invite only |
+    * el fails

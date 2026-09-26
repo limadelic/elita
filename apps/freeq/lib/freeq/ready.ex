@@ -16,11 +16,16 @@ defmodule Freeq.Ready do
 
   defp check(line, socket, count) do
     str = line |> to_string() |> trim_trailing("\r\n")
-    contains?(str, " 366 ") |> ready(socket, str, count + 1)
+    c366 = contains?(str, " 366 ")
+    c473 = contains?(str, " 473 ")
+    {c366, c473} |> classify(socket, str, count + 1)
   end
 
-  defp ready(true, _socket, _last, _count), do: :ok
-  defp ready(false, socket, last, count), do: await(socket, last, count)
+  defp classify({true, _}, _socket, _last, _count), do: :ok
+  defp classify({_, true}, _socket, _last, _count), do: :invite
+  defp classify({false, false}, socket, last, count) do
+    await(socket, last, count)
+  end
 
   defp text(0, _), do: "no lines received"
   defp text(count, last), do: "Last line: #{last} (#{count} lines received)"
