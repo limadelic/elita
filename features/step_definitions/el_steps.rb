@@ -5,7 +5,9 @@ require 'pty'
 When(/^a folder named elita$/) do
   tmp_dir = File.expand_path('../../tmp', __dir__)
   FileUtils.mkdir_p(tmp_dir)
-  @scratch = Dir.mktmpdir('elita', tmp_dir)
+  parent = Dir.mktmpdir('scratch', tmp_dir)
+  @scratch = File.join(parent, 'elita')
+  Dir.mkdir(@scratch)
   copy_el_binary
 end
 
