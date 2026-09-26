@@ -17,19 +17,15 @@ defmodule Freeq.Welcome do
     |> proceed(socket, str, count, nick)
   end
 
-  defp status(true, _, _, _), do: :nick_taken
+  defp status(true, _, nick, _), do: {:error, "nick #{nick} in use"}
   defp status(false, true, nick, str), do: verify(nick, target(str))
   defp status(false, false, _, _), do: :continue
 
   defp verify(nick, received_nick) when nick == received_nick, do: :ok
-  defp verify(nick, _), do: {:nick_taken, nick}
+  defp verify(nick, _), do: {:error, "nick #{nick} in use"}
 
-  defp proceed(:nick_taken, _socket, str, _count, _nick) do
-    {:error, "nick #{nick(str)} in use"}
-  end
-
-  defp proceed({:nick_taken, nick}, _socket, _str, _count, _nick) do
-    {:error, "nick #{nick} in use"}
+  defp proceed({:error, reason}, _socket, _str, _count, _nick) do
+    {:error, reason}
   end
 
   defp proceed(:ok, _socket, _last, _count, _nick), do: :ok
@@ -49,10 +45,6 @@ defmodule Freeq.Welcome do
 
   defp timeout(last, count) do
     "Timeout waiting for 001: Last line: #{last} (#{count} lines received)"
-  end
-
-  defp nick(str) do
-    str |> split() |> at(3, "unknown")
   end
 
   defp target(str) do

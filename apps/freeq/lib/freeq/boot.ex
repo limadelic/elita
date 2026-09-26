@@ -5,25 +5,22 @@ defmodule Freeq.Boot do
   import Freeq.SASL, only: [login: 2]
 
   def run(socket, name, channel) do
-    setup(socket, name) |> start(socket, channel)
+    setup(socket, name) |> start(socket, name, channel)
   end
 
   defp setup(socket, name) do
     caps(socket)
     nick(socket, name)
     user(socket, name)
-    done(login(socket, name), name)
+    login(socket, name)
   end
 
-  defp done(:ok, name), do: {:ok, name}
-  defp done({:error, _} = e, _name), do: e
-
-  defp start({:ok, name}, socket, channel) do
+  defp start(:ok, socket, name, channel) do
     register(greet(socket, name), socket, channel)
   end
 
-  defp start({:error, _} = e, _socket, _channel) do
-    e
+  defp start({:error, _} = error, _socket, _name, _channel) do
+    error
   end
 
   defp register(:ok, socket, channel) do
@@ -41,6 +38,7 @@ defmodule Freeq.Boot do
 
   defp caps(socket) do
     line(socket, "CAP LS 302")
-    line(socket, "CAP REQ :sasl batch draft/multiline message-tags echo-message")
+    req = "CAP REQ :sasl batch draft/multiline message-tags echo-message"
+    line(socket, req)
   end
 end
