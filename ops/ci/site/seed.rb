@@ -4,7 +4,10 @@ require 'fileutils'
 
 module Seed
   BASE_URL = 'https://limadelic.github.io/elita'.freeze
-  FILES = %w[report.html cukes.html cukes.json lint.json credo.html index.html].freeze
+  FILES = %w[
+    report.html cukes.html cukes.json lint.json credo.html
+    index.html cover.json freeq.json
+  ].freeze
 
   def self.run
     FileUtils.mkdir_p('site')
