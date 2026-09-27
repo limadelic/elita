@@ -25,7 +25,7 @@ module FreeqSasl
     (["1"] * zeros + digits).join
   end
 
-  def encode(bytes)
+  def base64(bytes)
     Base64.urlsafe_encode64(bytes, padding: false)
   end
 
@@ -43,15 +43,15 @@ module FreeqSasl
   end
 
   def msgsig(socket, public_key)
-    write_line(socket, "MSGSIG #{encode(public_key)}")
+    write_line(socket, "MSGSIG #{base64(public_key)}")
     read_line(socket, /MSGSIG OK/)
   end
 
   def sasl_authenticate(socket, name)
     key = load_key(name)
     signature = sign(key, challenge(socket))
-    auth_data = JSON.generate({ did: build_did(key), signature: encode(signature) })
-    write_line(socket, "AUTHENTICATE #{encode(auth_data)}")
+    auth_data = JSON.generate({ did: build_did(key), signature: base64(signature) })
+    write_line(socket, "AUTHENTICATE #{base64(auth_data)}")
     read_line(socket, / 903 /)
   end
 
