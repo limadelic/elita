@@ -4,10 +4,17 @@ defmodule Freeq.Keys do
   import Path, only: [expand: 1, join: 2]
 
   def seed(name) do
-    dir = get_env("ELITA_KEYS", expand("~/.elita/keys"))
-    path = join(dir, "#{name}.key")
-    mkdir_p(dir)
+    path = join(root(), "#{name}.key")
+    mkdir_p(root())
     read(path) |> pick(path)
+  end
+
+  def cert(name) do
+    read(join(root(), name <> ".cert"))
+  end
+
+  defp root do
+    get_env("ELITA_KEYS", expand("~/.elita/keys"))
   end
 
   defp pick({:ok, bytes}, _path), do: {:ok, bytes}
