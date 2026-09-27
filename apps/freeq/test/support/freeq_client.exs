@@ -20,6 +20,7 @@ defmodule FreeqTestClient do
     send_line("NICK brian")
     send_line("USER brian 0 * :brian")
     FreeqTestLogin.login(socket())
+    send_line("JOIN #the-lab")
     send_line("NAMES #the-lab")
     await("366", &String.contains?(&1, " 366 brian #the-lab "))
     Process.put(:freeq_transcript, [])
