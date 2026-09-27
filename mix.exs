@@ -3,7 +3,7 @@ defmodule Elita.Umbrella do
 
   def project do
     [
-      version: "0.0.2",
+      version: "0.0.4",
       elixir: "~> 1.18",
       apps_path: "apps",
       config_path: "config/config.exs",
@@ -32,8 +32,7 @@ defmodule Elita.Umbrella do
       cukes: [&run_cukes/1],
       cuke: [&run_cuke/1],
       build: [&run_build/1],
-      cover: [&run_cover/1],
-      ship: "cmd bin/release"
+      cover: [&run_cover/1]
     ]
   end
 

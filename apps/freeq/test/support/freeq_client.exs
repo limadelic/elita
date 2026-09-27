@@ -35,7 +35,14 @@ defmodule FreeqTestClient do
     await("#{agent} JOIN", &joined(&1, agent))
   end
 
-  def say(text), do: send_line("PRIVMSG #the-lab :#{text}")
+  def say(text) do
+    pace()
+    send_line("PRIVMSG #the-lab :#{text}")
+  end
+
+  defp pace do
+    System.get_env("PACE", "0") |> String.to_integer() |> Process.sleep()
+  end
 
   def hears(fragment), do: await(fragment, &holds(&1, fragment))
 

@@ -68,3 +68,9 @@ Feature: Greet
       | greet started |
     * brian> /names #vault
       | greet=agent |
+
+  Scenario: ls connects through hidden tunnel
+    * a folder named elita
+    * > el ls //
+      | node: elita-cukes |
+      | lab (freeq)       |

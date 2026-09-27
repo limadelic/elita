@@ -117,6 +117,8 @@ jobs:
       - name: Run greet test
         id: greet
         run: cd apps/freeq && mix test --include freeq
+        env:
+          PACE: "3000"
 
       - name: Record freeq result
         run: |
