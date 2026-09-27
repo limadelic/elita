@@ -59,3 +59,12 @@ Feature: Greet
 
     * brian> /whois brian
       | is authenticated as |
+
+  @freeq
+  Scenario: Greet joins brian's locked room
+    * brian> /JOIN #vault
+    * brian> /MODE #vault +i
+    * > el spawn greet@lab/vault
+      | greet started |
+    * brian> /names #vault
+      | greet=agent |

@@ -4,6 +4,7 @@ defmodule Freeq.Boot do
   import Freeq.Ready, only: [wait: 2]
   import Freeq.Welcome, only: [greet: 2]
   import Freeq.SASL, only: [login: 2]
+  import Freeq.Provenance, only: [vouch: 2]
 
   def run(socket, name, channel) do
     setup(socket, name) |> start(socket, name, channel)
@@ -17,10 +18,18 @@ defmodule Freeq.Boot do
   end
 
   defp start(:ok, socket, name, channel) do
-    register(greet(socket, name), socket, channel)
+    greet(socket, name) |> trust(socket, name) |> register(socket, channel)
   end
 
   defp start({:error, _} = error, _socket, _name, _channel) do
+    error
+  end
+
+  defp trust(:ok, socket, name) do
+    vouch(socket, name)
+  end
+
+  defp trust({:error, _} = error, _socket, _name) do
     error
   end
 
