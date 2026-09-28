@@ -40,14 +40,18 @@ module Merge
     repo = ENV['GITHUB_REPOSITORY']
     url = "repos/#{repo}/actions/artifacts/#{artifact_id}/zip"
     cmd = "gh api #{url} > #{temp_dir}/artifact.zip"
-    system(cmd)
-    system("cd #{temp_dir} && unzip -q artifact.zip")
+    system(cmd) || abort('merge download failed')
+    unzip_artifact(temp_dir)
+  end
+
+  def self.unzip_artifact(temp_dir)
+    cmd = "cd #{temp_dir} && unzip -q artifact.zip"
+    system(cmd) || abort('merge unzip failed')
   end
 
   def self.merge_artifact(temp_dir)
     tar_file = "#{temp_dir}/artifact.tar"
-    return unless File.exist?(tar_file)
-
+    abort('merge found no artifact.tar') unless File.exist?(tar_file)
     extract_tar(tar_file, temp_dir)
     copy_artifact_dir(temp_dir)
   end
@@ -55,16 +59,20 @@ module Merge
   def self.extract_tar(tar_file, temp_dir)
     tree_dir = "#{temp_dir}/tree"
     FileUtils.mkdir_p(tree_dir)
-    system("tar xf #{tar_file} -C #{tree_dir}")
+    cmd = "tar xf #{tar_file} -C #{tree_dir}"
+    system(cmd) || abort('merge extract failed')
   end
 
   def self.copy_artifact_dir(temp_dir)
     source = "#{temp_dir}/tree"
-    return unless Dir.exist?(source)
-
-    dest = "#{ENV['GITHUB_WORKSPACE']}/site/"
-    system("cp -R #{source}/. #{dest}")
+    abort('merge copy failed') unless Dir.exist?(source)
+    copy_tree(source)
     puts 'Base merged from previous deploy'
+  end
+
+  def self.copy_tree(source)
+    dest = "#{ENV['GITHUB_WORKSPACE']}/site/"
+    system("cp -R #{source}/. #{dest}") || abort('merge copy failed')
   end
 end
 
