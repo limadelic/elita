@@ -6,7 +6,7 @@ require 'tmpdir'
 module Merge
   def self.run
     artifact_id = artifact_id_to_merge
-    return unless artifact_id
+    return if artifact_id.to_s.empty?
 
     download_and_merge(artifact_id)
   end
@@ -14,16 +14,19 @@ module Merge
   def self.artifact_id_to_merge
     repo = ENV['GITHUB_REPOSITORY']
     cmd = artifact_query(repo)
-    exec_gh(cmd)
+    output = `#{cmd}`.chomp rescue ''
+    skip_error_response(output)
+  end
+
+  def self.skip_error_response(output)
+    output.start_with?('{') ? '' : output
   end
 
   def self.artifact_query(repo)
-    "gh api \"repos/#{repo}/actions/artifacts?name=github-pages&per_page=100\" " \
-    "--jq '.artifacts | map(select(.expired | not)) | max_by(.created_at) | .id'"
-  end
-
-  def self.exec_gh(cmd)
-    `#{cmd}`.chomp rescue nil
+    base = "gh api \"repos/#{repo}/actions/artifacts"
+    query = "?name=github-pages&per_page=100\" --jq"
+    select = "'.artifacts | map(select(.expired | not))"
+    "#{base}#{query} #{select} | max_by(.created_at) | .id // empty'"
   end
 
   def self.download_and_merge(artifact_id)
@@ -36,7 +39,7 @@ module Merge
   def self.download_artifact(artifact_id, temp_dir)
     repo = ENV['GITHUB_REPOSITORY']
     url = "repos/#{repo}/actions/artifacts/#{artifact_id}/zip"
-    cmd = "gh api #{url} -H \"Accept: application/zip\" > #{temp_dir}/artifact.zip"
+    cmd = "gh api #{url} > #{temp_dir}/artifact.zip"
     system(cmd)
     system("cd #{temp_dir} && unzip -q artifact.zip")
   end
