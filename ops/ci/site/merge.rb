@@ -14,12 +14,9 @@ module Merge
   def self.artifact_id_to_merge
     repo = ENV['GITHUB_REPOSITORY']
     cmd = artifact_query(repo)
-    output = `#{cmd}`.chomp rescue ''
-    skip_error_response(output)
-  end
-
-  def self.skip_error_response(output)
-    output.start_with?('{') ? '' : output
+    output = `#{cmd}`
+    abort('merge query failed') if $?.exitstatus != 0
+    output.chomp
   end
 
   def self.artifact_query(repo)
