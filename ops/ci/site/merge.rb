@@ -45,20 +45,22 @@ module Merge
     tar_file = "#{temp_dir}/artifact.tar"
     return unless File.exist?(tar_file)
 
-    extract_tar(tar_file)
-    copy_artifact_dir
+    extract_tar(tar_file, temp_dir)
+    copy_artifact_dir(temp_dir)
   end
 
-  def self.extract_tar(tar_file)
-    system("tar xf #{tar_file} -C /tmp")
+  def self.extract_tar(tar_file, temp_dir)
+    tree_dir = "#{temp_dir}/tree"
+    FileUtils.mkdir_p(tree_dir)
+    system("tar xf #{tar_file} -C #{tree_dir}")
   end
 
-  def self.copy_artifact_dir
-    artifact_dir = '/tmp/artifact'
-    return unless Dir.exist?(artifact_dir)
+  def self.copy_artifact_dir(temp_dir)
+    source = "#{temp_dir}/tree"
+    return unless Dir.exist?(source)
 
     dest = "#{ENV['GITHUB_WORKSPACE']}/site/"
-    system("cp -r #{artifact_dir}/* #{dest} 2>/dev/null || true")
+    system("cp -R #{source}/. #{dest}")
     puts 'Base merged from previous deploy'
   end
 end
