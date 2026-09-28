@@ -143,7 +143,8 @@ def track(chunk, stripped)
   @transcript_stripped << stripped
 end
 
-def note(prompt, input)
+def note(_prompt, input)
+  @last_input = input
 end
 
 def reply(prompt, table, output)
