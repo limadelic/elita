@@ -200,12 +200,12 @@ module Search
   end
 
   def flush
-    @writer.write(nudge_msg)
+    @writer.write(renudge)
     @writer.flush
   rescue IOError
   end
 
-  def nudge_msg
+  def renudge
     @last_input == "log" ? "log\n" : "\n"
   end
 
