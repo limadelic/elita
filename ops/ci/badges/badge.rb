@@ -13,8 +13,10 @@ module Badge
   end
 
   def self.lint
+    pr = ENV.fetch('PR_NUMBER')
     url = ENV.fetch('LINT_URL')
-    "[![lint](https://img.shields.io/endpoint?url=#{url})](https://github.com/limadelic/elita/actions/workflows/lint.yml)"
+    link = "https://github.com/limadelic/elita/pull/#{pr}/checks"
+    "[![lint](https://img.shields.io/endpoint?url=#{url})](#{link})"
   end
 
   def self.cukes
