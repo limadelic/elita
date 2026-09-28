@@ -18,8 +18,8 @@ module Merge
   end
 
   def self.artifact_query(repo)
-    "gh api repos/#{repo}/actions/artifacts --paginate --jq " \
-    "'.artifacts[] | select(.name == \"github-pages\") | .id' | head -1"
+    "gh api \"repos/#{repo}/actions/artifacts?name=github-pages&per_page=100\" " \
+    "--jq '.artifacts | map(select(.expired | not)) | max_by(.created_at) | .id'"
   end
 
   def self.exec_gh(cmd)
