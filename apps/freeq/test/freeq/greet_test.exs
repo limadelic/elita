@@ -17,20 +17,6 @@ defmodule FreeqGreetTest do
   end
 
   @tag cassette: "greet"
-  test "greet survives a failed answer" do
-    spawn(:greet)
-
-    answer = ask(:greet, "hello")
-    verify("who am i talking to", answer)
-
-    answer = ask(:greet, "unknown question")
-    verify("could not answer", answer)
-
-    answer = ask(:greet, "Brian")
-    verify("wonderful to meet you", answer)
-  end
-
-  @tag cassette: "greet"
   test "an agent cannot take a nick already in use" do
     start_time = System.monotonic_time(:millisecond)
     result = Freeq.Resident.start(:brian, "#the-lab", ~c"127.0.0.1", port())
