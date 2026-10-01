@@ -18,6 +18,12 @@ Feature: Greet sad paths
     * el fails
 
   @freeq
+  Scenario: Spawn fails when the nick is taken
+    * > el spawn brian@lab/the-lab
+      | nick brian in use |
+    * el fails
+
+  @freeq
   @tape:greet
   Scenario: Greet stays quiet on a finished answer
     * > el spawn greet@lab/the-lab
