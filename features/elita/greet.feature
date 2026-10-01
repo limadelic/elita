@@ -33,6 +33,7 @@ Feature: Greet
 
     * brian> /whois greet
       | actor_class=agent |
+      | did:key:z         |
 
   @freeq
   Scenario: Brian talks to greet
@@ -50,6 +51,23 @@ Feature: Greet
       | bob started |
     * brian> /names #the-lab
       | bob=agent |
+
+  @freeq
+  Scenario: Brian is himself
+    * > el spawn greet@lab/the-lab
+      | greet started |
+
+    * brian> /whois brian
+      | is authenticated as |
+
+  @freeq
+  Scenario: Greet joins brian's locked room
+    * brian> /JOIN #vault
+    * brian> /MODE #vault +i
+    * > el spawn greet@lab/vault
+      | greet started |
+    * brian> /names #vault
+      | greet=agent |
 
   Scenario: ls connects through hidden tunnel
     * a folder named elita

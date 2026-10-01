@@ -41,3 +41,12 @@ Feature: Greet sad paths
     * brian> /@batch=m1 PRIVMSG #the-lab :how are you
     * brian> /BATCH -m1
     * brian hears nothing more
+
+  @freeq
+  Scenario: An agent brian did not vouch for cannot join his locked room
+    * brian> /JOIN #locked
+    * brian> /MODE #locked +i
+    * a folder outside the repo with bob.md
+    * > el spawn bob@lab/locked
+      | bob: #locked is invite only |
+    * el fails
