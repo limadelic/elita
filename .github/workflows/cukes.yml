@@ -46,6 +46,31 @@ jobs:
           cd apps/elita
           mix compile
 
+      - name: Checkout freeq
+        uses: actions/checkout@v4
+        with:
+          repository: msuarz/freeq
+          ref: 6859c084e254e399dbdd2b854d8d911e79a33014
+          path: freeq
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build freeq Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: freeq
+          load: true
+          tags: freeq:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Start freeq server
+        run: docker run -d --name freeq -p 16683:6667 -p 8081:8080 freeq:ci
+
+      - name: Wait for freeq to be ready
+        run: timeout 60 bash -c 'until curl -sf http://127.0.0.1:8081/api/v1/health; do sleep 1; done'
+
       - name: Run Cucumber tests
         id: cukes
         run: |
@@ -53,6 +78,15 @@ jobs:
           TAPE=replay mix cukes --format html --out reports/cucumber.html --format json --out reports/cucumber.json --publish-quiet
         env:
           MIX_ENV: test
+
+      - name: Run freeq Cucumber tests
+        run: |
+          mkdir -p reports
+          mix cuke freeq --format html --out reports/cucumber_freeq.html --format json --out reports/cucumber_freeq.json --publish-quiet
+        env:
+          FREEQ_PORT: "16683"
+          MIX_ENV: test
+          TAPE: replay
 
       - name: Copy cucumber report to site
         run: |

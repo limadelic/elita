@@ -53,9 +53,9 @@ module Reap
   def reave(session)
     return false if bare?(session)
 
-    slay(session[:pid])
     cork(session[:reader])
     cork(session[:writer])
+    slay(session[:pid])
     true
   end
 

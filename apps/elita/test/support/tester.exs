@@ -3,11 +3,11 @@ defmodule Tester do
   import ExUnit.Callbacks
   import Elita, only: [request: 2, dispatch: 2]
 
-  defmacro __using__(_opts) do
+  defmacro __using__(opts) do
     quote do
       use ExUnit.Case
       import Kernel, except: [spawn: 1, spawn: 2]
-      import Tester
+      import Tester, except: unquote(Keyword.get(opts, :except, []))
 
       setup_all do
         case Tape.Writer.start_link(nil) do
@@ -23,6 +23,7 @@ defmodule Tester do
       setup context do
         cassette = context[:cassette] || default_cassette()
         System.put_env("CASSETTE", cassette)
+        Tape.Writer.reset()
         :ok
       end
 
@@ -42,7 +43,6 @@ defmodule Tester do
 
   def spawn(name, configs) do
     kill(name)
-    reset_tape_writer()
     opts = tape_opts()
     Elita.spawn(to_string(name), to_configs(configs), opts)
     on_exit(fn -> kill(name) end)
@@ -76,10 +76,6 @@ defmodule Tester do
       nil -> :ok
       pid -> GenServer.stop(pid)
     end
-  end
-
-  defp reset_tape_writer do
-    Tape.Writer.acquire(fn -> :ok end)
   end
 
   def tell(name, msg) do

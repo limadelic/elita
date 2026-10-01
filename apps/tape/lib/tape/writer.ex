@@ -22,6 +22,10 @@ defmodule Tape.Writer do
     get_and_update(__MODULE__, &allow(&1, key, times))
   end
 
+  def reset do
+    get_and_update(__MODULE__, fn _ -> {nil, %{}} end)
+  end
+
   defp allow(state, key, "always") do
     count = get(state, key, 0)
     {true, put(state, key, count + 1)}

@@ -65,6 +65,7 @@ module Node
       "ELITA_RUN" => "cukes",
       "TAPE" => ENV["TAPE"] || "replay",
       "CASSETTE_DIR" => File.expand_path("../cassettes", __dir__),
+      "ELITA_NODES" => "lab=freeq://127.0.0.1:16683",
       "HOME" => ENV["HOME"],
       "MIX_ENV" => "test"
     }

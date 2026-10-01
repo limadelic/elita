@@ -56,7 +56,7 @@ defmodule Elita.Boot do
     }
 
   defp launch(name, configs, opts),
-    do: {Agent.Tree, :start_link, [{name, configs, opts, via(name)}]}
+    do: {Agent.Tree, :start_link, [{name, configs, opts, via(name, opts)}]}
 
   defp post(addr, spec, n),
     do: :erpc.call(addr, Elita.Place, :put, [spec, n], 90_000)
@@ -64,7 +64,7 @@ defmodule Elita.Boot do
   defp addr, do: :"elita-#{get_env(:elita, :run, "")}@127.0.0.1"
 
   defp local(n, configs, opts) do
-    start(Elita, {n, configs, opts}, name: via(n)) |> join()
+    start(Elita, {n, configs, opts}, name: via(n, opts)) |> join()
   end
 
   defp ready?, do: get_env(:elita, :run, "") != ""
@@ -78,7 +78,8 @@ defmodule Elita.Boot do
 
   defp join({:error, _}), do: {:error, :init_failed}
 
-  defp via(n) do
-    {:via, Registry, {ElitaRegistry, name(n), %{kind: :native, folder: nil}}}
+  defp via(n, opts \\ []) do
+    kind = Keyword.get(opts, :kind, :native)
+    {:via, Registry, {ElitaRegistry, name(n), %{kind: kind, folder: nil}}}
   end
 end

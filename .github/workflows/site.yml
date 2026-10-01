@@ -9,6 +9,9 @@ permissions:
 jobs:
   site:
     runs-on: ubuntu-latest
+    concurrency:
+      group: pages
+      cancel-in-progress: false
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -56,7 +59,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_WORKSPACE: ${{ github.workspace }}
-        continue-on-error: true
 
       - name: Download lint badge artifact
         uses: actions/download-artifact@v4

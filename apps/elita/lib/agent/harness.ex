@@ -61,6 +61,7 @@ defmodule Agent.Harness do
   defp impl(:native), do: Agent.Kind.Native
   defp impl(:headless), do: Agent.Kind.Puppet
   defp impl(:puppet), do: Agent.Kind.Puppet
+  defp impl(kind) when is_atom(kind), do: kind
 
   defp ask!([{_pid, %{kind: kind}}] = entry, recipient, message) do
     impl(kind).ask(entry, recipient, message)

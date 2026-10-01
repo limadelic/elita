@@ -40,6 +40,7 @@ defmodule El.MixProject do
   defp deps do
     [
       {:elita, in_umbrella: true},
+      {:freeq, in_umbrella: true},
       {:matrix, in_umbrella: true}
     ]
   end

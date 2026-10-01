@@ -2,6 +2,43 @@
 
 require 'pty'
 
+When(/^a folder named elita$/) do
+  tmp_dir = File.expand_path('../../tmp', __dir__)
+  FileUtils.mkdir_p(tmp_dir)
+  parent = Dir.mktmpdir('scratch', tmp_dir)
+  @scratch = File.join(parent, 'elita')
+  Dir.mkdir(@scratch)
+  copy_el_binary
+end
+
+When(/^a folder outside the repo with bob.md$/) do
+  @scratch = Dir.mktmpdir('bob')
+  copy_el_binary
+  write_bob_file
+end
+
+def copy_el_binary
+  bin_dir = File.join(@scratch, 'bin')
+  Dir.mkdir(bin_dir)
+  el_escript = File.expand_path('../../apps/el/el', __dir__)
+  FileUtils.cp(el_escript, File.join(bin_dir, 'el'))
+  File.chmod(0755, File.join(bin_dir, 'el'))
+end
+
+def write_bob_file
+  bob_file = File.join(@scratch, 'bob.md')
+  File.write(bob_file, bob_content)
+end
+
+def bob_content
+  prompt = "Answer in two lines. Line 1: bob here. Line 2: your answer.\n\nBob the agent."
+  "---\nname: bob\ndescription: Agent Bob\n---\n\n# Bob\n\n#{prompt}"
+end
+
+When(/^no elita node$/) do
+  @elita_run = "nosuch"
+end
+
 When(/^clock (.+)$/) do |time|
   @clock = time
 end
@@ -16,12 +53,18 @@ When(/^> el tell (.+)$/) do |args, *rest|
   handle(rest.first, output)
 end
 
+When(/^> el (spawn|ls) (.+)$/) do |verb, args, *rest|
+  output = one("#{verb} #{args}")
+  track(output.dup, output.gsub(/\e\[[0-9;]*m/, ''))
+  handle(rest.first, output)
+end
+
 When(/^> el$/) do |*rest|
   boot('')
   handle(rest.first, transcript)
 end
 
-When(/^> el (.+)$/) do |args, *rest|
+When(/^> el (?!tell|spawn|ls)(.+)$/) do |args, *rest|
   route(args)
   handle(rest.first, transcript)
 end
@@ -46,6 +89,19 @@ end
 
 Then(/^screen shows (.+)$/) do |text|
   check(text)
+end
+
+Then(/^el fails$/) do
+  raise "Exit status not captured" unless @exit_status
+
+  exitstatus = @exit_status.exitstatus
+  raise "expected nonzero, got #{exitstatus}" if exitstatus&.zero?
+end
+
+Then(/^(\w+) hears$/) { |name, table| freeq_hears(name, table) }
+
+Then(/^(\w+) hears nothing more$/) do |name|
+  freeq_quiet(name)
 end
 
 When(/^(\w+):$/) do |name, *rest|
@@ -80,14 +136,15 @@ end
 
 def track(chunk, stripped)
   if @transcript.nil?
-    @transcript = ''
-    @transcript_stripped = ''
+    @transcript = +""
+    @transcript_stripped = +""
   end
   @transcript << chunk
   @transcript_stripped << stripped
 end
 
-def note(prompt, input)
+def note(_prompt, input)
+  @last_input = input
 end
 
 def reply(prompt, table, output)

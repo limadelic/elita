@@ -7,13 +7,15 @@ defmodule El.CLI do
   import El.Commands.Stop, only: [stop: 1]
   import El.Commands.Claude, only: [claude: 1]
   import El.Commands.Cd, only: [cd: 1]
-  import El.Distribution, only: [launch: 0]
+  import El.Distribution, only: [launch: 0, hidden: 1]
   import El.Command.Ls, only: [list: 1]
   import El.REPL, only: [run: 1, run: 2, attach: 2]
   import El.Trace, only: [setup: 2]
   import El.Ask, only: [invoke: 2]
   import El.Cli.Parse, only: [parse: 1, name: 1]
   import El.Bin, only: [locate: 0]
+  import El.Remote, only: [call: 1]
+  import System, only: [pid: 0, halt: 1]
 
   @usage """
   Usage:
@@ -57,6 +59,7 @@ defmodule El.CLI do
   defp exec({:ask, tool, agent, msg}), do: ask(agent, msg, tool)
   defp exec({:tell, tool, agent, msg}), do: send(agent, msg, tool)
   defp exec({:spawn, name, agent}), do: spawn(name, agent)
+  defp exec({:spawn_remote, addr}), do: reach(addr)
   defp exec({:stop, agent}), do: stop(agent)
   defp exec({:ask_tool, agent, msg}), do: invoke(agent, msg)
   defp exec({:claude, name}), do: claude(name)
@@ -64,4 +67,23 @@ defmodule El.CLI do
   defp exec({:cd, path}), do: cd(path)
   defp exec(:node), do: launch()
   defp exec(_), do: :usage
+
+  defp reach(addr) do
+    hidden("tunnel_#{pid()}")
+    call(["spawn", addr]) |> show()
+  end
+
+  defp show({:ok, output}) do
+    puts(output)
+  end
+
+  defp show({:error, output}) do
+    puts(output)
+    halt(1)
+  end
+
+  defp show(:error) do
+    puts("no node, run el node")
+    halt(1)
+  end
 end
