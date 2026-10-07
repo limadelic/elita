@@ -43,6 +43,15 @@ Feature: Greet sad paths
     * brian hears nothing more
 
   @freeq
+  @tape:greet
+  Scenario: Greet survives a tape miss
+    * > el spawn greet@lab/the-lab
+      | greet started |
+    * brian> @greet unknown question
+      | +elita/result           |
+      | @brian could not answer |
+
+  @freeq
   Scenario: An agent brian did not vouch for cannot join his locked room
     * brian> /JOIN #locked
     * brian> /MODE #locked +i
