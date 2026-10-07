@@ -19,8 +19,35 @@ module FreeqReply
 
   def freeq_hears(name, table)
     heard = +"#{@heard}"
-    retrying(24) { verify_cells(table, heard << freeq_collect(name)) }
+    deadline = Time.now + 10
+    matched = collect_until(name, table, heard, deadline)
     @heard = ''
+    raise hear_error(table, heard) unless matched
+  end
+
+  def collect_until(name, table, heard, deadline)
+    loop do
+      return matches?(table, heard) if should_stop?(table, heard, deadline)
+
+      heard << freeq_collect(name)
+    end
+  end
+
+  def should_stop?(table, heard, deadline)
+    matches?(table, heard) || Time.now > deadline
+  end
+
+  def matches?(table, heard)
+    verify_cells(table, heard)
+    true
+  rescue StandardError
+    false
+  end
+
+  def hear_error(table, heard)
+    cells = table.raw.map { |row| row.join(" = ") }.join(", ")
+    last = heard.split("\n").last(10).join("\n")
+    StandardError.new("Expected: #{cells}\nHeard:\n#{last}")
   end
 
   private

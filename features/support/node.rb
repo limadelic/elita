@@ -1,3 +1,6 @@
+require 'tmpdir'
+require 'fileutils'
+
 module Node
   def summon
     ENV["ELITA_RUN"] = "cukes"
@@ -65,10 +68,20 @@ module Node
       "ELITA_RUN" => "cukes",
       "TAPE" => ENV["TAPE"] || "replay",
       "CASSETTE_DIR" => File.expand_path("../cassettes", __dir__),
+      "ELITA_KEYS" => agent_keys,
       "ELITA_NODES" => "lab=freeq://127.0.0.1:16683",
       "HOME" => ENV["HOME"],
       "MIX_ENV" => "test"
     }
+  end
+
+  def agent_keys
+    Dir.mktmpdir("elita_keys").tap { |dir| seed_keys(dir) }
+  end
+
+  def seed_keys(dir)
+    keys = Dir[File.expand_path("keys/*", __dir__)]
+    FileUtils.cp(keys.reject { |key| key.end_with?("brian.key") }, dir)
   end
 
   def node_clock
